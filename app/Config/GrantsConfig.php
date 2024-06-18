@@ -12,6 +12,6 @@ class GrantsConfig extends BaseConfig
     public $defaultLaunchPage = 'Dashboard'; 
     public $systemName = "Grants Managememt System";
     public $modules = ['core','grants'];
-
     public $maxPriorityMenuItems = 10;
+    public $tableThatDontRequireHistoryFields = ['status', 'approve_item', 'approval_flow', 'ci_sessions'];
 }

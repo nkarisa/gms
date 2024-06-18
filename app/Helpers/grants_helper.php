@@ -1,8 +1,11 @@
-<?php 
+<?php
 
-if(!function_exists('get_phrase')){
-    function get_phrase($phrase, $translation = ''){
-        $translation = ucwords(str_replace("_", " ", $phrase));
+if (!function_exists('get_phrase')) {
+    function get_phrase($phrase, $translation = '')
+    {
+        helper('inflector');
+        // $translation = ucwords(str_replace("_", " ", $phrase));
+        $translation =  humanize($phrase, '_');
 
         return $translation;
     }
@@ -66,8 +69,10 @@ if (!function_exists('create_specs_array')) {
                         // Skip if the table name is not a string or the table properties are not an array or null
                         if (is_string($table_name) && (is_array($table_props) || is_null($table_props))) {
                             // Skip if the table properties do not contain 'field_data' or 'lookup_tables' keys or if 'field_data' is empty
-                            if (is_array($table_props) && 
-                                (!isset($table_props['field_data']) && !isset($table_props['lookup_tables']) || empty($table_props['field_data']))) {
+                            if (
+                                is_array($table_props) &&
+                                (!isset($table_props['field_data']) && !isset($table_props['lookup_tables']) || empty($table_props['field_data']))
+                            ) {
                                 continue;
                             }
 
@@ -94,7 +99,7 @@ if (!function_exists('create_specs_array')) {
  * @throws Exception If Hashids library is not installed or cannot be loaded.
  */
 if (!function_exists('hash_id')) {
-    function hash_id(int $id, string $action = 'encode'):string
+    function hash_id(int $id, string $action = 'encode'): string
     {
         // Initialize Hashids with a secret key and length
         $hashids = new Hashids\Hashids('#Compassion321', 10);
@@ -145,14 +150,14 @@ if (!function_exists('elevate_array_element_to_key')) {
         foreach ($unelevavated_array as $item) {
 
             // Cast $item to array if object
-            $item = is_object($item) ? (array)$item : $item;
+            $item = is_object($item) ? (array) $item : $item;
 
             // Check if the element to elevate exists in the item
             if (!array_key_exists($element_to_elevate, $item)) {
                 throw new Exception('Element to elevate does not exist in the array item');
             }
 
-            $elevated_array[$item[$element_to_elevate]] =  $item;
+            $elevated_array[$item[$element_to_elevate]] = $item;
 
             // Remove the element to elevate from the value
             unset($elevated_array[$item[$element_to_elevate]][$element_to_elevate]);
@@ -193,14 +198,14 @@ if (!function_exists('elevate_assoc_array_element_to_key')) {
         foreach ($unevelavated_array as $item) {
 
             // Cast $item to array if object
-            $item = is_object($item) ? (array)$item : $item;
+            $item = is_object($item) ? (array) $item : $item;
 
             // Check if the element to elevate exists in the item
             if (!array_key_exists($element_to_elevate, $item)) {
                 throw new Exception('Element to elevate does not exist in the array item');
             }
 
-            $elevated_array[$item[$element_to_elevate]][$cnt] =  $item;
+            $elevated_array[$item[$element_to_elevate]][$cnt] = $item;
 
             // Remove the element to elevate from the value
             unset($elevated_array[$item[$element_to_elevate]][$cnt][$element_to_elevate]);
@@ -246,7 +251,7 @@ if (!function_exists('record_prefix')) {
  *
  * @throws Exception If the input string is not a valid snake_case string.
  */
-if(!function_exists('generate_item_track_number_and_name')){
+if (!function_exists('generate_item_track_number_and_name')) {
     function generate_item_track_number_and_name($approveable_item)
     {
         // Check if the input string is a valid snake_case string
@@ -266,32 +271,18 @@ if(!function_exists('generate_item_track_number_and_name')){
     }
 }
 
-/**
- * Converts a string from snake_case to PascalCase.
- *
- * @param string $string The string to convert.
- * @return string The converted string in PascalCase.
- *
- * @throws Exception If the input string is not a valid snake_case string.
- */
-if(!function_exists('convertToPascalCase')){
-    function convertToPascalCase($string) {
-        // Check if the input string is a valid snake_case string
-        // if (!preg_match('/^[a-z0-9_]+$/i', $string)) {
-        //     throw new Exception('Invalid snake_case string');
-        // }
 
-        // Split the string by underscores
-        $words = explode('_', $string);
-        
-        // Initialize an empty string for the Pascal case result
-        $pascalCaseString = '';
-        
-        // Convert the first letter of each word to uppercase and append to the result
-        foreach ($words as $word) {
-            $pascalCaseString .= ucfirst(strtolower($word));
+if (!function_exists('isEmpty')) {
+    function isEmpty($input)
+    {
+        $strTemp = $input;
+        $strTemp = trim($strTemp);
+
+        if ($strTemp == '') 
+        {
+            return true;
         }
-        
-        return $pascalCaseString;
+
+        return false;
     }
 }

@@ -9,7 +9,7 @@ use Psr\Log\LoggerInterface;
 use CodeIgniter\HTTP\RedirectResponse;
 use App\Models\Core\SettingModel;
 use App\Models\Core\UserModel;
-use App\Libraries\Core\AwsParameterStoreLibrary as AwsParameterStore;
+use App\Libraries\System\AwsParameterStoreLibrary as AwsParameterStore;
 use App\Libraries\Core\UserLibrary;
 
 class Login extends BaseController
@@ -137,6 +137,8 @@ class Login extends BaseController
             'departments' => $userLibrary->getUserDepartments($user_id),
             'default_launch_page' => $this->config->defaultLaunchPage,
             'context_definition' => $userLibrary->getUserContextDefinition($user_id),
+            'user_account_system_id' => $user['fk_account_system_id'],
+            'hierarchy_offices' => $userLibrary->userHierarchyOffices($user_id),
         ];
 
         // If user is already authenticated, remove the previous session data

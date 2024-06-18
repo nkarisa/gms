@@ -12,6 +12,7 @@ use App\Libraries\Core\ApprovalFlowLibrary;
 use App\Libraries\Core\MenuLibrary;
 use App\Libraries\Core\GrantsLibrary;
 use App\Libraries\Core\StatusLibrary;
+use App\Libraries\Core\ApproveItemLibrary;
 
 class Dashboard extends BaseController
 {
@@ -37,6 +38,9 @@ class Dashboard extends BaseController
 
         // $statusLibrary = new StatusLibrary();
         // $statusLibrary->insertStatusForApproveableItem('abc');
+
+        // $approveItemLibrary = new ApproveItemLibrary();
+        // log_message('error',$approveItemLibrary->approveable_item('bank'));
 
         $data['controller'] = 'dashboard';
         $data['action'] = 'list';

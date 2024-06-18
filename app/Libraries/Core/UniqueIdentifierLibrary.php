@@ -2,10 +2,11 @@
 
 namespace App\Libraries\Core;
 
-use App\Libraries\Core\GrantsLibrary;
+use App\Libraries\System\GrantsLibrary;
 use App\Models\Core\UniqueIdentifierModel;
 
-class UniqueIdentifierLibrary extends GrantsLibrary{
+class UniqueIdentifierLibrary extends GrantsLibrary
+{
 
     protected $table;
 
@@ -19,6 +20,14 @@ class UniqueIdentifierLibrary extends GrantsLibrary{
         $this->table = 'unique_identifier';
     }
 
+    // public function multiSelectField(): string
+    // {
+    //     return '';
+    // }
+
+    // public function actionBeforeIinsert(array $postArray): array{
+    //     return $postArray;
+    // }
 /**
  * Retrieves the unique identifier associated with a specific account system.
  *

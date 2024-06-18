@@ -2,8 +2,9 @@
 
 namespace App\Libraries\Core;
 
-use App\Libraries\Core\GrantsLibrary;
+use App\Libraries\System\GrantsLibrary;
 use App\Models\Core\StatusModel;
+use CodeIgniter\HTTP\RedirectResponse;
 
 class StatusLibrary extends GrantsLibrary
 {
@@ -18,6 +19,15 @@ class StatusLibrary extends GrantsLibrary
 
         $this->table = 'status';
     }
+
+    // public function multiSelectField(): string
+    // {
+    //     return '';
+    // }
+
+    // public function actionBeforeIinsert(array $postArray): array{
+    //     return $postArray;
+    // }
 
     /**
      * Checks if the status ID is the maximum for a given approveable item and item ID.
@@ -242,5 +252,114 @@ function insertStatusIfMissing($approve_item_name)
     // Return the result of inserting status records for the given approveable item
     return $res;
 }
+
+public function initialItemStatus($table_name = "", $account_system_id = 0)
+{
+
+    if ($account_system_id == 0) {
+        $account_system_id = session()->get('user_account_system_id');
+    }
+
+    $table = isEmpty($table_name) ? $this->controller : $table_name;
+
+    $approveableItem = $this->read_db->table('approve_item')
+                          ->getWhere(['approve_item_name' => $table])
+                          ->getRow();
+
+    $status_id = 0;
+
+    if ($approveableItem) {
+        $approveable_item_id = $approveableItem->approve_item_id;
+        $approveable_item_is_active = $approveableItem->approve_item_is_active;
+
+        $condition_array = [
+            'fk_approve_item_id' => $approveable_item_id,
+            'status_approval_sequence' => 1,
+            'fk_account_system_id' => $account_system_id
+        ];
+
+        if (!$approveable_item_is_active) {
+            $condition_array = [
+                'fk_approve_item_id' => $approveable_item_id,
+                'status_is_requiring_approver_action' => 0,
+                'fk_account_system_id' => $account_system_id
+            ];
+        }
+
+        $initial_status = $this->read_db->table($this->table)
+                             ->join('approval_flow', 'approval_flow.approval_flow_id = status.fk_approval_flow_id')
+                             ->getWhere($condition_array)
+                             ->getRow();
+
+        if ($initial_status) {
+            $status_id = $initial_status->status_id;
+        }
+    }
+
+    return $status_id;
+}
+
+public function getMaxApprovalStatusId(string $approveableItem, array $officeIds = [], int $accountSystemId = 0): array|RedirectResponse
+    {
+        $maxStatusIds = [];
+        $builder = $this->read_db->table($this->table);
+        
+        if (empty($officeIds)) {
+            if (empty($this->session->get('hierarchy_offices'))) {
+                $message = "Your account is improperly set. Your user context assignment misses a related record in the correct context user table. Contact the administrator";
+                $message .= "<br/><a href='" . base_url() . "login/logout'>" . get_phrase('log_out') . "</a>";
+                // throw new \Exception($message);
+                return redirect()->to('login/index');
+            }
+        }
+
+        $builder->join('approval_flow', 'approval_flow.approval_flow_id = status.fk_approval_flow_id')
+                ->join('approve_item', 'approve_item.approve_item_id = approval_flow.fk_approve_item_id')
+                ->join('account_system', 'account_system.account_system_id = approval_flow.fk_account_system_id')
+                ->join('office', 'office.fk_account_system_id = account_system.account_system_id');
+
+        if ($accountSystemId > 0) {
+            $builder->where('account_system.account_system_id', $accountSystemId);
+        } else {
+            $hierarchyOffices = !empty($officeIds) ? $officeIds : array_column(session()->get('hierarchy_offices'), 'office_id');
+            $builder->whereIn('office.office_id', $hierarchyOffices);
+        }
+
+        $builder->select(['status_id', 'status_approval_sequence'])
+                ->where([
+                    'approve_item_name' => $approveableItem,
+                    'status_backflow_sequence' => 0,
+                    'status_approval_direction' => 1,
+                    'status_is_requiring_approver_action' => 0
+                ]);
+
+        $maxStatusApprovalSequenceObj = $builder->get();
+
+        if ($maxStatusApprovalSequenceObj->getNumRows() > 0 && $maxStatusApprovalSequenceObj->getRow()->status_approval_sequence > 0) {
+            $maxStatusIdsWithSeq = $maxStatusApprovalSequenceObj->getResultArray();
+            $maxStatusIds = array_unique(array_column($maxStatusIdsWithSeq, 'status_id'));
+        } elseif (in_array($approveableItem, $this->config->tableThatDontRequireHistoryFields)) {
+            // Nothing to do
+        } else {
+            $message = "You have no initial status set for the feature " . $approveableItem . ". Please check if all approval workflow related tables are correctly set</br>";
+            if (!$this->insertStatusIfMissing($approveableItem)) {
+                throw new \Exception($message);
+            }
+        }
+
+        return $maxStatusIds;
+    }
+
+    public function isMaxApprovalStatusId(string $approveableItem, int $statusId): bool
+    {
+        $isMaxStatusId = false;
+        $maxStatusId = $this->getMaxApprovalStatusId($approveableItem);
+
+        if (in_array($statusId, $maxStatusId)) {
+            $isMaxStatusId = true;
+        }
+
+        return $isMaxStatusId;
+    }
 
 }

@@ -9,6 +9,7 @@ use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Config\GrantsConfig;
+use CodeIgniter\CLI\CLI;
 
 /**
  * Class BaseController
@@ -57,6 +58,8 @@ abstract class BaseController extends Controller
     protected $action;
     protected $id;
     protected $config;
+    protected $uri;
+    protected $max_status_id;
 
     /**
      * @return void
@@ -84,12 +87,43 @@ abstract class BaseController extends Controller
         $this->config = config(GrantsConfig::class);
 
         // Set controller, action and ids
-        $uri = service('uri');
-        // $this->controller = $uri->getSegment(1);
-        // $this->action = $uri->getSegment(2);
-        // $this->id = $uri->getSegment(3);
+        $this->uri = service('uri');
+        $this->controller = $this->uri->getSegment(1, 'dashboard');
+        $this->action = $this->uri->getSegment(2, 'list');
+        $this->id = $this->uri->getSegment(3, 0);
+
+        // Only run these if not cli request
+        if (!is_cli()) {
+            $this->sessionBasedConstructorSet();
+        }
 
     }
+
+    private function sessionBasedConstructorSet()
+    {
+    
+        if ($this->action == 'view') {
+            if ($this->session->has('master_table')) {
+                $this->session->remove('master_table');
+            }
+            $this->session->set('master_table', ucfirst($this->controller));
+            $this->id = hash_id($this->uri->getSegment(3), 'decode'); // Not sure what's this line does
+        } elseif ($this->action == 'single_form_add' && count($this->uri->getSegments()) == 4) {
+            if ($this->session->has('master_table')) {
+                $this->session->remove('master_table');
+            }
+            $this->session->set('master_table', $this->uri->getSegment(4));
+            $this->id = hash_id($this->uri->getSegment(3), 'decode'); // Not sure what's this line does
+        } elseif ($this->action == 'list') {
+            $this->session->set('master_table', null);
+            $this->id = hash_id($this->uri->getSegment(3), 'decode'); 
+        }
+    
+        $this->id = $this->uri->getSegment(3, 0);
+        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+        $this->max_status_id = $statusLibrary->getMaxApprovalStatusId($this->controller);
+    }
+    
 
 /**
  * This function checks the maintainance mode status from the database and sets the session variable.

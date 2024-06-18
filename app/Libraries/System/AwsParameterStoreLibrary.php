@@ -1,6 +1,6 @@
 <?php 
 
-namespace App\Libraries\Core;
+namespace App\Libraries\System;
 
 use Config\AwsSdk;
 

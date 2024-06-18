@@ -2,7 +2,7 @@
 
 namespace App\Libraries\Core;
 
-use App\Libraries\Core\GrantsLibrary;
+use App\Libraries\System\GrantsLibrary;
 use App\Libraries\Core\UniqueIdentifierLibrary;
 use App\Libraries\Core\StatusLibrary;
 use App\Models\Core\UserModel;
@@ -21,6 +21,15 @@ class UserLibrary extends GrantsLibrary
 
         $this->table = 'user';
     }
+
+    // public function multiSelectField(): string
+    // {
+    //     return '';
+    // }
+
+    // public function actionBeforeIinsert(array $postArray): array{
+    //     return $postArray;
+    // }
 
     /**
      * This function retrieves the primary role of a user from the database.
@@ -555,4 +564,271 @@ class UserLibrary extends GrantsLibrary
         // Return the array of department IDs
         return $departmentIds;
     }
+
+    function computeUserHierarchyOffices($user_context, $user_context_id, $looping_context)
+    {
+
+        $contextDefinitionLibrary = new \App\Libraries\Core\ContextDefinitionLibrary();
+
+        $user_context_table = 'context_' . $user_context;
+        $user_context_level = $contextDefinitionLibrary->contextDefinitions()[$user_context]['context_definition_level'];
+        $contexts = array_keys($contextDefinitionLibrary->contextDefinitions());
+
+        $level_one_context_table = isset($contexts[0]) ? 'context_' . $contexts[0] : null; //center
+        $level_two_context_table = isset($contexts[1]) ? 'context_' . $contexts[1] : null; //cluster
+        $level_three_context_table = isset($contexts[2]) ? 'context_' . $contexts[2] : null; //cohort
+        $level_four_context_table = isset($contexts[3]) ? 'context_' . $contexts[3] : null; // country
+        $level_five_context_table = isset($contexts[4]) ? 'context_' . $contexts[4] : null; //region
+        $level_six_context_table = isset($contexts[5]) ? 'context_' . $contexts[5] : null; //global
+
+        $builder = $this->read_db->table($user_context_table);
+
+        $builder->select(array('office_id', 'office_name', 'office_is_active'));
+
+        if ($contexts[0] != null && $looping_context == $contexts[0]) { // center
+
+            if ($user_context_level > 5)
+                $builder->join($level_five_context_table, $level_five_context_table . '.fk_' . $level_six_context_table . '_id=' . $level_six_context_table . '.' . $level_six_context_table . '_id');
+            if ($user_context_level > 4)
+                $builder->join($level_four_context_table, $level_four_context_table . '.fk_' . $level_five_context_table . '_id=' . $level_five_context_table . '.' . $level_five_context_table . '_id');
+            if ($user_context_level > 3)
+                $builder->join($level_three_context_table, $level_three_context_table . '.fk_' . $level_four_context_table . '_id=' . $level_four_context_table . '.' . $level_four_context_table . '_id');
+            if ($user_context_level > 2)
+                $builder->join($level_two_context_table, $level_two_context_table . '.fk_' . $level_three_context_table . '_id=' . $level_three_context_table . '.' . $level_three_context_table . '_id');
+            if ($user_context_level > 1)
+                $builder->join($level_one_context_table, $level_one_context_table . '.fk_' . $level_two_context_table . '_id=' . $level_two_context_table . '.' . $level_two_context_table . '_id');
+
+            if ($user_context_level > 1)
+                $builder->select(array($level_two_context_table . '.fk_office_id as reporting_office_id'));
+        }
+
+        if ($contexts[1] != null && $looping_context == $contexts[1]) { //cluster
+
+            if ($user_context_level > 5)
+                $builder->join($level_five_context_table, $level_five_context_table . '.fk_' . $level_six_context_table . '_id=' . $level_six_context_table . '.' . $level_six_context_table . '_id');
+            if ($user_context_level > 4)
+                $builder->join($level_four_context_table, $level_four_context_table . '.fk_' . $level_five_context_table . '_id=' . $level_five_context_table . '.' . $level_five_context_table . '_id');
+            if ($user_context_level > 3)
+                $builder->join($level_three_context_table, $level_three_context_table . '.fk_' . $level_four_context_table . '_id=' . $level_four_context_table . '.' . $level_four_context_table . '_id');
+            if ($user_context_level > 2)
+                $builder->join($level_two_context_table, $level_two_context_table . '.fk_' . $level_three_context_table . '_id=' . $level_three_context_table . '.' . $level_three_context_table . '_id');
+
+            if ($user_context_level > 2)
+                $builder->select(array($level_three_context_table . '.fk_office_id as reporting_office_id'));
+        }
+
+        if ($contexts[2] != null && $looping_context == $contexts[2]) { //cohort
+
+            if ($user_context_level > 5)
+                $builder->join($level_five_context_table, $level_five_context_table . '.fk_' . $level_six_context_table . '_id=' . $level_six_context_table . '.' . $level_six_context_table . '_id');
+            if ($user_context_level > 4)
+                $builder->join($level_four_context_table, $level_four_context_table . '.fk_' . $level_five_context_table . '_id=' . $level_five_context_table . '.' . $level_five_context_table . '_id');
+            if ($user_context_level > 3)
+                $builder->join($level_three_context_table, $level_three_context_table . '.fk_' . $level_four_context_table . '_id=' . $level_four_context_table . '.' . $level_four_context_table . '_id');
+
+            if ($user_context_level > 3)
+                $builder->select(array($level_four_context_table . '.fk_office_id as reporting_office_id'));
+        }
+
+        if ($contexts[3] != null && $looping_context == $contexts[3]) { //country
+
+            if ($user_context_level > 5)
+                $builder->join($level_five_context_table, $level_five_context_table . '.fk_' . $level_six_context_table . '_id=' . $level_six_context_table . '.' . $level_six_context_table . '_id');
+            if ($user_context_level > 4)
+                $builder->join($level_four_context_table, $level_four_context_table . '.fk_' . $level_five_context_table . '_id=' . $level_five_context_table . '.' . $level_five_context_table . '_id');
+
+            if ($user_context_level > 4)
+                $builder->select(array($level_five_context_table . '.fk_office_id as reporting_office_id'));
+        }
+
+        if ($contexts[4] != null && $looping_context == $contexts[4]) { // region
+
+            if ($user_context_level > 5)
+                $builder->join($level_five_context_table, $level_five_context_table . '.fk_' . $level_six_context_table . '_id=' . $level_six_context_table . '.' . $level_six_context_table . '_id');
+
+            if ($user_context_level > 5)
+                $builder->select(array($level_six_context_table . '.fk_office_id as reporting_office_id'));
+        }
+
+        $builder->join('office', 'office.office_id=context_' . $looping_context . '.fk_office_id');
+        $builder->where(array($user_context_table . '_id' => $user_context_id));
+        $hierarchy_offices = $builder->get()->getResultArray();
+
+        return $hierarchy_offices;
+    }
+
+
+    function userOfficeGroupAssociations($user_hierarchy_offices)
+    {
+
+        $office_group_association = [];
+
+        $user_office_ids = array_column($user_hierarchy_offices, "office_id");
+
+        $builder = $this->read_db->table('office_group_association');
+        // Get office group id of the leading office for the group
+        if (!empty($user_office_ids)) {
+            $builder->select(array('fk_office_group_id'));
+            $builder->whereIn("fk_office_id", $user_office_ids);
+            $builder->where(array('office_group_association_is_lead' => 1));
+            $office_group_ids_array_obj = $builder->get('office_group_association');
+
+
+            if ($office_group_ids_array_obj->getNumRows() > 0) {
+
+                $office_group_ids_array = $office_group_ids_array_obj->getResultArray();
+
+                $office_group_ids = array_column($office_group_ids_array, 'fk_office_group_id');
+
+                $builder2 = $this->read_db->table('office_group_association');
+                $builder2->select(array('office_id', 'office_name', "office_is_active"));
+                $builder2->join('office', 'office.office_id=office_group_association.fk_office_id');
+                $builder2->whereIn('fk_office_group_id', $office_group_ids);
+                $office_group_association_obj = $builder2->get();
+
+                if ($office_group_association_obj->getNumRows() > 0) {
+                    $office_group_association = $office_group_association_obj->getResultArray();
+                }
+            }
+        }
+
+        return $office_group_association;
+    }
+
+    function officeDirectlyAttachedToUser($user_id)
+    {
+        $offices = [];
+
+        $builder = $this->read_db->table('office_user');
+
+        $builder->select(array('office_id', 'office_name'));
+        $builder->join('office', 'office.office_id=office_user.fk_office_id');
+        $builder->where(array('office_user.fk_user_id' => $user_id, 'office_user_is_active' => 1));
+        $offices_obj = $builder->get();
+
+        if ($offices_obj->getNumRows() > 0) {
+            $offices = $offices_obj->getResultArray();
+        }
+
+        return $offices;
+    }
+
+    function userHierarchyOffices($user_id, $show_context = false)
+    {
+        $contextDefinitionLibrary = new \App\Libraries\Core\ContextDefinitionLibrary();
+
+        $user_context_definition = $this->getUserContextDefinition($user_id);
+
+
+        /**
+         * $this->get_user_context_definition($user_id):
+         * 
+         * Array ( 
+         *    [context_definition_id] => 10 
+         *    [context_definition_name] => country 
+         *    [context_definition_level] => 4 
+         *    [context_definition_is_active] => 1 
+         * )
+         */
+        
+        $context_definitions = $contextDefinitionLibrary->contextDefinitions();
+
+        /**
+         * $this->grants->context_definitions():
+         * 
+         * Array ( 
+         * [center] => Array ( 
+         *    [context_table] => context_center 
+         *    [context_user_table] => context_center_user 
+         *    [fk] => fk_context_center_id ) 
+         * [cluster] => Array ( 
+         *    [context_table] => context_cluster 
+         *    [context_user_table] => context_cluster_user 
+         *    [fk] => fk_context_cluster_id ) 
+         * [cohort] => Array ( 
+         *    [context_table] => context_cohort 
+         *    [context_user_table] => context_cohort_user 
+         *    [fk] => fk_context_cohort_id ) 
+         * [country] => Array ( 
+         *    [context_table] => context_country 
+         *    [context_user_table] => context_country_user 
+         *    [fk] => fk_context_country_id ) 
+         * [region] => Array ( 
+         *    [context_table] => context_region 
+         *    [context_user_table] => context_region_user 
+         *    [fk] => fk_context_region_id ) 
+         * [global] => Array ( 
+         *    [context_table] => context_global 
+         *    [context_user_table] => context_global_user 
+         *    [fk] => fk_context_global_id ) )
+         */
+
+        $user_context = $user_context_definition['context_definition_name']; // e.g. country
+        $user_context_table = $context_definitions[$user_context]['context_table']; // e.g. context_country
+        //$user_context_table_user = $context_definitions[$user_context]['context_user_table']; // e.g. context_country_user
+
+        $user_context_level = $context_definitions[$user_context]['context_definition_level']; //e.g. 1 or 2 ....n    $this->db->get_where('context_definition',array('context_definition_name'=>$user_context))->row()->context_definition_level;
+
+        // A user can have multiple context association records e.g. Multiple countries
+        $user_context_association = array_column($this->getUserContextAssociation($user_id), $user_context_table . '_id');
+
+        /**
+         * $this->get_user_context_association($user_id):
+         * 
+         * Array ( [0] => Array ( 
+         *    [context_country_user_id] => 1 [context_country_id] => 1 [fk_designation_id] => 7 ) 
+         *    [context_country_user_id] => 1 [context_country_id] => 2 [fk_designation_id] => 7 ) 
+         * )
+         */
+        $hierachy_context_obj = $contextDefinitionLibrary->getReportingContextLevels($user_context_level);
+        /**
+         * if 2 i.e. cluster level is passed to $this->get_reporting_context_levels($user_context_level):
+         * 
+         * Array ( 
+         * [0] => Array ( [context_definition_name] => center ) 
+         * [1] => Array ( [context_definition_name] => cluster ) )
+         *  */
+        $hierachy_contexts = array_column($hierachy_context_obj, 'context_definition_name');
+
+
+        $user_hierarchy_offices = array();
+        //$office_ids = array();
+
+        $cnt = 0;
+
+        foreach ($user_context_association as $user_context_id) {
+            //$user_context_id can be ids for centers, countries depending on the user context assigned
+            foreach ($hierachy_contexts as $hierarchy_context) {
+                //$hierarchy_context can be center or cluster or cohort depending on the user context level
+
+                $looped_context_offices = $this->computeUserHierarchyOffices($user_context, $user_context_id, $hierarchy_context);
+
+                if ($show_context) {
+                    $user_hierarchy_offices[$hierarchy_context] = $looped_context_offices;
+                } else {
+                    $user_hierarchy_offices = array_merge($user_hierarchy_offices, $looped_context_offices);
+                }
+
+                $cnt++;
+            }
+        }
+
+        // Merge with Office group Association
+        $user_office_group_associations = $this->userOfficeGroupAssociations($user_hierarchy_offices);
+
+        if ($user_office_group_associations && !$show_context) {
+            $user_hierarchy_offices = array_merge($user_hierarchy_offices, $user_office_group_associations);
+        }
+
+        $office_directly_attached_to_user = $this->officeDirectlyAttachedToUser($user_id);
+
+        if (is_array($office_directly_attached_to_user) && count($office_directly_attached_to_user) > 0) {
+            foreach ($office_directly_attached_to_user as $office) {
+                array_push($user_hierarchy_offices, $office);
+            }
+        }
+
+        return array_unique($user_hierarchy_offices, SORT_REGULAR);
+    }
+
 }
