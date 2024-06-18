@@ -31,9 +31,14 @@ class GrantsLibrary implements DynamicMethodsInterface
 
     // Set controller, action and ids
     $uri = service('uri');
-    $this->controller = $uri->getSegment(1);
-    $this->action = $uri->getSegment(2);
-    $this->id = $uri->getSegment(3);
+    // $this->controller = $uri->getSegment(1);
+    // $this->action = $uri->getSegment(2);
+    // $this->id = $uri->getSegment(3);
+    $segments = $uri->getSegments();
+
+    $this->controller = isset($segments[0]) ? $segments[0] : 'dashboard';
+    $this->action = isset($segments[1]) ? $segments[1] : 'list';
+    $this->id = isset($segments[2]) ? $segments[2] : 0;
 
     // Session 
     $this->session = service('session');
@@ -336,7 +341,7 @@ private function loadLibrary(string $table_name)
     $modules = $this->config->modules; // Assuming $config is an instance of Config\App
     $table_library = null;
     $table_library_name = pascalize($table_name) . 'Library';
-
+    // log_message('eeror', json_encode($table_library_name));
     // Loop through the modules to find the appropriate library
     foreach ($modules as $module) {
         // Check if the library class exists

@@ -37,6 +37,7 @@ class ApproveItemLibrary extends GrantsLibrary
     public function insertMissingApproveableItem($table)
     {
         // Fetch the existing approveable item with the given table name
+        
         $approve_items = $this->read_db->table('approve_item')
             ->getWhere(['approve_item_name' => $table]);
 
@@ -60,6 +61,8 @@ class ApproveItemLibrary extends GrantsLibrary
                 'approve_item_created_by' => $user_id,
                 'approve_item_last_modified_by' => $user_id
             ];
+
+            // log_message('error', json_encode($data));
 
             // Insert the new approveable item into the database
             $this->approveItemModel->insert((object) $data);

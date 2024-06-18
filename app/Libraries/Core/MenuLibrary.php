@@ -4,7 +4,7 @@ namespace App\Libraries\Core;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Core\MenuModel;
-use App\Models\Core\PermissionModel;
+use App\Libraries\Core\UniqueIdentifierLibrary;
 
 class MenuLibrary extends GrantsLibrary
 {
@@ -202,68 +202,257 @@ class MenuLibrary extends GrantsLibrary
         return $this->getUserMenuItems();
     }
 
-//     public function upsert_menu($menus)
-// {
-//     $permissionModel = new PermissionModel();
+    public function upsertMenu($menus)
+    {
 
-//     foreach ($menus as $menu => $menuItems) {
-//         $data = [
-//             'menu_name' => $menu,
-//             'menu_derivative_controller' => $menu,
-//         ];
+        foreach ($menus as $menu => $menuItems) {
+            $data = [
+                'menu_name' => $menu,
+                'menu_derivative_controller' => $menu,
+            ];
 
-//         $countOfActiveMenus = $this->read_db->table($this->table)
-//         ->where('menu_derivative_controller', $menu)
-//         ->countAllResults();
+            if ($this->session->get('system_admin')) {
+                //$db->where(['menu_is_active' => 1]);
+            }
 
-//         if ($countOfActiveMenus == 0) {
-//             $this->menuModel->insert((object)$data);
+            $countOfActiveMenus = $this->read_db->table($this->table)
+                ->where('menu_derivative_controller', $menu)
+                ->countAllResults();
 
-//             $permissionData = [
-//                 'menu_id' => $this->menuModel->getInsertID(),
-//                 'table_name' => $menu,
-//             ];
+            if ($countOfActiveMenus == 0) {
+                $this->write_db->table($this->table)->insert($data);
 
-//             $permissionModel->insert((object)$permissionData);
+                $menuId = $this->write_db->insertID();
+                $permissionData = [
+                    'menu_id' => $menuId,
+                    'table_name' => $menu,
+                ];
 
-//             $grantsModel->insert_missing_approveable_item(strtolower($menu));
-//             $grantsModel->mandatory_fields(strtolower($menu));
-//             $grantsModel->insert_status_if_missing(strtolower($menu));
-//             $grants->create_resource_upload_directory_structure();
-//         } else {
-//             $db->table('menu')->where('menu_derivative_controller', $menu)->update($data);
-//         }
-//     }
+                $this->add('permission',$permissionData);
+                
+                $approveItemLibrary = new ApproveItemLibrary();
+                $statusLibrary = new StatusLibrary();
 
-//     // Array diff
-//     $arrMenu = array_column($db->table('menu')->get()->getResultArray(), 'menu_derivative_controller');
-//     $removedControllers = array_diff($arrMenu, array_keys($menus));
+                $approveItemLibrary->insertMissingApproveableItem(strtolower($menu));
+                $this->mandatoryFields(strtolower($menu));
+                $statusLibrary->insertStatusIfMissing(strtolower($menu));
+                $this->createResourceUploadDirectoryStructure();
+            } else {
+                $this->write_db->table($this->table)
+                    ->where('menu_derivative_controller', $menu)
+                    ->update($data);
+            }
+        }
 
-//     if (count($removedControllers) > 0) {
-//         foreach ($removedControllers as $removedController) {
-//             $db->transStart();
+        $arrMenu = array_column($this->read_db->table($this->table)->get()->getResultArray(), 'menu_derivative_controller');
+        $removedControllers = array_diff($arrMenu, array_keys($menus));
 
-//             $removedMenu = $db->table('menu')->where('menu_derivative_controller', $removedController)->get()->getRow();
+        if (count($removedControllers) > 0) {
+            foreach ($removedControllers as $removedController) {
+                $this->write_db->transStart();
 
-//             if ($removedMenu) {
-//                 $allMenuPermissions = $db->table('permission')->where('fk_menu_id', $removedMenu->menu_id)->get();
+                $removedMenu = $this->read_db->table($this->table)
+                    ->where('menu_derivative_controller', $removedController)
+                    ->get()
+                    ->getRow();
 
-//                 if ($allMenuPermissions->getNumRows() > 0) {
-//                     foreach ($allMenuPermissions->getResult() as $permission) {
-//                         $db->table('role_permission')->where('fk_permission_id', $permission->permission_id)->delete();
-//                     }
-//                 }
+                $allMenuPermissions = $this->read_db->table('permission')
+                    ->where('fk_menu_id', $removedMenu->menu_id)
+                    ->get();
 
-//                 // Remove all permissions
-//                 $db->table('permission')->where('fk_menu_id', $removedMenu->menu_id)->delete();
+                if ($allMenuPermissions->getNumRows() > 0) {
+                    foreach ($allMenuPermissions->getResult() as $permission) {
+                        $permissionId = $permission->permission_id;
 
-//                 // Delete the menu
-//                 $db->table('menu')->where('menu_derivative_controller', $removedController)->delete();
-//             }
+                        $this->write_db->table('role_permission')
+                            ->where('fk_permission_id', $permissionId)
+                            ->delete();
+                    }
+                }
 
-//             $db->transComplete();
-//         }
-//     }
-// }
+                $this->write_db->table('permission')
+                    ->where('fk_menu_id', $removedMenu->menu_id)
+                    ->delete();
+
+                $this->write_db->table($this->table)
+                    ->where('menu_derivative_controller', $removedController)
+                    ->delete();
+
+                $this->write_db->transComplete();
+            }
+        }
+    }
+
+    public function getMenuItems(): array
+    {
+
+        $controllers = $this->getAllTables();
+
+        $tablesNotRequiredInMenu = $this->config->tablesNotRequiredInMenu;
+
+        $controllers = array_diff($controllers, $tablesNotRequiredInMenu);
+
+        $menuItems = [];
+
+        foreach ($controllers as $controller) {
+            $menuItems[ucfirst($controller)] = [];
+        }
+
+        return $menuItems;
+    }
+
+    public function newMenuItems() {
+        $conditionArray = ['menu_is_active' => 1];
+    
+    
+        if (!$this->session->get('system_admin')) {
+            $this->read_db->table($this->table)->where($conditionArray);
+        }
+    
+        $registeredMenus = $this->read_db->table($this->table)->get()->getResultArray();
+        $menus = array_column($registeredMenus, 'menu_name');
+    
+        $formattedMenus = array_map([$this, 'toLower'], $menus);
+    
+        $specs = $this->getAllTables();
+    
+        $diff = array_diff($specs, $formattedMenus);
+    
+        if (($key = array_search('menu', $diff)) !== false) {
+            unset($diff[$key]);
+        }
+    
+        return $diff;
+    }
+    
+    protected function toLower($string) {
+        return strtolower($string);
+    }
+
+
+    public function setMenuSessions()
+{
+    $menus = $this->getMenuItems(); // $this->menuModel->getAllTables();
+    $newMenuItems = $this->newMenuItems();
+
+    if (!empty($newMenuItems)) {
+        $this->upsertMenu($menus);
+    }
+
+    $sizeOfMenuItemsByController = count($menus);
+    $sizeOfMenuItemsByDatabase = $this->getCountOfMenuItems();
+
+    if ($sizeOfMenuItemsByController !== $sizeOfMenuItemsByDatabase) {
+        session()->remove(['user_menu', 'user_priority_menu', 'user_more_menu']);
+    }
+
+    if (!session()->has('user_menu')) {
+        $userMenuItems = $this->upsertUserMenu();
+
+        $fullUserMenu = elevateArrayElementToKey($userMenuItems, 'menu_derivative_controller');
+
+        $userMenuByPriorityGroups = elevateAssocArrayElementToKey($userMenuItems, 'menu_user_order_priority_item');
+
+        $userPriorityMenu = elevateArrayElementToKey($userMenuByPriorityGroups[1], 'menu_derivative_controller');
+        $userMoreMenu = elevateArrayElementToKey($userMenuByPriorityGroups[0], 'menu_derivative_controller');
+
+        $this->session->set('user_menu', $fullUserMenu);
+
+        if (!session()->get('system_admin')) {
+            $userPriorityMenuBasedOnPermissions = [];
+            $userMoreMenuBasedOnPermissions = [];
+
+            foreach ($userPriorityMenu as $menu => $options) {
+                if (isset(session()->get('role_permissions')[ucfirst($menu)]) && array_key_exists('read', session()->get('role_permissions')[ucfirst($menu)][1])) {
+                    $userPriorityMenuBasedOnPermissions[$menu] = $options;
+                }
+            }
+
+            foreach ($userMoreMenu as $menu => $options) {
+                if (isset(session()->get('role_permissions')[ucfirst($menu)]) && array_key_exists('read', session()->get('role_permissions')[ucfirst($menu)][1])) {
+                    $userMoreMenuBasedOnPermissions[$menu] = $options;
+                }
+            }
+
+            if (
+                count($userPriorityMenuBasedOnPermissions) < $this->config->maxPriorityMenuItems - 1 &&
+                count($userMoreMenuBasedOnPermissions) > 0
+            ) {
+                $chunkedUserMore = array_chunk($userMoreMenuBasedOnPermissions, $this->config->maxPriorityMenuItems - 1, true);
+
+                foreach ($chunkedUserMore[0] as $menu => $options) {
+                    $userPriorityMenuBasedOnPermissions[$menu] = $options;
+                }
+
+                $userMoreMenuBasedOnPermissions = array_slice($userMoreMenuBasedOnPermissions, $this->config->maxPriorityMenuItems - 1);
+            }
+
+            session()->set('user_priority_menu', $userPriorityMenuBasedOnPermissions);
+            session()->set('user_more_menu', $userMoreMenuBasedOnPermissions);
+        } else {
+            session()->set('user_priority_menu', $userPriorityMenu);
+            session()->set('user_more_menu', $userMoreMenu);
+        }
+    }
+}
+
+public function navigationItems() {
+
+    $permission = $this->session->get('role_permissions');
+
+    $this->setMenuSessions();
+
+    $menus = $this->session->get('user_priority_menu');
+
+    $nav = "";
+    $menu_icon = '';
+
+    $all_active_menus_obj = $this->read_db->table($this->table)
+                               ->where('menu_is_active', 1)
+                               ->get();
+    
+    $menu_derivative_controllers = array_column($all_active_menus_obj->getResultArray(), 'menu_derivative_controller');
+
+    $uniqueIdentifierLibrary = new UniqueIdentifierLibrary();
+    $unique_identifier = $uniqueIdentifierLibrary->getAccountSystemUniqueIdentifier($this->session->get('user_account_system_id'));
+
+    $userLibrary = new UserLibrary();
+
+    foreach ($menus as $menu => $items) {
+        if ($userLibrary->checkRoleHasPermissions($menu, 'read') && 
+            in_array(ucfirst($menu), $menu_derivative_controllers)) {
+
+            if (
+                !$this->session->get('data_privacy_consented') && 
+                $menu != ucfirst($this->session->get('default_launch_page')) && 
+                !empty($unique_identifier)
+            ) {
+                continue;
+            }
+            
+            $nav .= '
+            <li class="menu_tab '.strtolower($menu).'">
+              <a href="'.base_url().strtolower($menu).'/list">
+                    <i class="'.$menu_icon.'"></i>
+                    <span>'.get_phrase(strtolower($items['menu_name'])).'</span>
+                </a>
+            </li>
+            ';
+        }
+    }
+
+    if (count($this->session->get('user_more_menu')) > 0) {
+        $nav .= '
+        <li class="">
+            <a href="'.base_url().'Menu/list">
+                <span class="fa fa-plus"></span>
+            </a>
+        </li>
+        ';
+    }
+
+    return $nav;
+}
+
 
 }

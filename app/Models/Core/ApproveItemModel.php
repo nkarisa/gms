@@ -15,7 +15,7 @@ class ApproveItemModel extends Model implements ModelInterface
     protected $protectFields    = true;
     protected $allowedFields    = [
         'approve_item_track_number',
-        'approve_item_track_name',
+        'approve_item_name',
         'approve_item_is_active',
         'approve_item_created_date',
         'approve_item_created_by',

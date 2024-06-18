@@ -178,6 +178,7 @@ public function insertStatusForApproveableItem(string $approveItemName): bool
         $userId = session()->get('user_id') ?? 1;
 
         // Check if the approve item exists in the database, and insert if it doesn't
+        
         $approveItemId = $approveItemLibrary->insertMissingApproveableItem($approveItemName);
 
         // Retrieve the account systems from the database

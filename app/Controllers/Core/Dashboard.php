@@ -24,23 +24,8 @@ class Dashboard extends BaseController
     }
   
     public function index(){
-        // $accountSystem = ['account_system_id' => 3, 'account_system_name' => 'Kenya'];
-        // $approvalFlowLibrary = new ApprovalFlowLibrary();
-        // $approvalFlowLibrary->insertApprovalFlow($accountSystem, 1, 'account_system', 1);
-        // log_message('error', json_encode($approvalFlowLibrary->mandatoryFields('abc')));
-        // log_message('error', $approvalFlowLibrary->hasDependantTable('voucher'));
 
-        // $menuLibrary = new MenuLibrary();
-        // log_message('error',json_encode($menuLibrary->getUserMenuItems()));
-
-        // $grantsLibrary = new GrantsLibrary();
-        // $grantsLibrary->createResourceUploadDirectoryStructure();
-
-        // $statusLibrary = new StatusLibrary();
-        // $statusLibrary->insertStatusForApproveableItem('abc');
-
-        // $approveItemLibrary = new ApproveItemLibrary();
-        // log_message('error',$approveItemLibrary->approveable_item('bank'));
+        // log_message('error', json_encode($this->session->hierarchy_offices));
 
         $data['controller'] = 'dashboard';
         $data['action'] = 'list';

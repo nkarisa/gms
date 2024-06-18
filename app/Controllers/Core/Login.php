@@ -139,7 +139,10 @@ class Login extends BaseController
             'context_definition' => $userLibrary->getUserContextDefinition($user_id),
             'user_account_system_id' => $user['fk_account_system_id'],
             'hierarchy_offices' => $userLibrary->userHierarchyOffices($user_id),
+            'data_privacy_consented' => $userLibrary->dataPrivacyConsented($user_id),
         ];
+
+        // log_message('error', json_encode($userLibrary->getUserPermissions($roleIds)));
 
         // If user is already authenticated, remove the previous session data
         if ($this->session->has('user_is_authenticated')) {

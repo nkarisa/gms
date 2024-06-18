@@ -99,7 +99,7 @@ if (!function_exists('create_specs_array')) {
  * @throws Exception If Hashids library is not installed or cannot be loaded.
  */
 if (!function_exists('hash_id')) {
-    function hash_id(int $id, string $action = 'encode'): string
+    function hash_id(int|string $id, string $action = 'encode'): null|string
     {
         // Initialize Hashids with a secret key and length
         $hashids = new Hashids\Hashids('#Compassion321', 10);
@@ -134,7 +134,7 @@ if (!function_exists('hash_id')) {
  * @throws Exception If the element to elevate is not a string.
  */
 if (!function_exists('elevate_array_element_to_key')) {
-    function elevate_array_element_to_key($unelevavated_array, $element_to_elevate)
+    function elevateArrayElementToKey($unelevavated_array, $element_to_elevate)
     {
         // Check if the input array is an array
         if (!is_array($unelevavated_array)) {
@@ -181,17 +181,17 @@ if (!function_exists('elevate_array_element_to_key')) {
  * @throws Exception If the element to elevate is not a string.
  */
 if (!function_exists('elevate_assoc_array_element_to_key')) {
-    function elevate_assoc_array_element_to_key($unevelavated_array, $element_to_elevate)
+    function elevateAssocArrayElementToKey($unevelavated_array, $element_to_elevate)
     {
         // Check if the input array is an associative array
-        if (!is_array($unevelavated_array) || array_values($unevelavated_array) === $unevelavated_array) {
-            throw new Exception('Invalid associative array');
-        }
+        // if (!is_array($unevelavated_array) || array_values($unevelavated_array) === $unevelavated_array) {
+        //     throw new Exception('Invalid associative array');
+        // }
 
         // Check if the element to elevate is a string
-        if (!is_string($element_to_elevate)) {
-            throw new Exception('Element to elevate must be a string');
-        }
+        // if (!is_string($element_to_elevate)) {
+        //     throw new Exception('Element to elevate must be a string');
+        // }
 
         $elevated_array = array();
         $cnt = 0;

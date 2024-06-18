@@ -469,8 +469,8 @@ class UserLibrary extends GrantsLibrary
      */
     public function getUserContextAssociation(int $userId): array
     {
-        $session = session();
-        $contextDefinition = $session->get('context_definition');
+
+        $contextDefinition = $this->getUserContextDefinition($userId);//$this->session->get('context_definition');
         $contextTable = 'context_' . strtolower($contextDefinition['context_definition_name']);
         $contextUsersTable = 'context_' . strtolower($contextDefinition['context_definition_name']) . '_user';
         $contextUsersTableId = $this->primaryKeyField($contextUsersTable);
@@ -671,7 +671,7 @@ class UserLibrary extends GrantsLibrary
             $builder->select(array('fk_office_group_id'));
             $builder->whereIn("fk_office_id", $user_office_ids);
             $builder->where(array('office_group_association_is_lead' => 1));
-            $office_group_ids_array_obj = $builder->get('office_group_association');
+            $office_group_ids_array_obj = $builder->get();
 
 
             if ($office_group_ids_array_obj->getNumRows() > 0) {

@@ -60,7 +60,7 @@ abstract class BaseController extends Controller
     protected $config;
     protected $uri;
     protected $max_status_id;
-
+    protected $segments;
     /**
      * @return void
      */
@@ -88,9 +88,14 @@ abstract class BaseController extends Controller
 
         // Set controller, action and ids
         $this->uri = service('uri');
-        $this->controller = $this->uri->getSegment(1, 'dashboard');
-        $this->action = $this->uri->getSegment(2, 'list');
-        $this->id = $this->uri->getSegment(3, 0);
+        // $this->controller = $this->uri->getSegment(1) ?? 'dashboard';
+        // $this->action = $this->uri->getSegment(2) ?? 'list';
+        // $this->id = $this->uri->getSegment(3) ?? 0;
+        $this->segments = $this->uri->getSegments();
+
+        $this->controller = isset($this->segments[0]) ? $this->segments[0] : 'dashboard';
+        $this->action = isset($this->segments[1]) ? $this->segments[1] : 'list';
+        $this->id = isset($this->segments[2]) ? $this->segments[2] : 0;
 
         // Only run these if not cli request
         if (!is_cli()) {
@@ -107,19 +112,19 @@ abstract class BaseController extends Controller
                 $this->session->remove('master_table');
             }
             $this->session->set('master_table', ucfirst($this->controller));
-            $this->id = hash_id($this->uri->getSegment(3), 'decode'); // Not sure what's this line does
+            $this->id = hash_id(isset($this->segments[2]) ? $this->segments[2] : null, 'decode'); // Not sure what's this line does
         } elseif ($this->action == 'single_form_add' && count($this->uri->getSegments()) == 4) {
             if ($this->session->has('master_table')) {
                 $this->session->remove('master_table');
             }
             $this->session->set('master_table', $this->uri->getSegment(4));
-            $this->id = hash_id($this->uri->getSegment(3), 'decode'); // Not sure what's this line does
+            $this->id = hash_id(isset($this->segments[2]) ? $this->segments[2] : 0, 'decode'); // Not sure what's this line does
         } elseif ($this->action == 'list') {
             $this->session->set('master_table', null);
-            $this->id = hash_id($this->uri->getSegment(3), 'decode'); 
+            $this->id = hash_id(isset($this->segments[2]) ? $this->segments[2] : 0, 'decode'); 
         }
     
-        $this->id = $this->uri->getSegment(3, 0);
+        $this->id = isset($this->segments[2]) ? $this->segments[2] : 0;
         $statusLibrary = new \App\Libraries\Core\StatusLibrary();
         $this->max_status_id = $statusLibrary->getMaxApprovalStatusId($this->controller);
     }
