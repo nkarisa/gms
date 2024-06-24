@@ -15,4 +15,5 @@ class GrantsConfig extends BaseConfig
     public $maxPriorityMenuItems = 10;
     public $tableThatDontRequireHistoryFields = ['status', 'approve_item', 'approval_flow', 'ci_sessions'];
     public $tablesNotRequiredInMenu = ['menu','ci_sessions'];
+
 }

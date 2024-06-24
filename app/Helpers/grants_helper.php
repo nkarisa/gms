@@ -1,5 +1,7 @@
 <?php
 
+define('DS', DIRECTORY_SEPARATOR);
+
 if (!function_exists('get_phrase')) {
     function get_phrase($phrase, $translation = '')
     {
@@ -318,5 +320,37 @@ if(!function_exists('exploding')){
         }
 
         return $keyedExplode;
+    }
+}
+
+if(!function_exists('clear_cache_files')){
+    function clear_cache_files($table){
+
+        $cache_dirs_actions = ['view','list','edit','single_form_add','multi_form_add','show_list'];
+
+        foreach($cache_dirs_actions as $action){
+          $dir = APPPATH.'cache'.DS.$table.'+'.$action;
+          
+          if(!file_exists($dir)) continue;
+
+          remove_directory($dir);
+          
+        }
+    }
+}
+
+if(!function_exists('remove_directory')){
+    function remove_directory($dir){
+        $it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS);
+        $files = new RecursiveIteratorIterator($it,
+                    RecursiveIteratorIterator::CHILD_FIRST);
+        foreach($files as $file) {
+            if ($file->isDir()){
+                rmdir($file->getRealPath());
+            } else {
+                unlink($file->getRealPath());
+            }
+        }
+        rmdir($dir);
     }
 }

@@ -20,6 +20,8 @@ class GrantsLibrary implements DynamicMethodsInterface
   protected $session;
   protected $request;
   protected $response;
+  protected $set_field_type = [];
+  protected $detail_tables = [];
 
   function __construct()
   {
@@ -479,7 +481,7 @@ public function mandatoryFields(string $table): void
  * @param string $table_name The name of the table to retrieve fields for. If empty, the controller name will be used.
  * @return array An array containing the names of all fields in the specified table.
  */
-private function getAllTableFields(string $table_name = ""): array
+public function getAllTableFields(string $table_name = ""): array
 {
     // If table_name is not provided, use the controller name
     $table = isEmpty($table_name) ? strtolower($this->controller) : strtolower($table_name);
@@ -834,7 +836,7 @@ public function transactionValidateDuplicates(string $table_name, array $insert_
  * @return mixed The instantiated library object for the specified table.
  * @throws \Exception If the library object could not be instantiated.
  */
-public function loadLibrary(string $table_name)
+final public function loadLibrary(string $table_name)
 {
     $modules = $this->config->modules; // Assuming $config is an instance of Config\App
     $table_library = null;
@@ -913,7 +915,376 @@ public function loadLibrary(string $table_name)
         }
     }
 
+    protected function lookupTables($table_name = ''): array{
+        
+        $approveItemLibrary = $this->loadLibrary('approve_item');
+
+        if (isEmpty($table_name)) $table_name = $this->controller;
+
+        $fields = $this->getAllTableFields($table_name);
+    
+        $foreign_tables_array_padded_with_false = array_map(function ($elem) {
+          return substr($elem, 0, 3) == 'fk_' ? substr($elem, 3, -3) : false;
+        }, $fields);
+    
+        // Prevent listing false values and status or approval tables for lookup. 
+        // Add status_name and approval_name to the correct visible_columns method in models to see these fields in a page
+        $foreign_tables_array = array_filter($foreign_tables_array_padded_with_false, function ($elem) {
+          return $elem ? $elem : false;
+        });
+    
+        // Just remove approval table due to its performance degradation history. This table will be removed in the future
+        if (in_array('approval', $foreign_tables_array)) {
+          unset($foreign_tables_array[array_search('approval', $foreign_tables_array)]);
+        }
+    
+        // Hide status and approval columns if the active controller/table is not approveable
+    
+        if (!$approveItemLibrary->approveableItem($table_name)) {
+          if (in_array('status', $foreign_tables_array)) {
+            unset($foreign_tables_array[array_search('status', $foreign_tables_array)]);
+          }
+          
+        }
+    
+        return $foreign_tables_array;
+    
+    }
+
+    function addMandatoryLookupTables(
+        &$existing_lookup_tables,
+        $mandatory_lookup_tables = ['status']
+      ) {
+        //$mandatory_lookup_tables = ['status', 'approval']
+        foreach ($mandatory_lookup_tables as $mandatory_lookup_table) {
+          if (!in_array($mandatory_lookup_table, $existing_lookup_tables)) {
+            array_push($existing_lookup_tables, $mandatory_lookup_table);
+          }
+        }
+      }
+    
+      function removeMandatoryLookupTables(
+        &$existing_lookup_tables,
+        $mandatory_lookup_tables = ['status']
+      ) {
+        //$mandatory_lookup_tables = ['status', 'approval']
+        foreach ($mandatory_lookup_tables as $mandatory_lookup_table) {
+          if (in_array($mandatory_lookup_table, $existing_lookup_tables)) {
+            unset($existing_lookup_tables[array_search($mandatory_lookup_table, $existing_lookup_tables)]);
+          }
+        }
+      }
+
+public function lookupTablesFields(String $table): array
+  {
+    $lookup_tables_fields = array();
+
+    if (is_array($this->loadLibrary($table)->lookupTables()) && count($this->loadLibrary($table)->lookupTables()) > 0) {
+      foreach ($this->loadLibrary($table)->lookupTables() as $lookup_table) {
+        $lookup_tables_fields = array_merge($lookup_tables_fields, $this->getAllTableFields($lookup_table));
+      }
+    }
+
+    return $lookup_tables_fields;
+  }
+
+    function callbackLookupTables(string $table_name): array
+    {
+  
+      $featureLibrary = $this->loadLibrary($table_name);
+      $approveItemLibrary = $this->loadLibrary('approve_item');
+  
+      $lookup_tables =  array();
+  
+      if (is_array($featureLibrary->lookupTables($table_name))) 
+      {  
+        if($this->action !== 'single_form_add'){
+          // Check if status and approval lookup tables doesn't exist and add them
+          $lookup_tables = $featureLibrary->lookupTables($table_name);
+          $this->addMandatoryLookupTables($lookup_tables);
+  
+          // Hide status and approval columns if the active controller/table is not approveable
+          if (!$approveItemLibrary->approveableItem($table_name)) {
+            $this->removeMandatoryLookupTables($lookup_tables);
+          }
+        }else{
+          $lookup_tables = $featureLibrary->lookupTables($table_name);
+        }
+      } 
+  
+      return $lookup_tables;
+    }
+
+    protected function listTableVisibleColumns():array{
+        return [];
+    }
+
+    private function historyTrackingField(String $table_name, String $history_type): String
+    {
+  
+      $featureLibrary = $this->loadLibrary($table_name);
+  
+      $history_type_field = "";
+  
+      if (property_exists($featureLibrary, $history_type . '_field')) {
+        $property = $history_type . '_field';
+        $history_type_field = $featureLibrary->$property;
+      } else {
+        $fields = $this->getAllTableFields($table_name);
+  
+        if (in_array($table_name . '_' . $history_type, $fields)) {
+          $history_type_field = $table_name . '_' . $history_type;
+        }
+      }
+  
+      return $history_type_field;
+    }
+
+    private function nameField(String $table_name = ""): String
+    {
+      // log_message('error', json_encode($table_name));
+      $featureLibrary = $this->loadLibrary($table_name);
+  
+      $name_field = "";
+  
+      if (property_exists($featureLibrary, 'name_field')) {
+        $name_field = $featureLibrary->name_field;
+      } else {
+        $fields = $this->getAllTableFields($table_name);
+  
+        if (in_array($table_name . '_name', $fields)) {
+          $name_field = $table_name . '_name';
+        }
+      }
+  
+      return $name_field;
+    }
+
+    public function fieldsMetaDataTypeAndName($table)
+    {
+  
+      $fields_meta_data = [];
+  
+      $table_names = $this->lookupTables($table);
+  
+      array_push($table_names, $table);
+      
+      $feature_library = $this->loadlibrary($table);
+
+      foreach ($table_names as $table_name) {
+        
+        if ($table_name !== $table) {
+          $feature_library = $this->loadlibrary($table_name);
+        }
+    
+        $meta_data = $this->tableFieldsMetadata($table_name);
+        $names = array_column($meta_data, 'name');
+        $types = array_column($meta_data, 'type');
+        $fields_meta_data = array_merge($fields_meta_data, array_combine($names, $types));
+  
+        foreach ($fields_meta_data as $field_name => $field_type) {
+          if (substr($field_name, 0, 3) == 'fk_') {
+            $_field_name = substr($field_name, 3, -3) . '_name';
+            unset($fields_meta_data[$field_name]);
+            $fields_meta_data[$_field_name] = 'varchar';
+          }
+  
+          if (
+            method_exists($feature_library, 'change_field_type') &&
+            array_key_exists($field_name, $feature_library->change_field_type())
+          ) {
+            $fields_meta_data[$field_name] = $$feature_library->change_field_type()[$field_name]['field_type'];
+          }
+        }
+      }
+
+      return $fields_meta_data;
+    }
+
+    public function isNameField(String $table, String $column): Bool
+    {
+  
+      $table_name_field = $this->nameField($table);
+  
+      $is_name_field = false;
+  
+      if (strtolower($table_name_field) == strtolower($column)) {
+        $is_name_field = true;
+      }
+  
+      return $is_name_field;
+    }
+
+    public function isHistoryTrackingField(String $table_name, String $column, String $history_type = "")
+  {
+
+    $is_history_tracking_field = false;
+
+    //Helps to prevent the use of invalid history tracking fields
+    $template_history_types = array('track_number', 'created_date', 'created_by', 'last_modified_date', 'last_modified_by', 'deleted_at');
+
+    //foreach($history_types as $history_type){
+
+    if ($history_type != "" && in_array($history_type, $template_history_types)) {
+      $history_tracking_field = $this->historyTrackingField($table_name, $history_type);
+
+      if ($column == $history_tracking_field) {
+        $is_history_tracking_field = true;
+      }
+    } else {
+      // Used when type is not passed. Uses strict column naming
+      foreach ($template_history_types as $template_history_type) {
+        if ($column == $table_name . '_' . $template_history_type) {
+          $is_history_tracking_field = true;
+        }
+      }
+    }
+    return $is_history_tracking_field;
+  }
+
+  function setChangeFieldType($detail_table = "")
+  {
+
+    // Aray format for the change_field_type method in feature library: 
+    //array('[field_name]'=>array('field_type'=>$new_type,'options'=>$options));
+
+    $featureLibary = $this->loadLibrary($this->controller);
+
+    if ($detail_table !== "") {
+      $featureLibary = $this->loadLibrary($detail_table);
+    }
+
+    if (
+      method_exists($featureLibary, 'change_field_type') &&
+      is_array($featureLibary->change_field_type())
+    ) {
+
+      $this->set_field_type = $featureLibary->change_field_type();
+    }
+
+    return $this->set_field_type;
+  }
+
+  protected function showAddButton(){
+    return true;
+  }
+
+  public function updateQueryResultForFieldsChangedToSelectType(String $table, array $query_result): array
+  {
+    // Check if there is a change of field type set and update the results
+    $changed_field_type = $this->setChangeFieldType($table);
+
+    if (count($this->set_field_type) > 0) {
+
+      //Get changed columns 
+      $changed_fields = array_keys($this->set_field_type);
+
+      if (!array_key_exists(0, $query_result)) {
+        // Used for single record pages e.g Master section 
+        foreach ($changed_fields as $changed_field) {
+          if (array_key_exists($changed_field, $query_result) && in_array('select', $this->set_field_type[$changed_field])) {
+            $query_result[$changed_field] = isset($this->set_field_type[$changed_field]['options'][$query_result[$changed_field]]) ? $this->set_field_type[$changed_field]['options'][$query_result[$changed_field]] : $query_result[$changed_field];
+          }
+        }
+      } else {
+        // Used for multi row data e.g. list and details sections
+        foreach ($query_result as $index => $row) {
+
+          foreach ($changed_fields as $changed_field) {
+            if (array_key_exists($changed_field, $row) && in_array('select', $this->set_field_type[$changed_field])) {
+              // The isset check has been used to solve a problem where a field type of select is changed to the same select in order to alter the number of select options. 
+              // This workaround is crucial on the detail list of view action pages, Most notably when using the group_country_user lib change_field_type
+              $query_result[$index][$changed_field] = isset($this->set_field_type[$changed_field]['options'][$row[$changed_field]]) ? $this->set_field_type[$changed_field]['options'][$row[$changed_field]] : $row[$changed_field];
+            }
+          }
+        }
+      }
+    }
+
+    return $query_result;
+  }
+
+  function detailTables(string $table_name = ""): array
+{
+    $featureLibrary = $this->loadLibrary($table_name);
+
+    $uri = service('uri');
+    $db = \Config\Database::connect('read');
+
+    if ($this->controller == 'approval' && $this->action == 'view') {
+        // This is specific to approval view, only to list the detail listing of the selected approveable 
+        // items
+        // This prevents the approval from listing the details tables instead of a specific approveable item
+        $id = $uri->getSegment(3, 0);
+
+        // This line needs to be moved to a model
+        $builder = $db->table('approval');
+        $builder->join('approve_item', 'approve_item.approve_item_id=approval.fk_approve_item_id');
+        $detail_table = $builder->getWhere(['approval_id' => hash_id($id, 'decode')])->getRow()->approve_item_name;
+
+        $this->detail_tables = [$detail_table];
+    } elseif ($this->dependantTable($table_name) !== "") {
+        // If dependant_table exists, you can't have more than one detail table. This piece nullifies the use
+        // of the detail_tables feature model if set
+        $this->detail_tables[] = $this->dependantTable($table_name);
+    } elseif (
+        $this->action == 'view' && method_exists($featureLibrary, 'detail_tables') &&
+        is_array($featureLibrary->detail_tables())
+    ) {
+        $this->detail_tables = $featureLibrary->detail_tables();
+    }
+
+    return $this->detail_tables;
+}
+
+public function checkIfTableHasDetailListing(String $table_name = ""): Bool
+  {
+
+    $table = $table_name == "" ? $this->controller : $table_name;
+
+    $all_detail_tables = $this->detailTables($table);
+
+    $has_detail_table = false;
+
+    if (is_array($all_detail_tables) && in_array($this->dependantTable($table), $all_detail_tables)) {
+      $has_detail_table = true;
+    }
+
+    return $has_detail_table;
+  }
+
+
+  function checkIfTableHasDetailTable(String $table_name = ""): Bool
+  {
+
+    $table = isEmpty($table_name) ? $this->controller : $table_name;
+
+    $all_detail_tables = $this->detailTables($table);
+
+    $has_detail_table = false;
+
+    if (is_array($all_detail_tables) && count($all_detail_tables) > 0) {
+      $has_detail_table = true;
+    }
+
+    return $has_detail_table;
+  }
+
+  protected function checkIfTableIsMultiRow(String $table_name = "")
+  {
+
+    $table = isEmpty($table_name) ? $this->controller : $table_name;
+    $featureLibrary = $this->loadLibrary($table);
+
+    if (property_exists($featureLibrary, 'is_multi_row')) {
+      return $featureLibrary->is_multi_row;
+    } else {
+      return false;
+    }
+  }
+
     protected function list_output(){
-        return ['message' => 'This is a list page for '. $this->controller];
+        $listOutput = new \App\Libraries\System\Outputs\ListOutput();
+        return $listOutput->getOutput();
     }
 }
