@@ -5,6 +5,8 @@ namespace App\Libraries\System;
 use App\Interfaces\DynamicMethodsInterface;
 use Config\GrantsConfig;
 use CodeIgniter\Database\Exceptions\DatabaseException;
+use BadMethodCallException;
+use InvalidArgumentException;
 
 class GrantsLibrary implements DynamicMethodsInterface
 {
@@ -24,16 +26,13 @@ class GrantsLibrary implements DynamicMethodsInterface
     // Load grants config
     $this->config = config(GrantsConfig::class);
     // Load default helpers
-    helper(['grants','inflector']);
+    // helper(['grants','inflector']);
     // Load database
     $this->read_db = \Config\Database::connect('read');
     $this->write_db = \Config\Database::connect('write');
 
     // Set controller, action and ids
     $uri = service('uri');
-    // $this->controller = $uri->getSegment(1);
-    // $this->action = $uri->getSegment(2);
-    // $this->id = $uri->getSegment(3);
     $segments = $uri->getSegments();
 
     $this->controller = isset($segments[0]) ? $segments[0] : 'dashboard';
@@ -336,7 +335,7 @@ private function tableExists(string $table_name = ""): bool
  * @return mixed The instantiated library object for the specified table.
  * @throws \Exception If the library object could not be instantiated.
  */
-private function loadLibrary(string $table_name)
+public function loadLibrary(string $table_name)
 {
     $modules = $this->config->modules; // Assuming $config is an instance of Config\App
     $table_library = null;
@@ -854,5 +853,59 @@ public function transactionValidateDuplicates(string $table_name, array $insert_
     return ['flag' => $validation_successful, 'error_message' => $failure_message];
 }
 
+   /**
+     * This method is used to call a specific method from a library based on the given namespace.
+     *
+     * @param string $namespace The namespace of the method to be called. It should be in the format 'group.feature.method'.
+     * @param array $args An optional array of arguments to be passed to the method.
+     *
+     * @return mixed The result of the called method.
+     *
+     * @throws InvalidArgumentException If the first namespace segment is not 'core', 'grants', or 'system'.
+     * @throws \Exception If the class corresponding to the given namespace does not exist.
+     * @throws BadMethodCallException If the method corresponding to the given namespace does not exist in the class.
+     */
+    public static function call(string $namespace, array $args = []): mixed
+    {
 
+        // Explode the namespace into segments
+        $namespace_items = exploding('.', $namespace, ['group', 'feature', 'method']);
+
+        // If only method is given, assume it's a method in the grants library
+        if (sizeof($namespace_items) == 1) {
+            $namespace_items['group'] = 'system';
+            $namespace_items['feature'] = 'grants';
+        }
+        // If method and class are given, assume it's a core library
+        elseif (sizeof($namespace_items) == 2) {
+            $namespace_items['group'] = 'core';
+        }
+
+        // Extract the namespace segments
+        extract($namespace_items);
+
+        // Validate the group segment
+        if (!in_array($group, ['core', 'grants', 'system'])) {
+            throw new InvalidArgumentException("First namespace segment must either be 'core', 'grants', or 'system'. Given '" . $group . "'");
+        }
+
+        // Construct the class name and full class path
+        $className = $feature . "Library";
+        $class = "\\App\\Libraries\\" . ucfirst($group) . "\\" . $className;
+
+        // Check if the class exists
+        if (class_exists($class)) {
+            $new = new $class();
+        } else {
+            throw new \Exception("Class '" . $class . "' not found");
+        }
+
+        // Check if the method exists in the class
+        if (method_exists($new, $method)) {
+            // Call the method with the given arguments and return the result
+            return $new->$method(...$args);
+        } else {
+            throw new BadMethodCallException("Method '" . $method . "' not found in class '" . $class . "'");
+        }
+    }
 }

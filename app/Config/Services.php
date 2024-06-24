@@ -42,4 +42,13 @@ class Services extends BaseService
     //     $view = new \CodeIgniter\View\View();
 
     // }
+
+    public static function grantslib($getShared = true)
+    {
+          if ($getShared) {
+              return static::getSharedInstance('grantslib');
+          }
+     
+          return new \App\Libraries\System\GrantsLibrary();
+    }
 }

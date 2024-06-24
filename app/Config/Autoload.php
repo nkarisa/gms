@@ -60,7 +60,9 @@ class Autoload extends AutoloadConfig
      *
      * @var array<string, string>
      */
-    public $classmap = [];
+    public $classmap = [
+        'GrantsLibrary' => APPPATH.'Libraries/System/GrantsLibrary.php',
+    ];
 
     /**
      * -------------------------------------------------------------------
@@ -90,5 +92,5 @@ class Autoload extends AutoloadConfig
      *
      * @var list<string>
      */
-    public $helpers = [];
+    public $helpers = ['grants','inflector'];
 }

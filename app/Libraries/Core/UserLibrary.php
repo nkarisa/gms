@@ -440,7 +440,10 @@ class UserLibrary extends GrantsLibrary
             'unique_identifier.unique_identifier_id',
             'unique_identifier.unique_identifier_name',
             'user.user_personal_data_consent_date',
-            'user.user_is_switchable'
+            'user.user_is_switchable',
+            'account_system.account_system_id',
+            'account_system.account_system_code',
+            'account_system.account_system_name',
         ]);
 
         // Join the necessary tables
@@ -448,6 +451,7 @@ class UserLibrary extends GrantsLibrary
         $builder->join('language', 'language.language_id = user.fk_language_id');
         $builder->join('role', 'role.role_id = user.fk_role_id');
         $builder->join('unique_identifier', 'unique_identifier.unique_identifier_id = user.fk_unique_identifier_id', 'left');
+        $builder->join('account_system', 'account_system.account_system_id = user.fk_account_system_id');
 
         // Apply conditions
         $builder->where('user.user_id', $userId);

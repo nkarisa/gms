@@ -9,7 +9,6 @@ use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Config\GrantsConfig;
-use CodeIgniter\CLI\CLI;
 
 /**
  * Class BaseController
@@ -61,6 +60,8 @@ abstract class BaseController extends Controller
     protected $uri;
     protected $max_status_id;
     protected $segments;
+    protected $libs;
+    protected $has_permission = false;
     /**
      * @return void
      */
@@ -101,6 +102,9 @@ abstract class BaseController extends Controller
         if (!is_cli()) {
             $this->sessionBasedConstructorSet();
         }
+
+        // Load system libraries 
+        $this->libs = service('grantslib');
 
     }
 
@@ -150,5 +154,71 @@ private function maintainanceModeCheck(){
         $this->session->set('maintenance_mode',1);
     }
 }
+
+// public function result($id = ''){
+//     return ['data' => 'Hello world'];
+// } 
+
+// public function page_name():string {
+//     if ((hash_id($this->id, 'decode') == null && $this->action == 'view') || !$this->has_permission) {
+//         return 'error';
+//       } else {
+//         return $this->action;
+//       }
+// }
+
+// function page_title(): string
+// {
+//   $title = $this->action == 'list' ? $this->action.'_'.plural($this->controller) : $this->action.'_'.plural($this->controller);
+//   return get_phrase($title);
+// }
+
+// public function views_dir():string {
+//     $view_path = strtolower($this->controller);
+//     $page_name = $this->page_name();
+
+//     if (file_exists(VIEWPATH . $view_path . '/' . $this->session->user_account_system_code . '/' . $page_name . '.php') && $this->has_permission) {
+//       $view_path .= '/' . $this->session->user_account_system;
+//     } elseif (!file_exists(VIEWPATH . $view_path . '/' . $page_name . '.php') || !$this->has_permission) {
+//       $view_path =  'templates';
+//     }
+
+//     return $view_path;
+// }
+
+// public function load_template(array $data = []):void{
+
+// }
+
+// function crud_views(String $id = ''):void
+// {
+
+//   $result = $this->result($id);
+  
+//   // Page name, Page title and views_dir can be overrode in a controller
+//   $page_data['page_name'] = $this->page_name();
+//   $page_data['page_title'] = $this->page_title();
+//   $page_data['views_dir'] = $this->views_dir();
+//   $page_data['result'] = $result;
+
+//   // Can be overrode in a specific controller
+//   $this->load_template($page_data);
+// }
+
+// public function list(){
+
+// }
+
+// public function single_form_add(){
+
+// }
+
+// public function multi_form_add(){
+
+// }
+
+// public function edit(){
+
+// }
 
 }

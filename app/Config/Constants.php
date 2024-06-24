@@ -92,3 +92,8 @@ define('EVENT_PRIORITY_NORMAL', 100);
  * @deprecated Use \CodeIgniter\Events\Events::PRIORITY_HIGH instead.
  */
 define('EVENT_PRIORITY_HIGH', 10);
+
+/**
+ * Custom VIEWPATH constant
+ */
+defined('VIEWPATH')      || define('VIEWPATH', APPPATH.'Views'.DIRECTORY_SEPARATOR);

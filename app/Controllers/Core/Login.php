@@ -10,7 +10,7 @@ use CodeIgniter\HTTP\RedirectResponse;
 use App\Models\Core\SettingModel;
 use App\Models\Core\UserModel;
 use App\Libraries\System\AwsParameterStoreLibrary as AwsParameterStore;
-use App\Libraries\Core\UserLibrary;
+
 
 class Login extends BaseController
 {
@@ -19,10 +19,6 @@ class Login extends BaseController
     {
         parent::initController($request, $response, $logger);
     }
-
-    // public function index(string $segment = 'login'){
-    //     $this->{$segment}();
-    // }
 
     /**
      * This method handles the login page and user authentication.
@@ -119,7 +115,7 @@ class Login extends BaseController
     private function create_user_session(array $user, bool $is_user_switch): string
     {
         // Load the User Libary
-        $userLibrary = new UserLibrary();
+        $userLibrary = $this->libs->loadLibrary('user'); 
         $user_id = $user['user_id'];
 
         // Prepare user session data
@@ -137,7 +133,8 @@ class Login extends BaseController
             'departments' => $userLibrary->getUserDepartments($user_id),
             'default_launch_page' => $this->config->defaultLaunchPage,
             'context_definition' => $userLibrary->getUserContextDefinition($user_id),
-            'user_account_system_id' => $user['fk_account_system_id'],
+            'user_account_system_id' => $user['account_system_id'],
+            'user_account_system_code' => $user['account_system_code'],
             'hierarchy_offices' => $userLibrary->userHierarchyOffices($user_id),
             'data_privacy_consented' => $userLibrary->dataPrivacyConsented($user_id),
         ];

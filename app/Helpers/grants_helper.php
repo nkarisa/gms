@@ -286,3 +286,37 @@ if (!function_exists('isEmpty')) {
         return false;
     }
 }
+
+/**
+ * Explodes a string into an array based on a given separator and assigns keys to the resulting array.
+ *
+ * @param string $separator The separator to use for exploding the string.
+ * @param string $string The string to explode.
+ * @param array $vars An optional array of keys to assign to the exploded parts.
+ * @param bool $reverse_assignment An optional flag to reverse the assignment of keys and exploded parts.
+ * @return array The resulting array with keys assigned to the exploded parts.
+ */
+if(!function_exists('exploding')){
+    function exploding($separator, $string, $vars = [], $reverse_assignment = true) {
+        
+        $explode = explode($separator, $string);
+
+        $keyedExplode = $explode;
+        if(!empty($vars)){
+            
+            if($reverse_assignment){
+                $explode = array_reverse($explode);
+                $vars = array_reverse($vars);
+            }
+
+            $keyedExplode = [];
+            for($i = 0; $i < count($vars); $i++){
+                if(isset($explode[$i])){
+                    $keyedExplode[$vars[$i]] = $explode[$i];
+                }
+            }
+        }
+
+        return $keyedExplode;
+    }
+}
