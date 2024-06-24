@@ -354,3 +354,21 @@ if(!function_exists('remove_directory')){
         rmdir($dir);
     }
 }
+
+if (!function_exists('render_list_table_header')) {
+    function render_list_table_header($table_name, $header_array)
+    {
+        $string = '<tr><th nowrap="nowrap">' . get_phrase("action") . '</th>';
+
+        foreach ($header_array as $th_value) {
+            if (strpos($th_value, 'key') == true || strpos($th_value, '_id') == true) {
+                continue;
+            }
+
+            $string .= '<th nowrap="nowrap">' . get_phrase($th_value) . '</th>';
+        }
+        $string .= '</tr>';
+
+        return $string;
+    }
+}

@@ -1283,7 +1283,7 @@ public function checkIfTableHasDetailListing(String $table_name = ""): Bool
     }
   }
 
-    protected function list_output(){
+    protected function listOutput(){
         $listOutput = new \App\Libraries\System\Outputs\ListOutput();
         return $listOutput->getOutput();
     }

@@ -89,9 +89,6 @@ abstract class BaseController extends Controller
 
         // Set controller, action and ids
         $this->uri = service('uri');
-        // $this->controller = $this->uri->getSegment(1) ?? 'dashboard';
-        // $this->action = $this->uri->getSegment(2) ?? 'list';
-        // $this->id = $this->uri->getSegment(3) ?? 0;
         $this->segments = $this->uri->getSegments();
 
         $this->controller = isset($this->segments[0]) ? $this->segments[0] : 'dashboard';
@@ -160,9 +157,9 @@ public function result($id = ''){
     $output = [];
 
     if($this->id == null){
-        $output  = $this->libs::call($this->controller.'.'.$this->action.'_output');
+        $output  = $this->libs::call($this->controller.'.'.$this->action.'Output');
     }else{
-        $output  = $this->libs::call($this->controller.'.'.$this->action.'_output', [$this->id]);
+        $output  = $this->libs::call($this->controller.'.'.$this->action.'Output', [$this->id]);
     }
 
     return $output;
@@ -207,6 +204,7 @@ function crud_views(String $id = ''):string
   $page_data['page_title'] = $this->page_title();
   $page_data['views_dir'] = $this->views_dir();
   $page_data['result'] = $result;
+//   $page_data['show_add_button'] = $this->libs::call($this->controller.'.showAddButton');
 
   // Can be overrode in a specific controller
   return view('general/index', ['output' => $page_data]);
@@ -245,6 +243,69 @@ public function update(){
 public function create(){
     $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'create');
     return $this->libs::call('system.grants.add', [$this->id]);
+}
+
+public function show_list(){
+    $results = $this->libs::call($this->controller.'.listOutput', [$this->id]);
+    $draw = intval($this->request->getPost('draw'));
+    
+    log_message('error', json_encode($results));
+
+    $records = [];
+    $columns = $results['keys'];
+
+    $cnt = 0;
+    foreach ($results['table_body'] as $row) {
+      $cols = 0;
+      $primary_key = 0;
+      foreach ($columns as $column) {
+        if($column == strtolower($this->controller).'_id'){
+          $primary_key = $row[$column];
+          continue;
+        }
+
+          if (strpos($column, 'track_number') == true) {
+            $track_number = '';
+              // method_exists($this->{strtolower($this->controller) . '_model'}, 'hide_edit_action_base_on_column_value') &&
+            if(
+              $this->session->system_admin ||
+              (
+                $this->{$this->controller.'_model'}->show_list_edit_action($row) &&
+                $this->libs->loadLibrary('user')->checkRoleHasPermissions(strtolower($this->controller),'update')
+              )
+            ){
+              $track_number .= '<a href="'.base_url().strtolower($this->controller).'/edit/'.hash_id($primary_key, 'encode').'"><i class = "fa fa-pencil"></i></a>';
+            }
+            
+            $track_number .= ' <a href="' . base_url() . $this->controller . '/view/' . hash_id($primary_key) . '">' . $row[$column] . '</a>';
+            $row[$column] = $track_number;
+
+          } elseif (strpos($column, '_is_') == true) {
+            $row[$column] =  $row[$column] == 1 ? "Yes" : "No";
+          } elseif ($results['fields_meta_data'][$column] == 'int' || $results['fields_meta_data'][$column] == 'decimal') {
+            // Defense code to ignore non numeric values when lookup values method changes value type from numeric to non numeric
+            $row[$column] = is_numeric($row[$column]) ? number_format($row[$column], 2) : $row[$column];
+          } else {
+            $row[$column] = ucfirst(str_replace("_", " ", $row[$column]));
+          }
+
+          $records[$cnt][$cols] = $row[$column];
+        // }
+
+        $cols++;
+      }
+      $cnt++;
+    }
+
+    $response = array(
+      'draw' => $draw,
+      'recordsTotal' => $results['total_records'],
+      'recordsFiltered' => $results['total_records'],
+      'data' => $records
+    );
+
+    log_message('error',json_encode($response));
+    return $this->response->setJSON($response);
 }
 
 }

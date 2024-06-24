@@ -328,7 +328,7 @@ private function toggleListSelectColumns()
         $show_add_button = $this->libs::call($this->controller.'.showAddButton');
 
         $columns = $keys;
-        // log_message('error', json_encode($columns));
+        // log_message('error', json_encode($keys));
         array_shift($columns);
 
         $return = array(
@@ -341,7 +341,8 @@ private function toggleListSelectColumns()
           'is_multi_row'=>$this->libs::call($this->controller.'.checkIfTableIsMultiRow'),
           'has_details_table' => $this->libs->checkIfTableHasDetailTable($this->controller),
           'has_details_listing' => $this->libs->checkIfTableHasDetailListing($this->controller),
-          'show_add_button'=>$show_add_button
+          'show_add_button'=>$show_add_button,
+          'controller' => $this->controller,
         );
 
         return $return;
