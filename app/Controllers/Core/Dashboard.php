@@ -22,13 +22,4 @@ class Dashboard extends BaseController
         parent::initController($request, $response, $logger);
 
     }
-  
-    public function index(){
-
-        // log_message('error', json_encode($this->session->hierarchy_offices));
-
-        $data['controller'] = 'dashboard';
-        $data['action'] = 'list';
-        return view('general/index', $data);
-    }
 }

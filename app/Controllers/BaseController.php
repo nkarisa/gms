@@ -155,59 +155,58 @@ private function maintainanceModeCheck(){
     }
 }
 
-// public function result($id = ''){
-//     return ['data' => 'Hello world'];
-// } 
+public function result($id = ''){
+    return ['data' => 'Hello world'];
+} 
 
-// public function page_name():string {
-//     if ((hash_id($this->id, 'decode') == null && $this->action == 'view') || !$this->has_permission) {
-//         return 'error';
-//       } else {
-//         return $this->action;
-//       }
-// }
+public function page_name():string {
+    if ((hash_id($this->id, 'decode') == null && $this->action == 'view') || !$this->has_permission) {
+        return 'error';
+      } else {
+        return $this->action;
+      }
+}
 
-// function page_title(): string
-// {
-//   $title = $this->action == 'list' ? $this->action.'_'.plural($this->controller) : $this->action.'_'.plural($this->controller);
-//   return get_phrase($title);
-// }
+function page_title(): string
+{
+  $title = $this->action == 'list' ? $this->action.'_'.plural($this->controller) : $this->action.'_'.plural($this->controller);
+  return get_phrase($title);
+}
 
-// public function views_dir():string {
-//     $view_path = strtolower($this->controller);
-//     $page_name = $this->page_name();
+public function views_dir():string {
+    $view_path = strtolower($this->controller);
+    $page_name = $this->page_name();
 
-//     if (file_exists(VIEWPATH . $view_path . '/' . $this->session->user_account_system_code . '/' . $page_name . '.php') && $this->has_permission) {
-//       $view_path .= '/' . $this->session->user_account_system;
-//     } elseif (!file_exists(VIEWPATH . $view_path . '/' . $page_name . '.php') || !$this->has_permission) {
-//       $view_path =  'templates';
-//     }
+    if (file_exists(VIEWPATH . $view_path . '/' . $this->session->user_account_system_code . '/' . $page_name . '.php') && $this->has_permission) {
+      $view_path .= '/' . $this->session->user_account_system;
+    } elseif (!file_exists(VIEWPATH . $view_path . '/' . $page_name . '.php') || !$this->has_permission) {
+      $view_path =  'components';
+    }
 
-//     return $view_path;
-// }
+    // log_message('error', json_encode($view_path));
 
-// public function load_template(array $data = []):void{
+    return $view_path;
+}
 
-// }
+function crud_views(String $id = ''):string
+{
 
-// function crud_views(String $id = ''):void
-// {
-
-//   $result = $this->result($id);
+  $result = $this->result($id);
   
-//   // Page name, Page title and views_dir can be overrode in a controller
-//   $page_data['page_name'] = $this->page_name();
-//   $page_data['page_title'] = $this->page_title();
-//   $page_data['views_dir'] = $this->views_dir();
-//   $page_data['result'] = $result;
+  // Page name, Page title and views_dir can be overrode in a controller
+  $page_data['page_name'] = $this->page_name();
+  $page_data['page_title'] = $this->page_title();
+  $page_data['views_dir'] = $this->views_dir();
+  $page_data['result'] = $result;
 
-//   // Can be overrode in a specific controller
-//   $this->load_template($page_data);
-// }
+  // Can be overrode in a specific controller
+  return view('general/index', ['output' => $page_data]);
+}
 
-// public function list(){
-
-// }
+public function list(){
+    $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'read');
+    return $this->crud_views();
+}
 
 // public function single_form_add(){
 

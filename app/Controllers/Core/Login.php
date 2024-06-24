@@ -91,9 +91,9 @@ class Login extends BaseController
         // Set the user array
         if (($password != '' && !$is_user_switch) || !$is_user_switch) {
             $password = $this->password_salt($password);
-            $user = $userModel->search(array('user_email' => $email, 'user_is_active' => 1, 'user_password' => $password), true);
+            $user = $this->libs->loadLibrary('user')->getUserInfo(['user_email' => $email, 'user_is_active' => 1, 'user_password' => $password]);// $userModel->search(array('user_email' => $email, 'user_is_active' => 1, 'user_password' => $password), true);
         } else {
-            $user = $userModel->search(array('user_email' => $email, 'user_is_active' => 1), true);
+            $user = $this->libs->loadLibrary('user')->getUserInfo(['user_email' => $email, 'user_is_active' => 1]);// $userModel->search(array('user_email' => $email, 'user_is_active' => 1), true);
         }
 
         // Create user session or invalidate user

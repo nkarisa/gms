@@ -170,6 +170,12 @@ private function getSchema($package = "")
     return $tables;
 }
 
+private function fieldNames($tableName){
+    $fieldData = $this->fieldData($tableName);
+    $fieldNames = array_column($fieldData,'name');
+    return $fieldNames;
+}
+
   /**
  * Retrieves the field data of a specific table from the schema.
  *

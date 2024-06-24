@@ -5,7 +5,7 @@ namespace App\Cells;
 class Content
 {
     public function show(array $params): string
-    {
-        return view("components/".$params['action']);
+    { 
+        return view($params['output']['views_dir']."/".$params['output']['page_name'], ['result' => $params['output']['result']]);   
     }
 }

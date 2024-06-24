@@ -386,7 +386,7 @@ class UserLibrary extends GrantsLibrary
         $uniqueIdentifierLibrary = new UniqueIdentifierLibrary();
         $userHasConsented = false;
 
-        $user = $this->getUserInfo($userId);
+        $user = $this->getUserInfo(['user_id' => $userId]);
         $userIsFullyApproved = $statusLibrary->isStatusIdMax('user', $userId);
 
         $consentDate = $user['user_personal_data_consent_date'];
@@ -404,13 +404,22 @@ class UserLibrary extends GrantsLibrary
     /**
      * Retrieves user information based on the given user ID.
      *
-     * @param int $userId The unique identifier of the user.
+     * @param array $searchFields User table search fields.
      * @return array An associative array containing user information.
      *
-     * @throws Exception If there is an error in executing the database query.
+     * @throws \Exception If there is an error in executing the database query.
      */
-    public function getUserInfo(int $userId): array
-    {
+    public function getUserInfo($searchFields): array
+    {   
+        $searchFieldKeys = array_keys($searchFields);
+        $userTableFields = service('grantslib')::call('system.grants.fieldNames', [$this->table]);
+
+        foreach ($searchFieldKeys as $searchFieldKey){
+            if (!in_array($searchFieldKey, $userTableFields)) {
+                throw new \Exception('Invalid search field: '. $searchFieldKey);
+            }
+        }
+        
         // Initialize a database builder for the 'user' table
         $builder = $this->read_db->table($this->table);
 
@@ -441,9 +450,9 @@ class UserLibrary extends GrantsLibrary
             'unique_identifier.unique_identifier_name',
             'user.user_personal_data_consent_date',
             'user.user_is_switchable',
-            'account_system.account_system_id',
-            'account_system.account_system_code',
-            'account_system.account_system_name',
+            'account_system.account_system_id as account_system_id',
+            'account_system.account_system_code as account_system_code',
+            'account_system.account_system_name as account_system_name',
         ]);
 
         // Join the necessary tables
@@ -454,7 +463,7 @@ class UserLibrary extends GrantsLibrary
         $builder->join('account_system', 'account_system.account_system_id = user.fk_account_system_id');
 
         // Apply conditions
-        $builder->where('user.user_id', $userId);
+        $builder->where($searchFields);
 
         // Execute the query and return the result
         $query = $builder->get();

@@ -22,7 +22,7 @@
 
 <?= $this->section('content') ?>
     <?php $session = session();?>
-    <?=view_cell('App\Cells\Content::show', ['action' => $action]);?>
+    <?=view_cell('App\Cells\Content::show', ['output' => $output]);?>
 <?= $this->endSection() ?>
 
 <?= $this->section('footer') ?>

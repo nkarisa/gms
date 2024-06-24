@@ -20,7 +20,15 @@ use App\Controllers\Core\Dashboard;
         $routes->post('(:segment)', [Login::class, 'ajax_login']);
     });
 
-    $routes->get('dashboard/list',[Dashboard::class, 'index'],['as' => 'dashboard']);    
+    $routes->get('(:segment)/list',[Dashboard::class, 'list']);  
+    $routes->get('(:segment)/view',[Dashboard::class, 'view']);   
+    $routes->get('(:segment)/single_form_add',[Dashboard::class, 'single_form_add']);    
+    $routes->get('(:segment)/multi_form_add',[Dashboard::class, 'multi_form_add']);
+    $routes->get('(:segment)/edit',[Dashboard::class, 'edit']);  
+    
+    $routes->post('(:segment)/create',[Dashboard::class, 'create']);
+    $routes->post('(:segment)/update',[Dashboard::class, 'update']);
+    $routes->post('(:segment)/delete',[Dashboard::class, 'delete']);
 // });
 
 
