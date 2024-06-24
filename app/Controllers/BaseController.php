@@ -156,7 +156,7 @@ private function maintainanceModeCheck(){
 }
 
 public function result($id = ''){
-    return ['data' => 'Hello world'];
+    return ['message' => 'This is your list page for '. $this->controller];
 } 
 
 public function page_name():string {
