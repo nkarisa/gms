@@ -156,7 +156,16 @@ private function maintainanceModeCheck(){
 }
 
 public function result($id = ''){
-    return ['message' => 'This is your list page for '. $this->controller];
+
+    $output = [];
+
+    if($this->id == null){
+        $output  = $this->libs::call($this->controller.'.'.$this->action.'_output');
+    }else{
+        $output  = $this->libs::call($this->controller.'.'.$this->action.'_output', [$this->id]);
+    }
+
+    return $output;
 } 
 
 public function page_name():string {
@@ -208,16 +217,34 @@ public function list(){
     return $this->crud_views();
 }
 
-// public function single_form_add(){
+public function single_form_add(){
+    $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'create');
+    return $this->crud_views();
+}
 
-// }
+public function multi_form_add(){
+    $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'create');
+    return $this->crud_views();
+}
 
-// public function multi_form_add(){
+public function edit(){
+    $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'update');
+    return $this->crud_views();
+}
 
-// }
+public function delete(){
+    $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'delete');
+    return $this->libs::call('system.grants.delete', [$this->id]);
+}
 
-// public function edit(){
+public function update(){
+    $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'update');
+    return $this->libs::call('system.grants.update', [$this->id]);
+}
 
-// }
+public function create(){
+    $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'create');
+    return $this->libs::call('system.grants.add', [$this->id]);
+}
 
 }

@@ -2,7 +2,7 @@
 
 namespace App\Libraries\Grants;
 
-use App\Libraries\Core\GrantsLibrary;
+use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\VoucherModel;
 
 class VoucherLibrary extends GrantsLibrary {

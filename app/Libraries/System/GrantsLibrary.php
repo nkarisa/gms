@@ -335,38 +335,6 @@ private function tableExists(string $table_name = ""): bool
 }
 
   /**
- * Loads a library for a specific table.
- *
- * @param string $table_name The name of the table for which to load the library.
- * @return mixed The instantiated library object for the specified table.
- * @throws \Exception If the library object could not be instantiated.
- */
-public function loadLibrary(string $table_name)
-{
-    $modules = $this->config->modules; // Assuming $config is an instance of Config\App
-    $table_library = null;
-    $table_library_name = pascalize($table_name) . 'Library';
-    // log_message('eeror', json_encode($table_library_name));
-    // Loop through the modules to find the appropriate library
-    foreach ($modules as $module) {
-        // Check if the library class exists
-        if (class_exists("App\\Libraries\\" . ucfirst($module) . "\\" . $table_library_name)) {
-            // Instantiate the library class
-            $table_library = new ("App\\Libraries\\" . ucfirst($module) . "\\" . $table_library_name)();
-        }
-    }
-
-    // If the library object is still null, throw an exception
-    if ($table_library == null) {
-        // To be updated and allow automatic creation of feature library files
-        throw new \Exception('Object could not be instantiated');
-    }
-
-    // Return the instantiated library object
-    return $table_library;
-}
-
-  /**
  * Checks if a table has a dependant table.
  *
  * @param string $table_name The name of the table to check. If empty, the controller name will be used.
@@ -859,6 +827,38 @@ public function transactionValidateDuplicates(string $table_name, array $insert_
     return ['flag' => $validation_successful, 'error_message' => $failure_message];
 }
 
+  /**
+ * Loads a library for a specific table.
+ *
+ * @param string $table_name The name of the table for which to load the library.
+ * @return mixed The instantiated library object for the specified table.
+ * @throws \Exception If the library object could not be instantiated.
+ */
+public function loadLibrary(string $table_name)
+{
+    $modules = $this->config->modules; // Assuming $config is an instance of Config\App
+    $table_library = null;
+    $table_library_name = pascalize($table_name) . 'Library';
+    // Loop through the modules to find the appropriate library
+    foreach ($modules as $module) {
+        // Check if the library class exists
+        if (class_exists("App\\Libraries\\" . ucfirst($module) . "\\" . $table_library_name)) {
+            // Instantiate the library class
+            $table_library = new ("App\\Libraries\\" . ucfirst($module) . "\\" . $table_library_name)();
+        }
+    }
+
+    // If the library object is still null, throw an exception
+    if ($table_library == null) {
+        // To be updated and allow automatic creation of feature library files
+        throw new \Exception('Object could not be instantiated');
+    }
+
+    // Return the instantiated library object
+    return $table_library;
+}
+
+
    /**
      * This method is used to call a specific method from a library based on the given namespace.
      *
@@ -871,47 +871,49 @@ public function transactionValidateDuplicates(string $table_name, array $insert_
      * @throws \Exception If the class corresponding to the given namespace does not exist.
      * @throws BadMethodCallException If the method corresponding to the given namespace does not exist in the class.
      */
-    public static function call(string $namespace, array $args = []): mixed
+    public static function call(string $namespace, array $args = [])
     {
+
+        $modules = config(GrantsConfig::class)->modules;
 
         // Explode the namespace into segments
         $namespace_items = exploding('.', $namespace, ['group', 'feature', 'method']);
 
         // If only method is given, assume it's a method in the grants library
         if (sizeof($namespace_items) == 1) {
-            $namespace_items['group'] = 'system';
             $namespace_items['feature'] = 'grants';
         }
-        // If method and class are given, assume it's a core library
-        elseif (sizeof($namespace_items) == 2) {
-            $namespace_items['group'] = 'core';
-        }
+        
 
         // Extract the namespace segments
         extract($namespace_items);
 
-        // Validate the group segment
-        if (!in_array($group, ['core', 'grants', 'system'])) {
-            throw new InvalidArgumentException("First namespace segment must either be 'core', 'grants', or 'system'. Given '" . $group . "'");
-        }
-
         // Construct the class name and full class path
-        $className = $feature . "Library";
-        $class = "\\App\\Libraries\\" . ucfirst($group) . "\\" . $className;
+        $className = pascalize($feature) . "Library";
+        
+        $class_exists = false;
+        foreach ($modules as $module) {
+            // Check if the library class exists
+            if (class_exists("App\\Libraries\\" . ucfirst($module) . "\\" . $className)) {
+                $class_exists = true;
+                $class = "App\\Libraries\\" . ucfirst($module) . "\\" . $className;
+                // Instantiate the library class
+                $newObj = new $class();
 
-        // Check if the class exists
-        if (class_exists($class)) {
-            $new = new $class();
-        } else {
-            throw new \Exception("Class '" . $class . "' not found");
+                if(method_exists($newObj, $method)){
+                    return $newObj->$method(...$args);
+                }else{
+                    throw new BadMethodCallException("Method '" . $method . "' not found in class '" . $class . "'");
+                }
+            }
         }
 
-        // Check if the method exists in the class
-        if (method_exists($new, $method)) {
-            // Call the method with the given arguments and return the result
-            return $new->$method(...$args);
-        } else {
-            throw new BadMethodCallException("Method '" . $method . "' not found in class '" . $class . "'");
+        if(!$class_exists){
+            throw new \Exception("Class '" . $feature . "' not found in all library namespaces");
         }
+    }
+
+    protected function list_output(){
+        return ['message' => 'This is a list page for '. $this->controller];
     }
 }

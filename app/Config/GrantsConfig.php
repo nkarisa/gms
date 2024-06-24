@@ -11,7 +11,7 @@ class GrantsConfig extends BaseConfig
     public $methodToAttachPermissionToRole = 'both'; // direct, role_group, both
     public $defaultLaunchPage = 'Dashboard'; 
     public $systemName = "Grants Managememt System";
-    public $modules = ['core','grants'];
+    public $modules = ['system','core','grants'];
     public $maxPriorityMenuItems = 10;
     public $tableThatDontRequireHistoryFields = ['status', 'approve_item', 'approval_flow', 'ci_sessions'];
     public $tablesNotRequiredInMenu = ['menu','ci_sessions'];
