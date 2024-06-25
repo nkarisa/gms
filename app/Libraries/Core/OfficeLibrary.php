@@ -19,5 +19,5 @@ class OfficeLibrary extends GrantsLibrary
 
         $this->table = 'office';
     }
-    
+
 }

@@ -37,7 +37,7 @@ class ApproveItemLibrary extends GrantsLibrary
     public function insertMissingApproveableItem($table)
     {
         // Fetch the existing approveable item with the given table name
-        
+
         $approve_items = $this->read_db->table('approve_item')
             ->getWhere(['approve_item_name' => $table]);
 
@@ -79,30 +79,31 @@ class ApproveItemLibrary extends GrantsLibrary
         return $approve_item_id;
     }
 
-    public function approveableItems() {
-    
+    public function approveableItems()
+    {
+
         $builder = $this->read_db->table('approve_item');
         $builder->select('approve_item_name');
         $builder->where('approve_item_is_active', 1);
-    
+
         $approveable_items_array = $builder->get()->getResultArray();
         $approveable_items = array_column($approveable_items_array, 'approve_item_name');
-    
+
         return $approveable_items;
     }
-    
+
     function approveableItem($approveable_item_name = "")
     {
-  
-      $approveable_item_name = isEmpty($approveable_item_name) ? $this->controller : $approveable_item_name;
-  
-      $approveable_item_flag = false;
-  
-      if (in_array($approveable_item_name,$this->approveableItems())) {
-        $approveable_item_flag = true;
-      }
-  
-      return $approveable_item_flag;
+
+        $approveable_item_name = isEmpty($approveable_item_name) ? $this->controller : $approveable_item_name;
+
+        $approveable_item_flag = false;
+
+        if (in_array($approveable_item_name, $this->approveableItems())) {
+            $approveable_item_flag = true;
+        }
+
+        return $approveable_item_flag;
     }
 
 }

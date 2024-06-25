@@ -130,8 +130,8 @@ private function toggleListSelectColumns()
 
         //print_r($toggle_list_select_columns);exit;
         
-        $selected_results = $this->runListQuery($table,$toggle_list_select_columns,$lookup_tables,'list_table_where',$filter_where_array);
-        $total_records = $this->runListQueryCountAllRecords($table,$toggle_list_select_columns,$lookup_tables,'list_table_where',$filter_where_array);
+        $selected_results = $this->runListQuery($table,$toggle_list_select_columns,$lookup_tables,'listTableWhere',$filter_where_array);
+        $total_records = $this->runListQueryCountAllRecords($table,$toggle_list_select_columns,$lookup_tables,'listTableWhere',$filter_where_array);
         
         return ['selected_results'=>$selected_results, 'total_records' => $total_records];
       }
@@ -140,7 +140,7 @@ private function toggleListSelectColumns()
         $table,
         $selected_columns,
         $lookup_tables,
-        $where_method = "list_table_where",
+        $where_method = "listTableWhere",
         $filter_where_array = array()
     ) {
         // Get the database connection
@@ -172,8 +172,8 @@ private function toggleListSelectColumns()
         }
     
         // Apply ordering
-        if (method_exists($featureLibary, 'order_list_page')) {
-            $builder->orderBy($featureLibary->order_list_page());
+        if (method_exists($featureLibary, 'orderListPage')) {
+            $builder->orderBy($featureLibary->orderListPage());
         } else {
             $builder->orderBy($table . '_created_date DESC');
         }
@@ -191,7 +191,7 @@ private function toggleListSelectColumns()
         $table,
         $selected_columns,
         $lookup_tables,
-        $model_where_method = "list_table_where",
+        $where_method = "listTableWhere",
         $filter_where_array = array()
     ) {
         $db = $this->read_db;//\Config\Database::connect('read_db');
@@ -201,7 +201,7 @@ private function toggleListSelectColumns()
             $message = 'The table ' . $this->controller . ' has no relationship with ' . $table . '. Check the ' . $this->controller . '_model detail_tables method';
             throw new \CodeIgniter\Exceptions\PageNotFoundException($message);
         } else {
-            $this->runDataTableListQuery($table, $selected_columns, $lookup_tables, $model_where_method, $filter_where_array);
+            $this->runDataTableListQuery($table, $selected_columns, $lookup_tables, $where_method, $filter_where_array);
     
             if ($this->request->getPost('draw')) {
                 // Limiting Server Datatable Results
@@ -263,7 +263,7 @@ private function toggleListSelectColumns()
         $table,
         $selected_columns,
         $lookup_tables,
-        $model_where_method = "list_table_where",
+        $model_where_method = "listTableWhere",
         $filter_where_array = array()
     ) {
         $db = $this->read_db; //\Config\Database::connect('read_db');

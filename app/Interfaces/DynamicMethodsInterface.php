@@ -5,18 +5,8 @@ namespace App\Interfaces;
 interface DynamicMethodsInterface
 {
 
-    // public function post_approval_action_event();
     // public function modify_datatable_columns();
-    // public function list_table_where();
-    // public function lookup_tables();
     // public function detach_detail_table();
-    // public function access_add_form_from_main_menu();
-    // public function change_field_type();
-    // public function detail_multi_form_add_visible_columns();
-    // public function master_multi_form_add_visible_columns();
-    // public function single_form_add_visible_columns();
-    // public function detail_list_table_visible_columns();
-    // public function edit_visible_columns();
     // public function show_add_button();
     // public function add();
     // public function action_before_insert();

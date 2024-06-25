@@ -410,16 +410,16 @@ class UserLibrary extends GrantsLibrary
      * @throws \Exception If there is an error in executing the database query.
      */
     public function getUserInfo($searchFields): array
-    {   
+    {
         $searchFieldKeys = array_keys($searchFields);
         $userTableFields = service('grantslib')::call('system.grants.fieldNames', [$this->table]);
 
-        foreach ($searchFieldKeys as $searchFieldKey){
+        foreach ($searchFieldKeys as $searchFieldKey) {
             if (!in_array($searchFieldKey, $userTableFields)) {
-                throw new \Exception('Invalid search field: '. $searchFieldKey);
+                throw new \Exception('Invalid search field: ' . $searchFieldKey);
             }
         }
-        
+
         // Initialize a database builder for the 'user' table
         $builder = $this->read_db->table($this->table);
 
@@ -743,7 +743,7 @@ class UserLibrary extends GrantsLibrary
          *    [context_definition_is_active] => 1 
          * )
          */
-        
+
         $context_definitions = $contextDefinitionLibrary->contextDefinitions();
 
         /**

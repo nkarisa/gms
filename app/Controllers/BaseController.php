@@ -266,7 +266,6 @@ public function show_list(){
 
           if (strpos($column, 'track_number') == true) {
             $track_number = '';
-              // method_exists($this->{strtolower($this->controller) . '_model'}, 'hide_edit_action_base_on_column_value') &&
             if(
               $this->session->system_admin ||
               (

@@ -4,7 +4,6 @@ namespace App\Libraries\Core;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Core\ApprovalFlowModel;
-
 class ApprovalFlowLibrary extends GrantsLibrary
 {
 
@@ -20,14 +19,6 @@ class ApprovalFlowLibrary extends GrantsLibrary
         $this->table = 'approval_flow';
     }
 
-    // public function multiSelectField(): string
-    // {
-    //     return '';
-    // }
-
-    // public function actionBeforeIinsert(array $postArray): array{
-    //     return $postArray;
-    // }
 
     /**
      * Inserts a new approval flow record into the database.

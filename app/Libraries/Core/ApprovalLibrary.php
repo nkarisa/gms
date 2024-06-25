@@ -21,41 +21,32 @@ class ApprovalLibrary extends GrantsLibrary
         $this->table = 'approval';
     }
 
-    // public function multiSelectField(): string
-    // {
-    //     return '';
-    // }
-
-    // public function actionBeforeIinsert(array $postArray): array{
-    //     return $postArray;
-    // }
-
     public function insertApprovalRecord($approveable_item)
-{
-    $statusLibrary = new StatusLibrary();
-    $insert_id = 0;
+    {
+        $statusLibrary = new StatusLibrary();
+        $insert_id = 0;
 
-    // Generate approval record details
-    $approval_random = record_prefix('Approval') . '-' . rand(1000, 90000);
-    $approval = [
-        'approval_track_number' => $approval_random,
-        'approval_name' => 'Approval Ticket # ' . $approval_random,
-        'approval_created_by' => $this->session->get('user_id') ?? 1,
-        'approval_created_date' => date('Y-m-d'),
-        'approval_last_modified_by' => $this->session->get('user_id') ?? 1,
-        'fk_approve_item_id' => $this->read_db->table('approve_item')
-                                      ->where('approve_item_name', strtolower($approveable_item))
-                                      ->get()
-                                      ->getRow()
-                                      ->approve_item_id,
-        'fk_status_id' => $statusLibrary->initialItemStatus($approveable_item)
-    ];
+        // Generate approval record details
+        $approval_random = record_prefix('Approval') . '-' . rand(1000, 90000);
+        $approval = [
+            'approval_track_number' => $approval_random,
+            'approval_name' => 'Approval Ticket # ' . $approval_random,
+            'approval_created_by' => $this->session->get('user_id') ?? 1,
+            'approval_created_date' => date('Y-m-d'),
+            'approval_last_modified_by' => $this->session->get('user_id') ?? 1,
+            'fk_approve_item_id' => $this->read_db->table('approve_item')
+                ->where('approve_item_name', strtolower($approveable_item))
+                ->get()
+                ->getRow()
+                ->approve_item_id,
+            'fk_status_id' => $statusLibrary->initialItemStatus($approveable_item)
+        ];
 
-    // Insert approval record
-    $this->approvalModel->insert((object)$approval);
-    $insert_id = $this->approvalModel->getInsertID();
+        // Insert approval record
+        $this->approvalModel->insert((object) $approval);
+        $insert_id = $this->approvalModel->getInsertID();
 
-    return $insert_id;
-}
+        return $insert_id;
+    }
 
 }

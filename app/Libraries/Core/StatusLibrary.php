@@ -75,236 +75,236 @@ class StatusLibrary extends GrantsLibrary
     }
 
     /**
- * Inserts a new status record into the database.
- *
- * @param int $user_id The ID of the user creating the status.
- * @param string $status_name The name of the status.
- * @param int $approval_flow_id The ID of the approval flow associated with the status.
- * @param int $status_approval_sequence The approval sequence of the status.
- * @param int $status_backflow_sequence The backflow sequence of the status.
- * @param int $status_approval_direction The approval direction of the status (1 for forward, -1 for backward).
- * @param int $status_is_requiring_approver_action Indicates whether the status requires approver action (0 for no, 1 for yes).
- * @param string $status_button_label The label for the status button.
- * @param string $status_decline_button_label The label for the status decline button.
- *
- * @return int The ID of the newly inserted status record. If the status already exists, the ID of the existing status is returned.
- */
-public function insertStatus($user_id, $status_name, $approval_flow_id, $status_approval_sequence, $status_backflow_sequence, $status_approval_direction, $status_is_requiring_approver_action, $status_button_label = "", $status_decline_button_label = "")
-{
-    $status_id = 0;
+     * Inserts a new status record into the database.
+     *
+     * @param int $user_id The ID of the user creating the status.
+     * @param string $status_name The name of the status.
+     * @param int $approval_flow_id The ID of the approval flow associated with the status.
+     * @param int $status_approval_sequence The approval sequence of the status.
+     * @param int $status_backflow_sequence The backflow sequence of the status.
+     * @param int $status_approval_direction The approval direction of the status (1 for forward, -1 for backward).
+     * @param int $status_is_requiring_approver_action Indicates whether the status requires approver action (0 for no, 1 for yes).
+     * @param string $status_button_label The label for the status button.
+     * @param string $status_decline_button_label The label for the status decline button.
+     *
+     * @return int The ID of the newly inserted status record. If the status already exists, the ID of the existing status is returned.
+     */
+    public function insertStatus($user_id, $status_name, $approval_flow_id, $status_approval_sequence, $status_backflow_sequence, $status_approval_direction, $status_is_requiring_approver_action, $status_button_label = "", $status_decline_button_label = "")
+    {
+        $status_id = 0;
 
-    // Check if the status already exists in the database
-    $existing_status = $this->statusModel->where([
-        'fk_approval_flow_id' => $approval_flow_id,
-        'status_approval_sequence' => $status_approval_sequence,
-        'status_backflow_sequence' => $status_backflow_sequence,
-        'status_approval_direction' => $status_approval_direction,
-        'status_is_requiring_approver_action' => $status_is_requiring_approver_action
-    ])->first();
-
-    // If the status does not exist, insert a new record
-    if (empty($existing_status)) {
-        $data = (object) [
-            'status_track_number' => generate_item_track_number_and_name('status')['status_track_number'],
-            'status_name' => $status_name,
-            'status_button_label' => $status_button_label,
-            'status_decline_button_label' => $status_decline_button_label,
+        // Check if the status already exists in the database
+        $existing_status = $this->statusModel->where([
             'fk_approval_flow_id' => $approval_flow_id,
             'status_approval_sequence' => $status_approval_sequence,
             'status_backflow_sequence' => $status_backflow_sequence,
             'status_approval_direction' => $status_approval_direction,
-            'status_is_requiring_approver_action' => $status_is_requiring_approver_action,
-            'status_created_date' => date('Y-m-d'),
-            'status_created_by' => $user_id,
-            'status_last_modified_by' => $user_id
-        ];
+            'status_is_requiring_approver_action' => $status_is_requiring_approver_action
+        ])->first();
 
-        $this->statusModel->insert($data);
-        $status_id = $this->statusModel->getInsertID();
-    } else {
-        // If the status already exists, return its ID
-        $status_id = $existing_status['status_id'];
+        // If the status does not exist, insert a new record
+        if (empty($existing_status)) {
+            $data = (object) [
+                'status_track_number' => generate_item_track_number_and_name('status')['status_track_number'],
+                'status_name' => $status_name,
+                'status_button_label' => $status_button_label,
+                'status_decline_button_label' => $status_decline_button_label,
+                'fk_approval_flow_id' => $approval_flow_id,
+                'status_approval_sequence' => $status_approval_sequence,
+                'status_backflow_sequence' => $status_backflow_sequence,
+                'status_approval_direction' => $status_approval_direction,
+                'status_is_requiring_approver_action' => $status_is_requiring_approver_action,
+                'status_created_date' => date('Y-m-d'),
+                'status_created_by' => $user_id,
+                'status_last_modified_by' => $user_id
+            ];
+
+            $this->statusModel->insert($data);
+            $status_id = $this->statusModel->getInsertID();
+        } else {
+            // If the status already exists, return its ID
+            $status_id = $existing_status['status_id'];
+        }
+
+        return $status_id;
     }
 
-    return $status_id;
-}
-
-
-/**
- * Inserts initial and final status records into the database for a given approval flow.
- *
- * @param int $approval_flow_id The ID of the approval flow.
- * @param int $user_id The ID of the user creating the statuses.
- *
- * @return int The ID of the fully approved status record.
- *
- * @throws \Exception If there is an error executing the database query.
- */
-function insertInitialAndFinalStatus($approval_flow_id, $user_id)
-{
-    // Insert initial status record
-    $initial_status_id = $this->insertStatus($user_id, get_phrase('ready_to_submit'), $approval_flow_id, 1, 0, 1, 1);
-
-    // Insert fully approved status
-    $fully_approved_status_id = $this->insertStatus($user_id, get_phrase('fully_approved'), $approval_flow_id, 2, 0, 1, 0);
-    $this->insertStatus($user_id, get_phrase('reinstate_after_allow_edit'), $approval_flow_id, 2, 1, -1, 1); // Reinstate the approval
-    $this->insertStatus($user_id, get_phrase('reinstated_after_edit'), $approval_flow_id, 2, 0, 0, 1); // Reinstated approval
-
-    // Return the ID of the fully approved status
-    return $fully_approved_status_id;
-}
 
     /**
- * Inserts status records into the database for a given approveable item, if they do not exist.
- *
- * @param string $approveItemName The name of the approveable item.
- *
- * @return bool Returns true if the status records were successfully inserted or already existed, false otherwise.
- *
- * @throws \Exception If there is an error executing the database query.
- */
-public function insertStatusForApproveableItem(string $approveItemName): bool
-{
-    // Instantiate necessary libraries
-    $approveItemLibrary = new \App\Libraries\Core\ApproveItemLibrary();
-    $approvalFlowLibrary = new \App\Libraries\Core\ApprovalFlowLibrary();
+     * Inserts initial and final status records into the database for a given approval flow.
+     *
+     * @param int $approval_flow_id The ID of the approval flow.
+     * @param int $user_id The ID of the user creating the statuses.
+     *
+     * @return int The ID of the fully approved status record.
+     *
+     * @throws \Exception If there is an error executing the database query.
+     */
+    function insertInitialAndFinalStatus($approval_flow_id, $user_id)
+    {
+        // Insert initial status record
+        $initial_status_id = $this->insertStatus($user_id, get_phrase('ready_to_submit'), $approval_flow_id, 1, 0, 1, 1);
 
-    // Ensure the approve item name length is greater than 2
-    if (strlen($approveItemName) > 2) {
-        // Start a database transaction
-        $this->statusModel->transBegin();
+        // Insert fully approved status
+        $fully_approved_status_id = $this->insertStatus($user_id, get_phrase('fully_approved'), $approval_flow_id, 2, 0, 1, 0);
+        $this->insertStatus($user_id, get_phrase('reinstate_after_allow_edit'), $approval_flow_id, 2, 1, -1, 1); // Reinstate the approval
+        $this->insertStatus($user_id, get_phrase('reinstated_after_edit'), $approval_flow_id, 2, 0, 0, 1); // Reinstated approval
 
-        // Retrieve the user ID from session or use 1 as a default
-        $userId = session()->get('user_id') ?? 1;
+        // Return the ID of the fully approved status
+        return $fully_approved_status_id;
+    }
 
-        // Check if the approve item exists in the database, and insert if it doesn't
-        
-        $approveItemId = $approveItemLibrary->insertMissingApproveableItem($approveItemName);
+    /**
+     * Inserts status records into the database for a given approveable item, if they do not exist.
+     *
+     * @param string $approveItemName The name of the approveable item.
+     *
+     * @return bool Returns true if the status records were successfully inserted or already existed, false otherwise.
+     *
+     * @throws \Exception If there is an error executing the database query.
+     */
+    public function insertStatusForApproveableItem(string $approveItemName): bool
+    {
+        // Instantiate necessary libraries
+        $approveItemLibrary = new \App\Libraries\Core\ApproveItemLibrary();
+        $approvalFlowLibrary = new \App\Libraries\Core\ApprovalFlowLibrary();
 
-        // Retrieve the account systems from the database
-        $accountSystems = $this->read_db->table('account_system')->get()->getResultArray();
+        // Ensure the approve item name length is greater than 2
+        if (strlen($approveItemName) > 2) {
+            // Start a database transaction
+            $this->statusModel->transBegin();
 
-        // Iterate over each account system
-        foreach ($accountSystems as $accountSystem) {
-            // Retrieve the approval flow for the current account system and approve item
-            $approvalFlow = $this->read_db->table('approval_flow')->where([
-                'fk_approve_item_id' => $approveItemId,
-                'fk_account_system_id' => $accountSystem['account_system_id']
-            ])->get()->getRowArray();
+            // Retrieve the user ID from session or use 1 as a default
+            $userId = session()->get('user_id') ?? 1;
 
-            $approvalFlowId = 0;
+            // Check if the approve item exists in the database, and insert if it doesn't
 
-            // If the approval flow does not exist, insert a new one
-            if (!$approvalFlow) {
-                $approvalFlowId = $approvalFlowLibrary->insertApprovalFlow($accountSystem, $approveItemId, $approveItemName, $userId);
+            $approveItemId = $approveItemLibrary->insertMissingApproveableItem($approveItemName);
+
+            // Retrieve the account systems from the database
+            $accountSystems = $this->read_db->table('account_system')->get()->getResultArray();
+
+            // Iterate over each account system
+            foreach ($accountSystems as $accountSystem) {
+                // Retrieve the approval flow for the current account system and approve item
+                $approvalFlow = $this->read_db->table('approval_flow')->where([
+                    'fk_approve_item_id' => $approveItemId,
+                    'fk_account_system_id' => $accountSystem['account_system_id']
+                ])->get()->getRowArray();
+
+                $approvalFlowId = 0;
+
+                // If the approval flow does not exist, insert a new one
+                if (!$approvalFlow) {
+                    $approvalFlowId = $approvalFlowLibrary->insertApprovalFlow($accountSystem, $approveItemId, $approveItemName, $userId);
+                } else {
+                    $approvalFlowId = $approvalFlow['approval_flow_id'];
+                }
+
+                // Retrieve the status for the current approval flow
+                $status = $this->read_db->table('status')->where([
+                    'fk_approval_flow_id' => $approvalFlowId
+                ])->get()->getResultArray();
+
+                // If there are less than 2 statuses, insert the initial and final statuses
+                if (count($status) < 2) {
+                    $this->insertInitialAndFinalStatus($approvalFlowId, $userId);
+                }
+            }
+
+            // Complete the transaction and handle errors
+            if ($this->statusModel->transStatus() === false) {
+                $this->statusModel->transRollback();
+                throw new \Exception("Error occurred when creating missing status", 500);
             } else {
-                $approvalFlowId = $approvalFlow['approval_flow_id'];
+                $this->statusModel->transCommit();
+                return true;
             }
-
-            // Retrieve the status for the current approval flow
-            $status = $this->read_db->table('status')->where([
-                'fk_approval_flow_id' => $approvalFlowId
-            ])->get()->getResultArray();
-
-            // If there are less than 2 statuses, insert the initial and final statuses
-            if (count($status) < 2) {
-                $this->insertInitialAndFinalStatus($approvalFlowId, $userId);
-            }
-        }
-
-        // Complete the transaction and handle errors
-        if ($this->statusModel->transStatus() === false) {
-            $this->statusModel->transRollback();
-            throw new \Exception("Error occurred when creating missing status", 500);
         } else {
-            $this->statusModel->transCommit();
-            return true;
+            return false;
         }
-    } else {
-        return false;
-    }
-}
-
-  /**
- * Inserts status records into the database for a given approveable item, if they do not exist.
- * Also checks if the approveable item has a dependant table and inserts status records for it if it does.
- *
- * @param string $approve_item_name The name of the approveable item.
- *
- * @return bool Returns true if the status records were successfully inserted or already existed, false otherwise.
- *
- * @throws \Exception If there is an error executing the database query.
- */
-function insertStatusIfMissing($approve_item_name)
-{
-    // Insert status records for the given approveable item
-    $res = $this->insertStatusForApproveableItem($approve_item_name);
-
-    // Check if the approveable item has a dependant table
-    $has_dependant_table = $this->hasDependantTable($approve_item_name);
-
-    // If the approveable item has a dependant table, insert status records for it
-    if ($has_dependant_table) {
-        $dependant_table = $this->DependantTable($approve_item_name);
-        $this->mandatoryFields($dependant_table);
-        $this->insertStatusForApproveableItem($dependant_table);
     }
 
-    // Return the result of inserting status records for the given approveable item
-    return $res;
-}
+    /**
+     * Inserts status records into the database for a given approveable item, if they do not exist.
+     * Also checks if the approveable item has a dependant table and inserts status records for it if it does.
+     *
+     * @param string $approve_item_name The name of the approveable item.
+     *
+     * @return bool Returns true if the status records were successfully inserted or already existed, false otherwise.
+     *
+     * @throws \Exception If there is an error executing the database query.
+     */
+    function insertStatusIfMissing($approve_item_name)
+    {
+        // Insert status records for the given approveable item
+        $res = $this->insertStatusForApproveableItem($approve_item_name);
 
-public function initialItemStatus($table_name = "", $account_system_id = 0)
-{
+        // Check if the approveable item has a dependant table
+        $has_dependant_table = $this->hasDependantTable($approve_item_name);
 
-    if ($account_system_id == 0) {
-        $account_system_id = session()->get('user_account_system_id');
+        // If the approveable item has a dependant table, insert status records for it
+        if ($has_dependant_table) {
+            $dependant_table = $this->DependantTable($approve_item_name);
+            $this->mandatoryFields($dependant_table);
+            $this->insertStatusForApproveableItem($dependant_table);
+        }
+
+        // Return the result of inserting status records for the given approveable item
+        return $res;
     }
 
-    $table = isEmpty($table_name) ? $this->controller : $table_name;
+    public function initialItemStatus($table_name = "", $account_system_id = 0)
+    {
 
-    $approveableItem = $this->read_db->table('approve_item')
-                          ->getWhere(['approve_item_name' => $table])
-                          ->getRow();
+        if ($account_system_id == 0) {
+            $account_system_id = session()->get('user_account_system_id');
+        }
 
-    $status_id = 0;
+        $table = isEmpty($table_name) ? $this->controller : $table_name;
 
-    if ($approveableItem) {
-        $approveable_item_id = $approveableItem->approve_item_id;
-        $approveable_item_is_active = $approveableItem->approve_item_is_active;
+        $approveableItem = $this->read_db->table('approve_item')
+            ->getWhere(['approve_item_name' => $table])
+            ->getRow();
 
-        $condition_array = [
-            'fk_approve_item_id' => $approveable_item_id,
-            'status_approval_sequence' => 1,
-            'fk_account_system_id' => $account_system_id
-        ];
+        $status_id = 0;
 
-        if (!$approveable_item_is_active) {
+        if ($approveableItem) {
+            $approveable_item_id = $approveableItem->approve_item_id;
+            $approveable_item_is_active = $approveableItem->approve_item_is_active;
+
             $condition_array = [
                 'fk_approve_item_id' => $approveable_item_id,
-                'status_is_requiring_approver_action' => 0,
+                'status_approval_sequence' => 1,
                 'fk_account_system_id' => $account_system_id
             ];
+
+            if (!$approveable_item_is_active) {
+                $condition_array = [
+                    'fk_approve_item_id' => $approveable_item_id,
+                    'status_is_requiring_approver_action' => 0,
+                    'fk_account_system_id' => $account_system_id
+                ];
+            }
+
+            $initial_status = $this->read_db->table($this->table)
+                ->join('approval_flow', 'approval_flow.approval_flow_id = status.fk_approval_flow_id')
+                ->getWhere($condition_array)
+                ->getRow();
+
+            if ($initial_status) {
+                $status_id = $initial_status->status_id;
+            }
         }
 
-        $initial_status = $this->read_db->table($this->table)
-                             ->join('approval_flow', 'approval_flow.approval_flow_id = status.fk_approval_flow_id')
-                             ->getWhere($condition_array)
-                             ->getRow();
-
-        if ($initial_status) {
-            $status_id = $initial_status->status_id;
-        }
+        return $status_id;
     }
 
-    return $status_id;
-}
-
-public function getMaxApprovalStatusId(string $approveableItem, array $officeIds = [], int $accountSystemId = 0): array|RedirectResponse
+    public function getMaxApprovalStatusId(string $approveableItem, array $officeIds = [], int $accountSystemId = 0): array|RedirectResponse
     {
         $maxStatusIds = [];
         $builder = $this->read_db->table($this->table);
-        
+
         if (empty($officeIds)) {
             if (empty($this->session->get('hierarchy_offices'))) {
                 $message = "Your account is improperly set. Your user context assignment misses a related record in the correct context user table. Contact the administrator";
@@ -315,9 +315,9 @@ public function getMaxApprovalStatusId(string $approveableItem, array $officeIds
         }
 
         $builder->join('approval_flow', 'approval_flow.approval_flow_id = status.fk_approval_flow_id')
-                ->join('approve_item', 'approve_item.approve_item_id = approval_flow.fk_approve_item_id')
-                ->join('account_system', 'account_system.account_system_id = approval_flow.fk_account_system_id')
-                ->join('office', 'office.fk_account_system_id = account_system.account_system_id');
+            ->join('approve_item', 'approve_item.approve_item_id = approval_flow.fk_approve_item_id')
+            ->join('account_system', 'account_system.account_system_id = approval_flow.fk_account_system_id')
+            ->join('office', 'office.fk_account_system_id = account_system.account_system_id');
 
         if ($accountSystemId > 0) {
             $builder->where('account_system.account_system_id', $accountSystemId);
@@ -327,12 +327,12 @@ public function getMaxApprovalStatusId(string $approveableItem, array $officeIds
         }
 
         $builder->select(['status_id', 'status_approval_sequence'])
-                ->where([
-                    'approve_item_name' => $approveableItem,
-                    'status_backflow_sequence' => 0,
-                    'status_approval_direction' => 1,
-                    'status_is_requiring_approver_action' => 0
-                ]);
+            ->where([
+                'approve_item_name' => $approveableItem,
+                'status_backflow_sequence' => 0,
+                'status_approval_direction' => 1,
+                'status_is_requiring_approver_action' => 0
+            ]);
 
         $maxStatusApprovalSequenceObj = $builder->get();
 

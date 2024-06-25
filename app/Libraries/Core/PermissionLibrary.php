@@ -20,12 +20,4 @@ class PermissionLibrary extends GrantsLibrary
         $this->table = 'permission';
     }
 
-    // public function multiSelectField(): string
-    // {
-    //     return '';
-    // }
-
-    // public function actionBeforeIinsert(array $postArray): array{
-    //     return $postArray;
-    // } 
 }
