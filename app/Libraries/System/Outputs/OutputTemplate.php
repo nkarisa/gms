@@ -14,11 +14,15 @@ class OutputTemplate {
     protected $currentLibrary;
     protected $read_db;
     protected $write_db;
+    protected $module;
+    protected $currentModel;
+    protected $uri;
 
-    function __construct()
+    function __construct($module)
     {
-        $uri = service('uri');
-        $segments = $uri->getSegments();
+        $this->module = $module;
+        $this->uri = service('uri');
+        $segments = $this->uri->getSegments();
 
         $this->controller = isset($segments[0]) ? $segments[0] : 'dashboard';
         $this->action = isset($segments[1]) ? $segments[1] : 'list';
@@ -32,7 +36,23 @@ class OutputTemplate {
 
         $this->currentLibrary = $this->libs->loadLibrary($this->controller);
 
+        $this->currentModel = $this->libs->loadModel($this->controller);
+
         $this->read_db = \Config\Database::connect('read');
         $this->write_db = \Config\Database::connect('write');
+
+        // $modelFileName = ucfirst($this->controller).'Model'; 
+        // if (class_exists("App\\Models\\" . ucfirst($this->module) . "\\" . $modelFileName)) {
+        //     $class = "App\\Models\\" . ucfirst($this->module) . "\\" . $modelFileName;
+
+        //     $this->currentModel = new $class();
+        // }
+
+        // $libraryFileName = ucfirst($this->controller).'Library'; 
+        // if (class_exists("App\\Libraries\\" . ucfirst($this->module) . "\\" . $libraryFileName)) {
+        //     $class = "App\\Libraries\\" . ucfirst($this->module) . "\\" . $libraryFileName;
+
+        //     $this->currentLibrary = new $class();
+        // }
     }
 }

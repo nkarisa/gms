@@ -62,7 +62,6 @@ class ApproveItemLibrary extends GrantsLibrary
                 'approve_item_last_modified_by' => $user_id
             ];
 
-            // log_message('error', json_encode($data));
 
             // Insert the new approveable item into the database
             $this->approveItemModel->insert((object) $data);

@@ -1,3 +1,7 @@
+<?php 
+// $grantsLibrary = new \App\Libraries\System\GrantsLibrary();
+// echo json_encode($grantsLibrary->dbSchema);
+?>
 <div class = 'row'>
     <div class="col-sm-12">
         <div class="well">

@@ -30,6 +30,12 @@ class Login extends BaseController
     {
         // Check if user is already authenticated
         if ($this->session->has('user_is_authenticated')) {
+            
+            if (parse_url(base_url())['host'] == 'localhost' && $this->session->system_admin) {
+                $grantsLibrary = new \App\Libraries\System\GrantsLibrary();
+                $grantsLibrary->create_missing_system_files_from_json_setup();
+            }
+
             // Redirect to dashboard if user is authenticated
             return redirect()->to('dashboard/list');
         }
@@ -46,7 +52,7 @@ class Login extends BaseController
         $data['maintenance_mode'] = $settings['maintenance_mode'];
 
         // Return the login view with the prepared data
-        return view('login/index', $data);
+        return view('general/login', $data);
     }
 
 
@@ -65,7 +71,7 @@ class Login extends BaseController
         $password = $_POST["password"];
 
         // Add the submitted data to the response array
-        $response['submitted_data'] = $_POST;
+        $response['submitted_data'] = $this->request->getPost(); // $_POST;
 
         // Validate the login credentials
         $login_status = $this->validate_login(strtolower(trim($email)), $password);
@@ -85,7 +91,7 @@ class Login extends BaseController
     function validate_login(string $email, string $password = '', bool $is_user_switch = false): string
     {
 
-        $userModel = new UserModel();
+        // $userModel = new UserModel();
         $user = [];
 
         // Set the user array
@@ -137,9 +143,9 @@ class Login extends BaseController
             'user_account_system_code' => $user['account_system_code'],
             'hierarchy_offices' => $userLibrary->userHierarchyOffices($user_id),
             'data_privacy_consented' => $userLibrary->dataPrivacyConsented($user_id),
+            'role_status' => $userLibrary->actionableRoleStatus(array_keys($userLibrary->userRoleIds($user_id, true))),
         ];
 
-        // log_message('error', json_encode($userLibrary->getUserPermissions($roleIds)));
 
         // If user is already authenticated, remove the previous session data
         if ($this->session->has('user_is_authenticated')) {

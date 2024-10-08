@@ -35,4 +35,30 @@ trait VisibilityTrait {
     protected function multiSelectField(): string{
       return '';
     }
+
+    public function masterTableAdditionalFields(): array {
+      return [];
+    }
+
+    public function masterView():array {
+      return [];
+    }
+
+    public function masterTableVisibleColumns():array {
+      return [];
+    }
+
+    public function detailListTableWhere():array {
+      return [];
+    }
+
+    public function orderListPage(){
+      return '';
+    }
+
+    public function detailListQuery(): array {
+      return [];
+    }
+
+    
 }

@@ -2,7 +2,7 @@
 
 use CodeIgniter\Router\RouteCollection;
 use App\Controllers\Core\Login;
-use App\Controllers\Core\Dashboard;
+use Config\GrantsConfig;
 
 /**
  * @var RouteCollection $routes
@@ -10,26 +10,41 @@ use App\Controllers\Core\Dashboard;
 
 // Web routes
 
-// $routes->group('web', static function ($routes) {
+$routes->get('/', [Login::class, 'index']);
 
-    $routes->get('/', [Login::class, 'index']);
+$routes->group('login', static function ($routes) {
+    $routes->get('logout', [Login::class, 'logout']);
+    $routes->get('(:segment)', [Login::class, 'index']);
+    $routes->post('(:segment)', [Login::class, 'ajax_login']);
+});
 
-    $routes->group('login', static function ($routes) {
-        $routes->get('logout', [Login::class, 'logout']);
-        $routes->get('(:segment)', [Login::class, 'index']);
-        $routes->post('(:segment)', [Login::class, 'ajax_login']);
-    });
 
-    $routes->get('(:segment)/list',[Dashboard::class, 'list']);  
-    $routes->get('(:segment)/view',[Dashboard::class, 'view']);   
-    $routes->get('(:segment)/single_form_add',[Dashboard::class, 'single_form_add']);    
-    $routes->get('(:segment)/multi_form_add',[Dashboard::class, 'multi_form_add']);
-    $routes->get('(:segment)/edit',[Dashboard::class, 'edit']);  
+$config = config(GrantsConfig::class);
+$modules = $config->modules;
+unset($modules[array_search('system', $modules)]);
+$grantsLibrary = new \App\Libraries\System\GrantsLibrary();
+
+foreach ($modules as $module){
+    $moduleTablesSchema = $grantsLibrary->getPackageSchema($module);
+    $moduleTables = array_keys($moduleTablesSchema);
+    $module = pascalize($module);
     
-    $routes->post('(:segment)/create',[Dashboard::class, 'create']);
-    $routes->post('(:segment)/update',[Dashboard::class, 'update']);
-    $routes->post('(:segment)/delete',[Dashboard::class, 'delete']);
-// });
+    foreach($moduleTables as $moduleTable){
+        $routeBase = strtolower($moduleTable);
+        $controllerName = pascalize($moduleTable);
+        $routes->group($routeBase, static function ($routes) use ($controllerName, $module) {
+            $routes->add('showList', $module.'\\'.$controllerName.'::showList');
+            $routes->add('list', $module.'\\'.$controllerName.'::list'); 
+            $routes->add('view/(:segment)', $module.'\\'.$controllerName.'::view/$1');
+            $routes->add('single_form_add', $module.'\\'.$controllerName.'::single_form_add');  
+            $routes->add('multi_form_add', $module.'\\'.$controllerName.'::multi_form_add'); 
+            $routes->add('edit/(:segment)', $module.'\\'.$controllerName.'::edit/$1'); 
+            $routes->add('create',$module.'\\'.$controllerName.'::create');
+            $routes->add('update',$module.'\\'.$controllerName.'::update');
+            $routes->add('delete',$module.'\\'.$controllerName.'::delete');
+        });        
+    }
+}
 
 
 // Api Routes

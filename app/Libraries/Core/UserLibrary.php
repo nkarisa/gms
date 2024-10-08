@@ -466,10 +466,15 @@ class UserLibrary extends GrantsLibrary
         $builder->where($searchFields);
 
         // Execute the query and return the result
-        $query = $builder->get();
+        $userObj = $builder->get();
 
         // Convert the result to an associative array and return it
-        return $query->getRowArray();
+        $user = [];
+        if($userObj->getNumRows() > 0){
+            $user = $userObj->getRowArray();
+        }
+
+        return $user;
     }
 
     /**
@@ -505,6 +510,167 @@ class UserLibrary extends GrantsLibrary
 
         return $associationsArray;
     }
+
+    public function isFeatureApproveable(string $feature)
+    {
+        // Get the database connection
+        $builder = $this->read_db->table('approve_item');
+    
+        // Apply the where condition
+        $builder->where(['approve_item_name' => $feature]);
+    
+        // Fetch the row and return the value of approve_item_is_active
+        $result = $builder->get()->getRow();
+    
+        return $result ? $result->approve_item_is_active : null;
+    }
+    
+
+    function isStatusActionableByUser($status_id,$feature){
+        return in_array($status_id, session()->get('role_status')) || !$this->isFeatureApproveable($feature) ? true : false;
+      }
+
+
+      public function actionableRoleStatus(array $roleIds)
+{
+    $userCrudActionableStatus = [];
+
+    // Connect to the database
+    $builder = $this->read_db->table('status_role');
+
+    // Select the status_id
+    $builder->select(['status.status_id as status_id']);
+    $builder->join('status', 'status.status_id = status_role.status_role_status_id');
+
+    if (!$this->session->system_admin) {
+        $builder->join('approval_flow', 'approval_flow.approval_flow_id = status.fk_approval_flow_id');
+        $builder->where(['approval_flow.fk_account_system_id' => $this->session->user_account_system_id]);
+    }
+
+    $builder->where(['status_role_is_active' => 1]);
+    $builder->whereIn('fk_role_id', $roleIds);
+
+    // Execute the query
+    $statusObj = $builder->get();
+
+    if ($statusObj->getNumRows() > 0) {
+        $userCrudActionableStatus = array_merge(
+            array_column($statusObj->getResultArray(), 'status_id'),
+            $this->reinstatingStatus()
+        );
+    }
+
+    return $userCrudActionableStatus;
+}
+
+function reinstatingStatus(){
+
+    $reinstating_status = [];
+
+    $builder = $this->read_db->table('status');
+
+    if(!$this->session->system_admin){
+      $builder->join('approval_flow','approval_flow.approval_flow_id=status.fk_approval_flow_id');
+      $builder->where(array('approval_flow.fk_account_system_id'=>session()->get('user_account_system_id')));
+    }
+
+    $builder->where(array('status_approval_direction' => -1));
+    $status_obj = $builder->get();
+
+    if($status_obj->getNumRows() > 0){
+      $reinstating_status = array_column($status_obj->getResultArray(),'status_id');
+    }
+
+    return $reinstating_status;
+  }
+
+      function userRoles($user_id){
+        $builder = $this->read_db->table('user');
+        $builder->select(['role_id', 'role_name']);
+        $builder->join('role','role.role_id=user.fk_role_id');
+        $builder->where(['user_id'=>$user_id]);
+        $user_roles_and_ids = $builder->get()->getResultArray();
+      
+        $role_ids=array_column($user_roles_and_ids,'role_id');
+        $role_names=array_column($user_roles_and_ids,'role_name');
+      
+        $role_ids_and_names=array_combine($role_ids,$role_names);
+      
+        return $role_ids_and_names;
+      
+      }
+      
+      public function userRoleIds($userId, $mergeWithPrimaryRole = true)
+{
+    // Retrieve the user's primary role
+    $userPrimaryRole = $this->userRoles($userId);
+
+    // Connect to the database
+
+    $builder = $this->read_db->table('role_user');
+
+    // Build the query
+    $builder->select(['role_id', 'role_name']);
+    $builder->where(['fk_user_id' => $userId, 'role_user_is_active' => 1]);
+    $builder->groupStart();
+    $builder->where('role_user_expiry_date IS NULL', null, false);
+    $builder->orWhere(['role_user_expiry_date >= ' => date('Y-m-d')]);
+    $builder->groupEnd();
+    $builder->join('role', 'role.role_id = role_user.fk_role_id');
+
+    // Execute the query
+    $roleUserObj = $builder->get();
+
+    $userRoleIds = [];
+
+    if ($roleUserObj->getNumRows() > 0) {
+        $userRoleIdsArray = $roleUserObj->getResultArray();
+        $roleIds = array_column($userRoleIdsArray, 'role_id');
+        $roleNames = array_column($userRoleIdsArray, 'role_name');
+
+        $userRoleIds = array_combine($roleIds, $roleNames);
+    }
+
+    // Combine the user role IDs with the primary role
+    $combinedUserRoleIds = array_replace($userPrimaryRole, $userRoleIds);
+
+    if (!$mergeWithPrimaryRole) {
+        $combinedUserRoleIds = $userRoleIds;
+    }
+
+    return $combinedUserRoleIds;
+}
+
+
+    function checkRoleHasFieldPermission(string $activeController, string $permissionLabel, string $column): bool
+    {
+        $hasPermission = false;
+        $activeController = ucfirst($activeController);
+
+        // Forces checking a field of a detail table
+        if (strpos($activeController, "_detail") !== false) {
+            $activeController = substr($activeController, 0, -7);
+        }
+
+        // Create a query with CodeIgniter 4 query builder
+        $builder = $this->read_db->table('permission');
+        $builder->join('menu', 'permission.fk_menu_id = menu.menu_id');
+        $builder->where('menu.menu_derivative_controller', $activeController);
+        $builder->where('permission.permission_field', $column);
+        
+        // Run the query
+        $isColumnControlled = $builder->get();
+
+        // Check if column is controlled and apply permission logic
+        if ($isColumnControlled->getNumRows() > 0) {
+            $hasPermission = $this->checkRoleHasPermissions($activeController, $permissionLabel, 2);
+        } else {
+            $hasPermission = true;
+        }
+
+        return $hasPermission;
+}
+
 
     /**
      * Checks if the user has the required permissions for a specific controller and permission label.

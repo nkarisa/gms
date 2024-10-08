@@ -161,7 +161,6 @@ public function result($id = ''){
     }else{
         $output  = $this->libs::call($this->controller.'.'.$this->action.'Output', [$this->id]);
     }
-
     return $output;
 } 
 
@@ -189,10 +188,49 @@ public function views_dir():string {
       $view_path =  'components';
     }
 
-    // log_message('error', json_encode($view_path));
-
     return $view_path;
 }
+
+public function user_info(): array
+    {
+        $primary_user_data_id = 0;
+        $session = session();
+        $user_can_read_switch = true;
+        $user_available_languages = [
+            [
+                'language_code' => 'eng',
+                'language_name' => 'English'
+            ]
+        ];
+        $user_locale = 'eng';
+        $default_language = [
+            'language_code' => 'eng',
+            'language_name' => 'English'
+        ];
+       
+        $user_icon = '2.png';
+
+        $user = [
+            'user_id' => $session->get('user_id'),
+            'name' => $session->get('name'),
+            'primary_user_data_id' => $primary_user_data_id,
+            'user_can_read_switch' => $user_can_read_switch,
+            'user_available_languages' => $user_available_languages,
+            'user_locale' => $user_locale,
+            'default_language' => $default_language,
+            // 'text_align' => $text_align,
+            'user_icon' => $user_icon,
+        ];
+
+        return $user;
+    }
+
+    public function navigation(): string
+    {
+        $menuLibrary = new \App\Libraries\Core\MenuLibrary();
+        $navItems = $menuLibrary->navigationItems();
+        return $navItems;
+    }
 
 function crud_views(String $id = ''):string
 {
@@ -203,16 +241,28 @@ function crud_views(String $id = ''):string
   $page_data['page_name'] = $this->page_name();
   $page_data['page_title'] = $this->page_title();
   $page_data['views_dir'] = $this->views_dir();
+  $page_data['action'] = $this->action;
   $page_data['result'] = $result;
-//   $page_data['show_add_button'] = $this->libs::call($this->controller.'.showAddButton');
+  $page_data['text_align'] = 'left-to-right';
+  $page_data['skin_colour'] = 'green';
+  $page_data['controller'] = $this->controller;
+
+  $page_data['user'] = $this->user_info();
+  $page_data['navigation'] = $this->navigation();
+  
 
   // Can be overrode in a specific controller
-  return view('general/index', ['output' => $page_data]);
+  return view('general/index', $page_data);
 }
 
 public function list(){
     $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'read');
     return $this->crud_views();
+}
+
+public function view($id){
+  $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'read');
+  return $this->crud_views();
 }
 
 public function single_form_add(){
@@ -245,23 +295,23 @@ public function create(){
     return $this->libs::call('system.grants.add', [$this->id]);
 }
 
-public function show_list(){
+public function showList(){
     $results = $this->libs::call($this->controller.'.listOutput', [$this->id]);
     $draw = intval($this->request->getPost('draw'));
-    
-    log_message('error', json_encode($results));
+    $data = $results['table_body'];
 
     $records = [];
     $columns = $results['keys'];
 
     $cnt = 0;
-    foreach ($results['table_body'] as $row) {
+    foreach ($data as $row) {
       $cols = 0;
       $primary_key = 0;
       foreach ($columns as $column) {
         if($column == strtolower($this->controller).'_id'){
+          // log_message('error', strtolower($this->controller).'_id');
           $primary_key = $row[$column];
-          continue;
+          $row[$column] = '<a href = "'.site_url(strtolower($this->controller).'/edit/'.hash_id($primary_key,'encode')).'" class = "btn btn-default">Edit</a>';
         }
 
           if (strpos($column, 'track_number') == true) {
@@ -303,7 +353,7 @@ public function show_list(){
       'data' => $records
     );
 
-    log_message('error',json_encode($response));
+
     return $this->response->setJSON($response);
 }
 

@@ -4,6 +4,7 @@ namespace App\Traits\System;
 
 trait SchemaTrait
 {
+
     /**
      * Retrieves the schema of the database tables.
      *
@@ -38,7 +39,7 @@ trait SchemaTrait
             if (isset($schema_array_format[$package]['tables'])) {
                 $tables = $schema_array_format[$package]['tables'];
             } else {
-                throw new \Exception('Package not found.');
+                throw new \Exception("Package $package not found.");
             }
         }
 
@@ -67,7 +68,6 @@ trait SchemaTrait
     {
         $field_data = [];
         $get_schema = $this->getSchema();
-        log_message('error', $table);
         // Check if the table exists in the schema and if the field data is defined
         if (isset($get_schema[$table]) && isset($get_schema[$table]['field_data'])) {
             $field_data = $get_schema[$table]['field_data'];
@@ -84,7 +84,7 @@ trait SchemaTrait
      *
      * @throws \Exception If the table does not exist in the schema or if the field data is not defined.
      */
-    private function tableFieldsMetadata($table_name = "")
+    public function tableFieldsMetadata($table_name = "")
     {
         // If table_name is not provided, use the controller name
         $table = isEmpty($table_name) ? $this->controller : $table_name;
@@ -122,7 +122,7 @@ trait SchemaTrait
 
         // If the primary key field is not found, throw an exception
         if (isEmpty($primary_key_field)) {
-            throw new \Exception('Primary key field not found.');
+            throw new \Exception("Primary key field for $table_name not found.");
         }
 
         // Return the primary key field name
@@ -447,7 +447,7 @@ trait SchemaTrait
     protected function detailTables(string $table_name = ""): array{
         return [];
       }
-      protected function lookupTables($table_name = ''): array{
+      public function lookupTables($table_name = ''): array{
           
           $approveItemLibrary = $this->loadLibrary('approve_item');
   
@@ -478,7 +478,7 @@ trait SchemaTrait
             }
             
           }
-      
+        //   log_message('error', json_encode($foreign_tables_array));
           return $foreign_tables_array;
       
       }

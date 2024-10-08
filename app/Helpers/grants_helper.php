@@ -7,9 +7,54 @@ if (!function_exists('get_phrase')) {
     {
         helper('inflector');
         // $translation = ucwords(str_replace("_", " ", $phrase));
-        $translation =  humanize($phrase, '_');
+        $translation =  $translation == '' ? humanize($phrase, '_'): $translation;
 
         return $translation;
+    }
+}
+
+if (!function_exists('render_list_table_header')) {
+    function render_list_table_header($table_name, $header_array)
+    {
+        $string = '<tr><th nowrap="nowrap">' . get_phrase("action") . '</th>';
+
+        foreach ($header_array as $th_value) {
+            if (strpos($th_value, 'key') == true || strpos($th_value, '_id') == true) {
+                continue;
+            }
+
+            $string .= '<th nowrap="nowrap">' . camel_case_header_element($th_value) . '</th>';
+        }
+        $string .= '</tr>';
+
+        return $string;
+    }
+}
+
+if (!function_exists('list_table_delete_action')) {
+    function list_table_delete_action($table_controller, $primary_key)
+    {
+
+        $string = '<a class="list_delete_link" href="' . base_url() . ucfirst($table_controller) . '/delete/' . hash_id($primary_key) . '">' . get_phrase("delete") . '</a>';
+
+        return $string;
+    }
+}
+
+if (!function_exists('list_table_edit_action')) {
+    function list_table_edit_action($table_controller, $primary_key, $status_id = 0)
+    {
+
+        $string = '<a class="list_edit_link" href="' . base_url() . ucfirst($table_controller) . '/edit/' . hash_id($primary_key, 'encode') . '">' . get_phrase("edit") . '</a>';
+
+        return $string;
+    }
+}
+
+if (!function_exists('camel_case_header_element')) {
+    function camel_case_header_element($header_element)
+    {
+        return  get_phrase($header_element); //ucwords(str_replace('_',' ',$header_element));
     }
 }
 
@@ -24,6 +69,7 @@ if (!function_exists('get_phrase')) {
 if (!function_exists('create_specs_array')) {
     function create_specs_array()
     {
+        // set_time_limit(300);
         // Define the path to the base schema file
         $schemaPath = APPPATH . 'DBManifest' . DIRECTORY_SEPARATOR . 'manifest.json';
 

@@ -1,6 +1,6 @@
 <?php 
 
-namespace App\Handlers;
+namespace App\Handlers\Core;
 
 use App\Interfaces\HandlerInterface;
 use CodeIgniter\HTTP\RequestInterface;

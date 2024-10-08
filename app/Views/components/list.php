@@ -1,5 +1,5 @@
 <?php 
-echo json_encode($result);
+// echo json_encode($result);
 extract($result);
 ?>
 
@@ -22,7 +22,7 @@ extract($result);
 
 <script>
   //$(document).ready(function(e){
-		let url = "<?=base_url();?><?=$controller;?>/show_list";
+		let url = "<?=base_url();?><?=$controller;?>/showList";
 		let datatable = $("#datatable").DataTable({
         dom: 'lBfrtip',
         buttons: [

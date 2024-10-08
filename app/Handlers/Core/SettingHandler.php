@@ -1,6 +1,6 @@
 <?php 
 
-namespace App\Handlers;
+namespace App\Handlers\Core;
 
 class SettingHandler {
     public function create($requestBody){}

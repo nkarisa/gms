@@ -25,7 +25,7 @@ public function before(RequestInterface $request, $arguments = null)
     ];
 
     // Log the request details using the 'notice' log level and encode the data as JSON
-    log_message('notice', json_encode($log));
+    // log_message('notice', json_encode($log));
 }
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)

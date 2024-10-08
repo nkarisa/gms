@@ -6,8 +6,8 @@ namespace App\Libraries\System\Outputs;
 class ListOutput extends OutputTemplate
 {
 
-function __construct(){
-    parent::__construct();
+function __construct($module){
+    parent::__construct($module);
 }
 
 function featureModelListTableVisibleColumns()
@@ -63,7 +63,6 @@ function featureModelListTableVisibleColumns()
         }
       }
     }
-    // log_message('error', json_encode($list_table_visible_columns));
     return $list_table_visible_columns;
   }
 
@@ -71,7 +70,6 @@ private function toggleListSelectColumns()
   {
     // Check if the table has list_table_visible_columns not empty
     $list_table_visible_columns = $this->featureModelListTableVisibleColumns();
-    // log_message('error', json_encode($list_table_visible_columns));
     $lookup_tables = $this->libs::call($this->controller.'.lookupTables');
 
     $get_all_table_fields = $this->libs->getAllTableFields();
@@ -92,11 +90,9 @@ private function toggleListSelectColumns()
     }
 
     $visible_columns = $get_all_table_fields;
-    // log_message('error', json_encode($list_table_visible_columns));
 
     if (is_array($list_table_visible_columns) && count($list_table_visible_columns) > 1) {
       $visible_columns = $list_table_visible_columns;
-      // log_message('error', json_encode($list_table_visible_columns));
     } else {
       if (is_array($lookup_tables) && count($lookup_tables) > 0) {
         foreach ($lookup_tables as $lookup_table) {
@@ -112,7 +108,6 @@ private function toggleListSelectColumns()
         }
       }
     }
-    // log_message('error', json_encode($visible_columns));
     return $visible_columns; //$this->CI->access->control_column_visibility($this->controller,$visible_columns,'read');
   }
 
@@ -127,8 +122,6 @@ private function toggleListSelectColumns()
         }else{
           array_push($toggle_list_select_columns,$table.'.fk_status_id as status_id');
         }
-
-        //print_r($toggle_list_select_columns);exit;
         
         $selected_results = $this->runListQuery($table,$toggle_list_select_columns,$lookup_tables,'listTableWhere',$filter_where_array);
         $total_records = $this->runListQueryCountAllRecords($table,$toggle_list_select_columns,$lookup_tables,'listTableWhere',$filter_where_array);
@@ -137,16 +130,17 @@ private function toggleListSelectColumns()
       }
 
       private function runDataTableListQuery(
-        $table,
-        $selected_columns,
-        $lookup_tables,
-        $where_method = "listTableWhere",
-        $filter_where_array = array()
+        \CodeIgniter\Database\BaseBuilder $builder,
+        string $table,
+        array $selected_columns,
+        array $lookup_tables,
+        string $where_method = "listTableWhere",
+        array $filter_where_array = array()
     ) {
+
         // Get the database connection
-        $db = $this->read_db;//\Config\Database::connect('read_db');
-        $builder = $db->table($table);
-    
+        $db = $this->read_db;
+
         // Select the specified columns
         $builder->select($selected_columns);
     
@@ -194,15 +188,14 @@ private function toggleListSelectColumns()
         $where_method = "listTableWhere",
         $filter_where_array = array()
     ) {
-        $db = $this->read_db;//\Config\Database::connect('read_db');
+        $db = $this->read_db;
         $builder = $db->table($table);
         
         if (!$builder->get()) {
             $message = 'The table ' . $this->controller . ' has no relationship with ' . $table . '. Check the ' . $this->controller . '_model detail_tables method';
             throw new \CodeIgniter\Exceptions\PageNotFoundException($message);
         } else {
-            $this->runDataTableListQuery($table, $selected_columns, $lookup_tables, $where_method, $filter_where_array);
-    
+            $this->runDataTableListQuery($builder, $table, $selected_columns, $lookup_tables, $where_method, $filter_where_array);
             if ($this->request->getPost('draw')) {
                 // Limiting Server Datatable Results
                 $start = intval($this->request->getPost('start'));
@@ -253,8 +246,10 @@ private function toggleListSelectColumns()
                 clear_cache_files($table);
                 return $builder->get()->getResultArray();
             }
-    
-            return $result_object->getResultArray();
+            
+            $rst = $result_object->getResultArray();
+            // log_message('error', json_encode($rst));
+            return $rst;
         }
     }
     
@@ -274,7 +269,7 @@ private function toggleListSelectColumns()
             throw new \CodeIgniter\Exceptions\PageNotFoundException($message);
         } else {
             // Call the _run_list_query method to build the query
-            $this->runDataTableListQuery($table, $selected_columns, $lookup_tables, $model_where_method, $filter_where_array);
+            $this->runDataTableListQuery($builder, $table, $selected_columns, $lookup_tables, $model_where_method, $filter_where_array);
     
             return $builder->countAllResults();
         }
@@ -287,10 +282,10 @@ private function toggleListSelectColumns()
 
         // Get the tables foreign key relationship
         $lookup_tables = $this->libs::call($this->controller.'.lookupTables');
-        
+        // log_message('error', json_encode($lookup_tables));
         // Get result from grants model if feature model list returns empty
         $query_result = $this->listInternalQueryResults($lookup_tables)['selected_results']; // System generated query result
-
+        // log_message('error', json_encode($query_result));
         if (method_exists($featureLibrary, 'list') && !empty($featureLibrary->list())) {
             $feature_model_list_result = $featureLibrary->list();
             if (is_array($feature_model_list_result)) {
@@ -325,10 +320,9 @@ private function toggleListSelectColumns()
         $result = $this->toggleListQueryResults()['selected_results'];
 
         $keys = $this->toggleListSelectColumns();
-        $show_add_button = $this->libs::call($this->controller.'.showAddButton');
+        $show_add_button = $this->libs::call($this->controller.'.showAddButton', [$this->controller]);
 
         $columns = $keys;
-        // log_message('error', json_encode($keys));
         array_shift($columns);
 
         $return = array(
