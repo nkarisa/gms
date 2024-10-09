@@ -14,13 +14,13 @@
 # ENVIRONMENT
 #--------------------------------------------------------------------
 
-# CI_ENVIRONMENT = development
+#CI_ENVIRONMENT = development
 
 #--------------------------------------------------------------------
 # APP
 #--------------------------------------------------------------------
 
-# app.baseURL = ''
+#app.baseURL = 'http://localhost:8000/'
 # If you have trouble with `.`, you could also use `_`.
 # app_baseURL = ''
 # app.forceGlobalSecureRequests = false
@@ -30,13 +30,21 @@
 # DATABASE
 #--------------------------------------------------------------------
 
-# database.default.hostname = localhost
-# database.default.database = ci4
-# database.default.username = root
-# database.default.password = root
-# database.default.DBDriver = MySQLi
-# database.default.DBPrefix =
-# database.default.port = 3306
+# database.read.hostname = localhost
+# database.read.database = toolkit
+# database.read.username = admin
+# database.read.password = 
+# database.read.DBDriver = MySQLi
+# database.read.DBPrefix = 
+# database.read.port = 3306
+
+# database.write.hostname = localhost
+# database.write.database = toolkit
+# database.write.username = admin
+# database.write.password = 
+# database.write.DBDriver = MySQLi
+# database.write.DBPrefix =
+# database.write.port = 3306
 
 # If you use MySQLi as tests, first update the values of Config\Database::$tests.
 # database.tests.hostname = localhost
@@ -72,11 +80,11 @@
 # Password salting 
 #--------------------------------------------------------------------
 
-SHA256-PASSWORD-SALT=your-password-salt
+#SHA256-PASSWORD-SALT=compassion_international_mission_2022m_@_SaLT
 
 #----------------------------------------------------------------
 # AWS CREDENTIALS 
 #--------------------------------------------------------------------
 
-AWS_CREDENTIALS_PROFILE=your-aws-credentials-profile
-AWS_DEFAULT_REGION=your-aws-region
+#AWS_CREDENTIALS_PROFILE=default-afr
+#AWS_DEFAULT_REGION=eu-west-1
