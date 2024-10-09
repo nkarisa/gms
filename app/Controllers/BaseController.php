@@ -246,6 +246,7 @@ function crud_views(String $id = ''):string
   $page_data['text_align'] = 'left-to-right';
   $page_data['skin_colour'] = 'green';
   $page_data['controller'] = $this->controller;
+  $page_data['id'] = $this->id;
 
   $page_data['user'] = $this->user_info();
   $page_data['navigation'] = $this->navigation();

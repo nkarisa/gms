@@ -60,10 +60,10 @@ $columns = array_chunk($keys,$config->master_table_columns,true);
               
               if(isset($action_labels['show_label_as_button']) && $action_labels['show_label_as_button']){ 
               
-                  $primary_key = hash_id($this->id, 'decode');
+                  $primary_key = hash_id($id, 'decode');
                   $status_id = $table_body['status_id'];
                   $account_system_id = $statusLibrary->getStatusAccountSystem($status_id);
-                  $status_data = $this->general_model->actionButtonData($controller, $account_system_id);
+                  $status_data = $lib->actionButtonData($controller, $account_system_id);
                   extract($status_data);
 
                 //   echo approval_action_button($this->controller,$item_status, $primary_key, $status_id, $item_initial_item_status_id, $item_max_approval_status_ids);
