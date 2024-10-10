@@ -1,7 +1,7 @@
 <?php
 
 use CodeIgniter\Router\RouteCollection;
-use App\Controllers\Core\Login;
+use App\Controllers\Web\Core\Login;
 use Config\GrantsConfig;
 
 /**
@@ -32,12 +32,12 @@ foreach ($modules as $module){
     foreach($moduleTables as $moduleTable){
         $routeBase = strtolower($moduleTable);
         $controllerName = pascalize($moduleTable);
-        $routes->group($routeBase, static function ($routes) use ($controllerName, $module) {
+        $routes->group($routeBase,['namespace' => 'App\Controllers\Web'], static function ($routes) use ($controllerName, $module) {
             $routes->add('showList', $module.'\\'.$controllerName.'::showList');
             $routes->add('list', $module.'\\'.$controllerName.'::list'); 
             $routes->add('view/(:segment)', $module.'\\'.$controllerName.'::view/$1');
-            $routes->add('single_form_add', $module.'\\'.$controllerName.'::single_form_add');  
-            $routes->add('multi_form_add', $module.'\\'.$controllerName.'::multi_form_add'); 
+            $routes->add('singleFormAdd', $module.'\\'.$controllerName.'::singleFormAdd');  
+            $routes->add('multiFormAdd', $module.'\\'.$controllerName.'::multiFormAdd'); 
             $routes->add('edit/(:segment)', $module.'\\'.$controllerName.'::edit/$1'); 
             $routes->add('create',$module.'\\'.$controllerName.'::create');
             $routes->add('update',$module.'\\'.$controllerName.'::update');
@@ -48,6 +48,6 @@ foreach ($modules as $module){
 
 
 // Api Routes
-$routes->group('api', ['namespace' => 'App\Controllers\Api'], static function ($routes) { // 'filter' => 'api-auth', 
-    // $routes->resource('users');
+$routes->group('api/v1', ['namespace' => 'App\Controllers\Api'], static function ($routes) { // 'filter' => 'api-auth', 
+    $routes->resource('user');
 });

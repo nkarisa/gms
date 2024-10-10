@@ -1,11 +1,24 @@
 <?php 
-// echo json_encode($result);
-extract($result);
+
+use App\Libraries\System\Widgets\WidgetBase;
+use App\Libraries\Core\UserLibrary;
+
+$userLibrary = new UserLibrary();
+
+// if(!empty($this->grants->field_data($this->controller))){
+  extract($result);
+// }
+
 ?>
 
 <div class="row" style="margin-bottom:25px;">
   <div class="col-xs-12" style="text-align:center;">
-
+  <?php
+    if($show_add_button && $userLibrary->checkRoleHasPermissions(ucfirst($controller),'create')){
+      echo add_record_button($controller, $has_details_table,null,$has_details_listing, $is_multi_row);
+    }
+    ?>
+    <?=WidgetBase::load('position','position_1');?>
   </div>
 </div>
 

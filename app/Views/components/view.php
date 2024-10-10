@@ -1,5 +1,8 @@
 <?php 
 
+use \App\Libraries\System\Widgets\WidgetBase;
+
+extract($result);
 extract($result['master']);
 
 $config = config(Config\GrantsConfig::class);
@@ -16,7 +19,7 @@ $columns = array_chunk($keys,$config->master_table_columns,true);
 <div class="row">
   <div class="col-xs-12">
       <?php 
-        // echo Widget_base::load('comment');
+        echo WidgetBase::load('comment');
       ?>
   </div>
 </div>
@@ -24,7 +27,7 @@ $columns = array_chunk($keys,$config->master_table_columns,true);
 <div class="row">
   <div class="col-xs-12">
     <?php 
-        // echo Widget_base::load('position','position_1');
+        echo WidgetBase::load('position','position_1');
     ?>
   </div>
 </div>
@@ -47,7 +50,7 @@ $columns = array_chunk($keys,$config->master_table_columns,true);
               if( $userLibrary->isStatusActionableByUser($table_body['status_id'], $controller) ){
                 if($userLibrary->checkRoleHasPermissions(ucfirst($controller),'update'))
                 {
-                    //  echo Widget_base::load('button',get_phrase('edit'),$this->controller.'/edit/'.$this->id);
+                     echo WidgetBase::load('button',get_phrase('edit'),$controller.'/edit/'.$id);
                 }
   
                 if($userLibrary->checkRoleHasPermissions(ucfirst($controller),'delete'))

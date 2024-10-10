@@ -4,36 +4,45 @@ namespace App\Traits\System;
 
 trait VisibilityTrait {
 
-    protected function showAddButton():bool{
+  public function showAddButton():bool{
       return true;
     }
    
-    protected function accessAddFormFromMainMenu():bool{
+    public function accessAddFormFromMainMenu():bool{
       return true;
     }
-    protected function changeFieldType():array{
+    public function changeFieldType():array{
       return [];
     }
-    protected function detailMultiFormAddVisibleColumns():array {
+    public function detailMultiFormAddVisibleColumns():array {
       return [];
     }
-    protected function masterMultiFormAddVisibleColumns():array{
+    public function masterMultiFormAddVisibleColumns():array{
       return [];
     }
-    protected function singleFormAddVisibleColumns(): array {
+    public function singleFormAddVisibleColumns(): array {
       return [];
     }
-    protected function detailListTableVisibleColumns(): array{
+
+    public function detailTablesSingleFormAddVisibleColumns(): array{
       return [];
     }
-    protected function editVisibleColumns():array {
+
+    public function detailListTableVisibleColumns(): array{
       return [];
     }
-    protected function listTableVisibleColumns():array{
+    public function editVisibleColumns():array {
       return [];
     }
-    protected function multiSelectField(): string{
+    public function listTableVisibleColumns():array{
+      return [];
+    }
+    public function multiSelectField(): string{
       return '';
+    }
+
+    public function defaultFieldValue(): array{
+      return [];
     }
 
     public function masterTableAdditionalFields(): array {
@@ -60,5 +69,9 @@ trait VisibilityTrait {
       return [];
     }
 
-    
+    function lookupValues(): array{
+      return [];
+    }
+
+
 }

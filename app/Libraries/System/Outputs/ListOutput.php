@@ -66,7 +66,7 @@ function featureModelListTableVisibleColumns()
     return $list_table_visible_columns;
   }
 
-private function toggleListSelectColumns()
+private function toggleListSelectColumns(): array
   {
     // Check if the table has list_table_visible_columns not empty
     $list_table_visible_columns = $this->featureModelListTableVisibleColumns();
@@ -320,7 +320,7 @@ private function toggleListSelectColumns()
         $result = $this->toggleListQueryResults()['selected_results'];
 
         $keys = $this->toggleListSelectColumns();
-        $show_add_button = $this->libs::call($this->controller.'.showAddButton', [$this->controller]);
+        $show_add_button = $this->libs::call($this->controller.'.checkShowAddButton', [$this->controller]);
 
         $columns = $keys;
         array_shift($columns);

@@ -31,6 +31,24 @@ if (!function_exists('render_list_table_header')) {
     }
 }
 
+if (!function_exists('add_record_button')) {
+    function add_record_button($table_controller, $has_details, $id = null, $has_listing = false, $is_multi_row = false)
+    {
+        $add_view = $has_listing ? "multiFormAdd" : "singleFormAdd";
+        $add_view = $is_multi_row ? "multiRowAdd" : $add_view;
+
+        $link = "";
+
+        if ($id !== null) {
+            $link =  '<a href="' . base_url() . strtolower($table_controller) . '/' . $add_view . '/' . $id . '/' . $table_controller . '" class="btn btn-default">' . get_phrase('add_' . strtolower($table_controller)) . '</a>';
+        } else {
+            $link =  '<a style="margin-bottom:-70px;z-index:100;position:relative;" href="' . base_url() . $table_controller . '/' . $add_view . '" class="btn btn-default">' . get_phrase('add_' . strtolower($table_controller)) . '</a>';
+        }
+
+        return $link;
+    }
+}
+
 if (!function_exists('list_table_delete_action')) {
     function list_table_delete_action($table_controller, $primary_key)
     {

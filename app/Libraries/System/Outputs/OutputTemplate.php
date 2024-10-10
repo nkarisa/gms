@@ -3,6 +3,7 @@
 namespace App\Libraries\System\Outputs;
 
 use Config\GrantsConfig;
+use App\Libraries\System\AccessBaseLibrary;
 
 class OutputTemplate {
     protected $controller;
@@ -17,8 +18,10 @@ class OutputTemplate {
     protected $module;
     protected $currentModel;
     protected $uri;
+    protected $access = null;
+    protected $subAction = null;
 
-    function __construct($module)
+    function __construct($module = "")
     {
         $this->module = $module;
         $this->uri = service('uri');
@@ -27,6 +30,7 @@ class OutputTemplate {
         $this->controller = isset($segments[0]) ? $segments[0] : 'dashboard';
         $this->action = isset($segments[1]) ? $segments[1] : 'list';
         $this->id = isset($segments[2]) ? $segments[2] : 0;
+        $this->subAction = isset($segments[4]) ? $segments[4] : null; //$this->uri->segment(4, null);;
 
         $this->request = service('request');
 
@@ -41,18 +45,26 @@ class OutputTemplate {
         $this->read_db = \Config\Database::connect('read');
         $this->write_db = \Config\Database::connect('write');
 
-        // $modelFileName = ucfirst($this->controller).'Model'; 
-        // if (class_exists("App\\Models\\" . ucfirst($this->module) . "\\" . $modelFileName)) {
-        //     $class = "App\\Models\\" . ucfirst($this->module) . "\\" . $modelFileName;
+        $this->access = new AccessBaseLibrary();
 
-        //     $this->currentModel = new $class();
-        // }
+        if($module == ""){
+            $modules = $this->config->modules;
+            $modelFileName = ucfirst($this->controller).'Model'; 
+        
+            foreach($modules as $moduleName){
+                if (class_exists("App\\Models\\" . ucfirst($moduleName) . "\\" . $modelFileName)) {
+                    $class = "App\\Models\\" . ucfirst($moduleName) . "\\" . $modelFileName;
 
-        // $libraryFileName = ucfirst($this->controller).'Library'; 
-        // if (class_exists("App\\Libraries\\" . ucfirst($this->module) . "\\" . $libraryFileName)) {
-        //     $class = "App\\Libraries\\" . ucfirst($this->module) . "\\" . $libraryFileName;
+                    $this->currentModel = new $class();
+                }
 
-        //     $this->currentLibrary = new $class();
-        // }
+                $libraryFileName = ucfirst($this->controller).'Library'; 
+                if (class_exists("App\\Libraries\\" . ucfirst($moduleName) . "\\" . $libraryFileName)) {
+                    $class = "App\\Libraries\\" . ucfirst($moduleName) . "\\" . $libraryFileName;
+
+                    $this->currentLibrary = new $class();
+                }
+            }
+        }
     }
 }

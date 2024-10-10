@@ -18,5 +18,8 @@ class BankLibrary extends GrantsLibrary {
         $this->table = 'bank';
     }
 
-    
+    // function pagePosition(){
+    //     $widget['position_1']['view'][] =  "Hello World";
+    //     return $widget;
+    // }
 }

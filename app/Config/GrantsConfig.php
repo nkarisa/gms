@@ -18,5 +18,6 @@ class GrantsConfig extends BaseConfig
     public $extraMenuItemColumns = 2; // Number of columns to display extra menu items
     public $maxCountOfFavoritesMenuItems = 10; //
     public $master_table_columns = 2;
+    public $use_select2_plugin = true;
 
 }

@@ -1,12 +1,12 @@
 
-namespace App\Controllers\%cap_module%;
+namespace App\Controllers\Web\%cap_module%;
 
-use App\Controllers\BaseController;
+use App\Controllers\Web\WebController;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
-class %cap_feature% extends BaseController
+class %cap_feature% extends WebController
 {
 
     function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)

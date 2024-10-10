@@ -18,7 +18,7 @@ trait OutputTrait {
         return $listOutput->getOutput();
     }
 
-    protected function SingleFormAddOutput($module){
+    protected function SingleFormAddOutput($module = ''){
         $listOutput = new \App\Libraries\System\Outputs\SingleFormAddOutput($module);
         return $listOutput->getOutput();
     }
