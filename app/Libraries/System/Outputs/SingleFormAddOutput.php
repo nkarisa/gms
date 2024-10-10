@@ -55,7 +55,7 @@ class SingleFormAddOutput extends OutputTemplate{
     return $fields;
   }
 
-    function getOutput(): array {
+    function getOutput(): array|\CodeIgniter\HTTP\Response {
 
       $table = $this->controller;
       // Insert appove item, approval  flow and status record if either in not existing
@@ -63,7 +63,9 @@ class SingleFormAddOutput extends OutputTemplate{
   
       if ($this->request->getPost()) {
         if (method_exists($this->currentLibrary, 'add')) {
-          return $this->currentLibrary->add();
+          return $this->libs->add();
+        }else{
+            return $this->libs->add();
         } 
       } else {
         // Adds mandatory fields if not present in the current table

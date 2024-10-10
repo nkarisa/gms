@@ -486,4 +486,12 @@ trait SchemaTrait
       protected function detachDetailTable():bool{
         return false;
       }
+
+      function lookupValuesWhere(): array{
+        return [];
+      }
+
+      function transactionValidateDuplicatesColumns(){
+        return [];
+      }
 }

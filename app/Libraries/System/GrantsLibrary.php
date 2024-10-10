@@ -237,7 +237,7 @@ class GrantsLibrary
 
     // If the library object is still null, throw an exception
     if ($table_model == null) {
-      log_message('error', json_encode($table_model_name));
+      // log_message('error', json_encode($table_model_name));
       // To be updated and allow automatic creation of feature library files
       throw new \Exception('Object could not be instantiated');
     }
@@ -263,7 +263,6 @@ class GrantsLibrary
       // Check if the library class exists
       if (class_exists("App\\Libraries\\" . ucfirst($module) . "\\" . $table_library_name)) {
         // Instantiate the library class
-        // log_message('error', json_encode(compact('module','table_library_name')));
         $table_library = new ("App\\Libraries\\" . ucfirst($module) . "\\" . $table_library_name)();
         break;
       }
@@ -271,7 +270,6 @@ class GrantsLibrary
 
     // If the library object is still null, throw an exception
     if ($table_library == null) {
-      // log_message('error', json_encode($table_library_name));
       // To be updated and allow automatic creation of feature library files
       throw new \Exception('Object could not be instantiated');
     }
@@ -328,7 +326,6 @@ class GrantsLibrary
         if (method_exists($newObj, $method)) {
           return $newObj->$method(...$args);
         } else {
-          // log_message('error', json_encode(compact('method','class')));
           throw new BadMethodCallException("Method '" . $method . "' not found in class '" . $class . "'");
         }
       }
@@ -1387,7 +1384,6 @@ class GrantsLibrary
 
   function checkShowAddButton(string $table): bool
   {
-    // log_message('error', json_encode($table));
     $library = $this->loadLibrary($table);
 
     $show_add_button = true;
@@ -1621,16 +1617,6 @@ class GrantsLibrary
 
     $lookup_values = [];
 
-    // $library_name = $table . 'Library';
-
-    // $this->CI->load->model($model);
-
-    // $current_model = $this->current_model;
-
-    // echo $this->CI->id; exit;
-    //try{
-    //throw new GrantsException;
-
     $library = $this->loadLibrary($table);
 
     if (
@@ -1638,33 +1624,59 @@ class GrantsLibrary
         && is_array($this->library->lookupValues())
         && array_key_exists($table, $this->library->lookupValues()))
     ) {
-
+      // log_message('error','One');
       $result = $this->library->lookupValues()[$table];
 
       $ids_array = array_column($result, $this->primaryKeyField($table));
       $value_array = array_column($result, $this->nameField($table));
 
       $lookup_values = array_combine($ids_array, $value_array);
-    } elseif (
-      (method_exists($library, 'lookupValues') &&
-        is_array($library->lookupValues()))
-    ) {
+      // } elseif (
+      //   (method_exists($library, 'lookupValues') &&
+      //     is_array($library->lookupValues()))
+      // ) {
+      //   // log_message('error','Two');
+      //   $result = $this->library->lookupValues();
 
-      $result = $this->library->lookupValues();
+      //   $ids_array = array_column($result, $this->primaryKeyField($table));
+      //   $value_array = array_column($result, $this->nameField($table));
 
-      $ids_array = array_column($result, $this->primaryKeyField($table));
-      $value_array = array_column($result, $this->nameField($table));
+      //   $lookup_values = []; //array_combine($ids_array,$value_array);
+      //   $count = 0;
 
-      $lookup_values = []; //array_combine($ids_array,$value_array);
-      $count = 0;
-
-      foreach ($value_array as $value) {
-        $lookup_values[$ids_array[$count]] = $value;
-        $count++;
-      }
+      //   foreach ($value_array as $value) {
+      //     $lookup_values[$ids_array[$count]] = $value;
+      //     $count++;
+      //   }
+    } else {
+      // log_message('error','Three');
+      $lookup_values = $this->getLookupValues($table);
     }
 
     return $lookup_values;
+  }
+
+  function getLookupValues($table)
+  {
+    $table = strtolower($table);
+
+    $builder = $this->read_db->table($table);
+
+    if (
+      isset($this->lookupValuesWhere()[$table]) &&
+      is_array($this->lookupValuesWhere()[$table]) &&
+      count($this->lookupValuesWhere()[$table]) > 0
+    ) {
+      //$this->create_table_join_statement(strtolower($this->controller),$this->grants->lookup_tables($this->controller));
+      $builder->where($this->lookupValuesWhere()[$table]);
+    }
+
+    $result = $builder->get()->getResultArray();
+
+    $ids_array = array_column($result, $this->primaryKeyField($table));
+    $value_array = array_column($result, $this->nameField($table));
+
+    return array_combine($ids_array, $value_array);
   }
 
   /**
@@ -1721,7 +1733,7 @@ class GrantsLibrary
   function checkMultiSelectField($table_name = "")
   {
 
-    if($table_name != ""){
+    if ($table_name != "") {
       $this->library = $this->loadLibrary($table_name);
     }
 
@@ -1741,8 +1753,9 @@ class GrantsLibrary
 
   function deriveLookupTables($table_name = "")
   {
-    
-    if ($table_name == '') $table_name = $this->controller;
+
+    if ($table_name == '')
+      $table_name = $this->controller;
 
     $fields = $this->getAllTableFields($table_name);
 
@@ -1768,28 +1781,29 @@ class GrantsLibrary
       if (in_array('status', $foreign_tables_array)) {
         unset($foreign_tables_array[array_search('status', $foreign_tables_array)]);
       }
-      
+
     }
 
     return $foreign_tables_array;
-    
-    
+
+
   }
 
-  function checkLookupTables($table_name = ""){
+  function checkLookupTables($table_name = "")
+  {
 
-    if($table_name != ''){
+    if ($table_name != '') {
       $this->library = $this->loadLibrary($table_name);
     }
-  
-    $lookup_tables =  array();
+
+    $lookup_tables = array();
 
     if (
       method_exists($this->library, 'lookupTables') &&
-      is_array( $this->library->lookupTables())
+      is_array($this->library->lookupTables())
     ) {
-      
-      if($this->action !== 'singleFormAdd'){
+
+      if ($this->action !== 'singleFormAdd') {
         // Check if status and approval lookup tables doesn't exist and add them
         $lookup_tables = $this->deriveLookupTables($table_name);
 
@@ -1800,7 +1814,7 @@ class GrantsLibrary
         if (!$approveItemLibrary->approveableItem($table_name)) {
           $this->removeMandatoryLookupTables($lookup_tables);
         }
-      }else{
+      } else {
         $lookup_tables = $this->deriveLookupTables($table_name);
       }
     } else {
@@ -1828,7 +1842,8 @@ class GrantsLibrary
 
     if (
       method_exists($this->library, 'singleFormAddVisibleColumns') &&
-      is_array($this->library->singleFormAddVisibleColumns() && 
+      is_array(
+        $this->library->singleFormAddVisibleColumns() &&
         !empty($this->library->singleFormAddVisibleColumns())
       )
     ) {
@@ -1852,23 +1867,352 @@ class GrantsLibrary
 
       $visible_columns = $get_all_table_fields;
 
-        if (is_array($lookup_tables) && count($lookup_tables) > 0) {
-          foreach ($lookup_tables as $lookup_table) {
+      if (is_array($lookup_tables) && count($lookup_tables) > 0) {
+        foreach ($lookup_tables as $lookup_table) {
 
-            $lookup_table_columns = $this->getAllTableFields($lookup_table);
+          $lookup_table_columns = $this->getAllTableFields($lookup_table);
 
-            foreach ($lookup_table_columns as $lookup_table_column) {
-              // Only include the name field of the look up table in the select columns
-              if (strpos($lookup_table_column, '_name') == true) {
-                array_push($visible_columns, $lookup_table_column);
-              }
+          foreach ($lookup_table_columns as $lookup_table_column) {
+            // Only include the name field of the look up table in the select columns
+            if (strpos($lookup_table_column, '_name') == true) {
+              array_push($visible_columns, $lookup_table_column);
             }
           }
         }
-      
+      }
+
       $single_form_add_visible_columns = $visible_columns;
     }
     return $single_form_add_visible_columns;
   }
+
+  function add()
+  {
+
+    // There are 3 insert scenarios
+    // Scenario 1: Master detail insert without a primary relationship and master requires approval
+    // Scenario 2: Master detail insert without a primary relationship and master doesn't require approval
+    // Scenario 3: Master detail insert with a primary relationship and master requires approval
+    // Scenario 4: Master detail insert with a primary relationship and master doesn't require approval
+    // Scenario 5: Single record insert that requires approval
+    // Scenario 6: Single record insert that doesn't require approval
+
+    // Asign the post input to $post_array
+    $post_array = $this->request->getPost();
+
+    // Check if there is a before insert method set in the feature model wrapped via grants model
+    $post_array = $this->actionBeforeInsert($post_array);
+
+    if (!array_key_exists('header', $post_array)) {
+      return $this->response->setJSON(['flag' => false, 'message' => $post_array['message']]);
+    }
+    //$detail = [];
+    // Extract the post array into header and detail variables
+    extract($post_array);
+
+    // Determine if the input post has details or not by checking if the detail variable is set
+    $post_has_detail = isset($detail) ? true : false;
+    $detail = $post_has_detail ? $detail : [];
+
+    // Check if the creation of the of the header and detail records requires an approval ticket
+    $approveItemLibrary = new \App\Libraries\Core\ApproveItemLibrary();
+    $header_record_requires_approval = $approveItemLibrary->approveableItem($this->controller);
+    //$detail_records_require_approval = $this->approveable_item($this->controller.'_detail');
+    $detail_records_require_approval = $approveItemLibrary->approveableItem($this->dependantTable($this->controller));
+
+    // Get the table name of multi select field
+    $multi_select_field_name = 'fk_' . $this->multiSelectField() . '_id';
+
+    $multi_select_field_values = [];
+
+    if ($this->multiSelectField() != '') {
+      $multi_select_field_values = $header[$multi_select_field_name];
+    }
+
+    // Start a transaction
+    /**
+     * $post = [
+     *  'header'=>[
+     *    'role_permission_track_number'='CBNAJS',
+     *    'role_permission_name'=>'role permission name'
+     *    'fk_permission_id'=>[
+     *          0=>'Read',
+     *          1=>'Update',
+     *      ]
+     * ],
+     *  'detail'=>[],
+     * ]
+     */
+    $message = "";
+    if (count($multi_select_field_values) > 0) {
+
+      unset($header[$multi_select_field_name]);
+
+      $onfly_created_multi_selects = [];
+
+      // Find any available on-fly multi select values from a model action_before_insert method
+      foreach ($header as $column_name => $form_values) {
+        if (is_array($form_values)) {
+          $onfly_created_multi_selects[$column_name] = $form_values;
+        }
+      }
+
+      $success = 0;
+      $failed = 0;
+      foreach ($multi_select_field_values as $multi_select_field_value) {
+
+        $header[$multi_select_field_name] = $multi_select_field_value;
+
+        if (!empty($onfly_created_multi_selects)) {
+          foreach ($onfly_created_multi_selects as $_column_name => $_column_values) {
+            $header[$_column_name] = $_column_values[$multi_select_field_value];
+          }
+        }
+
+        $returned_validation_message = $this->addInserts($header_record_requires_approval, $detail_records_require_approval, $post_has_detail, $header, $detail);
+        // log_message('error', $returned_validation_message);
+        if (json_decode($returned_validation_message, true)['flag'] == true) {
+          $success++;
+        } else {
+          $failed++;
+        }
+      }
+
+      $message .= $success . ' ' . str_replace('_', ' ', $this->controller) . ' inserted and ' . $failed . ' failed';
+
+      $message = ['flag' => true, 'message' => $message];
+
+    } else {
+      $message = $this->addInserts($header_record_requires_approval, $detail_records_require_approval, $post_has_detail, $header, $detail);
+    }
+
+    return $this->response->setJSON($message);
+  }
+
+  public function insertApprovalRecord($approveableItem)
+  {
+    // $this->write_db->resetQuery();
+    $insertId = 0;
+
+    // Prepare approval data
+    $approvalRandom = record_prefix('Approval') . '-' . rand(1000, 90000);
+    $approval = [
+      'approval_track_number' => $approvalRandom,
+      'approval_name' => 'Approval Ticket # ' . $approvalRandom,
+      'approval_created_by' => session()->get('user_id') ? session()->get('user_id') : 1,
+      'approval_created_date' => date('Y-m-d'),
+      'approval_last_modified_by' => session()->get('user_id') ? session()->get('user_id') : 1,
+      'fk_approve_item_id' => $this->write_db->table('approve_item')
+        ->getWhere(['approve_item_name' => strtolower($approveableItem)])
+        ->getRow()
+        ->approve_item_id,
+      'fk_status_id' => $this->initialItemStatus($approveableItem)
+    ];
+
+    // Insert approval record
+    $this->write_db->table('approval')->insert($approval);
+
+    // Get the insert ID
+    $insertId = $this->write_db->insertID();
+
+    return $insertId;
+  }
+
+
+  public function addInserts($headerRecordRequiresApproval, $detailRecordsRequireApproval, $postHasDetail, $header, $detail = [])
+  {
+    $initialStatus = $this->initialItemStatus($this->controller);
+
+    $this->write_db->transBegin();
+
+    // Create the approval ticket if required by the header record
+    $approvalId = $this->insertApprovalRecord(strtolower($this->controller));
+
+    $approval = [];
+    $details = [];
+
+    if ($this->id) {
+      $decodedHashId = hash_id($this->id, 'decode');
+
+      $approvalId = $this->write_db->table(strtolower(session()->get('masterTable')))
+        ->getWhere([session()->get('masterTable') . '_id' => $decodedHashId])
+        ->getRow()
+        ->fk_approval_id;
+    }
+
+    // Prepare the header columns for insertion
+    $headerColumns = [];
+    $headerRandom = record_prefix($this->controller) . '-' . rand(1000, 90000);
+    $headerColumns[strtolower($this->controller) . '_track_number'] = $headerRandom;
+    $headerColumns[strtolower($this->controller) . '_name'] = $this->request->getPost($this->controller . '_name') != ""
+      ? $this->request->getPost($this->controller . '_name')
+      : ucfirst($this->controller) . ' # ' . $headerRandom;
+
+    foreach ($header as $key => $value) {
+      $headerColumns[$key] = $value;
+    }
+
+    if (session()->has('masterTable')) {
+      $headerColumns['fk_' . strtolower(session()->get('masterTable')) . '_id'] = hash_id($this->id, 'decode');
+    }
+
+    $headerColumns['fk_status_id'] = $initialStatus;
+    $headerColumns['fk_approval_id'] = $approvalId;
+    $headerColumns[strtolower($this->controller) . '_created_date'] = date('Y-m-d');
+    $headerColumns[strtolower($this->controller) . '_created_by'] = session()->get('user_id');
+    $headerColumns[strtolower($this->controller) . '_last_modified_by'] = session()->get('user_id');
+
+    // Insert the header record
+    $this->write_db->table(strtolower($this->controller))->insert($headerColumns);
+
+    // Get the inserted header record ID
+    $headerId = $this->write_db->insertID();
+
+    // Proceed with inserting details if $postHasDetail is true
+    if ($postHasDetail) {
+      $detailArray = $detail;
+      $detailColumns = [];
+      $shiftedElement = array_shift($detail);
+
+      // Construct an insert batch array for details
+      for ($i = 0; $i < sizeof($shiftedElement); $i++) {
+        foreach ($detailArray as $column => $values) {
+          if (strpos($column, '_name') === true && $column !== $this->dependantTable($this->controller) . '_name') {
+            $column = 'fk_' . substr($column, 0, -5) . '_id';
+          }
+          $detailColumns[$i][$column] = $values[$i];
+
+          $detailRandom = record_prefix($this->dependantTable($this->controller)) . '-' . rand(1000, 90000);
+          $detailColumns[$i][$this->dependantTable($this->controller) . '_track_number'] = $detailRandom;
+          $detailColumns[$i]['fk_' . $this->controller . '_id'] = $headerId;
+
+          $detailColumns[$i]['fk_status_id'] = $this->initialItemStatus($this->dependantTable($this->controller));
+          $detailColumns[$i]['fk_approval_id'] = $approvalId;
+
+          $detailColumns[$i][$this->dependantTable($this->controller) . '_created_date'] = date('Y-m-d');
+          $detailColumns[$i][$this->dependantTable($this->controller) . '_created_by'] = session()->get('user_id');
+          $detailColumns[$i][$this->dependantTable($this->controller) . '_modified_by'] = session()->get('user_id');
+        }
+      }
+      $details = $detailColumns;
+
+      // Insert the details using insert batch
+      $this->write_db->table($this->dependantTable($this->controller))->insertBatch($detailColumns);
+    }
+
+    $library = $this->loadLibrary($this->controller);
+    $transactionValidateDuplicatesColumns = is_array($library->transactionValidateDuplicatesColumns())
+      ? $library->transactionValidateDuplicatesColumns()
+      : [];
+
+    $transactionValidateDuplicates = $this->transactionValidateDuplicates($this->controller, $header, $transactionValidateDuplicatesColumns);
+    $transactionValidateByComputation = $this->transactionValidateByComputation($this->controller, $header);
+
+    return $this->transactionValidate([$transactionValidateDuplicates, $transactionValidateByComputation], $headerColumns, $headerId, $approvalId);
+  }
+
+  public function transactionValidateDuplicates(String $table_name, array $insert_array, array $validation_fields = [], int $allowable_records = 0)
+  {
+
+    $validation_successful = true;
+    $failure_message = get_phrase('no_duplicate_records');
+
+    // $model = $table_name . "_model";
+    $library = $this->loadLibrary($table_name);
+
+    if (method_exists($library, 'transactionValidateDuplicatesColumns') && is_array($validation_fields) && count($validation_fields) > 0) {
+
+      $validate_duplicates_columns = $library->transactionValidateDuplicatesColumns();
+
+      $insert_array_keys = array_unique(array_merge(array_keys($insert_array), $validate_duplicates_columns));
+
+      foreach ($insert_array_keys as $insert_column) {
+
+        if (!array_key_exists($insert_column, $insert_array)) {
+          $missing_field_in_insert_array = [$insert_column => 1];
+          $insert_array = array_merge($insert_array, $missing_field_in_insert_array);
+        }
+
+        if (!in_array($insert_column, $validation_fields)) {
+          unset($insert_array[$insert_column]);
+        }
+      }
+
+      $result = $this->write_db->table($table_name)
+      ->where($insert_array)->get()->getNumRows();
+
+      if ($result > $allowable_records) {
+        $validation_successful = false; // Validation error flag
+
+        $failure_message = get_phrase('duplicate_entries_not_allowed');
+      }
+    }
+
+    return ['flag' => $validation_successful, 'error_message' => $failure_message];
+  }
+
+  function transactionValidateByComputation(String $table_name, array $insert_array){
+  
+      $validation_successful = true;
+      $failure_message = get_phrase('validation_failed');
+  
+      $library = $this->loadLibrary($table_name);
+  
+      if (method_exists($library, 'transactionValidateByComputationFlag')) {
+        if ($library->transactionValidateByComputationFlag($insert_array) == 'VALIDATION_ERROR') {
+          $validation_successful = false;
+        }
+      }
+  
+      return ['flag' => $validation_successful, 'error_message' => $failure_message];
+    
+  }
+
+  public function transactionValidate($validationFlagsAndFailureMessages, $postArray = [], $headerId = 0, $approvalId = 0)
+{
+    $message = '';
+    $messageAndFlag = [];
+    $messageAndFlag['flag'] = false;
+
+    // Extract flags from validation
+    $validationFlags = array_column($validationFlagsAndFailureMessages, 'flag');
+
+    // Check if the transaction status is valid
+    if ($this->write_db->transStatus() === false) {
+        $this->write_db->transRollback();
+        return get_phrase('insert_failed');
+    } else {
+        // If any validation flag is false, rollback
+        if (in_array(false, $validationFlags)) {
+            $this->write_db->transRollback();
+
+            foreach ($validationFlagsAndFailureMessages as $validationCheck) {
+                if (!$validationCheck['flag']) {
+                    $message .= $validationCheck['error_message'] . "\n";
+                    $messageAndFlag['flag'] = $validationCheck['flag'];
+                    $messageAndFlag['message'] = $message;
+                }
+            }
+        } else {
+            // If the insert action is successful
+            if ($this->actionAfterInsert($postArray, $approvalId, $headerId)) {
+                $this->write_db->transCommit();
+                $message = get_phrase('insert_successful');
+                $messageAndFlag['flag'] = true;
+                $messageAndFlag['message'] = $message;
+                $messageAndFlag['header_id'] = hash_id($headerId, 'encode');
+                $messageAndFlag['table'] = $this->controller;
+            } else {
+                $this->write_db->transRollback();
+                $message = get_phrase('insert_failed');
+                $messageAndFlag['message'] = $message;
+            }
+        }
+    }
+
+    return $messageAndFlag;
+}
+
+
 
 }

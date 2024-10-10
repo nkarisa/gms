@@ -49,6 +49,16 @@ if (!function_exists('add_record_button')) {
     }
 }
 
+if (!function_exists('record_prefix')) {
+    function record_prefix($string)
+    {
+        $lead_string = substr($string, 0, 2);
+        $trail_string = substr($string, -2, 2);
+
+        return strtoupper($lead_string . $trail_string);
+    }
+}
+
 if (!function_exists('list_table_delete_action')) {
     function list_table_delete_action($table_controller, $primary_key)
     {

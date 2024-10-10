@@ -240,6 +240,7 @@ function crud_views(String $id = ''):string
   $page_data['skin_colour'] = 'green';
   $page_data['controller'] = $this->controller;
   $page_data['id'] = $this->id;
+  $page_data['uri'] = $this->uri;
   $page_data['user'] = $this->user_info();
   $page_data['navigation'] = $this->navigation();
   
@@ -258,9 +259,17 @@ public function view($id){
   return $this->crud_views();
 }
 
+public function postSingleFormAdd(){
+    return $this->libs::call($this->controller.'.'.$this->action.'Output');;
+}
+
 public function singleFormAdd(){
     $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'create');
     return $this->crud_views();
+}
+
+public function postMultiFormAdd(){
+    return $this->response->setJSON(['message' => 'Successfully added']);
 }
 
 public function multiFormAdd(){
