@@ -9,7 +9,7 @@ use CodeIgniter\HTTP\CLIRequest;
 use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\RequestInterface;
 use Psr\Log\LoggerInterface;
-use Config\GrantsConfig;
+
 
 class ApiController extends BaseController
 {

@@ -22,7 +22,9 @@ class DashboardLibrary extends GrantsLibrary
 
     public function getDashboardData($data){
         $result = [
-            'message' => 'success',
+            'status' => 'success',
+            'message' => 'Dashboard data fetched successfully',
+            'data' => $data,
             'dashboards' => [
                 // 'total_users' => $this->dashboardModel->countAll(),
                 // 'total_grants' => $this->dashboardModel->getTotalGrants(),

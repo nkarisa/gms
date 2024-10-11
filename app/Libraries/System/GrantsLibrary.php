@@ -271,7 +271,7 @@ class GrantsLibrary
     // If the library object is still null, throw an exception
     if ($table_library == null) {
       // To be updated and allow automatic creation of feature library files
-      throw new \Exception('Object could not be instantiated');
+      throw new \Exception("Object '$table_library_name' could not be instantiated");
     }
 
     // Return the instantiated library object

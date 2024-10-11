@@ -359,22 +359,50 @@ public function showList(){
     return $this->response->setJSON($response);
 }
 
-public function ajax(): ResponseInterface
+public function ajax(?string $controller = "", ?string $method = "", ...$args): ResponseInterface
 {
     // Post keys should be: controller, method and data
     // All ajax request will be received here and passed to library of a controller
-    // All ajax responses MUST have a message key with either success or failure
-    $vars = $this->request->getPost();
-    extract($vars);
+    // All ajax responses MUST have a status key with either success or failed
+    // When using GET ajax, from the 3rd argument, the paramters MUST be paired with odd positioned parameters as keys and even positioned parameters as values
+    
+    if($controller && $method){
+
+        $data = [];
+
+        // Check if the args has equal number of odd and even positioned arguments
+        if(count($args) % 2 == 1){
+            return $this->response->setJSON(['status' => 'failed', "message" => "Odd number of arguments in ajax request"]);
+        }
+
+        // If there are arguments, then set them as an array
+        if(count($args) > 0){
+            $data = [];
+            for($i=0; $i<count($args); $i+=2){
+                $data[$args[$i]] = $args[$i+1];
+            }
+            // Verify if all keys are not numeric keys
+            if(array_filter(array_keys($data), 'is_numeric')){
+                return $this->response->setJSON(['status' => 'failed', "message" => "Numeric keys are not allowed in ajax request"]);
+            }
+        } else{
+            $data = null;
+        }
+
+    }else{
+        $vars = $this->request->getPost();
+        extract($vars);
+    }
     
     $controllerLibrary = $this->libs->loadLibrary($controller);
     $response = $controllerLibrary->{$method}($data);
 
     // If the method returns a response, add a message key with either success or failure
-    if (isset($response['message'])) {
+    if (isset($response['status'])) {
         return $this->response->setJSON($response);
     } else {
-        $response['message'] = 'An error occurred';
+        $response['status'] = 'failed';
+        $response['message'] = 'Wrongly formatted response';
         return $this->response->setJSON($response);
     }
 }
