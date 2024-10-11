@@ -51,7 +51,7 @@ foreach ($modules as $module){
 // Ajax Routes 
 
 $routes->group('ajax', ['namespace' => 'App\Controllers\Web'], static function($routes){
-    $routes->post('/','AjaxController::index');
+    $routes->post('/','WebController::ajax');
 });
 
 // Api Routes
