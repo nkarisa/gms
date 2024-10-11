@@ -61,9 +61,9 @@ trait VisibilityTrait {
       return [];
     }
 
-    public function orderListPage(){
-      return '';
-    }
+    // public function orderListPage(){
+    //   return '';
+    // }
 
     public function detailListQuery(): array {
       return [];

@@ -269,12 +269,12 @@ trait CrudTrait
         
     }
 
-    protected function orderListPage(): string
+    public function orderListPage(): string
     {
         return ''; // Example - 'status_approval_sequence ASC';
     }
 
-    protected function list():array{
+    public function list():array{
         return []; 
     }
 }

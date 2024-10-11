@@ -13,6 +13,7 @@ class GrantsLibrary
   use \App\Traits\System\CallbackTrait;
   use \App\Traits\System\VisibilityTrait;
   use \App\Traits\System\SchemaTrait;
+  use \App\Traits\System\CrudTrait;
 
   protected $read_db;
   protected $write_db;
@@ -317,13 +318,12 @@ class GrantsLibrary
       if (class_exists($class)) {
         $class_exists = true;
         // Instantiate the library class
-        if (in_array($method, ['listOutput', 'viewOutput', 'editOutput', 'singleFormAddOutput'])) {
-          $newObj = new $class($module);
-        } else {
           $newObj = new $class();
-        }
 
         if (method_exists($newObj, $method)) {
+          if (in_array($method, ['listOutput', 'viewOutput', 'editOutput', 'singleFormAddOutput'])) {
+            return $newObj->$method($module, ...$args);
+          }
           return $newObj->$method(...$args);
         } else {
           throw new BadMethodCallException("Method '" . $method . "' not found in class '" . $class . "'");
@@ -1617,7 +1617,7 @@ class GrantsLibrary
 
     $lookup_values = [];
 
-    $library = $this->loadLibrary($table);
+    $this->library = $this->loadLibrary($table);
 
     if (
       (method_exists($this->library, 'lookupValues')
@@ -1842,10 +1842,8 @@ class GrantsLibrary
 
     if (
       method_exists($this->library, 'singleFormAddVisibleColumns') &&
-      is_array(
-        $this->library->singleFormAddVisibleColumns() &&
+      is_array($this->library->singleFormAddVisibleColumns()) &&
         !empty($this->library->singleFormAddVisibleColumns())
-      )
     ) {
       // log_message('error', 'One');
       $single_form_add_visible_columns = $this->library->singleFormAddVisibleColumns();
@@ -2214,5 +2212,238 @@ class GrantsLibrary
 }
 
 
+  public function checkEditVisibleColumns($table)
+  {
+      $library = $this->loadLibrary($table);
+      $editVisibleColumns = [];
+      $visibleColumns = [];
+
+      // Get the list of visible columns and lookup tables
+      $editVisibleColumns = $library->editVisibleColumns();
+      $lookupTables = $this->lookupTables($table);
+
+      $getAllTableFields = $this->getAllTableFields();
+
+      // Filter out foreign key and certain columns
+      foreach ($getAllTableFields as $key => $getAllTableField) {
+          if (
+              substr($getAllTableField, 0, 3) === 'fk_' ||
+              strpos($getAllTableField, '_deleted_at') !== false
+          ) {
+              unset($getAllTableFields[$key]);
+          }
+      }
+
+      $visibleColumns = $getAllTableFields;
+
+      if (is_array($editVisibleColumns) && count($editVisibleColumns) > 0) {
+          $columns = [];
+          foreach ($editVisibleColumns as $column) {
+              if (strpos($column, '_name') !== false && $column !== strtolower($table) . '_name') {
+                  $columns[] = substr($column, 0, -5) . '_id';
+              } else {
+                  $columns[] = $column;
+              }
+          }
+          $visibleColumns = $columns;
+      } else {
+          if (is_array($lookupTables) && count($lookupTables) > 0) {
+              foreach ($lookupTables as $lookupTable) {
+                  $lookupTableColumns = $this->getAllTableFields($lookupTable);
+
+                  foreach ($lookupTableColumns as $lookupTableColumn) {
+                      if (strpos($lookupTableColumn, '_name') !== false) {
+                          $visibleColumns[] = substr($lookupTableColumn, 0, -5) . '_id';
+                      }
+                  }
+              }
+          }
+      }
+
+      // Add joins for lookup tables
+      $builder = $this->read_db->table($table);
+      if (is_array($lookupTables) && count($lookupTables) > 0) {
+          foreach ($lookupTables as $lookupTable) {
+              $lookupTableId = $lookupTable . '_id';
+              $builder->join(
+                  $lookupTable,
+                  "$lookupTable.$lookupTableId = $table.fk_$lookupTableId"
+              );
+          }
+      }
+
+      // Select the visible columns and return the row
+      $builder->select($visibleColumns);
+      $builder->where([$table . '_id' => hash_id($this->id, 'decode')]);
+      $obj = $builder->get();
+
+      $result = [];
+
+      if($obj->getNumRows() > 0){
+        $result = $obj->getRow();
+      }
+
+      return $result;
+  }
+
+
+  public function hasDuplicateRecord($table, $id, $checkDuplicateColumns, $postArray)
+  {
+      // This query is to extract data to cater for columns that are not sourced from the edit form
+      $builder = $this->read_db->table($table);
+      $builder->select($checkDuplicateColumns);
+      $builder->where([$table . '_id' => $id]);
+      $postedRecord = $builder->get()->getRowArray(); // Equivalent to row_array() in CI3
+
+      // Merge the posted array with the database record
+      $postArray = array_merge($postArray, $postedRecord);
+
+      // Initialize duplicate record flag
+      $hasDuplicateRecord = false;
+
+      if (count($checkDuplicateColumns) > 0) {
+          $cols = [];
+
+          // Loop through post data to build the query condition for duplicates
+          foreach ($postArray as $field => $value) {
+              if (in_array($field, $checkDuplicateColumns) || $field === 'fk_account_system_id') {
+                  $cols[$field] = $value;
+              }
+          }
+
+          // Exclude the current record from the duplicate check
+          $builder = $this->read_db->table($table);
+          $builder->where($table . '_id !=', $id);
+
+          if (count($cols) > 0) {
+              // Apply the duplicate check condition
+              $builder->where($cols);
+              $numRows = $builder->countAllResults(); // Equivalent to num_rows() in CI3
+
+              // If the count of rows is greater than 0, mark as duplicate
+              if ($numRows > 0) {
+                  $hasDuplicateRecord = true;
+              }
+          }
+      }
+      return $hasDuplicateRecord;
+  }
+
+  public function createChangeHistory(array $newData, bool $excludeUsingNewDataColumns = false, array $criticalColumnsToUnset = [], string $table = "", $itemId = 0)
+    {
+        // Determine the table name
+        $table = empty($table) ? $this->controller : $table;
+
+        // Determine the item ID
+        $itemId = $itemId == 0 ? $this->id : $itemId;
+
+        // Get table fields
+        $fields = $this->read_db->getFieldNames($table); // To be taken from the schema file instead of database table directly
+
+        $tableId = strtolower($table) . "_id";
+        $decodeId = is_numeric($itemId) ? $itemId : hash_id($itemId, 'decode'); // Assuming hash_id is still in use
+        $newData[$tableId] = $decodeId;
+
+        // Use fields from new data if not excluding
+        if (!$excludeUsingNewDataColumns) {
+            $fields = array_keys($newData);
+        }
+
+        // Determine which fields to include in the query by removing critical columns
+        $cols = array_diff($fields, $criticalColumnsToUnset);
+
+        // Select old data from the table
+        $builder = $this->read_db->table(strtolower($table));
+        $builder->select($cols);
+        $oldData = $builder->where([$tableId => $decodeId])
+            ->get()
+            ->getRowArray(); // CI4 equivalent of row_array()
+
+        // Prepare the update data for history table
+        $updateData = [
+            'fk_approve_item_id' => $this->read_db->table('approve_item')
+                ->select('approve_item_id')
+                ->where(['approve_item_name' => strtolower($table)])
+                ->get()
+                ->getRow()
+                ->approve_item_id,
+            'fk_user_id' => $this->session->get('user_id'),
+            'history_action' => 1, // 1 = Update, 2 = Delete
+            'history_current_body' => json_encode($oldData),
+            'history_updated_body' => json_encode($newData),
+            'history_created_date' => date('Y-m-d'),
+            'history_created_by' => $this->session->get('user_id'),
+            'history_last_modified_by' => $this->session->get('user_id'),
+        ];
+
+        // Insert update history into 'history' table
+        $builder = $this->write_db->table('history');
+        $builder->insert($updateData);
+    }
+
+  public function edit(int $id): \CodeIgniter\HTTP\Response
+    {
+     
+        $library = $this->loadLibrary($this->controller);
+        $postArray = $this->request->getPost(); // Equivalent to $this->input->post() in CI3
+
+        // Call action_before_edit from grants service
+        $postArray = $library->actionBeforeEdit($postArray);
+
+        $flag = false;
+        $flagMessage = "";
+
+        if (is_array($postArray) && !empty($postArray) && !array_key_exists('error', $postArray)) {
+            extract($postArray);
+            // $id = hash_id($id, 'decode');
+            $data = $header; 
+            $approvalId = 0; // To be evaluated later
+
+            $transactionValidateDuplicatesColumns = is_array($library->transactionValidateDuplicatesColumns()) 
+                ? $library->transactionValidateDuplicatesColumns() 
+                : [];
+
+            $hasDuplicateRecord = $this->hasDuplicateRecord(
+                $this->controller, 
+                $id, 
+                $transactionValidateDuplicatesColumns, 
+                $data
+            );
+
+            if (!$hasDuplicateRecord) {
+                $this->write_db->transBegin(); // Begin transaction
+                $this->write_db->table($this->controller)
+                    ->where([$this->primaryKeyField($this->controller) => $id])
+                    ->update($data); // Update the table
+
+                $this->createChangeHistory($data); // Create change history
+
+                if ($this->write_db->transStatus() === false) {
+                    $this->write_db->transRollback();
+                    $flagMessage = get_phrase('update_not_successful');
+                } else {
+                    if ($library->actionAfterEdit($data, $approvalId, $id)) {
+                        $this->write_db->transCommit();
+                        $flag = true;
+                        $flagMessage = get_phrase('update_completed');
+                    } else {
+                        $flag = false;
+                        $flagMessage = get_phrase('update_not_successful');
+                        $this->write_db->transRollback();
+                    }
+                }
+            } else {
+                $flagMessage = get_phrase('duplicates_not_allowed');
+            }
+        } else {
+            $flagMessage = get_phrase('edit_not_allowed');
+            if (array_key_exists('error', $postArray)) {
+                $flagMessage = $postArray['error'];
+            }
+        }
+
+        // Return JSON response
+        return $this->response->setJSON(['flag' => $flag, 'message' => $flagMessage]);
+    }
 
 }

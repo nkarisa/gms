@@ -263,6 +263,10 @@ public function postSingleFormAdd(){
     return $this->libs::call($this->controller.'.'.$this->action.'Output');;
 }
 
+public function postEdit($id){
+    return $this->libs::call($this->controller.'.'.$this->action.'Output',[hash_id($id, 'decode')]);
+}
+
 public function singleFormAdd(){
     $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'create');
     return $this->crud_views();
@@ -337,7 +341,7 @@ public function showList(){
             // Defense code to ignore non numeric values when lookup values method changes value type from numeric to non numeric
             $row[$column] = is_numeric($row[$column]) ? number_format($row[$column], 2) : $row[$column];
           } else {
-            $row[$column] = ucfirst(str_replace("_", " ", $row[$column]));
+            $row[$column] = $row[$column] != null ? ucfirst(str_replace("_", " ", $row[$column])) : $row[$column];
           }
 
           $records[$cnt][$cols] = $row[$column];
@@ -365,7 +369,7 @@ public function ajax(?string $controller = "", ?string $method = "", ...$args): 
     // All ajax request will be received here and passed to library of a controller
     // All ajax responses MUST have a status key with either success or failed
     // When using GET ajax, from the 3rd argument, the paramters MUST be paired with odd positioned parameters as keys and even positioned parameters as values
-    
+
     if($controller && $method){
 
         $data = [];

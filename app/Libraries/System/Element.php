@@ -120,7 +120,7 @@ class Element{
   
       }
   
-      $add_form .= $this->form_group([$this->reset_button(),$this->save_button(),$this->save_new_button()]);
+      $add_form .= $this->form_group([$this->reset_button(),$this->save_button($form_id),$this->save_new_button($form_id)]);
       
       $add_form .= "</form>";
   
@@ -131,12 +131,20 @@ class Element{
       return "<div class='btn btn-default'>".get_phrase('reset')."</div>";
     }
   
-    function save_button(){
-      return "<button class='btn btn-default save back'>".get_phrase('save')."</button>";
+    function save_button($form_id){
+        if($form_id == 'add_form'){
+            return "<button class='btn btn-default save back'>".get_phrase('save')."</button>";
+        }else{
+            return "<button class='btn btn-default edit back'>".get_phrase('edit')."</button>";
+        }
     }
   
-    function save_new_button(){
-      return "<button class='btn btn-default save_new'>".get_phrase('save_and_new')."</button>";
+    function save_new_button($form_id){
+      if($form_id == 'add_form'){
+        return "<button class='btn btn-default save_new'>".get_phrase('save_and_new')."</button>";
+      }else{
+        return "<button class='btn btn-default edit_continue'>".get_phrase('edit_and_continue')."</button>";
+      }
     }
   
   }

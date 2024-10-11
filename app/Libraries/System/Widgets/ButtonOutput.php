@@ -9,13 +9,13 @@ class ButtonOutput extends OutputTemplate{
     }
 
     function output(...$args){
-        $label = $args[0]??get_phrase('default_button');;
-        $action = $args[1]??"";;
-        $widget_id = $args[2]??"";;
-        $additional_class = $args[3]??"";
-        $onclick=$args[4]??"";
+        $label = isset($args[0]) ? $args[0]  : get_phrase('default_button');;
+        $action = isset($args[1]) ? $args[1] : "";
+        $widget_id = isset($args[2]) ? $args[2] : "";
+        $additional_class = isset($args[3]) ? $args[3] : "";
+        $onclick = isset($args[4]) ? $args[4] : "";
         
-        $action = $action == "" || $action == "#" ? "#" : base_url().ucfirst($action);
+        $action = $action == "" || $action == "#" ? "#" : site_url(strtolower($action));
 
         return '
             <a href="'.$action.'" class="btn btn-default '.$additional_class.'" id="'.$widget_id.'" onClick="'. $onclick.'">'

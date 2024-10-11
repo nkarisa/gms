@@ -42,7 +42,7 @@ foreach ($modules as $module){
             $routes->post('multiFormAdd', $module.'\\'.$controllerName.'::postMultiFormAdd'); 
             $routes->get('edit/(:segment)', $module.'\\'.$controllerName.'::edit/$1'); 
             $routes->get('create',$module.'\\'.$controllerName.'::create');
-            $routes->post('update',$module.'\\'.$controllerName.'::update');
+            $routes->post('edit/(:segment)',$module.'\\'.$controllerName.'::postEdit/$1');
             $routes->get('delete',$module.'\\'.$controllerName.'::delete');
         });        
     }

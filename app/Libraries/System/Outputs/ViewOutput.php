@@ -501,7 +501,9 @@ function detailListOutput(String $table): Array {
     );
   }
 
-    function getOutput(): array {
+    function getOutput($id): array {
+
+        // Use the $id instead of the getSegment(3) in the future code to allow calling this method without routed request
 
         $table = $this->controller;
         $master_additional_fields = [];

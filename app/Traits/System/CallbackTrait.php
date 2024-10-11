@@ -18,4 +18,12 @@ trait CallbackTrait
    protected function postApprovalActionEvent(array $item):void{
 
    }
+
+    protected function actionBeforeEdit(array $postArray): array{
+        return $postArray;
+   }
+
+   protected function actionAfterEdit(): bool {
+        return true;
+   }
 }

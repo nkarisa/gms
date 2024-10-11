@@ -8,14 +8,14 @@ trait OutputTrait {
         return $listOutput->getOutput();
     }
 
-    protected function viewOutput($module){
+    protected function viewOutput($module, ...$args){
         $listOutput = new \App\Libraries\System\Outputs\ViewOutput($module);
-        return $listOutput->getOutput();
+        return $listOutput->getOutput($args[0]);
     }
 
-    protected function editOutput($module){
+    protected function editOutput($module, ...$args){
         $listOutput = new \App\Libraries\System\Outputs\EditOutput($module);
-        return $listOutput->getOutput();
+        return $listOutput->getOutput($args[0]);
     }
 
     protected function SingleFormAddOutput($module = ''){

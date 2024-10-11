@@ -490,8 +490,4 @@ trait SchemaTrait
       function lookupValuesWhere(): array{
         return [];
       }
-
-      function transactionValidateDuplicatesColumns(){
-        return [];
-      }
 }

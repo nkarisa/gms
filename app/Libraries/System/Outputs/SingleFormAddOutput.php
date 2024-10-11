@@ -62,11 +62,7 @@ class SingleFormAddOutput extends OutputTemplate{
       $this->libs->tableSetup(strtolower($table));
   
       if ($this->request->getPost()) {
-        if (method_exists($this->currentLibrary, 'add')) {
           return $this->libs->add();
-        }else{
-            return $this->libs->add();
-        } 
       } else {
         // Adds mandatory fields if not present in the current table
         $visible_columns = $this->libs->checkSingleFormAddVisibleColumns();      
