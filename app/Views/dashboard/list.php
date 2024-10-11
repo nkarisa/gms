@@ -10,3 +10,28 @@
         </div>
     </div>
 </div>
+
+<div class = 'row'>
+    <div class="col-sm-12">
+        <div id="ajax_button" class = "btn btn-default">Ajax Click Me</div>
+    </div>
+</div>
+
+<script>
+    $('#ajax_button').click(function() {
+        $.ajax({
+            url: '<?= site_url('ajax')?>',
+            type: 'POST',
+            data: {
+                controller: 'dashboard',
+                method: 'getDashboardData',
+                data: {
+                    date: '<?= date('Y-m-d')?>'
+                }
+            },
+            success: function(response) {
+                console.log(response);
+            }
+        });
+    });
+</script>

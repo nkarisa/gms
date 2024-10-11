@@ -48,6 +48,11 @@ foreach ($modules as $module){
     }
 }
 
+// Ajax Routes 
+
+$routes->group('ajax', ['namespace' => 'App\Controllers\Web'], static function($routes){
+    $routes->post('/','AjaxController::index');
+});
 
 // Api Routes
 $routes->group('api/v1', ['namespace' => 'App\Controllers\Api'], static function ($routes) { // 'filter' => 'api-auth', 

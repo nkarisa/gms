@@ -20,5 +20,24 @@ class DashboardLibrary extends GrantsLibrary
     }
 
 
+    public function getDashboardData($data){
+        $result = [
+            'message' => 'success',
+            'dashboards' => [
+                // 'total_users' => $this->dashboardModel->countAll(),
+                // 'total_grants' => $this->dashboardModel->getTotalGrants(),
+                // 'total_funds' => $this->dashboardModel->getTotalFunds(),
+                // 'total_projects' => $this->dashboardModel->getTotalProjects(),
+                // 'total_applications' => $this->dashboardModel->getTotalApplications(),
+                // 'total_funds_transferred' => $this->dashboardModel->getTotalFundsTransferred(),
+                // 'total_financial_reports' => $this->dashboardModel->getTotalFinancialReports(),
+                // 'total_vouchers' => $this->dashboardModel->getTotalVouchers(),
+                // 'total_voucher_details' => $this->dashboardModel->getTotalVoucherDetails(),
+                // 'total_grants_pending' => $this->dashboardModel->getTotalGrantsPending(),
+            ]
+        ];
+
+        return $result;
+    }
    
 }
