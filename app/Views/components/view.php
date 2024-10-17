@@ -2,6 +2,8 @@
 
 use \App\Libraries\System\Widgets\WidgetBase;
 
+// echo json_encode($result['detail']);
+
 extract($result);
 extract($result['master']);
 
@@ -176,12 +178,7 @@ $columns = array_chunk($keys,$config->master_table_columns,true);
             
             <?php
               if($show_add_button){
-                // echo $detail_table_name.'</br>';
-                // echo $has_details_table.'</br>';
-                // echo $has_details_listing.'</br>';
-                // echo $is_multi_row.'</br>';
-                // echo $this->uri->segment(3,null).'</br>';
-                // echo add_record_button($detail_table_name,$has_details_table,$this->uri->segment(3,null),$has_details_listing, $is_multi_row);// $details['is_multi_row']
+                echo add_record_button($detail_table_name,$has_details_table,$uri->getSegment(3),$has_details_listing, $is_multi_row);// $details['is_multi_row']
               }
             ?>
           </div>

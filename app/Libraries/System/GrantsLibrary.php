@@ -450,15 +450,85 @@ class GrantsLibrary
     }
   }
 
-  private function runListQuery(
+  public function runListQuery(
     string $table,
-    string $selectedColumns,
+    array $selectedColumns,
+    array $lookupTables = [],
+    string $modelWhereMethod = "listTableWhere",
+    array $filterWhereArray = []
+  ){
+
+    // Get the database connection
+    $builder = $this->read_db->table($table);
+
+    if (!$this->tableExists($table)) {
+      $message = "The table " . $table . " doesn't exist in the database. Check the lookupTables function in the " . $table . "Model.";
+      throw new \CodeIgniter\Exceptions\PageNotFoundException($message);
+    }else{
+      $this->runListActualQuery($builder, $table, $selectedColumns,$lookupTables,$modelWhereMethod, $filterWhereArray);
+      
+      if ($this->request->getPost('draw')) {
+
+        // Limiting Server Datatable Results
+        $start = intval($this->request->getPost('start'));
+        $length = intval($this->request->getPost('length'));
+        $builder->limit($length, $start);
+    
+        // Ordering Server Datatable Results
+        $order = $this->request->getPost('order');
+        $col = '';
+        $dir = 'desc';
+    
+        if (!empty($order)) {
+            $col = $order[0]['column'];
+            $dir = $order[0]['dir'];
+        }
+    
+        if ($col == '') {
+            $builder->orderBy($table . '_id', 'DESC');
+        } else {
+            $builder->orderBy($selectedColumns[$col], $dir);
+        }
+    
+        // Searching Server Datatable Results
+        $search = $this->request->getPost('search');
+        $value = $search['value'];
+    
+        // Remove the last column (if necessary)
+        array_pop($selectedColumns);
+    
+        if (!empty($value)) {
+            $builder->groupStart();  // Begin grouping
+            $column_key = 0;
+            foreach ($selectedColumns as $column) {
+                if ($column_key == 0) {
+                    $builder->like($column, $value, 'both');
+                } else {
+                    $builder->orLike($column, $value, 'both');
+                }
+                $column_key++;
+            }
+            $builder->groupEnd();  // End grouping
+        }
+      }
+
+      $result = $builder->get()->getResultArray();
+      // log_message('error', json_encode($result));
+      return $result;
+    }
+
+  }
+
+  private function runListActualQuery(
+    $builder,
+    string $table,
+    array $selectedColumns,
     array $lookupTables = [],
     string $modelWhereMethod = "listTableWhere",
     array $filterWhereArray = []
   ) {
-    // Get the database connection
-    $builder = $this->read_db->table($table);
+    // log_message('error', json_encode(compact('table','selectedColumns','lookupTables','modelWhereMethod','filterWhereArray')));
+  
 
     // Run column selector
     $builder->select($selectedColumns);
@@ -468,7 +538,9 @@ class GrantsLibrary
 
 
     // Apply the model's custom "where" method, if it exists
-    if (method_exists($library, $modelWhereMethod)) {
+    if (method_exists($library, $modelWhereMethod) && 
+      count($library->$modelWhereMethod($builder)) > 0
+    ) {
       $library->$modelWhereMethod($builder);
     }
 
@@ -498,6 +570,7 @@ class GrantsLibrary
     if (is_array($filterWhereArray) && count($filterWhereArray) > 0) {
       $builder->where($filterWhereArray);
     }
+
   }
 
 
@@ -756,12 +829,11 @@ class GrantsLibrary
     return $query_result;
   }
 
-  function detailTables(string $table_name = ""): array
+  function checkDetailTables(string $table_name = ""): array
   {
     $featureLibrary = $this->loadLibrary($table_name);
 
     $uri = service('uri');
-    $db = \Config\Database::connect('read');
 
     if ($this->controller == 'approval' && $this->action == 'view') {
       // This is specific to approval view, only to list the detail listing of the selected approveable 
@@ -780,10 +852,10 @@ class GrantsLibrary
       // of the detail_tables feature model if set
       $this->detail_tables[] = $this->dependantTable($table_name);
     } elseif (
-      $this->action == 'view' && method_exists($featureLibrary, 'detail_tables') &&
-      is_array($featureLibrary->detail_tables())
+      $this->action == 'view' && method_exists($featureLibrary, 'detailTables') &&
+      is_array($featureLibrary->detailTables()) && count($featureLibrary->detailTables()) > 0
     ) {
-      $this->detail_tables = $featureLibrary->detail_tables();
+      $this->detail_tables = $featureLibrary->detailTables();
     }
 
     return $this->detail_tables;
@@ -808,10 +880,10 @@ class GrantsLibrary
 
   function checkIfTableHasDetailTable(string $table_name = ""): bool
   {
-
+    // log_message('error', json_encode($table_name));
     $table = isEmpty($table_name) ? $this->controller : $table_name;
 
-    $all_detail_tables = $this->detailTables($table);
+    $all_detail_tables = $this->checkDetailTables($table);
 
     $has_detail_table = false;
 
@@ -822,7 +894,7 @@ class GrantsLibrary
     return $has_detail_table;
   }
 
-  protected function checkIfTableIsMultiRow(string $table_name = "")
+  public function checkIfTableIsMultiRow(string $table_name = "")
   {
 
     $table = isEmpty($table_name) ? $this->controller : $table_name;

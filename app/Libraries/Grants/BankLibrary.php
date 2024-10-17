@@ -22,4 +22,9 @@ class BankLibrary extends GrantsLibrary {
     //     $widget['position_1']['view'][] =  "Hello World";
     //     return $widget;
     // }
+
+    function detailTables(): array
+    {
+        return ['office_bank'];
+    }
 }

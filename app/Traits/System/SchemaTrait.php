@@ -444,7 +444,7 @@ trait SchemaTrait
         return $is_history_tracking_field;
     }
 
-    protected function detailTables(string $table_name = ""): array{
+    public function detailTables(): array{
         return [];
       }
       public function lookupTables($table_name = ''): array{

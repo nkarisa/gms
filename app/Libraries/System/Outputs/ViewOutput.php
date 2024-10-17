@@ -217,6 +217,8 @@ class ViewOutput extends OutputTemplate{
         $lookup_tables = $this->libs->lookupTables($table);
         //runMasterViewQuery
         $master_view_query_result = $this->libs->runMasterViewQuery($table,$select_columns,$lookup_tables);
+
+        // log_message('error', json_encode($master_view_query_result));
         
         return $this->libs->updateQueryResultForFieldsChangedToSelectType($this->controller,$master_view_query_result);
         
@@ -297,40 +299,40 @@ class ViewOutput extends OutputTemplate{
         $detail_list_table_visible_columns = [];
     
         if(method_exists($library,'detailListTableVisibleColumns') && 
-            is_array($library->detailListTableVisibleColumns())
+            is_array($library->detailListTableVisibleColumns()) && count($library->detailListTableVisibleColumns()) > 0
         ){
-        $detail_list_table_visible_columns = $library->detailListTableVisibleColumns();
-    
-        //Add the table id columns if does not exist in $columns
-        if(is_array($detail_list_table_visible_columns) && 
-            !in_array($this->libs->primaryKeyField($table),$detail_list_table_visible_columns)){
-            array_unshift($detail_list_table_visible_columns,$this->libs->primaryKeyField($table));
-        }
-
-        if($table != 'status'){
-            array_push($detail_list_table_visible_columns,$table.'.fk_status_id as status_id');
-        }else{
-            array_push($detail_list_table_visible_columns,$table.'.status_id');
-        }
+            $detail_list_table_visible_columns = $library->detailListTableVisibleColumns();
         
+            //Add the table id columns if does not exist in $columns
+            if(is_array($detail_list_table_visible_columns) && 
+                !in_array($this->libs->primaryKeyField($table),$detail_list_table_visible_columns)){
+                array_unshift($detail_list_table_visible_columns,$this->libs->primaryKeyField($table));
+            }
 
-        //Remove status and approval columns if the approveable item is not approveable
-        $approveItemLibary = new \App\Libraries\Core\ApproveItemLibrary();
-        if(!$approveItemLibary->approveableItem($table)) {
-            
-            $cols = ['status_name','approval_name'];
-
-            if ($table == 'status') {
-                $cols = ['approval_name'];
+            if($table != 'status'){
+                array_push($detail_list_table_visible_columns,$table.'.fk_status_id as status_id');
+            }else{
+                array_push($detail_list_table_visible_columns,$table.'.status_id');
             }
             
-            $this->libs->removeMandatoryLookupTables($detail_list_table_visible_columns,$cols);
-          }else{
-            $this->libs->addMandatoryLookupTables($detail_list_table_visible_columns,['status_name','approval_name']);
-          }
-    
+
+            //Remove status and approval columns if the approveable item is not approveable
+            $approveItemLibary = new \App\Libraries\Core\ApproveItemLibrary();
+            if(!$approveItemLibary->approveableItem($table)) {
+                
+                $cols = ['status_name','approval_name'];
+
+                if ($table == 'status') {
+                    $cols = ['approval_name'];
+                }
+                
+                $this->libs->removeMandatoryLookupTables($detail_list_table_visible_columns,$cols);
+            }else{
+                $this->libs->addMandatoryLookupTables($detail_list_table_visible_columns,['status_name','approval_name']);
+            }
+        
         }
-    
+        
         return $detail_list_table_visible_columns;
     }
  
@@ -348,6 +350,8 @@ class ViewOutput extends OutputTemplate{
 
         // Check if the table has list_table_visible_columns not empty
         $detail_list_table_visible_columns = $this->featureModelDetailListTableVisibleColumns($table);
+
+        // log_message('error', json_encode($detail_list_table_visible_columns));
         
         //Table lookup tables
         $lookup_tables = $this->libs->lookupTables($table);
@@ -411,6 +415,7 @@ class ViewOutput extends OutputTemplate{
           }
         }
         
+
         $accessLibrary = new \App\Libraries\System\AccessBaseLibrary();
         return $accessLibrary->controlColumnVisibility($table,$visible_columns,'read');
     
@@ -420,12 +425,13 @@ class ViewOutput extends OutputTemplate{
 
         //$lookup_tables = ($table == 'permission_template') ? ['role_group','permission'] : $this->CI->grants->lookup_tables($table);
         $lookup_tables = $this->libs->lookupTables($table);
-        //print_r($lookup_tables);exit;
         $select_columns = $this->toggleDetailListSelectColumns($table);
      
         $filter_where = array($table.'.fk_'.strtolower($this->controller).'_id'=> hash_id($this->uri->getSegment(3,0),'decode') );
         //print_r($filter_where);exit;
-        return $this->libs->runListQuery($table,$select_columns,$lookup_tables,'detailListTableWhere',$filter_where);
+        $runListQueryResult = $this->libs->runListQuery($table,$select_columns,$lookup_tables,'detailListTableWhere',$filter_where);
+
+        return $runListQueryResult;
       }   
 
         /**
@@ -443,7 +449,7 @@ class ViewOutput extends OutputTemplate{
         $library = $this->libs->loadLibrary($table);
     
         $detail_list_query = $this->detailListInternalQueryResult($table); // System generated query result
-        
+        // log_message('error', json_encode($detail_list_query));
         
         if(method_exists($library,'detailListQuery') && 
             is_array($library->detailListQuery($table)) &&
@@ -488,7 +494,7 @@ function detailListOutput(String $table): Array {
     $show_add_button = $this->libs->showAddButton($table);
   
     // Checks if the detail table has a detail table to it
-    $has_details_listing = $this->libs->check_if_table_has_detail_listing($table);
+    $has_details_listing = $this->libs->checkIfTableHasDetailListing($table);
     
     return array(
       'keys'=> $keys,
@@ -526,6 +532,8 @@ function detailListOutput(String $table): Array {
         $has_details = $this->libs->checkIfTableHasDetailTable($table);
         $is_approveable_item = $approveItemLibrary->approveableItem($table);
 
+        // log_message('error', json_encode($has_details));
+
         $look_tables_name_fields = $this->libs->tablesNameFields(
             $this->libs->lookupTables()
         );
@@ -540,9 +548,11 @@ function detailListOutput(String $table): Array {
             'action_labels'=>$this->libs->actionLabels($table,hash_id($this->uri->getSegment(3,0),'decode'))
         );
     
-        $detail_tables = $this->libs->detailTables($table);
+        $detail_tables = $this->libs->checkDetailTables($table);
 
-        $result['detail'] = array();
+        // log_message('error', json_encode($detail_tables));
+
+        $result['detail'] = [];
         
         if($has_details){
             $detail = array();

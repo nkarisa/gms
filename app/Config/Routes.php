@@ -36,7 +36,8 @@ foreach ($modules as $module){
             $routes->post('showList', $module.'\\'.$controllerName.'::showList');
             $routes->get('list', $module.'\\'.$controllerName.'::list'); 
             $routes->get('view/(:segment)', $module.'\\'.$controllerName.'::view/$1');
-            $routes->get('singleFormAdd', $module.'\\'.$controllerName.'::singleFormAdd');  
+            $routes->get('singleFormAdd', $module.'\\'.$controllerName.'::singleFormAdd'); 
+            $routes->get('singleFormAdd/(:segment)/(:segment)', $module.'\\'.$controllerName.'::singleFormAdd/$1/$2');  
             $routes->post('singleFormAdd', $module.'\\'.$controllerName.'::postSingleFormAdd');
             $routes->get('multiFormAdd', $module.'\\'.$controllerName.'::multiFormAdd'); 
             $routes->post('multiFormAdd', $module.'\\'.$controllerName.'::postMultiFormAdd'); 
