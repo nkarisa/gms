@@ -1,6 +1,7 @@
 <?php 
-// $grantsLibrary = new \App\Libraries\System\GrantsLibrary();
-// echo json_encode($grantsLibrary->dbSchema);
+// echo $session->get('user_locale');
+// echo lang('Global/App.welcome_message')
+// echo $session->get('user_account_system_code');
 ?>
 <div class = 'row'>
     <div class="col-sm-12">

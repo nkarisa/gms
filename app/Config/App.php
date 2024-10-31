@@ -105,7 +105,7 @@ class App extends BaseConfig
      *
      * If false, no automatic detection will be performed.
      */
-    public bool $negotiateLocale = false;
+    public bool $negotiateLocale = true;
 
     /**
      * --------------------------------------------------------------------------
@@ -120,7 +120,7 @@ class App extends BaseConfig
      *
      * @var list<string>
      */
-    public array $supportedLocales = ['en'];
+    public array $supportedLocales = ['en','es','fr-FR','sw'];
 
     /**
      * --------------------------------------------------------------------------
@@ -133,7 +133,7 @@ class App extends BaseConfig
      * @see https://www.php.net/manual/en/timezones.php for list of timezones
      *      supported by PHP.
      */
-    public string $appTimezone = 'UTC';
+    public string $appTimezone = 'Africa/Nairobi';
 
     /**
      * --------------------------------------------------------------------------
@@ -160,8 +160,8 @@ class App extends BaseConfig
     public bool $forceGlobalSecureRequests = false;
 
     /**
-     * --------------------------------------------------------------------------
-     * Reverse Proxy IPs
+     * --------------------------------------------------------------------------                                       
+     * Reverse Proxy IPs                                                                                                                                            
      * --------------------------------------------------------------------------
      *
      * If your server is behind a reverse proxy, you must whitelist the proxy

@@ -23,5 +23,12 @@ trait OutputTrait {
         return $listOutput->getOutput();
     }
 
+    function currencyFields(){
+        return [];
+    }
+
+    function showListEditAction(array $record): bool{
+        return false;
+    }
 
 }

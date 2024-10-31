@@ -364,134 +364,151 @@ class StatusLibrary extends GrantsLibrary
     }
 
     public function getStatusAccountSystem($statusId)
-{
-    // Initialize the default account system ID
-    $accountSystemId = 0;
+    {
+        // Initialize the default account system ID
+        $accountSystemId = 0;
 
-    // Get the database connection
-    $builder = $this->read_db->table('status');
+        // Get the database connection
+        $builder = $this->read_db->table('status');
 
-    // Apply the necessary joins and conditions
-    $builder->where('status.status_id', $statusId);
-    $builder->join('approval_flow', 'approval_flow.approval_flow_id = status.fk_approval_flow_id');
+        // Apply the necessary joins and conditions
+        $builder->where('status.status_id', $statusId);
+        $builder->join('approval_flow', 'approval_flow.approval_flow_id = status.fk_approval_flow_id');
 
-    // Get the result
-    $statusObj = $builder->get();
+        // Get the result
+        $statusObj = $builder->get();
 
-    // Check if the result exists and assign the account system ID
-    if ($statusObj->getNumRows() > 0) {
-        $accountSystemId = $statusObj->getRow()->fk_account_system_id;
+        // Check if the result exists and assign the account system ID
+        if ($statusObj->getNumRows() > 0) {
+            $accountSystemId = $statusObj->getRow()->fk_account_system_id;
+        }
+
+        return $accountSystemId;
     }
 
-    return $accountSystemId;
-}
+    function getItemStatusRoles($table)
+    {
 
-function getItemStatusRoles($table){
+        $status_roles_obj = $this->read_db->table('status_role')
+            ->select(array('status_id', 'status_role.fk_role_id as role_id', 'status_approval_sequence'))
+            ->where(array('approve_item_name' => $table, 'status_role_is_active' => 1, 'approval_flow.fk_account_system_id' => $this->session->user_account_system_id))
+            ->join('status', 'status.status_id=status_role.status_role_status_id')
+            ->join('approval_flow', 'approval_flow.approval_flow_id=status.fk_approval_flow_id')
+            ->join('approve_item', 'approve_item.approve_item_id=approval_flow.fk_approve_item_id')
+            ->get();
 
-    $status_roles_obj = $this->read_db->table('status_role')
-    ->select(array('status_id','status_role.fk_role_id as role_id','status_approval_sequence'))
-    ->where(array('approve_item_name'=>$table, 'status_role_is_active' => 1,'approval_flow.fk_account_system_id'=>$this->session->user_account_system_id))
-    ->join('status','status.status_id=status_role.status_role_status_id')
-    ->join('approval_flow','approval_flow.approval_flow_id=status.fk_approval_flow_id')
-    ->join('approve_item','approve_item.approve_item_id=approval_flow.fk_approve_item_id')
-    ->get();
+        $roles = [];
+        $level_roles = [];
 
-    $roles = [];
-    $level_roles = [];
+        if ($status_roles_obj->getNumRows() > 0) {
+            $status_roles = $status_roles_obj->getResultArray();
+            foreach ($status_roles as $status_role) {
+                $roles[$status_role['status_id']][] = $status_role['role_id'];
+                $level_roles[$status_role['status_approval_sequence']][] = $status_role['role_id'];
+            }
+        }
 
-    if($status_roles_obj->getNumRows() > 0){
-      $status_roles = $status_roles_obj->getResultArray();
-      foreach($status_roles as $status_role){
-        $roles[$status_role['status_id']][] = $status_role['role_id']; 
-        $level_roles[$status_role['status_approval_sequence']][] = $status_role['role_id']; 
-      }
+        return ['status_roles' => $roles, 'level_roles' => $level_roles];
     }
 
-    return ['status_roles'=>$roles,'level_roles'=>$level_roles];
-  }
+    public function itemStatus($table, $itemInitialItemStatusId, $accountSystemId = 0)
+    {
+        // Retrieve the item status roles
+        $itemStatusRoles = $this->getItemStatusRoles($table);
+        $statusRoles = $itemStatusRoles['status_roles'];
+        $levelRoles = $itemStatusRoles['level_roles'];
 
-public function itemStatus($table, $itemInitialItemStatusId, $accountSystemId = 0)
-{
-    // Retrieve the item status roles
-    $itemStatusRoles = $this->getItemStatusRoles($table);
-    $statusRoles = $itemStatusRoles['status_roles'];
-    $levelRoles = $itemStatusRoles['level_roles'];
+        // If account_system_id is not provided, use the session's account system ID
+        if ($accountSystemId == 0) {
+            $accountSystemId = session()->get('user_account_system_id');
+        }
 
-    // If account_system_id is not provided, use the session's account system ID
-    if ($accountSystemId == 0) {
-        $accountSystemId = session()->get('user_account_system_id');
+        // First query: Fetch status details
+        $db = \Config\Database::connect();
+        $builder = $db->table('status');
+
+        $builder->select([
+            'status.status_id',
+            'status.status_name',
+            'status.status_button_label',
+            'status.status_decline_button_label',
+            'status.status_approval_sequence',
+            'status.status_approval_direction',
+            'status.status_backflow_sequence'
+        ]);
+        $builder->join('approval_flow', 'approval_flow.approval_flow_id = status.fk_approval_flow_id');
+        $builder->join('approve_item', 'approve_item.approve_item_id = approval_flow.fk_approve_item_id');
+        $builder->where([
+            'approve_item_name' => $table,
+            'approval_flow.fk_account_system_id' => $accountSystemId
+        ]);
+        $status = $builder->get()->getResultArray();
+
+        // Second query: Fetch approval exemptions
+        $builder = $db->table('approval_exemption');
+        $builder->select([
+            'status.status_id',
+            'approval_exemption.fk_office_id as office_id',
+            'status.status_approval_sequence'
+        ]);
+        $builder->join('status', 'status.status_id = approval_exemption.approval_exemption_status_id');
+        $builder->join('approval_flow', 'approval_flow.approval_flow_id = status.fk_approval_flow_id');
+        $builder->join('approve_item', 'approve_item.approve_item_id = approval_flow.fk_approve_item_id');
+        $builder->where([
+            'approve_item_name' => $table,
+            'approval_exemption_is_active' => 1,
+            'approval_flow.fk_account_system_id' => $accountSystemId
+        ]);
+        $builder->whereIn('fk_office_id', array_column(session()->get('hierarchy_offices'), 'office_id'));
+        $exemptionsObj = $builder->get();
+
+        // Collect the exempted sequences
+        $exemptedSequences = [];
+        if ($exemptionsObj->getNumRows() > 0) {
+            $exemptionsRaw = $exemptionsObj->getResultArray();
+            foreach ($exemptionsRaw as $exemptRow) {
+                $exemptedSequences[$exemptRow['status_id']] = $exemptRow['status_approval_sequence'];
+            }
+        }
+
+        // Organize status records with status_id as the key
+        $statusRecordsWithStatusIdKey = [];
+        foreach ($status as $statusRecord) {
+            if (!in_array($statusRecord['status_approval_sequence'], $exemptedSequences)) {
+                $statusId = $statusRecord['status_id'];
+                $statusRecordsWithStatusIdKey[$statusId] = $statusRecord;
+            }
+        }
+
+        // Assign roles based on approval direction
+        foreach ($statusRecordsWithStatusIdKey as $statusId => &$statusRecord) {
+            if ($statusRecord['status_approval_direction'] == -1) {
+                $statusRecord['status_role'] = isset($statusRoles[$itemInitialItemStatusId]) ? $statusRoles[$itemInitialItemStatusId] : [];
+            } elseif ($statusRecord['status_approval_direction'] == 0) {
+                $statusRecord['status_role'] = isset($levelRoles[$statusRecord['status_approval_sequence']]) ? $levelRoles[$statusRecord['status_approval_sequence']] : [];
+            } else {
+                $statusRecord['status_role'] = isset($statusRoles[$statusId]) ? $statusRoles[$statusId] : [];
+            }
+        }
+
+        return $statusRecordsWithStatusIdKey;
     }
 
-    // First query: Fetch status details
-    $db = \Config\Database::connect();
-    $builder = $db->table('status');
+    function returnToPreviousPositiveStatus($table_name, $item_id, $item_initial_item_status_id){
+
+        $data['fk_status_id'] = $item_initial_item_status_id;
+        $builder = $this->write_db->table($table_name);
+        $builder->where($table_name.'_id', $item_id);
+        $builder->update($data);
     
-    $builder->select([
-        'status.status_id', 
-        'status.status_name', 
-        'status.status_button_label', 
-        'status.status_decline_button_label',
-        'status.status_approval_sequence', 
-        'status.status_approval_direction', 
-        'status.status_backflow_sequence'
-    ]);
-    $builder->join('approval_flow', 'approval_flow.approval_flow_id = status.fk_approval_flow_id');
-    $builder->join('approve_item', 'approve_item.approve_item_id = approval_flow.fk_approve_item_id');
-    $builder->where([
-        'approve_item_name' => $table,
-        'approval_flow.fk_account_system_id' => $accountSystemId
-    ]);
-    $status = $builder->get()->getResultArray();
-
-    // Second query: Fetch approval exemptions
-    $builder = $db->table('approval_exemption');
-    $builder->select([
-        'status.status_id',
-        'approval_exemption.fk_office_id as office_id',
-        'status.status_approval_sequence'
-    ]);
-    $builder->join('status', 'status.status_id = approval_exemption.approval_exemption_status_id');
-    $builder->join('approval_flow', 'approval_flow.approval_flow_id = status.fk_approval_flow_id');
-    $builder->join('approve_item', 'approve_item.approve_item_id = approval_flow.fk_approve_item_id');
-    $builder->where([
-        'approve_item_name' => $table,
-        'approval_exemption_is_active' => 1,
-        'approval_flow.fk_account_system_id' => $accountSystemId
-    ]);
-    $builder->whereIn('fk_office_id', array_column(session()->get('hierarchy_offices'), 'office_id'));
-    $exemptionsObj = $builder->get();
-
-    // Collect the exempted sequences
-    $exemptedSequences = [];
-    if ($exemptionsObj->getNumRows() > 0) {
-        $exemptionsRaw = $exemptionsObj->getResultArray();
-        foreach ($exemptionsRaw as $exemptRow) {
-            $exemptedSequences[$exemptRow['status_id']] = $exemptRow['status_approval_sequence'];
+        $updates_rows =  false;
+        // log_message('error', json_encode($this->write_db->affected_rows()));
+        if($this->write_db->affectedRows() > 0){
+          $updates_rows = true;
         }
+        // $this->write_db->close();
+    
+        return $updates_rows;
     }
-
-    // Organize status records with status_id as the key
-    $statusRecordsWithStatusIdKey = [];
-    foreach ($status as $statusRecord) {
-        if (!in_array($statusRecord['status_approval_sequence'], $exemptedSequences)) {
-            $statusId = $statusRecord['status_id'];
-            $statusRecordsWithStatusIdKey[$statusId] = $statusRecord;
-        }
-    }
-
-    // Assign roles based on approval direction
-    foreach ($statusRecordsWithStatusIdKey as $statusId => &$statusRecord) {
-        if ($statusRecord['status_approval_direction'] == -1) {
-            $statusRecord['status_role'] = isset($statusRoles[$itemInitialItemStatusId]) ? $statusRoles[$itemInitialItemStatusId] : [];
-        } elseif ($statusRecord['status_approval_direction'] == 0) {
-            $statusRecord['status_role'] = isset($levelRoles[$statusRecord['status_approval_sequence']]) ? $levelRoles[$statusRecord['status_approval_sequence']] : [];
-        } else {
-            $statusRecord['status_role'] = isset($statusRoles[$statusId]) ? $statusRoles[$statusId] : [];
-        }
-    }
-
-    return $statusRecordsWithStatusIdKey;
-}
-
 
 }

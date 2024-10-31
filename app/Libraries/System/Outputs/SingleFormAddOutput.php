@@ -30,7 +30,6 @@ class SingleFormAddOutput extends OutputTemplate{
 
       if (!is_array($column)) {
         // Used to set the default select value in a single_form_add name fields if the form has been opened from a parent record
-
         if ($this->id != null  && hash_id($this->id, 'decode') > 0 && $column == $this->subAction . '_name') {
           $field_value = hash_id($this->id, 'decode');
           $show_only_selected_value = true;
@@ -68,8 +67,6 @@ class SingleFormAddOutput extends OutputTemplate{
         $visible_columns = $this->libs->checkSingleFormAddVisibleColumns();      
         $visible_columns = array_merge($visible_columns, $this->currentLibrary->detailTablesSingleFormAddVisibleColumns()); // To be tested more of its impact if numbed
         
-        // log_message('error', json_encode($visible_columns));
-
         $fields = $this->addFormFields($visible_columns); //$this->single_form_add_query();
         
         return array(

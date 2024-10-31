@@ -68,7 +68,6 @@ class Element{
     }
   
     function form_group($form_group_input, int $input_holder_size = 12, int $label_size = 0, String $label_name = ''){
-      // log_message('error', json_encode($form_group_input));
       if($input_holder_size == 12){
         $label_size = 0;
       }elseif($input_holder_size + $label_size > 12){

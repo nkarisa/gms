@@ -54,6 +54,8 @@ class WebController extends BaseController
     protected $libs;
     protected $has_permission = false;
     protected $subAction = null;
+    protected $library;
+    protected $settings;
     /**
      * @return void
      */
@@ -96,6 +98,12 @@ class WebController extends BaseController
         // Load system libraries 
         $this->libs = service('grantslib');
 
+        $this->settings = service('settings');
+
+        if($this->controller != "login"){
+            $this->library = $this->libs->loadLibrary($this->controller);
+        }
+
     }
 
     private function sessionBasedConstructorSet()
@@ -121,6 +129,10 @@ class WebController extends BaseController
         $this->id = isset($this->segments[2]) ? $this->segments[2] : 0;
         $statusLibrary = new \App\Libraries\Core\StatusLibrary();
         $this->max_status_id = $statusLibrary->getMaxApprovalStatusId($this->controller);
+
+        // Manually initialize the user locale
+        $locale = $this->session->get('user_locale') ? $this->session->get('user_locale') : service('settings')->get('App.defaultLocale');
+        $this->request->setLocale($locale);
     }
     
 
@@ -189,17 +201,10 @@ public function user_info(): array
         $primary_user_data_id = 0;
         $session = session();
         $user_can_read_switch = true;
-        $user_available_languages = [
-            [
-                'language_code' => 'eng',
-                'language_name' => 'English'
-            ]
-        ];
-        $user_locale = 'eng';
-        $default_language = [
-            'language_code' => 'eng',
-            'language_name' => 'English'
-        ];
+        $languageLibrary = new \App\Libraries\Core\LanguageLibrary();
+        $user_available_languages = $languageLibrary->getUserAvailableLanguages();
+        $user_locale = $session->get('user_locale');
+        $default_language = $languageLibrary->getDefaultLanguage();
        
         $user_icon = '2.png';
 
@@ -243,6 +248,9 @@ function crud_views(String $id = ''):string
   $page_data['uri'] = $this->uri;
   $page_data['user'] = $this->user_info();
   $page_data['navigation'] = $this->navigation();
+  $page_data['session'] = session();
+  $page_data['config'] = $this->config;
+  $page_data['libs'] = $this->libs;
   
 
   // Can be overrode in a specific controller
@@ -315,9 +323,20 @@ public function showList(){
       $primary_key = 0;
       foreach ($columns as $column) {
         if($column == strtolower($this->controller).'_id'){
-          // log_message('error', strtolower($this->controller).'_id');
           $primary_key = $row[$column];
-          $row[$column] = '<a href = "'.site_url(strtolower($this->controller).'/edit/'.hash_id($primary_key,'encode')).'" class = "btn btn-default">Edit</a>';
+
+          $editActionDisabled = "disabled";
+          
+          if(
+            $this->session->system_admin ||
+            (
+              $this->library->showListEditAction($row) &&
+              $this->libs->loadLibrary('user')->checkRoleHasPermissions(strtolower($this->controller),'update')
+            )
+          ){
+            $editActionDisabled = "";
+          }
+          $row[$column] = '<a href = "'.site_url(strtolower($this->controller).'/edit/'.hash_id($primary_key,'encode')).'" class = "btn btn-default '.$editActionDisabled.'">'.get_phrase('edit').'</a>';
         }
 
           if (strpos($column, 'track_number') == true) {
@@ -325,7 +344,7 @@ public function showList(){
             if(
               $this->session->system_admin ||
               (
-                $this->{$this->controller.'_model'}->show_list_edit_action($row) &&
+                $this->library->showListEditAction($row) &&
                 $this->libs->loadLibrary('user')->checkRoleHasPermissions(strtolower($this->controller),'update')
               )
             ){

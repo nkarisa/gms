@@ -11,10 +11,16 @@ use Config\GrantsConfig;
 // Web routes
 
 $routes->get('/', [Login::class, 'index']);
+$routes->get('language/switch_language/(:segment)', [App\Controllers\Web\Core\Language::class, "switchLanguage/$1"]);
+$routes->get('language/download_language_file/(:segment)/(:segment)', [App\Controllers\Web\Core\Language::class, "downloadLanguageFile/$1/$2"]);
+$routes->post('language/upload_language_file', [App\Controllers\Web\Core\Language::class, "uploadLanguageFile"]);
 
 $routes->group('login', static function ($routes) {
     $routes->get('logout', [Login::class, 'logout']);
+    // $routes->get('/', [Login::class, 'index']);
     $routes->get('(:segment)', [Login::class, 'index']);
+    $routes->post('switch_user', [Login::class, 'switchUser']);
+    $routes->get('switch_user/(:segment)', [Login::class, 'switchUser/$1']);
     $routes->post('(:segment)', [Login::class, 'ajax_login']);
 });
 

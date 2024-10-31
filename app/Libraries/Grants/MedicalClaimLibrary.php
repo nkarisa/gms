@@ -19,6 +19,8 @@ class MedicalClaimLibrary extends GrantsLibrary
         $this->table = 'grants';
     }
 
-
+    function updateMedicalClaimAttachmentId(){
+        
+    }
    
 }

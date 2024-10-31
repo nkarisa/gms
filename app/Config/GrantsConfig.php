@@ -19,5 +19,8 @@ class GrantsConfig extends BaseConfig
     public $maxCountOfFavoritesMenuItems = 10; //
     public $master_table_columns = 2;
     public $use_select2_plugin = true;
-
+    public $attachment_table_name = "attachment";
+    public $attachment_key_column = "attachment_url";
+    public $s3_region = 'eu-west-1';
+    public $s3_bucket_name = "fms-bucket";
 }

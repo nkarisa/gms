@@ -258,7 +258,6 @@ class FieldsBase
 
   function select_field($options, $selected_option = 0, $show_only_selected_value = false, $onchange_function_name = '', $multi_select_field = '')
   {
-
     if ($onchange_function_name == '') {
       $onchange_function_name =  'onchange_' . $this->column;
     }

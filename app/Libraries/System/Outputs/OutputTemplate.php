@@ -30,7 +30,7 @@ class OutputTemplate {
         $this->controller = isset($segments[0]) ? $segments[0] : 'dashboard';
         $this->action = isset($segments[1]) ? $segments[1] : 'list';
         $this->id = isset($segments[2]) ? $segments[2] : 0;
-        $this->subAction = isset($segments[4]) ? $segments[4] : null; //$this->uri->segment(4, null);;
+        $this->subAction = isset($segments[3]) ? $segments[3] : null; //$this->uri->segment(4, null);;
 
         $this->request = service('request');
 

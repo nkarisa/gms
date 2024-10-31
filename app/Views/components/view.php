@@ -57,7 +57,7 @@ $columns = array_chunk($keys,$config->master_table_columns,true);
   
                 if($userLibrary->checkRoleHasPermissions(ucfirst($controller),'delete'))
                 {
-                    // echo Widget_base::load('button',get_phrase('delete'),$controller.'/delete/'.$this->id);
+                    echo WidgetBase::load('button',get_phrase('delete'),$controller.'/delete/'.$id);
                 }
   
               }
@@ -71,17 +71,15 @@ $columns = array_chunk($keys,$config->master_table_columns,true);
                   $status_data = $lib->actionButtonData($controller, $account_system_id);
                   extract($status_data);
 
-                //   echo approval_action_button($this->controller,$item_status, $primary_key, $status_id, $item_initial_item_status_id, $item_max_approval_status_ids);
+                  echo approval_action_button($controller,$item_status, $primary_key, $status_id, $item_initial_item_status_id, $item_max_approval_status_ids);
               }
               
-              // if(isset($action_labels['show_decline_button']) && $action_labels['show_decline_button']){
-              //      echo Widget_base::load('button',get_phrase('decline'),$this->controller.'/decline/'.$this->id);
+              if(isset($action_labels['show_decline_button']) && $action_labels['show_decline_button']){
+                   echo WidgetBase::load('button',get_phrase('decline'),$controller.'/decline/'.$id);
               
-              //  }
+               }
 
-              
-
-                // echo Widget_base::load('button',get_phrase('print'),'#','btn_print','hidden-print');
+                echo WidgetBase::load('button',get_phrase('print'),'#','btn_print','hidden-print');
                ?>     
                   
 
@@ -178,7 +176,7 @@ $columns = array_chunk($keys,$config->master_table_columns,true);
             
             <?php
               if($show_add_button){
-                echo add_record_button($detail_table_name,$has_details_table,$uri->getSegment(3),$has_details_listing, $is_multi_row);// $details['is_multi_row']
+                echo add_record_button($detail_table_name, $controller,$has_details_table,$uri->getSegment(3),$has_details_listing, $is_multi_row);// $details['is_multi_row']
               }
             ?>
           </div>

@@ -122,7 +122,9 @@ class Login extends WebController
     {
         // Load the User Libary
         $userLibrary = $this->libs->loadLibrary('user'); 
+        $languageLibrary = $this->libs->loadLibrary('language'); 
         $user_id = $user['user_id'];
+        $user_language_id = $user['language_id'];
 
         // Prepare user session data
         $roleIds = array_keys($userLibrary->getUserRoles($user_id));
@@ -131,6 +133,7 @@ class Login extends WebController
             'user_id' => $user_id,
             'name' => $user['user_firstname'] . ' ' . $user['user_lastname'],
             'user_is_authenticated' => 1,
+            'user_locale' => $languageLibrary->languageLocaleById($user_language_id),
             'role_ids' => $roleIds,
             'roles' => array_values($userLibrary->getUserRoles($user_id)),
             'system_admin' => $user['user_is_system_admin'],
@@ -146,6 +149,10 @@ class Login extends WebController
             'role_status' => $userLibrary->actionableRoleStatus(array_keys($userLibrary->userRoleIds($user_id, true))),
         ];
 
+        if ($is_user_switch && !$this->session->has('primary_user_data')) {
+            // Session for the primary user
+            $this->session->set('primary_user_data', ['user_id' => $this->session->user_id, 'user_name' => $this->session->name]);
+        }
 
         // If user is already authenticated, remove the previous session data
         if ($this->session->has('user_is_authenticated')) {
@@ -173,7 +180,7 @@ class Login extends WebController
      * @param string $password The password to be hashed.
      * @return string The hashed password.
      *
-     * @throws Exception If there is an error fetching the salt from AWS Parameter Store.
+     * @throws \Exception If there is an error fetching the salt from AWS Parameter Store.
      */
     private function password_salt(string $password): string
     {
@@ -196,6 +203,55 @@ class Login extends WebController
     //     $this->write_db->where(array('user_id' => $user_id));
     //     $this->write_db->update('user', $update_data);
     // }
+
+    public function switchUser($userId = '')
+    {
+        // Decode or retrieve user ID from POST data
+        $userId = empty($userId) ? $this->request->getPost('user_id') : hash_id($userId, 'decode');
+
+        // Retrieve the target user information
+        $user = $this->read_db->table('user')->where('user_id', $userId)->get()->getRowArray();
+
+        // Get current user's email as a fallback
+        $currentUser = $this->read_db->table('user')->where('user_id', $this->session->get('user_id'))->get()->getRow();
+        $currentUserEmail = $currentUser ? $currentUser->user_email : null;
+
+        $email = $user['user_email'] ?? $currentUserEmail;
+
+        // Validate login with the selected user email
+        $loginStatus = $this->validate_login($email, '', true);
+
+        // Redirect based on login status
+        return redirect()->to($loginStatus ? site_url('/') : base_url());
+    }
+
+
+    function checkGlobalLanguagePackState()
+    {
+        $languageLibrary = new \App\Libraries\Core\LanguageLibrary();
+
+        $defaultLocale = service('settings')->get('App.defaultLocale');
+        
+        // Get all languages
+        $builder  = $this->read_db->table('language');
+        $builder->select('language_code, language_is_default');
+        $all_languages = $builder->get()->getResultArray();
+
+        $defaultPath = APPPATH . 'language' . DIRECTORY_SEPARATOR . $defaultLocale . DIRECTORY_SEPARATOR . 'Global' . DIRECTORY_SEPARATOR;
+
+        if (!file_exists($defaultPath)) {
+            if (mkdir($defaultPath)) {
+                foreach ($all_languages as $language) {
+                    $additonalLanguagePath = APPPATH . 'language' . DIRECTORY_SEPARATOR . $language['language_code'] . DIRECTORY_SEPARATOR . 'Global' . DIRECTORY_SEPARATOR;
+                    if(!file_exists($additonalLanguagePath)){
+                        if (mkdir($additonalLanguagePath)) {
+                            $languageLibrary->createLanguageFiles($language['language_code'], 'global');
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * This method handles the user logout process.

@@ -20,5 +20,10 @@ class ChequeInjectionLibrary extends GrantsLibrary
     }
 
 
-   
+    public function showListEditAction(array $record): bool {
+        if(!isset($record['cheque_injection_is_active']) || $record['cheque_injection_is_active'] == 0){
+            return false;
+        }
+        return true;
+    }
 }

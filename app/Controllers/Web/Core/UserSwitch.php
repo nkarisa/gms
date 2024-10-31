@@ -15,4 +15,14 @@ class UserSwitch extends WebController
         parent::initController($request, $response, $logger);
 
     }
+
+
+    public function result($id = "")
+    {
+     
+        $userSwitchLibary = new \App\Libraries\Core\UserSwitchLibrary();
+        $users = $userSwitchLibary->getSwitchableUsers();
+  
+        return $users;
+    }
 }

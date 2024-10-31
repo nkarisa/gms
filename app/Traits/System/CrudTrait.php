@@ -264,10 +264,6 @@ trait CrudTrait
         return VALIDATION_SUCCESS; // OR VALIDATION_ERROR
     }
 
-    protected function listTableWhere(\CodeIgniter\Database\BaseBuilder $queryBuilder): void
-    {
-        
-    }
 
     public function orderListPage(): string
     {

@@ -3,11 +3,20 @@
 define('DS', DIRECTORY_SEPARATOR);
 
 if (!function_exists('get_phrase')) {
-    function get_phrase($phrase, $translation = '')
+    function get_phrase($phrase, $translated_string = '', $phrase_variables_values = [])
     {
         helper('inflector');
-        // $translation = ucwords(str_replace("_", " ", $phrase));
-        $translation =  $translation == '' ? humanize($phrase, '_'): $translation;
+
+        $accountSystem = session()->has('user_account_system_code') ? ucfirst(session()->get('user_account_system_code')) : 'Global';
+        $translation = lang("$accountSystem/App.$phrase", $phrase_variables_values);
+
+        if (count(explode("/", $translation)) > 1) {
+            if ($translated_string == '') {
+                $translation = ucwords(str_replace("_", " ", $phrase));
+            } else {
+                $translation = $translated_string;
+            }
+        }
 
         return $translation;
     }
@@ -32,7 +41,7 @@ if (!function_exists('render_list_table_header')) {
 }
 
 if (!function_exists('add_record_button')) {
-    function add_record_button($table_controller, $has_details, $id = null, $has_listing = false, $is_multi_row = false)
+    function add_record_button($table_controller, $parent_controller, $has_details, $id = null, $has_listing = false, $is_multi_row = false)
     {
         $add_view = $has_listing ? "multiFormAdd" : "singleFormAdd";
         $add_view = $is_multi_row ? "multiRowAdd" : $add_view;
@@ -40,9 +49,9 @@ if (!function_exists('add_record_button')) {
         $link = "";
 
         if ($id !== null) {
-            $link =  '<a href="' . base_url() . strtolower($table_controller) . '/' . $add_view . '/' . $id . '/' . $table_controller . '" class="btn btn-default">' . get_phrase('add_' . strtolower($table_controller)) . '</a>';
+            $link = '<a href="' . base_url() . strtolower($table_controller) . '/' . $add_view . '/' . $id . '/' . $parent_controller . '" class="btn btn-default">' . get_phrase('add_' . strtolower($table_controller)) . '</a>';
         } else {
-            $link =  '<a style="margin-bottom:-70px;z-index:100;position:relative;" href="' . base_url() . $table_controller . '/' . $add_view . '" class="btn btn-default">' . get_phrase('add_' . strtolower($table_controller)) . '</a>';
+            $link = '<a style="margin-bottom:-70px;z-index:100;position:relative;" href="' . base_url() . $table_controller . '/' . $add_view . '" class="btn btn-default">' . get_phrase('add_' . strtolower($table_controller)) . '</a>';
         }
 
         return $link;
@@ -82,7 +91,7 @@ if (!function_exists('list_table_edit_action')) {
 if (!function_exists('camel_case_header_element')) {
     function camel_case_header_element($header_element)
     {
-        return  get_phrase($header_element); //ucwords(str_replace('_',' ',$header_element));
+        return get_phrase($header_element); //ucwords(str_replace('_',' ',$header_element));
     }
 }
 
@@ -354,8 +363,7 @@ if (!function_exists('isEmpty')) {
         $strTemp = $input;
         $strTemp = trim($strTemp);
 
-        if ($strTemp == '') 
-        {
+        if ($strTemp == '') {
             return true;
         }
 
@@ -372,22 +380,23 @@ if (!function_exists('isEmpty')) {
  * @param bool $reverse_assignment An optional flag to reverse the assignment of keys and exploded parts.
  * @return array The resulting array with keys assigned to the exploded parts.
  */
-if(!function_exists('exploding')){
-    function exploding($separator, $string, $vars = [], $reverse_assignment = true) {
-        
+if (!function_exists('exploding')) {
+    function exploding($separator, $string, $vars = [], $reverse_assignment = true)
+    {
+
         $explode = explode($separator, $string);
 
         $keyedExplode = $explode;
-        if(!empty($vars)){
-            
-            if($reverse_assignment){
+        if (!empty($vars)) {
+
+            if ($reverse_assignment) {
                 $explode = array_reverse($explode);
                 $vars = array_reverse($vars);
             }
 
             $keyedExplode = [];
-            for($i = 0; $i < count($vars); $i++){
-                if(isset($explode[$i])){
+            for ($i = 0; $i < count($vars); $i++) {
+                if (isset($explode[$i])) {
                     $keyedExplode[$vars[$i]] = $explode[$i];
                 }
             }
@@ -397,29 +406,34 @@ if(!function_exists('exploding')){
     }
 }
 
-if(!function_exists('clear_cache_files')){
-    function clear_cache_files($table){
+if (!function_exists('clear_cache_files')) {
+    function clear_cache_files($table)
+    {
 
-        $cache_dirs_actions = ['view','list','edit','single_form_add','multi_form_add','show_list'];
+        $cache_dirs_actions = ['view', 'list', 'edit', 'single_form_add', 'multi_form_add', 'show_list'];
 
-        foreach($cache_dirs_actions as $action){
-          $dir = APPPATH.'cache'.DS.$table.'+'.$action;
-          
-          if(!file_exists($dir)) continue;
+        foreach ($cache_dirs_actions as $action) {
+            $dir = APPPATH . 'cache' . DS . $table . '+' . $action;
 
-          remove_directory($dir);
-          
+            if (!file_exists($dir))
+                continue;
+
+            remove_directory($dir);
+
         }
     }
 }
 
-if(!function_exists('remove_directory')){
-    function remove_directory($dir){
+if (!function_exists('remove_directory')) {
+    function remove_directory($dir)
+    {
         $it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS);
-        $files = new RecursiveIteratorIterator($it,
-                    RecursiveIteratorIterator::CHILD_FIRST);
-        foreach($files as $file) {
-            if ($file->isDir()){
+        $files = new RecursiveIteratorIterator(
+            $it,
+            RecursiveIteratorIterator::CHILD_FIRST
+        );
+        foreach ($files as $file) {
+            if ($file->isDir()) {
                 rmdir($file->getRealPath());
             } else {
                 unlink($file->getRealPath());
@@ -444,5 +458,304 @@ if (!function_exists('render_list_table_header')) {
         $string .= '</tr>';
 
         return $string;
+    }
+}
+
+if (!function_exists('formatBytes')) {
+    function formatBytes($bytes, $precision = 2)
+    {
+        $units = array('B', 'KB', 'MB', 'GB', 'TB');
+
+        $bytes = max($bytes, 0);
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+
+        // Uncomment one of the following alternatives
+        $bytes /= pow(1024, $pow);
+        // $bytes /= (1 << (10 * $pow)); 
+
+        return round($bytes, $precision) . ' ' . $units[$pow];
+    }
+}
+
+
+if (!function_exists('currency_conversion')) {
+    function currency_conversion($office_id, $conversion_month = '2020-05-01')
+    {
+
+        // Database connection for codeigniter 4
+        $db = \Config\Database::connect();
+    
+        $builder = $db->table('office');
+        $builder->where('office_id',$office_id);
+        $office_currency_id = $builder->get()->getRow()->fk_country_currency_id;
+
+        $user_currency_id = service('session')->get('user_currency_id');
+
+        $base_currency_id = service('session')->get('base_currency_id');
+
+        $builder = $db->table('currency_conversion_detail');
+        $builder->join('currency_conversion', 'currency_conversion.currency_conversion_id=currency_conversion_detail.fk_currency_conversion_id');
+        $office_rate_obj = $builder->where('fk_country_currency_id', $office_currency_id)->get();
+
+        $office_rate = 1;
+
+        if ($office_rate_obj->getNumRows() > 0) {
+            $office_rate = $office_rate_obj->getRow()->currency_conversion_detail_rate;
+        }
+
+
+        $builder = $db->table('currency_conversion_detail');
+        $builder->join('currency_conversion', 'currency_conversion.currency_conversion_id=currency_conversion_detail.fk_currency_conversion_id');
+        $user_rate_obj = $builder->where('fk_country_currency_id', $user_currency_id)->get();
+
+        $user_rate = 1;
+
+        if ($user_rate_obj->getNumRows() > 0) {
+            $user_rate = $user_rate_obj->getRow()->currency_conversion_detail_rate;
+        }
+
+        $computed_rate = 1;
+
+        if ($user_currency_id !== $base_currency_id) {
+            $computed_rate = $user_rate / $office_rate;
+        } else {
+            $computed_rate = 1 / $office_rate;
+        }
+
+        return $computed_rate; // .' - '. $user_rate . ' - '.$office_rate;
+    }
+}
+
+if(!function_exists('approval_action_button')){
+    function approval_action_button(
+        $table_name, 
+        $item_status, 
+        $item_id, 
+        $status_id, 
+        $item_initial_item_status_id, 
+        $item_max_approval_status_ids, 
+        $disable_btn=false, 
+        $confirmation_required = true, 
+        $custom_status_name = '', 
+        $voided_chq=false, 
+        $missing_voucher_detail_flag=false
+        ): string{
+
+    $disable_class='';
+    $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+
+    if($disable_btn){
+      $disable_class='disabled';
+    }
+    
+    $buttons = "<div class = 'btn btn-info disabled'>".get_phrase('exempted_status')."</div>"; 
+    if(!service('session')->system_admin && !isset($item_status[$status_id])){
+        $return_item = $statusLibrary->returnToPreviousPositiveStatus($table_name, $item_id, $item_initial_item_status_id);
+        // in_array($status_id, $item_max_approval_status_ids) or
+        if(!$return_item){
+            return $buttons;
+        }else{
+            $status_id = $item_initial_item_status_id;
+        }
+    }
+
+    $role_ids = service('session')->role_ids; 
+    $status = 0;
+    $status_button_label = '';
+    $status_decline_button_label = '';
+    $status_name = $custom_status_name;
+    // $status_approval_sequence = 0;
+    $status_approval_direction = 0;
+
+    $buttons = '';
+    $role_ids = service('session')->role_ids;	
+    $status = $item_status[$status_id];
+    $status_button_label = $item_status[$status_id]['status_button_label'] != '' ? $item_status[$status_id]['status_button_label'] : $item_status[$status_id]['status_name'];
+    $status_decline_button_label = $item_status[$status_id]['status_decline_button_label'] != "" ? $item_status[$status_id]['status_decline_button_label']: get_phrase('return');
+    $status_name = $item_status[$status_id]['status_name'];
+    // $status_approval_sequence =  $item_status[$status_id]['status_approval_sequence'];
+    $status_approval_direction = $item_status[$status_id]['status_approval_direction'];
+
+    if(isset($item_status[$status_id])){
+        $status = $item_status[$status_id];
+        $status_button_label = $item_status[$status_id]['status_button_label'] != '' ? $item_status[$status_id]['status_button_label'] : $item_status[$status_id]['status_name'];
+        $status_decline_button_label = $item_status[$status_id]['status_decline_button_label'] != "" ? $item_status[$status_id]['status_decline_button_label']: get_phrase('decline');
+        $status_name = $item_status[$status_id]['status_name'];
+        // $status_approval_sequence =  $item_status[$status_id]['status_approval_sequence'];
+        $status_approval_direction = $item_status[$status_id]['status_approval_direction'];
+    }
+    
+    $approve_next_status = 0;
+    $decline_next_status = 0;
+
+    $next_status = approval_next_status($table_name, $item_status, $item_id, $status_id, $item_initial_item_status_id, $item_max_approval_status_ids);
+    extract($next_status);
+
+    $match_roles = isset($status['status_role']) ? array_intersect($status['status_role'],$role_ids) : [];
+    //print_r($match_roles);
+    $info_color = 'info';
+
+    if(in_array($status_id,$item_max_approval_status_ids)){
+        $info_color = "primary";
+    }
+
+    if(sizeof($match_roles) > 0){
+        // Show action button with button label
+        if(!in_array($status_id,$item_max_approval_status_ids)){
+            $color = 'success';
+
+            if($status_approval_direction == -1){
+                $color = 'danger';
+            }
+
+            if($voided_chq==true){
+                $color='warning';
+            }
+            //echo $status_button_label;
+            //Check if voucher is missing voucher details
+            
+            if($missing_voucher_detail_flag==true){
+                $voucher_detail_value=1;
+
+                $voucher_detail_value="data-voucher-missing-details='1'";
+            }else{
+                $voucher_detail_value="data-voucher-missing-details='0'";
+            }
+            $buttons = "<button id= '".$item_id."' type='button' style='margin-right:5px' data-table='".$table_name."' data-item_id='".$item_id."'  $voucher_detail_value  data-confirmation='".$confirmation_required."' data-current_status='".$status_id."' data-next_status='".$approve_next_status."' class='btn btn-".$color." item_action ".$disable_class."'>".$status_button_label."</button>";
+        }else{
+           
+            $buttons .= "<button id= '".$item_id."' type='button' style='margin-right:5px' class='btn btn-".$info_color." disabled final_status'>".$status_name."</button>";
+        }
+        
+        // Show decline button with decline button label
+        if( $status_id != $item_initial_item_status_id && $status_approval_direction != -1){
+            $buttons .= "<button id= 'decline_btn_".$item_id."' type='button' data-table='".$table_name."' data-confirmation='".$confirmation_required."' data-item_id='".$item_id."' data-current_status='".$status_id."' data-next_status='".$decline_next_status."' class='btn btn-danger  ".$disable_class." item_action'>".$status_decline_button_label."</button>";
+        }	
+    }else{
+        // Show status name/label
+         if($voided_chq==true){
+            $info_color='warning';
+        }
+        $buttons = "<button type='button' style='margin-right:5px' class='btn btn-".$info_color." disabled final_status'>".$status_name."</button>";
+    }
+
+    return $buttons;
+}
+}
+
+
+if(!function_exists('approval_next_status')){
+    function approval_next_status($table_name, $item_status, $item_id, $status_id, $item_initial_item_status_id, $item_max_approval_status_ids){
+        // log_message('error', json_encode($item_max_approval_status_ids));
+        $status_approval_sequence = 1;
+        $status_approval_direction = 1;
+        $status = [];
+
+        $status_approval_sequences = array_values(array_unique(array_column($item_status, 'status_approval_sequence')));
+        sort($status_approval_sequences);
+
+        $approve_next_status = 0;
+        $decline_next_status = 0;
+        $sequence_order_number = 0;
+
+        if(isset($item_status[$status_id])){
+            $status = $item_status[$status_id];
+            $status_approval_sequence =  $item_status[$status_id]['status_approval_sequence'];
+            $status_approval_direction = $item_status[$status_id]['status_approval_direction'];
+            $sequence_order_number = array_search($status_approval_sequence, $status_approval_sequences);
+        }
+
+        // Compute next approval status and decline status
+        foreach($item_status as $id_status => $status_data){            
+            
+            $next_order_number = $sequence_order_number < count($status_approval_sequences) - 1 ? $sequence_order_number + 1 : $sequence_order_number;
+            $next_sequence_number = $status_approval_sequences[$next_order_number];
+
+            // Forward Jump
+            if(
+                $status_data['status_approval_sequence'] ==  $next_sequence_number && 
+                !in_array($status_id, $item_max_approval_status_ids) &&
+                $status_data['status_approval_direction'] == 1 &&
+                ($status_approval_direction == 1 ||$status_approval_direction == 0)
+                ){
+                $approve_next_status = $id_status;
+            }
+
+            // For Reinstating
+            if(
+                $status_data['status_approval_sequence'] ==  $status_approval_sequence && 
+                $status_id != $item_initial_item_status_id &&
+                $status_data['status_approval_direction'] == 0 &&
+                $status_approval_direction == -1
+            ){
+                $approve_next_status = $id_status;
+            }
+
+            // For Approving Reinstatement
+            if(
+                $status_data['status_approval_sequence'] ==  $next_sequence_number && 
+                $status_id != $item_initial_item_status_id &&
+                $status_data['status_approval_direction'] == 1 &&
+                $status_approval_direction == 0
+            ){
+                $approve_next_status = $id_status;
+            }
+
+            // For Declining
+            if(
+                $status_data['status_approval_sequence'] ==  $status_approval_sequence && 
+                $status_id != $item_initial_item_status_id &&
+                $status_data['status_approval_direction'] == -1
+                ){
+                $decline_next_status = $id_status;
+            }
+
+            // Approving reinstated item that was declined from full approval status
+
+            if(
+                $status_data['status_approval_sequence'] ==  $status_approval_sequence && 
+                $status_id != $item_initial_item_status_id &&
+                $status_data['status_approval_direction'] == 0 &&
+                $status_approval_direction == 0
+            ){
+                $approve_next_status = $item_max_approval_status_ids[0];
+            }
+        }
+
+        $role_ids = service('session')->role_ids;
+        $user_id = service('session')->user_id;
+
+        // Only get positive status greater than the next approval status seq.
+        // log_message('error', json_encode($item_status));
+        $filtered_positive_item_status_above_current_sequence = array_filter($item_status, function($value) use($item_status, $approve_next_status) {
+            return $value['status_approval_direction'] == 1 && $approve_next_status != 0 && $value['status_approval_sequence'] >= $item_status[$approve_next_status]['status_approval_sequence'];
+        });
+
+        
+        $seqs = array_column($filtered_positive_item_status_above_current_sequence,'status_approval_sequence');
+        $status_roles = array_column($filtered_positive_item_status_above_current_sequence,'status_role');
+        $seqs_with_roles = array_combine($seqs, $status_roles);
+        ksort($seqs_with_roles);
+
+        $ids = array_keys($filtered_positive_item_status_above_current_sequence);
+        $seqs = array_column($filtered_positive_item_status_above_current_sequence,'status_approval_sequence');
+        $seq_with_ids = array_combine($seqs, $ids);
+
+
+        // Compute the next approval status if the user is an actor in the next approval process
+        if($approve_next_status && sizeof(array_intersect($item_status[$approve_next_status]['status_role'], $role_ids)) > 0){
+            foreach($seqs_with_roles as $status_approval_sequence => $state_roles){ 
+                $id = $seq_with_ids[$status_approval_sequence];
+                if(sizeof(array_intersect($state_roles, $role_ids)) == 0 || in_array($id, $item_max_approval_status_ids)){
+                    $approve_next_status = $id;
+                    break;
+                }
+            }
+        }
+
+        $next_approval_states = compact('approve_next_status', 'decline_next_status');
+
+        return $next_approval_states;
     }
 }

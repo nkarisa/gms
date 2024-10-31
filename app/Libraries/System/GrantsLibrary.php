@@ -238,7 +238,6 @@ class GrantsLibrary
 
     // If the library object is still null, throw an exception
     if ($table_model == null) {
-      // log_message('error', json_encode($table_model_name));
       // To be updated and allow automatic creation of feature library files
       throw new \Exception('Object could not be instantiated');
     }
@@ -456,8 +455,8 @@ class GrantsLibrary
     array $lookupTables = [],
     string $modelWhereMethod = "listTableWhere",
     array $filterWhereArray = []
-  ){
-
+  ): array {
+    
     // Get the database connection
     $builder = $this->read_db->table($table);
 
@@ -465,6 +464,7 @@ class GrantsLibrary
       $message = "The table " . $table . " doesn't exist in the database. Check the lookupTables function in the " . $table . "Model.";
       throw new \CodeIgniter\Exceptions\PageNotFoundException($message);
     }else{
+      
       $this->runListActualQuery($builder, $table, $selectedColumns,$lookupTables,$modelWhereMethod, $filterWhereArray);
       
       if ($this->request->getPost('draw')) {
@@ -513,7 +513,6 @@ class GrantsLibrary
       }
 
       $result = $builder->get()->getResultArray();
-      // log_message('error', json_encode($result));
       return $result;
     }
 
@@ -524,10 +523,9 @@ class GrantsLibrary
     string $table,
     array $selectedColumns,
     array $lookupTables = [],
-    string $modelWhereMethod = "listTableWhere",
+    string $libraryWhereMethod = "listTableWhere",
     array $filterWhereArray = []
   ) {
-    // log_message('error', json_encode(compact('table','selectedColumns','lookupTables','modelWhereMethod','filterWhereArray')));
   
 
     // Run column selector
@@ -535,13 +533,12 @@ class GrantsLibrary
 
     // Load the model dynamically
     $library = $this->loadLibrary($table);
-
-
+    
     // Apply the model's custom "where" method, if it exists
-    if (method_exists($library, $modelWhereMethod) && 
-      count($library->$modelWhereMethod($builder)) > 0
+    if (method_exists($library, $libraryWhereMethod) && 
+      count($library->$libraryWhereMethod($builder)) > 0
     ) {
-      $library->$modelWhereMethod($builder);
+      $library->$libraryWhereMethod($builder);
     }
 
     // Handle lookup tables and apply joins
@@ -555,6 +552,7 @@ class GrantsLibrary
 
         // Join lookup tables
         $lookupTableId = $lookupTable . '_id';
+        
         $builder->join($lookupTable, $lookupTable . '.' . $lookupTableId . '=' . $table . '.fk_' . $lookupTableId);
       }
     }
@@ -618,6 +616,8 @@ class GrantsLibrary
 
     return $visible_columns;
   }
+
+  
   public function lookupTablesFields(string $table): array
   {
     $lookup_tables_fields = array();
@@ -631,31 +631,75 @@ class GrantsLibrary
     return $lookup_tables_fields;
   }
 
-  function callbackLookupTables(string $table_name): array
+  // function callbackLookupTables(string $table_name): array
+  // {
+
+  //   $featureLibrary = $this->loadLibrary($table_name);
+  //   $approveItemLibrary = $this->loadLibrary('approve_item');
+
+  //   $lookup_tables = array();
+
+  //   if (is_array($featureLibrary->lookupTables($table_name))) {
+  //     if ($this->action !== 'single_form_add') {
+  //       // Check if status and approval lookup tables doesn't exist and add them
+  //       $lookup_tables = $featureLibrary->lookupTables($table_name);
+  //       $this->addMandatoryLookupTables($lookup_tables);
+
+  //       // Hide status and approval columns if the active controller/table is not approveable
+  //       if (!$approveItemLibrary->approveableItem($table_name)) {
+  //         $this->removeMandatoryLookupTables($lookup_tables);
+  //       }
+  //     } else {
+  //       $lookup_tables = $featureLibrary->lookupTables($table_name);
+  //     }
+  //   }
+
+  //   return $lookup_tables;
+  // }
+
+  function lookupTables(): array
   {
+    $lookUpTables = $this->callbackLookupTables();
+    return $lookUpTables;
+  }
 
-    $featureLibrary = $this->loadLibrary($table_name);
-    $approveItemLibrary = $this->loadLibrary('approve_item');
+  public function callbackLookupTables($table_name = ''): array
+    {
 
-    $lookup_tables = array();
+        $approveItemLibrary = $this->loadLibrary('approve_item');
 
-    if (is_array($featureLibrary->lookupTables($table_name))) {
-      if ($this->action !== 'single_form_add') {
-        // Check if status and approval lookup tables doesn't exist and add them
-        $lookup_tables = $featureLibrary->lookupTables($table_name);
-        $this->addMandatoryLookupTables($lookup_tables);
+        if (isEmpty($table_name))
+            $table_name = $this->controller;
+
+        $fields = $this->getAllTableFields($table_name);
+
+        $foreign_tables_array_padded_with_false = array_map(function ($elem) {
+            return substr($elem, 0, 3) == 'fk_' ? substr($elem, 3, -3) : false;
+        }, $fields);
+
+        // Prevent listing false values and status or approval tables for lookup. 
+        // Add status_name and approval_name to the correct visible_columns method in models to see these fields in a page
+        $foreign_tables_array = array_filter($foreign_tables_array_padded_with_false, function ($elem) {
+            return $elem ? $elem : false;
+        });
+
+        // Just remove approval table due to its performance degradation history. This table will be removed in the future
+        if (in_array('approval', $foreign_tables_array)) {
+            unset($foreign_tables_array[array_search('approval', $foreign_tables_array)]);
+        }
 
         // Hide status and approval columns if the active controller/table is not approveable
-        if (!$approveItemLibrary->approveableItem($table_name)) {
-          $this->removeMandatoryLookupTables($lookup_tables);
-        }
-      } else {
-        $lookup_tables = $featureLibrary->lookupTables($table_name);
-      }
-    }
 
-    return $lookup_tables;
-  }
+        if (!$approveItemLibrary->approveableItem($table_name)) {
+            if (in_array('status', $foreign_tables_array)) {
+                unset($foreign_tables_array[array_search('status', $foreign_tables_array)]);
+            }
+
+        }
+
+        return !empty($foreign_tables_array) ? array_values($foreign_tables_array) : [];;
+
+    }
 
   public function historyTrackingField(string $table_name, string $history_type): string
   {
@@ -758,7 +802,7 @@ class GrantsLibrary
     $fields_meta_data = [];
     $library = $this->loadLibrary($table);
 
-    $table_names = $this->lookupTables($table);
+    $table_names = $this->callbacklookupTables($table);
 
     array_push($table_names, $table);
 
@@ -880,7 +924,6 @@ class GrantsLibrary
 
   function checkIfTableHasDetailTable(string $table_name = ""): bool
   {
-    // log_message('error', json_encode($table_name));
     $table = isEmpty($table_name) ? $this->controller : $table_name;
 
     $all_detail_tables = $this->checkDetailTables($table);
@@ -930,12 +973,12 @@ class GrantsLibrary
   public function listTableWhere(\CodeIgniter\Database\BaseBuilder $queryBuilder): void
   {
     $tables_with_account_system_relationship = $this->tablesWithAccountSystemRelationship();
-
     $lookup_tables = $this->lookupTables();
-
     $account_system_table = '';
 
-    if (!empty($lookup_tables)) {
+    if(!$this->session->system_admin && in_array($this->controller, $tables_with_account_system_relationship)){
+      $queryBuilder->where(array($this->controller.'.fk_account_system_id' => $this->session->user_account_system_id));
+    }elseif (!empty($lookup_tables)) {
       foreach ($lookup_tables as $lookup_table) {
         if (in_array($lookup_table, $tables_with_account_system_relationship)) {
           $account_system_table = $lookup_table;
@@ -946,6 +989,44 @@ class GrantsLibrary
       if (!$this->session->system_admin && $account_system_table !== '') {
         $queryBuilder->where(array($account_system_table . '.fk_account_system_id' => $this->session->user_account_system_id));
       }
+    }
+  }
+
+
+  function checkIfTableHasAccountSystem($table)
+  {
+
+    $table_has_account_system = false;
+
+    $table_fields = $this->getAllTableFields($table);
+
+    if(in_array( 'fk_account_system_id', $table_fields)) {
+      $table_has_account_system = true;
+    }
+    //echo 1;exit;
+    return $table_has_account_system;
+  }
+
+  function joinTablesWithAccountSystem($builder, $table)
+  {
+
+    $array_intersect = array_intersect($this->callbackLookupTables($table), $this->tablesWithAccountSystemRelationship());
+    
+    $array_intersect = array_values($array_intersect);
+
+    if ($this->checkIfTableHasAccountSystem($table)) {
+      $builder->join('account_system', 'account_system.account_system_id=' . $table . '.fk_account_system_id');
+      $builder->where(array('account_system_code' => $this->session->user_account_system_code));
+    } elseif (count($array_intersect) > 0) {
+    
+        foreach ($array_intersect as $lookup_table) {
+          $lookup_table_id = $lookup_table . '_id';
+          $builder->join($lookup_table, $lookup_table . '.' . $lookup_table_id . '=' . $table . '.fk_' . $lookup_table_id);
+        }
+
+            
+      $builder->join('account_system', 'account_system.account_system_id=' . $array_intersect[0] . '.fk_account_system_id');
+      $builder->where(array('account_system_code' => $this->session->user_account_system_code));
     }
   }
 
@@ -1008,7 +1089,8 @@ class GrantsLibrary
 
     // Check if the record exists and if 'fk_status_id' exists in the result
     if ($recordObject->getNumRows() > 0 && array_key_exists('fk_status_id', (array) $recordObject->getRowArray())) {
-      $fkStatusId = $recordObject->getRow()->fk_status_id;
+      $status_id = $recordObject->getRow()->fk_status_id;
+      $fkStatusId = $status_id != null ? $status_id : 0;
     }
 
     return $fkStatusId;
@@ -1435,10 +1517,9 @@ class GrantsLibrary
   function unsetLookupTablesIds(&$keys, $table_name = "")
   {
 
-    $library = $this->library;//$this->loadLibrary($table_name);
-    if ($table_name != "") {
-      $library = $this->loadLibrary($table_name);
-    }
+    $table_name = $table_name == "" ? $this->controller : $table_name;
+    $library = $this->loadLibrary($table_name);
+
     $lookup_tables = $library->lookupTables();
 
     // Unset the lookup id keys
@@ -1688,43 +1769,23 @@ class GrantsLibrary
   {
 
     $lookup_values = [];
-
     $this->library = $this->loadLibrary($table);
+
+    log_message('error',method_exists($this->library, 'lookupValues'));
 
     if (
       (method_exists($this->library, 'lookupValues')
         && is_array($this->library->lookupValues())
         && array_key_exists($table, $this->library->lookupValues()))
     ) {
-      // log_message('error','One');
       $result = $this->library->lookupValues()[$table];
-
       $ids_array = array_column($result, $this->primaryKeyField($table));
       $value_array = array_column($result, $this->nameField($table));
-
       $lookup_values = array_combine($ids_array, $value_array);
-      // } elseif (
-      //   (method_exists($library, 'lookupValues') &&
-      //     is_array($library->lookupValues()))
-      // ) {
-      //   // log_message('error','Two');
-      //   $result = $this->library->lookupValues();
-
-      //   $ids_array = array_column($result, $this->primaryKeyField($table));
-      //   $value_array = array_column($result, $this->nameField($table));
-
-      //   $lookup_values = []; //array_combine($ids_array,$value_array);
-      //   $count = 0;
-
-      //   foreach ($value_array as $value) {
-      //     $lookup_values[$ids_array[$count]] = $value;
-      //     $count++;
-      //   }
     } else {
-      // log_message('error','Three');
       $lookup_values = $this->getLookupValues($table);
     }
-
+    // log_message('error', json_encode($lookup_values));
     return $lookup_values;
   }
 
@@ -1898,6 +1959,30 @@ class GrantsLibrary
     return $lookup_tables;
   }
 
+
+  function listTableWhereByAccountSystem($builder, $tableName)
+  {
+    $fields = 
+    $tables_with_account_system_relationship = $this->tablesWithAccountSystemRelationship();
+    $lookup_tables = $this->lookupTables();
+
+    $account_system_table = '';
+
+    if (!empty($lookup_tables)) {
+      foreach ($lookup_tables as $lookup_table) {
+        if (in_array($lookup_table, $tables_with_account_system_relationship)) {
+          $account_system_table = $lookup_table;
+          break;
+        }
+      }
+
+      if (!$this->session->system_admin && $account_system_table !== '') {
+        $builder->where(array($account_system_table . '.fk_account_system_id' => $this->session->user_account_system_id));
+      }
+    }
+  }
+
+
   /**
    * single_form_add_visible_columns
    * 
@@ -1917,10 +2002,8 @@ class GrantsLibrary
       is_array($this->library->singleFormAddVisibleColumns()) &&
         !empty($this->library->singleFormAddVisibleColumns())
     ) {
-      // log_message('error', 'One');
       $single_form_add_visible_columns = $this->library->singleFormAddVisibleColumns();
     } else {
-      // log_message('error', 'Two');
       // Check if the table has list_table_visible_columns not empty
       $lookup_tables = $this->checkLookupTables();
       $get_all_table_fields = $this->getAllTableFields();
@@ -2040,7 +2123,6 @@ class GrantsLibrary
         }
 
         $returned_validation_message = $this->addInserts($header_record_requires_approval, $detail_records_require_approval, $post_has_detail, $header, $detail);
-        // log_message('error', $returned_validation_message);
         if (json_decode($returned_validation_message, true)['flag'] == true) {
           $success++;
         } else {
@@ -2292,7 +2374,7 @@ class GrantsLibrary
 
       // Get the list of visible columns and lookup tables
       $editVisibleColumns = $library->editVisibleColumns();
-      $lookupTables = $this->lookupTables($table);
+      $lookupTables = $this->callbacklookupTables($table);
 
       $getAllTableFields = $this->getAllTableFields();
 
@@ -2517,5 +2599,15 @@ class GrantsLibrary
         // Return JSON response
         return $this->response->setJSON(['flag' => $flag, 'message' => $flagMessage]);
     }
+    
+    function generateItemTrackNumberAndName($approveable_item)
+    {
+      $header_random = record_prefix($approveable_item) . '-' . rand(1000, 90000);
+      $columns[$approveable_item . '_track_number'] = $header_random;
+      $columns[$approveable_item . '_name'] = ucfirst($approveable_item) . ' # ' . $header_random;
+  
+      return $columns;
+    }
+    
 
 }

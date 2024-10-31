@@ -2,7 +2,7 @@
 
 namespace App\Libraries\System\Outputs;
 
-
+use \CodeIgniter\Database\BaseBuilder;
 class ListOutput extends OutputTemplate
 {
 
@@ -113,7 +113,7 @@ private function toggleListSelectColumns(): array
 
     private function listInternalQueryResults(Array $lookup_tables):Array {
         $table = $this->controller;
-        //echo hash_id($this->CI->id,'decode');exit;
+    
         $filter_where_array = hash_id($this->id,'decode') > 0 && !in_array($table,$this->config->tableThatDontRequireHistoryFields) ? [$table.'.fk_status_id'=>hash_id($this->id,'decode')] : [];
         $toggle_list_select_columns = $this->toggleListSelectColumns();
 
@@ -130,14 +130,13 @@ private function toggleListSelectColumns(): array
       }
 
       private function runDataTableListQuery(
-        \CodeIgniter\Database\BaseBuilder $builder,
+        BaseBuilder $builder,
         string $table,
         array $selected_columns,
         array $lookup_tables,
         string $where_method = "listTableWhere",
-        array $filter_where_array = array()
-    ) {
-
+        array $filter_where_array = []
+    ): BaseBuilder {
         // Get the database connection
         $db = $this->read_db;
 
@@ -145,11 +144,11 @@ private function toggleListSelectColumns(): array
         $builder->select($selected_columns);
     
         // Load the model dynamically
-        $featureLibary = $this->libs->loadLibrary($table);
-    
+        $featureLibrary = $this->libs->loadLibrary($table);
+     
         // Apply model-defined where condition if the method exists
-        if (method_exists($featureLibary, $where_method)) {
-            $featureLibary->$where_method($builder);
+        if (method_exists($featureLibrary, $where_method)) {
+            $featureLibrary->$where_method($builder);
         }
     
         // Handle lookup tables
@@ -166,8 +165,8 @@ private function toggleListSelectColumns(): array
         }
     
         // Apply ordering
-        if (method_exists($featureLibary, 'orderListPage')) {
-            $builder->orderBy($featureLibary->orderListPage());
+        if (method_exists($featureLibrary, 'orderListPage')) {
+            $builder->orderBy($featureLibrary->orderListPage());
         } else {
             $builder->orderBy($table . '_created_date DESC');
         }
@@ -248,7 +247,6 @@ private function toggleListSelectColumns(): array
             }
             
             $rst = $result_object->getResultArray();
-            // log_message('error', json_encode($rst));
             return $rst;
         }
     }
@@ -282,10 +280,9 @@ private function toggleListSelectColumns(): array
 
         // Get the tables foreign key relationship
         $lookup_tables = $this->libs::call($this->controller.'.lookupTables');
-        // log_message('error', json_encode($lookup_tables));
         // Get result from grants model if feature model list returns empty
-        $query_result = $this->listInternalQueryResults($lookup_tables)['selected_results']; // System generated query result
-        // log_message('error', json_encode($query_result));
+        $listInternalQueryResults = $this->listInternalQueryResults($lookup_tables);
+        $query_result = $listInternalQueryResults['selected_results']; // System generated query result
         if (method_exists($featureLibrary, 'list') && !empty($featureLibrary->list())) {
             $feature_model_list_result = $featureLibrary->list();
             if (is_array($feature_model_list_result)) {
@@ -296,7 +293,7 @@ private function toggleListSelectColumns(): array
 
         // // Implemeting resetting of options if a field is changed from to a select type
         $query_result['selected_results'] = $this->libs->updateQueryResultForFieldsChangedToSelectType($this->controller, $query_result);
-        $query_result['total_records'] = $this->listInternalQueryResults($lookup_tables)['total_records'];
+        $query_result['total_records'] = $listInternalQueryResults['total_records'];
         
         return $query_result;
     }
@@ -316,8 +313,9 @@ private function toggleListSelectColumns(): array
             return [];
         }
 
-        // Mandatory fields for details tables
-        $result = $this->toggleListQueryResults()['selected_results'];
+        $toggleListQueryResults = $this->toggleListQueryResults();
+
+        $result = $toggleListQueryResults['selected_results'];
 
         $keys = $this->toggleListSelectColumns();
         $show_add_button = $this->libs::call($this->controller.'.checkShowAddButton', [$this->controller]);
@@ -329,7 +327,7 @@ private function toggleListSelectColumns(): array
           'keys'=> $keys,
           'columns' => $columns,
           'fields_meta_data'=>$this->libs->fieldsMetaDataTypeAndName($this->controller),
-          'total_records'=>  $this->toggleListQueryResults()['total_records'],
+          'total_records'=>  $toggleListQueryResults['total_records'],
           'table_body'=>$result,
           'table_name'=> $this->controller,
           'is_multi_row'=>$this->libs::call($this->controller.'.checkIfTableIsMultiRow'),

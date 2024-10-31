@@ -32,7 +32,6 @@ $max_fav_items_reached = $favorite_menu_items_with_max_flag['max_items_reached']
 </style>
 
 <?php 
-    // log_message('error',json_encode($result));
     $userLibrary = new UserLibrary();
     if($userLibrary->checkRoleHasPermissions(ucfirst($controller),'update')){
 

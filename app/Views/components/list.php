@@ -5,9 +5,7 @@ use App\Libraries\Core\UserLibrary;
 
 $userLibrary = new UserLibrary();
 
-// if(!empty($this->grants->field_data($this->controller))){
-  extract($result);
-// }
+extract($result);
 
 ?>
 
@@ -24,8 +22,8 @@ $userLibrary = new UserLibrary();
 
 
 <div class="row">
-  <div class="col-xs-12">
-    <table class="table table-striped" id="datatable">
+  <div class="col-xs-12" style='overflow-x: auto'>
+    <table class="table table-striped nowrap" id="datatable" style="width:100%">
       <thead><?=render_list_table_header($controller,$keys);?></thead>
       <tbody>
       </tbody>

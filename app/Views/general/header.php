@@ -47,8 +47,8 @@
 							
                     </a>
 
-					<?php if($primary_user_data_id && $user_id != $primary_user_data_id){?>
-						<div style="cursor:pointer;" id="btn_restore_user" class='label label-danger'><?=get_phrase('restore_to');?>  <?php echo ucfirst($this->session->primary_user_data['user_name']);?></div>
+					<?php if($session->has('primary_user_data') && $user_id != $session->primary_user_data['user_id']){?>
+						<div style="cursor:pointer;" id="btn_restore_user" class='label label-danger'><?=get_phrase('restore_to');?>  <?php echo ucfirst($session->primary_user_data['user_name']);?></div>
 					<?php }?>
 
 
@@ -60,7 +60,7 @@
 						</a>
 					</li>
 
-					<?php if($user_can_read_switch || $primary_user_data_id){?>
+					<?php if($user_can_read_switch || $session->primary_user_data['user_id']){?>
 					<li>
 						<a href="<?php echo base_url();?>user_switch/list">
                         	<i class="fa fa-toggle-on"></i>
@@ -130,10 +130,16 @@
 <hr class="hidden-print" style="margin-top:0px;" />
 
 <script>
+
 	$("#btn_restore_user").on('click',function(){
-		const url = "<?=base_url();?>login/switch_user/<?=$primary_user_data_id ? $primary_user_data_id : 0;?>";
+		const url = "<?=base_url();?>login/switch_user/<?=$session->has('primary_user_data') ? hash_id($session->primary_user_data['user_id'],'encode'): 0;?>";
 		location.href = url;
 	});
+
+	// $("#btn_restore_user").on('click',function(){
+	// 	const url = "<?=base_url();?>login/switch_user/<?=$primary_user_data_id ? $primary_user_data_id : 0;?>";
+	// 	location.href = url;
+	// });
 
 	// $(document).ready(function () {
 		
@@ -149,12 +155,15 @@
 
 	$(".language_selector").on('click', function () {
 		const lang = $(this).attr('id');
-		const url = "<?=base_url();?>language/switch_language/" + lang;
-
-		$.get(url, function (resp) {
-			alert(resp);
-
-			window.location.reload();
+		const url = "<?=site_url("language/switch_language");?>/" + lang;
+	
+		$.ajax({
+			url: url,
+            type: 'GET',
+            success: function (response) {
+				alert(response);
+                window.location.reload();
+            }
 		});
 	})
 </script>
