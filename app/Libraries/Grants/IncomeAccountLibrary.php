@@ -8,17 +8,19 @@ class IncomeAccountLibrary extends GrantsLibrary
 {
 
     protected $table;
-    protected $grantsModel;
+    protected $incomeAccountModel;
 
     function __construct()
     {
         parent::__construct();
 
-        $this->grantsModel = new IncomeAccountModel();
+        $this->incomeAccountModel = new IncomeAccountModel();
 
-        $this->table = 'grants';
+        $this->table = 'income_account';
     }
 
-
+    function detailTables(): array {
+        return ['expense_account'];
+    }
    
 }

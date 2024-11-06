@@ -57,16 +57,21 @@ trait VisibilityTrait {
       return [];
     }
 
-    public function detailListTableWhere():array {
-      return [];
+    public function detailListTableWhere(\CodeIgniter\Database\BaseBuilder $builder):void {
+      
+    }
+
+
+    public function ListTableWhere(): void{
+
     }
 
     // public function orderListPage(){
     //   return '';
     // }
 
-    public function detailListQuery(): array {
-      return [];
+    public function detailListQuery(): void {
+      // return [];
     }
 
     function lookupValues(): array{

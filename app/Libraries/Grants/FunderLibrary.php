@@ -19,6 +19,7 @@ class FunderLibrary extends GrantsLibrary
         $this->table = 'grants';
     }
 
-
-   
+    function detailTables(): array{
+        return ['project'];
+    }
 }

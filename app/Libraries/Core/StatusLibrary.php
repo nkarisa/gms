@@ -18,16 +18,86 @@ class StatusLibrary extends GrantsLibrary
         $this->statusModel = new StatusModel();
 
         $this->table = 'status';
+
+        $this->checkDeclineReinstateStatus();
     }
 
-    // public function multiSelectField(): string
-    // {
-    //     return '';
-    // }
+    function checkDeclineReinstateStatus(){
 
-    // public function actionBeforeIinsert(array $postArray): array{
-    //     return $postArray;
-    // }
+        $id = hash_id($this->id,'decode');
+
+        $builder = $this->write_db->table('status');
+
+        $builder->select(array(
+          'status_id',
+          'status_name',
+          'fk_approval_flow_id',
+          'status_approval_sequence',
+          'status_backflow_sequence',
+          'status_approval_direction',
+          'status_is_requiring_approver_action'
+        ));
+
+        $builder->where(array('fk_approval_flow_id'=>$id));
+        $approval_flow_status = $builder->get()->getResultArray(); 
+    
+        $status_grouped_by_level = [];
+    
+        foreach ($approval_flow_status as $status) {
+          if ($status['status_approval_sequence'] == 1) {
+            continue;
+    
+          }
+    
+          $status_grouped_by_level[$status['status_approval_sequence']][$status['status_approval_direction']] = $status;
+        }
+    
+        $directions = [-1, 0, 1];
+    
+        $new_status_to_add = [];
+    
+        $cnt = 0;
+    
+        foreach($status_grouped_by_level as $status_level => $status){
+          foreach($directions as $direction){
+            if(!array_key_exists($direction,$status)){
+    
+              $status_name = get_phrase("fully_approve");
+              $status_button_label = '';
+    
+              if($direction == -1){
+                $status_name = get_phrase("declined");
+                $status_button_label = get_phrase('reinstate');
+              }elseif($direction == 0){
+                $status_name = get_phrase("reinstated");
+                $status_button_label = get_phrase("approve_after_reinstate");
+              }
+    
+              $new_status_to_add[$cnt]['status_name'] = $status_name;
+              $new_status_to_add[$cnt]['status_button_label'] = $status_button_label;
+              $new_status_to_add[$cnt]['fk_approval_flow_id'] = $id;
+              $new_status_to_add[$cnt]['status_approval_sequence'] = $status_level;
+              $new_status_to_add[$cnt]['status_approval_direction'] = $direction;
+              $new_status_to_add[$cnt]['status_backflow_sequence'] = $direction == -1 ? 1 : 0;
+              $new_status_to_add[$cnt]['status_is_requiring_approver_action'] = 1;
+    
+              $new_status_to_add[$cnt]['status_track_number'] = $this->generateItemTrackNumberAndName('status')['status_track_number'];
+              $new_status_to_add[$cnt]['status_created_date'] = date('Y-m-d');
+              $new_status_to_add[$cnt]['status_created_by'] = $this->session->user_id;
+              $new_status_to_add[$cnt]['status_last_modified_by'] = $this->session->user_id;
+    
+    
+            }
+            $cnt++;
+          }
+        }
+    
+        if(!empty($new_status_to_add)){
+          $builder->insertBatch($new_status_to_add);
+        }
+    
+        //print_r($new_status_to_add);exit;
+      }
 
     /**
      * Checks if the status ID is the maximum for a given approveable item and item ID.
@@ -254,7 +324,7 @@ class StatusLibrary extends GrantsLibrary
         return $res;
     }
 
-    public function initialItemStatus($table_name = "", $account_system_id = 0)
+    public function initialItemStatus($table_name = "", $account_system_id = 0): int
     {
 
         if ($account_system_id == 0) {
@@ -494,21 +564,379 @@ class StatusLibrary extends GrantsLibrary
         return $statusRecordsWithStatusIdKey;
     }
 
-    function returnToPreviousPositiveStatus($table_name, $item_id, $item_initial_item_status_id){
+    function returnToPreviousPositiveStatus($table_name, $item_id, $item_initial_item_status_id)
+    {
 
         $data['fk_status_id'] = $item_initial_item_status_id;
         $builder = $this->write_db->table($table_name);
-        $builder->where($table_name.'_id', $item_id);
+        $builder->where($table_name . '_id', $item_id);
         $builder->update($data);
-    
-        $updates_rows =  false;
-        // log_message('error', json_encode($this->write_db->affected_rows()));
-        if($this->write_db->affectedRows() > 0){
-          $updates_rows = true;
+
+        $updates_rows = false;
+        if ($this->write_db->affectedRows() > 0) {
+            $updates_rows = true;
         }
         // $this->write_db->close();
-    
+
         return $updates_rows;
     }
 
+
+    function detailListTableWhere(\CodeIgniter\Database\BaseBuilder $builder): void
+    {
+        if (!$this->session->system_admin) {
+            $builder->groupStart();
+            $builder->where(array('status_approval_sequence <> ' => 1));
+            $builder->oRwhere(array('status_is_requiring_approver_action <> ' => 0));
+            $builder->groupEnd();
+
+            $builder->where(array('status_approval_sequence <> ' => 0));
+            $builder->where(array('status_approval_direction ' => 1));
+            $builder->orderBy('status_approval_sequence ASC');
+        }
+
+    }
+
+    public function singleFormAddVisibleColumns(): array
+    {
+        return ['status_name', 'status_button_label', 'status_decline_button_label', 'approval_flow_name', 'status_approval_sequence'];
+    }
+
+
+    function action_before_edit($post_array)
+    {
+
+        $this->write_db->transStart();
+
+        $status_id = hash_id($this->id, 'decode');
+
+        $builder = $this->read_db->table('status');
+        $builder->select('fk_approval_flow_id, status_approval_sequence');
+        $builder->where('status_id', $status_id);
+        $status_obj = $builder->get()->getRow();
+
+        $current_seq = $status_obj->status_approval_sequence;
+        // $updated_seq = $post_array['header']['status_approval_sequence'];
+
+        // Prevent from updating the approval sequencies with an edit.
+        $post_array['header']['status_approval_sequence'] = $current_seq;
+
+        // Prevent giving a decline button label for step number 1
+        if ($status_obj->status_approval_sequence == 1) {
+            $post_array['header']['status_decline_button_label'] = NULL;
+        }
+
+        $this->write_db->transComplete();
+
+        if ($this->write_db->transStatus() === FALSE) {
+            return [];
+        } else {
+            return $post_array;
+        }
+    }
+
+
+
+    function actionAfterInsert($post_array, $approval_id, $header_id): bool
+    {
+        $state = true;
+        // log_message('error', json_encode($post_array));
+        // Get approve item name of the of the created status
+        $builder = $this->write_db->table('status');
+        $builder->join('approval_flow', 'approval_flow.approval_flow_id=status.fk_approval_flow_id');
+        $builder->join('approve_item', 'approve_item.approve_item_id=approval_flow.fk_approve_item_id');
+        $builder->where('status_id', $header_id);
+        $approve_item_name = $builder->get()->getRow()->approve_item_name;
+
+        // Get the dependant/ detail table of the approve item name
+        $approve_item_detail_name = $this->dependantTable($approve_item_name);
+
+        $builder = $this->write_db->table('approval_flow');
+        $builder->join('approve_item', 'approve_item.approve_item_id=approval_flow.fk_approve_item_id');
+        $builder->where('approve_item_name', $approve_item_detail_name);
+        $dependant_table_approval_flow = $builder->get()->getRow();
+
+        if ($approve_item_detail_name !== "") {
+            $this->write_db->transStart();
+            $data['status_track_number'] = $this->generateItemTrackNumberAndName('status')['status_track_number'];
+            $data['status_name'] = $post_array['status_name'];
+            $data['fk_approval_flow_id'] = $dependant_table_approval_flow->approval_flow_id;
+            $data['status_approval_sequence'] = $post_array['status_approval_sequence'];
+            $data['status_backflow_sequence'] = $post_array['status_backflow_sequence'];
+            $data['status_approval_direction'] = $post_array['status_approval_direction'];
+            $data['status_is_requiring_approver_action'] = $post_array['status_is_requiring_approver_action'];
+            $data['status_created_date'] = $post_array['status_created_date'];
+            $data['status_created_by'] = $post_array['status_created_by'];
+            $data['status_last_modified_by'] = $post_array['status_last_modified_by'];
+            $data['fk_approval_id'] = $post_array['fk_approval_id'];
+            $data['fk_status_id'] = $post_array['fk_status_id'];
+
+            $builder = $this->write_db->table('status');
+            $builder->insert($data);
+            $this->write_db->transComplete();
+
+            if ($this->write_db->transStatus() == false) {
+                $state = false;
+            } 
+        }
+
+        return $state;
+    }
+
+
+    function changeFieldType(): array
+    {
+  
+      $change_field_type = array();
+  
+      $roles = $this->getAccountSystemRoles($this->session->user_account_system_id);
+      
+      $builder = $this->read_db->table('role');
+      $builder->select(array('role_id', 'role_name'));
+  
+      if (!$this->session->system_admin) {
+        $builder->where('fk_account_system_id', $this->session->user_account_system_id);
+      }
+  
+      $roles = $builder->get()->getResultArray();
+  
+      $array_of_role_ids = array_column($roles, 'role_id');
+      $array_of_role_names = array_column($roles, 'role_name');
+      $role_select_options = array_combine($array_of_role_ids, $array_of_role_names);
+  
+      // print_r($role_select_options);
+      // exit;
+  
+      $change_field_type['role_name']['field_type'] = 'select';
+      $change_field_type['role_name']['options'] = $role_select_options;
+  
+      $change_field_type['status_approval_direction']['field_type'] = 'select';
+      $change_field_type['status_approval_direction']['options'] = array(
+        '-1' => get_phrase('return_to_sender'),
+        '0' => get_phrase('reinstated_to_last_approver'),
+        '1' => get_phrase('send_to_next_approver')
+      );
+  
+  
+      $change_field_type['status_is_requiring_approver_action']['field_type'] = 'select';
+      $change_field_type['status_is_requiring_approver_action']['options'] = array(
+        get_phrase('no'),
+        get_phrase('yes')
+      );
+  
+      $change_field_type['status_approval_sequence']['field_type'] = 'select';
+  
+      $default_sequencies = array(
+        '1' => get_phrase('first_level'),
+        '2' => get_phrase('second_level'),
+        '3' => get_phrase('third_level'),
+        '4' => get_phrase('fourth_level'),
+        '5' => get_phrase('fifth_level'),
+        '6' => get_phrase('sixth_level'),
+        '7' => get_phrase('seventh_level'),
+        '8' => get_phrase('eight_level'),
+        '9' => get_phrase('nineth_level'),
+        '10' => get_phrase('tenth_level'),
+      );
+  
+      if ($this->action == 'singleFormAdd') {
+        // Get an array from the $default_sequencies of approval sequencies that have not been used in reference to the status table
+        $unused_approval_sequencies = $this->statusApprovalSequencies($default_sequencies);
+        $immediate_unused_approval_sequency_label = current($unused_approval_sequencies);
+        $immediate_unused_approval_sequency_key = array_search($immediate_unused_approval_sequency_label, $unused_approval_sequencies);
+  
+        // Create an array of the immediate unused approval sequency
+        $immediate_unused_approval_sequency_array = [$immediate_unused_approval_sequency_key => $immediate_unused_approval_sequency_label];
+  
+        $default_sequencies = $immediate_unused_approval_sequency_array;
+      }elseif($this->action == 'edit'){
+  
+        $builder = $this->read_db->table('status');
+        $builder->select('fk_approval_flow_id');
+        $builder->where(array('status_id' => hash_id($this->id, 'decode')));
+        $approval_flow_id = $builder->get()->getRow()->fk_approval_flow_id;
+  
+        $builder = $this->read_db->table('status');
+        $builder->select('status_approval_sequence');
+        $builder->where(array('fk_approval_flow_id' => $approval_flow_id,'status_approval_sequence > ' => 1));
+        $builder->orderBy('status_approval_sequence ASC');
+        $status_approval_sequence_obj = $builder->get();
+  
+        if($status_approval_sequence_obj->getNumRows() > 0){
+          $status_approval_sequence = $status_approval_sequence_obj->getResultArray();
+  
+          $levels = array_column( $status_approval_sequence, 'status_approval_sequence');
+          $levels = array_unique($levels);
+          $levels = array_flip($levels);
+  
+          array_pop($levels); // Remove the last sequence
+          unset($default_sequencies[1]); // Remove the first level
+  
+          $default_sequencies = array_intersect_key($default_sequencies, $levels); // Get sequences that are common
+          $default_sequencies[0] =  get_phrase('deactivate');
+          
+        }
+      }
+  
+      $change_field_type['status_approval_sequence']['options'] = $default_sequencies;
+  
+      $change_field_type['status_backflow_sequence']['field_type'] = 'select';
+      $change_field_type['status_backflow_sequence']['options'] = array(
+        '0' => get_phrase('none'),
+        '1' => get_phrase('first_level'),
+        '2' => get_phrase('second_level'),
+        '3' => get_phrase('third_level'),
+        '4' => get_phrase('fourth_level'),
+        '5' => get_phrase('fifth_level'),
+        '6' => get_phrase('sixth_level'),
+        '7' => get_phrase('seventh_level'),
+        '8' => get_phrase('eight_level'),
+        '9' => get_phrase('nineth_level'),
+        '10' => get_phrase('tenth_level'),
+      );
+  
+  
+      return $change_field_type;
+    }
+
+
+    function statusApprovalSequencies($change_field_type_sequencies)
+  {
+    $lookup_values = [];
+
+    if ($this->id != null) {
+      $builder = $this->read_db->table('status');  
+      $builder->select(array('status_approval_sequence'));
+      $builder->where([
+        'approval_flow_id' => hash_id($this->id, 'decode'),
+        'status_is_requiring_approver_action' => 1, 'status_approval_direction' => 1
+      ]);
+      $builder->join('approval_flow', 'approval_flow.approval_flow_id=status.fk_approval_flow_id');
+      $status_approval_sequence_obj = $builder->get();
+
+      if ($status_approval_sequence_obj->getNumRows() > 0) {
+        $status_approval_sequence = array_flip(array_column($status_approval_sequence_obj->getResultArray(), 'status_approval_sequence'));
+
+        $all_status_approval_sequence = $change_field_type_sequencies; //$this->change_field_type()['status_approval_sequence'];
+
+        foreach ($status_approval_sequence as $status_approval_sequence_id => $status_approval_sequence_label) {
+          if (array_key_exists($status_approval_sequence_id, $all_status_approval_sequence)) {
+            unset($all_status_approval_sequence[$status_approval_sequence_id]);
+          }
+        }
+      }
+
+      $lookup_values =  $all_status_approval_sequence;
+    }
+
+    return $lookup_values;
+  }
+
+
+  function add()
+  {
+    $post = $this->request->getPost()['header'];
+
+    $jumps = [1, 0, -1]; // 1 = Submitted new Item, 0 = Submitted Reinstated Item, -1 = Declined Item
+
+    $messageAndFlag['flag'] = true;
+    $messageAndFlag['message'] = get_phrase('insert_successful');
+    
+    $insert_array = [];
+
+    $this->write_db->transStart();
+
+    $status_approval_sequence = $post['status_approval_sequence'];
+    $approval_flow_id = $post['fk_approval_flow_id'];
+
+    // Insert a fully approved status/ final status
+    $this->insertFinalApprovalStatus($approval_flow_id, $status_approval_sequence);
+
+    $cnt = 0;
+
+    foreach ($jumps as $jump) {
+
+      $insert_array[$cnt]['status_approval_sequence'] = $post['status_approval_sequence'];
+      $insert_array[$cnt]['fk_approval_flow_id'] = $post['fk_approval_flow_id'];
+      $insert_array[$cnt]['status_name'] = $post['status_name'];
+      $insert_array[$cnt]['status_button_label'] = $post['status_button_label'];
+      $insert_array[$cnt]['status_decline_button_label'] = "";
+      $insert_array[$cnt]['status_signatory_label'] = NULL;
+
+
+      if ($jump == 0) {
+        $insert_array[$cnt]['status_name'] = 'Reinstated for ' . $insert_array[$cnt]['status_name'];
+        $insert_array[$cnt]['status_button_label'] =  get_phrase("approve");
+        $insert_array[$cnt]['status_decline_button_label'] = $post['status_decline_button_label'];
+      } elseif ($jump == 1) {
+        $insert_array[$cnt]['status_signatory_label'] = NULL;//$post['status_signatory_label'];
+        $insert_array[$cnt]['status_decline_button_label'] = $post['status_decline_button_label'];
+      } elseif ($jump == -1) {
+        $insert_array[$cnt]['status_name'] = 'Declined from ' . $insert_array[$cnt]['status_name'];
+        $insert_array[$cnt]['status_button_label'] = get_phrase("reinstate");
+      }
+
+
+      //$status_approval_sequence = $status_approval_sequence_level;
+      $insert_array[$cnt]['status_backflow_sequence'] =  $jump == -1 ? 1 : 0;
+      $insert_array[$cnt]['status_approval_direction'] = $jump;
+      $insert_array[$cnt]['status_is_requiring_approver_action'] = 1; // All custom status require an action from a user
+
+      $insert_array[$cnt]['status_track_number'] = $this->generateItemTrackNumberAndName('status')['status_track_number'];
+
+      $insert_array[$cnt]['status_created_date'] = date('Y-m-d');
+      $insert_array[$cnt]['status_created_by'] = $this->session->user_id;
+      $insert_array[$cnt]['status_last_modified_by'] = $this->session->user_id;
+
+      $cnt++;
+    }
+
+    $builder = $this->write_db->table('status');
+
+    $builder->insertBatch($insert_array);
+
+    $this->write_db->transComplete();
+
+    if (!$this->write_db->transStatus()) {
+        $messageAndFlag['flag'] = false;
+        $messageAndFlag['message'] = get_phrase('insert_failed');
+    }
+
+    return $this->response->setJSON($messageAndFlag);
+  }
+
+  function insertFinalApprovalStatus($approval_flow_id, $status_approval_sequence)
+  {
+
+    $builder = $this->read_db->table('status');
+    // Is final approval status
+    $builder->where(array(
+      'fk_approval_flow_id' => $approval_flow_id,
+      'status_is_requiring_approver_action' => 0,
+      'status_approval_direction' => 1,
+      'status_backflow_sequence' => 0
+    ));
+    $final_approval_status = $builder->get();
+
+    $max_sequency_level = $status_approval_sequence + 1;
+
+    if ($final_approval_status->getNumRows() == 0) {
+      $this->insertStatus($this->session->user_id, get_phrase('fully_approved'), $approval_flow_id, $max_sequency_level, 0, 1, 0);
+      $this->insertStatus($this->session->user_id, get_phrase('reinstate_after_allow_edit'), $approval_flow_id, $max_sequency_level, 1, -1, 1);
+      $this->insertStatus($this->session->user_id, get_phrase('reinstated_after_edit'), $approval_flow_id, $max_sequency_level, 0, 0, 1);
+    } else {
+      // Update to the status_approval_sequence to the last sequence
+      $update_data['status_approval_sequence'] = $max_sequency_level;
+      $builder = $this->write_db->table('status');
+      
+      $builder->update($update_data, [
+        'status_approval_sequence' => $status_approval_sequence,
+        'fk_approval_flow_id' => $approval_flow_id
+        ]);
+    }
+  }
+
+  function detailTables(): array {
+    return ['status_role'];
+  }
 }

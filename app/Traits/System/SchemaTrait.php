@@ -495,7 +495,7 @@ trait SchemaTrait
         return false;
     }
 
-    function lookupValuesWhere(): array
+    function lookupValuesWhere(\CodeIgniter\Database\BaseBuilder $builder): array
     {
         return [];
     }

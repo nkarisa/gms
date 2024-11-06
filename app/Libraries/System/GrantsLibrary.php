@@ -63,36 +63,36 @@ class GrantsLibrary
 
   }
 
-  private function callbackActionAfterInsert($table_name, $post_array, $approval_id, $header_id): array
-  {
+  // private function callbackActionAfterInsert($table_name, $post_array, $approval_id, $header_id): array
+  // {
 
-    $featureLibrary = $this->loadLibrary($table_name);
+  //   $featureLibrary = $this->loadLibrary($table_name);
 
-    $success = false;
+  //   $success = false;
 
-    if (method_exists($featureLibrary, 'actionAfterInsert')) {
-      $success = $featureLibrary->actionAfterInsert($post_array, $approval_id, $header_id);
-    }
+  //   if (method_exists($featureLibrary, 'actionAfterInsert')) {
+  //     $success = $featureLibrary->actionAfterInsert($post_array, $approval_id, $header_id);
+  //   }
 
-    return $success;
-  }
+  //   return $success;
+  // }
 
 
-  private function callbackActionBeforeInsert($table_name, $post_array): array
-  {
+  // private function callbackActionBeforeInsert($table_name, $post_array): array
+  // {
 
-    $featureLibrary = $this->loadLibrary($table_name);
+  //   $featureLibrary = $this->loadLibrary($table_name);
 
-    $updated_post_array = array();
+  //   $updated_post_array = array();
 
-    if (method_exists($featureLibrary, 'actionBeforeInsert')) {
-      $updated_post_array = $featureLibrary->actionBeforeInsert($post_array);
-    } else {
-      $updated_post_array = $post_array;
-    }
+  //   if (method_exists($featureLibrary, 'actionBeforeInsert')) {
+  //     $updated_post_array = $featureLibrary->actionBeforeInsert($post_array);
+  //   } else {
+  //     $updated_post_array = $post_array;
+  //   }
 
-    return $updated_post_array;
-  }
+  //   return $updated_post_array;
+  // }
 
   private function callbackTransactionValidateDuplicatesColumns($table_name)
   {
@@ -449,127 +449,123 @@ class GrantsLibrary
     }
   }
 
-  public function runListQuery(
-    string $table,
-    array $selectedColumns,
-    array $lookupTables = [],
-    string $modelWhereMethod = "listTableWhere",
-    array $filterWhereArray = []
-  ): array {
+  // public function runListQuery(
+  //   string $table,
+  //   array $selectedColumns,
+  //   array $lookupTables = [],
+  //   string $modelWhereMethod = "listTableWhere",
+  //   array $filterWhereArray = []
+  // ): array {
     
-    // Get the database connection
-    $builder = $this->read_db->table($table);
+  //   // Get the database connection
+  //   $builder = $this->read_db->table($table);
 
-    if (!$this->tableExists($table)) {
-      $message = "The table " . $table . " doesn't exist in the database. Check the lookupTables function in the " . $table . "Model.";
-      throw new \CodeIgniter\Exceptions\PageNotFoundException($message);
-    }else{
+  //   if (!$this->tableExists($table)) {
+  //     $message = "The table " . $table . " doesn't exist in the database. Check the lookupTables function in the " . $table . "Model.";
+  //     throw new \CodeIgniter\Exceptions\PageNotFoundException($message);
+  //   }else{
       
-      $this->runListActualQuery($builder, $table, $selectedColumns,$lookupTables,$modelWhereMethod, $filterWhereArray);
+  //     $this->runListActualQuery($builder, $table, $selectedColumns,$lookupTables,$modelWhereMethod, $filterWhereArray);
       
-      if ($this->request->getPost('draw')) {
+  //     if ($this->request->getPost('draw')) {
 
-        // Limiting Server Datatable Results
-        $start = intval($this->request->getPost('start'));
-        $length = intval($this->request->getPost('length'));
-        $builder->limit($length, $start);
+  //       // Limiting Server Datatable Results
+  //       $start = intval($this->request->getPost('start'));
+  //       $length = intval($this->request->getPost('length'));
+  //       $builder->limit($length, $start);
     
-        // Ordering Server Datatable Results
-        $order = $this->request->getPost('order');
-        $col = '';
-        $dir = 'desc';
+  //       // Ordering Server Datatable Results
+  //       $order = $this->request->getPost('order');
+  //       $col = '';
+  //       $dir = 'desc';
     
-        if (!empty($order)) {
-            $col = $order[0]['column'];
-            $dir = $order[0]['dir'];
-        }
+  //       if (!empty($order)) {
+  //           $col = $order[0]['column'];
+  //           $dir = $order[0]['dir'];
+  //       }
     
-        if ($col == '') {
-            $builder->orderBy($table . '_id', 'DESC');
-        } else {
-            $builder->orderBy($selectedColumns[$col], $dir);
-        }
+  //       if ($col == '') {
+  //           $builder->orderBy($table . '_id', 'DESC');
+  //       } else {
+  //           $builder->orderBy($selectedColumns[$col], $dir);
+  //       }
     
-        // Searching Server Datatable Results
-        $search = $this->request->getPost('search');
-        $value = $search['value'];
+  //       // Searching Server Datatable Results
+  //       $search = $this->request->getPost('search');
+  //       $value = $search['value'];
     
-        // Remove the last column (if necessary)
-        array_pop($selectedColumns);
+  //       // Remove the last column (if necessary)
+  //       array_pop($selectedColumns);
     
-        if (!empty($value)) {
-            $builder->groupStart();  // Begin grouping
-            $column_key = 0;
-            foreach ($selectedColumns as $column) {
-                if ($column_key == 0) {
-                    $builder->like($column, $value, 'both');
-                } else {
-                    $builder->orLike($column, $value, 'both');
-                }
-                $column_key++;
-            }
-            $builder->groupEnd();  // End grouping
-        }
-      }
+  //       if (!empty($value)) {
+  //           $builder->groupStart();  // Begin grouping
+  //           $column_key = 0;
+  //           foreach ($selectedColumns as $column) {
+  //               if ($column_key == 0) {
+  //                   $builder->like($column, $value, 'both');
+  //               } else {
+  //                   $builder->orLike($column, $value, 'both');
+  //               }
+  //               $column_key++;
+  //           }
+  //           $builder->groupEnd();  // End grouping
+  //       }
+  //     }
 
-      $result = $builder->get()->getResultArray();
-      return $result;
-    }
+  //     $result = $builder->get()->getResultArray();
+  //     return $result;
+  //   }
 
-  }
+  // }
 
-  private function runListActualQuery(
-    $builder,
-    string $table,
-    array $selectedColumns,
-    array $lookupTables = [],
-    string $libraryWhereMethod = "listTableWhere",
-    array $filterWhereArray = []
-  ) {
-  
+  // private function runListActualQuery(
+  //   $builder,
+  //   string $table,
+  //   array $selectedColumns,
+  //   array $lookupTables = [],
+  //   string $libraryWhereMethod = "listTableWhere",
+  //   array $filterWhereArray = []
+  // ) {
+  //   // Run column selector
+  //   $builder->select($selectedColumns);
 
-    // Run column selector
-    $builder->select($selectedColumns);
-
-    // Load the model dynamically
-    $library = $this->loadLibrary($table);
+  //   // Load the model dynamically
+  //   $library = $this->loadLibrary($table);
     
-    // Apply the model's custom "where" method, if it exists
-    if (method_exists($library, $libraryWhereMethod) && 
-      count($library->$libraryWhereMethod($builder)) > 0
-    ) {
-      $library->$libraryWhereMethod($builder);
-    }
+  //   // Apply the model's custom "where" method, if it exists
+  //   if (method_exists($library, $libraryWhereMethod)) {
+  //     $library->$libraryWhereMethod($builder);
+  //   }
 
-    // Handle lookup tables and apply joins
-    if (is_array($lookupTables) && count($lookupTables) > 0) {
-      foreach ($lookupTables as $lookupTable) {
-        // Ensure lookup table exists in the database
-        if (!$this->tableExists($lookupTable)) {
-          $message = "The table " . $lookupTable . " doesn't exist in the database. Check the lookupTables function in the " . $table . "Model.";
-          throw new \CodeIgniter\Exceptions\PageNotFoundException($message);
-        }
+  //   // Handle lookup tables and apply joins
+  //   if (is_array($lookupTables) && count($lookupTables) > 0) {
+  //     foreach ($lookupTables as $lookupTable) {
+  //       // Ensure lookup table exists in the database
+  //       if (!$this->tableExists($lookupTable)) {
+  //         $message = "The table " . $lookupTable . " doesn't exist in the database. Check the lookupTables function in the " . $table . "Model.";
+  //         throw new \CodeIgniter\Exceptions\PageNotFoundException($message);
+  //       }
 
-        // Join lookup tables
-        $lookupTableId = $lookupTable . '_id';
+  //       // Join lookup tables
+  //       $lookupTableId = $lookupTable . '_id';
         
-        $builder->join($lookupTable, $lookupTable . '.' . $lookupTableId . '=' . $table . '.fk_' . $lookupTableId);
-      }
-    }
+  //       $builder->join($lookupTable, $lookupTable . '.' . $lookupTableId . '=' . $table . '.fk_' . $lookupTableId);
+  //     }
+  //   }
 
-    // Apply ordering method from the model, if exists
-    if (method_exists($library, 'orderListPage')) {
-      $builder->orderBy($library->orderListPage());
-    } else {
-      $builder->orderBy($table . '_created_date', 'DESC');
-    }
+  //   // Apply ordering method from the model, if exists
+  //   if (method_exists($library, 'orderListPage')) {
+  //     $builder->orderBy($library->orderListPage());
+  //   } else {
+  //     $builder->orderBy($table . '_created_date', 'DESC');
+  //   }
 
-    // Apply additional filter conditions, if provided
-    if (is_array($filterWhereArray) && count($filterWhereArray) > 0) {
-      $builder->where($filterWhereArray);
-    }
+  //   // Apply additional filter conditions, if provided
+  //   if (is_array($filterWhereArray) && count($filterWhereArray) > 0) {
+  //     $builder->where($filterWhereArray);
+  //   }
 
-  }
+  // }
 
 
   function addMandatoryLookupTables(
@@ -1245,7 +1241,7 @@ class GrantsLibrary
 
       if ($statusApprovalDirection == 1) {
         // Next approval step
-        $builder = $this->read_db->table('status_role');
+        $builder = $this->read_db->table('status');
         $builder->select('status_role.fk_role_id as fk_role_id');
         $builder->join('approval_flow', 'approval_flow.approval_flow_id = status.fk_approval_flow_id');
         $builder->join('status_role', 'status_role.status_role_status_id = status.status_id');
@@ -1262,7 +1258,7 @@ class GrantsLibrary
 
       } elseif ($statusApprovalDirection == -1) {
         // Backward approval step
-        $builder = $this->read_db->table('status_role');
+        $builder = $this->read_db->table('status');
         $builder->select('status_role.fk_role_id as fk_role_id');
         $builder->join('approval_flow', 'approval_flow.approval_flow_id = status.fk_approval_flow_id');
         $builder->join('status_role', 'status_role.status_role_status_id = status.status_id');
@@ -1467,7 +1463,7 @@ class GrantsLibrary
     return $label;
   }
 
-  function initialItemStatus($tableName = "", $accountSystemId = 0)
+  function initialItemStatus($tableName = "", $accountSystemId = 0): int
   {
     // $this->read_db->resetQuery();
 
@@ -1769,14 +1765,14 @@ class GrantsLibrary
   {
 
     $lookup_values = [];
-    $this->library = $this->loadLibrary($table);
-
-    log_message('error',method_exists($this->library, 'lookupValues'));
+    $this->library = $this->loadLibrary($this->controller);
 
     if (
-      (method_exists($this->library, 'lookupValues')
-        && is_array($this->library->lookupValues())
-        && array_key_exists($table, $this->library->lookupValues()))
+        (
+          method_exists($this->library, 'lookupValues')
+          && is_array($this->library->lookupValues())
+          && array_key_exists($table, $this->library->lookupValues())
+        )
     ) {
       $result = $this->library->lookupValues()[$table];
       $ids_array = array_column($result, $this->primaryKeyField($table));
@@ -1785,7 +1781,7 @@ class GrantsLibrary
     } else {
       $lookup_values = $this->getLookupValues($table);
     }
-    // log_message('error', json_encode($lookup_values));
+
     return $lookup_values;
   }
 
@@ -1796,12 +1792,12 @@ class GrantsLibrary
     $builder = $this->read_db->table($table);
 
     if (
-      isset($this->lookupValuesWhere()[$table]) &&
-      is_array($this->lookupValuesWhere()[$table]) &&
-      count($this->lookupValuesWhere()[$table]) > 0
+      isset($this->lookupValuesWhere($builder)[$table]) &&
+      is_array($this->lookupValuesWhere($builder)[$table]) &&
+      count($this->lookupValuesWhere($builder)[$table]) > 0
     ) {
       //$this->create_table_join_statement(strtolower($this->controller),$this->grants->lookup_tables($this->controller));
-      $builder->where($this->lookupValuesWhere()[$table]);
+      $builder->where($this->lookupValuesWhere($builder)[$table]);
     }
 
     $result = $builder->get()->getResultArray();
@@ -2068,10 +2064,10 @@ class GrantsLibrary
     $detail = $post_has_detail ? $detail : [];
 
     // Check if the creation of the of the header and detail records requires an approval ticket
-    $approveItemLibrary = new \App\Libraries\Core\ApproveItemLibrary();
-    $header_record_requires_approval = $approveItemLibrary->approveableItem($this->controller);
+    // $approveItemLibrary = new \App\Libraries\Core\ApproveItemLibrary();
+    // $header_record_requires_approval = $approveItemLibrary->approveableItem($this->controller);
     //$detail_records_require_approval = $this->approveable_item($this->controller.'_detail');
-    $detail_records_require_approval = $approveItemLibrary->approveableItem($this->dependantTable($this->controller));
+    // $detail_records_require_approval = $approveItemLibrary->approveableItem($this->dependantTable($this->controller));
 
     // Get the table name of multi select field
     $multi_select_field_name = 'fk_' . $this->multiSelectField() . '_id';
@@ -2082,20 +2078,6 @@ class GrantsLibrary
       $multi_select_field_values = $header[$multi_select_field_name];
     }
 
-    // Start a transaction
-    /**
-     * $post = [
-     *  'header'=>[
-     *    'role_permission_track_number'='CBNAJS',
-     *    'role_permission_name'=>'role permission name'
-     *    'fk_permission_id'=>[
-     *          0=>'Read',
-     *          1=>'Update',
-     *      ]
-     * ],
-     *  'detail'=>[],
-     * ]
-     */
     $message = "";
     if (count($multi_select_field_values) > 0) {
 
@@ -2122,8 +2104,8 @@ class GrantsLibrary
           }
         }
 
-        $returned_validation_message = $this->addInserts($header_record_requires_approval, $detail_records_require_approval, $post_has_detail, $header, $detail);
-        if (json_decode($returned_validation_message, true)['flag'] == true) {
+        $returned_validation_message = $this->addInserts($post_has_detail, $header, $detail);
+        if ($returned_validation_message['flag'] == true) {
           $success++;
         } else {
           $failed++;
@@ -2133,11 +2115,12 @@ class GrantsLibrary
       $message .= $success . ' ' . str_replace('_', ' ', $this->controller) . ' inserted and ' . $failed . ' failed';
 
       $message = ['flag' => true, 'message' => $message];
-
+    
     } else {
-      $message = $this->addInserts($header_record_requires_approval, $detail_records_require_approval, $post_has_detail, $header, $detail);
+   
+      $message = $this->addInserts( $post_has_detail, $header, $detail);
     }
-
+    
     return $this->response->setJSON($message);
   }
 
@@ -2171,7 +2154,7 @@ class GrantsLibrary
   }
 
 
-  public function addInserts($headerRecordRequiresApproval, $detailRecordsRequireApproval, $postHasDetail, $header, $detail = [])
+  public function addInserts($postHasDetail, $header, $detail = []): array
   {
     $initialStatus = $this->initialItemStatus($this->controller);
 
@@ -2180,8 +2163,8 @@ class GrantsLibrary
     // Create the approval ticket if required by the header record
     $approvalId = $this->insertApprovalRecord(strtolower($this->controller));
 
-    $approval = [];
-    $details = [];
+    // $approval = [];
+    // $details = [];
 
     if ($this->id) {
       $decodedHashId = hash_id($this->id, 'decode');
@@ -2208,17 +2191,21 @@ class GrantsLibrary
       $headerColumns['fk_' . strtolower(session()->get('masterTable')) . '_id'] = hash_id($this->id, 'decode');
     }
 
-    $headerColumns['fk_status_id'] = $initialStatus;
-    $headerColumns['fk_approval_id'] = $approvalId;
+    $headerColumns['fk_status_id'] = $this->controller != 'status' ? $initialStatus : NULL;
+    $headerColumns['fk_approval_id'] = $this->controller != 'status' ?  $approvalId : NULL;
     $headerColumns[strtolower($this->controller) . '_created_date'] = date('Y-m-d');
     $headerColumns[strtolower($this->controller) . '_created_by'] = session()->get('user_id');
     $headerColumns[strtolower($this->controller) . '_last_modified_by'] = session()->get('user_id');
+
+    // log_message('error', json_encode($headerColumns));
 
     // Insert the header record
     $this->write_db->table(strtolower($this->controller))->insert($headerColumns);
 
     // Get the inserted header record ID
-    $headerId = $this->write_db->insertID();
+    $headerId = $this->write_db->insertID();;
+
+    // log_message('error', json_encode($this->controller));
 
     // Proceed with inserting details if $postHasDetail is true
     if ($postHasDetail) {
@@ -2246,7 +2233,7 @@ class GrantsLibrary
           $detailColumns[$i][$this->dependantTable($this->controller) . '_modified_by'] = session()->get('user_id');
         }
       }
-      $details = $detailColumns;
+      // $details = $detailColumns;
 
       // Insert the details using insert batch
       $this->write_db->table($this->dependantTable($this->controller))->insertBatch($detailColumns);
@@ -2260,10 +2247,12 @@ class GrantsLibrary
     $transactionValidateDuplicates = $this->transactionValidateDuplicates($this->controller, $header, $transactionValidateDuplicatesColumns);
     $transactionValidateByComputation = $this->transactionValidateByComputation($this->controller, $header);
 
+    // log_message('error', json_encode(compact('transactionValidateDuplicates', 'transactionValidateByComputation','headerColumns','headerId','approvalId')));
+
     return $this->transactionValidate([$transactionValidateDuplicates, $transactionValidateByComputation], $headerColumns, $headerId, $approvalId);
   }
 
-  public function transactionValidateDuplicates(String $table_name, array $insert_array, array $validation_fields = [], int $allowable_records = 0)
+  public function transactionValidateDuplicates(String $table_name, array $insert_array, array $validation_fields = [], int $allowable_records = 0): array
   {
 
     $validation_successful = true;
@@ -2303,7 +2292,7 @@ class GrantsLibrary
     return ['flag' => $validation_successful, 'error_message' => $failure_message];
   }
 
-  function transactionValidateByComputation(String $table_name, array $insert_array){
+  function transactionValidateByComputation(String $table_name, array $insert_array): array{
   
       $validation_successful = true;
       $failure_message = get_phrase('validation_failed');
@@ -2320,11 +2309,12 @@ class GrantsLibrary
     
   }
 
-  public function transactionValidate($validationFlagsAndFailureMessages, $postArray = [], $headerId = 0, $approvalId = 0)
+  public function transactionValidate($validationFlagsAndFailureMessages, $postArray = [], $headerId = 0, $approvalId = 0): array
 {
     $message = '';
     $messageAndFlag = [];
     $messageAndFlag['flag'] = false;
+    $library = $this->loadLibrary($this->controller);
 
     // Extract flags from validation
     $validationFlags = array_column($validationFlagsAndFailureMessages, 'flag');
@@ -2332,7 +2322,7 @@ class GrantsLibrary
     // Check if the transaction status is valid
     if ($this->write_db->transStatus() === false) {
         $this->write_db->transRollback();
-        return get_phrase('insert_failed');
+        $messageAndFlag['message'] = get_phrase('insert_failed');
     } else {
         // If any validation flag is false, rollback
         if (in_array(false, $validationFlags)) {
@@ -2347,7 +2337,7 @@ class GrantsLibrary
             }
         } else {
             // If the insert action is successful
-            if ($this->actionAfterInsert($postArray, $approvalId, $headerId)) {
+            if ($library->actionAfterInsert($postArray, $approvalId, $headerId)) {
                 $this->write_db->transCommit();
                 $message = get_phrase('insert_successful');
                 $messageAndFlag['flag'] = true;
@@ -2446,7 +2436,7 @@ class GrantsLibrary
       // This query is to extract data to cater for columns that are not sourced from the edit form
       $builder = $this->read_db->table($table);
       $builder->select($checkDuplicateColumns);
-      $builder->where([$table . '_id' => $id]);
+      $builder->where([$table . '_id' => hash_id($id, 'decode')]);
       $postedRecord = $builder->get()->getRowArray(); // Equivalent to row_array() in CI3
 
       // Merge the posted array with the database record
@@ -2535,7 +2525,7 @@ class GrantsLibrary
         $builder->insert($updateData);
     }
 
-  public function edit(int $id): \CodeIgniter\HTTP\Response
+  public function edit(string $id): \CodeIgniter\HTTP\Response
     {
      
         $library = $this->loadLibrary($this->controller);
@@ -2567,7 +2557,7 @@ class GrantsLibrary
             if (!$hasDuplicateRecord) {
                 $this->write_db->transBegin(); // Begin transaction
                 $this->write_db->table($this->controller)
-                    ->where([$this->primaryKeyField($this->controller) => $id])
+                    ->where([$this->primaryKeyField($this->controller) => hash_id($id, 'decode')])
                     ->update($data); // Update the table
 
                 $this->createChangeHistory($data); // Create change history
@@ -2609,5 +2599,19 @@ class GrantsLibrary
       return $columns;
     }
     
+
+    function getAccountSystemRoles($user_account_system_id)
+    {
+      $builder = $this->read_db->table('role');
+      $builder->select('role_id, role_name');
+  
+      if (!$this->session->system_admin) {
+        $builder->where('fk_account_system_id', $user_account_system_id);
+      }
+  
+      $roles = $builder->get()->getResultArray();
+  
+      return $roles;
+    }
 
 }

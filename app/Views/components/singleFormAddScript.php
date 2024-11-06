@@ -40,19 +40,13 @@
     } else {
       pre_record_post();
 
-      let url = "<?= base_url() . $controller; ?>/<?=$action;?>";
-      
-      if ('<?= hash_id($uri->getSegment(3), 'decode'); ?>' !== 0) {
-        url = "<?= base_url() . $controller; ?>/<?= $action; ?>/<?= $uri->getSegment(3); ?>";
-      }
-
+      let url = "<?= base_url(implode("/", $uri->getSegments()));?>"
       let data = $(this).closest('form').serializeArray();
-
+      
       postRequest(
         url,
         data,
         function(response) {
-    
           if (response.flag == false) {
             $('#'+code_field_or_element).css('border', '1px solid red')
             alert(response.message)

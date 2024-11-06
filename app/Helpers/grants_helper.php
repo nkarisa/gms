@@ -22,23 +22,23 @@ if (!function_exists('get_phrase')) {
     }
 }
 
-if (!function_exists('render_list_table_header')) {
-    function render_list_table_header($table_name, $header_array)
-    {
-        $string = '<tr><th nowrap="nowrap">' . get_phrase("action") . '</th>';
+// if (!function_exists('render_list_table_header')) {
+//     function render_list_table_header($header_array)
+//     {
+//         $string = '<tr><th nowrap="nowrap">' . get_phrase("action") . '</th>';
 
-        foreach ($header_array as $th_value) {
-            if (strpos($th_value, 'key') == true || strpos($th_value, '_id') == true) {
-                continue;
-            }
+//         foreach ($header_array as $th_value) {
+//             if (strpos($th_value, 'key') == true || strpos($th_value, '_id') == true) {
+//                 continue;
+//             }
 
-            $string .= '<th nowrap="nowrap">' . camel_case_header_element($th_value) . '</th>';
-        }
-        $string .= '</tr>';
+//             $string .= '<th nowrap="nowrap">' . camel_case_header_element($th_value) . '</th>';
+//         }
+//         $string .= '</tr>';
 
-        return $string;
-    }
-}
+//         return $string;
+//     }
+// }
 
 if (!function_exists('add_record_button')) {
     function add_record_button($table_controller, $parent_controller, $has_details, $id = null, $has_listing = false, $is_multi_row = false)
@@ -444,9 +444,9 @@ if (!function_exists('remove_directory')) {
 }
 
 if (!function_exists('render_list_table_header')) {
-    function render_list_table_header($table_name, $header_array)
+    function render_list_table_header($header_array)
     {
-        $string = '<tr><th nowrap="nowrap">' . get_phrase("action") . '</th>';
+        $string = '';
 
         foreach ($header_array as $th_value) {
             if (strpos($th_value, 'key') == true || strpos($th_value, '_id') == true) {
@@ -647,7 +647,6 @@ if(!function_exists('approval_action_button')){
 
 if(!function_exists('approval_next_status')){
     function approval_next_status($table_name, $item_status, $item_id, $status_id, $item_initial_item_status_id, $item_max_approval_status_ids){
-        // log_message('error', json_encode($item_max_approval_status_ids));
         $status_approval_sequence = 1;
         $status_approval_direction = 1;
         $status = [];
@@ -727,7 +726,6 @@ if(!function_exists('approval_next_status')){
         $user_id = service('session')->user_id;
 
         // Only get positive status greater than the next approval status seq.
-        // log_message('error', json_encode($item_status));
         $filtered_positive_item_status_above_current_sequence = array_filter($item_status, function($value) use($item_status, $approve_next_status) {
             return $value['status_approval_direction'] == 1 && $approve_next_status != 0 && $value['status_approval_sequence'] >= $item_status[$approve_next_status]['status_approval_sequence'];
         });

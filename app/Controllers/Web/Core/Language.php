@@ -151,9 +151,7 @@ class Language extends WebController
 
                 // Define the target path for the uploaded file
                 $uploadPath = WRITEPATH . 'uploads' . DIRECTORY_SEPARATOR . 'attachments' . DIRECTORY_SEPARATOR . 'language' . DIRECTORY_SEPARATOR . $languageCode . DIRECTORY_SEPARATOR . $accountSystemCode . DIRECTORY_SEPARATOR;
-                // log_message('error', $uploadPath);
                 if (!file_exists($uploadPath)) {
-                    // log_message('error', 'Here');
                     mkdir($uploadPath, 0777, recursive: true);
                 }
 

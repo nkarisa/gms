@@ -3,9 +3,9 @@
 namespace App\Traits\System;
 
 trait OutputTrait {
-    protected function listOutput($module = ''){
+    protected function listOutput($module, ...$args){
         $listOutput = new \App\Libraries\System\Outputs\ListOutput($module);
-        return $listOutput->getOutput();
+        return $listOutput->getOutput($args);
     }
 
     protected function viewOutput($module, ...$args){
@@ -18,9 +18,9 @@ trait OutputTrait {
         return $listOutput->getOutput($args[0]);
     }
 
-    protected function SingleFormAddOutput($module = ''){
+    protected function SingleFormAddOutput($module, ...$args){
         $listOutput = new \App\Libraries\System\Outputs\SingleFormAddOutput($module);
-        return $listOutput->getOutput();
+        return $listOutput->getOutput($args);
     }
 
     function currencyFields(){
@@ -28,7 +28,7 @@ trait OutputTrait {
     }
 
     function showListEditAction(array $record): bool{
-        return false;
+        return true;
     }
 
 }

@@ -148,12 +148,11 @@ class FieldsBase
   function set_default_field_value()
   {
 
-    $library = new GrantsLibrary();
-
+    $lib = new GrantsLibrary();
+    $library = $lib->loadLibrary($this->table);
+  
     if (method_exists($library, 'defaultFieldValue') && count($library->defaultFieldValue()) > 0) {
-
       $default_fields_values = $library->defaultFieldValue();
-
       if (array_key_exists($this->column, $default_fields_values)) {
         $this->default_field_value = $default_fields_values[$this->column];
       }
@@ -299,6 +298,8 @@ class FieldsBase
     }
 
     $this->set_default_field_value();
+
+    // log_message('error', json_encode($this->default_field_value));
 
     $selected_option = ($selected_option == "" && $this->default_field_value !== 0) ? $this->default_field_value : $selected_option;
 

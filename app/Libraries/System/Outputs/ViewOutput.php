@@ -444,18 +444,18 @@ class ViewOutput extends OutputTemplate
 
     }
 
-    function detailListInternalQueryResult($table)
-    {
-        $lookup_tables = $this->libs->callbackLookupTables($table);
+    // function detailListInternalQueryResult($table)
+    // {
+    //     $lookup_tables = $this->libs->callbackLookupTables($table);
 
-        $select_columns = $this->toggleDetailListSelectColumns(table: $table);
+    //     $select_columns = $this->toggleDetailListSelectColumns(table: $table);
 
-        $filter_where = array($table . '.fk_' . strtolower($this->controller) . '_id' => hash_id($this->uri->getSegment(3, 0), 'decode'));
-        //print_r($filter_where);exit;
-        $runListQueryResult = $this->libs->runListQuery($table, $select_columns, $lookup_tables, 'detailListTableWhere', $filter_where);
+    //     $filter_where = array($table . '.fk_' . strtolower($this->controller) . '_id' => hash_id($this->uri->getSegment(3, 0), 'decode'));
+    //     //print_r($filter_where);exit;
+    //     $runListQueryResult = $this->libs->runListQuery($table, $select_columns, $lookup_tables, 'detailListTableWhere', $filter_where);
 
-        return $runListQueryResult;
-    }
+    //     return $runListQueryResult;
+    // }
 
     /**
      * detail_list_query
@@ -468,25 +468,25 @@ class ViewOutput extends OutputTemplate
      * @return array
      * 
      */
-    function toggleDetailListQuery(string $table): array
-    {
-        $library = $this->libs->loadLibrary($table);
+    // function toggleDetailListQuery(string $table): array
+    // {
+    //     $library = $this->libs->loadLibrary($table);
 
-        $detail_list_query = $this->detailListInternalQueryResult($table); // System generated query result
+    //     $detail_list_query = $this->detailListInternalQueryResult($table); // System generated query result
 
-        if (
-            method_exists($library, 'detailListQuery') &&
-            is_array($library->detailListQuery($table)) &&
-            count($library->detailListQuery($table)) > 0
-        ) {
-            $detail_list_query = $library->detailListQuery($table); // A full user defined query result
-        }
+    //     if (
+    //         method_exists($library, 'detailListQuery') &&
+    //         is_array($library->detailListQuery($table)) &&
+    //         count($library->detailListQuery($table)) > 0
+    //     ) {
+    //         $detail_list_query = $library->detailListQuery($table); // A full user defined query result
+    //     }
 
-        $detail_list_query = $this->libs->updateQueryResultForFieldsChangedToSelectType($table, $detail_list_query);
+    //     $detail_list_query = $this->libs->updateQueryResultForFieldsChangedToSelectType($table, $detail_list_query);
 
 
-        return $detail_list_query;
-    }
+    //     return $detail_list_query;
+    // }
     /**
      * detail_list_view
      * 
@@ -502,7 +502,7 @@ class ViewOutput extends OutputTemplate
     {
 
         // Query result of the detail table
-        $result = $this->toggleDetailListQuery($table);
+        // $result = $this->toggleDetailListQuery($table);
 
         // Selected column of the detail table
         $keys = $this->toggleDetailListSelectColumns($table);
@@ -523,7 +523,7 @@ class ViewOutput extends OutputTemplate
 
         return array(
             'keys' => $keys,
-            'table_body' => $result,
+            // 'table_body' => $result, Uses the listOutPut function
             'table_name' => $table,
             'has_details_table' => $has_details,
             'has_details_listing' => $has_details_listing,
@@ -561,7 +561,52 @@ class ViewOutput extends OutputTemplate
         }
     
         return $query_output;
-    }
+    } 
+
+//     private function detailtoggleListSelectColumns($table_name): array
+//   {
+//     // Check if the table has list_table_visible_columns not empty
+//     $list_table_visible_columns = $this->featureModelDetailListTableVisibleColumns($table_name);
+//     $lookup_tables = $this->libs::call($this->controller.'.lookupTables');
+
+//     $get_all_table_fields = $this->libs->getAllTableFields();
+
+//     foreach ($get_all_table_fields as $get_all_table_field) {
+
+//       //Unset foreign keys columns, created_by and last_modified_by columns
+
+//       if (
+//         substr($get_all_table_field, 0, 3) == 'fk_' ||
+//         $this->libs->isHistoryTrackingField($this->controller, $get_all_table_field, 'created_by') ||
+//         $this->libs->isHistoryTrackingField($this->controller, $get_all_table_field, 'last_modified_by') ||
+//         $this->libs->isHistoryTrackingField($this->controller, $get_all_table_field, 'deleted_at')
+//       ) {
+
+//         unset($get_all_table_fields[array_search($get_all_table_field, $get_all_table_fields)]);
+//       }
+//     }
+
+//     $visible_columns = $get_all_table_fields;
+
+//     if (is_array($list_table_visible_columns) && count($list_table_visible_columns) > 1) {
+//       $visible_columns = $list_table_visible_columns;
+//     } else {
+//       if (is_array($lookup_tables) && count($lookup_tables) > 0) {
+//         foreach ($lookup_tables as $lookup_table) {
+
+//           $lookup_table_columns = $this->libs->getAllTableFields($lookup_table);
+
+//           foreach ($lookup_table_columns as $lookup_table_column) {
+//             // Only include the name field of the look up table in the select columns
+//             if ($this->libs->isNameField($lookup_table, $lookup_table_column)) {
+//               array_push($visible_columns, $lookup_table_column);
+//             }
+//           }
+//         }
+//       }
+//     }
+//     return $visible_columns; //$this->CI->access->control_column_visibility($this->controller,$visible_columns,'read');
+//   }
 
     function getOutput($id): array
     {
@@ -609,6 +654,7 @@ class ViewOutput extends OutputTemplate
         if ($has_details) {
             $detail = array();
             foreach ($detail_tables as $detail_table) {
+                // $detail[$detail_table]['keys'] = $this->toggleDetailListSelectColumns($detail_table);
                 $detail[$detail_table] = $this->detailListOutput($detail_table);
                 $detail[$detail_table]['fields_meta_data'] = $this->libs->fieldsMetaDataTypeAndName($detail_table);
                 $detail[$detail_table]['is_multi_row'] = $this->libs->checkIfTableIsMultiRow($detail_table);

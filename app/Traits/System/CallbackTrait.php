@@ -5,7 +5,7 @@ namespace App\Traits\System;
 trait CallbackTrait
 {
 
-    public function actionAfterInsert(array $post_array, int $approval_id, int $header_id): bool
+    public function actionAfterInsert(array $post_array, int|null $approval_id, int $header_id): bool
     {
         return true;
     }

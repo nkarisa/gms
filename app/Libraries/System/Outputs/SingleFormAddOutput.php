@@ -35,7 +35,6 @@ class SingleFormAddOutput extends OutputTemplate{
           $show_only_selected_value = true;
         }
 
-
         $fields[$column] = $this->libs->headerRowField($column, $field_value, $show_only_selected_value);
       } else {
 
@@ -54,24 +53,25 @@ class SingleFormAddOutput extends OutputTemplate{
     return $fields;
   }
 
-    function getOutput(): array|\CodeIgniter\HTTP\Response {
+    function getOutput($args): array|\CodeIgniter\HTTP\Response {
 
       $table = $this->controller;
       // Insert appove item, approval  flow and status record if either in not existing
       $this->libs->tableSetup(strtolower($table));
   
       if ($this->request->getPost()) {
-          return $this->libs->add();
+          $library = $this->libs->loadLibrary($table);
+          // We use feature library since to allow overriding the grants library add method
+          $response = $library->add();
+          return $response;
       } else {
         // Adds mandatory fields if not present in the current table
         $visible_columns = $this->libs->checkSingleFormAddVisibleColumns();      
         $visible_columns = array_merge($visible_columns, $this->currentLibrary->detailTablesSingleFormAddVisibleColumns()); // To be tested more of its impact if numbed
         
-        $fields = $this->addFormFields($visible_columns); //$this->single_form_add_query();
+        $fields = $this->addFormFields($visible_columns); 
         
-        return array(
-          'fields' => $fields
-        );
+        return compact('fields');
       }  
     }
 

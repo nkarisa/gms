@@ -97,7 +97,6 @@ class LanguageLibrary extends GrantsLibrary
       function getUserAvailableLanguages(){
         $languages = [];
 
-        // log_message('error', json_encode($this->session->get('user_account_system_code')));
         // Get all languages 
         $builder = $this->read_db->table($this->table);
         $builder->select('language_id, language_name, language_code');
@@ -166,7 +165,6 @@ class LanguageLibrary extends GrantsLibrary
         $language_phrases_obj = $builder->get();
     
         if($language_phrases_obj->getNumRows() > 0){
-          // log_message('error', 'Here');
           $data['language_phrase_data'] = json_encode($translations);
           $data['language_phrase_last_modified_date'] = date('Y-m-d h:i:s');
           $data['language_phrase_last_modified_by'] = $this->session->user_id;
@@ -175,7 +173,6 @@ class LanguageLibrary extends GrantsLibrary
           $builder->where(array('fk_language_id' => $language_id, 'fk_account_system_id' => $account_system_id));
           $builder->update( $data);
         }else{
-          // log_message('error', 'There');
           $data['fk_account_system_id'] = $account_system_id;
           $data['fk_language_id'] = $language_id;
           $data['language_phrase_data'] = json_encode($translations);

@@ -132,17 +132,17 @@ class Element{
   
     function save_button($form_id){
         if($form_id == 'add_form'){
-            return "<button class='btn btn-default save back'>".get_phrase('save')."</button>";
+            return "<div class='btn btn-default save back'>".get_phrase('save')."</div>";
         }else{
-            return "<button class='btn btn-default edit back'>".get_phrase('edit')."</button>";
+            return "<div class='btn btn-default edit back'>".get_phrase('edit')."</div>";
         }
     }
   
     function save_new_button($form_id){
       if($form_id == 'add_form'){
-        return "<button class='btn btn-default save_new'>".get_phrase('save_and_new')."</button>";
+        return "<div class='btn btn-default save_new'>".get_phrase('save_and_new')."</div>";
       }else{
-        return "<button class='btn btn-default edit_continue'>".get_phrase('edit_and_continue')."</button>";
+        return "<div class='btn btn-default edit_continue'>".get_phrase('edit_and_continue')."</div>";
       }
     }
   

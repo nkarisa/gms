@@ -65,31 +65,31 @@
 
     function post_row_delete() {}
 
-    $('.datatable_details').DataTable({
-         dom: 'Bfrtip',
-         "bDestroy": true,
-         fixedHeader: true,
-         stateSave: true,
-         buttons: [{
-                 extend: 'excelHtml5',
-                 text: '<?= get_phrase('export_in_excel'); ?>',
-                 className: 'btn btn-default btn_export',
-                 exportOptions: {
-                     columns: 'th:not(:first-child)',
-                 }
-             },
-             {
-                 extend: 'pdfHtml5',
-                 className: 'btn btn-default btn_export',
-                 text: '<?= get_phrase('export_in_pdf'); ?>',
-                 orientation: 'landscape',
-                 exportOptions: {
-                     columns: 'th:not(:first-child)'
-                 }
-             }
-         ],
-         "pagingType": "full_numbers"
-     });
+    // $('.datatable_details').DataTable({
+    //      dom: 'Bfrtip',
+    //      "bDestroy": true,
+    //      fixedHeader: true,
+    //      stateSave: true,
+    //      buttons: [{
+    //              extend: 'excelHtml5',
+    //              text: '<?= get_phrase('export_in_excel'); ?>',
+    //              className: 'btn btn-default btn_export',
+    //              exportOptions: {
+    //                  columns: 'th:not(:first-child)',
+    //              }
+    //          },
+    //          {
+    //              extend: 'pdfHtml5',
+    //              className: 'btn btn-default btn_export',
+    //              text: '<?= get_phrase('export_in_pdf'); ?>',
+    //              orientation: 'landscape',
+    //              exportOptions: {
+    //                  columns: 'th:not(:first-child)'
+    //              }
+    //          }
+    //      ],
+    //      "pagingType": "full_numbers"
+    //  });
 
 
 </script>

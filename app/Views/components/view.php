@@ -18,6 +18,13 @@ $lib->unsetLookupTablesIds($keys);
 $columns = array_chunk($keys,$config->master_table_columns,true);
 
 ?>
+<style>
+  .nowrap {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+</style>
 <div class="row">
   <div class="col-xs-12">
       <?php 
@@ -45,22 +52,20 @@ $columns = array_chunk($keys,$config->master_table_columns,true);
 
         <tr>
           <th colspan="<?=$config->master_table_columns;?>" style="text-align:center;">
-              <?php 
-              //echo $table_body['status_id'];
-              //echo $this->status_model->is_status_actionable_by_user($table_body['status_id'],$this->controller);
+              <?php
               
-              if( $userLibrary->isStatusActionableByUser($table_body['status_id'], $controller) ){
-                if($userLibrary->checkRoleHasPermissions(ucfirst($controller),'update'))
-                {
-                     echo WidgetBase::load('button',get_phrase('edit'),$controller.'/edit/'.$id);
+                if( $userLibrary->isStatusActionableByUser($table_body['status_id'], $controller) ){
+                  if($userLibrary->checkRoleHasPermissions(ucfirst($controller),'update'))
+                  {
+                      echo WidgetBase::load('button',get_phrase('edit'),$controller.'/edit/'.$id);
+                  }
+    
+                  if($userLibrary->checkRoleHasPermissions(ucfirst($controller),'delete'))
+                  {
+                      echo WidgetBase::load('button',get_phrase('delete'),$controller.'/delete/'.$id);
+                  }
+    
                 }
-  
-                if($userLibrary->checkRoleHasPermissions(ucfirst($controller),'delete'))
-                {
-                    echo WidgetBase::load('button',get_phrase('delete'),$controller.'/delete/'.$id);
-                }
-  
-              }
               
               
               if(isset($action_labels['show_label_as_button']) && $action_labels['show_label_as_button']){ 
@@ -137,7 +142,7 @@ $columns = array_chunk($keys,$config->master_table_columns,true);
                       //  echo number_format($column_value,2);
                         //echo $column_value;
                     }else{
-                        echo ucwords(str_replace('_',' ',$column_value));
+                        echo $column_value != null ? ucwords(str_replace('_',' ',$column_value)): '';
                     }
                   ?>
                 </td>
@@ -154,19 +159,19 @@ $columns = array_chunk($keys,$config->master_table_columns,true);
     <div class="row">
       <div class="col-xs-12">
         <?php 
-            // echo Widget_base::load('position','position_3');
+            echo WidgetBase::load('position','position_3');
         ?>
       </div>
     </div>
     <?php
 
     if( isset($result['detail']) && count($result['detail']) > 0){
-      //print_r($result['detail']);
+      // echo json_encode($result['detail']['project']['keys']);
       foreach ($result['detail'] as $detail_table_name => $details) {
         //print_r(array_keys($details));
         extract($details);
         //echo $detail_table_name;
-        $primary_key_column = array_shift($keys);
+        // $primary_key_column = array_shift($keys);
         ?>
 
         <hr/>
@@ -181,103 +186,45 @@ $columns = array_chunk($keys,$config->master_table_columns,true);
             ?>
           </div>
         </div>
-          <table class="table table-striped datatable_details">
+          <table class="table table-striped nowrap datatable_details" id = "<?=$detail_table_name?>">
             <thead>
-              <!--Add one to count of keys because of the action column that has been added in this view s-->
+              <!--Add one to count of keys because of the action column that has been added in this view-->
               <tr><th colspan="<?=count($keys) + 1;?>"><?=ucwords(str_replace("_"," ",$detail_table_name));?></th></tr>
-              <?=render_list_table_header($detail_table_name,$keys);?>
+              <?=render_list_table_header($keys);?>
             </thead>
             <tbody>
-              <?php foreach ($table_body as $row) {
-                //print_r($row);
-                ?>
-                <tr>
-                  <td class='hidden-print'>
-                      <?php
-                        //echo $this->grants->action_list($detail_table_name,$row[$detail_table_name.'_id'],$is_approveable_item);
-                      ?>
-                      <div class="dropdown">
-                      <button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">
-                        <?=get_phrase('action');?>
-                      <span class="caret"></span></button>
-                      <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
-
-                      <?php if(
-                      $userLibrary->isStatusActionableByUser($row['status_id'],$detail_table_name) &&
-                      (
-                        $userLibrary->checkRoleHasPermissions((ucfirst($detail_table_name)),'update') || 
-                        $userLibrary->checkRoleHasPermissions((ucfirst($detail_table_name)),'delete')
-                      )
-                    ){?>
-
-                        <?php if($userLibrary->checkRoleHasPermissions(ucfirst($detail_table_name),'update')){ ?>
-                        <li><?=list_table_edit_action($detail_table_name,$row[$detail_table_name.'_id']);?></li>
-                        <li class="divider"></li>
-                        <?php }?>
-                        <?php if($userLibrary->checkRoleHasPermissions(ucfirst($detail_table_name),'delete')){ ?>
-                        <li><?=list_table_delete_action($detail_table_name,$row[$detail_table_name.'_id']);?></li>
-                        <?php }?>
-
-                        <?php }else{
-                            echo "<li><a href='#'>".get_phrase('no_action')."</a></li>";
-                        }?>
-
-                      </ul>
-                    </div>
-                  </td>
-                  <?php
-                      
-                      $primary_key = 0;
-                      
-                      $column_key = 0;
-
-                      $lookup_table = "";
-                      
-                      foreach ($keys as $column){
-                        $primary_key = $row[$primary_key_column];
-                        
-                        if(strpos($column,'_id') == true && 
-                            !$lib->isPrimaryKeyField($detail_table_name,$column) 
-                          ){
-
-                          //$column_key = $row['fk_'.$column];
-                          // Remove the id suffix
-
-                          $lookup_table = substr($column,0,-3);
-                          continue;
-                        }
-
-                  ?>
-                        <td>
-
-                          <?php
-                          if(isset($row[$column]) && array_key_exists($column,$row) ){
-                            if(strpos($column,'track_number') == true && $has_details_table == 1 ){
-                              echo '<a href="'.base_url().$detail_table_name.'/view/'.hash_id($primary_key).'">'.$row[$column].'</a>';
-                            }elseif(strpos($column,'_is_') == true){
-                                echo $row[$column] == 1 || $row[$column] == "Yes" || $row[$column] == "yes" ?"Yes":"No";
-                            }elseif($fields_meta_data[$column] == 'int' || $fields_meta_data[$column] == 'decimal'){
-                               echo number_format($row[$column],2);
-                            }elseif($column_key > 0){ 
-                               echo '<a href="'.base_url().$lookup_table.'/view/'.hash_id($column_key).'">'.ucwords(str_replace('_',' ',$row[$column])).'</a>';
-                            }else{
-                                echo ucfirst($row[$column]);
-                            }
-                          }
-                          else{
-                            echo get_phrase('value_not_set');
-                          }
-                          ?>
-                        </td>
-                  <?php
-                      }
-                  ?>
-                </tr>
-              <?php
-              }
-              ?>
+              
             </tbody>
           </table>
+
+          <script>
+              let url = "<?=base_url();?><?=$detail_table_name;?>/showList";
+              let datatable = $("#<?=$detail_table_name;?>").DataTable({
+                  dom: 'lBfrtip',
+                  buttons: [
+                      'copyHtml5',
+                      'excelHtml5',
+                      'csvHtml5',
+                      'pdfHtml5',
+                  ],
+                  pagingType: "full_numbers",
+                  pageLength:10,
+                  order:[],
+                  serverSide:true,
+                  processing:true,
+                  language:{processing:'Loading ...'},
+                  destroy: true,
+                  ajax:{
+                      url:url,
+                      type:"POST",
+                      data: function(data){
+                        data['parentId'] = "<?=$id;?>";
+                        data['parentTable'] = "<?=$controller;?>";
+                      }
+                  }
+              });
+        
+      </script>
         <?php
       }
     }

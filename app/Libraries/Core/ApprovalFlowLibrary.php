@@ -54,11 +54,6 @@ class ApprovalFlowLibrary extends GrantsLibrary
         return ['status'];
     }
 
-    function showListEditAction(array $record): bool{
-        return true;
-    }
-
-
     function listTableWhere(\CodeIgniter\Database\BaseBuilder $builder): void{
        parent::listTableWhere($builder);
        $builder->where('approve_item_is_active', 1);

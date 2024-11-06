@@ -9,6 +9,7 @@ use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\RequestInterface;
 use Psr\Log\LoggerInterface;
 use Config\GrantsConfig;
+use App\Libraries\System\GrantsLibrary;
 
 
 class WebController extends BaseController
@@ -100,7 +101,7 @@ class WebController extends BaseController
 
         $this->settings = service('settings');
 
-        if($this->controller != "login"){
+        if($this->controller != "login" && $this->controller != "ajax"){
             $this->library = $this->libs->loadLibrary($this->controller);
         }
 
@@ -108,21 +109,22 @@ class WebController extends BaseController
 
     private function sessionBasedConstructorSet()
     {
-    
-        if ($this->action == 'view') {
-            if ($this->session->has('master_table')) {
-                $this->session->remove('master_table');
-            }
-            $this->session->set('master_table', ucfirst($this->controller));
+
+        $lib = new GrantsLibrary();
+
+        if ($this->session->has('masterTable')) {
+          $this->session->remove('masterTable');
+        }
+
+
+        if ($this->action == 'view' && $lib->checkIfTableHasDetailTable($this->controller)) {
+            $this->session->set('masterTable', ucfirst($this->controller));
             $this->id = hash_id(isset($this->segments[2]) ? $this->segments[2] : null, 'decode'); // Not sure what's this line does
-        } elseif ($this->action == 'single_form_add' && count($this->uri->getSegments()) == 4) {
-            if ($this->session->has('master_table')) {
-                $this->session->remove('master_table');
-            }
-            $this->session->set('master_table', $this->uri->getSegment(4));
+        } elseif ($this->action == 'singleFormAdd' && count($this->uri->getSegments()) == 4) {
+            $this->session->set('masterTable', $this->uri->getSegment(4));
             $this->id = hash_id(isset($this->segments[2]) ? $this->segments[2] : 0, 'decode'); // Not sure what's this line does
         } elseif ($this->action == 'list') {
-            $this->session->set('master_table', null);
+            $this->session->set('masterTable', null);
             $this->id = hash_id(isset($this->segments[2]) ? $this->segments[2] : 0, 'decode'); 
         }
     
@@ -164,8 +166,9 @@ public function result($id = ''){
     if($this->id == null){
         $output  = $this->libs::call($this->controller.'.'.$this->action.'Output');
     }else{
-        $output  = $this->libs::call($this->controller.'.'.$this->action.'Output', [$this->id]);
+      $output  = $this->libs::call($this->controller.'.'.$this->action.'Output', [$this->id]);
     }
+
     return $output;
 } 
 
@@ -230,10 +233,13 @@ public function user_info(): array
         return $navItems;
     }
 
-function crud_views(String $id = ''):string
+function crud_views(string $id = null, $parentTable = null):string|\CodeIgniter\HTTP\Response
 {
-
   $result = $this->result($id);
+
+  if($this->request->getPost()){
+    return $result;
+  }
   
   // Page name, Page title and views_dir can be overrode in a controller
   $page_data['page_name'] = $this->page_name();
@@ -267,17 +273,18 @@ public function view($id){
   return $this->crud_views();
 }
 
-public function postSingleFormAdd(){
-    return $this->libs::call($this->controller.'.'.$this->action.'Output');;
-}
+// public function postSingleFormAdd($parentId = null, $parentTable = null){
+//     log_message('error', 'One');
+//     return $this->libs::call($this->controller.'.'.$this->action.'Output', [$parentId, $parentTable]);;
+// }
 
-public function postEdit($id){
-    return $this->libs::call($this->controller.'.'.$this->action.'Output',[hash_id($id, 'decode')]);
-}
+// public function postEdit($id){
+//     return $this->libs::call($this->controller.'.'.$this->action.'Output',[hash_id($id, 'decode')]);
+// }
 
-public function singleFormAdd(){
+public function singleFormAdd($parentId = null, $parentTable = null){
     $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'create');
-    return $this->crud_views();
+    return $this->crud_views($parentId, $parentTable);
 }
 
 public function postMultiFormAdd(){
@@ -309,10 +316,25 @@ public function create(){
     return $this->libs::call('system.grants.add', [$this->id]);
 }
 
-public function showList(){
-    $results = $this->libs::call($this->controller.'.listOutput', [$this->id]);
+public function showList(): ResponseInterface{
+
+    $parentId = null;
+    $parentTable = null;
+
+    if($this->request->getPost('parentId')){
+      $parentId = $this->request->getPost('parentId');
+    }
+
+    if($this->request->getPost('parentTable')){
+      $parentTable = $this->request->getPost('parentTable');
+    }
+
+    $results = $this->libs::call($this->controller.'.listOutput', [$parentId, $parentTable]);
     $draw = intval($this->request->getPost('draw'));
     $data = $results['table_body'];
+    $total_records = $results['total_records'];
+
+    // log_message('error', json_encode($total_records));
 
     $records = [];
     $columns = $results['keys'];
@@ -324,19 +346,7 @@ public function showList(){
       foreach ($columns as $column) {
         if($column == strtolower($this->controller).'_id'){
           $primary_key = $row[$column];
-
-          $editActionDisabled = "disabled";
-          
-          if(
-            $this->session->system_admin ||
-            (
-              $this->library->showListEditAction($row) &&
-              $this->libs->loadLibrary('user')->checkRoleHasPermissions(strtolower($this->controller),'update')
-            )
-          ){
-            $editActionDisabled = "";
-          }
-          $row[$column] = '<a href = "'.site_url(strtolower($this->controller).'/edit/'.hash_id($primary_key,'encode')).'" class = "btn btn-default '.$editActionDisabled.'">'.get_phrase('edit').'</a>';
+          continue;
         }
 
           if (strpos($column, 'track_number') == true) {
@@ -371,12 +381,12 @@ public function showList(){
       $cnt++;
     }
 
-    $response = array(
-      'draw' => $draw,
-      'recordsTotal' => $results['total_records'],
-      'recordsFiltered' => $results['total_records'],
+    $response = [
+      'draw' => intval($draw),
+      'recordsTotal' => intval($total_records),
+      'recordsFiltered' => intval($total_records),
       'data' => $records
-    );
+    ];
 
 
     return $this->response->setJSON($response);
@@ -388,6 +398,8 @@ public function ajax(?string $controller = "", ?string $method = "", ...$args): 
     // All ajax request will be received here and passed to library of a controller
     // All ajax responses MUST have a status key with either success or failed
     // When using GET ajax, from the 3rd argument, the paramters MUST be paired with odd positioned parameters as keys and even positioned parameters as values
+    
+    log_message('error', json_encode($this->request->getPost()));
 
     if($controller && $method){
 
