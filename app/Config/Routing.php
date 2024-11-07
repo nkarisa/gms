@@ -41,7 +41,7 @@ class Routing extends BaseRouting
      *
      * Default: 'App\Controllers'
      */
-    public string $defaultNamespace = 'App\Controllers'; // 'App\Modules\Core\Controllers'; 
+    public string $defaultNamespace = 'App\Controllers\Web\Core'; 
 
     /**
      * For Auto Routing.
@@ -96,7 +96,7 @@ class Routing extends BaseRouting
      *
      * If FALSE, will stop searching and do NO automatic routing.
      */
-    public bool $autoRoute = false;
+    public bool $autoRoute = true;
 
     /**
      * For Defined Routes.

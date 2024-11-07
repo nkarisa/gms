@@ -23,12 +23,4 @@ trait OutputTrait {
         return $listOutput->getOutput($args);
     }
 
-    function currencyFields(){
-        return [];
-    }
-
-    function showListEditAction(array $record): bool{
-        return true;
-    }
-
 }

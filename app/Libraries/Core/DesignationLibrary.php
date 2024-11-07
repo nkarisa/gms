@@ -20,5 +20,20 @@ class DesignationLibrary extends GrantsLibrary
     }
 
 
+    function retrieveDesignations($context_definition_id){
+
+        $builder = $this->read_db->table('designation');
+        $builder->select(array('designation_id', 'designation_name'));
+        $builder->where(['fk_context_definition_id'=>$context_definition_id]);
+        $designations = $builder->get()->getResultArray();
+    
+        $designations_ids = array_column($designations,'designation_id');
+    
+        $designations_names = array_column($designations,'designation_name');
+    
+        $designations_ids_and_names = array_combine($designations_ids,$designations_names);
+    
+        return  $designations_ids_and_names;
+       }
    
 }

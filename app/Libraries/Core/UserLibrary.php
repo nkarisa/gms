@@ -2,6 +2,7 @@
 
 namespace App\Libraries\Core;
 
+use App\Libraries\System\AwsAttachmentLibrary;
 use App\Libraries\System\GrantsLibrary;
 use App\Libraries\Core\UniqueIdentifierLibrary;
 use App\Libraries\Core\StatusLibrary;
@@ -271,7 +272,7 @@ class UserLibrary extends GrantsLibrary
      * @param array|int $role_ids The unique identifier(s) of the role(s).
      * @return mixed The result of the database query.
      *
-     * @throws Exception If there is an error in executing the database query.
+     * @throws \Exception If there is an error in executing the database query.
      */
     public function permissionDirectlyAssignedToRoles($role_ids)
     {
@@ -409,7 +410,7 @@ class UserLibrary extends GrantsLibrary
      *
      * @throws \Exception If there is an error in executing the database query.
      */
-    public function getUserInfo($searchFields): array
+    public function getUserInfo(array $searchFields): array
     {
         $searchFieldKeys = array_keys($searchFields);
         $userTableFields = service('grantslib')::call('system.grants.fieldNames', [$this->table]);
@@ -470,12 +471,13 @@ class UserLibrary extends GrantsLibrary
 
         // Convert the result to an associative array and return it
         $user = [];
-        if($userObj->getNumRows() > 0){
+        if ($userObj->getNumRows() > 0) {
             $user = $userObj->getRowArray();
         }
 
         return $user;
     }
+
 
     /**
      * Retrieves the context associations of a user.
@@ -515,131 +517,134 @@ class UserLibrary extends GrantsLibrary
     {
         // Get the database connection
         $builder = $this->read_db->table('approve_item');
-    
+
         // Apply the where condition
         $builder->where(['approve_item_name' => $feature]);
-    
+
         // Fetch the row and return the value of approve_item_is_active
         $result = $builder->get()->getRow();
-    
+
         return $result ? $result->approve_item_is_active : null;
     }
-    
 
-    function isStatusActionableByUser($status_id,$feature){
+
+    function isStatusActionableByUser($status_id, $feature)
+    {
         return in_array($status_id, session()->get('role_status')) || !$this->isFeatureApproveable($feature) ? true : false;
-      }
-
-
-      public function actionableRoleStatus(array $roleIds)
-{
-    $userCrudActionableStatus = [];
-
-    // Connect to the database
-    $builder = $this->read_db->table('status_role');
-
-    // Select the status_id
-    $builder->select(['status.status_id as status_id']);
-    $builder->join('status', 'status.status_id = status_role.status_role_status_id');
-
-    if (!$this->session->system_admin) {
-        $builder->join('approval_flow', 'approval_flow.approval_flow_id = status.fk_approval_flow_id');
-        $builder->where(['approval_flow.fk_account_system_id' => $this->session->user_account_system_id]);
     }
 
-    $builder->where(['status_role_is_active' => 1]);
-    $builder->whereIn('fk_role_id', $roleIds);
 
-    // Execute the query
-    $statusObj = $builder->get();
+    public function actionableRoleStatus(array $roleIds)
+    {
+        $userCrudActionableStatus = [];
 
-    if ($statusObj->getNumRows() > 0) {
-        $userCrudActionableStatus = array_merge(
-            array_column($statusObj->getResultArray(), 'status_id'),
-            $this->reinstatingStatus()
-        );
+        // Connect to the database
+        $builder = $this->read_db->table('status_role');
+
+        // Select the status_id
+        $builder->select(['status.status_id as status_id']);
+        $builder->join('status', 'status.status_id = status_role.status_role_status_id');
+
+        if (!$this->session->system_admin) {
+            $builder->join('approval_flow', 'approval_flow.approval_flow_id = status.fk_approval_flow_id');
+            $builder->where(['approval_flow.fk_account_system_id' => $this->session->user_account_system_id]);
+        }
+
+        $builder->where(['status_role_is_active' => 1]);
+        $builder->whereIn('fk_role_id', $roleIds);
+
+        // Execute the query
+        $statusObj = $builder->get();
+
+        if ($statusObj->getNumRows() > 0) {
+            $userCrudActionableStatus = array_merge(
+                array_column($statusObj->getResultArray(), 'status_id'),
+                $this->reinstatingStatus()
+            );
+        }
+
+        return $userCrudActionableStatus;
     }
 
-    return $userCrudActionableStatus;
-}
+    function reinstatingStatus()
+    {
 
-function reinstatingStatus(){
+        $reinstating_status = [];
 
-    $reinstating_status = [];
+        $builder = $this->read_db->table('status');
 
-    $builder = $this->read_db->table('status');
+        if (!$this->session->system_admin) {
+            $builder->join('approval_flow', 'approval_flow.approval_flow_id=status.fk_approval_flow_id');
+            $builder->where(array('approval_flow.fk_account_system_id' => session()->get('user_account_system_id')));
+        }
 
-    if(!$this->session->system_admin){
-      $builder->join('approval_flow','approval_flow.approval_flow_id=status.fk_approval_flow_id');
-      $builder->where(array('approval_flow.fk_account_system_id'=>session()->get('user_account_system_id')));
+        $builder->where(array('status_approval_direction' => -1));
+        $status_obj = $builder->get();
+
+        if ($status_obj->getNumRows() > 0) {
+            $reinstating_status = array_column($status_obj->getResultArray(), 'status_id');
+        }
+
+        return $reinstating_status;
     }
 
-    $builder->where(array('status_approval_direction' => -1));
-    $status_obj = $builder->get();
-
-    if($status_obj->getNumRows() > 0){
-      $reinstating_status = array_column($status_obj->getResultArray(),'status_id');
-    }
-
-    return $reinstating_status;
-  }
-
-      function userRoles($user_id){
+    function userRoles($user_id)
+    {
         $builder = $this->read_db->table('user');
         $builder->select(['role_id', 'role_name']);
-        $builder->join('role','role.role_id=user.fk_role_id');
-        $builder->where(['user_id'=>$user_id]);
+        $builder->join('role', 'role.role_id=user.fk_role_id');
+        $builder->where(['user_id' => $user_id]);
         $user_roles_and_ids = $builder->get()->getResultArray();
-      
-        $role_ids=array_column($user_roles_and_ids,'role_id');
-        $role_names=array_column($user_roles_and_ids,'role_name');
-      
-        $role_ids_and_names=array_combine($role_ids,$role_names);
-      
+
+        $role_ids = array_column($user_roles_and_ids, 'role_id');
+        $role_names = array_column($user_roles_and_ids, 'role_name');
+
+        $role_ids_and_names = array_combine($role_ids, $role_names);
+
         return $role_ids_and_names;
-      
-      }
-      
-      public function userRoleIds($userId, $mergeWithPrimaryRole = true)
-{
-    // Retrieve the user's primary role
-    $userPrimaryRole = $this->userRoles($userId);
 
-    // Connect to the database
-
-    $builder = $this->read_db->table('role_user');
-
-    // Build the query
-    $builder->select(['role_id', 'role_name']);
-    $builder->where(['fk_user_id' => $userId, 'role_user_is_active' => 1]);
-    $builder->groupStart();
-    $builder->where('role_user_expiry_date IS NULL', null, false);
-    $builder->orWhere(['role_user_expiry_date >= ' => date('Y-m-d')]);
-    $builder->groupEnd();
-    $builder->join('role', 'role.role_id = role_user.fk_role_id');
-
-    // Execute the query
-    $roleUserObj = $builder->get();
-
-    $userRoleIds = [];
-
-    if ($roleUserObj->getNumRows() > 0) {
-        $userRoleIdsArray = $roleUserObj->getResultArray();
-        $roleIds = array_column($userRoleIdsArray, 'role_id');
-        $roleNames = array_column($userRoleIdsArray, 'role_name');
-
-        $userRoleIds = array_combine($roleIds, $roleNames);
     }
 
-    // Combine the user role IDs with the primary role
-    $combinedUserRoleIds = array_replace($userPrimaryRole, $userRoleIds);
+    public function userRoleIds($userId, $mergeWithPrimaryRole = true)
+    {
+        // Retrieve the user's primary role
+        $userPrimaryRole = $this->userRoles($userId);
 
-    if (!$mergeWithPrimaryRole) {
-        $combinedUserRoleIds = $userRoleIds;
+        // Connect to the database
+
+        $builder = $this->read_db->table('role_user');
+
+        // Build the query
+        $builder->select(['role_id', 'role_name']);
+        $builder->where(['fk_user_id' => $userId, 'role_user_is_active' => 1]);
+        $builder->groupStart();
+        $builder->where('role_user_expiry_date IS NULL', null, false);
+        $builder->orWhere(['role_user_expiry_date >= ' => date('Y-m-d')]);
+        $builder->groupEnd();
+        $builder->join('role', 'role.role_id = role_user.fk_role_id');
+
+        // Execute the query
+        $roleUserObj = $builder->get();
+
+        $userRoleIds = [];
+
+        if ($roleUserObj->getNumRows() > 0) {
+            $userRoleIdsArray = $roleUserObj->getResultArray();
+            $roleIds = array_column($userRoleIdsArray, 'role_id');
+            $roleNames = array_column($userRoleIdsArray, 'role_name');
+
+            $userRoleIds = array_combine($roleIds, $roleNames);
+        }
+
+        // Combine the user role IDs with the primary role
+        $combinedUserRoleIds = array_replace($userPrimaryRole, $userRoleIds);
+
+        if (!$mergeWithPrimaryRole) {
+            $combinedUserRoleIds = $userRoleIds;
+        }
+
+        return $combinedUserRoleIds;
     }
-
-    return $combinedUserRoleIds;
-}
 
 
     function checkRoleHasFieldPermission(string $activeController, string $permissionLabel, string $column): bool
@@ -657,7 +662,7 @@ function reinstatingStatus(){
         $builder->join('menu', 'permission.fk_menu_id = menu.menu_id');
         $builder->where('menu.menu_derivative_controller', $activeController);
         $builder->where('permission.permission_field', $column);
-        
+
         // Run the query
         $isColumnControlled = $builder->get();
 
@@ -669,7 +674,7 @@ function reinstatingStatus(){
         }
 
         return $hasPermission;
-}
+    }
 
 
     /**
@@ -1008,6 +1013,300 @@ function reinstatingStatus(){
         }
 
         return array_unique($user_hierarchy_offices, SORT_REGULAR);
+    }
+
+    function listTableVisibleColumns(): array
+    {
+        $columns = array(
+            'user_track_number',
+            'user_firstname',
+            'user_lastname',
+            'user_email',
+            'user_employment_date',
+            'context_definition_name',
+            'user_is_system_admin',
+            'language_name',
+            'user_is_active',
+            'status_name',
+            'role_name',
+            'account_system_name',
+            'user_first_time_login'
+        );
+
+        return $columns;
+    }
+
+    function formatColumnsValues(string $column, mixed $columnValue): mixed
+    {
+        if ($column == 'user_first_time_login') {
+            $columnValue = $columnValue == 1 ? get_phrase('yes') : get_phrase('no');
+        }
+
+        return $columnValue;
+    }
+
+
+    /**
+     * get_user_context_offices
+     * 
+     * This method returns office ids the user has an association with in his/her context
+     * 
+     * A user can have multiple offices associated to him or her e.g. A user of context definition of a country
+     * can be associated to multiple countries.
+     * 
+     * @param int $user_id 
+     * @return array - Office ids
+     */
+
+    function getUserContextOffices(int $user_id)
+    {
+
+        $contextDefinitionLibrary = new \App\Libraries\Core\ContextDefinitionLibrary();
+        $context_defs = $contextDefinitionLibrary->contextDefinitions();
+
+        // User context
+        $user_context_name = strtolower($this->getUserContextDefinition($user_id)['context_definition_name']);
+
+        // User context user table
+        $context_table = $context_defs[$user_context_name]['context_table'];
+        $context_user_table = $context_defs[$user_context_name]['context_user_table'];
+
+        $builder = $this->read_db->table($context_user_table);
+
+        $builder->select(array('office_name', 'office_id'));
+        $builder->join($context_table, $context_table . '.' . $context_table . '_id=' . $context_user_table . '.fk_' . $context_table . '_id');
+        $builder->join('office', 'office.office_id=' . $context_table . '.fk_office_id');
+        $builder->where(array('fk_user_id' => $user_id));
+        $user_context_obj = $builder->get();
+
+
+        $user_offices = array();
+
+        if ($user_context_obj->getNumRows() > 0) {
+            $user_offices = $user_context_obj->getResultArray();
+        }
+
+        return $user_offices;
+    }
+
+    function userRoleIdsWithExpiryDates($user_id)
+    {
+        $builder = $this->read_db->table('role_user');
+        $builder->select(array('role_id', 'role_name', 'role_user_expiry_date'));
+        $builder->where(array('fk_user_id' => $user_id, 'role_user_is_active' => 1));
+        $builder->groupStart();
+        $builder->where('role_user_expiry_date IS NULL', NULL, FALSE);
+        $builder->oRwhere(array('role_user_expiry_date >=' => date('Y-m-d')));
+        $builder->groupEnd();
+        $builder->join('role', 'role.role_id=role_user.fk_role_id');
+        $role_user_obj = $builder->get();
+
+        $user_role_ids = [];
+
+        if ($role_user_obj->getNumRows() > 0) {
+            $user_role_ids_array = $role_user_obj->getResultArray();
+
+            foreach ($user_role_ids_array as $role) {
+                $user_role_ids[$role['role_id']]['role_name'] = $role['role_name'];
+                $user_role_ids[$role['role_id']]['expiry_date'] = $role['role_user_expiry_date'];
+            }
+        }
+
+        return $user_role_ids;
+    }
+
+
+    function userDesignation($user_id, $context_defination_id)
+    {
+
+        switch ($context_defination_id) {
+            case 1:
+                $context_table = 'context_center_user';
+                break;
+            case 2:
+                $context_table = 'context_cluster_user';
+                break;
+            case 3:
+                $context_table = 'context_cohort_user';
+                break;
+            case 4:
+                $context_table = 'context_country_user';
+                break;
+            case 5:
+                $context_table = 'context_region_user';
+                break;
+            case 6:
+                $context_table = 'context_global_user';
+                break;
+
+        }
+
+        $builder = $this->read_db->table($context_table);
+        $builder->select(['designation_id', 'designation_name']);
+        $builder->join('designation', 'designation.designation_id=' . $context_table . '.fk_designation_id');
+        $builder->where(['fk_user_id' => $user_id]);
+        $user_designition_and_ids = $builder->get()->getResultArray();
+
+        $designition_ids = array_column($user_designition_and_ids, 'designation_id');
+        $designition_names = array_column($user_designition_and_ids, 'designation_name');
+
+        $designitions = array_combine($designition_ids, $designition_names);
+
+        return $designitions;
+
+    }
+
+    function add()
+    {
+        $response['flag'] = false;
+        $response['message'] = get_phrase('user_creation_failed');
+
+        $post = $this->request->getPost()['header'];
+
+        $uniqueIdentifierLibrary = new UniqueIdentifierLibrary();
+        $officeLibrary = new OfficeLibrary();
+
+        $this->write_db->transStart();
+
+        $user['user_name'] = sanitize_characters($post['user_name']);
+        $user['user_firstname'] = $post['user_firstname'];
+        $user['user_lastname'] = $post['user_lastname'];
+        $user['user_email'] = strtolower(trim($post['user_email']));
+        $user['fk_context_definition_id'] = $post['fk_context_definition_id'];
+        $user['user_is_context_manager'] = isset($post['user_is_context_manager']) ? $post['user_is_context_manager'] : 0;
+        $user['user_is_system_admin'] = isset($post['user_is_system_admin']) ? $post['user_is_system_admin'] : 0;
+        $user['fk_language_id'] = $post['fk_language_id'];
+        $user['user_is_active'] = $this->assignUserActiveStatus($post['fk_context_definition_id'], isset($post['fk_account_system_id']) ? $post['fk_account_system_id'] : null); // A user has to be full approved to have the record active. Normal approval flow to be followed.
+        $user['md5_migrate'] = 1; //For migrating fro use of php MD5 to complex sha256 with salt
+        $user['fk_role_id'] = $post['fk_role_id'];
+        $user['user_is_switchable'] = isset($post['user_is_switchable']) ? $post['user_is_switchable'] : 1;
+        if ($this->session->system_admin) {
+            $user['fk_country_currency_id'] = $post['fk_country_currency_id'];
+            $user['fk_account_system_id'] = $post['fk_account_system_id'];
+        } else {
+            $user['fk_country_currency_id'] = $post['currency_id'];
+            $user['fk_account_system_id'] = $officeLibrary->getOfficeAccountSystem($post['fk_user_context_office_id'])['account_system_id']; //$post['account_system_id'];
+        }
+
+        $unique_identifier = $uniqueIdentifierLibrary->getAccountSystemUniqueIdentifier($user['fk_account_system_id']);
+        $hashed = $this->passwordSalt($post['user_password']);
+        $user['user_password'] = $hashed;
+
+        $user_to_insert = $this->mergeWithHistoryFields($this->controller, $user, false);
+
+        $this->write_db->table('user')->insert($user_to_insert);
+
+        $user_id = $this->write_db->insertId();
+
+        // Insert a user in a context table 
+        $builder = $this->write_db->table('context_definition');
+        $builder->where(array('context_definition_id' => $post['fk_context_definition_id']));
+        $context_definition_name = $builder->get()->getRow()->context_definition_name;
+        $context_definition_user_table = 'context_' . $context_definition_name . '_user';
+
+        $context[$context_definition_user_table . '_name'] = "Office context for " . $post['user_firstname'] . " " . $post['user_lastname'];
+        $context['fk_user_id'] = $user_id;
+        $context['fk_context_' . $context_definition_name . '_id'] = $post['fk_user_context_office_id'];
+        $context['fk_designation_id'] = $post['designation'];
+        $context[$context_definition_user_table . '_is_active'] = 1;
+
+        $context_to_insert = $this->mergeWithHistoryFields($context_definition_user_table, $context, false);
+
+        $this->write_db->table($context_definition_user_table)->insert($context_to_insert);
+
+        // Insert user department
+        $department['department_user_name'] = "Department for " . $post['user_firstname'] . " " . $post['user_lastname'];
+        $department['fk_user_id'] = $user_id;
+        $department['fk_department_id'] = $post['department'];
+
+        $department_to_insert = $this->mergeWithHistoryFields('department_user', $department, false);
+
+        $this->write_db->table('department_user')->insert($department_to_insert);
+
+        $this->write_db->transComplete();
+
+        if ($this->write_db->transStatus() == false) {
+            if (isset($unique_identifier['unique_identifier_id'])) {
+                $checkIfUniqueIdDublipcates = $uniqueIdentifierLibrary->checkUniqueIdentifierDuplicates($unique_identifier['unique_identifier_id'], $post['user_unique_identifier']);
+
+                if ($checkIfUniqueIdDublipcates['status']) {
+                    $response['message'] = get_phrase('duplicate_identifier', 'Duplicate user identification is not allowed');
+                } else {
+                    $response['message'] = get_phrase('error_occurred');
+                }
+
+            }
+
+        } else {
+            $response['flag'] = true;
+            $response['message'] = get_phrase('user_created_successfully');
+        }
+
+        return $this->response->setJSON($response);
+    }
+
+    function passwordSalt(string $password): string
+    {
+        // This construct was built to prevent system admin being forced going to aws while developing on localhost without internet
+        // System admins need to have the env file set with a key PASSWORD_SALT and use the value given by the system administrator
+
+        $awsParameterLibrary = new \App\Libraries\System\AwsParameterStoreLibrary();
+
+        $salt = 'none';
+
+        try {
+            $salt = $awsParameterLibrary->getParameterValue('sha256-password-salt');
+        } catch (\Throwable $th) {
+            $salt = env('PASSWORD_SALT');
+        }
+
+        $hashed = hash('sha256', $password . $salt);
+        return $hashed;
+    }
+
+
+    private function assignUserActiveStatus($user_context_definition_id, $account_system_id = null)
+    {
+        $uniqueIdentifierLibrary = new UniqueIdentifierLibrary();
+        $active_status = 0;
+        $account_system_id = $account_system_id == null ? $this->session->user_account_system_id : $account_system_id;
+
+        if ($user_context_definition_id == 1) {
+            $account_system_unique_identifier = $uniqueIdentifierLibrary->getAccountSystemUniqueIdentifier($account_system_id);
+            if (!empty($account_system_unique_identifier)) {
+                $active_status = 1;
+            }
+        }
+
+        return $active_status;
+    }
+
+    function list($builder, array $columns,string $parentId = null, string $parentTable = null): array 
+    {      
+        $builder->select($columns);
+        $builder->join('context_definition', 'context_definition.context_definition_id=user.fk_context_definition_id');
+        $builder->join('language', 'language.language_id=user.fk_language_id');
+        $builder->join('role', 'role.role_id=user.fk_role_id');
+        $builder->join('account_system', 'account_system.account_system_id=user.fk_account_system_id');
+        $builder->join('status', 'status.status_id=user.fk_status_id');
+        $builder->where(array('user_id <> ' => $this->session->user_id));
+        if (!$this->session->system_admin) {
+            $user_context = $this->session->context_definition['context_definition_name'];
+            if ($user_context == 'cluster') {
+                $builder->join('context_center_user', 'context_center_user.fk_user_id=user.user_id');
+                $builder->join('context_center', 'context_center.context_center_id=context_center_user.fk_context_center_id');
+                $builder->whereIn('context_center.fk_office_id', array_column($this->session->hierarchy_offices, 'office_id'));
+            }
+            $builder->where(array('user.fk_account_system_id' => $this->session->user_account_system_id));
+        }
+
+        $obj = $builder->get();
+
+        if ($obj->getNumRows() > 0) {
+            $users = $obj->getResultArray();
+        }
+        
+        return $users;
     }
 
 }

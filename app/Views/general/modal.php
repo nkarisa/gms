@@ -65,6 +65,20 @@
 
     function post_row_delete() {}
 
+
+    $('.datatable').DataTable({
+         dom: 'lBfrtip',
+         "bDestroy": true,
+         buttons: [
+             'copyHtml5',
+             'excelHtml5',
+             'csvHtml5',
+             'pdfHtml5',
+         ],
+         "pagingType": "full_numbers",
+         'stateSave': true
+     });
+
     // $('.datatable_details').DataTable({
     //      dom: 'Bfrtip',
     //      "bDestroy": true,

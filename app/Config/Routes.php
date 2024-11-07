@@ -45,16 +45,29 @@ foreach ($modules as $module){
             $routes->get('view/(:segment)', $module.'\\'.$controllerName.'::view/$1');
             $routes->get('singleFormAdd', $module.'\\'.$controllerName.'::singleFormAdd'); 
             $routes->get('singleFormAdd/(:segment)/(:segment)', $module.'\\'.$controllerName.'::singleFormAdd/$1/$2'); 
-            $routes->post('singleFormAdd/(:segment)/(:segment)', $module.'\\'.$controllerName.'::singleFormAdd/$1/$2'); 
-            $routes->post('singleFormAdd/(:segment)', $module.'\\'.$controllerName.'::singleFormAdd/$1');  
-            $routes->post('singleFormAdd', $module.'\\'.$controllerName.'::singleFormAdd');
             $routes->get('multiFormAdd', $module.'\\'.$controllerName.'::multiFormAdd'); 
-            $routes->post('multiFormAdd', $module.'\\'.$controllerName.'::multiFormAdd'); 
+            $routes->get('multiFormAdd/(:segment)/(:segment)', $module.'\\'.$controllerName.'::multiFormAdd/$1/$2'); 
+            $routes->post('singleFormAdd/(:segment)/(:segment)', $module.'\\'.$controllerName.'::create/$1/$2'); 
+            $routes->post('singleFormAdd', $module.'\\'.$controllerName.'::create');
+            $routes->post('multiFormAdd', $module.'\\'.$controllerName.'::create'); 
+            $routes->post('multiFormAdd/(:segment)/(:segment)', $module.'\\'.$controllerName.'::create/$1/$2'); 
             $routes->get('edit/(:segment)', $module.'\\'.$controllerName.'::edit/$1'); 
-            $routes->get('create',$module.'\\'.$controllerName.'::create');
-            $routes->post('edit/(:segment)',$module.'\\'.$controllerName.'::edit/$1');
+            // $routes->get('create',$module.'\\'.$controllerName.'::create');
+            $routes->post('edit/(:segment)',$module.'\\'.$controllerName.'::update/$1');
             $routes->get('delete',$module.'\\'.$controllerName.'::delete');
-        });        
+        });  
+        
+        $routes->group("ajax/$routeBase", ['namespace' => 'App\Controllers\Web'], static function($routes) use ($controllerName, $module){
+            $routes->post('(:segment)',$module.'\\'.$controllerName.'::$1');
+            $routes->post('(:segment)/(:any)',$module.'\\'.$controllerName.'::$1/$2');
+            $routes->post('(:segment)/(:any)/(:any)',$module.'\\'.$controllerName.'::$1/$2/$2/$3');
+            $routes->post('(:segment)/(:any)/(:any)/(:any)',$module.'\\'.$controllerName.'::$1/$2/$3/$4');
+
+            $routes->get('(:segment)',$module.'\\'.$controllerName.'::$1');
+            $routes->get('(:segment)/(:any)',$module.'\\'.$controllerName.'::$1/$2');
+            $routes->get('(:segment)/(:any)/(:any)',$module.'\\'.$controllerName.'::$1/$2/$2/$3');
+            $routes->get('(:segment)/(:any)/(:any)/(:any)',$module.'\\'.$controllerName.'::$1/$2/$3/$4');
+        });
     }
 }
 
@@ -62,6 +75,7 @@ foreach ($modules as $module){
 
 $routes->group('ajax', ['namespace' => 'App\Controllers\Web'], static function($routes){
     $routes->post('/','WebController::ajax');
+    $routes->post('(:segment)','WebController::ajax');
     $routes->get('(:segment)/(:segment)/(:any)','WebController::ajax/$1/$2/$3');
 });
 
@@ -69,3 +83,6 @@ $routes->group('ajax', ['namespace' => 'App\Controllers\Web'], static function($
 $routes->group('api/v1', ['namespace' => 'App\Controllers\Api'], static function ($routes) { // 'filter' => 'api-auth', 
     $routes->resource('user');
 });
+
+
+$routes->setAutoRoute(true);

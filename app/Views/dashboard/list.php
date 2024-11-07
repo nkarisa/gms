@@ -1,7 +1,5 @@
 <?php 
-// echo $session->get('user_locale');
-// echo lang('Global/App.welcome_message')
-// echo $session->get('user_account_system_code');
+// echo json_encode(array_column($session->hierarchy_offices,'office_id'));
 ?>
 <div class = 'row'>
     <div class="col-sm-12">

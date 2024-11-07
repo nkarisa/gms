@@ -70,7 +70,7 @@ class WebController extends BaseController
         $this->session = \Config\Services::session();
 
         // Load default helpers
-        helper(['grants','form']);
+        helper(['grants','form', 'elements']);
 
         // Load database
         $this->read_db = \Config\Database::connect('read');
@@ -237,10 +237,6 @@ function crud_views(string $id = null, $parentTable = null):string|\CodeIgniter\
 {
   $result = $this->result($id);
 
-  if($this->request->getPost()){
-    return $result;
-  }
-  
   // Page name, Page title and views_dir can be overrode in a controller
   $page_data['page_name'] = $this->page_name();
   $page_data['page_title'] = $this->page_title();
@@ -258,7 +254,6 @@ function crud_views(string $id = null, $parentTable = null):string|\CodeIgniter\
   $page_data['config'] = $this->config;
   $page_data['libs'] = $this->libs;
   
-
   // Can be overrode in a specific controller
   return view('general/index', $page_data);
 }
@@ -273,27 +268,19 @@ public function view($id){
   return $this->crud_views();
 }
 
-// public function postSingleFormAdd($parentId = null, $parentTable = null){
-//     log_message('error', 'One');
-//     return $this->libs::call($this->controller.'.'.$this->action.'Output', [$parentId, $parentTable]);;
-// }
-
-// public function postEdit($id){
-//     return $this->libs::call($this->controller.'.'.$this->action.'Output',[hash_id($id, 'decode')]);
-// }
-
 public function singleFormAdd($parentId = null, $parentTable = null){
     $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'create');
     return $this->crud_views($parentId, $parentTable);
 }
 
-public function postMultiFormAdd(){
-    return $this->response->setJSON(['message' => 'Successfully added']);
+public function multiFormAdd(){
+  $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'create');
+  return $this->crud_views();
 }
 
-public function multiFormAdd(){
-    $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'create');
-    return $this->crud_views();
+public function create($parentId = null, $parentTable = null){
+  $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'create');
+  return $this->libs::call("$this->controller.add", [$parentId, $parentTable]);
 }
 
 public function edit(){
@@ -301,19 +288,14 @@ public function edit(){
     return $this->crud_views();
 }
 
+public function update(){
+  $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'update');
+  return $this->libs::call("$this->controller.edit", [$this->id]);
+}
+
 public function delete(){
     $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'delete');
     return $this->libs::call('system.grants.delete', [$this->id]);
-}
-
-public function update(){
-    $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'update');
-    return $this->libs::call('system.grants.update', [$this->id]);
-}
-
-public function create(){
-    $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'create');
-    return $this->libs::call('system.grants.add', [$this->id]);
 }
 
 public function showList(): ResponseInterface{
@@ -333,8 +315,6 @@ public function showList(): ResponseInterface{
     $draw = intval($this->request->getPost('draw'));
     $data = $results['table_body'];
     $total_records = $results['total_records'];
-
-    // log_message('error', json_encode($total_records));
 
     $records = [];
     $columns = $results['keys'];
@@ -367,14 +347,16 @@ public function showList(): ResponseInterface{
           } elseif (strpos($column, '_is_') == true) {
             $row[$column] =  $row[$column] == 1 ? "Yes" : "No";
           } elseif ($results['fields_meta_data'][$column] == 'int' || $results['fields_meta_data'][$column] == 'decimal') {
-            // Defense code to ignore non numeric values when lookup values method changes value type from numeric to non numeric
             $row[$column] = is_numeric($row[$column]) ? number_format($row[$column], 2) : $row[$column];
           } else {
             $row[$column] = $row[$column] != null ? ucfirst(str_replace("_", " ", $row[$column])) : $row[$column];
           }
 
+          if(method_exists($this->library, 'formatColumnsValues')){
+            $row[$column] = $this->library->formatColumnsValues($column, $row[$column]);
+          }
+
           $records[$cnt][$cols] = $row[$column];
-        // }
 
         $cols++;
       }

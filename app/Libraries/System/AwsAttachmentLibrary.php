@@ -279,4 +279,7 @@ class AwsAttachmentLibrary {
         return $filesArray;
     }
   
+    function getLocalFilesystemAttachmentUrl($objectKey){
+        return base_url().$objectKey;
+      }
 }

@@ -22,33 +22,13 @@ if (!function_exists('get_phrase')) {
     }
 }
 
-// if (!function_exists('render_list_table_header')) {
-//     function render_list_table_header($header_array)
-//     {
-//         $string = '<tr><th nowrap="nowrap">' . get_phrase("action") . '</th>';
-
-//         foreach ($header_array as $th_value) {
-//             if (strpos($th_value, 'key') == true || strpos($th_value, '_id') == true) {
-//                 continue;
-//             }
-
-//             $string .= '<th nowrap="nowrap">' . camel_case_header_element($th_value) . '</th>';
-//         }
-//         $string .= '</tr>';
-
-//         return $string;
-//     }
-// }
-
 if (!function_exists('add_record_button')) {
     function add_record_button($table_controller, $parent_controller, $has_details, $id = null, $has_listing = false, $is_multi_row = false)
     {
         $add_view = $has_listing ? "multiFormAdd" : "singleFormAdd";
         $add_view = $is_multi_row ? "multiRowAdd" : $add_view;
-
         $link = "";
-
-        if ($id !== null) {
+        if ($id != null) {
             $link = '<a href="' . base_url() . strtolower($table_controller) . '/' . $add_view . '/' . $id . '/' . $parent_controller . '" class="btn btn-default">' . get_phrase('add_' . strtolower($table_controller)) . '</a>';
         } else {
             $link = '<a style="margin-bottom:-70px;z-index:100;position:relative;" href="' . base_url() . $table_controller . '/' . $add_view . '" class="btn btn-default">' . get_phrase('add_' . strtolower($table_controller)) . '</a>';
@@ -755,5 +735,16 @@ if(!function_exists('approval_next_status')){
         $next_approval_states = compact('approve_next_status', 'decline_next_status');
 
         return $next_approval_states;
+    }
+}
+
+
+if (!function_exists('sanitize_characters')) {
+
+    function sanitize_characters($string)
+    {
+        $string = str_replace(' ', '', $string); // Replaces all spaces with hyphens.
+        return strtolower(preg_replace('/[^A-Za-z0-9]/', '', $string)); // Removes special chars.
+
     }
 }

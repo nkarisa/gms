@@ -219,64 +219,11 @@ private function toggleListSelectColumns(): array
           $filter_where_array
         );
 
-      $this->dataTableResults(
-        $builder, 
-        $table, 
-        $selected_columns
-      );
-
+        $this->libs->dataTableBuilder($builder, $table, $selected_columns);
+        $builder->select($selected_columns);
       
-      $builder->select($selected_columns);
-      
-      return $builder->get()->getResultArray();
+        return $builder->get()->getResultArray();
     }
-
-    function dataTableResults(BaseBuilder $builder, string $table, array $selected_columns): void{
-      if ($this->request->getPost('draw')) {
-        // Limiting Server Datatable Results
-        $start = intval($this->request->getPost('start'));
-        $length = intval($this->request->getPost('length'));
-
-        $builder->limit($length, $start);
-
-        // Ordering Server Datatable Results
-        $order = $this->request->getPost('order');
-        $col = '';
-        $dir = 'desc';
-
-        if (!empty($order)) {
-            $col = $order[0]['column'];
-            $dir = $order[0]['dir'];
-        }
-        
-        if ($col == '') {
-            $builder->orderBy($table . '_id', 'DESC');
-        } else {
-            $builder->orderBy($selected_columns[$col], $dir);
-        }
-
-        // Searching Server Datatable Results
-        $search = $this->request->getPost('search');
-        $value = $search['value'];
-
-        array_pop($selected_columns);
-
-        if (!empty($value)) {
-            $builder->groupStart();
-            $column_key = 0;
-            foreach ($selected_columns as $column) {
-                if ($column_key == 0) {
-                    $builder->like($column, $value, 'both');
-                } else {
-                    $builder->orLike($column, $value, 'both');
-                }
-                $column_key++;
-            }
-            $builder->groupEnd();
-        }
-    }
-    
-  }
 
 
     function runListQueryCountAllRecords(
@@ -286,8 +233,6 @@ private function toggleListSelectColumns(): array
       $listTableWhere, 
       $filter_where_array
     ): int {
-
-    
         if (!$this->read_db->tableExists($table)) {
             $message = 'The table ' . $this->controller . ' has no relationship with ' . $table . '. Check the ' . $this->controller . '_model detail_tables method';
             throw new \CodeIgniter\Exceptions\PageNotFoundException($message);
@@ -302,13 +247,9 @@ private function toggleListSelectColumns(): array
             $filter_where_array
           );
 
-          $this->dataTableResults(
-            $builder, 
-            $table, 
-            $selected_columns
-          );
+          $this->libs->dataTableBuilder($builder, $table, $selected_columns);
            
-            return $builder->countAllResults();
+          return $builder->countAllResults();
         }
     }
     
@@ -325,12 +266,15 @@ private function toggleListSelectColumns(): array
 
         $listSelectColumns = $this->toggleListSelectColumns();
         
+        $builder = $this->read_db->table($this->controller);
+        $datatableBuilder = $this->libs->dataTableBuilder($builder, $this->controller, $listSelectColumns);
+
         if (
             method_exists($featureLibrary, 'list') 
-            && is_array($featureLibrary->list($listSelectColumns,$this->parentId, $this->parentTable))
-            && array_key_exists('results', $featureLibrary->list($listSelectColumns,$this->parentId, $this->parentTable))
+            && is_array($featureLibrary->list($datatableBuilder, $listSelectColumns,$this->parentId, $this->parentTable))
+            && array_key_exists('results', $featureLibrary->list($datatableBuilder, $listSelectColumns,$this->parentId, $this->parentTable))
         ) {
-            $feature_model_list_result = $featureLibrary->list($listSelectColumns,$this->parentId, $this->parentTable)['results'];
+            $feature_model_list_result = $featureLibrary->list($datatableBuilder, $listSelectColumns,$this->parentId, $this->parentTable)['results'];
             // Allows empty result set
             $query_result = $feature_model_list_result; // A full user defined query result
             $total_records = count($query_result);

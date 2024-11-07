@@ -15,4 +15,16 @@ class UniqueIdentifier extends WebController
         parent::initController($request, $response, $logger);
 
     }
+
+    function getOfficeAllowedUniqueIdentifierByAjax(){
+        $post = $this->request->getPost();
+    
+        $context_definition_id = $post['context_definition_id'];
+        $context_office_id = $post['context_office_id'];
+    
+        $uniqueIdentifierLibrary = new \App\Libraries\Core\UniqueIdentifierLibrary();
+        $active_unique_identifier = $uniqueIdentifierLibrary->getOfficeContextAllowedUniqueIdentifier($context_definition_id, $context_office_id);
+    
+        return $this->response->setJSON($active_unique_identifier);
+      }
 }

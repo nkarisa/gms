@@ -271,7 +271,7 @@ trait CrudTrait
     }
 
     // Results Must have a key names results when implementing this method
-    public function list(array $listSelectColumns, string $parentId = null, string $parentTable = null):array{
+    public function list($datatableBuilder, array $listSelectColumns, string $parentId = null, string $parentTable = null):array{
         return []; 
     }
 }

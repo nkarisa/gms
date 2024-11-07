@@ -11,9 +11,10 @@ class GrantsLibrary
 
   use \App\Traits\System\OutputTrait;
   use \App\Traits\System\CallbackTrait;
-  use \App\Traits\System\VisibilityTrait;
+  use \App\Traits\System\Extendable;
   use \App\Traits\System\SchemaTrait;
   use \App\Traits\System\CrudTrait;
+  use \App\Traits\System\DataTable;
 
   protected $read_db;
   protected $write_db;
@@ -63,37 +64,6 @@ class GrantsLibrary
 
   }
 
-  // private function callbackActionAfterInsert($table_name, $post_array, $approval_id, $header_id): array
-  // {
-
-  //   $featureLibrary = $this->loadLibrary($table_name);
-
-  //   $success = false;
-
-  //   if (method_exists($featureLibrary, 'actionAfterInsert')) {
-  //     $success = $featureLibrary->actionAfterInsert($post_array, $approval_id, $header_id);
-  //   }
-
-  //   return $success;
-  // }
-
-
-  // private function callbackActionBeforeInsert($table_name, $post_array): array
-  // {
-
-  //   $featureLibrary = $this->loadLibrary($table_name);
-
-  //   $updated_post_array = array();
-
-  //   if (method_exists($featureLibrary, 'actionBeforeInsert')) {
-  //     $updated_post_array = $featureLibrary->actionBeforeInsert($post_array);
-  //   } else {
-  //     $updated_post_array = $post_array;
-  //   }
-
-  //   return $updated_post_array;
-  // }
-
   private function callbackTransactionValidateDuplicatesColumns($table_name)
   {
 
@@ -125,8 +95,6 @@ class GrantsLibrary
 
     return $multi_select_field;
   }
-
-
 
 
   /**
@@ -336,24 +304,14 @@ class GrantsLibrary
     }
   }
 
-  // static function createMissingResources($feature){
-  //   // Create missing controllers, models and libraries
-  // }
-
-
   function create_missing_system_files_from_json_setup()
   {
-
     $specs_array = create_specs_array(); // file_get_contents(APPPATH . 'version' . DIRECTORY_SEPARATOR . 'spec.json');
-    //print_r($specs_array);
-    //$specs_array = yaml_parse($raw_specs, 0);
-
     $this->create_missing_system_files($specs_array);
   }
 
   function create_missing_system_files($table_array)
   {
-    //print_r($table_array);exit;
     foreach ($table_array as $app_name => $app_tables) {
       foreach ($app_tables['tables'] as $table_name => $setup) {
         $this->create_missing_system_files_methods($table_name, $app_name);
@@ -449,124 +407,6 @@ class GrantsLibrary
     }
   }
 
-  // public function runListQuery(
-  //   string $table,
-  //   array $selectedColumns,
-  //   array $lookupTables = [],
-  //   string $modelWhereMethod = "listTableWhere",
-  //   array $filterWhereArray = []
-  // ): array {
-    
-  //   // Get the database connection
-  //   $builder = $this->read_db->table($table);
-
-  //   if (!$this->tableExists($table)) {
-  //     $message = "The table " . $table . " doesn't exist in the database. Check the lookupTables function in the " . $table . "Model.";
-  //     throw new \CodeIgniter\Exceptions\PageNotFoundException($message);
-  //   }else{
-      
-  //     $this->runListActualQuery($builder, $table, $selectedColumns,$lookupTables,$modelWhereMethod, $filterWhereArray);
-      
-  //     if ($this->request->getPost('draw')) {
-
-  //       // Limiting Server Datatable Results
-  //       $start = intval($this->request->getPost('start'));
-  //       $length = intval($this->request->getPost('length'));
-  //       $builder->limit($length, $start);
-    
-  //       // Ordering Server Datatable Results
-  //       $order = $this->request->getPost('order');
-  //       $col = '';
-  //       $dir = 'desc';
-    
-  //       if (!empty($order)) {
-  //           $col = $order[0]['column'];
-  //           $dir = $order[0]['dir'];
-  //       }
-    
-  //       if ($col == '') {
-  //           $builder->orderBy($table . '_id', 'DESC');
-  //       } else {
-  //           $builder->orderBy($selectedColumns[$col], $dir);
-  //       }
-    
-  //       // Searching Server Datatable Results
-  //       $search = $this->request->getPost('search');
-  //       $value = $search['value'];
-    
-  //       // Remove the last column (if necessary)
-  //       array_pop($selectedColumns);
-    
-  //       if (!empty($value)) {
-  //           $builder->groupStart();  // Begin grouping
-  //           $column_key = 0;
-  //           foreach ($selectedColumns as $column) {
-  //               if ($column_key == 0) {
-  //                   $builder->like($column, $value, 'both');
-  //               } else {
-  //                   $builder->orLike($column, $value, 'both');
-  //               }
-  //               $column_key++;
-  //           }
-  //           $builder->groupEnd();  // End grouping
-  //       }
-  //     }
-
-  //     $result = $builder->get()->getResultArray();
-  //     return $result;
-  //   }
-
-  // }
-
-  // private function runListActualQuery(
-  //   $builder,
-  //   string $table,
-  //   array $selectedColumns,
-  //   array $lookupTables = [],
-  //   string $libraryWhereMethod = "listTableWhere",
-  //   array $filterWhereArray = []
-  // ) {
-  //   // Run column selector
-  //   $builder->select($selectedColumns);
-
-  //   // Load the model dynamically
-  //   $library = $this->loadLibrary($table);
-    
-  //   // Apply the model's custom "where" method, if it exists
-  //   if (method_exists($library, $libraryWhereMethod)) {
-  //     $library->$libraryWhereMethod($builder);
-  //   }
-
-  //   // Handle lookup tables and apply joins
-  //   if (is_array($lookupTables) && count($lookupTables) > 0) {
-  //     foreach ($lookupTables as $lookupTable) {
-  //       // Ensure lookup table exists in the database
-  //       if (!$this->tableExists($lookupTable)) {
-  //         $message = "The table " . $lookupTable . " doesn't exist in the database. Check the lookupTables function in the " . $table . "Model.";
-  //         throw new \CodeIgniter\Exceptions\PageNotFoundException($message);
-  //       }
-
-  //       // Join lookup tables
-  //       $lookupTableId = $lookupTable . '_id';
-        
-  //       $builder->join($lookupTable, $lookupTable . '.' . $lookupTableId . '=' . $table . '.fk_' . $lookupTableId);
-  //     }
-  //   }
-
-  //   // Apply ordering method from the model, if exists
-  //   if (method_exists($library, 'orderListPage')) {
-  //     $builder->orderBy($library->orderListPage());
-  //   } else {
-  //     $builder->orderBy($table . '_created_date', 'DESC');
-  //   }
-
-  //   // Apply additional filter conditions, if provided
-  //   if (is_array($filterWhereArray) && count($filterWhereArray) > 0) {
-  //     $builder->where($filterWhereArray);
-  //   }
-
-  // }
-
 
   function addMandatoryLookupTables(
     &$existing_lookup_tables,
@@ -626,32 +466,6 @@ class GrantsLibrary
 
     return $lookup_tables_fields;
   }
-
-  // function callbackLookupTables(string $table_name): array
-  // {
-
-  //   $featureLibrary = $this->loadLibrary($table_name);
-  //   $approveItemLibrary = $this->loadLibrary('approve_item');
-
-  //   $lookup_tables = array();
-
-  //   if (is_array($featureLibrary->lookupTables($table_name))) {
-  //     if ($this->action !== 'single_form_add') {
-  //       // Check if status and approval lookup tables doesn't exist and add them
-  //       $lookup_tables = $featureLibrary->lookupTables($table_name);
-  //       $this->addMandatoryLookupTables($lookup_tables);
-
-  //       // Hide status and approval columns if the active controller/table is not approveable
-  //       if (!$approveItemLibrary->approveableItem($table_name)) {
-  //         $this->removeMandatoryLookupTables($lookup_tables);
-  //       }
-  //     } else {
-  //       $lookup_tables = $featureLibrary->lookupTables($table_name);
-  //     }
-  //   }
-
-  //   return $lookup_tables;
-  // }
 
   function lookupTables(): array
   {
@@ -717,37 +531,6 @@ class GrantsLibrary
 
     return $history_type_field;
   }
-
-  // function loadDetailLibrary(string $tableName = "", string $module = ""): string
-  // {
-
-  //     $tableExists = $this->tableExists($tableName);
-
-  //     if ($tableName !== "" && !is_array($tableName) && $this->read_db->tableExists($tableName) && $tableName != 'migrations') {
-
-  //         // Check if the controller for the table does not exist and the table exists
-  //         if (!file_exists(APPPATH . 'Controllers' . DIRECTORY_SEPARATOR . $tableName . '.php') && $tableExists) {
-  //             // Handle creating missing models or controllers based on a missing controller
-  //             // when the database table exists
-  //             $assetsTempPath = FCPATH . 'assets' . DIRECTORY_SEPARATOR . 'temp' . DIRECTORY_SEPARATOR;
-
-  //             // Additional logic for creating missing files can be added here if required
-  //         }
-
-  //         $model = $tableName . 'Model';
-
-  //         try {
-  //             // Load the model
-  //             $this->load->model($model);
-  //         } catch (\Exception $e) {
-  //             $message = "Unable to load the specified model " . $model . " in Grants Library as indicated in the detail_tables function of the " . $this->controller . "Model.</br>";
-  //             $message .= "Verify if the table " . $tableName . " exists and if the file " . $model . " is present in the third_party Packages Core or Grants models.";
-  //             throw new \CodeIgniter\Exceptions\PageNotFoundException($message);
-  //         }
-  //     }
-
-  //     return $model;
-  // }
 
 
   public function nameField(string $table_name = ""): string
@@ -2204,9 +1987,6 @@ class GrantsLibrary
 
     // Get the inserted header record ID
     $headerId = $this->write_db->insertID();;
-
-    // log_message('error', json_encode($this->controller));
-
     // Proceed with inserting details if $postHasDetail is true
     if ($postHasDetail) {
       $detailArray = $detail;
@@ -2599,7 +2379,6 @@ class GrantsLibrary
       return $columns;
     }
     
-
     function getAccountSystemRoles($user_account_system_id)
     {
       $builder = $this->read_db->table('role');
@@ -2612,6 +2391,59 @@ class GrantsLibrary
       $roles = $builder->get()->getResultArray();
   
       return $roles;
+    }
+
+
+    function selectField($column, $options)
+    {
+      $field =  new FieldsBase($column, $this->controller, true);
+      return $field->select_field($options);
+    }
+  
+    function emailField($field_name)
+    {
+      $field =  new FieldsBase($field_name, $this->controller, true);
+      return $field->email_field();
+    }
+  
+    function textField($field_name)
+    {
+      $field =  new FieldsBase($field_name, $this->controller, true);
+      return $field->text_field();
+    }
+  
+    function passwordField($field_name)
+    {
+      $field =  new FieldsBase($field_name, $this->controller, true);
+      return $field->password_field();
+    }
+  
+
+    function mergeWithHistoryFields(String $approve_item_name, array $array_to_merge, bool $add_name_to_array = true, $is_a_new_record = true)
+    {
+      
+      $approvalLibrary = new \App\Libraries\Core\ApprovalLibrary();
+      $data = [];
+  
+      if($is_a_new_record){
+  
+        $data[$approve_item_name . '_track_number'] = $this->generateItemTrackNumberAndName($approve_item_name)[$approve_item_name . '_track_number'];
+        $data[$approve_item_name . '_created_by'] = $this->session->user_id ? $this->session->user_id : 1;
+        $data[$approve_item_name . '_created_date'] = date('Y-m-d');
+        $data['fk_approval_id'] = $approvalLibrary->insertApprovalRecord($approve_item_name);
+        $data['fk_status_id'] = $approvalLibrary->insertApprovalRecord($approve_item_name);
+  
+      }else{
+        $data[$approve_item_name.'_last_modified_date'] = date('Y-m-d h:i:s');
+  
+        $data[$approve_item_name . '_last_modified_by'] = $this->session->user_id ? $this->session->user_id : 1;
+      }
+  
+      if ($add_name_to_array) {
+        $data[$approve_item_name . '_name'] = $this->generateItemTrackNumberAndName($approve_item_name)[$approve_item_name . '_name'];
+      }
+  
+      return array_merge($array_to_merge, $data);
     }
 
 }

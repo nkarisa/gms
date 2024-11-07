@@ -31,10 +31,8 @@ class StatusRoleLibrary extends GrantsLibrary
     //     return $result;
     // }
 
-    function list(array $listSelectColumns, string $parentId = null, string $parentTable = null): array
+    function list($builder, array $listSelectColumns, string $parentId = null, string $parentTable = null): array
     {
-        
-        $builder = $this->read_db->table('status_role');
         $builder->select($listSelectColumns);
         $builder->join('role', 'role.role_id=status_role.fk_role_id');
         $builder->join('status', 'status.status_id=status_role.status_role_status_id');

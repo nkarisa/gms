@@ -936,6 +936,20 @@ class StatusLibrary extends GrantsLibrary
     }
   }
 
+  public function getApprovalAssignments($role_id)
+  {
+
+    $builder = $this->read_db->table('status');
+    $builder->select(array('status_name', 'approve_item_name'));
+    $builder->join('approval_flow', 'approval_flow.approval_flow_id=status.fk_approval_flow_id');
+    $builder->join('approve_item', 'approve_item.approve_item_id=approval_flow.fk_approve_item_id');
+    $builder->join('status_role', 'status_role.status_role_status_id=status.status_id');
+    $builder->where(array('status_role.fk_role_id' => $role_id, 'status_approval_direction' => 1));
+    $status = $builder->get()->getResultArray();
+
+    return $status;
+  }
+
   function detailTables(): array {
     return ['status_role'];
   }

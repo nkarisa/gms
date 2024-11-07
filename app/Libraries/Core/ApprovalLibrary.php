@@ -43,8 +43,12 @@ class ApprovalLibrary extends GrantsLibrary
         ];
 
         // Insert approval record
-        $this->approvalModel->insert((object) $approval);
-        $insert_id = $this->approvalModel->getInsertID();
+        // $this->approvalModel->insert((object) $approval);
+        // $insert_id = $this->approvalModel->getInsertID();
+
+        $builder = $this->write_db->table('approval');
+        $builder->insert($approval);
+        $insert_id = $this->write_db->insertID();
 
         return $insert_id;
     }
