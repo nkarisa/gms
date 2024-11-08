@@ -93,41 +93,24 @@ $max_fav_items_reached = $favorite_menu_items_with_max_flag['max_items_reached']
 
     $(".fa-star").on('click', function () {
 
-        let url = "<?=base_url();?>menu_user_order/update_favorite"
+        let url = "<?=base_url();?>ajax/menu_user_order/updateFavoriteByAjax"
         const star = $(this);
         let max_items_reached = false;
   
         if($(this).hasClass('fa-star-fav')){
             // Already a favorite
             const data = {fav_status: 'fav', item_name: $(this).closest('td').attr('id')};
-
-            $.post(url, data, function (response) {
-
-                const items = JSON.parse(response);
-
+            $.post(url, data, function (items) {
                 create_favorite_menu_items(items.item_list);
                 star.removeClass('fa-star-fav');
                 star.addClass('fa-star-unfav');
-
-                // console.log(items.max_items_reached);
-
-                // if(items.max_items_reached){
-                //     alert('Maximum number of favorite items has been reached');
-                // }
             });
         }else{
             // Not a favorite
             const data = {fav_status: 'unfav', item_name: $(this).closest('td').attr('id')};
-
-            $.post(url, data, function (response) {
-
-                const items = JSON.parse(response);
-
+            $.post(url, data, function (items) {
                 create_favorite_menu_items(items.item_list);
                 items.is_favorite ? star.addClass('fa-star-fav') : '';
-
-                console.log(items.max_items_reached);
-
                 if(items.max_items_reached){
                     alert('Maximum number of favorite items has been reached');
                 }

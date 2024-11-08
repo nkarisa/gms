@@ -23,4 +23,5 @@ class GrantsConfig extends BaseConfig
     public $attachment_key_column = "attachment_url";
     public $s3_region = 'eu-west-1';
     public $s3_bucket_name = "fms-bucket";
+    public $max_count_of_favorites_menu_items = 10;
 }

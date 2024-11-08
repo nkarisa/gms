@@ -374,7 +374,7 @@ class ViewOutput extends OutputTemplate
         $detail_list_table_visible_columns = $this->featureModelDetailListTableVisibleColumns($table);
         
         //Table lookup tables
-        $lookup_tables = $this->libs->callbackLookupTables($table);
+        $lookup_tables = $this->libs->checkLookupTables($table);
 
         $get_all_table_fields = $this->libs->getAllTableFields($table);
 
@@ -446,7 +446,7 @@ class ViewOutput extends OutputTemplate
 
     // function detailListInternalQueryResult($table)
     // {
-    //     $lookup_tables = $this->libs->callbackLookupTables($table);
+    //     $lookup_tables = $this->libs->checkLookupTables($table);
 
     //     $select_columns = $this->toggleDetailListSelectColumns(table: $table);
 

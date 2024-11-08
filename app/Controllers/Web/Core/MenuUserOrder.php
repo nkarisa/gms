@@ -15,4 +15,27 @@ class MenuUserOrder extends WebController
         parent::initController($request, $response, $logger);
 
     }
+
+    function updateFavoriteByAjax(){
+        // echo $fav_status;
+        
+        $menuUserOrderLibrary = new \App\Libraries\Core\MenuUserOrderLibrary();
+        $menu_data = $menuUserOrderLibrary->updateFavorite();
+
+        return $this->response->setJSON($menu_data);
+      }
+
+
+      function getFavoriteMenuItems(){
+        $items = [];
+        $menuLibrary = new \App\Libraries\Core\MenuLibrary();
+        if(
+           $this->session->data_privacy_consented 
+          )
+        {
+          $items = $menuLibrary->getFavoriteMenuItems();
+        }
+        
+        return $this->response->setJSON($items);
+      }
 }

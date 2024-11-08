@@ -194,7 +194,7 @@
         },
         
         "status_role":{
-          "lookup_tables":[],
+          "lookup_tables":["status","role"],
           "field_data":[{"name":"status_role_id","type":"int","max_length":100,"default":null,"primary_key":1},{"name":"status_role_track_number","type":"varchar","max_length":100,"default":null,"primary_key":0},{"name":"status_role_name","type":"varchar","max_length":100,"default":null,"primary_key":0},{"name":"fk_role_id","type":"int","max_length":100,"default":null,"primary_key":0},{"name":"fk_status_id","type":"int","max_length":100,"default":null,"primary_key":0},{"name":"status_role_status_id","type":"int","max_length":100,"default":null,"primary_key":0},{"name":"status_role_is_active","type":"int","max_length":5,"default":"1","primary_key":0},{"name":"status_role_created_by","type":"int","max_length":100,"default":null,"primary_key":0},{"name":"status_role_created_date","type":"date","max_length":null,"default":"0000-00-00","primary_key":0},{"name":"status_role_last_modified_by","type":"int","max_length":100,"default":null,"primary_key":0},{"name":"status_role_last_modified_date","type":"timestamp","max_length":null,"default":"current_timestamp()","primary_key":0},{"name":"fk_approval_id","type":"int","max_length":100,"default":null,"primary_key":0}]
         },
         "user":{

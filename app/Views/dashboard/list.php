@@ -1,5 +1,6 @@
 <?php 
-// echo json_encode(array_column($session->hierarchy_offices,'office_id'));
+// $grantsLibrary = new \App\Libraries\System\GrantsLibrary();
+// $grantsLibrary->deriveLookupTables("status_role");
 ?>
 <div class = 'row'>
     <div class="col-sm-12">

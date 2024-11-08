@@ -461,44 +461,47 @@ class MenuLibrary extends GrantsLibrary
 
 
     public function getFavoriteMenuItems()
-{
-    $db = db_connect();  // Get the database connection
-    $userId = session()->get('user_id');  // Get user id from session
+    {
+        $db = db_connect();  // Get the database connection
+        $userId = session()->get('user_id');  // Get user id from session
 
-    // Count the number of favorite menu items
-    $countOfFavorites = $db->table('menu_user_order')
-        ->where(['fk_user_id' => $userId, 'menu_user_order_is_favorite' => 1])
-        ->countAllResults();
+        // Count the number of favorite menu items
+        $countOfFavorites = $db->table('menu_user_order')
+            ->where(['fk_user_id' => $userId, 'menu_user_order_is_favorite' => 1])
+            ->countAllResults();
 
-    // Get the menu items with their names and derivative controllers
-    $query = $db->table('menu_user_order')
-        ->select(['menu.menu_id', 'menu.menu_name', 'menu.menu_derivative_controller'])
-        ->join('menu', 'menu_user_order.fk_menu_id = menu.menu_id')
-        ->where(['fk_user_id' => $userId, 'menu_user_order_is_favorite' => 1])
-        ->get();
+        // Get the menu items with their names and derivative controllers
+        $query = $db->table('menu_user_order')
+            ->select(['menu.menu_id', 'menu.menu_name', 'menu.menu_derivative_controller'])
+            ->join('menu', 'menu_user_order.fk_menu_id = menu.menu_id')
+            ->where(['fk_user_id' => $userId, 'menu_user_order_is_favorite' => 1])
+            ->get();
 
-    $items = [];
+        $items = [];
 
-    if ($query->getNumRows() > 0) {
-        $itemResult = $query->getResultArray();
+        if ($query->getNumRows() > 0) {
+            $itemResult = $query->getResultArray();
 
-        $itemNamesRaw = array_column($itemResult, 'menu_name');
+            $itemNamesRaw = array_column($itemResult, 'menu_name');
 
-        // Use the helper to convert item names to phrases in lower case
-        $itemNames = array_map(function ($elem) {
-            return get_phrase(strtolower($elem));
-        }, $itemNamesRaw);
+            // Use the helper to convert item names to phrases in lower case
+            $itemNames = array_map(function ($elem) {
+                return get_phrase($elem);
+            }, $itemNamesRaw);
 
-        $itemControllers = array_column($itemResult, 'menu_derivative_controller');
+            $itemControllers = array_column($itemResult, 'menu_derivative_controller');
 
-        $items = array_combine($itemControllers, $itemNames);
+            $itemControllers = array_map(function ($elem) {
+                return strtolower($elem);
+            }, $itemNamesRaw);
+
+            $items = array_combine($itemControllers, $itemNames);
+        }
+        
+        $data['item_list'] = $items;
+        $data['max_items_reached'] = $countOfFavorites == config(\Config\GrantsConfig::class)->maxCountOfFavoritesMenuItems;
+
+        return $data;
     }
-
-    $data['item_list'] = $items;
-    $data['max_items_reached'] = $countOfFavorites == config(\Config\GrantsConfig::class)->maxCountOfFavoritesMenuItems;
-
-    return $data;
-}
-
 
 }

@@ -10,6 +10,11 @@ class StatusRoleLibrary extends GrantsLibrary
     protected $table;
     protected $coreModel;
 
+    public array $lookUpTablesForeignKeyMappings = [
+        'role' => 'fk_role_id',
+        'status' => 'status_role_status_id',
+    ];
+
     function __construct()
     {
         parent::__construct();
@@ -33,6 +38,8 @@ class StatusRoleLibrary extends GrantsLibrary
 
     function list($builder, array $listSelectColumns, string $parentId = null, string $parentTable = null): array
     {
+        // log_message('error', json_encode($this->tableLookUp($this->controller)));
+        $this->dataTableBuilder($builder, $this->controller, $listSelectColumns);
         $builder->select($listSelectColumns);
         $builder->join('role', 'role.role_id=status_role.fk_role_id');
         $builder->join('status', 'status.status_id=status_role.status_role_status_id');
@@ -41,6 +48,16 @@ class StatusRoleLibrary extends GrantsLibrary
 
         return ['results' => $results];
     }
+
+    // function detailListTableVisibleColumns(): array{
+    //     return [
+    //         'status_role_track_number',
+    //         'status_role_name',
+    //         'status_role_is_active',
+    //         'role_name',
+    //         'status_role_created_date'
+    //     ];
+    // }
 
     function singleFormAddVisibleColumns(): array
     {
@@ -52,10 +69,8 @@ class StatusRoleLibrary extends GrantsLibrary
     {
         // Call the parent lookup_values method
         $lookup_values = parent::lookupValues();
-
         // Decode the status_id from the hashed ID
         $status_id = hash_id($this->id, 'decode');
-
         // Handle the 'edit' action case
         if ($this->action === 'edit') {
             $status_role_id = hash_id($this->id, 'decode');
@@ -64,7 +79,6 @@ class StatusRoleLibrary extends GrantsLibrary
                 ->get();
             $status_id = $statusRoleQuery->getRow()->status_role_status_id;
         }
-
         // Get the approve_item_name related to the given status_id
         $approveItemQuery = $this->read_db->table('approve_item')
             ->select('approve_item_name')
@@ -73,28 +87,27 @@ class StatusRoleLibrary extends GrantsLibrary
             ->where('status_id', $status_id)
             ->get();
         $approve_item_name = $approveItemQuery->getRow()->approve_item_name;
-
         // Query to get role information with conditions
-        $roleQuery = $this->read_db->table('role')
-            ->select('role_id, role_name')
-            ->where("NOT EXISTS (SELECT * FROM status_role WHERE status_role.fk_role_id = role.role_id AND status_role_status_id = " . $status_id . ")", null, false);
+        $builder = $this->read_db->table('role');
+        $builder->select('role_id, role_name');
+        $builder->where("NOT EXISTS (SELECT * FROM status_role WHERE status_role.fk_role_id = role.role_id AND status_role_status_id = " . $status_id . ")", null, false);
 
         if (!$this->session->get('system_admin')) {
-            $roleQuery->where('fk_account_system_id', $this->session->get('user_account_system_id'))
-                ->where('role_is_active', 1)
-                ->whereNotIn('role_id', $this->session->get('role_ids'));
+            $builder->where('fk_account_system_id', $this->session->user_account_system_id);
+            $builder->where('role_is_active', 1);
+            $builder->whereNotIn('role_id', $this->session->get('role_ids'));
 
             // Additional filtering for non-edit action
             if ($this->action !== 'edit') {
-                $roleQuery->where('menu_derivative_controller', $approve_item_name)
+                $builder->where('menu_derivative_controller', $approve_item_name)
                     ->where('role_permission_is_active', 1)
                     ->join('role_permission', 'role_permission.fk_role_id = role.role_id')
                     ->join('permission', 'permission.permission_id = role_permission.fk_permission_id')
                     ->join('menu', 'menu.menu_id = permission.fk_menu_id');
             }
         }
-
-        $lookup_values['role'] = $roleQuery->get()->getResultArray();
+        // log_message('error', $builder->getCompiledSelect());
+        $lookup_values['role'] = $builder->get()->getResultArray();
 
         return $lookup_values;
     }

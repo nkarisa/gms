@@ -136,22 +136,13 @@
 		location.href = url;
 	});
 
-	// $("#btn_restore_user").on('click',function(){
-	// 	const url = "<?=base_url();?>login/switch_user/<?=$primary_user_data_id ? $primary_user_data_id : 0;?>";
-	// 	location.href = url;
-	// });
-
-	// $(document).ready(function () {
-		
-	// 	const url = "<?=base_url();?>menu_user_order/get_favorite_menu_items"
-
-	// 	$.get(url, function (response) {
-	// 		const items = JSON.parse(response);
-	// 		// console.log(items);
-	// 		create_favorite_menu_items(items.item_list);
-	// 	});
+	$(document).ready(function () {
+		const url = "<?=base_url();?>ajax/menu_user_order/getFavoriteMenuItems"
+		$.get(url, function (items) {
+			create_favorite_menu_items(items.item_list);
+		});
 	
-	// })
+	})
 
 	$(".language_selector").on('click', function () {
 		const lang = $(this).attr('id');

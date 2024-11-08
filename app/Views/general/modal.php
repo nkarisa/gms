@@ -136,4 +136,13 @@
         });
     }
 
+
+    function create_favorite_menu_items(items) {
+        let elements = '<ul>';
+        $.each(items, function (i, elem) {
+            elements += "<li><a href='<?= base_url(); ?>" + i + "/list'>" + elem + "</a></li>"
+        })
+        elements += '</ul>';
+        $("#fav_menu_items").html(elements);
+    }
 </script>

@@ -76,6 +76,18 @@ trait SchemaTrait
         return $field_data;
     }
 
+    protected function tableLookUp($table)
+    {
+        $lookup_tables = [];
+        $get_schema = $this->getSchema();
+        // Check if the table exists in the schema and if the field data is defined
+        if (isset($get_schema[$table]) && isset($get_schema[$table]['lookup_tables'])) {
+            $lookup_tables = $get_schema[$table]['lookup_tables'];
+        }
+
+        return $lookup_tables;
+    }
+
     /**
      * Retrieves the field data of a specific table from the schema.
      *
@@ -121,7 +133,7 @@ trait SchemaTrait
         }
 
         // If the primary key field is not found, throw an exception
-        if (isEmpty($primary_key_field)) {
+        if (isset($this->getSchema[$table_name]) && isEmpty($primary_key_field)) {
             throw new \Exception("Primary key field for $table_name not found.");
         }
 

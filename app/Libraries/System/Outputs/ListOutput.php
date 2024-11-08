@@ -18,7 +18,7 @@ class ListOutput extends OutputTemplate
     $table = $this->controller;
 
     $filter_where_array = hash_id($this->id, 'decode') > 0 && !in_array($table, $this->config->tableThatDontRequireHistoryFields) ? [$table . '.fk_status_id' => hash_id($this->id, 'decode')] : [];
-    $toggle_list_select_columns = $this->libs->toggleListSelectColumns();
+    $toggle_list_select_columns = $this->libs->toggleListSelectColumns($this->parentTable);
 
     if ($table == 'status') {
       array_push($toggle_list_select_columns, $table . '.status_id');
@@ -49,10 +49,16 @@ class ListOutput extends OutputTemplate
 
     // Load the model dynamically
     $featureLibrary = $this->libs->loadLibrary($table);
+    $foreignKeyMappings = $featureLibrary->lookUpTablesForeignKeyMappings;
 
     // Apply model-defined where condition if the method exists
     if ($this->parentTable != null) {
-      $builder->where($this->parentTable . '_id', hash_id($this->parentId, 'decode'));
+      $foreignKeyField = $this->parentTable . '_id';
+      
+      if(array_key_exists($this->parentTable,$foreignKeyMappings)){
+        $foreignKeyField = $foreignKeyMappings[$this->parentTable];
+      }
+      $builder->where($foreignKeyField, hash_id($this->parentId, 'decode'));
     }
 
     if (method_exists($featureLibrary, $where_method)) {
@@ -67,8 +73,14 @@ class ListOutput extends OutputTemplate
           $message = "The table " . $lookup_table . " doesn't exist in the database. Check the lookup_tables function in the " . $table . "_model";
           throw new \CodeIgniter\Exceptions\PageNotFoundException($message);
         }
+
         $lookup_table_id = $lookup_table . '_id';
-        $builder->join($lookup_table, $lookup_table . '.' . $lookup_table_id . '=' . $table . '.fk_' . $lookup_table_id);
+        $foreignKeyField = 'fk_' . $lookup_table_id;
+
+        if(array_key_exists($lookup_table,$foreignKeyMappings)){
+          $foreignKeyField = $foreignKeyMappings[$lookup_table];
+        }
+        $builder->join($lookup_table, $lookup_table . '.' . $lookup_table_id . '=' . $table . '.' . $foreignKeyField);
       }
     }
 
@@ -101,7 +113,6 @@ class ListOutput extends OutputTemplate
   {
 
     $builder = $this->tableQueryBuilder($table);
-
     $this->runQueryBuilder(
       $builder,
       $table,
@@ -112,7 +123,7 @@ class ListOutput extends OutputTemplate
 
     $this->libs->dataTableBuilder($builder, $table, $selected_columns);
     $builder->select($selected_columns);
-
+    // log_message('error', $builder->getCompiledSelect());
     return $builder->get()->getResultArray();
   }
 
@@ -153,9 +164,8 @@ class ListOutput extends OutputTemplate
 
     $featureLibrary = $this->libs->loadLibrary($this->controller);
     $lookup_tables = $this->libs::call($this->controller . '.lookupTables');
-    $listSelectColumns = $this->libs->toggleListSelectColumns();
+    $listSelectColumns = $this->libs->toggleListSelectColumns($this->parentTable);
     $builder = $this->read_db->table($this->controller);
-
     $filter_where_array = hash_id($this->id, 'decode') > 0 && !in_array($this->controller, $this->config->tableThatDontRequireHistoryFields) ? [$this->controller . '.fk_status_id' => hash_id($this->id, 'decode')] : [];
     $listTableWhere = 'listTableWhere';
 
@@ -173,7 +183,6 @@ class ListOutput extends OutputTemplate
       $feature_model_list_result = $featureLibrary->list($builder, $listSelectColumns, $this->parentId, $this->parentTable)['results'];
       // Allows empty result set
       $query_result = $feature_model_list_result; // A full user defined query result
-
     } else {
       // Get result from grants model if feature model list returns empty
       $query_result = $this->listInternalQueryResults($lookup_tables);
@@ -190,7 +199,6 @@ class ListOutput extends OutputTemplate
   {
     $this->parentId = isset($args[0]) ? $args[0] : null;
     $this->parentTable = isset($args[1]) ? $args[1] : null;
-
     // This line prevent the timeout issue of the more menu icon. Reason for timeout are unknown
     if ($this->controller == 'menu') {
       return [];
@@ -204,23 +212,14 @@ class ListOutput extends OutputTemplate
     }
 
     $toggleListQueryResults = $this->toggleListQueryResults();
-    $result = $toggleListQueryResults['selected_results'];
+    $table_body = $toggleListQueryResults['selected_results'];
     $total_records = $toggleListQueryResults['total_records'];
-
-    $keys = $this->libs->toggleListSelectColumns();
-
-    $columns = $keys;
-    array_shift($columns);
-
-    $return = array(
-      'table_body' => $result,
-      'total_records' => $total_records,
-      'keys' => $keys,
-      'columns' => $columns,
-      'fields_meta_data' => $this->libs->fieldsMetaDataTypeAndName($this->controller),
-      'controller' => $this->controller,
-    );
-
-    return $return;
+    $controller = $this->controller;
+    $fields_meta_data = $this->libs->fieldsMetaDataTypeAndName($this->controller);
+    $keys = $this->libs->toggleListSelectColumns($this->parentTable);
+    // $columns = $keys;
+    // array_shift($columns);
+  
+    return compact('table_body', 'total_records', 'keys', 'fields_meta_data', 'controller');
   }
 }

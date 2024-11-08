@@ -33,6 +33,8 @@ class GrantsLibrary
   public $dbSchema;
   private $uri;
 
+  public array $lookUpTablesForeignKeyMappings = [];
+
   function __construct()
   {
     // Load grants config
@@ -332,12 +334,9 @@ class GrantsLibrary
 
   function create_missing_controller($table, $assets_temp_path, $app_name)
   {
-
     $controllers_path = APPPATH . 'controllers' . DIRECTORY_SEPARATOR . 'web' . DIRECTORY_SEPARATOR . $app_name . DIRECTORY_SEPARATOR;
-
     // Copy contents of assets/temp_library to the created file after the tag above
     $replaceables = array("%cap_feature%" => $table, '%cap_module%' => $app_name);
-
     $this->write_file_contents($table, $controllers_path, $assets_temp_path, $replaceables, 'Controller');
   }
 
@@ -345,10 +344,8 @@ class GrantsLibrary
   {
 
     $libararies_path = APPPATH . 'Libraries' . DIRECTORY_SEPARATOR . $app_name . DIRECTORY_SEPARATOR;
-
     // Copy contents of assets/temp_library to the created file after the tag above
     $replaceables = array("%cap_feature%" => $table, '%cap_module%' => $app_name, '%small_feature%' => strtolower($table));
-
     $this->write_file_contents($table, $libararies_path, $assets_temp_path, $replaceables, 'Library');
   }
 
@@ -464,47 +461,38 @@ class GrantsLibrary
 
   function lookupTables(): array
   {
-    $lookUpTables = $this->callbackLookupTables();
+    $lookUpTables = $this->checkLookupTables();
     return $lookUpTables;
   }
 
-  public function callbackLookupTables($table_name = ''): array
+  function checkLookupTables($table_name = "")
   {
 
-    $approveItemLibrary = $this->loadLibrary('approve_item');
+    $lookup_tables = array();
 
-    if (isEmpty($table_name))
-      $table_name = $this->controller;
-
-    $fields = $this->getAllTableFields($table_name);
-
-    $foreign_tables_array_padded_with_false = array_map(function ($elem) {
-      return substr($elem, 0, 3) == 'fk_' ? substr($elem, 3, -3) : false;
-    }, $fields);
-
-    // Prevent listing false values and status or approval tables for lookup. 
-    // Add status_name and approval_name to the correct visible_columns method in models to see these fields in a page
-    $foreign_tables_array = array_filter($foreign_tables_array_padded_with_false, function ($elem) {
-      return $elem ? $elem : false;
-    });
-
-    // Just remove approval table due to its performance degradation history. This table will be removed in the future
-    if (in_array('approval', $foreign_tables_array)) {
-      unset($foreign_tables_array[array_search('approval', $foreign_tables_array)]);
-    }
-
-    // Hide status and approval columns if the active controller/table is not approveable
-
-    if (!$approveItemLibrary->approveableItem($table_name)) {
-      if (in_array('status', $foreign_tables_array)) {
-        unset($foreign_tables_array[array_search('status', $foreign_tables_array)]);
+    if ($table_name != '') {
+      $this->library = $this->loadLibrary($table_name);
+      if (method_exists($this->library, 'lookupTables') && is_array($this->library->lookupTables())) {
+        $lookup_tables = $this->deriveLookupTables($table_name);
+        if ($this->action !== 'singleFormAdd') {
+          // Check if status and approval lookup tables doesn't exist and add them
+          $this->addMandatoryLookupTables($lookup_tables);
+          // Hide status and approval columns if the active controller/table is not approveable
+          $approveItemLibrary = new \App\Libraries\Core\ApproveItemLibrary();
+          if (!$approveItemLibrary->approveableItem($table_name)) {
+            $this->removeMandatoryLookupTables($lookup_tables);
+          }
+        } else {
+          $lookup_tables = $this->deriveLookupTables($table_name);
+        }
       }
-
+    } else {
+      // This part of a code is meant to offer an alternative to lookup_tables 
+      // methods in models that overrided the MY_Model method
+      $lookup_tables = $this->deriveLookupTables();
     }
-
-    return !empty($foreign_tables_array) ? array_values($foreign_tables_array) : [];
-    ;
-
+    //print_r($lookup_tables);exit;
+    return $lookup_tables;
   }
 
   public function historyTrackingField(string $table_name, string $history_type): string
@@ -577,7 +565,7 @@ class GrantsLibrary
     $fields_meta_data = [];
     $library = $this->loadLibrary($table);
 
-    $table_names = $this->callbacklookupTables($table);
+    $table_names = $this->checklookupTables($table);
 
     array_push($table_names, $table);
 
@@ -785,7 +773,7 @@ class GrantsLibrary
   function joinTablesWithAccountSystem($builder, $table)
   {
 
-    $array_intersect = array_intersect($this->callbackLookupTables($table), $this->tablesWithAccountSystemRelationship());
+    $array_intersect = array_intersect($this->checkLookupTables($table), $this->tablesWithAccountSystemRelationship());
 
     $array_intersect = array_values($array_intersect);
 
@@ -1682,14 +1670,16 @@ class GrantsLibrary
       unset($foreign_tables_array[array_search('approval', $foreign_tables_array)]);
     }
 
+    // Add look up tables from the schema
+    $tableLookUp = $this->tableLookUp($table_name);
+    $foreign_tables_array = array_unique(array_merge($foreign_tables_array, $tableLookUp));
+
     // Hide status and approval columns if the active controller/table is not approveable
     $approveItemLibrary = new \App\Libraries\Core\ApproveItemLibrary();
-
     if (!$approveItemLibrary->approveableItem($table_name)) {
       if (in_array('status', $foreign_tables_array)) {
         unset($foreign_tables_array[array_search('status', $foreign_tables_array)]);
       }
-
     }
 
     return $foreign_tables_array;
@@ -1697,42 +1687,6 @@ class GrantsLibrary
 
   }
 
-  function checkLookupTables($table_name = "")
-  {
-
-    if ($table_name != '') {
-      $this->library = $this->loadLibrary($table_name);
-    }
-
-    $lookup_tables = array();
-
-    if (
-      method_exists($this->library, 'lookupTables') &&
-      is_array($this->library->lookupTables())
-    ) {
-
-      if ($this->action !== 'singleFormAdd') {
-        // Check if status and approval lookup tables doesn't exist and add them
-        $lookup_tables = $this->deriveLookupTables($table_name);
-
-        $this->addMandatoryLookupTables($lookup_tables);
-
-        // Hide status and approval columns if the active controller/table is not approveable
-        $approveItemLibrary = new \App\Libraries\Core\ApproveItemLibrary();
-        if (!$approveItemLibrary->approveableItem($table_name)) {
-          $this->removeMandatoryLookupTables($lookup_tables);
-        }
-      } else {
-        $lookup_tables = $this->deriveLookupTables($table_name);
-      }
-    } else {
-      // This part of a code is meant to offer an alternative to lookup_tables 
-      // methods in models that overrided the MY_Model method
-      $lookup_tables = $this->deriveLookupTables();
-    }
-    //print_r($lookup_tables);exit;
-    return $lookup_tables;
-  }
 
 
   function listTableWhereByAccountSystem($builder, $tableName)
@@ -2142,7 +2096,7 @@ class GrantsLibrary
 
     // Get the list of visible columns and lookup tables
     $editVisibleColumns = $library->editVisibleColumns();
-    $lookupTables = $this->callbacklookupTables($table);
+    $lookupTables = $this->checklookupTables($table);
 
     $getAllTableFields = $this->getAllTableFields();
 
@@ -2449,13 +2403,10 @@ class GrantsLibrary
   function featureListTableVisibleColumns($parentTable = null)
   {
     $list_table_visible_columns = [];
-
     $list_table_visible_columns_method = 'listTableVisibleColumns';
-
     if ($parentTable != null) {
       $list_table_visible_columns_method = 'detailListTableVisibleColumns';
     }
-
     $currentLibrary = $this->loadLibrary($this->controller);
 
     if (
@@ -2514,15 +2465,11 @@ class GrantsLibrary
   {
     // Check if the table has list_table_visible_columns not empty
     $list_table_visible_columns = $this->featureListTableVisibleColumns($parentTable);
-
     $lookup_tables = $this->lookupTables();
-
     $get_all_table_fields = $this->getAllTableFields();
 
     foreach ($get_all_table_fields as $get_all_table_field) {
-
       //Unset foreign keys columns, created_by and last_modified_by columns
-
       if (
         substr($get_all_table_field, 0, 3) == 'fk_' ||
         $this->isHistoryTrackingField($this->controller, $get_all_table_field, 'created_by') ||
@@ -2541,9 +2488,7 @@ class GrantsLibrary
     } else {
       if (is_array($lookup_tables) && count($lookup_tables) > 0) {
         foreach ($lookup_tables as $lookup_table) {
-
           $lookup_table_columns = $this->getAllTableFields($lookup_table);
-
           foreach ($lookup_table_columns as $lookup_table_column) {
             // Only include the name field of the look up table in the select columns
             if ($this->isNameField($lookup_table, $lookup_table_column)) {
@@ -2553,6 +2498,7 @@ class GrantsLibrary
         }
       }
     }
+
     return $visible_columns; //$this->CI->access->control_column_visibility($this->controller,$visible_columns,'read');
   }
 
