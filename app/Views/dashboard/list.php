@@ -10,12 +10,12 @@
     </div>
 </div>
 
-<div class = 'row'>
+<!-- <div class = 'row'>
     <div class="col-sm-12">
         <div id="post_ajax_button" class = "btn btn-default">Ajax Click Me {Uses Post}</div>
         <div id="get_ajax_button" class = "btn btn-default">Ajax Click Me {Uses Get}</div>
     </div>
-</div>
+</div> -->
 
 <script>
     $('#post_ajax_button').click(function() {

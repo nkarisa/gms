@@ -1281,8 +1281,245 @@ class UserLibrary extends GrantsLibrary
         return $active_status;
     }
 
-    function list($builder, array $columns,string $parentId = null, string $parentTable = null): array 
-    {      
+    function edit($id): \CodeIgniter\HTTP\Response
+    {
+        $flag = true;
+        $flagMessage = '';
+        $user_id = hash_id($id, 'decode');
+
+        $uniqueIdentifierLibrary = new UniqueIdentifierLibrary();
+
+        $post = $this->request->getPost()['header'];
+        // $user_info = $this->getUserInfo(['user_id' => $user_id]);
+
+        $this->write_db->transStart();
+
+        // Track change history. This line should be placed befire actual editing happens 
+        $this->createChangeHistory($post, true, ['user_password']);
+
+        $user['user_firstname'] = $post['user_firstname'];
+        $user['user_name'] = sanitize_characters($post['user_name']);
+        $user['user_lastname'] = $post['user_lastname'];
+        $user['user_email'] = $post['user_email'];
+        $user['fk_context_definition_id'] = $post['fk_context_definition_id'];
+        $user['user_is_context_manager'] = isset($post['user_is_context_manager']) ? $post['user_is_context_manager'] : 0;
+        $user['user_is_system_admin'] = isset($post['user_is_system_admin']) ? $post['user_is_system_admin'] : 0;
+        $user['fk_language_id'] = isset($post['fk_language_id']) ? $post['fk_language_id'] : 1;
+        $user['user_is_active'] = 1;
+        $user['md5_migrate'] = 1; // For migrating fro use of php MD5 to complex sha256 with salt
+        $user['fk_role_id'] = $post['primary_role_id'];
+        $user['user_is_switchable'] = $post['user_is_switchable'];
+        if ($this->session->system_admin) {
+            $user['fk_country_currency_id'] = $post['fk_country_currency_id'];
+
+            $user['fk_account_system_id'] = $post['fk_account_system_id'];
+        } else {
+            $user['fk_country_currency_id'] = $post['currency_id'];
+
+            $user['fk_account_system_id'] = $post['account_system_id'];
+        }
+
+        $unique_identifier = $uniqueIdentifierLibrary->validUserUniqueIdentifier($user_id);
+
+        if (isset($unique_identifier['unique_identifier_id']) && $unique_identifier['unique_identifier_id'] > 0) {
+            $user['user_employment_date'] = isset($post['user_employment_date']) && $post['user_employment_date'] != '' ? $post['user_employment_date'] : NULL;
+            $user['user_unique_identifier'] = isset($post['user_unique_identifier']) && $post['user_unique_identifier'] != '' ? $post['user_unique_identifier'] : NULL;
+            $user['fk_unique_identifier_id'] = $unique_identifier['unique_identifier_id'];
+        }
+
+        $user_to_insert = $this->mergeWithHistoryFields($this->controller, $user, false, false);
+
+        $builder = $this->write_db->table("user");
+        $builder->where(array('user_id' => $user_id));
+        $builder->update( $user_to_insert);
+
+        // Delete secondary roles if not provided any in the edit form
+    
+        if (!isset($post['secondary_role_ids'])) {
+            $builder = $this->write_db->table('role_user');
+            $builder->where(array('fk_user_id' => $user_id));
+            $builder->delete();
+        } elseif (count($post['secondary_role_ids']) > 0) {
+            $builder = $this->read_db->table('role_user');
+            $builder->select(array('fk_role_id'));
+            $builder->where(array('fk_user_id' => $user_id));
+            $role_user_obj = $builder->get();
+
+            if ($role_user_obj->getNumRows() > 0) {
+                $current_role_ids = array_column($role_user_obj->getResultArray(), 'fk_role_id');
+
+                $isEqual = array_diff($post['secondary_role_ids'], $current_role_ids) === array_diff($current_role_ids, $post['secondary_role_ids']);
+                // Only update if the current secondary roles do not match the incoming ones
+                if (!$isEqual) {
+                    $builder = $this->write_db->table('role_user');
+                    $builder->where(array('fk_user_id' => $user_id));
+                    $builder->delete();
+
+                    $cnt = 0;
+                    foreach ($post['secondary_role_ids'] as $key => $role_id) {
+                        $role_user_track = $this->generateItemTrackNumberAndName('role_user');
+                        $insert_role_user[$cnt]['role_user_track_number'] = $role_user_track['role_user_track_number'];
+                        $insert_role_user[$cnt]['role_user_name'] = $role_user_track['role_user_name'];
+                        $insert_role_user[$cnt]['fk_user_id'] = $user_id;
+                        $insert_role_user[$cnt]['fk_role_id'] = $role_id;
+                        $insert_role_user[$cnt]['role_user_created_date'] = date('Y-m-d');
+                        $insert_role_user[$cnt]['role_user_created_by'] = $this->session->user_id;
+                        $insert_role_user[$cnt]['role_user_last_modified_by'] = $this->session->user_id;
+                        $insert_role_user[$cnt]['role_user_expiry_date'] = $post['expiry_dates'][$key]; // date('Y-m-d', strtotime('+30 days'));
+                        $insert_role_user[$cnt]['fk_status_id'] = $this->initialItemStatus('role_user');
+                        $insert_role_user[$cnt]['fk_approval_id'] = $this->insertApprovalRecord('role_user');
+                        $cnt++;
+                    }
+                    $builder = $this->write_db->table('role_user');
+                    $builder->insertBatch( $insert_role_user);
+                }
+            }
+        }
+
+        // Update a user in a context table 
+        $builder = $this->write_db->table('context_definition');
+        $builder->where(array('context_definition_id' => $post['fk_context_definition_id']));
+        $context_definition_name = $builder->get()->getRow()->context_definition_name;
+        $context_definition_user_table = 'context_' . $context_definition_name . '_user';
+
+        $context[$context_definition_user_table . '_name'] = "Office context for " . $post['user_firstname'] . " " . $post['user_lastname'];
+
+        switch ($post['fk_context_definition_id']) {
+            case 1:
+                $context_table = 'context_center';
+                break;
+            case 2:
+                $context_table = 'context_cluster';
+                break;
+
+            case 3:
+                $context_table = 'context_cohort';
+                break;
+            case 4:
+                $context_table = 'context_country';
+                break;
+            case 5:
+                $context_table = 'context_region';
+                break;
+            case 6:
+                $context_table = 'context_global';
+                break;
+        }
+        // Check if user is changing the office context
+        if ($post['hold_context_definition_id'] != $post['fk_context_definition_id']) {
+
+            switch ($post['hold_context_definition_id']) {
+                case 1:
+                    $table_to_delete_records_from = 'context_center_user';
+                    break;
+                case 2:
+                    $table_to_delete_records_from = 'context_cluster_user';
+                    break;
+                case 3:
+                    $table_to_delete_records_from = 'context_cohort_user';
+                    break;
+                case 4:
+                    $table_to_delete_records_from = 'context_country_user';
+                    break;
+                case 5:
+                    $table_to_delete_records_from = 'context_region_user';
+                    break;
+                case 6:
+                    $table_to_delete_records_from = 'context_global_user';
+                    break;
+            }
+            //Delete data from the context office where user is moving from
+            $builder = $this->write_db->table($table_to_delete_records_from);
+            $builder->where(array('fk_user_id' => $user_id));
+            $builder->delete();
+
+            //Save record in new context table [Insert a user in a context table] 
+            $builder = $this->write_db->table('context_definition');
+            $builder->where(array('context_definition_id' => $post['fk_context_definition_id']));
+            $context_definition_name = $builder->get()->getRow()->context_definition_name;
+            $context_definition_user_table = 'context_' . $context_definition_name . '_user';
+
+            //Get the context ids e.g fk_cluster_id using the office_id [BUG for switching from FCP to cluster and vice versa]
+            $builder = $this->write_db->table($context_table);
+            $fk_context_column_id = $context_table . '_id';
+            $builder->select($fk_context_column_id);
+            $builder->where(array('fk_office_id' => $post['fk_user_context_office_id'][0]));
+            $fk_context_id_obj = $builder->get();
+
+            $fk_context_id = 0;
+
+            if ($fk_context_id_obj->getNumRows() > 0) {
+                $fk_context_id = $fk_context_id_obj->getRow()->$fk_context_column_id;
+                $context['fk_context_' . $context_definition_name . '_id'] = $fk_context_id;
+                $context[$context_definition_user_table . '_last_modified_by'] = $this->session->user_id;
+                $context[$context_definition_user_table . '_name'] = "Office context for " . $post['user_firstname'] . " " . $post['user_lastname'];
+                $context['fk_user_id'] = $user_id;
+                $context['fk_designation_id'] = $post['designation'];
+                $context[$context_definition_user_table . '_is_active'] = 1;
+
+                $context_to_insert = $this->mergeWithHistoryFields($context_definition_user_table, $context, false);
+                
+                $this->write_db->table($context_definition_user_table)->insert( $context_to_insert);
+
+            }
+        } else {
+
+            $column_id = $context_table . '_id';
+
+            if ($post['office_context_changed'] > 0) {
+                // Delete all office assignments for the user
+                $builder = $this->write_db->table($context_definition_user_table);
+                $builder->where(array('fk_user_id' => $user_id));
+                $builder->delete();
+
+                foreach (array_unique($post['fk_user_context_office_id']) as $office_id) {
+                    $builder = $this->write_db->table('context_' . $context_definition_name);
+                    $builder->select(array($column_id));
+                    $builder->where(array('fk_office_id' => $office_id));
+                    $context_office_id_obj = $builder->get();
+
+                    $context_office_id = 0;
+
+                    if ($context_office_id_obj->getNumRows() > 0) {
+                        $context_office_id = $context_office_id_obj->getRow()->$column_id;
+
+                        $context['fk_context_' . $context_definition_name . '_id'] = $context_office_id;
+                        $context['fk_designation_id'] = $post['designation'];
+                        $context['fk_user_id'] = $user_id;
+                        $context[$context_definition_user_table . '_is_active'] = 1;
+
+                        $context_to_insert = $this->mergeWithHistoryFields($context_definition_user_table, $context, false);
+                        $this->write_db->table($context_definition_user_table)->insert( $context_to_insert);
+                    }
+                }
+            }
+        }
+        // Update user department
+        $department['department_user_name'] = "Department for " . $post['user_firstname'] . " " . $post['user_lastname'];
+        $department['fk_department_id'] = $post['department'];
+
+        $department_to_insert = $this->mergeWithHistoryFields('department_user', $department, false);
+
+        $builder = $this->write_db->table('department_user');
+        $builder->where(array('fk_user_id' => $user_id));
+        $builder->update($department_to_insert);
+
+        $this->write_db->transComplete();
+
+        if ($this->write_db->transStatus() == false) {
+            $flagMessage = "Database Error occurred";
+        } else {
+            $flagMessage = "User record updated";
+            $flag = true;
+        }
+
+        return $this->response->setJSON(['flag' => $flag, 'message' => $flagMessage]);
+    }
+
+    function list($builder, array $columns, string $parentId = null, string $parentTable = null): array
+    {
+        $users = [];
+
         $builder->select($columns);
         $builder->join('context_definition', 'context_definition.context_definition_id=user.fk_context_definition_id');
         $builder->join('language', 'language.language_id=user.fk_language_id');
@@ -1305,7 +1542,7 @@ class UserLibrary extends GrantsLibrary
         if ($obj->getNumRows() > 0) {
             $users = $obj->getResultArray();
         }
-        
+
         return $users;
     }
 

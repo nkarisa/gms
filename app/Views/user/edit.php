@@ -4,6 +4,8 @@ $grantsLibrary = new \App\Libraries\System\GrantsLibrary();
 $accountSystemLibrary = new \App\Libraries\Core\AccountSystemLibrary();
 $countryCurrencyLibrary = new \App\Libraries\Grants\CountryCurrencyLibrary();
 
+$user_id = $id;
+
 extract($result);
 
 extract($result['edit_user_info']);
@@ -128,14 +130,13 @@ if(isset($account_system_identifier['unique_identifier_id']) && $account_system_
                                 <option value="<?= $context_definition_id ?>"><?= $redescribe_office_compassion_way; ?></option>
                                 <?php
                                 //Poulate other context offices
-                                foreach ($all_context_offices as $id => $context_office) {
-                                    if ($id != $context_definition_id) { ?>
-
+                                    foreach ($all_context_offices as $id => $context_office) {
+                                        if ($id != $context_definition_id) { 
+                                ?>
                                         <option value="<?= $id ?>"><?= $context_office; ?></option>
-
-                                <?php }
-                                }
-
+                                <?php 
+                                        }
+                                    }
                                 ?>
 
 
@@ -233,7 +234,7 @@ if(isset($account_system_identifier['unique_identifier_id']) && $account_system_
 
                         <label class='col-xs-2 control-label'><?=get_phrase('is_user_system_administrator');?></label>
                         <div class='col-xs-4'>
-                            <?= $grantsLibrary->headerRowField('user_is_system_admin', 0, $this->session->system_admin ? false : true); ?>
+                            <?= $grantsLibrary->headerRowField('user_is_system_admin', 0, $session->system_admin ? false : true); ?>
                         </div>
 
                     </div>
@@ -322,19 +323,16 @@ if(isset($account_system_identifier['unique_identifier_id']) && $account_system_
 
                                 <select id='fk_account_system_id' name="header[fk_account_system_id]" class='form-control master required input_user select2 select2-offscreen visible '>
                                     <option value='0'><?= get_phrase('select_records'); ?></option>
-                                <?php foreach($account_systems as $account_id => $account_system_name){?>
-                                    <option value='<?=$account_id;?>' <?=$account_system_id == $account_id ? 'selected': '';?> ><?=$account_system_name;?></option>
+                                <?php foreach($account_systems as $account_system){?>
+                                    <option value='<?=$account_system->account_system_id;?>' <?=$account_system_id == $account_system->account_system_id ? 'selected': '';?> ><?=$account_system->account_system_name;?></option>
                                 <?php }?>
                                 </select>
 
                                 <?php } else {
-
-                                
-
-                                foreach ($account_systems as $account_system_id_key => $account_system) { ?>
-
-                                    <input id="account_system_id" value="<?= $account_system_id_key; ?>" required="required" type="text" class="form-control" name="header[account_system_id]">
-                            <?php  }
+                                   // foreach ($account_systems as $account_system_id_key => $account_system) { ?>
+                                        <input id="account_system_id" value="<?= $account_system_id; ?>" required="required" type="text" class="form-control" name="header[account_system_id]">
+                            <?php  
+                                // }
                             } ?>
                         </div>
 
@@ -379,11 +377,6 @@ if(isset($account_system_identifier['unique_identifier_id']) && $account_system_
                     <div class='col-xs-4'>
                         <?= $grantsLibrary->headerRowField('user_employment_date', $user_employment_date); ?>
                     </div>
-
-                    <!-- <label class='col-xs-2 control-label'><?= get_phrase($valid_user_unique_identifier['unique_identifier_name']); ?></label>
-                    <div class='col-xs-4'>
-                        <?= $grantsLibrary->headerRowField('user_unique_identifier', $user_unique_identifier); ?>
-                    </div> -->
                 </div>
                 <?php }?>
 
@@ -614,7 +607,7 @@ if(isset($account_system_identifier['unique_identifier_id']) && $account_system_
     //Check the validity of email
     $(document).on('change', "#user_email", function() {
 
-        alert($(this).val());
+        // alert($(this).val());
         if ($(this).val() != '') {
 
             $('#fk_context_definition_id').removeAttr('disabled');
@@ -624,7 +617,7 @@ if(isset($account_system_identifier['unique_identifier_id']) && $account_system_
         }
         var user_email = $(this);
         var user_name = $("#user_email");
-        let url = "<?= base_url(); ?>user/check_if_email_is_used";
+        let url = "<?= base_url(); ?>ajax/user/checkIfEmailIsUsed";
         let data = {
             'user_email': $(this).val(),
             'user_name': preferred_user_name
@@ -680,11 +673,9 @@ if(isset($account_system_identifier['unique_identifier_id']) && $account_system_
     $(".btn-save").on('click', function(ev) {
 
         let btn = $(this);
-
-        let url = "<?= base_url(); ?>user/edit_user/" + <?= hash_id($id, 'decode'); ?>;
-
+        let url = "<?= base_url(); ?>user/edit/<?=hash_id($user_id,'encode');?>";
         let data = $("#frm_edit_user").serializeArray();
-
+        
         // Validate fields missing
 
         const form_controls = $(".form-control");
@@ -696,11 +687,11 @@ if(isset($account_system_identifier['unique_identifier_id']) && $account_system_
             if ($(elem).hasClass('select2') && $(elem).text().trim().length == 0) {
                 count_validation_errors += 1;
                 $(elem).css('border', 'red solid 1px');
-
+                console.log(elem)
             } else if (!$(elem).hasClass('select2') && ($(elem).val() == "" || $(elem).val() == 0)) {
-
                 count_validation_errors += 1;
                 $(elem).css('border', 'red solid 1px');
+                console.log(elem)
             } else {
                 $(elem).removeAttr('style');
             }
@@ -713,13 +704,13 @@ if(isset($account_system_identifier['unique_identifier_id']) && $account_system_
         }
 
         $.post(url, data, function(response) {
-
-            alert(response);
-
-            if (btn.hasClass('btn-save')) {
-                location.href = document.referrer
-            } else {
-                reset_form();
+            alert(response.message);
+            if(response.flag){
+                if (btn.hasClass('btn-save')) {
+                    location.href = document.referrer
+                } else {
+                    reset_form();
+                }
             }
         });
 

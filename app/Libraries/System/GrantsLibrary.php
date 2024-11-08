@@ -2419,10 +2419,12 @@ class GrantsLibrary
     }
   
 
-    function mergeWithHistoryFields(String $approve_item_name, array $array_to_merge, bool $add_name_to_array = true, $is_a_new_record = true)
+    function mergeWithHistoryFields(string $approve_item_name, array $array_to_merge, bool $add_name_to_array = true, $is_a_new_record = true)
     {
       
       $approvalLibrary = new \App\Libraries\Core\ApprovalLibrary();
+      $statusLibary = new \App\Libraries\Core\StatusLibrary();
+
       $data = [];
   
       if($is_a_new_record){
@@ -2431,11 +2433,10 @@ class GrantsLibrary
         $data[$approve_item_name . '_created_by'] = $this->session->user_id ? $this->session->user_id : 1;
         $data[$approve_item_name . '_created_date'] = date('Y-m-d');
         $data['fk_approval_id'] = $approvalLibrary->insertApprovalRecord($approve_item_name);
-        $data['fk_status_id'] = $approvalLibrary->insertApprovalRecord($approve_item_name);
+        $data['fk_status_id'] = $statusLibary->initialItemStatus($approve_item_name);
   
       }else{
         $data[$approve_item_name.'_last_modified_date'] = date('Y-m-d h:i:s');
-  
         $data[$approve_item_name . '_last_modified_by'] = $this->session->user_id ? $this->session->user_id : 1;
       }
   

@@ -288,7 +288,7 @@ public function edit(){
     return $this->crud_views();
 }
 
-public function update(){
+public function update($id){
   $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'update');
   return $this->libs::call("$this->controller.edit", [$this->id]);
 }
