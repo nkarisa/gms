@@ -25,14 +25,13 @@ class OutputTemplate {
     {
         $this->module = $module;
         $this->uri = service('uri');
+        $this->request = service('request');
         $segments = $this->uri->getSegments();
 
         $this->controller = isset($segments[0]) ? $segments[0] : 'dashboard';
-        $this->action = isset($segments[1]) ? $segments[1] : 'list';
-        $this->id = isset($segments[2]) ? $segments[2] : 0;
-        $this->subAction = isset($segments[3]) ? $segments[3] : null; //$this->uri->segment(4, null);;
-
-        $this->request = service('request');
+        $this->action = isset($segments[1]) && !$this->request->isAJAX() ? $segments[1] : 'list';
+        $this->id = isset($segments[2]) && !$this->request->isAJAX()  ? $segments[2] : 0;
+        $this->subAction = isset($segments[3]) && !$this->request->isAJAX()  ? $segments[3] : null; //$this->uri->segment(4, null);;
 
         $this->libs = service('grantslib');
 

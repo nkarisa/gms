@@ -45,19 +45,16 @@ class GrantsLibrary
 
     // Set controller, action and ids
     $this->uri = service('uri');
+    // Request 
+    $this->request = service('request');
     $segments = $this->uri->getSegments();
 
     $this->controller = isset($segments[0]) ? $segments[0] : 'dashboard';
-    $this->action = isset($segments[1]) ? $segments[1] : 'list';
-    $this->id = isset($segments[2]) ? $segments[2] : 0;
-
-    // $this->library = $this->loadLibrary($this->controller);
+    $this->action = isset($segments[1]) && !$this->request->isAJAX() ? $segments[1] : 'list';
+    $this->id = isset($segments[2]) && !$this->request->isAJAX() ? $segments[2] : 0;
 
     // Session 
     $this->session = service('session');
-
-    // Request 
-    $this->request = service('request');
 
     // Response 
     $this->response = service('response'); // Services::response()
@@ -263,14 +260,12 @@ class GrantsLibrary
   {
 
     $modules = config(GrantsConfig::class)->modules;
-
     // Explode the namespace into segments
     $namespace_items = exploding('.', $namespace, ['group', 'feature', 'method']);
     // If only method is given, assume it's a method in the grants library
     if (sizeof($namespace_items) == 1) {
       $namespace_items['feature'] = 'grants';
     }
-
 
     // Extract the namespace segments
     extract($namespace_items);
@@ -285,7 +280,7 @@ class GrantsLibrary
       if (class_exists($class)) {
         $class_exists = true;
         // Instantiate the library class
-          $newObj = new $class();
+        $newObj = new $class();
 
         if (method_exists($newObj, $method)) {
           if (in_array($method, ['listOutput', 'viewOutput', 'editOutput', 'singleFormAddOutput'])) {
@@ -453,7 +448,7 @@ class GrantsLibrary
     return $visible_columns;
   }
 
-  
+
   public function lookupTablesFields(string $table): array
   {
     $lookup_tables_fields = array();
@@ -474,42 +469,43 @@ class GrantsLibrary
   }
 
   public function callbackLookupTables($table_name = ''): array
-    {
+  {
 
-        $approveItemLibrary = $this->loadLibrary('approve_item');
+    $approveItemLibrary = $this->loadLibrary('approve_item');
 
-        if (isEmpty($table_name))
-            $table_name = $this->controller;
+    if (isEmpty($table_name))
+      $table_name = $this->controller;
 
-        $fields = $this->getAllTableFields($table_name);
+    $fields = $this->getAllTableFields($table_name);
 
-        $foreign_tables_array_padded_with_false = array_map(function ($elem) {
-            return substr($elem, 0, 3) == 'fk_' ? substr($elem, 3, -3) : false;
-        }, $fields);
+    $foreign_tables_array_padded_with_false = array_map(function ($elem) {
+      return substr($elem, 0, 3) == 'fk_' ? substr($elem, 3, -3) : false;
+    }, $fields);
 
-        // Prevent listing false values and status or approval tables for lookup. 
-        // Add status_name and approval_name to the correct visible_columns method in models to see these fields in a page
-        $foreign_tables_array = array_filter($foreign_tables_array_padded_with_false, function ($elem) {
-            return $elem ? $elem : false;
-        });
+    // Prevent listing false values and status or approval tables for lookup. 
+    // Add status_name and approval_name to the correct visible_columns method in models to see these fields in a page
+    $foreign_tables_array = array_filter($foreign_tables_array_padded_with_false, function ($elem) {
+      return $elem ? $elem : false;
+    });
 
-        // Just remove approval table due to its performance degradation history. This table will be removed in the future
-        if (in_array('approval', $foreign_tables_array)) {
-            unset($foreign_tables_array[array_search('approval', $foreign_tables_array)]);
-        }
+    // Just remove approval table due to its performance degradation history. This table will be removed in the future
+    if (in_array('approval', $foreign_tables_array)) {
+      unset($foreign_tables_array[array_search('approval', $foreign_tables_array)]);
+    }
 
-        // Hide status and approval columns if the active controller/table is not approveable
+    // Hide status and approval columns if the active controller/table is not approveable
 
-        if (!$approveItemLibrary->approveableItem($table_name)) {
-            if (in_array('status', $foreign_tables_array)) {
-                unset($foreign_tables_array[array_search('status', $foreign_tables_array)]);
-            }
-
-        }
-
-        return !empty($foreign_tables_array) ? array_values($foreign_tables_array) : [];;
+    if (!$approveItemLibrary->approveableItem($table_name)) {
+      if (in_array('status', $foreign_tables_array)) {
+        unset($foreign_tables_array[array_search('status', $foreign_tables_array)]);
+      }
 
     }
+
+    return !empty($foreign_tables_array) ? array_values($foreign_tables_array) : [];
+    ;
+
+  }
 
   public function historyTrackingField(string $table_name, string $history_type): string
   {
@@ -755,9 +751,9 @@ class GrantsLibrary
     $lookup_tables = $this->lookupTables();
     $account_system_table = '';
 
-    if(!$this->session->system_admin && in_array($this->controller, $tables_with_account_system_relationship)){
-      $queryBuilder->where(array($this->controller.'.fk_account_system_id' => $this->session->user_account_system_id));
-    }elseif (!empty($lookup_tables)) {
+    if (!$this->session->system_admin && in_array($this->controller, $tables_with_account_system_relationship)) {
+      $queryBuilder->where(array($this->controller . '.fk_account_system_id' => $this->session->user_account_system_id));
+    } elseif (!empty($lookup_tables)) {
       foreach ($lookup_tables as $lookup_table) {
         if (in_array($lookup_table, $tables_with_account_system_relationship)) {
           $account_system_table = $lookup_table;
@@ -779,7 +775,7 @@ class GrantsLibrary
 
     $table_fields = $this->getAllTableFields($table);
 
-    if(in_array( 'fk_account_system_id', $table_fields)) {
+    if (in_array('fk_account_system_id', $table_fields)) {
       $table_has_account_system = true;
     }
     //echo 1;exit;
@@ -790,20 +786,20 @@ class GrantsLibrary
   {
 
     $array_intersect = array_intersect($this->callbackLookupTables($table), $this->tablesWithAccountSystemRelationship());
-    
+
     $array_intersect = array_values($array_intersect);
 
     if ($this->checkIfTableHasAccountSystem($table)) {
       $builder->join('account_system', 'account_system.account_system_id=' . $table . '.fk_account_system_id');
       $builder->where(array('account_system_code' => $this->session->user_account_system_code));
     } elseif (count($array_intersect) > 0) {
-    
-        foreach ($array_intersect as $lookup_table) {
-          $lookup_table_id = $lookup_table . '_id';
-          $builder->join($lookup_table, $lookup_table . '.' . $lookup_table_id . '=' . $table . '.fk_' . $lookup_table_id);
-        }
 
-            
+      foreach ($array_intersect as $lookup_table) {
+        $lookup_table_id = $lookup_table . '_id';
+        $builder->join($lookup_table, $lookup_table . '.' . $lookup_table_id . '=' . $table . '.fk_' . $lookup_table_id);
+      }
+
+
       $builder->join('account_system', 'account_system.account_system_id=' . $array_intersect[0] . '.fk_account_system_id');
       $builder->where(array('account_system_code' => $this->session->user_account_system_code));
     }
@@ -1551,11 +1547,11 @@ class GrantsLibrary
     $this->library = $this->loadLibrary($this->controller);
 
     if (
-        (
-          method_exists($this->library, 'lookupValues')
-          && is_array($this->library->lookupValues())
-          && array_key_exists($table, $this->library->lookupValues())
-        )
+      (
+        method_exists($this->library, 'lookupValues')
+        && is_array($this->library->lookupValues())
+        && array_key_exists($table, $this->library->lookupValues())
+      )
     ) {
       $result = $this->library->lookupValues()[$table];
       $ids_array = array_column($result, $this->primaryKeyField($table));
@@ -1741,8 +1737,8 @@ class GrantsLibrary
 
   function listTableWhereByAccountSystem($builder, $tableName)
   {
-    $fields = 
-    $tables_with_account_system_relationship = $this->tablesWithAccountSystemRelationship();
+    $fields =
+      $tables_with_account_system_relationship = $this->tablesWithAccountSystemRelationship();
     $lookup_tables = $this->lookupTables();
 
     $account_system_table = '';
@@ -1779,7 +1775,7 @@ class GrantsLibrary
     if (
       method_exists($this->library, 'singleFormAddVisibleColumns') &&
       is_array($this->library->singleFormAddVisibleColumns()) &&
-        !empty($this->library->singleFormAddVisibleColumns())
+      !empty($this->library->singleFormAddVisibleColumns())
     ) {
       $single_form_add_visible_columns = $this->library->singleFormAddVisibleColumns();
     } else {
@@ -1898,12 +1894,12 @@ class GrantsLibrary
       $message .= $success . ' ' . str_replace('_', ' ', $this->controller) . ' inserted and ' . $failed . ' failed';
 
       $message = ['flag' => true, 'message' => $message];
-    
+
     } else {
-   
-      $message = $this->addInserts( $post_has_detail, $header, $detail);
+
+      $message = $this->addInserts($post_has_detail, $header, $detail);
     }
-    
+
     return $this->response->setJSON($message);
   }
 
@@ -1975,7 +1971,7 @@ class GrantsLibrary
     }
 
     $headerColumns['fk_status_id'] = $this->controller != 'status' ? $initialStatus : NULL;
-    $headerColumns['fk_approval_id'] = $this->controller != 'status' ?  $approvalId : NULL;
+    $headerColumns['fk_approval_id'] = $this->controller != 'status' ? $approvalId : NULL;
     $headerColumns[strtolower($this->controller) . '_created_date'] = date('Y-m-d');
     $headerColumns[strtolower($this->controller) . '_created_by'] = session()->get('user_id');
     $headerColumns[strtolower($this->controller) . '_last_modified_by'] = session()->get('user_id');
@@ -1986,7 +1982,8 @@ class GrantsLibrary
     $this->write_db->table(strtolower($this->controller))->insert($headerColumns);
 
     // Get the inserted header record ID
-    $headerId = $this->write_db->insertID();;
+    $headerId = $this->write_db->insertID();
+    ;
     // Proceed with inserting details if $postHasDetail is true
     if ($postHasDetail) {
       $detailArray = $detail;
@@ -2032,7 +2029,7 @@ class GrantsLibrary
     return $this->transactionValidate([$transactionValidateDuplicates, $transactionValidateByComputation], $headerColumns, $headerId, $approvalId);
   }
 
-  public function transactionValidateDuplicates(String $table_name, array $insert_array, array $validation_fields = [], int $allowable_records = 0): array
+  public function transactionValidateDuplicates(string $table_name, array $insert_array, array $validation_fields = [], int $allowable_records = 0): array
   {
 
     $validation_successful = true;
@@ -2060,7 +2057,7 @@ class GrantsLibrary
       }
 
       $result = $this->write_db->table($table_name)
-      ->where($insert_array)->get()->getNumRows();
+        ->where($insert_array)->get()->getNumRows();
 
       if ($result > $allowable_records) {
         $validation_successful = false; // Validation error flag
@@ -2072,25 +2069,26 @@ class GrantsLibrary
     return ['flag' => $validation_successful, 'error_message' => $failure_message];
   }
 
-  function transactionValidateByComputation(String $table_name, array $insert_array): array{
-  
-      $validation_successful = true;
-      $failure_message = get_phrase('validation_failed');
-  
-      $library = $this->loadLibrary($table_name);
-  
-      if (method_exists($library, 'transactionValidateByComputationFlag')) {
-        if ($library->transactionValidateByComputationFlag($insert_array) == 'VALIDATION_ERROR') {
-          $validation_successful = false;
-        }
+  function transactionValidateByComputation(string $table_name, array $insert_array): array
+  {
+
+    $validation_successful = true;
+    $failure_message = get_phrase('validation_failed');
+
+    $library = $this->loadLibrary($table_name);
+
+    if (method_exists($library, 'transactionValidateByComputationFlag')) {
+      if ($library->transactionValidateByComputationFlag($insert_array) == 'VALIDATION_ERROR') {
+        $validation_successful = false;
       }
-  
-      return ['flag' => $validation_successful, 'error_message' => $failure_message];
-    
+    }
+
+    return ['flag' => $validation_successful, 'error_message' => $failure_message];
+
   }
 
   public function transactionValidate($validationFlagsAndFailureMessages, $postArray = [], $headerId = 0, $approvalId = 0): array
-{
+  {
     $message = '';
     $messageAndFlag = [];
     $messageAndFlag['flag'] = false;
@@ -2101,350 +2099,462 @@ class GrantsLibrary
 
     // Check if the transaction status is valid
     if ($this->write_db->transStatus() === false) {
-        $this->write_db->transRollback();
-        $messageAndFlag['message'] = get_phrase('insert_failed');
+      $this->write_db->transRollback();
+      $messageAndFlag['message'] = get_phrase('insert_failed');
     } else {
-        // If any validation flag is false, rollback
-        if (in_array(false, $validationFlags)) {
-            $this->write_db->transRollback();
+      // If any validation flag is false, rollback
+      if (in_array(false, $validationFlags)) {
+        $this->write_db->transRollback();
 
-            foreach ($validationFlagsAndFailureMessages as $validationCheck) {
-                if (!$validationCheck['flag']) {
-                    $message .= $validationCheck['error_message'] . "\n";
-                    $messageAndFlag['flag'] = $validationCheck['flag'];
-                    $messageAndFlag['message'] = $message;
-                }
-            }
-        } else {
-            // If the insert action is successful
-            if ($library->actionAfterInsert($postArray, $approvalId, $headerId)) {
-                $this->write_db->transCommit();
-                $message = get_phrase('insert_successful');
-                $messageAndFlag['flag'] = true;
-                $messageAndFlag['message'] = $message;
-                $messageAndFlag['header_id'] = hash_id($headerId, 'encode');
-                $messageAndFlag['table'] = $this->controller;
-            } else {
-                $this->write_db->transRollback();
-                $message = get_phrase('insert_failed');
-                $messageAndFlag['message'] = $message;
-            }
+        foreach ($validationFlagsAndFailureMessages as $validationCheck) {
+          if (!$validationCheck['flag']) {
+            $message .= $validationCheck['error_message'] . "\n";
+            $messageAndFlag['flag'] = $validationCheck['flag'];
+            $messageAndFlag['message'] = $message;
+          }
         }
+      } else {
+        // If the insert action is successful
+        if ($library->actionAfterInsert($postArray, $approvalId, $headerId)) {
+          $this->write_db->transCommit();
+          $message = get_phrase('insert_successful');
+          $messageAndFlag['flag'] = true;
+          $messageAndFlag['message'] = $message;
+          $messageAndFlag['header_id'] = hash_id($headerId, 'encode');
+          $messageAndFlag['table'] = $this->controller;
+        } else {
+          $this->write_db->transRollback();
+          $message = get_phrase('insert_failed');
+          $messageAndFlag['message'] = $message;
+        }
+      }
     }
 
     return $messageAndFlag;
-}
+  }
 
 
   public function checkEditVisibleColumns($table)
   {
-      $library = $this->loadLibrary($table);
-      $editVisibleColumns = [];
-      $visibleColumns = [];
+    $library = $this->loadLibrary($table);
+    $editVisibleColumns = [];
+    $visibleColumns = [];
 
-      // Get the list of visible columns and lookup tables
-      $editVisibleColumns = $library->editVisibleColumns();
-      $lookupTables = $this->callbacklookupTables($table);
+    // Get the list of visible columns and lookup tables
+    $editVisibleColumns = $library->editVisibleColumns();
+    $lookupTables = $this->callbacklookupTables($table);
 
-      $getAllTableFields = $this->getAllTableFields();
+    $getAllTableFields = $this->getAllTableFields();
 
-      // Filter out foreign key and certain columns
-      foreach ($getAllTableFields as $key => $getAllTableField) {
-          if (
-              substr($getAllTableField, 0, 3) === 'fk_' ||
-              strpos($getAllTableField, '_deleted_at') !== false
-          ) {
-              unset($getAllTableFields[$key]);
-          }
+    // Filter out foreign key and certain columns
+    foreach ($getAllTableFields as $key => $getAllTableField) {
+      if (
+        substr($getAllTableField, 0, 3) === 'fk_' ||
+        strpos($getAllTableField, '_deleted_at') !== false
+      ) {
+        unset($getAllTableFields[$key]);
       }
+    }
 
-      $visibleColumns = $getAllTableFields;
+    $visibleColumns = $getAllTableFields;
 
-      if (is_array($editVisibleColumns) && count($editVisibleColumns) > 0) {
-          $columns = [];
-          foreach ($editVisibleColumns as $column) {
-              if (strpos($column, '_name') !== false && $column !== strtolower($table) . '_name') {
-                  $columns[] = substr($column, 0, -5) . '_id';
-              } else {
-                  $columns[] = $column;
-              }
-          }
-          $visibleColumns = $columns;
-      } else {
-          if (is_array($lookupTables) && count($lookupTables) > 0) {
-              foreach ($lookupTables as $lookupTable) {
-                  $lookupTableColumns = $this->getAllTableFields($lookupTable);
-
-                  foreach ($lookupTableColumns as $lookupTableColumn) {
-                      if (strpos($lookupTableColumn, '_name') !== false) {
-                          $visibleColumns[] = substr($lookupTableColumn, 0, -5) . '_id';
-                      }
-                  }
-              }
-          }
+    if (is_array($editVisibleColumns) && count($editVisibleColumns) > 0) {
+      $columns = [];
+      foreach ($editVisibleColumns as $column) {
+        if (strpos($column, '_name') !== false && $column !== strtolower($table) . '_name') {
+          $columns[] = substr($column, 0, -5) . '_id';
+        } else {
+          $columns[] = $column;
+        }
       }
-
-      // Add joins for lookup tables
-      $builder = $this->read_db->table($table);
+      $visibleColumns = $columns;
+    } else {
       if (is_array($lookupTables) && count($lookupTables) > 0) {
-          foreach ($lookupTables as $lookupTable) {
-              $lookupTableId = $lookupTable . '_id';
-              $builder->join(
-                  $lookupTable,
-                  "$lookupTable.$lookupTableId = $table.fk_$lookupTableId"
-              );
+        foreach ($lookupTables as $lookupTable) {
+          $lookupTableColumns = $this->getAllTableFields($lookupTable);
+
+          foreach ($lookupTableColumns as $lookupTableColumn) {
+            if (strpos($lookupTableColumn, '_name') !== false) {
+              $visibleColumns[] = substr($lookupTableColumn, 0, -5) . '_id';
+            }
           }
+        }
       }
+    }
 
-      // Select the visible columns and return the row
-      $builder->select($visibleColumns);
-      $builder->where([$table . '_id' => hash_id($this->id, 'decode')]);
-      $obj = $builder->get();
-
-      $result = [];
-
-      if($obj->getNumRows() > 0){
-        $result = $obj->getRow();
+    // Add joins for lookup tables
+    $builder = $this->read_db->table($table);
+    if (is_array($lookupTables) && count($lookupTables) > 0) {
+      foreach ($lookupTables as $lookupTable) {
+        $lookupTableId = $lookupTable . '_id';
+        $builder->join(
+          $lookupTable,
+          "$lookupTable.$lookupTableId = $table.fk_$lookupTableId"
+        );
       }
+    }
 
-      return $result;
+    // Select the visible columns and return the row
+    $builder->select($visibleColumns);
+    $builder->where([$table . '_id' => hash_id($this->id, 'decode')]);
+    $obj = $builder->get();
+
+    $result = [];
+
+    if ($obj->getNumRows() > 0) {
+      $result = $obj->getRow();
+    }
+
+    return $result;
   }
 
 
   public function hasDuplicateRecord($table, $id, $checkDuplicateColumns, $postArray)
   {
-      // This query is to extract data to cater for columns that are not sourced from the edit form
-      $builder = $this->read_db->table($table);
-      $builder->select($checkDuplicateColumns);
-      $builder->where([$table . '_id' => hash_id($id, 'decode')]);
-      $postedRecord = $builder->get()->getRowArray(); // Equivalent to row_array() in CI3
+    // This query is to extract data to cater for columns that are not sourced from the edit form
+    $builder = $this->read_db->table($table);
+    $builder->select($checkDuplicateColumns);
+    $builder->where([$table . '_id' => hash_id($id, 'decode')]);
+    $postedRecord = $builder->get()->getRowArray(); // Equivalent to row_array() in CI3
 
-      // Merge the posted array with the database record
-      $postArray = array_merge($postArray, $postedRecord);
+    // Merge the posted array with the database record
+    $postArray = array_merge($postArray, $postedRecord);
 
-      // Initialize duplicate record flag
-      $hasDuplicateRecord = false;
+    // Initialize duplicate record flag
+    $hasDuplicateRecord = false;
 
-      if (count($checkDuplicateColumns) > 0) {
-          $cols = [];
+    if (count($checkDuplicateColumns) > 0) {
+      $cols = [];
 
-          // Loop through post data to build the query condition for duplicates
-          foreach ($postArray as $field => $value) {
-              if (in_array($field, $checkDuplicateColumns) || $field === 'fk_account_system_id') {
-                  $cols[$field] = $value;
-              }
-          }
-
-          // Exclude the current record from the duplicate check
-          $builder = $this->read_db->table($table);
-          $builder->where($table . '_id !=', $id);
-
-          if (count($cols) > 0) {
-              // Apply the duplicate check condition
-              $builder->where($cols);
-              $numRows = $builder->countAllResults(); // Equivalent to num_rows() in CI3
-
-              // If the count of rows is greater than 0, mark as duplicate
-              if ($numRows > 0) {
-                  $hasDuplicateRecord = true;
-              }
-          }
+      // Loop through post data to build the query condition for duplicates
+      foreach ($postArray as $field => $value) {
+        if (in_array($field, $checkDuplicateColumns) || $field === 'fk_account_system_id') {
+          $cols[$field] = $value;
+        }
       }
-      return $hasDuplicateRecord;
+
+      // Exclude the current record from the duplicate check
+      $builder = $this->read_db->table($table);
+      $builder->where($table . '_id !=', $id);
+
+      if (count($cols) > 0) {
+        // Apply the duplicate check condition
+        $builder->where($cols);
+        $numRows = $builder->countAllResults(); // Equivalent to num_rows() in CI3
+
+        // If the count of rows is greater than 0, mark as duplicate
+        if ($numRows > 0) {
+          $hasDuplicateRecord = true;
+        }
+      }
+    }
+    return $hasDuplicateRecord;
   }
 
   public function createChangeHistory(array $newData, bool $excludeUsingNewDataColumns = false, array $criticalColumnsToUnset = [], string $table = "", $itemId = 0)
-    {
-        // Determine the table name
-        $table = empty($table) ? $this->controller : $table;
+  {
+    // Determine the table name
+    $table = empty($table) ? $this->controller : $table;
 
-        // Determine the item ID
-        $itemId = $itemId == 0 ? $this->id : $itemId;
+    // Determine the item ID
+    $itemId = $itemId == 0 ? $this->id : $itemId;
 
-        // Get table fields
-        $fields = $this->read_db->getFieldNames($table); // To be taken from the schema file instead of database table directly
+    // Get table fields
+    $fields = $this->read_db->getFieldNames($table); // To be taken from the schema file instead of database table directly
 
-        $tableId = strtolower($table) . "_id";
-        $decodeId = is_numeric($itemId) ? $itemId : hash_id($itemId, 'decode'); // Assuming hash_id is still in use
-        $newData[$tableId] = $decodeId;
+    $tableId = strtolower($table) . "_id";
+    $decodeId = is_numeric($itemId) ? $itemId : hash_id($itemId, 'decode'); // Assuming hash_id is still in use
+    $newData[$tableId] = $decodeId;
 
-        // Use fields from new data if not excluding
-        if (!$excludeUsingNewDataColumns) {
-            $fields = array_keys($newData);
-        }
-
-        // Determine which fields to include in the query by removing critical columns
-        $cols = array_diff($fields, $criticalColumnsToUnset);
-
-        // Select old data from the table
-        $builder = $this->read_db->table(strtolower($table));
-        $builder->select($cols);
-        $oldData = $builder->where([$tableId => $decodeId])
-            ->get()
-            ->getRowArray(); // CI4 equivalent of row_array()
-
-        // Prepare the update data for history table
-        $updateData = [
-            'fk_approve_item_id' => $this->read_db->table('approve_item')
-                ->select('approve_item_id')
-                ->where(['approve_item_name' => strtolower($table)])
-                ->get()
-                ->getRow()
-                ->approve_item_id,
-            'fk_user_id' => $this->session->get('user_id'),
-            'history_action' => 1, // 1 = Update, 2 = Delete
-            'history_current_body' => json_encode($oldData),
-            'history_updated_body' => json_encode($newData),
-            'history_created_date' => date('Y-m-d'),
-            'history_created_by' => $this->session->get('user_id'),
-            'history_last_modified_by' => $this->session->get('user_id'),
-        ];
-
-        // Insert update history into 'history' table
-        $builder = $this->write_db->table('history');
-        $builder->insert($updateData);
+    // Use fields from new data if not excluding
+    if (!$excludeUsingNewDataColumns) {
+      $fields = array_keys($newData);
     }
+
+    // Determine which fields to include in the query by removing critical columns
+    $cols = array_diff($fields, $criticalColumnsToUnset);
+
+    // Select old data from the table
+    $builder = $this->read_db->table(strtolower($table));
+    $builder->select($cols);
+    $oldData = $builder->where([$tableId => $decodeId])
+      ->get()
+      ->getRowArray(); // CI4 equivalent of row_array()
+
+    // Prepare the update data for history table
+    $updateData = [
+      'fk_approve_item_id' => $this->read_db->table('approve_item')
+        ->select('approve_item_id')
+        ->where(['approve_item_name' => strtolower($table)])
+        ->get()
+        ->getRow()
+        ->approve_item_id,
+      'fk_user_id' => $this->session->get('user_id'),
+      'history_action' => 1, // 1 = Update, 2 = Delete
+      'history_current_body' => json_encode($oldData),
+      'history_updated_body' => json_encode($newData),
+      'history_created_date' => date('Y-m-d'),
+      'history_created_by' => $this->session->get('user_id'),
+      'history_last_modified_by' => $this->session->get('user_id'),
+    ];
+
+    // Insert update history into 'history' table
+    $builder = $this->write_db->table('history');
+    $builder->insert($updateData);
+  }
 
   public function edit(string $id): \CodeIgniter\HTTP\Response
-    {
-     
-        $library = $this->loadLibrary($this->controller);
-        $postArray = $this->request->getPost(); // Equivalent to $this->input->post() in CI3
+  {
 
-        // Call action_before_edit from grants service
-        $postArray = $library->actionBeforeEdit($postArray);
+    $library = $this->loadLibrary($this->controller);
+    $postArray = $this->request->getPost(); // Equivalent to $this->input->post() in CI3
 
-        $flag = false;
-        $flagMessage = "";
+    // Call action_before_edit from grants service
+    $postArray = $library->actionBeforeEdit($postArray);
 
-        if (is_array($postArray) && !empty($postArray) && !array_key_exists('error', $postArray)) {
-            extract($postArray);
-            // $id = hash_id($id, 'decode');
-            $data = $header; 
-            $approvalId = 0; // To be evaluated later
+    $flag = false;
+    $flagMessage = "";
 
-            $transactionValidateDuplicatesColumns = is_array($library->transactionValidateDuplicatesColumns()) 
-                ? $library->transactionValidateDuplicatesColumns() 
-                : [];
+    if (is_array($postArray) && !empty($postArray) && !array_key_exists('error', $postArray)) {
+      extract($postArray);
+      // $id = hash_id($id, 'decode');
+      $data = $header;
+      $approvalId = 0; // To be evaluated later
 
-            $hasDuplicateRecord = $this->hasDuplicateRecord(
-                $this->controller, 
-                $id, 
-                $transactionValidateDuplicatesColumns, 
-                $data
-            );
+      $transactionValidateDuplicatesColumns = is_array($library->transactionValidateDuplicatesColumns())
+        ? $library->transactionValidateDuplicatesColumns()
+        : [];
 
-            if (!$hasDuplicateRecord) {
-                $this->write_db->transBegin(); // Begin transaction
-                $this->write_db->table($this->controller)
-                    ->where([$this->primaryKeyField($this->controller) => hash_id($id, 'decode')])
-                    ->update($data); // Update the table
+      $hasDuplicateRecord = $this->hasDuplicateRecord(
+        $this->controller,
+        $id,
+        $transactionValidateDuplicatesColumns,
+        $data
+      );
 
-                $this->createChangeHistory($data); // Create change history
+      if (!$hasDuplicateRecord) {
+        $this->write_db->transBegin(); // Begin transaction
+        $this->write_db->table($this->controller)
+          ->where([$this->primaryKeyField($this->controller) => hash_id($id, 'decode')])
+          ->update($data); // Update the table
 
-                if ($this->write_db->transStatus() === false) {
-                    $this->write_db->transRollback();
-                    $flagMessage = get_phrase('update_not_successful');
-                } else {
-                    if ($library->actionAfterEdit($data, $approvalId, $id)) {
-                        $this->write_db->transCommit();
-                        $flag = true;
-                        $flagMessage = get_phrase('update_completed');
-                    } else {
-                        $flag = false;
-                        $flagMessage = get_phrase('update_not_successful');
-                        $this->write_db->transRollback();
-                    }
-                }
-            } else {
-                $flagMessage = get_phrase('duplicates_not_allowed');
-            }
+        $this->createChangeHistory($data); // Create change history
+
+        if ($this->write_db->transStatus() === false) {
+          $this->write_db->transRollback();
+          $flagMessage = get_phrase('update_not_successful');
         } else {
-            $flagMessage = get_phrase('edit_not_allowed');
-            if (array_key_exists('error', $postArray)) {
-                $flagMessage = $postArray['error'];
-            }
+          if ($library->actionAfterEdit($data, $approvalId, $id)) {
+            $this->write_db->transCommit();
+            $flag = true;
+            $flagMessage = get_phrase('update_completed');
+          } else {
+            $flag = false;
+            $flagMessage = get_phrase('update_not_successful');
+            $this->write_db->transRollback();
+          }
         }
-
-        // Return JSON response
-        return $this->response->setJSON(['flag' => $flag, 'message' => $flagMessage]);
-    }
-    
-    function generateItemTrackNumberAndName($approveable_item)
-    {
-      $header_random = record_prefix($approveable_item) . '-' . rand(1000, 90000);
-      $columns[$approveable_item . '_track_number'] = $header_random;
-      $columns[$approveable_item . '_name'] = ucfirst($approveable_item) . ' # ' . $header_random;
-  
-      return $columns;
-    }
-    
-    function getAccountSystemRoles($user_account_system_id)
-    {
-      $builder = $this->read_db->table('role');
-      $builder->select('role_id, role_name');
-  
-      if (!$this->session->system_admin) {
-        $builder->where('fk_account_system_id', $user_account_system_id);
+      } else {
+        $flagMessage = get_phrase('duplicates_not_allowed');
       }
-  
-      $roles = $builder->get()->getResultArray();
-  
-      return $roles;
-    }
-
-
-    function selectField($column, $options)
-    {
-      $field =  new FieldsBase($column, $this->controller, true);
-      return $field->select_field($options);
-    }
-  
-    function emailField($field_name)
-    {
-      $field =  new FieldsBase($field_name, $this->controller, true);
-      return $field->email_field();
-    }
-  
-    function textField($field_name)
-    {
-      $field =  new FieldsBase($field_name, $this->controller, true);
-      return $field->text_field();
-    }
-  
-    function passwordField($field_name)
-    {
-      $field =  new FieldsBase($field_name, $this->controller, true);
-      return $field->password_field();
-    }
-  
-
-    function mergeWithHistoryFields(string $approve_item_name, array $array_to_merge, bool $add_name_to_array = true, $is_a_new_record = true)
-    {
-      
-      $approvalLibrary = new \App\Libraries\Core\ApprovalLibrary();
-      $statusLibary = new \App\Libraries\Core\StatusLibrary();
-
-      $data = [];
-  
-      if($is_a_new_record){
-  
-        $data[$approve_item_name . '_track_number'] = $this->generateItemTrackNumberAndName($approve_item_name)[$approve_item_name . '_track_number'];
-        $data[$approve_item_name . '_created_by'] = $this->session->user_id ? $this->session->user_id : 1;
-        $data[$approve_item_name . '_created_date'] = date('Y-m-d');
-        $data['fk_approval_id'] = $approvalLibrary->insertApprovalRecord($approve_item_name);
-        $data['fk_status_id'] = $statusLibary->initialItemStatus($approve_item_name);
-  
-      }else{
-        $data[$approve_item_name.'_last_modified_date'] = date('Y-m-d h:i:s');
-        $data[$approve_item_name . '_last_modified_by'] = $this->session->user_id ? $this->session->user_id : 1;
+    } else {
+      $flagMessage = get_phrase('edit_not_allowed');
+      if (array_key_exists('error', $postArray)) {
+        $flagMessage = $postArray['error'];
       }
-  
-      if ($add_name_to_array) {
-        $data[$approve_item_name . '_name'] = $this->generateItemTrackNumberAndName($approve_item_name)[$approve_item_name . '_name'];
-      }
-  
-      return array_merge($array_to_merge, $data);
     }
+
+    // Return JSON response
+    return $this->response->setJSON(['flag' => $flag, 'message' => $flagMessage]);
+  }
+
+  function generateItemTrackNumberAndName($approveable_item)
+  {
+    $header_random = record_prefix($approveable_item) . '-' . rand(1000, 90000);
+    $columns[$approveable_item . '_track_number'] = $header_random;
+    $columns[$approveable_item . '_name'] = ucfirst($approveable_item) . ' # ' . $header_random;
+
+    return $columns;
+  }
+
+  function getAccountSystemRoles($user_account_system_id)
+  {
+    $builder = $this->read_db->table('role');
+    $builder->select('role_id, role_name');
+
+    if (!$this->session->system_admin) {
+      $builder->where('fk_account_system_id', $user_account_system_id);
+    }
+
+    $roles = $builder->get()->getResultArray();
+
+    return $roles;
+  }
+
+
+  function selectField($column, $options)
+  {
+    $field = new FieldsBase($column, $this->controller, true);
+    return $field->select_field($options);
+  }
+
+  function emailField($field_name)
+  {
+    $field = new FieldsBase($field_name, $this->controller, true);
+    return $field->email_field();
+  }
+
+  function textField($field_name)
+  {
+    $field = new FieldsBase($field_name, $this->controller, true);
+    return $field->text_field();
+  }
+
+  function passwordField($field_name)
+  {
+    $field = new FieldsBase($field_name, $this->controller, true);
+    return $field->password_field();
+  }
+
+
+  function mergeWithHistoryFields(string $approve_item_name, array $array_to_merge, bool $add_name_to_array = true, $is_a_new_record = true)
+  {
+
+    $approvalLibrary = new \App\Libraries\Core\ApprovalLibrary();
+    $statusLibary = new \App\Libraries\Core\StatusLibrary();
+
+    $data = [];
+
+    if ($is_a_new_record) {
+
+      $data[$approve_item_name . '_track_number'] = $this->generateItemTrackNumberAndName($approve_item_name)[$approve_item_name . '_track_number'];
+      $data[$approve_item_name . '_created_by'] = $this->session->user_id ? $this->session->user_id : 1;
+      $data[$approve_item_name . '_created_date'] = date('Y-m-d');
+      $data['fk_approval_id'] = $approvalLibrary->insertApprovalRecord($approve_item_name);
+      $data['fk_status_id'] = $statusLibary->initialItemStatus($approve_item_name);
+
+    } else {
+      $data[$approve_item_name . '_last_modified_date'] = date('Y-m-d h:i:s');
+      $data[$approve_item_name . '_last_modified_by'] = $this->session->user_id ? $this->session->user_id : 1;
+    }
+
+    if ($add_name_to_array) {
+      $data[$approve_item_name . '_name'] = $this->generateItemTrackNumberAndName($approve_item_name)[$approve_item_name . '_name'];
+    }
+
+    return array_merge($array_to_merge, $data);
+  }
+
+
+  function featureListTableVisibleColumns($parentTable = null)
+  {
+    $list_table_visible_columns = [];
+
+    $list_table_visible_columns_method = 'listTableVisibleColumns';
+
+    if ($parentTable != null) {
+      $list_table_visible_columns_method = 'detailListTableVisibleColumns';
+    }
+
+    $currentLibrary = $this->loadLibrary($this->controller);
+
+    if (
+      method_exists($currentLibrary, $list_table_visible_columns_method) &&
+      is_array($currentLibrary->$list_table_visible_columns_method())
+    ) {
+      $list_table_visible_columns = $currentLibrary->$list_table_visible_columns_method();
+
+      if (!$this->loadLibrary('approve_item')->approveableItem(strtolower($this->controller))) {
+        $columns = ['status_name', 'approval_name'];
+
+        foreach ($columns as $column) {
+          if (in_array($column, $list_table_visible_columns)) {
+            $column_name_key = array_search($column, $list_table_visible_columns);
+            unset($list_table_visible_columns[$column_name_key]);
+          }
+        }
+      }
+
+      //Add the table id columns if does not exist in $columns
+      if (
+        is_array($list_table_visible_columns) &&
+        !in_array(
+          $this->primaryKeyField($this->controller),
+          $list_table_visible_columns
+        )
+      ) {
+
+        array_unshift(
+          $list_table_visible_columns,
+          $this->primaryKeyField(strtolower($this->controller))
+        );
+
+        // Throw error when a column doesn't exists to avoid Datatable server side loading error
+
+        //Add the lookup table name to the all fields array
+        $all_fields = $this->getAllTableFields($this->controller);
+        $all_lookup_fields = $this->lookupTablesFields($this->controller);
+        $all_fields = array_merge($all_fields, $all_lookup_fields);
+        $lookup_tables = $this->checkLookupTables($this->controller);
+
+        foreach ($list_table_visible_columns as $_column) {
+          if (!in_array($_column, $all_fields) && $_column !== "") {
+            $message = "The column " . $_column . " does not exist in the table " . $this->controller . " or its lookup tables " . implode(',', $lookup_tables) . "</br>";
+            $message .= "Check the 'list_table_visible_columns' or 'lookup_tables' functions of the " . $this->controller . "_model for the source";
+            // show_error($message, 500, 'An Error As Encountered');
+            throw new \Exception($message);
+          }
+        }
+      }
+    }
+    return $list_table_visible_columns;
+  }
+
+  public function toggleListSelectColumns($parentTable = null): array
+  {
+    // Check if the table has list_table_visible_columns not empty
+    $list_table_visible_columns = $this->featureListTableVisibleColumns($parentTable);
+
+    $lookup_tables = $this->lookupTables();
+
+    $get_all_table_fields = $this->getAllTableFields();
+
+    foreach ($get_all_table_fields as $get_all_table_field) {
+
+      //Unset foreign keys columns, created_by and last_modified_by columns
+
+      if (
+        substr($get_all_table_field, 0, 3) == 'fk_' ||
+        $this->isHistoryTrackingField($this->controller, $get_all_table_field, 'created_by') ||
+        $this->isHistoryTrackingField($this->controller, $get_all_table_field, 'last_modified_by') ||
+        $this->isHistoryTrackingField($this->controller, $get_all_table_field, 'deleted_at')
+      ) {
+
+        unset($get_all_table_fields[array_search($get_all_table_field, $get_all_table_fields)]);
+      }
+    }
+
+    $visible_columns = $get_all_table_fields;
+
+    if (is_array($list_table_visible_columns) && count($list_table_visible_columns) > 1) {
+      $visible_columns = $list_table_visible_columns;
+    } else {
+      if (is_array($lookup_tables) && count($lookup_tables) > 0) {
+        foreach ($lookup_tables as $lookup_table) {
+
+          $lookup_table_columns = $this->getAllTableFields($lookup_table);
+
+          foreach ($lookup_table_columns as $lookup_table_column) {
+            // Only include the name field of the look up table in the select columns
+            if ($this->isNameField($lookup_table, $lookup_table_column)) {
+              array_push($visible_columns, $lookup_table_column);
+            }
+          }
+        }
+      }
+    }
+    return $visible_columns; //$this->CI->access->control_column_visibility($this->controller,$visible_columns,'read');
+  }
+
 
 }

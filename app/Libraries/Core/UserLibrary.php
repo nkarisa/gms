@@ -1345,9 +1345,11 @@ class UserLibrary extends GrantsLibrary
             $builder->where(array('fk_user_id' => $user_id));
             $role_user_obj = $builder->get();
 
+            $current_role_ids = [];
+            
             if ($role_user_obj->getNumRows() > 0) {
                 $current_role_ids = array_column($role_user_obj->getResultArray(), 'fk_role_id');
-
+            }
                 $isEqual = array_diff($post['secondary_role_ids'], $current_role_ids) === array_diff($current_role_ids, $post['secondary_role_ids']);
                 // Only update if the current secondary roles do not match the incoming ones
                 if (!$isEqual) {
@@ -1373,7 +1375,7 @@ class UserLibrary extends GrantsLibrary
                     $builder = $this->write_db->table('role_user');
                     $builder->insertBatch( $insert_role_user);
                 }
-            }
+           // }
         }
 
         // Update a user in a context table 
@@ -1520,6 +1522,8 @@ class UserLibrary extends GrantsLibrary
     {
         $users = [];
 
+        $this->dataTableBuilder($builder, $this->controller, $columns);
+
         $builder->select($columns);
         $builder->join('context_definition', 'context_definition.context_definition_id=user.fk_context_definition_id');
         $builder->join('language', 'language.language_id=user.fk_language_id');
@@ -1536,14 +1540,14 @@ class UserLibrary extends GrantsLibrary
             }
             $builder->where(array('user.fk_account_system_id' => $this->session->user_account_system_id));
         }
-
+        
         $obj = $builder->get();
 
         if ($obj->getNumRows() > 0) {
             $users = $obj->getResultArray();
         }
-
-        return $users;
+        
+        return ['results' => $users];
     }
 
 }

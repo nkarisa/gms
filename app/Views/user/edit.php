@@ -328,12 +328,9 @@ if(isset($account_system_identifier['unique_identifier_id']) && $account_system_
                                 <?php }?>
                                 </select>
 
-                                <?php } else {
-                                   // foreach ($account_systems as $account_system_id_key => $account_system) { ?>
+                                <?php } else {?>
                                         <input id="account_system_id" value="<?= $account_system_id; ?>" required="required" type="text" class="form-control" name="header[account_system_id]">
-                            <?php  
-                                // }
-                            } ?>
+                                <?php } ?>
                         </div>
 
                     </div>
@@ -470,58 +467,38 @@ if(isset($account_system_identifier['unique_identifier_id']) && $account_system_
 
         let user_context_level =  <?=$user_context_level;?>;
         let context_office = $(this).val()
-        // alert(user_context_level)
+      
         if(user_context_level < 4){
             $(this).val($(this).data('context_definition_id'));
         }else if (context_office == 0) {
-
             $(this).attr('disabled', 'disabled');
-
             $("#user_email").val('');
-
             //Reload the select user context office dropdown and disable it
             let empty_array_for_offices_or_roles_or_departments_designation = [];
 
-            //build_office_context_element(offices, true);
-
             draw_select2_dropdown('fk_user_context_office_id', 'fk_user_context_office_id', 'div_office_context', empty_array_for_offices_or_roles_or_departments_designation);
-
             draw_select2_dropdown('department', 'department', 'div_user_department', empty_array_for_offices_or_roles_or_departments_designation);
-
             draw_select2_dropdown('fk_role_id', 'primary_role_id', 'div_user_role', empty_array_for_offices_or_roles_or_departments_designation);
-
             draw_select2_dropdown('designation', 'designation', 'div_user_designation', empty_array_for_offices_or_roles_or_departments_designation);
-
             draw_select2_dropdown('fk_country_currency_id', 'fk_country_currency_id', 'div_country_currency_id', empty_array_for_offices_or_roles_or_departments_designation);
 
-
             $('#fk_user_context_office_id').attr('disabled', 'disabled');
-
             $('#department').attr('disabled', 'disabled');
-
             $('#fk_role_id').attr('disabled', 'disabled');
-
             $('#designation').attr('disabled', 'disabled');
-
             $('#fk_country_currency_id').attr('disabled', 'disabled');
 
-
             return false;
-
         } else {
-
             get_common_data_and_build_dropdown(context_office)
-
         }
     });
 
     //Method to build the select tag element
     function get_common_data_and_build_dropdown(context_office) {
         let get_user_data = "<?= base_url() ?>user/get_user_data/" + context_office
-
         //Get data asynchronously 
         $.get(get_user_data, function(response) {
-
             let json_data = JSON.parse(response);
             let {offices, departments, context_roles, designations, account_systems, country_currency} = json_data
 
@@ -542,21 +519,15 @@ if(isset($account_system_identifier['unique_identifier_id']) && $account_system_
 
     //Method to build the select tag element
     function get_data_and_build_dropdown(url_link, tag_unique_id, tag_unique_name, div_id_to_put_select_tag) {
-
         //Get data asynchronously 
         $.get(url_link, function(response) {
-
             let json_data = JSON.parse(response);
-
             draw_select2_dropdown(tag_unique_id, tag_unique_name, div_id_to_put_select_tag, json_data);
-
         });
     }
 
-
     //Select2 Tag [Method to build the select tag element]
     function draw_select2_dropdown(select_tag_id, select_tag_name, tag_id_to_attach_selecttag_html, data) {
-
         if(select_tag_id == 'fk_user_context_office_id'){
             console.log(data)
         }
@@ -575,13 +546,10 @@ if(isset($account_system_identifier['unique_identifier_id']) && $account_system_
         }
 
         element_str += attr_name_def
-        
         element_str += "class='form-control select2 visible' " + multiple + " >";
-
         element_str +=  "<option value='0'><?= get_phrase('select_records'); ?></option>";
 
         $.each(data, function(index, value) {
-
             element_str = element_str + "<option value=" + index + ">" + value + "</option>";
         });
 
@@ -609,11 +577,8 @@ if(isset($account_system_identifier['unique_identifier_id']) && $account_system_
 
         // alert($(this).val());
         if ($(this).val() != '') {
-
             $('#fk_context_definition_id').removeAttr('disabled');
-
             var preferred_user_name = $(this).val();
-
         }
         var user_email = $(this);
         var user_name = $("#user_email");
@@ -637,8 +602,6 @@ if(isset($account_system_identifier['unique_identifier_id']) && $account_system_
                     user_email.val(null);
                     user_name.val(null);
                 }
-
-
             }
         });
 
@@ -675,11 +638,8 @@ if(isset($account_system_identifier['unique_identifier_id']) && $account_system_
         let btn = $(this);
         let url = "<?= base_url(); ?>user/edit/<?=hash_id($user_id,'encode');?>";
         let data = $("#frm_edit_user").serializeArray();
-        
         // Validate fields missing
-
         const form_controls = $(".form-control");
-
         let count_validation_errors = 0;
 
         $.each(form_controls, function(index, elem) {
@@ -729,9 +689,6 @@ if(isset($account_system_identifier['unique_identifier_id']) && $account_system_
 
     function reset_form() {
         $('input').val(null);
-
-
-        // $("#fk_office_id").select2("val","");
         $("#fk_context_definition_id").select2("val", "");
         $("#user_is_context_manager").select2("val", "");
         $("#user_is_context_manager").val(1).prop('selected', true);
@@ -744,10 +701,8 @@ if(isset($account_system_identifier['unique_identifier_id']) && $account_system_
         $("#fk_role_id").select2("val", "");
         $("#user_password").val(null).prop('selected', true);
         $("#confirm_user_password").val(null).prop('selected', true);
-
         $("#office_context").empty().prop('disabled', 'disabled');
         $("#department").empty().prop('disabled', 'disabled');
-
         $(".user_message").html(null);
     }
 
@@ -758,7 +713,6 @@ if(isset($account_system_identifier['unique_identifier_id']) && $account_system_
     $(document).on('click','#add_role', function () {
         const secondary_roles_table = $('#secondary_roles');
         const row = '<tr><td>' + action_button() + '</td><td>' + role_options() + '</td><td>' + expiry_date() + '</td></tr>';
-
         secondary_roles_table.find('tbody').append(row)
 
         $('.expiry_date').datepicker({
@@ -790,9 +744,7 @@ if(isset($account_system_identifier['unique_identifier_id']) && $account_system_
     }
 
     $(document).on('click','.remove_role', function () {
-
         const conf = confirm('<?=get_phrase('confirm_role_user_detach','Are you sure you want to detach this role from this user');?>')
-       
         if(!conf){
             alert('<?=get_phrase('process_aborted');?>')
             return false;

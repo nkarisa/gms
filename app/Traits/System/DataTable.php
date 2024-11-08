@@ -4,14 +4,16 @@ namespace App\Traits\System;
 
 
 trait DataTable {
-    function setDatatableLimit(\CodeIgniter\Database\BaseBuilder &$builder){
+    function setDatatableLimit(\CodeIgniter\Database\BaseBuilder $builder){
         $start = intval($this->request->getPost('start'));
         $length = intval($this->request->getPost('length'));
 
         $builder->limit($length, $start);
+
+        return $builder;
     }
 
-    function setDatatableOrdering(\CodeIgniter\Database\BaseBuilder &$builder, string $tableName, array $selectColumns){
+    function setDatatableOrdering(\CodeIgniter\Database\BaseBuilder $builder, string $tableName, array $selectColumns){
         $order = $this->request->getPost('order');
         $col = '';
         $dir = 'desc';
@@ -26,9 +28,11 @@ trait DataTable {
         } else {
             $builder->orderBy($selectColumns[$col], $dir);
         }
+
+        return $builder;
     }
 
-    function setDatatableSearching(\CodeIgniter\Database\BaseBuilder &$builder, array $selectColumns){
+    function setDatatableSearching(\CodeIgniter\Database\BaseBuilder $builder, array $selectColumns){
         $search = $this->request->getPost('search');
         $value = isset($search['value']) ? $search['value'] : '';
 
@@ -47,6 +51,8 @@ trait DataTable {
             }
             $builder->groupEnd();
         }
+
+        return $builder;
     }
 
     function dataTableBuilder(\CodeIgniter\Database\BaseBuilder &$builder, string $tableName, array $selectColumns){

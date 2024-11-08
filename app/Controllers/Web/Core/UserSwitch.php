@@ -17,7 +17,7 @@ class UserSwitch extends WebController
     }
 
 
-    public function result($id = "")
+    public function result($id = "", $aprentTable = null)
     {
      
         $userSwitchLibary = new \App\Libraries\Core\UserSwitchLibrary();

@@ -68,7 +68,7 @@ class Language extends WebController
         echo get_phrase('language_switch_alert', $message);
     }
 
-    function result($id = 0)
+    function result($id = 0, $parentTable = null)
     {
 
         $result = parent::result($id);

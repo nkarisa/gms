@@ -16,7 +16,7 @@ class User extends WebController
 
     }
 
-    function result($id = ""){
+    function result($id = "", $parentTable = null){
         $result = parent::result($id);
 
         $uniqueIdentifierLibrary = new \App\Libraries\Core\UniqueIdentifierLibrary();
