@@ -55,6 +55,7 @@ foreach ($modules as $module){
             // $routes->get('create',$module.'\\'.$controllerName.'::create');
             $routes->post('edit/(:segment)',$module.'\\'.$controllerName.'::update/$1');
             $routes->get('delete',$module.'\\'.$controllerName.'::delete');
+            $routes->post('update_item_status/(:segment)',$module.'\\'.$controllerName.'::updateItemStatus/$1');
         });  
         
         $routes->group("ajax/$routeBase", ['namespace' => 'App\Controllers\Web'], static function($routes) use ($controllerName, $module){

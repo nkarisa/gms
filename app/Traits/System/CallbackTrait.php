@@ -15,10 +15,6 @@ trait CallbackTrait
         return $postArray;
     }
 
-   protected function postApprovalActionEvent(array $item):void{
-
-   }
-
     protected function actionBeforeEdit(array $postArray): array{
         return $postArray;
    }

@@ -521,7 +521,7 @@ if(!function_exists('approval_action_button')){
         $voided_chq=false, 
         $missing_voucher_detail_flag=false
         ): string{
-
+            
     $disable_class='';
     $statusLibrary = new \App\Libraries\Core\StatusLibrary();
 

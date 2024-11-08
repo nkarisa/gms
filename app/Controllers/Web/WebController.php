@@ -454,4 +454,159 @@ class WebController extends BaseController
       return $this->response->setJSON($response);
     }
   }
+
+  function createTableApproversColumns(string $tableName)
+{
+    $db_forge = \Config\Database::forge('write'); // Load the default database group
+
+    if (!$this->write_db->fieldExists($tableName . '_approvers', $tableName)) {
+        // Define the column details
+        $fields = [
+            $tableName . '_approvers' => [
+                'type' => 'JSON',
+                'null' => true,
+            ],
+        ];
+
+        // Add the column to the specified table
+        $db_forge->addColumn($tableName, $fields);
+    }
+}
+
+function createChangeHistory($new_data, $old_data, $table)
+  {
+    // Insert Update History
+    $builder = $this->read_db->table('approve_item');
+    $builder->where(array('approve_item_name' => strtolower($table)));
+    $update_data['fk_approve_item_id'] = $builder->get()->getRow()->approve_item_id;
+
+    $update_data['fk_user_id'] = $this->session->user_id;
+    $update_data['history_action'] = 1; // 1 = Update, 2 = Delete
+    $update_data['history_current_body'] = json_encode($old_data);
+    $update_data['history_updated_body'] = json_encode($new_data);
+    $update_data['history_created_date'] = date('Y-m-d');
+    $update_data['history_created_by'] = $this->session->user_id;
+    $update_data['history_last_modified_by'] = $this->session->user_id;
+
+    $this->write_db->table('history')->insert($update_data);
+  }
+  public function updateItemStatus($item)
+  {
+    $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+    // Check if <table_name>_approvers column exists if not create it
+    $this->createTableApproversColumns($item);
+    $buttons = '<div class="badge badge-danger">' . get_phrase('approval_process_failed') . '</div>';
+    $post = $this->request->getPost();
+
+    $this->createChangeHistory([$item . '_id' => $post['item_id'], 'fk_status_id' => $post['next_status']], [$item . '_id' => $post['item_id'], 'fk_status_id' => $post['current_status']], $item);
+
+    if ($post['next_status'] > 0) {
+      $account_system_id = $statusLibrary->getStatusAccountSystem($post['next_status']);
+      $action_button_data = $this->libs->actionButtonData($item, $account_system_id);
+      
+      // Once the update is successful, complete post update events
+      $itemLibrary = $this->libs->loadLibrary($item);
+      if (method_exists($itemLibrary , 'postApprovalActionEvent')) {
+        $itemLibrary ->postApprovalActionEvent([
+          'item' => $item,
+          'post' => $post
+        ]);
+      }
+
+      $buttons = approval_action_button($item, $action_button_data['item_status'], $post['item_id'], $post['next_status'], $action_button_data['item_initial_item_status_id'], $action_button_data['item_max_approval_status_ids']);
+      
+      $data['fk_status_id'] = $post['next_status'];
+      $data[$item.'_last_modified_by'] = $this->session->user_id;
+      $data[$item.'_last_modified_date'] = date('Y-m-d h:i:s');
+      $data[$item.'_approvers'] = $this->updateApproversList($this->session->user_id, $item, $post['item_id'], $post['current_status'], $post['next_status']);
+      
+      $builder = $this->write_db->table($item);
+      $builder->where(array($item . '_id' => $post['item_id']));
+      $builder->update($data);
+    }
+
+    echo $buttons;
+  }
+
+
+  function updateApproversList($user_id, $table_name, $item_id, $current_status, $next_status){
+    $builder = $this->read_db->table('user');
+    $builder->select(array('CONCAT(user_firstname, " ", user_lastname) as fullname', 'role_id', 'role_name'));
+    $builder->join('role','role.role_id=user.fk_role_id');
+    $builder->where(array('user_id' => $user_id));
+    $user = $builder->get()->getRow();
+
+    $user_fullname = $user->fullname;
+    $user_role_id = $user->role_id;
+    $user_role_name = $user->role_name;
+
+    $builder = $this->read_db->table('status');
+    $builder->select(array('status_id','status_name','status_approval_sequence','status_approval_direction','fk_approval_flow_id as approval_flow_id'));
+    $builder->whereIn('status_id', [$current_status, $next_status]);
+    $status_obj = $builder->get()->getResultArray();
+
+    $status = [];
+    $approval_flow_id = 0;
+    foreach($status_obj as $step){
+      $approval_flow_id = $step['approval_flow_id'];
+      if($step['status_id'] == $current_status){
+        $status['current'] = $step;
+      }else{
+        $status['next'] = $step;
+      }
+    }
+
+    $current_status_name = $status['current']['status_name'];
+    $current_status_sequence = $status['current']['status_approval_sequence'];
+    $current_approval_direction = $status['current']['status_approval_direction'];
+
+    $reinstatement_status_id = 0;
+
+    if($current_approval_direction == 0){
+      $builder = $this->read_db->table('status');
+      $builder->select(array('status_id','status_name','status_approval_sequence','status_approval_direction','fk_approval_flow_id as approval_flow_id'));
+      $builder->where(['fk_approval_flow_id' => $approval_flow_id]);
+      $builder->where(['status_approval_sequence' => $current_status_sequence, 'status_approval_direction' => 1]);
+      $alt_status = $builder->get()->getRowArray();
+      
+      $reinstatement_status_id = $current_status;
+      $current_status = $alt_status['status_id'];
+      $current_status_name = $alt_status['status_name'];
+      $current_status_sequence = $alt_status['status_approval_sequence'];
+      $current_approval_direction = $alt_status['status_approval_direction'];
+    }
+
+    $next_status_name = $status['next']['status_name'];
+    $next_status_sequence = $status['next']['status_approval_sequence'];
+    $next_approval_direction = $status['next']['status_approval_direction'];
+
+    $builder = $this->read_db->table($table_name);
+    $builder->where(array($table_name.'_id' => $item_id));
+    $existing_approvers = $builder->get()->getRow()->{$table_name.'_approvers'};
+
+    $approvers = json_encode($existing_approvers);
+
+    $new_approver = [
+      'user_id' => $user_id, 
+      'fullname' => $user_fullname, 
+      'user_role_id' => $user_role_id,
+      'user_role_name' => $user_role_name,
+      'approval_date' => date('Y-m-d h:i:s'), 
+      'status_id' => $next_approval_direction == 1 ? $current_status : $next_status,
+      'status_name' => $next_approval_direction == 1 ?  $current_status_name  : $next_status_name, 
+      'status_sequence' => $next_approval_direction == 1 ? $current_status_sequence : $next_status_sequence, 
+      'approval_direction' => $next_approval_direction == 1 ? $current_approval_direction : $next_approval_direction, 
+      'reinstatement_status_id' => $reinstatement_status_id
+    ];
+
+  if($existing_approvers == "" || $existing_approvers == "[]" || $existing_approvers == NULL){
+    $approvers = [$new_approver];
+  }else{
+    array_push($approvers, $new_approver);
+  }
+
+    $approvers = json_encode($approvers);
+
+    return $approvers;
+  }
 }

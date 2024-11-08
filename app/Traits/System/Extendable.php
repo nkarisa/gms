@@ -102,4 +102,8 @@ trait Extendable {
     function showListEditAction(array $record): bool{
         return true;
     }
+
+    public function postApprovalActionEvent(array $item): void{
+
+    }
 }
