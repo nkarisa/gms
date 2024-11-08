@@ -1,4 +1,15 @@
+<style>
+    .menu_tab.active {
+        border: 5px white solid;
+        border-radius: 2px;
+    }
+</style>
 <script>
+
+    $(document).ready(function(){
+        $(".navbar-nav").find(".<?=$uri->getSegments()[0];?>").addClass("active");
+    });
+
     function getRequest(url, on_success) {
         $.post({
             url: url,
@@ -145,4 +156,6 @@
         elements += '</ul>';
         $("#fav_menu_items").html(elements);
     }
+
+    
 </script>

@@ -401,12 +401,9 @@ class MenuLibrary extends GrantsLibrary
     public function navigationItems()
     {
 
-        $permission = $this->session->get('role_permissions');
-
+        // $permission = $this->session->role_permissions;
         $this->setMenuSessions();
-
         $menus = $this->session->get('user_priority_menu');
-
         $nav = "";
         $menu_icon = '';
 
@@ -415,7 +412,6 @@ class MenuLibrary extends GrantsLibrary
             ->get();
 
         $menu_derivative_controllers = array_column($all_active_menus_obj->getResultArray(), 'menu_derivative_controller');
-
         $uniqueIdentifierLibrary = new UniqueIdentifierLibrary();
         $unique_identifier = $uniqueIdentifierLibrary->getAccountSystemUniqueIdentifier($this->session->get('user_account_system_id'));
 
@@ -436,12 +432,13 @@ class MenuLibrary extends GrantsLibrary
                 }
 
                 $nav .= '
-            <li class="menu_tab ' . strtolower($menu) . '">
-              <a href="' . base_url() . strtolower($menu) . '/list">
-                    <i class="' . $menu_icon . '"></i>
-                    <span>' . get_phrase(strtolower($items['menu_name'])) . '</span>
-                </a>
-            </li>
+                <li class="sep"></li>
+                <li class="menu_tab ' . strtolower($menu) . '">
+                    <a href="' . base_url() . strtolower($menu) . '/list">
+                        <i class="' . $menu_icon . '"></i>
+                        <span>' . get_phrase(strtolower($items['menu_name'])) . '</span>
+                    </a>
+                </li>
             ';
             }
         }
