@@ -417,10 +417,13 @@ class MenuLibrary extends GrantsLibrary
 
         $userLibrary = new UserLibrary();
 
+        $nav .= view("general/menu_item", ['menu' => 'dashboard', 'menu_name' => 'dashboard', 'icon' => 'fa fa-home']);
+
         foreach ($menus as $menu => $items) {
             if (
                 $userLibrary->checkRoleHasPermissions($menu, 'read') &&
-                in_array(ucfirst($menu), $menu_derivative_controllers)
+                in_array(ucfirst($menu), $menu_derivative_controllers) && 
+                strtolower($menu) != 'dashboard'
             ) {
 
                 if (
@@ -431,15 +434,7 @@ class MenuLibrary extends GrantsLibrary
                     continue;
                 }
 
-                $nav .= '
-                <li class="sep"></li>
-                <li class="menu_tab ' . strtolower($menu) . '">
-                    <a href="' . base_url() . strtolower($menu) . '/list">
-                        <i class="' . $menu_icon . '"></i>
-                        <span>' . get_phrase(strtolower($items['menu_name'])) . '</span>
-                    </a>
-                </li>
-            ';
+                $nav .= view("general/menu_item", ['menu' => $menu, 'menu_name' => $items['menu_name'], 'icon' => $menu_icon]);
             }
         }
 
