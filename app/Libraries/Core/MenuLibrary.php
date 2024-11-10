@@ -417,7 +417,7 @@ class MenuLibrary extends GrantsLibrary
 
         $userLibrary = new UserLibrary();
 
-        $nav .= view("general/menu_item", ['menu' => 'dashboard', 'menu_name' => 'dashboard', 'icon' => 'fa fa-home']);
+        $nav .= view("general/menu_item", ['menu' => $this->config->defaultLaunchPage, 'menu_name' => $this->config->defaultLaunchPage, 'icon' => 'fa fa-home']);
 
         foreach ($menus as $menu => $items) {
             if (

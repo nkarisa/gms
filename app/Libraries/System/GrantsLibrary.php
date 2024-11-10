@@ -1628,6 +1628,8 @@ class GrantsLibrary
 
   function checkMultiSelectField($table_name = "")
   {
+    
+    $this->library = $this->loadLibrary($this->controller);
 
     if ($table_name != "") {
       $this->library = $this->loadLibrary($table_name);

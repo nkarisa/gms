@@ -39,4 +39,7 @@ class RoleLibrary extends GrantsLibrary
         return $roles_ids_and_names;
        }
    
+       function detailTables(): array {
+        return ['role_permission','role_group_association'];
+       }
 }

@@ -186,7 +186,7 @@ $columns = array_chunk($keys,$config->master_table_columns,true);
             ?>
           </div>
         </div>
-          <table class="table table-striped nowrap datatable_details" id = "<?=$detail_table_name?>">
+          <table class="table table-striped nowrap" id = "<?=$detail_table_name?>">
             <thead>
               <!--Add one to count of keys because of the action column that has been added in this view-->
               <tr><th colspan="<?=count($keys) + 1;?>"><?=ucwords(str_replace("_"," ",$detail_table_name));?></th></tr>
@@ -198,8 +198,8 @@ $columns = array_chunk($keys,$config->master_table_columns,true);
           </table>
 
           <script>
-              let url = "<?=base_url();?><?=$detail_table_name;?>/showList";
-              let datatable = $("#<?=$detail_table_name;?>").DataTable({
+              var url = "<?=base_url();?><?=$detail_table_name;?>/showList";
+              var datatable = $("#<?=$detail_table_name;?>").DataTable({
                   dom: 'lBfrtip',
                   buttons: [
                       'copyHtml5',
