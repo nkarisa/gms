@@ -28,6 +28,12 @@ class Login extends WebController
      */
     public function index(): string|RedirectResponse
     {
+        
+        // Prepare data for the login view
+        $data['system_name'] = $this->settings->get('GrantsConfig.systemName');
+        $data['system_title'] = $this->settings->get('GrantsConfig.systemName');
+        $data['maintenance_mode'] = $this->settings->get('GrantsConfig.maintenance_mode');
+
         // Check if user is already authenticated
         if ($this->session->has('user_is_authenticated')) {
             
@@ -36,20 +42,39 @@ class Login extends WebController
                 $grantsLibrary->create_missing_system_files_from_json_setup();
             }
 
+            if($this->session->system_admin){
+                $grantsConfig  = new \Config\GrantsConfig();
+                $globalConfigurations = get_object_vars($grantsConfig);
+                foreach($globalConfigurations as $globalConfigurationKey => $globalConfigurationValue){
+                    // Check if the setting exists in the database
+                    
+                    $setting = $this->settings->get("GrantsConfig.$globalConfigurationKey");
+                    if($setting === null){
+                        // If the setting does not exist, insert it into the database
+                        $globalConfigurationValue = is_array($globalConfigurationValue)? json_encode($globalConfigurationValue) : $globalConfigurationValue;
+                        $this->settings->set("GrantsConfig.$globalConfigurationKey", $globalConfigurationValue); 
+                    }
+
+                }
+
+                $contextConfig  = new \Config\ContextConfig();
+                $contextualConfigurations = get_object_vars($contextConfig);
+
+                foreach($contextualConfigurations as $contextualConfigurationKey => $contextualConfigurationValue){
+                    $setting = $this->settings->get("ContextConfig.$globalConfigurationKey");
+                    if($setting === null && is_array($contextualConfigurationValue)){
+                        $this->settings->set("ContextConfig.$contextualConfigurationKey", json_encode($contextualConfigurationValue)); 
+                    }
+                }
+            }
+
             // Redirect to dashboard if user is authenticated
+            if($this->settings->get("GrantsConfig.maintenance_mode") && !$this->session->system_admin){
+                return view('general/login', $data);
+            }
+
             return redirect()->to('dashboard/list');
         }
-
-        // Initialize the SettingModel
-        $settingModel = new SettingModel();
-
-        // Fetch all settings from the database
-        $settings = $settingModel->all();
-
-        // Prepare data for the login view
-        $data['system_name'] = $settings['system_name'];
-        $data['system_title'] = $settings['system_title'];
-        $data['maintenance_mode'] = $settings['maintenance_mode'];
 
         // Return the login view with the prepared data
         return view('general/login', $data);
@@ -140,7 +165,7 @@ class Login extends WebController
             'role_permissions' => $userLibrary->getUserPermissions($roleIds),
             'is_user_switch' => $is_user_switch,
             'departments' => $userLibrary->getUserDepartments($user_id),
-            'default_launch_page' => $this->config->defaultLaunchPage,
+            'default_launch_page' => $this->settings->get("GrantsConfig.defaultLaunchPage"),
             'context_definition' => $userLibrary->getUserContextDefinition($user_id),
             'user_account_system_id' => $user['account_system_id'],
             'user_account_system_code' => $user['account_system_code'],

@@ -120,12 +120,12 @@ class UserLibrary extends GrantsLibrary
         if ($roleAssignedPermissions->getNumRows() > 0 || $roleGroupAssignedPermissions->getNumRows() > 0) {
 
             // Depending on the configuration, merge permissions from roles and role groups
-            if ($this->config->methodToAttachPermissionToRole == 'both') {
+            if (service("settings")->get("GrantsConfig.methodToAttachPermissionToRole") == 'both') {
                 $role_permissions = $roleAssignedPermissions->getResultObject();
                 $role_group_permissions = $roleGroupAssignedPermissions->getResultObject();
-            } elseif ($this->config->methodToAttachPermissionToRole == 'direct') {
+            } elseif (service("settings")->get("GrantsConfig.methodToAttachPermissionToRole") == 'direct') {
                 $role_permissions = $roleAssignedPermissions->getResultObject();
-            } elseif ($this->config->methodToAttachPermissionToRole == 'role_group') {
+            } elseif (service("settings")->get("GrantsConfig.methodToAttachPermissionToRole") == 'role_group') {
                 $role_group_permissions = $roleGroupAssignedPermissions->getResultObject();
             } else {
                 $role_permissions = $roleAssignedPermissions->getResultObject();
@@ -154,7 +154,7 @@ class UserLibrary extends GrantsLibrary
         }
 
         // If the default launch page is not in the permission array or does not have 'read' permission, add it
-        $default_launch_page = $this->config->defaultLaunchPage;
+        $default_launch_page = service("settings")->get("GrantsConfig.defaultLaunchPage");
         if (
             !array_key_exists($default_launch_page, $role_permission_array) ||
             !in_array('read', $role_permission_array)
@@ -295,7 +295,7 @@ class UserLibrary extends GrantsLibrary
         $builder->join('menu', 'menu.menu_id = permission.fk_menu_id');
 
         // Apply conditions based on the configuration and user role
-        if (!session()->get('system_admin') && $this->config->preventUsingGlobalPermissionsByNonAdmins) {
+        if (!session()->get('system_admin') && service("settings")->get("GrantsConfig.preventUsingGlobalPermissionsByNonAdmins")) {
             $builder->where('permission.permission_is_global', 0);
         }
 
@@ -350,7 +350,7 @@ class UserLibrary extends GrantsLibrary
         // Apply conditions based on the configuration and user role
         $builder->where('role_group_association.role_group_association_is_active', 1);
 
-        if (!session()->get('system_admin') && $this->config->preventUsingGlobalPermissionsByNonAdmins) {
+        if (!session()->get('system_admin') && service("settings")->get("GrantsConfig.preventUsingGlobalPermissionsByNonAdmins")) {
             $builder->where('permission.permission_is_global', 0);
         }
 

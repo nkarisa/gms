@@ -116,7 +116,7 @@ class MenuLibrary extends GrantsLibrary
     {
         // Query the database to find the menu item with the default launch page controller
         $result = $this->read_db->table($this->table)
-            ->where('menu_derivative_controller', $this->config->defaultLaunchPage)
+            ->where('menu_derivative_controller', service("settings")->get("GrantsConfig.defaultLaunchPage"))
             ->get()
             ->getRow();
 
@@ -170,7 +170,7 @@ class MenuLibrary extends GrantsLibrary
                 $user_menu_data['menu_user_order_priority_item'] = 1;
                 if (sizeof($menu_ids) - 1 == $order) {
                     $user_menu_data['menu_user_order_priority_item'] = 0;
-                } elseif ($order > $this->config->maxPriorityMenuItems - 1) {
+                } elseif ($order > service("settings")->get("GrantsConfig.maxPriorityMenuItems") - 1) {
                     $user_menu_data['menu_user_order_priority_item'] = 0;
                 }
 
@@ -288,7 +288,7 @@ class MenuLibrary extends GrantsLibrary
 
         $controllers = $this->getAllTables();
 
-        $tablesNotRequiredInMenu = $this->config->tablesNotRequiredInMenu;
+        $tablesNotRequiredInMenu = json_decode(service("settings")->get("GrantsConfig.tablesNotRequiredInMenu"));
 
         $controllers = array_diff($controllers, $tablesNotRequiredInMenu);
 
@@ -377,16 +377,16 @@ class MenuLibrary extends GrantsLibrary
                 }
 
                 if (
-                    count($userPriorityMenuBasedOnPermissions) < $this->config->maxPriorityMenuItems - 1 &&
+                    count($userPriorityMenuBasedOnPermissions) < service("settings")->get("GrantsConfig.maxPriorityMenuItems") - 1 &&
                     count($userMoreMenuBasedOnPermissions) > 0
                 ) {
-                    $chunkedUserMore = array_chunk($userMoreMenuBasedOnPermissions, $this->config->maxPriorityMenuItems - 1, true);
+                    $chunkedUserMore = array_chunk($userMoreMenuBasedOnPermissions, service("settings")->get("GrantsConfig.maxPriorityMenuItems") - 1, true);
 
                     foreach ($chunkedUserMore[0] as $menu => $options) {
                         $userPriorityMenuBasedOnPermissions[$menu] = $options;
                     }
 
-                    $userMoreMenuBasedOnPermissions = array_slice($userMoreMenuBasedOnPermissions, $this->config->maxPriorityMenuItems - 1);
+                    $userMoreMenuBasedOnPermissions = array_slice($userMoreMenuBasedOnPermissions, service("settings")->get("GrantsConfig.maxPriorityMenuItems") - 1);
                 }
 
                 session()->set('user_priority_menu', $userPriorityMenuBasedOnPermissions);
@@ -417,7 +417,7 @@ class MenuLibrary extends GrantsLibrary
 
         $userLibrary = new UserLibrary();
 
-        $nav .= view("general/menu_item", ['menu' => $this->config->defaultLaunchPage, 'menu_name' => $this->config->defaultLaunchPage, 'icon' => 'fa fa-home']);
+        $nav .= view("general/menu_item", ['menu' => service("settings")->get("GrantsConfig.defaultLaunchPage"), 'menu_name' => service("settings")->get("GrantsConfig.defaultLaunchPage"), 'icon' => 'fa fa-home']);
 
         foreach ($menus as $menu => $items) {
             if (
@@ -496,4 +496,30 @@ class MenuLibrary extends GrantsLibrary
         return $data;
     }
 
+    function createBreadcrumb(){
+
+        $breadcrumb_list = $this->session->has('breadcrumb_list') ? $this->session->breadcrumb_list : [];
+        $uri = service("uri");
+
+        if($uri->getSegment(2,'list') == 'list' ){
+          $this->session->set('breadcrumb_list',array($uri->getSegment(1,'')));
+        }
+
+        if(array_pop($breadcrumb_list) !== $uri->getSegment(1,'') ){
+          $breadcrumb_list = $this->session->breadcrumb_list;
+          $new = array($uri->getSegment(1,'') );
+
+          if(!in_array($uri->getSegment(1,''),$breadcrumb_list)){
+            $breadcrumb_list = array_merge($breadcrumb_list,$new);
+          }
+
+          $this->session->set('breadcrumb_list', $breadcrumb_list );
+        }
+    }
+
+    function checkIfMenuIsActive($menuItem){
+        return $this->read_db->table('menu')
+            ->where(array('menu_name' => $menuItem, 'menu_is_active' => 0))
+            ->get()->getNumRows() > 0;
+    }
 }

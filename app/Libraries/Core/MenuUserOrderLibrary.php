@@ -37,7 +37,7 @@ class MenuUserOrderLibrary extends GrantsLibrary
     
         $is_favorite = 0;
     
-        if($fav_status == 'unfav' && $count_of_favorites < $this->config->max_count_of_favorites_menu_items){
+        if($fav_status == 'unfav' && $count_of_favorites < service("settings")->get("GrantsConfig.max_count_of_favorites_menu_items")){
           $is_favorite = 1;
         }
     

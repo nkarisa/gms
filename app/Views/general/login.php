@@ -133,8 +133,10 @@
 			?>
 			<div class="row">
 				<div class="col-xs-12 text-center">
-					<span id="outage_message">The system is under maintenance schedule. You will be contacted by your
-						Country Administrators once the system is back</span>
+					<span id="outage_message">
+						<?=get_phrase('maintenance_mode_message','The system is under maintenance schedule. You will be contacted by your
+						Country Administrators once the system is back');?>
+					</span>
 				</div>
 			</div>
 			<?php

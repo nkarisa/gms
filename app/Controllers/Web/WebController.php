@@ -77,7 +77,7 @@ class WebController extends BaseController
     $this->write_db = \Config\Database::connect('write');
 
     // Set a maintainance mode session 
-    $this->maintainanceModeCheck();
+    // $this->maintainanceModeCheck();
 
     // Load grants config
     $this->config = config(GrantsConfig::class);
@@ -143,22 +143,15 @@ class WebController extends BaseController
    *
    * @return void
    */
-  private function maintainanceModeCheck()
-  {
-    // Instantiate the SettingModel
-    $settingModel = new \App\Models\Core\SettingModel();
-
-    // Fetch all settings from the database
-    $settings = $settingModel->all();
-
-    // Set the default value of maintenance_mode in the session to 0
-    $this->session->set('maintenance_mode', 0);
-
-    // If the maintenance_mode is enabled in the database, set the session variable to 1
-    if ($settings['maintenance_mode'] == 1) {
-      $this->session->set('maintenance_mode', 1);
-    }
-  }
+  // private function maintainanceModeCheck()
+  // {
+  //   // If the maintenance_mode is enabled in the database, set the session variable to 1
+  //   if (service("settings")->get('GrantsConfig.maintenance_mode') == 1) {
+  //     $this->session->set('maintenance_mode', 1);
+  //   }else{
+  //     $this->session->set('maintenance_mode', 0);
+  //   }
+  // }
 
   public function result($id = '', $parentTable = null)
   {
@@ -265,6 +258,7 @@ class WebController extends BaseController
     $page_data['session'] = session();
     $page_data['config'] = $this->config;
     $page_data['libs'] = $this->libs;
+    $page_data['settings'] = $this->settings;
 
     if ($this->action == 'list') {
       $show_add_button = $this->libs::call($this->controller . '.checkShowAddButton', [$this->controller]);

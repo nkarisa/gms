@@ -26,8 +26,8 @@ $routes->get('language/download_language_file/(:segment)/(:segment)', [App\Contr
 $routes->post('language/upload_language_file', [App\Controllers\Web\Core\Language::class, "uploadLanguageFile"]);
 
 
-$config = config(GrantsConfig::class);
-$modules = $config->modules;
+// $config = config(GrantsConfig::class);
+$modules = json_decode(service("settings")->get("GrantsConfig.modules"));
 unset($modules[array_search('system', $modules)]);
 $grantsLibrary = new \App\Libraries\System\GrantsLibrary();
 

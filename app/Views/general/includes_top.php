@@ -38,6 +38,8 @@
 <script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.3.1/css/buttons.dataTables.min.css">
 
+<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/grants.css">
+
 <?php
 if ($skin_colour != ''): ?>
 	<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/skins/<?php echo $skin_colour; ?>.css">

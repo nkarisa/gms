@@ -4,7 +4,7 @@ use App\Libraries\Core\MenuLibrary;
 use App\Libraries\Core\UserLibrary;
 
 $config = config(Config\GrantsConfig::class);
-$chunk = array_chunk(session()->user_more_menu,$config->extraMenuItemColumns,true);
+$chunk = array_chunk(session()->user_more_menu,service('settings')->get('GrantsConfig.extraMenuItemColumns'),true);
 
 $menuLibrary = new MenuLibrary();
 $favorite_menu_items_with_max_flag = $menuLibrary->getFavoriteMenuItems();
@@ -45,7 +45,7 @@ $max_fav_items_reached = $favorite_menu_items_with_max_flag['max_items_reached']
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th colspan="<?=$config->extraMenuItemColumns;?>"><?=get_phrase('more_menu_items');?></th>
+                <th colspan="<?=service("settings")->get("GrantsConfig.extraMenuItemColumns");?>"><?=get_phrase('more_menu_items');?></th>
             </tr>
         </thead>
         <tbody>

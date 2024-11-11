@@ -5,9 +5,9 @@ use Config\GrantsConfig;
 if ( ! function_exists('form_group')){
     function form_group(...$form_group_contents){
 
-        $config = config(GrantsConfig::class);
+        // $config = config(GrantsConfig::class);
 
-        $master_table_columns = $config->master_table_columns;
+        $master_table_columns = service("settings")->get("GrantsConfig.master_table_columns");
 
         $chunked_form_group_contents = array_chunk($form_group_contents,$master_table_columns);
         
@@ -46,9 +46,9 @@ if ( ! function_exists('form_group_content')){
         $form_control_div_size = 0;
         $cols = [];
 
-        $config = config(GrantsConfig::class);
+        // $config = config(GrantsConfig::class);
         
-        $column_size = $config->master_table_columns;
+        $column_size = service("settings")->get("GrantsConfig.master_table_columns");
 
         switch($column_size){
             case 1:

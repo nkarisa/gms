@@ -191,7 +191,7 @@ class GrantsLibrary
 
   final public function loadModel(string $table_name)
   {
-    $modules = $this->config->modules; // Assuming $config is an instance of Config\App
+    $modules = json_decode(service("settings")->get("GrantsConfig.modules")); // Assuming $config is an instance of Config\App
     $table_model = null;
     $table_model_name = pascalize($table_name) . 'Model';
     // Loop through the modules to find the appropriate library
@@ -222,7 +222,7 @@ class GrantsLibrary
    */
   final public function loadLibrary(string $table_name)
   {
-    $modules = $this->config->modules; // Assuming $config is an instance of Config\App
+    $modules = json_decode(service("settings")->get("GrantsConfig.modules")); // Assuming $config is an instance of Config\App
     $table_library = null;
     $table_library_name = pascalize($table_name) . 'Library';
     // Loop through the modules to find the appropriate library

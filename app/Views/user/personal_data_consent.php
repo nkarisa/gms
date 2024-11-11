@@ -71,7 +71,7 @@ if(!$is_status_id_max && $identifier_number != NULL){
                             foreach($user_unique_identifier_uploads as $user_unique_identifier_upload){
                             $objectKey = $user_unique_identifier_upload['attachment_url'].'/'.$user_unique_identifier_upload['attachment_name'];
                            // $objectKey = $bank_statements_upload['attachment_url'].'/'.$bank_statements_upload['attachment_name'];
-                           $url = $this->config->item('upload_files_to_s3')?$this->grants_s3_lib->s3_preassigned_url($objectKey):$this->attachment_library->get_local_filesystem_attachment_url($objectKey);
+                           $url = service("settings")->get('GrantsConfig.upload_files_to_s3') ? $this->grants_s3_lib->s3_preassigned_url($objectKey) : $this->attachment_library->get_local_filesystem_attachment_url($objectKey);
                         ?>
                             <li><a target='__blank' href='<?=$url;?>'><?=$user_unique_identifier_upload['attachment_name'];?></li>
                         <?php

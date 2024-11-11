@@ -15,7 +15,7 @@ $grantsLibrary->unsetLookupTablesIds($keys);
 
 
 // Make the master detail table have columns as per the config
-$columns = array_chunk($keys,$config->master_table_columns,true);
+$columns = array_chunk($keys,service("settings")->get("GrantsConfig.master_table_columns"),true);
 
 ?>
 <div class="row">
@@ -35,12 +35,12 @@ $columns = array_chunk($keys,$config->master_table_columns,true);
     <table class="table">
       <thead>
         <tr>
-          <th colspan="<?=$config->master_table_columns;?>" style="text-align:center;"><?=get_phrase($uri->getSegment(1).'_master_record');?>
+          <th colspan="<?=service("settings")->get("GrantsConfig.master_table_columns");?>" style="text-align:center;"><?=get_phrase($uri->getSegment(1).'_master_record');?>
           </th>
         </tr>
 
         <tr>
-          <th colspan="<?=$config->master_table_columns;?>" style="text-align:center;">
+          <th colspan="<?=service("settings")->get("GrantsConfig.master_table_columns");?>" style="text-align:center;">
               <?php 
               if( $userLibrary->isStatusActionableByUser($table_body['status_id'], $controller) ){
                 if($userLibrary->checkRoleHasPermissions(ucfirst($controller),'update'))

@@ -68,7 +68,7 @@ extract($result['status_data']);
                             if(!isset($user_identity_document['attachment_url'])) continue;
     
                             $objectKey = $user_identity_document['attachment_url'].'/'.$user_identity_document['attachment_name'];
-                            $url = $config->upload_files_to_s3 ? $attachmentLibrary->s3PreassignedUrl($objectKey): $attachmentLibrary->getLocalFilesystemAttachmentUrl($objectKey);
+                            $url = service("settings")->get("GrantsConfig.upload_files_to_s3") ? $attachmentLibrary->s3PreassignedUrl($objectKey): $attachmentLibrary->getLocalFilesystemAttachmentUrl($objectKey);
                             
                             $list_of_uploads .= "<a target='__blank' href='". $url. "'>". $user_identity_document['attachment_name']. "</a></br>";
                         }

@@ -26,8 +26,8 @@ class AwsAttachmentLibrary {
         $this->s3Setup();
 
         // Access config items directly
-        $this->attachment_table_name = $this->config->attachment_table_name;
-        $this->attachment_key_column = $this->config->attachment_key_column;
+        $this->attachment_table_name = service("settings")->get("GrantsConfig.attachment_table_name");
+        $this->attachment_key_column = service("settings")->get("GrantsConfig.attachment_key_column");
 
         $this->db = \Config\Database::connect();
     }
@@ -37,7 +37,7 @@ class AwsAttachmentLibrary {
 
         // Array for server credentials
         $s3ClientCredentials = [
-            'region' => $this->config->s3_region,
+            'region' => service("settings")->get("GrantsConfig.s3_region"),
             'version' => '2006-03-01',
         ];
 
@@ -59,7 +59,7 @@ class AwsAttachmentLibrary {
    
         $this->s3Client->putObject([
           'Key' => $key, // Where the file will be placed in S3
-          'Bucket' => $this->config->s3_bucket_name,
+          'Bucket' => service("settings")->get("GrantsConfig.s3_bucket_name"),
           'SourceFile' => $SourceFile, // Where the file originate in the local machine
         ]);
    
@@ -76,7 +76,7 @@ class AwsAttachmentLibrary {
     function s3PreassignedUrl($object_key)
     {
       $cmd = $this->s3Client->getCommand('GetObject', [
-        'Bucket' => $this->config->s3_bucket_name,
+        'Bucket' => service("settings")->get("GrantsConfig.s3_bucket_name"),
         'Key' => $object_key,
    
       ]);
@@ -91,7 +91,7 @@ class AwsAttachmentLibrary {
     {   
       $file = $file_parts[0] . '_' . $country_id . '.' . $file_parts[1];
    
-      $bucket = $this->config->s3_bucket_name; //'participants-csv-upload';
+      $bucket = service("settings")->get("GrantsConfig.s3_bucket_name"); //'participants-csv-upload';
    
       $keyname = 'reimbursement_participants/' . $file; // Replace with your desired file path and name in S3
    

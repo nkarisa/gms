@@ -28,16 +28,31 @@
 
             <div class="row">
                 <div class="col-xs-12">
-                    <h5 style="" class="pull-left">
-                        <!-- <i class="entypo-right-circled"></i> -->
-                        <?= $this->renderSection('breadcrumb') ?>
-                    </h5>
+                    <div class = "col-xs-4">
+                        <h5 class="pull-left">
+                            <!-- <i class="entypo-right-circled"></i> -->
+                            <?=create_breadcrumb();?>
+                        </h5>
+                    </div>
 
-                    <div class="btn-group pull-right">
-                        <button class="btn btn-default" title="<?= get_phrase('back'); ?>"
-                            onclick="javascript:go_back();"><i class="fa fa-backward"></i></button>
-                        <button class="btn btn-default" title="<?= get_phrase('forward'); ?>"
-                            onclick="javascript:go_forward();"><i class="fa fa-forward"></i></button>
+                    <div class = "col-xs-6 pull-left">
+                        <?php 
+                            if(service('settings')->get("GrantsConfig.maintenance_mode")){
+                        ?>
+                                <div class = "warning"><?=get_phrase('maintenance_mode_message','The system is under maintenance schedule. You will be contacted by your
+						Country Administrators once the system is back')?></div>
+                        <?php
+                            }
+                        ?>
+                    </div>
+
+                    <div class = "col-xs-2">
+                        <div class="btn-group pull-right">
+                            <button class="btn btn-default" title="<?= get_phrase('back'); ?>"
+                                onclick="javascript:go_back();"><i class="fa fa-backward"></i></button>
+                            <button class="btn btn-default" title="<?= get_phrase('forward'); ?>"
+                                onclick="javascript:go_forward();"><i class="fa fa-forward"></i></button>
+                        </div>
                     </div>
                 </div>
 

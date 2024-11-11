@@ -17,7 +17,7 @@ class ListOutput extends OutputTemplate
   {
     $table = $this->controller;
 
-    $filter_where_array = hash_id($this->id, 'decode') > 0 && !in_array($table, $this->config->tableThatDontRequireHistoryFields) ? [$table . '.fk_status_id' => hash_id($this->id, 'decode')] : [];
+    $filter_where_array = hash_id($this->id, 'decode') > 0 && !in_array($table, json_decode(service("settings")->get("GrantsConfig.tableThatDontRequireHistoryFields"))) ? [$table . '.fk_status_id' => hash_id($this->id, 'decode')] : [];
     $toggle_list_select_columns = $this->libs->toggleListSelectColumns($this->parentTable);
 
     if ($table == 'status') {
@@ -166,7 +166,7 @@ class ListOutput extends OutputTemplate
     $lookup_tables = $this->libs::call($this->controller . '.lookupTables');
     $listSelectColumns = $this->libs->toggleListSelectColumns($this->parentTable);
     $builder = $this->read_db->table($this->controller);
-    $filter_where_array = hash_id($this->id, 'decode') > 0 && !in_array($this->controller, $this->config->tableThatDontRequireHistoryFields) ? [$this->controller . '.fk_status_id' => hash_id($this->id, 'decode')] : [];
+    $filter_where_array = hash_id($this->id, 'decode') > 0 && !in_array($this->controller, json_decode(service("settings")->get("GrantsConfig.tableThatDontRequireHistoryFields"))) ? [$this->controller . '.fk_status_id' => hash_id($this->id, 'decode')] : [];
     $listTableWhere = 'listTableWhere';
 
     if ($this->parentTable != null) {

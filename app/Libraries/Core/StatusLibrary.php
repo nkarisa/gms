@@ -409,7 +409,7 @@ class StatusLibrary extends GrantsLibrary
         if ($maxStatusApprovalSequenceObj->getNumRows() > 0 && $maxStatusApprovalSequenceObj->getRow()->status_approval_sequence > 0) {
             $maxStatusIdsWithSeq = $maxStatusApprovalSequenceObj->getResultArray();
             $maxStatusIds = array_unique(array_column($maxStatusIdsWithSeq, 'status_id'));
-        } elseif (in_array($approveableItem, $this->config->tableThatDontRequireHistoryFields)) {
+        } elseif (in_array($approveableItem, json_decode(service("settings")->get("GrantsConfig.tableThatDontRequireHistoryFields")))) {
             // Nothing to do
         } else {
             $message = "You have no initial status set for the feature " . $approveableItem . ". Please check if all approval workflow related tables are correctly set</br>";

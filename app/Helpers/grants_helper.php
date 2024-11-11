@@ -748,3 +748,27 @@ if (!function_exists('sanitize_characters')) {
 
     }
 }
+
+
+if (!function_exists('create_breadcrumb')) {
+    function create_breadcrumb()
+    {
+
+        $session = service('session');
+        $menuLibrary = new \App\Libraries\Core\MenuLibrary();
+        $menuLibrary->createBreadcrumb();
+
+        $breadcrumb_list = $session->breadcrumb_list;
+		$string = '<nav class = "hidden-print" aria-label="breadcrumb"><ol class="breadcrumb">';
+
+        foreach ($breadcrumb_list as $menuItem) {
+            if ($menuLibrary->checkIfMenuIsActive($menuItem)) continue;
+
+            $string .= '<li class="breadcrumb-item"><a href="' . base_url() . $menuItem . '/list">' . get_phrase($menuItem) . '</a></li>';
+        }
+
+        $string .= '</ol></nav>';
+
+        return $string;
+    }
+}

@@ -303,7 +303,7 @@ class FieldsBase
 
     $selected_option = ($selected_option == "" && $this->default_field_value !== 0) ? $this->default_field_value : $selected_option;
 
-    $select2 = $this->config->use_select2_plugin ? 'select2 select2-offscreen' : 'no-select';
+    $select2 = service("settings")->get("GrantsConfig.use_select2_plugin") ? 'select2 select2-offscreen' : 'no-select';
 
     $required = $this->is_field_required ? "required='required'" : '';
     $mask_asterisk_color = $this->is_field_required ? "red" : "green";
