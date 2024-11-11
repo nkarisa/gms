@@ -1,0 +1,11 @@
+Dear {user},
+
+Your user account has been approved for you to access {system_name}.
+
+Kindly use click on this <a href='{url}'>link</a> to reset your password with the email {email}.
+
+In case of any issue, please feel free to reach any available Administrator.
+
+Regards,
+
+System Administrator.

@@ -1,0 +1,15 @@
+Dear {user},
+
+You have a new account created for you to access {system_name}.
+
+Kindly use click on this <a href='{url}'>link</a> and the credentials below to login to the system.
+
+<b>User email:</b> {email}
+
+The system will force you to change your password when you use it for the first time. Kindly provided
+an alternative password when asked to and do not repeat the same password as the initial one.
+
+
+Regards,
+
+System Administrator.

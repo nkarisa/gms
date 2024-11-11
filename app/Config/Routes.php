@@ -2,7 +2,6 @@
 
 use CodeIgniter\Router\RouteCollection;
 use App\Controllers\Web\Core\Login;
-use Config\GrantsConfig;
 
 /**
  * @var RouteCollection $routes
@@ -13,12 +12,41 @@ use Config\GrantsConfig;
 $routes->get('/', [Login::class, 'index']);
 $routes->group('login', static function ($routes) {
     $routes->get('logout', [Login::class, 'logout']);
-    // $routes->get('/', [Login::class, 'index']);
-    $routes->get('(:segment)', [Login::class, 'index']);
     $routes->post('switch_user', [Login::class, 'switchUser']);
     $routes->get('switch_user/(:segment)', [Login::class, 'switchUser/$1']);
+    $routes->get('forgot_password', [Login::class, 'forgotPassword']);
+    $routes->get('create_account', [Login::class, 'createAccount']);
+    
+    
+    $routes->get('forgot_password', [Login::class, 'forgotPassword']);
+    $routes->post('verifyPasswordComplexity', [Login::class, 'verifyPasswordComplexity']);
+    $routes->get('getOffices/(:segment)/(:segment)', [Login::class, 'getOfficesByAccountSystemId/$1/$2']);
+    $routes->get('getUserDepartmentsRolesAndDesignations/(:segment)/(:segment)/(:segment)', [Login::class, 'getUserDepartmentsRolesAndDesignations/$1/$2/$3']);
+    $routes->get('getUserActivatorIds/(:segment)/(:segment)/(:segment)', [Login::class, 'getUserActivatorIds/$1/$2/$3']);
+    $routes->get('getCountryLanguage/(:segment)', [Login::class, 'getCountryLanguage/$1']);
+    $routes->get('getCountryCurrency/(:segment)', [Login::class, 'getCountryCurrency/$1']);
+    $routes->post('verifyValidEmail', [Login::class, 'verifyValidEmail']);
+    $routes->post('emailExists', [Login::class, 'emailExists']);
+    $routes->post('saveCreateAccountData', [Login::class, 'saveCreateAccountData']);
+    
+
+    $routes->post('ajax_forgot_password', [Login::class, 'ajax_forgot_password']);
     $routes->post('(:segment)', [Login::class, 'ajax_login']);
+    $routes->get('(:segment)', [Login::class, 'index']);
+    
 });
+
+// $routes->group("ajax/login", static function($routes) {
+//     $routes->post('(:segment)',[Login::class, '$1']);
+//     $routes->post('(:segment)/(:any)',[Login::class, '$1/$2']);
+//     $routes->post('(:segment)/(:any)/(:any)',[Login::class, '$1/$2/$3']);
+//     $routes->post('(:segment)/(:any)/(:any)/(:any)',[Login::class, '$1/$2/$3/$4']);
+
+//     $routes->get('(:segment)',[Login::class, '$1']);
+//     $routes->get('(:segment)/(:any)',[Login::class, '$1/$2']);
+//     $routes->get('(:segment)/(:any)/(:any)',[Login::class, '$1/$2/$3']);
+//     $routes->get('(:segment)/(:any)/(:any)/(:any)',[Login::class, '$1/$2/$3/$4']);
+// });
 
 // These routes should be autorouted
 $routes->get('language/switch_language/(:segment)', [App\Controllers\Web\Core\Language::class, "switchLanguage/$1"]);

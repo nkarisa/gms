@@ -208,7 +208,7 @@
 
 					<div>
 						<a href="<?php echo base_url(); ?>login/forgot_password" class="link">
-							<?php echo get_phrase('forgot_your_password'); ?> ?
+							<?php echo get_phrase('forgot_your_password','Forgot Your Password'); ?> ?
 						</a>
 					</div>
 				</div>

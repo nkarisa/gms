@@ -169,4 +169,46 @@ class OfficeLibrary extends GrantsLibrary
   }
 
 
+  /**
+   * get_offices(): return an array of offices like fcp/cluster/region
+   * @author Onduso 
+   * @access public 
+   * @return array
+   * @param int $account_system_id, int $context_definition_id
+   */
+  public function getOfficesByAccountSystemId(int $account_system_id, int $context_definition_id): array
+  {
+
+    $builder = $this->read_db->table('office');
+
+    $builder->select(['office_id', 'office_name']);
+    $builder->where(['office_is_active' => 1, 'fk_account_system_id' => $account_system_id, 'fk_context_definition_id' => $context_definition_id]);
+    $offices = $builder->get()->getResultArray();
+
+    $office_ids = array_column($offices, 'office_id');
+    $office_names = array_column($offices, 'office_name');
+
+    $office_ids_and_names = array_combine($office_ids, $office_names);
+
+    return $office_ids_and_names;
+  }
+
+   /**
+     * get_office_name(): get office name of the user; 
+     * @author Onduso 
+     * @access private 
+     * @return string
+     * @dated: 18/08/2023
+     * @param int $user_office
+     */
+    public function getOfficeName(int $officeId): string
+    {
+        $builder = $this->read_db->table('office');
+        $builder->select(['office_name']);
+        $builder->where(['office_id' => $officeId]);
+        $user_office_name = $builder->get()->getRow()->office_name;
+
+        return $user_office_name;
+    }
+
 }

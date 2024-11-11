@@ -1,0 +1,9 @@
+Dear User,
+
+You have a {item} that is awaiting your approval. 
+
+Kindly click <a href='{url}'>here</a> view the {item} for approval.
+
+Regards,
+
+System Notifications

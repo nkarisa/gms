@@ -1,0 +1,7 @@
+Dear {user},
+
+Your {item} has been updated successful. To view it, kindly click <a href='{url}'>here</a> to view the record.
+
+Regards,
+
+System Notifications

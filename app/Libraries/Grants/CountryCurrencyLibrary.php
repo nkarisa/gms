@@ -16,13 +16,13 @@ class CountryCurrencyLibrary extends GrantsLibrary
 
         $this->grantsModel = new CountryCurrencyModel();
 
-        $this->table = 'grants';
+        $this->table = 'country_currency';
     }
 
     public function getCountryCurrency()
     {
 
-        $builder = $this->read_db->table('country_currency');
+        $builder = $this->read_db->table($this->table);
         $builder->select(array('country_currency_id', 'country_currency_name'));
 
         if (!$this->session->system_admin) {
@@ -36,5 +36,30 @@ class CountryCurrencyLibrary extends GrantsLibrary
 
         return $curreny_ids_and_names;
     }
+
+
+    /**
+   * get_country_currency(): returns currency id
+   * @author Onduso 
+   * @access public 
+   * @return int
+   * @param int $account_system_id
+   */
+  public function getCountryCurrencyByAccountSystemId(int $account_system_id): array
+  {
+    $builder = $this->read_db->table($this->table);
+    $builder->select(['country_currency_id']);
+    $builder->where(['fk_account_system_id' => $account_system_id]);
+    $country_currency = $builder->get();
+
+    $country_currency_id = 0;
+
+    if($country_currency->getNumRows() > 0){
+        $country_currency_id = $country_currency->getRow()->country_currency_id;
+    }
+
+    return compact('country_currency_id'); 
+
+  }
 
 }

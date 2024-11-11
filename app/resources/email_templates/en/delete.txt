@@ -1,0 +1,7 @@
+Dear {user},
+
+Your {item} has been deleted successful. 
+
+Regards,
+
+System Notifications

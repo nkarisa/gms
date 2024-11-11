@@ -2,35 +2,23 @@
 
 namespace App\Libraries\Core;
 
-use App\Libraries\System\AwsAttachmentLibrary;
+// use App\Libraries\System\AwsAttachmentLibrary;
 use App\Libraries\System\GrantsLibrary;
 use App\Libraries\Core\UniqueIdentifierLibrary;
 use App\Libraries\Core\StatusLibrary;
 use App\Models\Core\UserModel;
+use CodeIgniter\Database\ResultInterface;
 
 class UserLibrary extends GrantsLibrary
 {
-
     protected $table;
-
     protected $userModel;
     function __construct()
     {
         parent::__construct();
-
         $this->userModel = new UserModel();
-
         $this->table = 'user';
     }
-
-    // public function multiSelectField(): string
-    // {
-    //     return '';
-    // }
-
-    // public function actionBeforeIinsert(array $postArray): array{
-    //     return $postArray;
-    // }
 
     /**
      * This function retrieves the primary role of a user from the database.
@@ -38,7 +26,7 @@ class UserLibrary extends GrantsLibrary
      * @param int $userId The unique identifier of the user.
      * @return array An associative array containing the role_id and role_name of the user's primary role.
      *
-     * @throws Exception If there is an error in executing the database query.
+     * @throws \Exception If there is an error in executing the database query.
      */
     public function getUserPrimaryRole(int $userId): array|null
     {
@@ -63,14 +51,12 @@ class UserLibrary extends GrantsLibrary
      * @param int $userId The unique identifier of the user.
      * @return array An associative array containing the role_id and role_name of all roles associated with the user.
      *
-     * @throws Exception If there is an error in executing the database query.
+     * @throws \Exception If there is an error in executing the database query.
      */
     public function getUserRoles($userId)
     {
-
         // Retrieve the primary role of the user
         $userPrimaryRole = $this->getUserPrimaryRole($userId);
-
         // Retrieve all roles associated with the user, including expired ones
         $allUserRoles = $this->read_db->table('user')
             ->join('role_user', 'user.user_id=role_user.fk_user_id')
@@ -186,18 +172,14 @@ class UserLibrary extends GrantsLibrary
     {
         // Get the permission label depth
         $permissionLabelDepth = $this->permissionLabelDepth($permissionLabel);
-
         // Initialize an empty array to store the updated permissions
         $updatedPermissions = [];
-
         // Capitalize the active controller
         $activeController = ucfirst($activeController);
-
         // Iterate over the permissions array
         foreach ($permissions as $controller => $permission) {
             // Capitalize the controller
             $controller = ucfirst($controller);
-
             // Check if the current controller is the active controller and if the permission type exists
             if (
                 $controller === $activeController && array_key_exists($permissionType, $permissions[$controller])
@@ -1550,7 +1532,6 @@ class UserLibrary extends GrantsLibrary
         return ['results' => $users];
     }
 
-
     function updateApproversList($user_id, $table_name, $item_id, $current_status, $next_status)
     {
         $approvers = [];
@@ -1633,6 +1614,176 @@ class UserLibrary extends GrantsLibrary
         $approvers = json_encode($approvers);
 
         return $approvers;
+    }
+
+    /**
+     * email_exists(): check if email exists
+     * @author Onduso 
+     * @access public 
+     * @return int
+     */
+    function emailExists($email): int
+    {
+
+        $builder = $this->read_db->table($this->table);
+
+        $builder->select(['user_email']);
+        $builder->where(['user_email' => trim($email)]);
+        $email_exists = $builder->countAllResults();
+
+        $is_email_present = 0;
+
+        if ($email_exists > 0) {
+            $is_email_present = 1;
+        }
+
+        return $is_email_present;
+    }
+
+    /**
+     * get_user_departments_roles_and_designations(): returns departments based on selected office context e.g. fcp/cluster
+     * @author Onduso 
+     * @access public 
+     * @return array
+     * @Dated: 10/8/2023
+     * @param int $context_definition_id
+     */
+    public function getUserDepartmentsRolesAndDesignations(int $user_type, string $table_name, int $countryID): array
+    {
+
+        $column_id = $table_name . '_id';
+        $column_name = $table_name . '_name';
+
+        $builder = $this->read_db->table($table_name);
+        $builder->select([$column_id, $column_name]);
+        //Other national offices represented by user_type 5
+        if ($user_type == 5) {
+            $builder->where(['fk_context_definition_id' => 4]);
+        } else {
+            $builder->where(['fk_context_definition_id' => $user_type]);
+        }
+
+        if ($countryID != 0) {
+            $builder->where(['fk_account_system_id' => $countryID]);
+        }
+
+        $departments_or_roles_or_designations = $builder->get()->getResultArray();
+
+        //Modify if user Type is Country Admins
+        $modify_user_for_admins = [];
+        if ($user_type == 4) {
+            $modify_user_for_admins[] = $departments_or_roles_or_designations[0];
+            $departments_or_roles_or_designations = $modify_user_for_admins;
+        }
+
+        //Remove country administrators from dropdown for other national staffs
+        if ($user_type == 5) {
+            array_shift($departments_or_roles_or_designations);
+        }
+
+        $ids = array_column($departments_or_roles_or_designations, $column_id);
+        $names = array_column($departments_or_roles_or_designations, $column_name);
+
+        $ids_and_names = array_combine($ids, $names);
+
+        return $ids_and_names;
+    }
+
+    /**
+     * get_user_activator_ids(): returns activator_user_ids
+     * @author Onduso 
+     * @access public 
+     * @Dated: 16/8/2023
+     * @return array
+     * @param int int $user_type, int $office_id
+     */
+    public function getUserActivatorIds(int $user_type, int $office_id, int $country_id): array
+    {
+        if ($user_type == 1) {
+            //Pfs user_ids to activate fcps staffs
+            $activator_user_ids = $this->pullActivatorUsersForFcpUsers($office_id);
+        } elseif ($user_type == 2 || $user_type == 3 || $user_type == 5) {
+            //Country Admnis to activate national office staff
+            $activator_user_ids = $this->pullActivatorUsersForNationalStaffs($country_id);
+        } elseif ($user_type == 4) {
+            $activator_user_ids = $this->pullActivatorUsersForCountryAdministrators();
+        }
+        return $activator_user_ids;
+    }
+
+    /**
+     * pull_activator_users_for_fcp_users(): returns activator_user_ids
+     * @author Onduso 
+     * @access private 
+     * @Dated: 16/8/2023
+     * @return array
+     * @param int $office_id
+     */
+    private function pullActivatorUsersForFcpUsers(int $office_id): array
+    {
+        $builder = $this->read_db->table('context_center');
+        $builder->select(['fk_context_cluster_id']);
+        $builder->where(['fk_office_id' => $office_id]);
+        $context_cluster_id = $builder->get()->getRow()->fk_context_cluster_id;
+
+        //get the activator fk_user_id
+        $builder = $this->read_db->table('context_cluster_user');
+        $builder->select('fk_user_id');
+        $builder->where(['fk_context_cluster_id' => $context_cluster_id]);
+        $user_activator_id = $builder->get()->getResultArray();
+
+        return $user_activator_id;
+    }
+
+    /**
+     * pull_activator_users_for_national_staffs(): returns activator_user_ids
+     * @author Onduso 
+     * @access private 
+     * @Dated: 16/8/2023
+     * @return array
+     * @param int country_id
+     */
+    private function pullActivatorUsersForNationalStaffs(int $country_id): array
+    {
+        $builder = $this->read_db->table('user');
+        $builder->select(['user_id']);
+        $builder->where(['fk_account_system_id' => $country_id, 'user_is_context_manager' => 1, 'fk_context_definition_id' => 4]);
+        $user_ids = $builder->get()->getResultArray();
+
+        return $user_ids;
+    }
+
+
+    /**
+     * pull_activator_users_for_country_administrators(): returns activator_user_ids
+     * @author Onduso 
+     * @access private 
+     * @Dated: 17/8/2023
+     * @return array
+     */
+    private function pullActivatorUsersForCountryAdministrators(): array
+    {
+        $builder = $this->read_db->table('user');
+        $builder->select(['user_id']);
+        $builder->where(['fk_context_definition_id' => 6]);
+        $user_ids = $builder->get()->getResultArray();
+
+        return $user_ids;
+    }
+
+    function getUserByEmail($email): ResultInterface{
+        $builder = $this->read_db->table('user');
+        $builder->where(array('user_email' => $email));
+        $query = $builder->get();
+
+        return $query;
+    }
+
+    function updateUserPasswordByEmail($email, $new_password){
+        $builder = $this->write_db->table('user');
+        $builder->where('user_email', $email);
+        $builder->update(array('user_password' => $new_password, 'user_first_time_login' => 0));
+            
     }
 
 }

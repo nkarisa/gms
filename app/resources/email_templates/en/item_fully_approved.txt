@@ -1,0 +1,9 @@
+Dear User,
+
+You have a {item} that that has fully been approved. 
+
+Kindly click <a href='{url}'>here</a> view the fully approved {item}.
+
+Regards,
+
+System Notifications

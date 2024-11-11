@@ -1,0 +1,9 @@
+Dear User,
+
+You have a {item} that that has been declined. 
+
+Kindly click <a href='{url}'>here</a> view the declined {item}.
+
+Regards,
+
+System Notifications

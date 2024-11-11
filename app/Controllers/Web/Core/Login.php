@@ -7,17 +7,22 @@ use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use CodeIgniter\HTTP\RedirectResponse;
-use App\Models\Core\SettingModel;
-use App\Models\Core\UserModel;
 use App\Libraries\System\AwsParameterStoreLibrary as AwsParameterStore;
 
 
 class Login extends WebController
 {
+    private string $system_name;
+    private string $system_title;
+
+    use \App\Traits\Core\UserSelfCreation;
 
     function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
     {
         parent::initController($request, $response, $logger);
+
+        $this->system_name = $this->settings->get('GrantsConfig.systemName');
+        $this->system_title = $this->settings->get('GrantsConfig.systemName');
     }
 
     /**
@@ -28,26 +33,26 @@ class Login extends WebController
      */
     public function index(): string|RedirectResponse
     {
-        
+
         // Prepare data for the login view
-        $data['system_name'] = $this->settings->get('GrantsConfig.systemName');
-        $data['system_title'] = $this->settings->get('GrantsConfig.systemName');
+        $data['system_name'] = $this->system_name;
+        $data['system_title'] = $this->system_title;
         $data['maintenance_mode'] = $this->settings->get('GrantsConfig.maintenance_mode');
 
         // Check if user is already authenticated
         if ($this->session->has('user_is_authenticated')) {
-            
+
             if (parse_url(base_url())['host'] == 'localhost' && $this->session->system_admin) {
                 $grantsLibrary = new \App\Libraries\System\GrantsLibrary();
                 $grantsLibrary->create_missing_system_files_from_json_setup();
             }
 
-            if($this->session->system_admin){
+            if ($this->session->system_admin) {
                 $grantsLibrary->loadConfigurations();
             }
 
             // Redirect to dashboard if user is authenticated
-            if($this->settings->get("GrantsConfig.maintenance_mode") && !$this->session->system_admin){
+            if ($this->settings->get("GrantsConfig.maintenance_mode") && !$this->session->system_admin) {
                 return view('general/login', $data);
             }
 
@@ -124,8 +129,8 @@ class Login extends WebController
     private function create_user_session(array $user, bool $is_user_switch): string
     {
         // Load the User Libary
-        $userLibrary = $this->libs->loadLibrary('user'); 
-        $languageLibrary = $this->libs->loadLibrary('language'); 
+        $userLibrary = $this->libs->loadLibrary('user');
+        $languageLibrary = $this->libs->loadLibrary('language');
         $user_id = $user['user_id'];
         $user_language_id = $user['language_id'];
 
@@ -200,13 +205,6 @@ class Login extends WebController
         return $hashed;
     }
 
-    // private function update_login_history($user_id, $user_access_count){
-    //     $update_data['user_last_login_time'] = date('Y-m-d H:i:s');
-    //     $update_data['user_access_count'] = $user_access_count + 1;
-    //     $this->write_db->where(array('user_id' => $user_id));
-    //     $this->write_db->update('user', $update_data);
-    // }
-
     public function switchUser($userId = '')
     {
         // Decode or retrieve user ID from POST data
@@ -229,32 +227,32 @@ class Login extends WebController
     }
 
 
-    function checkGlobalLanguagePackState()
-    {
-        $languageLibrary = new \App\Libraries\Core\LanguageLibrary();
+    // function checkGlobalLanguagePackState()
+    // {
+    //     $languageLibrary = new \App\Libraries\Core\LanguageLibrary();
 
-        $defaultLocale = service('settings')->get('App.defaultLocale');
-        
-        // Get all languages
-        $builder  = $this->read_db->table('language');
-        $builder->select('language_code, language_is_default');
-        $all_languages = $builder->get()->getResultArray();
+    //     $defaultLocale = service('settings')->get('App.defaultLocale');
 
-        $defaultPath = APPPATH . 'language' . DIRECTORY_SEPARATOR . $defaultLocale . DIRECTORY_SEPARATOR . 'Global' . DIRECTORY_SEPARATOR;
+    //     // Get all languages
+    //     $builder = $this->read_db->table('language');
+    //     $builder->select('language_code, language_is_default');
+    //     $all_languages = $builder->get()->getResultArray();
 
-        if (!file_exists($defaultPath)) {
-            if (mkdir($defaultPath)) {
-                foreach ($all_languages as $language) {
-                    $additonalLanguagePath = APPPATH . 'language' . DIRECTORY_SEPARATOR . $language['language_code'] . DIRECTORY_SEPARATOR . 'Global' . DIRECTORY_SEPARATOR;
-                    if(!file_exists($additonalLanguagePath)){
-                        if (mkdir($additonalLanguagePath)) {
-                            $languageLibrary->createLanguageFiles($language['language_code'], 'global');
-                        }
-                    }
-                }
-            }
-        }
-    }
+    //     $defaultPath = APPPATH . 'language' . DIRECTORY_SEPARATOR . $defaultLocale . DIRECTORY_SEPARATOR . 'Global' . DIRECTORY_SEPARATOR;
+
+    //     if (!file_exists($defaultPath)) {
+    //         if (mkdir($defaultPath)) {
+    //             foreach ($all_languages as $language) {
+    //                 $additonalLanguagePath = APPPATH . 'language' . DIRECTORY_SEPARATOR . $language['language_code'] . DIRECTORY_SEPARATOR . 'Global' . DIRECTORY_SEPARATOR;
+    //                 if (!file_exists($additonalLanguagePath)) {
+    //                     if (mkdir($additonalLanguagePath)) {
+    //                         $languageLibrary->createLanguageFiles($language['language_code'], 'global');
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 
     /**
      * This method handles the user logout process.
@@ -269,4 +267,54 @@ class Login extends WebController
         // Redirect the user to the login page
         return redirect()->to('login/index');
     }
+
+    function forgotPassword()
+    {
+        $data['system_name'] = $this->system_name;
+        $data['system_title'] = $this->system_title;
+
+        return view('user/forgot_password', $data);
+    }
+
+
+    function ajax_forgot_password()
+    {
+        $resp                   = array();
+        $resp['status']         = 'false';
+        $email                  = $_POST["email"];
+        //$reset_account_type     = '';
+        //resetting user password here
+        $new_password           =   substr(md5(rand(100000, 200000)), 0, 7);
+
+        // Checking credential for user
+
+        $userLibrary = new \App\Libraries\Core\UserLibrary();
+        $queryObj = $userLibrary->getUserByEmail($email);
+
+        $user = [];
+
+        if ($queryObj->getNumRows() > 0) {
+            $user = $queryObj->getRow();
+            $userLibrary->updateUserPasswordByEmail($email, $this->password_salt($new_password));
+            $resp['status'] = 'true';
+
+            $emailTemplateLibrary = new \App\Libraries\Core\EmailTemplateLibrary();
+
+            $tags['user'] =  $user->user_firstname . ' ' . $user->user_lastname;
+            $tags['email'] = $email;
+            $tags['password'] = $new_password;
+
+            $email_subject = get_phrase('password_reset_notification');
+            $email_body = file_get_contents(APPPATH . 'resources/email_templates/en/password_reset.txt'); // Template language should be from user session
+            $mail_recipients['send_to'] = [$email]; // must be an array
+
+            $emailTemplateLibrary->logEmail($tags, $email_subject, $email_body, $mail_recipients);
+            
+            $resp['submitted_data'] = $_POST;
+        }
+
+        return  $this->response->setJSON($resp);
+    }
+
+
 }
