@@ -29,9 +29,9 @@ if (!function_exists('add_record_button')) {
         $add_view = $is_multi_row ? "multiRowAdd" : $add_view;
         $link = "";
         if ($id != null) {
-            $link = '<a href="' . base_url() . strtolower($table_controller) . '/' . $add_view . '/' . $id . '/' . $parent_controller . '" class="btn btn-default">' . get_phrase('add_' . strtolower($table_controller)) . '</a>';
+            $link = '<a href="' . base_url() . strtolower($table_controller) . '/' . $add_view . '/' . $id . '/' . $parent_controller . '" class="btn btn-default hidden-print ">' . get_phrase('add_' . strtolower($table_controller)) . '</a>';
         } else {
-            $link = '<a style="margin-bottom:-70px;z-index:100;position:relative;" href="' . base_url() . $table_controller . '/' . $add_view . '" class="btn btn-default">' . get_phrase('add_' . strtolower($table_controller)) . '</a>';
+            $link = '<a style="margin-bottom:-70px;z-index:100;position:relative;" href="' . base_url() . $table_controller . '/' . $add_view . '" class="btn btn-default hidden-print ">' . get_phrase('add_' . strtolower($table_controller)) . '</a>';
         }
 
         return $link;
@@ -770,5 +770,17 @@ if (!function_exists('create_breadcrumb')) {
         $string .= '</ol></nav>';
 
         return $string;
+    }
+}
+
+if(!function_exists('decode_setting')){
+    function decode_setting ($confiClass, $ConfigKey){
+        $dbValue = service('settings')->get("$confiClass.$ConfigKey");
+
+        if(!is_array($dbValue)){
+            return json_decode($dbValue);
+        }else{
+            return $dbValue;
+        }
     }
 }

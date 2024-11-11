@@ -18,7 +18,7 @@ class SingleFormAddOutput extends OutputTemplate{
    * 
    * @return array
    */
-  function addFormFields(array $visible_columns_array): array
+  private function addFormFields(array $visible_columns_array): array
   {
 
     $fields = [];
@@ -53,7 +53,7 @@ class SingleFormAddOutput extends OutputTemplate{
     return $fields;
   }
 
-    function getOutput($args): array|\CodeIgniter\HTTP\Response {
+  public function getOutput($args): array|\CodeIgniter\HTTP\Response {
 
       $table = $this->controller;
       // Insert appove item, approval  flow and status record if either in not existing

@@ -409,7 +409,7 @@ class StatusLibrary extends GrantsLibrary
         if ($maxStatusApprovalSequenceObj->getNumRows() > 0 && $maxStatusApprovalSequenceObj->getRow()->status_approval_sequence > 0) {
             $maxStatusIdsWithSeq = $maxStatusApprovalSequenceObj->getResultArray();
             $maxStatusIds = array_unique(array_column($maxStatusIdsWithSeq, 'status_id'));
-        } elseif (in_array($approveableItem, json_decode(service("settings")->get("GrantsConfig.tableThatDontRequireHistoryFields")))) {
+        } elseif (in_array($approveableItem, decode_setting("GrantsConfig","tableThatDontRequireHistoryFields"))) {
             // Nothing to do
         } else {
             $message = "You have no initial status set for the feature " . $approveableItem . ". Please check if all approval workflow related tables are correctly set</br>";
@@ -952,5 +952,23 @@ class StatusLibrary extends GrantsLibrary
 
   function detailTables(): array {
     return ['status_role'];
+  }
+
+  function createChangeHistoryOnStatusChange($new_data, $old_data, $table)
+  {
+    // Insert Update History
+    $builder = $this->read_db->table('approve_item');
+    $builder->where(array('approve_item_name' => strtolower($table)));
+    $update_data['fk_approve_item_id'] = $builder->get()->getRow()->approve_item_id;
+
+    $update_data['fk_user_id'] = $this->session->user_id;
+    $update_data['history_action'] = 1; // 1 = Update, 2 = Delete
+    $update_data['history_current_body'] = json_encode($old_data);
+    $update_data['history_updated_body'] = json_encode($new_data);
+    $update_data['history_created_date'] = date('Y-m-d');
+    $update_data['history_created_by'] = $this->session->user_id;
+    $update_data['history_last_modified_by'] = $this->session->user_id;
+
+    $this->write_db->table('history')->insert($update_data);
   }
 }

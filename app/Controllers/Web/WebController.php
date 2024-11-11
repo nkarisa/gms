@@ -57,9 +57,19 @@ class WebController extends BaseController
   protected $subAction = null;
   protected $library;
   protected $settings;
+  
   /**
-   * @return void
-   */
+ * Initializes the controller with necessary configurations and dependencies.
+ *
+ * This method sets up the controller by loading required services, helpers, 
+ * databases, and configurations. It also determines the current controller, 
+ * action, and ID based on the URL segments.
+ *
+ * @param RequestInterface $request The current HTTP request
+ * @param ResponseInterface $response The HTTP response
+ * @param LoggerInterface $logger The logger instance
+ * @return void
+ */
   public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
   {
     // Do Not Edit This Line
@@ -75,9 +85,6 @@ class WebController extends BaseController
     // Load database
     $this->read_db = \Config\Database::connect('read');
     $this->write_db = \Config\Database::connect('write');
-
-    // Set a maintainance mode session 
-    // $this->maintainanceModeCheck();
 
     // Load grants config
     $this->config = config(GrantsConfig::class);
@@ -107,6 +114,16 @@ class WebController extends BaseController
 
   }
 
+
+  /**
+ * Sets up session-based constructor variables and initializes user locale.
+ *
+ * This method handles the setup of session-based variables, particularly the 'masterTable',
+ * based on the current action and URI segments. It also initializes the max status ID and
+ * sets the user locale.
+ *
+ * @return void
+ */
   private function sessionBasedConstructorSet()
   {
 
@@ -137,23 +154,19 @@ class WebController extends BaseController
     $this->request->setLocale($locale);
   }
 
+/**
+ * Retrieves the data for the specified action and id.
+ *
+ * This method is responsible for fetching the data required for the specified action and id.
+ * It checks if the action is "list" and if the request is an AJAX request, it calls the appropriate method to fetch the data for datatable serverside processing.
+ * If the action is not "list", it calls the appropriate method to fetch the data for the specified id.
+ *
+ * @param string $id The id of the record to fetch data for.
+ * @param string $parentTable The parent table of the record, if applicable.
+ * @return array The data fetched for the specified action and id.
+ */
 
-  /**
-   * This function checks the maintainance mode status from the database and sets the session variable.
-   *
-   * @return void
-   */
-  // private function maintainanceModeCheck()
-  // {
-  //   // If the maintenance_mode is enabled in the database, set the session variable to 1
-  //   if (service("settings")->get('GrantsConfig.maintenance_mode') == 1) {
-  //     $this->session->set('maintenance_mode', 1);
-  //   }else{
-  //     $this->session->set('maintenance_mode', 0);
-  //   }
-  // }
-
-  public function result($id = '', $parentTable = null)
+  protected function result($id = '', $parentTable = null)
   {
 
     $output = [];
@@ -171,11 +184,18 @@ class WebController extends BaseController
       }
     }
 
-
     return $output;
   }
 
-  public function page_name(): string
+/**
+ * Retrieves the page name based on the current state of the controller.
+ *
+ * This method determines the page name based on the current state of the controller. 
+ * It returns error pages for users who do not have permission to view the page.
+ *
+ * @return string The action name or "view_ajax" if the action is "view" and the request is an AJAX request.
+ */
+  private function page_name(): string
   {
     if ((hash_id($this->id, 'decode') == null && $this->action == 'view') || !$this->has_permission) {
       return 'error';
@@ -184,17 +204,24 @@ class WebController extends BaseController
     }
   }
 
-  function page_title(): string
+  /**
+   * This method retrieves the page title based on the current state of the controller.
+   * @return string
+   */
+  private function page_title(): string
   {
     $title = $this->action == 'list' ? $this->action . '_' . plural($this->controller) : $this->action . '_' . plural($this->controller);
     return get_phrase($title);
   }
 
-  public function views_dir(): string
+  /**
+   * The method retrieves the views directory based on the current state of the controller.
+   * @return string
+   */
+  private function views_dir(): string
   {
     $view_path = strtolower($this->controller);
     $page_name = $this->page_name();
-
     if (file_exists(VIEWPATH . $view_path . '/' . $this->session->user_account_system_code . '/' . $page_name . '.php') && $this->has_permission) {
       $view_path .= '/' . $this->session->user_account_system;
     } elseif (!file_exists(VIEWPATH . $view_path . '/' . $page_name . '.php') || !$this->has_permission) {
@@ -204,7 +231,11 @@ class WebController extends BaseController
     return $view_path;
   }
 
-  public function user_info(): array
+  /**
+   * Prepare user infomation of the current user logged and aunthenticating the user.
+   * @return array
+   */
+  private function user_info(): array
   {
     $primary_user_data_id = 0;
     $session = session();
@@ -231,14 +262,24 @@ class WebController extends BaseController
     return $user;
   }
 
-  public function navigation(): string
+  /**
+   * Retrieves the navigation items for the current user.
+   * @return string
+   */
+  private function navigation(): string
   {
     $menuLibrary = new \App\Libraries\Core\MenuLibrary();
     $navItems = $menuLibrary->navigationItems();
     return $navItems;
   }
 
-  function crud_views(string $id = null, $parentTable = null): string|\CodeIgniter\HTTP\Response
+  /**
+   * Builds what to render back to the views
+   * @param string $id
+   * @param mixed $parentTable
+   * @return string|\CodeIgniter\HTTP\Response
+   */
+  private function crud_views(string $id = null, $parentTable = null): string|\CodeIgniter\HTTP\Response
   {
     $result = $this->result($id);
 
@@ -246,7 +287,7 @@ class WebController extends BaseController
     $page_data['page_name'] = $this->page_name();
     $page_data['page_title'] = $this->page_title();
     $page_data['views_dir'] = $this->views_dir();
-    $page_data['action'] = $this->action;
+    $page_data['action'] = $this->page_name();
     $page_data['result'] = $result;
     $page_data['text_align'] = 'left-to-right';  // Set in the settings config
     $page_data['skin_colour'] = 'green'; // Set in the settings config
@@ -274,54 +315,96 @@ class WebController extends BaseController
     return view('general/index', $page_data);
   }
 
+  /**
+   * Get list of records from the database and load its view
+   * @return string|\CodeIgniter\HTTP\Response
+   */
   public function list()
   {
     $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'read');
     return $this->crud_views();
   }
 
+  /**
+   * Get a single record from the database and load its view
+   * @param mixed $id
+   * @return string|\CodeIgniter\HTTP\Response
+   */
   public function view($id)
   {
     $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'read');
     return $this->crud_views();
   }
 
+  /**
+   * Get a view for adding a new record
+   * @param mixed $parentId
+   * @param mixed $parentTable
+   * @return string|\CodeIgniter\HTTP\Response
+   */
   public function singleFormAdd($parentId = null, $parentTable = null)
   {
     $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'create');
     return $this->crud_views($parentId, $parentTable);
   }
 
+  /**
+   * Get a view for adding multiple records
+   * @return string|\CodeIgniter\HTTP\Response
+   */
   public function multiFormAdd()
   {
     $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'create');
     return $this->crud_views();
   }
 
+  /**
+   * Recieve a record saving request
+   * @param mixed $parentId
+   * @param mixed $parentTable
+   * @return mixed
+   */
   public function create($parentId = null, $parentTable = null)
   {
     $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'create');
     return $this->libs::call("$this->controller.add", [$parentId, $parentTable]);
   }
 
+  /**
+   * Get a view for editing a record
+   * @return string|\CodeIgniter\HTTP\Response
+   */
   public function edit()
   {
     $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'update');
     return $this->crud_views();
   }
 
+  /**
+   * Get a record editing request
+   * @param mixed $id
+   * @return mixed
+   */
   public function update($id)
   {
     $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'update');
     return $this->libs::call("$this->controller.edit", [$this->id]);
   }
 
+  /**
+   * Get a record deleting request
+   * @return mixed
+   */
   public function delete()
   {
     $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'delete');
     return $this->libs::call('system.grants.delete', [$this->id]);
   }
 
+  /**
+   * Load datatable serverside listing rew records and the related datatable serverside processing responses
+   * @return \CodeIgniter\HTTP\ResponseInterface
+   */
   public function showList(): ResponseInterface
   {
 
@@ -399,14 +482,19 @@ class WebController extends BaseController
     return $this->response->setJSON($response);
   }
 
+  /**
+   * Receives ajax requests from the client
+   * @param mixed $controller
+   * @param mixed $method
+   * @param array $args
+   * @return \CodeIgniter\HTTP\ResponseInterface
+   */
   public function ajax(?string $controller = "", ?string $method = "", ...$args): ResponseInterface
   {
     // Post keys should be: controller, method and data
     // All ajax request will be received here and passed to library of a controller
     // All ajax responses MUST have a status key with either success or failed
     // When using GET ajax, from the 3rd argument, the paramters MUST be paired with odd positioned parameters as keys and even positioned parameters as values
-
-    log_message('error', json_encode($this->request->getPost()));
 
     if ($controller && $method) {
 
@@ -449,50 +537,22 @@ class WebController extends BaseController
     }
   }
 
-  function createTableApproversColumns(string $tableName)
-{
-    $db_forge = \Config\Database::forge('write'); // Load the default database group
-
-    if (!$this->write_db->fieldExists($tableName . '_approvers', $tableName)) {
-        // Define the column details
-        $fields = [
-            $tableName . '_approvers' => [
-                'type' => 'JSON',
-                'null' => true,
-            ],
-        ];
-
-        // Add the column to the specified table
-        $db_forge->addColumn($tableName, $fields);
-    }
-}
-
-function createChangeHistory($new_data, $old_data, $table)
-  {
-    // Insert Update History
-    $builder = $this->read_db->table('approve_item');
-    $builder->where(array('approve_item_name' => strtolower($table)));
-    $update_data['fk_approve_item_id'] = $builder->get()->getRow()->approve_item_id;
-
-    $update_data['fk_user_id'] = $this->session->user_id;
-    $update_data['history_action'] = 1; // 1 = Update, 2 = Delete
-    $update_data['history_current_body'] = json_encode($old_data);
-    $update_data['history_updated_body'] = json_encode($new_data);
-    $update_data['history_created_date'] = date('Y-m-d');
-    $update_data['history_created_by'] = $this->session->user_id;
-    $update_data['history_last_modified_by'] = $this->session->user_id;
-
-    $this->write_db->table('history')->insert($update_data);
-  }
+  /**
+   * Receives an approval action from a user and changes the status of an item and update approvers list
+   * @param mixed $item
+   * @return void
+   */
   public function updateItemStatus($item)
   {
     $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+    $userLibrary = new \App\Libraries\Core\UserLibrary();
+
     // Check if <table_name>_approvers column exists if not create it
-    $this->createTableApproversColumns($item);
+    $this->libs->createTableApproversColumns($item);
     $buttons = '<div class="badge badge-danger">' . get_phrase('approval_process_failed') . '</div>';
     $post = $this->request->getPost();
 
-    $this->createChangeHistory([$item . '_id' => $post['item_id'], 'fk_status_id' => $post['next_status']], [$item . '_id' => $post['item_id'], 'fk_status_id' => $post['current_status']], $item);
+    $statusLibrary->createChangeHistoryOnStatusChange([$item . '_id' => $post['item_id'], 'fk_status_id' => $post['next_status']], [$item . '_id' => $post['item_id'], 'fk_status_id' => $post['current_status']], $item);
 
     if ($post['next_status'] > 0) {
       $account_system_id = $statusLibrary->getStatusAccountSystem($post['next_status']);
@@ -508,11 +568,11 @@ function createChangeHistory($new_data, $old_data, $table)
       }
 
       $buttons = approval_action_button($item, $action_button_data['item_status'], $post['item_id'], $post['next_status'], $action_button_data['item_initial_item_status_id'], $action_button_data['item_max_approval_status_ids']);
-      
+
       $data['fk_status_id'] = $post['next_status'];
       $data[$item.'_last_modified_by'] = $this->session->user_id;
       $data[$item.'_last_modified_date'] = date('Y-m-d h:i:s');
-      $data[$item.'_approvers'] = $this->updateApproversList($this->session->user_id, $item, $post['item_id'], $post['current_status'], $post['next_status']);
+      $data[$item.'_approvers'] = $userLibrary->updateApproversList($this->session->user_id, $item, $post['item_id'], $post['current_status'], $post['next_status']);
       
       $builder = $this->write_db->table($item);
       $builder->where(array($item . '_id' => $post['item_id']));
@@ -522,85 +582,4 @@ function createChangeHistory($new_data, $old_data, $table)
     echo $buttons;
   }
 
-
-  function updateApproversList($user_id, $table_name, $item_id, $current_status, $next_status){
-    $builder = $this->read_db->table('user');
-    $builder->select(array('CONCAT(user_firstname, " ", user_lastname) as fullname', 'role_id', 'role_name'));
-    $builder->join('role','role.role_id=user.fk_role_id');
-    $builder->where(array('user_id' => $user_id));
-    $user = $builder->get()->getRow();
-
-    $user_fullname = $user->fullname;
-    $user_role_id = $user->role_id;
-    $user_role_name = $user->role_name;
-
-    $builder = $this->read_db->table('status');
-    $builder->select(array('status_id','status_name','status_approval_sequence','status_approval_direction','fk_approval_flow_id as approval_flow_id'));
-    $builder->whereIn('status_id', [$current_status, $next_status]);
-    $status_obj = $builder->get()->getResultArray();
-
-    $status = [];
-    $approval_flow_id = 0;
-    foreach($status_obj as $step){
-      $approval_flow_id = $step['approval_flow_id'];
-      if($step['status_id'] == $current_status){
-        $status['current'] = $step;
-      }else{
-        $status['next'] = $step;
-      }
-    }
-
-    $current_status_name = $status['current']['status_name'];
-    $current_status_sequence = $status['current']['status_approval_sequence'];
-    $current_approval_direction = $status['current']['status_approval_direction'];
-
-    $reinstatement_status_id = 0;
-
-    if($current_approval_direction == 0){
-      $builder = $this->read_db->table('status');
-      $builder->select(array('status_id','status_name','status_approval_sequence','status_approval_direction','fk_approval_flow_id as approval_flow_id'));
-      $builder->where(['fk_approval_flow_id' => $approval_flow_id]);
-      $builder->where(['status_approval_sequence' => $current_status_sequence, 'status_approval_direction' => 1]);
-      $alt_status = $builder->get()->getRowArray();
-      
-      $reinstatement_status_id = $current_status;
-      $current_status = $alt_status['status_id'];
-      $current_status_name = $alt_status['status_name'];
-      $current_status_sequence = $alt_status['status_approval_sequence'];
-      $current_approval_direction = $alt_status['status_approval_direction'];
-    }
-
-    $next_status_name = $status['next']['status_name'];
-    $next_status_sequence = $status['next']['status_approval_sequence'];
-    $next_approval_direction = $status['next']['status_approval_direction'];
-
-    $builder = $this->read_db->table($table_name);
-    $builder->where(array($table_name.'_id' => $item_id));
-    $existing_approvers = $builder->get()->getRow()->{$table_name.'_approvers'};
-
-    $approvers = json_encode($existing_approvers);
-
-    $new_approver = [
-      'user_id' => $user_id, 
-      'fullname' => $user_fullname, 
-      'user_role_id' => $user_role_id,
-      'user_role_name' => $user_role_name,
-      'approval_date' => date('Y-m-d h:i:s'), 
-      'status_id' => $next_approval_direction == 1 ? $current_status : $next_status,
-      'status_name' => $next_approval_direction == 1 ?  $current_status_name  : $next_status_name, 
-      'status_sequence' => $next_approval_direction == 1 ? $current_status_sequence : $next_status_sequence, 
-      'approval_direction' => $next_approval_direction == 1 ? $current_approval_direction : $next_approval_direction, 
-      'reinstatement_status_id' => $reinstatement_status_id
-    ];
-
-  if($existing_approvers == "" || $existing_approvers == "[]" || $existing_approvers == NULL){
-    $approvers = [$new_approver];
-  }else{
-    array_push($approvers, $new_approver);
-  }
-
-    $approvers = json_encode($approvers);
-
-    return $approvers;
-  }
 }

@@ -8,7 +8,7 @@ class EditOutput extends OutputTemplate{
         parent::__construct($module);
     }
 
-    function editQuery($table)
+    private function editQuery($table)
     {
   
       $keys = $this->libs->checkEditVisibleColumns($table);
@@ -28,7 +28,7 @@ class EditOutput extends OutputTemplate{
       return $edit_query;
     }
 
-    function editFormFields(array $visible_columns_array): array
+    private function editFormFields(array $visible_columns_array): array
     {
         $fields = [];
 
@@ -39,7 +39,7 @@ class EditOutput extends OutputTemplate{
         return $fields;
     }
 
-    function getOutput($id): array|\CodeIgniter\HTTP\Response {
+    public function getOutput($id): array|\CodeIgniter\HTTP\Response {
         $table = $this->controller;
 
         if ($this->request->getPost()) {

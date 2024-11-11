@@ -15,10 +15,12 @@ class ButtonOutput extends OutputTemplate{
         $additional_class = isset($args[3]) ? $args[3] : "";
         $onclick = isset($args[4]) ? $args[4] : "";
         
-        $action = $action == "" || $action == "#" ? "#" : site_url(strtolower($action));
+        // log_message('error', json_encode($args)  );
+
+        $url = $action == "" || $action == "#" ? "#" : base_url("$action/$widget_id/$additional_class");
 
         return '
-            <a href="'.$action.'" class="btn btn-default '.$additional_class.'" id="'.$widget_id.'" onClick="'. $onclick.'">'
+            <a href="'.$url.'" class="btn btn-default hidden-print '.$additional_class.'" id="'.$widget_id.'" onClick="'. $onclick.'">'
             .ucfirst($label).
             '</a>
         ';

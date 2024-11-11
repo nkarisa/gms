@@ -47,7 +47,7 @@ class OutputTemplate {
         $this->access = new AccessBaseLibrary();
 
         if($module == ""){
-            $modules = json_decode(service("settings")->get("GrantsConfig.modules"));
+            $modules = decode_setting("GrantsConfig","modules");
             $modelFileName = ucfirst($this->controller).'Model'; 
         
             foreach($modules as $moduleName){

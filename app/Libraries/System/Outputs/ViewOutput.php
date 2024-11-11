@@ -18,7 +18,7 @@ class ViewOutput extends OutputTemplate
      * the feature model is specified
      * @return Array
      */
-    function featureModelMasterTableVisibleColumns(): array
+    private function featureModelMasterTableVisibleColumns(): array
     {
 
         $master_table_visible_columns = [];
@@ -60,7 +60,7 @@ class ViewOutput extends OutputTemplate
      * 
      * @return Array - Update visible columns array
      */
-    function addLookupNameFieldsToVisibleColumns(array $visible_columns, array $lookup_tables): array
+    private function addLookupNameFieldsToVisibleColumns(array $visible_columns, array $lookup_tables): array
     {
         foreach ($lookup_tables as $lookup_table) {
 
@@ -90,7 +90,7 @@ class ViewOutput extends OutputTemplate
      * @param array $visible_columns - Selected columns
      * @return array - Update selected columns
      */
-    function insertHistoryTrackingFieldsToMasterView(array $visible_columns): array
+    private function insertHistoryTrackingFieldsToMasterView(array $visible_columns): array
     {
         if (
             !in_array($this->libs->historyTrackingField($this->controller, 'created_by'), $visible_columns) ||
@@ -119,7 +119,7 @@ class ViewOutput extends OutputTemplate
      * 
      * @return array - Update selected columns array for the master view
      */
-    function insertStatusColumnToMasterView(array $visible_columns): array
+    private function insertStatusColumnToMasterView(array $visible_columns): array
     {
 
         $status_name_field = $this->libs->nameField('status');
@@ -219,7 +219,7 @@ class ViewOutput extends OutputTemplate
      * 
      * @return array - Database query result 
      */
-    function masterViewQueryResult(): array
+    private function masterViewQueryResult(): array
     {
 
         $table = strtolower($this->controller);
@@ -253,7 +253,7 @@ class ViewOutput extends OutputTemplate
      *  
      */
 
-    function toggleMasterViewQueryResult(): array
+    private function toggleMasterViewQueryResult(): array
     {
 
         $master_view = $this->masterViewQueryResult();
@@ -310,7 +310,7 @@ class ViewOutput extends OutputTemplate
      * 
      * @return array
      */
-    function featureModelDetailListTableVisibleColumns(string $table)
+    private function featureModelDetailListTableVisibleColumns(string $table)
     {
 
         $library = $this->libs->loadLibrary($table);
@@ -368,7 +368,7 @@ class ViewOutput extends OutputTemplate
      * @param string $table - Passed table name
      * @return array - Columns to select
      */
-    function toggleDetailListSelectColumns($table): array
+    private function toggleDetailListSelectColumns($table): array
     {
         // Check if the table has list_table_visible_columns not empty
         $detail_list_table_visible_columns = $this->featureModelDetailListTableVisibleColumns($table);
@@ -498,7 +498,7 @@ class ViewOutput extends OutputTemplate
      * @return array
      * 
      */
-    function detailListOutput(string $table): array
+    private function detailListOutput(string $table): array
     {
 
         // Query result of the detail table
@@ -533,7 +533,7 @@ class ViewOutput extends OutputTemplate
     }
 
 
-    function currencyConversion(&$query_output,$table_name = ""){
+    private function currencyConversion(&$query_output,$table_name = ""){
     
         $table_name = $table_name == "" ? $this->controller : $table_name;
     
@@ -608,7 +608,7 @@ class ViewOutput extends OutputTemplate
 //     return $visible_columns; //$this->CI->access->control_column_visibility($this->controller,$visible_columns,'read');
 //   }
 
-    function getOutput($id): array
+   public  function getOutput($id): array
     {
 
         // Use the $id instead of the getSegment(3) in the future code to allow calling this method without routed request

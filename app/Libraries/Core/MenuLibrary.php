@@ -288,7 +288,7 @@ class MenuLibrary extends GrantsLibrary
 
         $controllers = $this->getAllTables();
 
-        $tablesNotRequiredInMenu = json_decode(service("settings")->get("GrantsConfig.tablesNotRequiredInMenu"));
+        $tablesNotRequiredInMenu = decode_setting("GrantsConfig","tablesNotRequiredInMenu");
 
         $controllers = array_diff($controllers, $tablesNotRequiredInMenu);
 

@@ -1331,10 +1331,10 @@ class UserLibrary extends GrantsLibrary
 
         $builder = $this->write_db->table("user");
         $builder->where(array('user_id' => $user_id));
-        $builder->update( $user_to_insert);
+        $builder->update($user_to_insert);
 
         // Delete secondary roles if not provided any in the edit form
-    
+
         if (!isset($post['secondary_role_ids'])) {
             $builder = $this->write_db->table('role_user');
             $builder->where(array('fk_user_id' => $user_id));
@@ -1346,36 +1346,36 @@ class UserLibrary extends GrantsLibrary
             $role_user_obj = $builder->get();
 
             $current_role_ids = [];
-            
+
             if ($role_user_obj->getNumRows() > 0) {
                 $current_role_ids = array_column($role_user_obj->getResultArray(), 'fk_role_id');
             }
-                $isEqual = array_diff($post['secondary_role_ids'], $current_role_ids) === array_diff($current_role_ids, $post['secondary_role_ids']);
-                // Only update if the current secondary roles do not match the incoming ones
-                if (!$isEqual) {
-                    $builder = $this->write_db->table('role_user');
-                    $builder->where(array('fk_user_id' => $user_id));
-                    $builder->delete();
+            $isEqual = array_diff($post['secondary_role_ids'], $current_role_ids) === array_diff($current_role_ids, $post['secondary_role_ids']);
+            // Only update if the current secondary roles do not match the incoming ones
+            if (!$isEqual) {
+                $builder = $this->write_db->table('role_user');
+                $builder->where(array('fk_user_id' => $user_id));
+                $builder->delete();
 
-                    $cnt = 0;
-                    foreach ($post['secondary_role_ids'] as $key => $role_id) {
-                        $role_user_track = $this->generateItemTrackNumberAndName('role_user');
-                        $insert_role_user[$cnt]['role_user_track_number'] = $role_user_track['role_user_track_number'];
-                        $insert_role_user[$cnt]['role_user_name'] = $role_user_track['role_user_name'];
-                        $insert_role_user[$cnt]['fk_user_id'] = $user_id;
-                        $insert_role_user[$cnt]['fk_role_id'] = $role_id;
-                        $insert_role_user[$cnt]['role_user_created_date'] = date('Y-m-d');
-                        $insert_role_user[$cnt]['role_user_created_by'] = $this->session->user_id;
-                        $insert_role_user[$cnt]['role_user_last_modified_by'] = $this->session->user_id;
-                        $insert_role_user[$cnt]['role_user_expiry_date'] = $post['expiry_dates'][$key]; // date('Y-m-d', strtotime('+30 days'));
-                        $insert_role_user[$cnt]['fk_status_id'] = $this->initialItemStatus('role_user');
-                        $insert_role_user[$cnt]['fk_approval_id'] = $this->insertApprovalRecord('role_user');
-                        $cnt++;
-                    }
-                    $builder = $this->write_db->table('role_user');
-                    $builder->insertBatch( $insert_role_user);
+                $cnt = 0;
+                foreach ($post['secondary_role_ids'] as $key => $role_id) {
+                    $role_user_track = $this->generateItemTrackNumberAndName('role_user');
+                    $insert_role_user[$cnt]['role_user_track_number'] = $role_user_track['role_user_track_number'];
+                    $insert_role_user[$cnt]['role_user_name'] = $role_user_track['role_user_name'];
+                    $insert_role_user[$cnt]['fk_user_id'] = $user_id;
+                    $insert_role_user[$cnt]['fk_role_id'] = $role_id;
+                    $insert_role_user[$cnt]['role_user_created_date'] = date('Y-m-d');
+                    $insert_role_user[$cnt]['role_user_created_by'] = $this->session->user_id;
+                    $insert_role_user[$cnt]['role_user_last_modified_by'] = $this->session->user_id;
+                    $insert_role_user[$cnt]['role_user_expiry_date'] = $post['expiry_dates'][$key]; // date('Y-m-d', strtotime('+30 days'));
+                    $insert_role_user[$cnt]['fk_status_id'] = $this->initialItemStatus('role_user');
+                    $insert_role_user[$cnt]['fk_approval_id'] = $this->insertApprovalRecord('role_user');
+                    $cnt++;
                 }
-           // }
+                $builder = $this->write_db->table('role_user');
+                $builder->insertBatch($insert_role_user);
+            }
+            // }
         }
 
         // Update a user in a context table 
@@ -1460,8 +1460,8 @@ class UserLibrary extends GrantsLibrary
                 $context[$context_definition_user_table . '_is_active'] = 1;
 
                 $context_to_insert = $this->mergeWithHistoryFields($context_definition_user_table, $context, false);
-                
-                $this->write_db->table($context_definition_user_table)->insert( $context_to_insert);
+
+                $this->write_db->table($context_definition_user_table)->insert($context_to_insert);
 
             }
         } else {
@@ -1491,7 +1491,7 @@ class UserLibrary extends GrantsLibrary
                         $context[$context_definition_user_table . '_is_active'] = 1;
 
                         $context_to_insert = $this->mergeWithHistoryFields($context_definition_user_table, $context, false);
-                        $this->write_db->table($context_definition_user_table)->insert( $context_to_insert);
+                        $this->write_db->table($context_definition_user_table)->insert($context_to_insert);
                     }
                 }
             }
@@ -1540,14 +1540,99 @@ class UserLibrary extends GrantsLibrary
             }
             $builder->where(array('user.fk_account_system_id' => $this->session->user_account_system_id));
         }
-        
+
         $obj = $builder->get();
 
         if ($obj->getNumRows() > 0) {
             $users = $obj->getResultArray();
         }
-        
+
         return ['results' => $users];
+    }
+
+
+    function updateApproversList($user_id, $table_name, $item_id, $current_status, $next_status)
+    {
+        $approvers = [];
+
+        $builder = $this->read_db->table('user');
+        $builder->select(array('CONCAT(user_firstname, " ", user_lastname) as fullname', 'role_id', 'role_name'));
+        $builder->join('role', 'role.role_id=user.fk_role_id');
+        $builder->where(array('user_id' => $user_id));
+        $user = $builder->get()->getRow();
+
+        $user_fullname = $user->fullname;
+        $user_role_id = $user->role_id;
+        $user_role_name = $user->role_name;
+
+        $builder = $this->read_db->table('status');
+        $builder->select(array('status_id', 'status_name', 'status_approval_sequence', 'status_approval_direction', 'fk_approval_flow_id as approval_flow_id'));
+        $builder->whereIn('status_id', [$current_status, $next_status]);
+        $status_obj = $builder->get()->getResultArray();
+
+        $status = [];
+        $approval_flow_id = 0;
+        foreach ($status_obj as $step) {
+            $approval_flow_id = $step['approval_flow_id'];
+            if ($step['status_id'] == $current_status) {
+                $status['current'] = $step;
+            } else {
+                $status['next'] = $step;
+            }
+        }
+
+        $current_status_name = $status['current']['status_name'];
+        $current_status_sequence = $status['current']['status_approval_sequence'];
+        $current_approval_direction = $status['current']['status_approval_direction'];
+
+        $reinstatement_status_id = 0;
+
+        if ($current_approval_direction == 0) {
+            $builder = $this->read_db->table('status');
+            $builder->select(array('status_id', 'status_name', 'status_approval_sequence', 'status_approval_direction', 'fk_approval_flow_id as approval_flow_id'));
+            $builder->where(['fk_approval_flow_id' => $approval_flow_id]);
+            $builder->where(['status_approval_sequence' => $current_status_sequence, 'status_approval_direction' => 1]);
+            $alt_status = $builder->get()->getRowArray();
+
+            $reinstatement_status_id = $current_status;
+            $current_status = $alt_status['status_id'];
+            $current_status_name = $alt_status['status_name'];
+            $current_status_sequence = $alt_status['status_approval_sequence'];
+            $current_approval_direction = $alt_status['status_approval_direction'];
+        }
+
+        $next_status_name = $status['next']['status_name'];
+        $next_status_sequence = $status['next']['status_approval_sequence'];
+        $next_approval_direction = $status['next']['status_approval_direction'];
+
+        $builder = $this->read_db->table($table_name);
+        $builder->where(array($table_name . '_id' => $item_id));
+        $existing_approvers = $builder->get()->getRow()->{$table_name . '_approvers'};
+
+        $approvers = json_encode($existing_approvers);
+
+        $new_approver = [
+            'user_id' => $user_id,
+            'fullname' => $user_fullname,
+            'user_role_id' => $user_role_id,
+            'user_role_name' => $user_role_name,
+            'approval_date' => date('Y-m-d h:i:s'),
+            'status_id' => $next_approval_direction == 1 ? $current_status : $next_status,
+            'status_name' => $next_approval_direction == 1 ? $current_status_name : $next_status_name,
+            'status_sequence' => $next_approval_direction == 1 ? $current_status_sequence : $next_status_sequence,
+            'approval_direction' => $next_approval_direction == 1 ? $current_approval_direction : $next_approval_direction,
+            'reinstatement_status_id' => $reinstatement_status_id
+        ];
+
+        if ($existing_approvers == "" || $existing_approvers == "[]" || $existing_approvers == NULL) {
+            $approvers = [$new_approver];
+        } else {
+            array_push($approvers, $new_approver);
+        }
+
+        $approvers = json_encode($approvers);
+
+        return $approvers;
     }
 
 }

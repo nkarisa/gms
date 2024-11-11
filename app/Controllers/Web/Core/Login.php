@@ -43,29 +43,7 @@ class Login extends WebController
             }
 
             if($this->session->system_admin){
-                $grantsConfig  = new \Config\GrantsConfig();
-                $globalConfigurations = get_object_vars($grantsConfig);
-                foreach($globalConfigurations as $globalConfigurationKey => $globalConfigurationValue){
-                    // Check if the setting exists in the database
-                    
-                    $setting = $this->settings->get("GrantsConfig.$globalConfigurationKey");
-                    if($setting === null){
-                        // If the setting does not exist, insert it into the database
-                        $globalConfigurationValue = is_array($globalConfigurationValue)? json_encode($globalConfigurationValue) : $globalConfigurationValue;
-                        $this->settings->set("GrantsConfig.$globalConfigurationKey", $globalConfigurationValue); 
-                    }
-
-                }
-
-                $contextConfig  = new \Config\ContextConfig();
-                $contextualConfigurations = get_object_vars($contextConfig);
-
-                foreach($contextualConfigurations as $contextualConfigurationKey => $contextualConfigurationValue){
-                    $setting = $this->settings->get("ContextConfig.$globalConfigurationKey");
-                    if($setting === null && is_array($contextualConfigurationValue)){
-                        $this->settings->set("ContextConfig.$contextualConfigurationKey", json_encode($contextualConfigurationValue)); 
-                    }
-                }
+                $grantsLibrary->loadConfigurations();
             }
 
             // Redirect to dashboard if user is authenticated

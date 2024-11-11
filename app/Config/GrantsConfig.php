@@ -5,12 +5,32 @@ namespace Config;
 
 use CodeIgniter\Config\BaseConfig;
 
+/**
+ * Summary of GrantsConfig
+ * 
+ * @package Config
+ * @author Nicodemus Karisa Mwambire
+ * @copyright 2024 Safina Solution
+ * @version 3.0.0
+ * @license https://safina-solutions.com/licenses/MIT MIT License
+ * @file GrantsConfig.php
+ * @since 2024-11-11
+ * @see https://codeigniter4.github.io/CodeIgniter4/
+ * 
+ * This class provides configuration options for the Grants Management System.
+ * Unlike the ContextConfig, this class is intended to be used for managing grant-related configurations.
+ * 
+ * Note that, the configuration values can be changed directly in the settings database table and its
+ * advisable to use service("settings")->get('GrantsConfig.<<ConfigKey>>')
+ * 
+ */
+
 class GrantsConfig extends BaseConfig
 {
     public $preventUsingGlobalPermissionsByNonAdmins = true; // or false, depending on your default value
     public $methodToAttachPermissionToRole = 'both'; // direct, role_group, both
     public $defaultLaunchPage = 'Dashboard'; 
-    public $systemName = "Grants Managememt System";
+    public $systemName = "Safina Grants Managememt System";
     public $modules = ['system','core','grants'];
     public $maxPriorityMenuItems = 10;
     public $tableThatDontRequireHistoryFields = ['status', 'approve_item', 'approval_flow', 'ci_sessions'];

@@ -270,8 +270,5 @@ trait CrudTrait
         return ''; // Example - 'status_approval_sequence ASC';
     }
 
-    // Results Must have a key names results when implementing this method
-    public function list($datatableBuilder, array $listSelectColumns, string $parentId = null, string $parentTable = null):array{
-        return []; 
-    }
+    
 }

@@ -8,10 +8,16 @@ use Aws\AwsClientInterface;
 
 /**
  * AWS SDK Configuration Class
+ * 
+ * @package Config
+ * @author Nicodemus Karisa Mwambire
+ * @copyright 2024 Safina Solution
+ * @version 3.0.0
  *
  * This class is responsible for initializing the AWS SDK and providing a method
  * to create clients for different AWS services.
  */
+
 class AwsSdk extends BaseConfig
 {
     /**
@@ -29,9 +35,9 @@ class AwsSdk extends BaseConfig
         parent::__construct();
 
         $this->sdk = new Sdk([
-            'region'  => $_ENV['AWS_DEFAULT_REGION'], 
+            'region'  => env('aws.region'), 
             'version' => 'latest',
-            'profile'=> $_ENV['AWS_CREDENTIALS_PROFILE'],
+            'profile'=> env('aws.credentials_profile'),
         ]);
     }
 

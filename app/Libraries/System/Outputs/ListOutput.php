@@ -17,7 +17,7 @@ class ListOutput extends OutputTemplate
   {
     $table = $this->controller;
 
-    $filter_where_array = hash_id($this->id, 'decode') > 0 && !in_array($table, json_decode(service("settings")->get("GrantsConfig.tableThatDontRequireHistoryFields"))) ? [$table . '.fk_status_id' => hash_id($this->id, 'decode')] : [];
+    $filter_where_array = hash_id($this->id, 'decode') > 0 && !in_array($table, decode_setting("GrantsConfig","tableThatDontRequireHistoryFields")) ? [$table . '.fk_status_id' => hash_id($this->id, 'decode')] : [];
     $toggle_list_select_columns = $this->libs->toggleListSelectColumns($this->parentTable);
 
     if ($table == 'status') {
@@ -97,7 +97,7 @@ class ListOutput extends OutputTemplate
     }
   }
 
-  function tableQueryBuilder($table): BaseBuilder
+  private function tableQueryBuilder($table): BaseBuilder
   {
     $builder = $this->read_db->table($table);
 
@@ -109,7 +109,7 @@ class ListOutput extends OutputTemplate
     return $builder;
   }
 
-  function drawDatatableResults(string $table, array $selected_columns, array $lookup_tables, string $listTableWhere, array $filter_where_array): array
+  private function drawDatatableResults(string $table, array $selected_columns, array $lookup_tables, string $listTableWhere, array $filter_where_array): array
   {
 
     $builder = $this->tableQueryBuilder($table);
@@ -128,7 +128,7 @@ class ListOutput extends OutputTemplate
   }
 
 
-  function runListQueryCountAllRecords(
+  private function runListQueryCountAllRecords(
     $table,
     $selected_columns,
     $lookup_tables,
@@ -166,7 +166,7 @@ class ListOutput extends OutputTemplate
     $lookup_tables = $this->libs::call($this->controller . '.lookupTables');
     $listSelectColumns = $this->libs->toggleListSelectColumns($this->parentTable);
     $builder = $this->read_db->table($this->controller);
-    $filter_where_array = hash_id($this->id, 'decode') > 0 && !in_array($this->controller, json_decode(service("settings")->get("GrantsConfig.tableThatDontRequireHistoryFields"))) ? [$this->controller . '.fk_status_id' => hash_id($this->id, 'decode')] : [];
+    $filter_where_array = hash_id($this->id, 'decode') > 0 && !in_array($this->controller, decode_setting("GrantsConfig","tableThatDontRequireHistoryFields")) ? [$this->controller . '.fk_status_id' => hash_id($this->id, 'decode')] : [];
     $listTableWhere = 'listTableWhere';
 
     if ($this->parentTable != null) {

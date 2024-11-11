@@ -191,7 +191,7 @@ class GrantsLibrary
 
   final public function loadModel(string $table_name)
   {
-    $modules = json_decode(service("settings")->get("GrantsConfig.modules")); // Assuming $config is an instance of Config\App
+    $modules = decode_setting("GrantsConfig","modules"); // Assuming $config is an instance of Config\App
     $table_model = null;
     $table_model_name = pascalize($table_name) . 'Model';
     // Loop through the modules to find the appropriate library
@@ -222,7 +222,7 @@ class GrantsLibrary
    */
   final public function loadLibrary(string $table_name)
   {
-    $modules = json_decode(service("settings")->get("GrantsConfig.modules")); // Assuming $config is an instance of Config\App
+    $modules = decode_setting("GrantsConfig","modules"); // Assuming $config is an instance of Config\App
     $table_library = null;
     $table_library_name = pascalize($table_name) . 'Library';
     // Loop through the modules to find the appropriate library
@@ -1628,7 +1628,7 @@ class GrantsLibrary
 
   function checkMultiSelectField($table_name = "")
   {
-    
+
     $this->library = $this->loadLibrary($this->controller);
 
     if ($table_name != "") {
@@ -2501,8 +2501,52 @@ class GrantsLibrary
       }
     }
 
-    return $visible_columns; //$this->CI->access->control_column_visibility($this->controller,$visible_columns,'read');
+    return $visible_columns;
   }
 
 
+  function loadConfigurations()
+  {
+    $grantsConfig = new GrantsConfig();
+    $settings = service('settings');
+    $settingsModel = new \App\Models\System\SettingsModel();
+
+    $globalConfigurations = get_object_vars($grantsConfig);
+    foreach ($globalConfigurations as $globalConfigurationKey => $globalConfigurationValue) {
+      // Check if the setting exists in the database
+      if (!$settingsModel->hasSetting("GrantsConfig", $globalConfigurationKey)) {
+        // If the setting does not exist, insert it into the database
+        $globalConfigurationValue = is_array($globalConfigurationValue) ? json_encode($globalConfigurationValue) : $globalConfigurationValue;
+        $settings->set("GrantsConfig.$globalConfigurationKey", $globalConfigurationValue);
+      }
+
+    }
+
+    $contextConfig = new \Config\ContextConfig();
+    $contextualConfigurations = get_object_vars($contextConfig);
+
+    foreach ($contextualConfigurations as $contextualConfigurationKey => $contextualConfigurationValue) {
+      if (!$settingsModel->hasSetting("ContextConfig", $contextualConfigurationKey) && is_array($contextualConfigurationValue)) {
+        $settings->set("ContextConfig.$contextualConfigurationKey", json_encode($contextualConfigurationValue));
+      }
+    }
+  }
+
+  function createTableApproversColumns(string $tableName)
+  {
+      $db_forge = \Config\Database::forge('write'); // Load the default database group
+  
+      if (!$this->write_db->fieldExists($tableName . '_approvers', $tableName)) {
+          // Define the column details
+          $fields = [
+              $tableName . '_approvers' => [
+                  'type' => 'JSON',
+                  'null' => true,
+              ],
+          ];
+  
+          // Add the column to the specified table
+          $db_forge->addColumn($tableName, $fields);
+      }
+  }
 }
