@@ -195,10 +195,53 @@ class ListOutput extends OutputTemplate
     return $query_result;
   }
 
+  function updateListCustomColumnsValues(&$fields_meta_data, &$selectedRecords, array &$selectedColumns){
+    
+    $library = $this->libs->loadLibrary($this->controller);
+    if(
+      method_exists($library, 'additionalListColumns') && 
+      is_array($additionalListColumns = $library->additionalListColumns()) &&
+      count($additionalListColumns) > 0
+    ){
+
+      ['positionAfter' => $positionAfter, 'columns' => $columns] = $additionalListColumns; 
+
+      if(!empty($columns)){
+        foreach($columns as $newColumn){
+            if($positionAfter != null){  
+              $refIndex = array_search($positionAfter, $selectedColumns);
+              array_splice($selectedColumns, $refIndex, 0, $newColumn);
+              for($i = 0; $i <= count($selectedColumns); $i++){
+                if(isset($selectedRecords[$i])){
+                  $keys = array_keys($selectedRecords[$i]);
+                  array_splice($keys, $refIndex, 0, $newColumn);
+                  
+                  $values = array_values($selectedRecords[$i]);
+                  array_splice($values, $refIndex, 0, get_phrase('value_set_set'));
+        
+                  $selectedRecords[$i] = array_combine($keys, $values);
+                  }
+              }
+            }else{
+              array_push($selectedColumns, $newColumn );
+              for($i = 0; $i<count($selectedRecords); $i++){
+                $selectedRecords[$i][$newColumn] = get_phrase('value_set_set');
+              }
+            }
+            $fields_meta_data[$newColumn] = 'varchar';
+        }
+      }
+    }
+    
+    $selectedColumns = array_values($selectedColumns);
+  }
+
   public function getOutput($args = [])
   {
     $this->parentId = isset($args[0]) ? $args[0] : null;
     $this->parentTable = isset($args[1]) ? $args[1] : null;
+    $library = $this->libs->loadLibrary($this->controller);
+
     // This line prevent the timeout issue of the more menu icon. Reason for timeout are unknown
     if ($this->controller == 'menu') {
       return [];
@@ -212,13 +255,19 @@ class ListOutput extends OutputTemplate
     }
 
     $toggleListQueryResults = $this->toggleListQueryResults();
+    $keys = $this->libs->toggleListSelectColumns($this->parentTable);
     $table_body = $toggleListQueryResults['selected_results'];
+    $fields_meta_data = $this->libs->fieldsMetaDataTypeAndName($this->controller);
+
+    // $k = $keys;
+    // $b = $table_body;
+
+    $this->updateListCustomColumnsValues($fields_meta_data, $table_body, $keys);
+    // log_message('error', json_encode(compact('keys','fields_meta_data','table_body')));
+
     $total_records = $toggleListQueryResults['total_records'];
     $controller = $this->controller;
-    $fields_meta_data = $this->libs->fieldsMetaDataTypeAndName($this->controller);
-    $keys = $this->libs->toggleListSelectColumns($this->parentTable);
-    // $columns = $keys;
-    // array_shift($columns);
+    // $fields_meta_data = $this->libs->fieldsMetaDataTypeAndName($this->controller);
   
     return compact('table_body', 'total_records', 'keys', 'fields_meta_data', 'controller');
   }

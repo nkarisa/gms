@@ -429,7 +429,7 @@ if (!function_exists('render_list_table_header')) {
         $string = '';
 
         foreach ($header_array as $th_value) {
-            if (strpos($th_value, 'key') == true || strpos($th_value, '_id') == true) {
+            if (strpos($th_value, 'key') == true || substr($th_value, -2) === "id") {
                 continue;
             }
 

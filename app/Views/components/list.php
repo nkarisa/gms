@@ -20,7 +20,6 @@ extract($result);
   </div>
 </div>
 
-
 <div class="row">
   <div class="col-xs-12" style='overflow-x: auto'>
     <table class="table table-striped nowrap" id="datatable" style="width:100%">

@@ -2463,6 +2463,31 @@ class GrantsLibrary
     return $list_table_visible_columns;
   }
 
+  public function getListColumns(string $parentTable = null){
+    $selectedColumns = $this->toggleListSelectColumns($parentTable);
+    $library = $this->loadLibrary($this->controller);
+    
+    if(
+      method_exists($library, 'additionalListColumns') && 
+      is_array($additionalListColumns = $library->additionalListColumns()) &&
+      count($additionalListColumns) > 0
+    ){
+      ['positionAfter' => $positionAfter, 'columns' => $columns] = $additionalListColumns; 
+      if(!empty($columns)){
+        foreach($columns as $newColumn){
+            if($positionAfter != null){
+              $refIndex = array_search($positionAfter, $selectedColumns);
+              array_splice($selectedColumns, $refIndex, 0, $newColumn);
+            }else{
+              array_push($selectedColumns, $newColumn );
+            }
+        }
+      }
+    }
+
+    return $selectedColumns;
+  }
+
   public function toggleListSelectColumns($parentTable = null): array
   {
     // Check if the table has list_table_visible_columns not empty

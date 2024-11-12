@@ -1018,7 +1018,7 @@ class UserLibrary extends GrantsLibrary
         return $columns;
     }
 
-    function formatColumnsValues(string $column, mixed $columnValue): mixed
+    function formatColumnsValues(string $column, mixed $columnValue, array $rowArray): mixed
     {
         if ($column == 'user_first_time_login') {
             $columnValue = $columnValue == 1 ? get_phrase('yes') : get_phrase('no');

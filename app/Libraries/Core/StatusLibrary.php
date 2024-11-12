@@ -971,4 +971,5 @@ class StatusLibrary extends GrantsLibrary
 
     $this->write_db->table('history')->insert($update_data);
   }
+
 }

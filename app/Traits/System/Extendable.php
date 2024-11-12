@@ -72,7 +72,7 @@ trait Extendable {
         return [];
       }
   
-      function formatColumnsValues(string $columnName, mixed $columnValue): mixed{
+      function formatColumnsValues(string $columnName, mixed $columnValue, array $rowArray): mixed{
         return $columnValue;
       }
 
@@ -110,5 +110,9 @@ trait Extendable {
     // Results Must have a key names results when implementing this method
     public function list($datatableBuilder, array $listSelectColumns, string $parentId = null, string $parentTable = null):array{
       return []; 
-  }
+    }
+
+    public function additionalListColumns(): array {
+      return ['positionAfter' => null, 'columns' => []];
+    }
 }

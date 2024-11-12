@@ -303,7 +303,7 @@ class WebController extends BaseController
 
     if ($this->action == 'list') {
       $show_add_button = $this->libs::call($this->controller . '.checkShowAddButton', [$this->controller]);
-      $keys = $this->libs->toggleListSelectColumns();
+      $keys = $this->libs->getListColumns();
       $page_data['keys'] = $keys;
       $page_data['is_multi_row'] = $this->libs::call($this->controller . '.checkIfTableIsMultiRow');
       $page_data['has_details_table'] = $this->libs->checkIfTableHasDetailTable($this->controller);
@@ -432,7 +432,7 @@ class WebController extends BaseController
       $cols = 0;
       $primary_key = 0;
       foreach ($columns as $column) {
-        if ($column == strtolower($this->controller) . '_id') {
+        if (substr($column, -2) === "id" && $column == strtolower($this->controller) . '_id') {
           $primary_key = $row[$column];
           continue;
         }
@@ -453,7 +453,7 @@ class WebController extends BaseController
           $row[$column] = $track_number;
 
         } elseif (strpos($column, '_is_') == true) {
-          $row[$column] = $row[$column] == 1 ? "Yes" : "No";
+          $row[$column] = $row[$column] == 1 ? get_phrase('yes') : get_phrase('no');
         } elseif ($results['fields_meta_data'][$column] == 'int' || $results['fields_meta_data'][$column] == 'decimal') {
           $row[$column] = is_numeric($row[$column]) ? number_format($row[$column], 2) : $row[$column];
         } else {
@@ -461,11 +461,10 @@ class WebController extends BaseController
         }
 
         if (method_exists($this->library, 'formatColumnsValues')) {
-          $row[$column] = $this->library->formatColumnsValues($column, $row[$column]);
+          $row[$column] = $this->library->formatColumnsValues($column, $row[$column], $row);
         }
 
         $records[$cnt][$cols] = $row[$column];
-
         $cols++;
       }
       $cnt++;
