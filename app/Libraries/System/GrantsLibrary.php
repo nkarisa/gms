@@ -2470,12 +2470,12 @@ class GrantsLibrary
     
     if(
       method_exists($library, 'additionalListColumns') && 
-      is_array($additionalListColumns = $library->additionalListColumns()) &&
-      count($additionalListColumns) > 0
+      is_array($columns = $library->additionalListColumns()) &&
+      count($columns) > 0
     ){
-      ['positionAfter' => $positionAfter, 'columns' => $columns] = $additionalListColumns; 
+
       if(!empty($columns)){
-        foreach($columns as $newColumn){
+        foreach($columns as $newColumn => $positionAfter){
             if($positionAfter != null){
               $refIndex = array_search($positionAfter, $selectedColumns);
               array_splice($selectedColumns, $refIndex + 1, 0, $newColumn);
@@ -2574,5 +2574,12 @@ class GrantsLibrary
           // Add the column to the specified table
           $db_forge->addColumn($tableName, $fields);
       }
+  }
+
+  function checkDataTableCondition(\CodeIgniter\Database\BaseBuilder $builder, $customFields){
+    $library = $this->loadLibrary($this->controller);
+    if(method_exists($library, 'dataTableCondition')){
+      $library->dataTableCondition($builder, $customFields);
+    }
   }
 }

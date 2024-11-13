@@ -52,10 +52,28 @@ trait DataTable {
             $builder->groupEnd();
         }
 
+        $post = $this->request->getPost();
+        $customFields = [];
+
+        foreach($post as $key => $value) {
+            if (str_starts_with($key, "customfield_")) {
+                $customFields[substr($key, 12)] = $value;
+            }
+        }
+
+        if(!empty($customFields)) {
+            $this->checkDataTableCondition($builder, $customFields);
+        }
+        
         return $builder;
     }
 
+    protected function dataTableCondition(\CodeIgniter\Database\BaseBuilder $builder, array $dataFields){
+        //$builder->where($dataFields);
+    }
+
     function dataTableBuilder(\CodeIgniter\Database\BaseBuilder &$builder, string $tableName, array $selectColumns){
+        // log_message('error', json_encode($this->request->getPost()));
         if ($this->request->getPost('draw')) {
             // Limiting Server Datatable Results
             $this->setDatatableLimit($builder);

@@ -16,6 +16,11 @@ extract($result);
       echo add_record_button($controller, $has_details_table,null,$has_details_listing, $is_multi_row);
     }
     ?>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-12">
     <?=WidgetBase::load('position','position_1');?>
   </div>
 </div>

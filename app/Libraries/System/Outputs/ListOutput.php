@@ -203,14 +203,12 @@ class ListOutput extends OutputTemplate
     $library = $this->libs->loadLibrary($this->controller);
     if(
       method_exists($library, 'additionalListColumns') && 
-      is_array($additionalListColumns = $library->additionalListColumns()) &&
-      count($additionalListColumns) > 0
+      is_array($columns = $library->additionalListColumns()) &&
+      count($columns) > 0
     ){
-
-      ['positionAfter' => $positionAfter, 'columns' => $columns] = $additionalListColumns; 
       
       if(!empty($columns)){
-        foreach($columns as $newColumn){
+        foreach($columns as $newColumn => $positionAfter){
             if($positionAfter != null){  
               $refIndex = array_search($positionAfter, $selectedColumns);
               array_splice($selectedColumns, $refIndex + 1, 0, $newColumn);
@@ -220,7 +218,7 @@ class ListOutput extends OutputTemplate
                   array_splice($keys, $refIndex + 1, 0, $newColumn);
                   
                   $values = array_values($selectedRecords[$i]);
-                  array_splice($values, $refIndex + 1, 0, get_phrase('value_set_set'));
+                  array_splice($values, $refIndex + 1, 0, get_phrase('value_not_set'));
         
                   $selectedRecords[$i] = array_combine($keys, $values);
                   }
@@ -228,7 +226,7 @@ class ListOutput extends OutputTemplate
             }else{
               array_push($selectedColumns, $newColumn );
               for($i = 0; $i<count($selectedRecords); $i++){
-                $selectedRecords[$i][$newColumn] = get_phrase('value_set_set');
+                $selectedRecords[$i][$newColumn] = get_phrase('value_not_set');
               }
             }
             $fields_meta_data[$newColumn] = 'varchar';

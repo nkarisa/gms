@@ -62,4 +62,22 @@ class CountryCurrencyLibrary extends GrantsLibrary
 
   }
 
+     /**
+   * get_country_currency_id() 
+   * This method returns the currenncy of a country
+   *@return Array
+   * @Author: Livingstone Onduso
+   * @Dated: 03/08/2022
+   */
+  public function getCountryCurrencyId()
+  {
+    $builder = $this->read_db->table('country_currency');
+    $builder->select(array('country_currency_id'));
+    if (!$this->session->system_admin) {
+        $builder->where(array('fk_account_system_id' => $this->session->user_account_system_id));
+    }
+    $country_currency_id =$builder->get()->getRow()->country_currency_id;  
+    return  $country_currency_id;
+  }
+
 }

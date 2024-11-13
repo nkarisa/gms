@@ -199,14 +199,12 @@ trait Extendable
   /**
    * Allows adding extra columns to a list table. The columns are not necessarily be part of the database table fields.
    * This method normally works hand in hand with formatColumnsValues to define the values of the added columns.
-   *
-   * @return array{positionAfter: string, columns: string} An associative array containing the following keys:
-   *  - positionAfter: The position after which the new column should be added. If null, the column will be added at the end.
-   *  - columns: An array of column names to be added to the list table.
+   * Each element has a key of the new column name and a value of the column the new column will ne placed after
+   * @return array
    */
   public function additionalListColumns(): array
   {
-    return ['positionAfter' => null, 'columns' => []];
+    return [];
   }
 
   public function accessAddFormFromMainMenu(): bool

@@ -211,4 +211,227 @@ class OfficeLibrary extends GrantsLibrary
         return $user_office_name;
     }
 
+    function pagePosition(){
+      $widget['position_1']['list'] = view("office/buttons");
+      return $widget;
+    }
+
+
+    function dataTableCondition(\CodeIgniter\Database\BaseBuilder $builder, $dataFields){
+      $context_definition_id = $dataFields['fk_context_definition_id'];
+      $builder->where('office.fk_context_definition_id', $context_definition_id);
+    }
+
+    function listTableVisibleColumns(): array {
+      return ['office_track_number', 'office_name', 'office_is_active', 'office_is_suspended','office_start_date', 'office_end_date', 'context_definition_name', 'account_system_name'];
+    }
+
+    function formatColumnsValues(string $columnName, mixed $columnValue, array $rowArray): mixed {
+      
+      switch($columnName){
+        case "office_end_date":
+          $columnValue = $columnValue == "0000-00-00" ? get_phrase('value_not_set') : $columnValue;
+          break;
+        case "mass_update":
+          $columnValue = '<div class="form-group"><input class="checkbox" type="checkbox" onclick="check_or_uncheck_checkbox()" name="office_ids[]"  id="'.$rowArray['office_id'].'"></div>';
+          break;
+        case "action":
+          $userLibrary = new UserLibrary();
+          $label = 'Suspend';
+          $color = 'btn-danger';
+
+          if($rowArray['office_is_suspended']){
+              $label = 'Unsuspend';
+              $color = 'btn-success';
+          }
+          
+          $disabled = "disabled";
+          if(
+            $userLibrary->checkRoleHasPermissions('office', 'update') &&
+            $rowArray['context_definition_name'] == 'center'
+            ){
+              $disabled = "";
+          }
+
+          $columnValue = '<div data-office_id = "'.$rowArray['office_id'].'" data-suspension_status = "'.$rowArray['office_is_suspended'].'" class="btn '.$color.' suspend '.$disabled.'">'.$label.'</div>';
+          break;
+        case "office_reporting_to":
+          $columnValue = $this->getReportingOfficeName($rowArray['office_id'], $rowArray['context_definition_name']);
+          break;
+        default:
+          break;
+      }
+
+      return $columnValue;
+    }
+
+    function getReportingOfficeName(int $officeId, string $officeContextName){
+      $reportingOfficeName = "";
+      if($officeContextName == 'center'){
+        $builder = $this->read_db->table('context_center');
+        $builder->select("office_name");
+        $builder->join("context_cluster","context_cluster.context_cluster_id=context_center.fk_context_cluster_id");
+        $builder->join("office","office.office_id=context_cluster.fk_office_id");
+        $builder->where("context_center.fk_office_id", $officeId);
+        $reportingOfficeName = $builder->get()->getRow()->office_name;
+      }elseif($officeContextName == 'cluster'){
+        $builder = $this->read_db->table('context_cluster');
+        $builder->select("office_name");
+        $builder->join("context_cohort","context_cohort.context_cohort_id=context_cluster.fk_context_cohort_id");
+        $builder->join("office","office.office_id=context_cohort.fk_office_id");
+        $builder->where("context_cluster.fk_office_id", $officeId);
+        $reportingOfficeName = $builder->get()->getRow()->office_name;
+      }elseif($officeContextName == 'cohort'){
+        $builder = $this->read_db->table('context_cohort');
+        $builder->select("office_name");
+        $builder->join("context_country","context_country.context_country_id=context_cohort.fk_context_country_id");
+        $builder->join("office","office.office_id=context_country.fk_office_id");
+        $builder->where("context_cohort.fk_office_id", $officeId);
+        $reportingOfficeName = $builder->get()->getRow()->office_name;
+      }elseif($officeContextName == 'country'){
+        $builder = $this->read_db->table('context_country');
+        $builder->select("office_name");
+        $builder->join("context_region","context_region.context_region_id=context_country.fk_context_region_id");
+        $builder->join("office","office.office_id=context_region.fk_office_id");
+        $builder->where("context_country.fk_office_id", $officeId);
+        $reportingOfficeName = $builder->get()->getRow()->office_name;
+      }
+
+      return $reportingOfficeName;
+    }
+
+    function additionalListColumns(): array {
+      $columns = [
+        'office_reporting_to' => 'office_name',
+        'mass_update' => "office_id", 
+        "action" => "mass_update"
+      ];
+
+      return $columns;
+    }
+
+    public function getAllAccountSystemOffices($account_system_id, $context_definition_id = 0){
+      $builder = $this->read_db->table('office');
+      $builder->select(array('office_id','office_track_number','office_code','context_definition_id','context_definition_name',
+      'office_name','office_start_date','context_cluster_name','context_cohort_name','context_cohort_name','context_country_name','office_is_suspended')); 
+      
+      if(!$this->session->system_admin){
+        $builder->where(array('fk_account_system_id' => $account_system_id));
+        $builder->whereIn('office_id',array_column($this->session->hierarchy_offices,'office_id'));
+      }
+  
+      if($context_definition_id > 0){
+        $builder->where(array('office.fk_context_definition_id' => $context_definition_id));
+      }
+  
+      $builder->join('context_definition','context_definition.context_definition_id=office.fk_context_definition_id');
+      $builder->join('context_center','context_center.fk_office_id=office.office_id',"LEFT");
+      $builder->join('context_cluster','context_cluster.context_cluster_id=context_center.fk_context_cluster_id',"LEFT");
+      $builder->join('context_cohort','context_cohort.context_cohort_id=context_cluster.fk_context_cohort_id',"LEFT");
+      $builder->join('context_country','context_country.context_country_id=context_cohort.fk_context_country_id',"LEFT");
+      $builder->join('context_region','context_region.context_region_id=context_country.fk_context_region_id',"LEFT");
+      $builder->join('context_global','context_global.context_global_id=context_region.fk_context_global_id',"LEFT");
+      $offices_obj = $builder->get();
+  
+      $offices = [];
+  
+      if($offices_obj->getNumRows() > 0){
+        $offices = $offices_obj->getResultArray();
+      }
+  
+      return $offices;
+    }
+
+     /**
+   * Get edit records
+   * 
+   * This method retrives records to be edited 
+   * .
+   * 
+   * @param int $office_id - Primary ID of the office
+   * @return array - array of a row
+   * @Author :Livingstone Onduso
+   * @Date: 08/05/2022
+   */
+
+  function getEditOfficeRecords(int $office_id){
+
+    //Get the context_defination to edit
+    $context_definition_id = $this->read_db->table('office')
+    ->where(['office_id'=>$office_id])->get()->getRow()->fk_context_definition_id;
+
+    //Get reporting_context_id and name
+    switch($context_definition_id) {
+      case 1:
+         $table_name='context_center';
+         $context_reporting_column_name='fk_context_cluster_id';
+         break;
+      case 2:
+        $table_name='context_cluster';
+        $context_reporting_column_name='fk_context_cohort_id';
+        break;
+      case 3: 
+        $table_name='context_cohort';
+        $context_reporting_column_name='fk_context_country_id';
+        break;
+      case 4:
+        $table_name='context_country';
+        $context_reporting_column_name='fk_context_region_id';
+        break;
+      case 5: 
+        $table_name='context_region';
+        $context_reporting_column_name='fk_context_global_id';
+        break;
+      case 6:
+        $table_name='context_global';
+        break;
+
+    }
+
+    //Get the join table and get the reporting context office 
+    $explode_to_column=explode('_', $context_reporting_column_name);
+    $join_table_name=$explode_to_column[1].'_'.$explode_to_column[2]; 
+    $join_column_id_str=$join_table_name.'.'.$join_table_name.'_id='.$table_name.'.'.$context_reporting_column_name;
+
+    $builder = $this->read_db->table($table_name);
+    $builder->select([$context_reporting_column_name,$join_table_name.'_name']);
+    $builder->join($join_table_name, $join_column_id_str);
+    $builder->where(array($table_name.'.'.'fk_office_id'=>$office_id));
+    $reporting_context = $builder->get()->getRowArray();
+
+    //Get the office record to edit
+    $builder = $this->read_db->table('office');
+    $builder->select(['office_id','office_name','office_code','office_description', 'office_start_date', 'office_is_active','office_is_readonly', 'office.fk_context_definition_id as fk_context_definition_id','context_definition_name', 'account_system_name','fk_account_system_id','fk_country_currency_id']);
+    $builder->join('context_definition', 'context_definition.context_definition_id=office.fk_context_definition_id');
+    $builder->join('account_system','account_system.account_system_id=office.fk_account_system_id');
+    $builder->where(['office_id'=>$office_id]);
+    $records_to_be_edited = $builder->get()->getRowArray();
+
+    //Merge the reporting office and the office records
+    $all_records_to_be_edited = array_merge($records_to_be_edited,$reporting_context);
+
+    return $all_records_to_be_edited;
+  }
+
+   /**
+   * Get ids and names columns details from the tables
+   * This method retrives combined ids
+   * @return Array - array
+   * @Author :Livingstone Onduso
+   * @Date: 07/08/2022
+   */
+
+   function retrieveIdsAndNamesRecords(Array $select_columns, string $table_name):array{
+    $builder = $this->read_db->table($table_name);
+    $builder->select($select_columns);
+    $context = $builder->get()->getResultArray();
+
+    $ids = array_column($context,$select_columns[0]);
+    $names = array_column($context,$select_columns[1]);
+    $combined_ids_and_names=array_combine($ids, $names);
+
+    return $combined_ids_and_names;
+
+
+  }
 }

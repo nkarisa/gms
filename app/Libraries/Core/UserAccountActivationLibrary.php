@@ -20,8 +20,10 @@ class UserAccountActivationLibrary extends GrantsLibrary
   }
 
   function additionalListColumns(): array {
-    $additionalListColumns = ['activate_or_reject_user'];
-    return ['positionAfter' => 'user_account_activation_id', 'columns' => $additionalListColumns];
+    $additionalListColumns = [
+      'activate_or_reject_user' => 'user_account_activation_id'
+    ];
+    return $additionalListColumns;
   }
 
   function formatColumnsValues(string $column, mixed $columnValue, array $rowArray): mixed
