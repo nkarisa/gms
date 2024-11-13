@@ -2478,7 +2478,7 @@ class GrantsLibrary
         foreach($columns as $newColumn){
             if($positionAfter != null){
               $refIndex = array_search($positionAfter, $selectedColumns);
-              array_splice($selectedColumns, $refIndex, 0, $newColumn);
+              array_splice($selectedColumns, $refIndex + 1, 0, $newColumn);
             }else{
               array_push($selectedColumns, $newColumn );
             }

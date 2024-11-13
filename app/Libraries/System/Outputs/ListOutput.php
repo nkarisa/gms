@@ -208,19 +208,19 @@ class ListOutput extends OutputTemplate
     ){
 
       ['positionAfter' => $positionAfter, 'columns' => $columns] = $additionalListColumns; 
-
+      
       if(!empty($columns)){
         foreach($columns as $newColumn){
             if($positionAfter != null){  
               $refIndex = array_search($positionAfter, $selectedColumns);
-              array_splice($selectedColumns, $refIndex, 0, $newColumn);
-              for($i = 0; $i <= count($selectedColumns); $i++){
+              array_splice($selectedColumns, $refIndex + 1, 0, $newColumn);
+              for($i = 0; $i <= count($selectedRecords); $i++){
                 if(isset($selectedRecords[$i])){
                   $keys = array_keys($selectedRecords[$i]);
-                  array_splice($keys, $refIndex, 0, $newColumn);
+                  array_splice($keys, $refIndex + 1, 0, $newColumn);
                   
                   $values = array_values($selectedRecords[$i]);
-                  array_splice($values, $refIndex, 0, get_phrase('value_set_set'));
+                  array_splice($values, $refIndex + 1, 0, get_phrase('value_set_set'));
         
                   $selectedRecords[$i] = array_combine($keys, $values);
                   }
@@ -235,7 +235,7 @@ class ListOutput extends OutputTemplate
         }
       }
     }
-    log_message('error', json_encode(compact("selectedRecords","selectedColumns")));    
+
     $selectedColumns = array_values($selectedColumns);
   }
 

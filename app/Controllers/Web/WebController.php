@@ -427,18 +427,17 @@ class WebController extends BaseController
     $records = [];
     $columns = $results['keys'];
 
-    // log_message('error', json_encode($results));
-
     $cnt = 0;
     foreach ($data as $row) {
       $cols = 0;
       $primary_key = 0;
       foreach ($columns as $column) {
+        
         if (substr($column, -2) === "id" && $column == strtolower($this->controller) . '_id') {
           $primary_key = $row[$column];
           continue;
         }
-
+        // log_message('error', json_encode($column));
         if (strpos($column, 'track_number') == true) {
           $track_number = '';
           if (
