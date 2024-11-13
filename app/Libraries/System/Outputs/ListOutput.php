@@ -235,7 +235,7 @@ class ListOutput extends OutputTemplate
         }
       }
     }
-    
+    log_message('error', json_encode(compact("selectedRecords","selectedColumns")));    
     $selectedColumns = array_values($selectedColumns);
   }
 

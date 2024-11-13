@@ -50,21 +50,21 @@ class UserAccountActivationLibrary extends GrantsLibrary
    * @return array
    * @Dated: 17/8/2023
    */
-  public function listTableVisibleColumns():array
-  {
-    $columns = [
-      'user_account_activation_id',
-      'user_account_activation_reject_reason',
-      'user_account_activation_name',
-      'user_email',
-      'role_name',
-      'user_works_for',
-      'user_account_activation_created_date',
-      'user_activator_ids'
-    ];
+  // public function listTableVisibleColumns():array
+  // {
+  //   $columns = [
+  //     'user_account_activation_id',
+  //     'user_account_activation_reject_reason',
+  //     'user_account_activation_name',
+  //     'user_email',
+  //     // 'role_name',
+  //     'user_works_for',
+  //     'user_account_activation_created_date',
+  //     'user_activator_ids'
+  //   ];
 
-    return $columns;
-  }
+  //   return $columns;
+  // }
 
     /**
    * get_users_for_activation(): returns an array of users to be activated by either admin/pf/super admins

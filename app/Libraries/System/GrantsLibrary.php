@@ -1788,7 +1788,8 @@ class GrantsLibrary
     $post_array = $this->actionBeforeInsert($post_array);
 
     if (!array_key_exists('header', $post_array)) {
-      return $this->response->setJSON(['flag' => false, 'message' => $post_array['message']]);
+      $message = get_phrase('add_operation_failed');
+      return $this->response->setJSON(['flag' => false, 'message' => isset($post_array['message']) ? $post_array['message'] : $message]);
     }
     //$detail = [];
     // Extract the post array into header and detail variables

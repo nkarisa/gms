@@ -30,21 +30,21 @@
 # DATABASE
 #--------------------------------------------------------------------
 
-# database.read.hostname = localhost
-# database.read.database = toolkit
-# database.read.username = admin
-# database.read.password = 
-# database.read.DBDriver = MySQLi
-# database.read.DBPrefix = 
-# database.read.port = 3306
+database.read.hostname = localhost
+database.read.database = toolkit
+database.read.username = admin
+database.read.password = 
+database.read.DBDriver = MySQLi
+database.read.DBPrefix = 
+database.read.port = 3306
 
-# database.write.hostname = localhost
-# database.write.database = toolkit
-# database.write.username = admin
-# database.write.password = 
-# database.write.DBDriver = MySQLi
-# database.write.DBPrefix =
-# database.write.port = 3306
+database.write.hostname = localhost
+database.write.database = toolkit
+database.write.username = admin
+database.write.password = 
+database.write.DBDriver = MySQLi
+database.write.DBPrefix =
+database.write.port = 3306
 
 # If you use MySQLi as tests, first update the values of Config\Database::$tests.
 # database.tests.hostname = localhost
@@ -86,5 +86,5 @@
 # AWS CREDENTIALS 
 #--------------------------------------------------------------------
 
-#AWS_CREDENTIALS_PROFILE=default-afr
-#AWS_DEFAULT_REGION=eu-west-1
+# aws.credentials_profile = <<YOUR AWS PROFILE>>
+# aws.region = <<YOUR AWS REGION>>
