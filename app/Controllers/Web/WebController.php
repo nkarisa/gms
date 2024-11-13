@@ -427,6 +427,8 @@ class WebController extends BaseController
     $records = [];
     $columns = $results['keys'];
 
+    // log_message('error', json_encode($results));
+
     $cnt = 0;
     foreach ($data as $row) {
       $cols = 0;

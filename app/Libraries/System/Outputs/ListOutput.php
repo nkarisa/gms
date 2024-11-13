@@ -179,11 +179,14 @@ class ListOutput extends OutputTemplate
       method_exists($featureLibrary, 'list')
       && is_array($featureLibrary->list($builder, $listSelectColumns, $this->parentId, $this->parentTable))
       && array_key_exists('results', $featureLibrary->list($builder, $listSelectColumns, $this->parentId, $this->parentTable))
+      && !empty($featureLibrary->list($builder, $listSelectColumns, $this->parentId, $this->parentTable)['result'])
     ) {
+      // log_message('error', 'Here');
       $feature_model_list_result = $featureLibrary->list($builder, $listSelectColumns, $this->parentId, $this->parentTable)['results'];
       // Allows empty result set
       $query_result = $feature_model_list_result; // A full user defined query result
     } else {
+      // log_message('error', 'There');
       // Get result from grants model if feature model list returns empty
       $query_result = $this->listInternalQueryResults($lookup_tables);
     }
@@ -258,12 +261,7 @@ class ListOutput extends OutputTemplate
     $keys = $this->libs->toggleListSelectColumns($this->parentTable);
     $table_body = $toggleListQueryResults['selected_results'];
     $fields_meta_data = $this->libs->fieldsMetaDataTypeAndName($this->controller);
-
-    // $k = $keys;
-    // $b = $table_body;
-
     $this->updateListCustomColumnsValues($fields_meta_data, $table_body, $keys);
-    // log_message('error', json_encode(compact('keys','fields_meta_data','table_body')));
 
     $total_records = $toggleListQueryResults['total_records'];
     $controller = $this->controller;
