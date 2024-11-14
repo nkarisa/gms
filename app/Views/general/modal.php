@@ -6,8 +6,8 @@
 </style>
 <script>
 
-    $(document).ready(function(){
-        $(".navbar-nav").find(".<?=$uri->getSegments()[0];?>").addClass("active");
+    $(document).ready(function () {
+        $(".navbar-nav").find(".<?= $uri->getSegments()[0]; ?>").addClass("active");
     });
 
     function getRequest(url, on_success) {
@@ -157,5 +157,39 @@
         $("#fav_menu_items").html(elements);
     }
 
-    
+   
+    function reload_datatable(customFields) {
+        const url = "<?= base_url("$controller/showList"); ?>"
+        if (typeof customFields === 'object') {
+            $(".datatable").dataTable().fnDestroy();
+            const datatable = $("#datatable").DataTable({
+                dom: 'lBfrtip',
+                "bDestroy": true,
+                buttons: [
+                    'copyHtml5',
+                    'excelHtml5',
+                    'csvHtml5',
+                    'pdfHtml5',
+                ],
+                pagingType: "full_numbers",
+                stateSave: true,
+                pageLength: 10,
+                order: [],
+                serverSide: true,
+                processing: true,
+                language: { processing: 'Loading ...' },
+                ajax: {
+                    url: url,
+                    type: "POST",
+                    "data": function (d) {
+                        d.customData = customFields
+                    }
+                }
+            });
+        }else{
+            console.log('Argument supplied must be an object');
+        }
+
+    }
+
 </script>

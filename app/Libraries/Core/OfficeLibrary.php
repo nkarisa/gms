@@ -218,7 +218,7 @@ class OfficeLibrary extends GrantsLibrary
 
 
     function dataTableCondition(\CodeIgniter\Database\BaseBuilder $builder, $dataFields){
-      $context_definition_id = $dataFields['fk_context_definition_id'];
+      $context_definition_id = $dataFields['context_definition_id'];
       $builder->where('office.fk_context_definition_id', $context_definition_id);
     }
 
@@ -233,7 +233,11 @@ class OfficeLibrary extends GrantsLibrary
           $columnValue = $columnValue == "0000-00-00" ? get_phrase('value_not_set') : $columnValue;
           break;
         case "mass_update":
-          $columnValue = '<div class="form-group"><input class="checkbox" type="checkbox" onclick="check_or_uncheck_checkbox()" name="office_ids[]"  id="'.$rowArray['office_id'].'"></div>';
+          $disabled = "";
+          if($rowArray["context_definition_name"] != "center"){
+            $disabled = "disabled";
+          }
+          $columnValue = '<div class="form-group"><input class="checkbox" '.$disabled.' type="checkbox" onclick="check_or_uncheck_checkbox()" name="office_ids[]"  id="'.$rowArray['office_id'].'"></div>';
           break;
         case "action":
           $userLibrary = new UserLibrary();
@@ -431,7 +435,104 @@ class OfficeLibrary extends GrantsLibrary
     $combined_ids_and_names=array_combine($ids, $names);
 
     return $combined_ids_and_names;
+  }
 
+  function add(){
+    $flag = false;
+    $message = 'Office creation failed';
+    $error_messages = [];
 
+    $this->write_db->transBegin();
+
+    $post = $this->request->getPost()['header'];
+
+    $office['office_name'] = $post['office_name'];
+    $office['office_description'] = $post['office_description'];
+    $office['office_code'] = $post['office_code'];
+    $office['fk_context_definition_id'] = $post['fk_context_definition_id'];
+    $office['office_start_date'] = $post['office_start_date'];
+    $office['fk_country_currency_id'] = $post['fk_country_currency_id'];
+    $office['office_is_active'] = $post['office_is_active'];
+    $office['fk_account_system_id'] = $post['fk_account_system_id'];
+    $office['fk_country_currency_id'] = $post['fk_country_currency_id'];
+
+    $office['office_is_readonly'] = 1;
+    //Modify this to 0 if the office==center
+    if($post['fk_context_definition_id']==1){
+      $office['office_is_readonly'] = 0;
+    }
+   
+    $office_to_insert = $this->mergeWithHistoryFields($this->controller, $office, false);
+    $this->write_db->table('office')->insert( $office_to_insert);
+
+    $error_messages['office']=$this->write_db->error();
+
+    $inserted_office_id = $this->write_db->insertId();
+
+    // Create an office context 
+    $context_definition = $this->read_db->table('context_definition')
+    ->where(array('context_definition_id' => $post['fk_context_definition_id']))->get()->getRow();
+
+    $context_definition_name = $context_definition->context_definition_name;
+
+    $reporting_context_definition_name = $this->getReportingOfficeContext($context_definition)->context_definition_name;
+
+    $reporting_context_definition_table = 'context_' . $reporting_context_definition_name;
+
+    $office_context['context_' . $context_definition_name . '_name'] = "Context for office " . $post['office_name'];
+    $office_context['context_' . $context_definition_name . '_description'] = "Context for office " . $post['office_name'];
+    $office_context['fk_' . $reporting_context_definition_table . '_id'] = $post['office_context'];
+    $office_context['fk_context_definition_id'] = $post['fk_context_definition_id'];
+    $office_context['fk_office_id'] = $inserted_office_id;
+
+    //echo json_encode($office_context);
+    $office_context_to_insert = $this->mergeWithHistoryFields('context_' . $context_definition_name, $office_context, false);
+
+    $this->write_db->table('context_' . $context_definition_name)->insert( $office_context_to_insert);
+
+    $error_messages['context'] = $this->write_db->error();
+
+    // Create office System Opening Balance Record
+    $system_opening_balance['system_opening_balance_name'] = 'Financial Opening Balance for ' . $post['office_name'];
+    $system_opening_balance['fk_office_id'] = $inserted_office_id;
+    $system_opening_balance['month'] = $post['office_start_date'];
+
+    $system_opening_balance_to_insert = $this->mergeWithHistoryFields('system_opening_balance', $system_opening_balance, false);
+
+    $this->write_db->table('system_opening_balance')->insert( $system_opening_balance_to_insert);
+
+    $error_messages['system_openning'] = $this->write_db->error();
+
+    if ($this->write_db->transStatus() == false) {
+      $this->write_db->transRollback();
+     alert_error_message($error_messages);
+      
+    } else {
+      $this->write_db->transCommit();
+      // Append office to user session after creating an office to allow user see the office immediately the create it without the need to log out
+      $hierarchy_offices = $this->session->hierarchy_offices;
+      array_push($hierarchy_offices, ['office_name' => $post['office_name'], 'office_id' => $inserted_office_id, 'office_is_active' => 1]);
+      $this->session->set(
+        'hierarchy_offices',
+        $hierarchy_offices
+      );
+      $flag = true;
+      $message = "Office inserted successfully ";
+
+    }
+
+    return $this->response->setJSON(compact('message', 'flag'));
+  }
+
+  function getReportingOfficeContext($context_definition)
+  {
+
+    $reporting_context_definition_level = $context_definition->context_definition_level + 1;
+
+    $reporting_context_definition = $this->read_db->table('context_definition')
+    ->where(array('context_definition_level' => $reporting_context_definition_level)
+    )->get()->getRow();
+
+    return $reporting_context_definition;
   }
 }

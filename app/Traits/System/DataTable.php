@@ -52,15 +52,8 @@ trait DataTable {
             $builder->groupEnd();
         }
 
-        $post = $this->request->getPost();
-        $customFields = [];
-
-        foreach($post as $key => $value) {
-            if (str_starts_with($key, "customfield_")) {
-                $customFields[substr($key, 12)] = $value;
-            }
-        }
-
+        $customFields = $this->request->getPost("customData");
+       
         if(!empty($customFields)) {
             $this->checkDataTableCondition($builder, $customFields);
         }

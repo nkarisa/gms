@@ -28,7 +28,32 @@ class Database extends Config
      * @var array<string, mixed>
      */
 
-    public array $default = [];
+    public array $default = [
+
+        'DSN'          => '',
+        'hostname'     => '',
+        'username'     => '',
+        'password'     => '',
+        'database'     => '',
+        'DBDriver'     => 'MySQLi',
+        'DBPrefix'     => '',
+        'pConnect'     => false,
+        'DBDebug'      => true,
+        'charset'      => 'utf8mb4',
+        'DBCollat'     => 'utf8mb4_general_ci',
+        'swapPre'      => '',
+        'encrypt'      => false,
+        'compress'     => false,
+        'strictOn'     => false,
+        'failover'     => [],
+        'port'         => 3306,
+        'numberNative' => false,
+        'dateFormat'   => [
+            'date'     => 'Y-m-d',
+            'datetime' => 'Y-m-d H:i:s',
+            'time'     => 'H:i:s',
+        ],
+    ];
     public array $read = [];
     public array $write = [];
 
@@ -180,85 +205,30 @@ class Database extends Config
             $this->defaultGroup = 'tests';
         }
 
-        $this->default = [
+        $this->default = [...$this->default,
             'DSN'          => 'mysql:host='.env("database.default.hostname").';dbname='.env("database.default.database"),
             'hostname'     => env("database.default.hostname"),
             'username'     => env("database.default.username"),
             'password'     => env("database.default.password"),
-            'database'     => env("database.default.database"),
-            'DBDriver'     => 'MySQLi',
-            'DBPrefix'     => '',
-            'pConnect'     => false,
-            'DBDebug'      => true,
-            'charset'      => 'utf8mb4',
-            'DBCollat'     => 'utf8mb4_general_ci',
-            'swapPre'      => '',
-            'encrypt'      => false,
-            'compress'     => false,
-            'strictOn'     => false,
-            'failover'     => [],
-            'port'         => 3306,
-            'numberNative' => false,
-            'dateFormat'   => [
-                'date'     => 'Y-m-d',
-                'datetime' => 'Y-m-d H:i:s',
-                'time'     => 'H:i:s',
-            ],
+            'database'     => env("database.default.database")
         ];
 
-        $this->read = [
+        $this->read = [...$this->default, 
             'DSN'          => 'mysql:host='.env("database.read.hostname").';dbname='.env("database.read.database"),
             'hostname'     => env("database.read.hostname"),
             'username'     => env("database.read.username"),
             'password'     => env("database.read.password"),
-            'database'     => env("database.read.database"),
-            'DBDriver'     => 'MySQLi',
-            'DBPrefix'     => '',
-            'pConnect'     => false,
-            'DBDebug'      => true,
-            'charset'      => 'utf8mb4',
-            'DBCollat'     => 'utf8mb4_general_ci',
-            'swapPre'      => '',
-            'encrypt'      => false,
-            'compress'     => false,
-            'strictOn'     => false,
-            'failover'     => [],
-            'port'         => 3306,
-            'numberNative' => false,
-            'dateFormat'   => [
-                'date'     => 'Y-m-d',
-                'datetime' => 'Y-m-d H:i:s',
-                'time'     => 'H:i:s',
-            ],
+            'database'     => env("database.read.database")
         ];
 
 
-        $this->write = [
+        $this->write = [...$this->default,
             'DSN'          => 'mysql:host='.env("database.write.hostname").';dbname='.env("database.write.database"),
             'hostname'     => env("database.write.hostname"),
             'username'     => env("database.write.username"),
             'password'     => env("database.write.password"),
             'database'     => env("database.write.database"),
-            'DBDriver'     => 'MySQLi',
-            'DBPrefix'     => '',
-            'pConnect'     => false,
-            'DBDebug'      => true,
-            'charset'      => 'utf8mb4',
-            'DBCollat'     => 'utf8mb4_general_ci',
-            'swapPre'      => '',
-            'encrypt'      => false,
-            'compress'     => false,
-            'strictOn'     => false,
-            'failover'     => [],
-            'port'         => 3306,
-            'numberNative' => false,
-            'dateFormat'   => [
-                'date'     => 'Y-m-d',
-                'datetime' => 'Y-m-d H:i:s',
-                'time'     => 'H:i:s',
-            ],
         ];
-
 
     }
 }

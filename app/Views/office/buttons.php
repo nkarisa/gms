@@ -76,7 +76,7 @@ if ($session->system_admin) {
     <?php } ?>
   </div>
 
-  <div class="col-xs-12" style = "margin-top: 30px;">
+  <div class="col-xs-12 hidden" id = "select_cluster_to_move" style = "margin-top: 30px;">
     <div class='col-xs-4'>
       <!-- Populate clusters for enabling mass update of moving fcp to clusters -->
       <select id="cluster" name="header[fk_cluster_id]"

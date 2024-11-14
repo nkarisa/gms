@@ -784,3 +784,36 @@ if(!function_exists('decode_setting')){
         }
     }
 }
+
+
+if (!function_exists('combine_name_with_ids')) {
+    function combine_name_with_ids($office_names_and_ids_arr, $id_field_name, $name_field_name)
+    {
+        $names_and_ids_arr_without_context_for_office_part=[];    
+        foreach ($office_names_and_ids_arr as $name_and_ids) {
+
+            if(strpos($name_and_ids[$name_field_name],'office')){
+                $explode_to_remove_context_office_of_part = explode('Context for office', $name_and_ids[$name_field_name]);
+
+                $name_and_ids[$name_field_name] = $explode_to_remove_context_office_of_part[1];
+
+                $names_and_ids_arr_without_context_for_office_part[] = $name_and_ids;
+            }else{
+                $names_and_ids_arr_without_context_for_office_part[] = $name_and_ids;
+            }
+
+        }
+
+        $names = array_column($names_and_ids_arr_without_context_for_office_part, $name_field_name);
+        $ids = array_column($names_and_ids_arr_without_context_for_office_part, $id_field_name);
+        return array_combine($ids, $names);
+    }
+}
+
+if (!function_exists('alert_error_message')) {
+    function alert_error_message($error_messages)
+    {
+        $messages = array_column($error_messages, 'message');
+        array_walk($messages, 'create_error_message');
+    }
+}
