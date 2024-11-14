@@ -167,15 +167,42 @@
   function reset_form() {
     $('input').val(null);
     $("#fk_context_definition_id").val(null).attr('selected', true);
-
     $("#fk_account_system_id").val(0).prop('selected', true);
     $("#office_description").val(null);
-
     $("#office_context").empty().prop('disabled', 'disabled');
-
     $('#unit').val('21');
-
   }
+
+
+  $(document).on('click','.suspend', function () {
+  const btn = $(this)
+  const suspension_status = btn.data('suspension_status');
+  const office_id = btn.data('office_id')
+  const data = {office_id, suspension_status}
+  const url = '<?=base_url();?>ajax/office/suspend_office'
+
+  const cnf = confirm('<?=get_phrase('confirm_suspension','Are you sure you want to perform this action?');?>');
+
+  if(!cnf){
+    alert('<?=get_phrase('process_aborted');?>');
+    return false;
+  }
+
+  $.post(url, data, function (response) {
+    // console.log(response);
+    if(response.flag){
+      btn.removeClass('btn-success')
+      btn.addClass('btn-danger')
+      btn.html('Suspend')
+      btn.data('suspension_status',0)
+    }else{
+      btn.addClass('btn-success')
+      btn.removeClass('btn-danger')
+      btn.html('Unsuspend')
+      btn.data('suspension_status',1)
+    }
+  })
+})
 
 
   function onchange_fk_context_definition_id(elem) {

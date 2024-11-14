@@ -122,4 +122,32 @@ class Office extends WebController
     return $this->response->setJSON(array('office_context' => $office_context));
   }
 
+  function suspend_office(){
+    $post = $this->request->getPost();
+    $office_id = $post['office_id'];
+    $suspension_status = $post['suspension_status'];
+    $flag = false;
+    $message = get_phrase('office_suspension_failed');
+
+    $this->write_db->transStart();
+    $status_to_update = $suspension_status == 0 ? 1 : 0;
+    
+    $data['office_is_suspended'] = $status_to_update;
+    $builder = $this->write_db->table('office');
+    $builder->where(array('office_id' => $office_id));
+    $builder->update($data);
+
+    $projectAllocationLibrary = new \App\Libraries\Grants\ProjectAllocationLibrary();
+    $projectAllocationLibrary->deactivateDefaultAllocation($office_id, $suspension_status);
+
+    $this->write_db->transComplete();
+      
+    if($this->write_db->transStatus() == true){
+      $flag = true;
+      $message = get_phrase('office_suspension_success');
+    }
+
+    return $this->response->setJSON(compact('flag','message'));
+  }
+
 }
