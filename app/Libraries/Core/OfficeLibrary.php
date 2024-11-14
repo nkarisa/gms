@@ -227,7 +227,6 @@ class OfficeLibrary extends GrantsLibrary
     }
 
     function formatColumnsValues(string $columnName, mixed $columnValue, array $rowArray): mixed {
-      
       switch($columnName){
         case "office_end_date":
           $columnValue = $columnValue == "0000-00-00" ? get_phrase('value_not_set') : $columnValue;
