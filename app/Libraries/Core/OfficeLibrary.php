@@ -534,4 +534,5 @@ class OfficeLibrary extends GrantsLibrary
 
     return $reporting_context_definition;
   }
+
 }

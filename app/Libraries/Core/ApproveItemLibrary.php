@@ -64,10 +64,11 @@ class ApproveItemLibrary extends GrantsLibrary
 
 
             // Insert the new approveable item into the database
-            $this->approveItemModel->insert((object) $data);
+            $builder = $this->write_db->table("approve_item");
+            $builder->insert($data);
 
             // Get the ID of the newly inserted approveable item
-            $approve_item_id = $this->approveItemModel->getInsertID();
+            $approve_item_id = $this->write_db->insertID();
         } else {
             // If an existing approveable item is found, get its ID
             $approve_item = $approve_items->getRow();

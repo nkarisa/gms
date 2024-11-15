@@ -44,10 +44,11 @@ class ApprovalFlowLibrary extends GrantsLibrary
         $approval_flow_data['approval_flow_last_modified_by'] = $user_id;
 
         // Insert the approval flow record into the database
-        $this->approvalFlowModel->insert((object) $approval_flow_data);
+        $builder = $this->write_db->table('approval_flow');;
+        $builder->insert($approval_flow_data);
 
         // Return the ID of the newly inserted record
-        return $this->approvalFlowModel->getInsertID();
+        return $this->write_db->insertID();
     }
 
     function detailTables(): array {

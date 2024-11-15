@@ -30,10 +30,10 @@ class Routing extends BaseRouting
      */
     public array $routeFiles = [
         APPPATH . 'Config/Routes.php',
-        APPPATH . 'Routes/Web/Core/Routes.php',
-        APPPATH . 'Routes/Web/Grants/Routes.php',
-        APPPATH . 'Routes/Api/Core/Routes.php',
-        APPPATH . 'Routes/Api/Grants/Routes.php',
+        APPPATH . 'Routes/Web/CoreRoutes.php',
+        APPPATH . 'Routes/Web/GrantsRoutes.php',
+        APPPATH . 'Routes/Api/CoreRoutes.php',
+        APPPATH . 'Routes/Api/GrantsRoutes.php',
     ];
 
     /**
@@ -98,7 +98,7 @@ class Routing extends BaseRouting
      *
      * If FALSE, will stop searching and do NO automatic routing.
      */
-    public bool $autoRoute = true;
+    public bool $autoRoute = false;
 
     /**
      * For Defined Routes.

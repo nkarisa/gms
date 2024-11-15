@@ -42,10 +42,6 @@ class ApprovalLibrary extends GrantsLibrary
             'fk_status_id' => $statusLibrary->initialItemStatus($approveable_item)
         ];
 
-        // Insert approval record
-        // $this->approvalModel->insert((object) $approval);
-        // $insert_id = $this->approvalModel->getInsertID();
-
         $builder = $this->write_db->table('approval');
         $builder->insert($approval);
         $insert_id = $this->write_db->insertID();

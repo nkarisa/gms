@@ -10,6 +10,19 @@ use App\Controllers\Web\Core\Login;
 // Web routes
 
 $routes->get('/', [Login::class, 'index']);
+
+$routes->group('ajax/login', static function ($routes) {
+    $routes->post('(:segment)',[Login::class,'$1']);
+    $routes->post('(:segment)/(:any)',[Login::class,'$1/$2']);
+    $routes->post('(:segment)/(:any)/(:any)',[Login::class,'$1/$2/$3']);
+    $routes->post('(:segment)/(:any)/(:any)/(:any)',[Login::class,'$1/$2/$3/$4']);
+
+    $routes->get('(:segment)',[Login::class,'$1']);
+    $routes->get('(:segment)/(:any)',[Login::class,'$1/$2']);
+    $routes->get('(:segment)/(:any)/(:any)',[Login::class,'$1/$2/$3']);
+    $routes->get('(:segment)/(:any)/(:any)/(:any)',[Login::class,'$1/$2/$3/$4']);
+});
+
 $routes->group('login', static function ($routes) {
     $routes->get('logout', [Login::class, 'logout']);
     $routes->post('switch_user', [Login::class, 'switchUser']);
@@ -70,10 +83,10 @@ foreach ($modules as $module){
 
 // Ajax Routes 
 
-$routes->group('ajax', ['namespace' => 'App\Controllers\Web'], static function($routes){
-    $routes->post('/','WebController::ajax');
-    $routes->post('(:segment)','WebController::ajax');
-    $routes->get('(:segment)/(:segment)/(:any)','WebController::ajax/$1/$2/$3');
+$routes->group('ajaxRequest', ['namespace' => 'App\Controllers\Web'], static function($routes){
+    $routes->post('/','WebController::ajaxRequest');
+    $routes->post('(:segment)','WebController::ajaxRequest');
+    $routes->get('(:segment)/(:segment)/(:any)','WebController::ajaxRequest/$1/$2/$3');
 });
 
 // Api Routes
@@ -82,4 +95,4 @@ $routes->group('api/v1', ['namespace' => 'App\Controllers\Api'], static function
 });
 
 
-$routes->setAutoRoute(true);
+// $routes->setAutoRoute(true);

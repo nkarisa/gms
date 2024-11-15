@@ -94,10 +94,23 @@ class WebController extends BaseController
     $this->segments = $this->uri->getSegments();
 
     $this->controller = isset($this->segments[0]) ? $this->segments[0] : 'dashboard';
-    $this->action = isset($this->segments[1]) && !$this->request->isAJAX() ? $this->segments[1] : 'list';
-    $this->id = isset($this->segments[2]) && !$this->request->isAJAX() ? $this->segments[2] : 0;
-    $this->subAction = isset($this->segments[4]) && !$this->request->isAJAX() ? $this->segments[4] : null;
+    $this->action = isset($this->segments[1]) ? $this->segments[1] : 'list';
+    $this->id = isset($this->segments[2]) ? $this->segments[2] : 0;
+    $this->subAction = isset($this->segments[4]) ? $this->segments[4] : null;
 
+    if($this->request->isAJAX()){
+      if($this->controller == "ajax" || $this->controller == "ajaxRequest"){
+        $this->controller = isset($this->segments[1]) ? $this->segments[1] : 'dashboard';
+      }
+
+      if($this->action == "showList"){
+        $this->action = 'list';
+      }
+      // $this->action = null;
+      // $this->id = null;
+      // $this->subAction = null;
+    }
+    
     // Only run these if not cli request
     if (!is_cli()) {
       $this->sessionBasedConstructorSet();
@@ -210,8 +223,20 @@ class WebController extends BaseController
    */
   private function page_title(): string
   {
-    $title = $this->action == 'list' ? $this->action . '_' . plural($this->controller) : $this->action . '_' . plural($this->controller);
-    return get_phrase($title);
+    $title = service("settings")->get('GrantsConfig.systemName');//$this->action == 'list' ? humanize($this->action) . '_' . plural($this->controller) : humanize($this->action) . '_' . $this->controller;
+    
+    $plural = get_phrase(underscore(plural(humanize($this->controller))), plural(humanize($this->controller)));
+    $singular = get_phrase($this->controller, humanize($this->controller));
+
+    if($this->action == 'list'){
+      $title = get_phrase('list') . ' ' . $plural;
+    }elseif($this->action == 'singleFormAdd' || $this->action == 'multiFormAdd'){
+      $title = get_phrase('add') . ' ' . $singular;
+    }else{
+      $title = get_phrase($this->action) . ' ' . $singular;
+    }
+
+    return $title;
   }
 
   /**
@@ -489,7 +514,7 @@ class WebController extends BaseController
    * @param array $args
    * @return \CodeIgniter\HTTP\ResponseInterface
    */
-  public function ajax(?string $controller = "", ?string $method = "", ...$args): ResponseInterface
+  public function ajaxRequest(?string $controller = "", ?string $method = "", ...$args): ResponseInterface
   {
     // Post keys should be: controller, method and data
     // All ajax request will be received here and passed to library of a controller

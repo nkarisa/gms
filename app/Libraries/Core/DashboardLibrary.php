@@ -26,16 +26,16 @@ class DashboardLibrary extends GrantsLibrary
             'message' => 'Dashboard data fetched successfully',
             'data' => $data,
             'dashboards' => [
-                // 'total_users' => $this->dashboardModel->countAll(),
-                // 'total_grants' => $this->dashboardModel->getTotalGrants(),
-                // 'total_funds' => $this->dashboardModel->getTotalFunds(),
-                // 'total_projects' => $this->dashboardModel->getTotalProjects(),
-                // 'total_applications' => $this->dashboardModel->getTotalApplications(),
-                // 'total_funds_transferred' => $this->dashboardModel->getTotalFundsTransferred(),
-                // 'total_financial_reports' => $this->dashboardModel->getTotalFinancialReports(),
-                // 'total_vouchers' => $this->dashboardModel->getTotalVouchers(),
-                // 'total_voucher_details' => $this->dashboardModel->getTotalVoucherDetails(),
-                // 'total_grants_pending' => $this->dashboardModel->getTotalGrantsPending(),
+                // 'total_users' => $dashboardLibrary->countAll(),
+                // 'total_grants' => $dashboardLibrary->getTotalGrants(),
+                // 'total_funds' => $dashboardLibrary->getTotalFunds(),
+                // 'total_projects' => $dashboardLibrary->getTotalProjects(),
+                // 'total_applications' => $dashboardLibrary->getTotalApplications(),
+                // 'total_funds_transferred' => $dashboardLibrary->getTotalFundsTransferred(),
+                // 'total_financial_reports' => $dashboardLibrary->getTotalFinancialReports(),
+                // 'total_vouchers' => $dashboardLibrary->getTotalVouchers(),
+                // 'total_voucher_details' => $dashboardLibrary->getTotalVoucherDetails(),
+                // 'total_grants_pending' => $dashboardLibrary->getTotalGrantsPending(),
             ]
         ];
 

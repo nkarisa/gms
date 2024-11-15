@@ -96,7 +96,7 @@
   $("#fk_context_definition_id").on('change', function () {
     $(".btn-save,.btn-save-new").removeClass('disabled');
 
-    let url = "<?= base_url(); ?>office/responsesForContextDefinition";
+    let url = "<?= base_url("ajax/office/responsesForContextDefinition"); ?>";
     let data = {
       'context_definition_id': $(this).val()
     };

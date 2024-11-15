@@ -334,7 +334,7 @@ class MenuLibrary extends GrantsLibrary
 
     public function setMenuSessions()
     {
-        $menus = $this->getMenuItems(); // $this->menuModel->getAllTables();
+        $menus = $this->getMenuItems(); 
         $newMenuItems = $this->newMenuItems();
 
         if (!empty($newMenuItems)) {

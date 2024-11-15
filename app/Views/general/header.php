@@ -146,7 +146,7 @@
 
 	$(".language_selector").on('click', function () {
 		const lang = $(this).attr('id');
-		const url = "<?=site_url("language/switch_language");?>/" + lang;
+		const url = "<?=site_url("ajax/language/switchLanguage");?>/" + lang;
 	
 		$.ajax({
 			url: url,

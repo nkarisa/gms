@@ -55,6 +55,16 @@ class GrantsLibrary
     $this->action = isset($segments[1]) && !$this->request->isAJAX() ? $segments[1] : 'list';
     $this->id = isset($segments[2]) && !$this->request->isAJAX() ? $segments[2] : 0;
 
+    // if($this->request->isAJAX()){
+      if($this->controller == "ajax" || $this->controller == "ajaxRequest"){
+        $this->controller = isset($segments[1]) ? $segments[1] : 'dashboard';
+      }
+
+      if($this->action == "showList"){
+        $this->action = 'list';
+      }
+    // }
+
     // Session 
     $this->session = service('session');
 

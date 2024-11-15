@@ -47,7 +47,7 @@ trait UserSelfCreation {
         //Get password inputted and check for password complexity.
         $password = $this->request->getPost('password');
         $un_allowed_password = [];
-
+        
         if($password){
             if (strlen($password) < 8) {
                 $un_allowed_password[] = "Password must be more than 8 characters!";

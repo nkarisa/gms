@@ -163,14 +163,15 @@ class StatusLibrary extends GrantsLibrary
     {
         $status_id = 0;
 
+        $builder = $this->read_db->table('status');
         // Check if the status already exists in the database
-        $existing_status = $this->statusModel->where([
+        $existing_status = $builder->where([
             'fk_approval_flow_id' => $approval_flow_id,
             'status_approval_sequence' => $status_approval_sequence,
             'status_backflow_sequence' => $status_backflow_sequence,
             'status_approval_direction' => $status_approval_direction,
             'status_is_requiring_approver_action' => $status_is_requiring_approver_action
-        ])->first();
+        ])->get()->getRow();
 
         // If the status does not exist, insert a new record
         if (empty($existing_status)) {
@@ -189,8 +190,8 @@ class StatusLibrary extends GrantsLibrary
                 'status_last_modified_by' => $user_id
             ];
 
-            $this->statusModel->insert($data);
-            $status_id = $this->statusModel->getInsertID();
+            $this->write_db->table("status")->insert($data);
+            $status_id = $this->write_db->insertID();
         } else {
             // If the status already exists, return its ID
             $status_id = $existing_status['status_id'];
@@ -213,7 +214,7 @@ class StatusLibrary extends GrantsLibrary
     function insertInitialAndFinalStatus($approval_flow_id, $user_id)
     {
         // Insert initial status record
-        $initial_status_id = $this->insertStatus($user_id, get_phrase('ready_to_submit'), $approval_flow_id, 1, 0, 1, 1);
+        // $initial_status_id = $this->insertStatus($user_id, get_phrase('ready_to_submit'), $approval_flow_id, 1, 0, 1, 1);
 
         // Insert fully approved status
         $fully_approved_status_id = $this->insertStatus($user_id, get_phrase('fully_approved'), $approval_flow_id, 2, 0, 1, 0);
@@ -242,7 +243,7 @@ class StatusLibrary extends GrantsLibrary
         // Ensure the approve item name length is greater than 2
         if (strlen($approveItemName) > 2) {
             // Start a database transaction
-            $this->statusModel->transBegin();
+            $this->write_db->transBegin();
 
             // Retrieve the user ID from session or use 1 as a default
             $userId = session()->get('user_id') ?? 1;
@@ -283,11 +284,11 @@ class StatusLibrary extends GrantsLibrary
             }
 
             // Complete the transaction and handle errors
-            if ($this->statusModel->transStatus() === false) {
-                $this->statusModel->transRollback();
+            if ($this->write_db->transStatus() === false) {
+                $this->write_db->transRollback();
                 throw new \Exception("Error occurred when creating missing status", 500);
             } else {
-                $this->statusModel->transCommit();
+                $this->write_db->transCommit();
                 return true;
             }
         } else {

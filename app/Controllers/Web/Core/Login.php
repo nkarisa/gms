@@ -12,10 +12,10 @@ use App\Libraries\System\AwsParameterStoreLibrary as AwsParameterStore;
 
 class Login extends WebController
 {
+    use \App\Traits\Core\UserSelfCreation;
+
     private string $system_name;
     private string $system_title;
-
-    use \App\Traits\Core\UserSelfCreation;
 
     function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
     {
@@ -105,9 +105,9 @@ class Login extends WebController
         // Set the user array
         if (($password != '' && !$is_user_switch) || !$is_user_switch) {
             $password = $this->password_salt($password);
-            $user = $this->libs->loadLibrary('user')->getUserInfo(['user_email' => $email, 'user_is_active' => 1, 'user_password' => $password]);// $userModel->search(array('user_email' => $email, 'user_is_active' => 1, 'user_password' => $password), true);
+            $user = $this->libs->loadLibrary('user')->getUserInfo(['user_email' => $email, 'user_is_active' => 1, 'user_password' => $password]);
         } else {
-            $user = $this->libs->loadLibrary('user')->getUserInfo(['user_email' => $email, 'user_is_active' => 1]);// $userModel->search(array('user_email' => $email, 'user_is_active' => 1), true);
+            $user = $this->libs->loadLibrary('user')->getUserInfo(['user_email' => $email, 'user_is_active' => 1]);
         }
 
         // Create user session or invalidate user
@@ -316,5 +316,27 @@ class Login extends WebController
         return  $this->response->setJSON($resp);
     }
 
+    function verifyPasswordComplexity(): ResponseInterface
+    {
+        //Get password inputted and check for password complexity.
+        $password = $this->request->getPost('password');
+        $un_allowed_password = [];
+        
+        if($password){
+            if (strlen($password) < 8) {
+                $un_allowed_password[] = "Password must be more than 8 characters!";
+            }
+            if (!preg_match("#[0-9]+#", $password)) {
+                $un_allowed_password[] = "Password must include at least one number!";
+            }
+            if (!preg_match('/(?=.*[a-z])(?=.*[A-Z])/', $password)) {
+                $un_allowed_password[] = "Password must have a lower and caps letters!";
+            }
+            if (!preg_match('@[^\w]@', $password)) {
+                $un_allowed_password[] = "Password must include at least one a special character!";
+            }
+        }
 
+        return $this->response->setJSON($un_allowed_password);
+    }
 }
