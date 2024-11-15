@@ -798,7 +798,7 @@ class GrantsLibrary
   {
 
     if ($this->checkIfTableHasOfficeRelationship($table)) {
-      $builder->whereIn('fk_office_id', array_column($this->session->hierarchy_offices,'office_id'));
+      $builder->whereIn("$table.fk_office_id", array_column($this->session->hierarchy_offices,'office_id'));
     }
   }
   

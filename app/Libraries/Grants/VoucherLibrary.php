@@ -544,4 +544,31 @@ class VoucherLibrary extends GrantsLibrary
  
          return $voucher_to_edit;
      }
+
+
+     function listTableVisibleColumns(): array
+     {
+       $columns = [
+         'voucher_id',
+         'voucher_track_number',
+         'voucher_number',
+         'voucher_description',
+         'voucher_date',
+         'voucher_cheque_number',
+         'voucher_is_reversed',
+         'voucher_created_date',
+         'office_name',
+         'voucher_type_name',
+         'status_name',       
+       ];
+   
+       return $columns;
+     }
+
+    //  function listTableWhere(\CodeIgniter\Database\BaseBuilder $queryBuilder): void {
+    //     if(!$this->session->system_admin){
+    //         $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+    //         $queryBuilder->where(['voucher.fk_status_id' => $statusLibrary->getMaxApprovalStatusId($this->controller)]);
+    //     }
+    //  }
 }
