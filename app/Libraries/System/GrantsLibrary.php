@@ -2592,4 +2592,16 @@ class GrantsLibrary
       $library->dataTableCondition($builder, $customFields);
     }
   }
+
+  function getTypeNameById($type, $type_id = '', $field = '')
+  {
+    $field = $field == '' ? $type . '_name' : $field;
+    $builder = $this->read_db->table($type);
+    $queryResult = $builder->getWhere( array($type . '_id' => $type_id));
+    if ($queryResult->getNumRows() > 0) {
+      return $queryResult->getRow()->$field;
+    } else {
+      return "";
+    }
+  }
 }

@@ -817,3 +817,17 @@ if (!function_exists('alert_error_message')) {
         array_walk($messages, 'create_error_message');
     }
 }
+
+if (!function_exists('is_office_in_context_offices')) {
+    function is_office_in_context_offices($office_id)
+    {
+        return in_array($office_id, array_column(session()->context_offices, 'office_id'));
+    }
+}
+
+if(!function_exists('get_related_voucher')){
+    function get_related_voucher($voucher_id){
+        $db = \Config\Database::connect();
+        return $db->table("voucher")->getWhere(array('voucher_id'=>$voucher_id))->getRow()->voucher_number;
+    }
+}

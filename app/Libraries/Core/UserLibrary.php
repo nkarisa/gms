@@ -1042,7 +1042,6 @@ class UserLibrary extends GrantsLibrary
 
     function getUserContextOffices(int $user_id)
     {
-
         $contextDefinitionLibrary = new \App\Libraries\Core\ContextDefinitionLibrary();
         $context_defs = $contextDefinitionLibrary->contextDefinitions();
 

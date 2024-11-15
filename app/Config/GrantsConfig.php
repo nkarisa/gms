@@ -45,4 +45,6 @@ class GrantsConfig extends BaseConfig
     public $s3_bucket_name = "fms-bucket";
     public $max_count_of_favorites_menu_items = 10;
     public $maintenance_mode = false;
+    public $allow_skipping_of_cheque_leaves = true;
+    public $use_voucher_type_abbreviation = true;
 }

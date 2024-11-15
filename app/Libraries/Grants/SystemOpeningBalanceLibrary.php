@@ -16,9 +16,7 @@ class SystemOpeningBalanceLibrary extends GrantsLibrary
 
         $this->grantsModel = new SystemOpeningBalanceModel();
 
-        $this->table = 'grants';
+        $this->table = 'system_opening_balance';
     }
-
-
    
 }

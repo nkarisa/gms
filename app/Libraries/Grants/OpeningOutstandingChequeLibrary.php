@@ -18,7 +18,5 @@ class OpeningOutstandingChequeLibrary extends GrantsLibrary
 
         $this->table = 'grants';
     }
-
-
    
 }

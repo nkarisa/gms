@@ -155,7 +155,9 @@ class Login extends WebController
             'hierarchy_offices' => $userLibrary->userHierarchyOffices($user_id),
             'data_privacy_consented' => $userLibrary->dataPrivacyConsented($user_id),
             'role_status' => $userLibrary->actionableRoleStatus(array_keys($userLibrary->userRoleIds($user_id, true))),
+            'context_offices' =>$userLibrary->getUserContextOffices($user_id),
         ];
+
 
         if ($is_user_switch && !$this->session->has('primary_user_data')) {
             // Session for the primary user

@@ -125,6 +125,9 @@ class WebController extends BaseController
       $this->library = $this->libs->loadLibrary($this->controller);
     }
 
+    $this->read_db->query("SET sql_mode = ''");
+    $this->read_db->query("SET sql_mode = ''");
+    $this->read_db->query("SET sql_mode = ''");
   }
 
 
