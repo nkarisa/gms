@@ -65,6 +65,9 @@ class ListOutput extends OutputTemplate
       $featureLibrary->$where_method($builder);
     }
 
+    $this->libs->joinTablesWithOffice($builder, $table);
+
+
     // Handle lookup tables and joins
     if (is_array($lookup_tables) && count($lookup_tables) > 0) {
       foreach ($lookup_tables as $lookup_table) {
@@ -122,6 +125,7 @@ class ListOutput extends OutputTemplate
     );
 
     $this->libs->dataTableBuilder($builder, $table, $selected_columns);
+
     $builder->select($selected_columns);
     // log_message('error', $builder->getCompiledSelect());
     return $builder->get()->getResultArray();

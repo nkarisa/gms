@@ -973,4 +973,24 @@ class StatusLibrary extends GrantsLibrary
     $this->write_db->table('history')->insert($update_data);
   }
 
+  function getApprovalStepsForAccountSystemApproveItem($account_system_id, $approveable_item_name){
+    $builder = $this->read_db->table("status");
+    $builder->select(array('status_id','status_name','status_signatory_label','status_approval_sequence','status_approval_direction'));
+    $builder->where(array('fk_account_system_id' => $account_system_id, 'approve_item_name' => $approveable_item_name));
+    $builder->where(array('status_is_requiring_approver_action' => 1));
+    $builder->whereIn('status_approval_direction', [1]);
+    $builder->join('approval_flow','approval_flow.approval_flow_id=status.fk_approval_flow_id');
+    $builder->join('approve_item','approve_item.approve_item_id=approval_flow.fk_approve_item_id');
+    $builder->orderBy('status_approval_sequence','ASC');
+    $status_obj = $builder->get();
+
+    $status = [];
+
+    if($status_obj->getNumRows() > 0){
+      $status = $status_obj->getResultArray();
+    }
+
+    return $status;
+  }
+
 }

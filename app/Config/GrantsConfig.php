@@ -47,4 +47,6 @@ class GrantsConfig extends BaseConfig
     public $maintenance_mode = false;
     public $allow_skipping_of_cheque_leaves = true;
     public $use_voucher_type_abbreviation = true;
+    public $use_default_logo = false;
+    public $append_office_code_to_voucher_number = true;
 }

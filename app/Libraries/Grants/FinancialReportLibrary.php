@@ -590,4 +590,14 @@ class FinancialReportLibrary extends GrantsLibrary
         return $computed_cash_at_bank;
     }
 
+    function computeCashAtHand($office_ids, $reporting_month, $project_ids = [], $office_bank_ids = [], $office_cash_id = 0, $retrieve_only_max_approved = true)
+    {
+      $cash_transactions_to_date = $this->cashTransactionsToDate($office_ids, $reporting_month, $project_ids, $office_bank_ids, $office_cash_id, $retrieve_only_max_approved); 
+      $opening_cash_balance = $this->openingCashBalance($office_ids, $reporting_month, $project_ids, $office_bank_ids, $office_cash_id)['cash'];
+      $cash_income_to_date = isset($cash_transactions_to_date['cash']['income']) ? $cash_transactions_to_date['cash']['income'] : 0; 
+      $cash_expenses_to_date = isset($cash_transactions_to_date['cash']['expense']) ? $cash_transactions_to_date['cash']['expense'] : 0; 
+  
+      return $opening_cash_balance + $cash_income_to_date - $cash_expenses_to_date;
+    }
+
 }

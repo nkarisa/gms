@@ -831,3 +831,41 @@ if(!function_exists('get_related_voucher')){
         return $db->table("voucher")->getWhere(array('voucher_id'=>$voucher_id))->getRow()->voucher_number;
     }
 }
+
+if (!function_exists('show_logo')) {
+    function show_logo($office_id)
+    {
+        $logo = "";
+        if (!service("settings")->get('GrantsConfig.use_default_logo') && file_exists( "/uploads/office_logos/" . $office_id . ".png")) {
+            $logo = '<img src="' . base_url() . 'uploads/office_logos/' . $office_id . '.png"  style="max-height:150px;" alt="Logo"/>';
+        } else {
+            //$logo = '<img src="' . base_url() . 'uploads/logo.png"  style="max-height:150px;" alt="Logo"/>';
+        }
+        return $logo;
+    }
+}
+
+if(!function_exists('format_date')){
+    function format_date($mysql_date_format, $format = 'uk'){
+        // format can be uk, us
+        // Replace the $format with a user session for locale
+        $date = new DateTime($mysql_date_format);
+        $formatted_date = '';
+
+        if($format == 'us'){
+            $formatted_date = $date->format('m/d/Y');
+        }else{
+            $formatted_date = $date->format('d/m/Y');
+        }
+
+        return $formatted_date;
+    }
+}
+
+if(!function_exists('approval_steps')){
+    function approval_steps($account_system_id, $approveable_item_name){   
+        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+        $approval_steps = $statusLibrary->getApprovalStepsForAccountSystemApproveItem($account_system_id, $approveable_item_name);
+        return $approval_steps;
+    }
+}

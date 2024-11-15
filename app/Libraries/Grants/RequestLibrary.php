@@ -8,17 +8,24 @@ class RequestLibrary extends GrantsLibrary
 {
 
     protected $table;
-    protected $grantsModel;
+    protected $requestModel;
 
     function __construct()
     {
         parent::__construct();
 
-        $this->grantsModel = new RequestModel();
+        $this->requestModel = new RequestModel();
 
-        $this->table = 'grants';
+        $this->table = 'request';
     }
 
 
+    function getOfficeRequestCount(){
+        $builder = $this->read_db->table('request');
+        $builder->whereIn('fk_office_id',array_column($this->session->hierarchy_offices,'office_id'));
+        $get_office_request_count = $builder->get()->getNumRows();
+    
+        return $get_office_request_count;
+      }
    
 }

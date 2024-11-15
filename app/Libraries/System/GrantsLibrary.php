@@ -780,6 +780,28 @@ class GrantsLibrary
     return $table_has_account_system;
   }
 
+  function checkIfTableHasOfficeRelationship($table)
+  {
+
+    $table_has_office_relationship = false;
+
+    $table_fields = $this->getAllTableFields($table);
+
+    if (in_array('fk_office_id', $table_fields)) {
+      $table_has_office_relationship = true;
+    }
+    
+    return $table_has_office_relationship;
+  }
+
+  function joinTablesWithOffice($builder, $table)
+  {
+
+    if ($this->checkIfTableHasOfficeRelationship($table)) {
+      $builder->whereIn('fk_office_id', array_column($this->session->hierarchy_offices,'office_id'));
+    }
+  }
+  
   function joinTablesWithAccountSystem($builder, $table)
   {
 
