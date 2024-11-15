@@ -446,7 +446,7 @@ class FinancialReportLibrary extends GrantsLibrary
         return $list_oustanding_cheques_and_deposit;
     }
 
-    private function getUnclearedAndClearedDepositInTransit($office_ids, $reporting_month, $state = 'uncleared', $office_bank_ids)
+    private function getUnclearedAndClearedDepositInTransit($office_ids, $reporting_month, $state = 'uncleared', $office_bank_ids = [])
     {
         $opening_deposit_in_transits = [];
 

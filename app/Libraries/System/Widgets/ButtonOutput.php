@@ -15,8 +15,6 @@ class ButtonOutput extends OutputTemplate{
         $additional_class = isset($args[3]) ? $args[3] : "";
         $onclick = isset($args[4]) ? $args[4] : "";
         
-        // log_message('error', json_encode($args)  );
-
         $url = $action == "" || $action == "#" ? "#" : base_url("$action/$widget_id/$additional_class");
 
         return '

@@ -134,7 +134,6 @@ trait UserSelfCreation {
     {
         $accountSystemLibrary = new \App\Libraries\Core\AccountSystemLibrary();
         $language = $accountSystemLibrary->getCountryLanguage($account_system_id);
-        // log_message('error', json_encode($language));
         return $this->response->setJSON($language);
     }
 
@@ -160,7 +159,6 @@ trait UserSelfCreation {
      */
     public function saveCreateAccountData(): ResponseInterface
     {
-        log_message('error', json_encode($this->request->getPost()));
         $message = "Account Not Created contact the system administration";
 
         $this->write_db->transBegin();

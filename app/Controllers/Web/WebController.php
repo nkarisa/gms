@@ -465,7 +465,6 @@ class WebController extends BaseController
           $primary_key = $row[$column];
           continue;
         }
-        // log_message('error', json_encode($column));
         if (strpos($column, 'track_number') == true) {
           $track_number = '';
           if (
@@ -523,7 +522,6 @@ class WebController extends BaseController
     // All ajax request will be received here and passed to library of a controller
     // All ajax responses MUST have a status key with either success or failed
     // When using GET ajax, from the 3rd argument, the paramters MUST be paired with odd positioned parameters as keys and even positioned parameters as values
-    // log_message('error', json_encode(compact('controller','method')));
     if ($controller && $method) {
 
       $data = [];

@@ -76,7 +76,6 @@ class UserAccountActivationLibrary extends GrantsLibrary
    */
   public function list($builder, array $selectColumns, $parentId = null, $parentTable = null):array
   {
-    // log_message('error', json_encode($selectColumns));
     $selectColumns = array_values($selectColumns);
     $this->dataTableBuilder($builder, $this->controller, $selectColumns);
     //Get records

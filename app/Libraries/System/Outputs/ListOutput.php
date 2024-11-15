@@ -127,7 +127,6 @@ class ListOutput extends OutputTemplate
     $this->libs->dataTableBuilder($builder, $table, $selected_columns);
 
     $builder->select($selected_columns);
-    // log_message('error', $builder->getCompiledSelect());
     return $builder->get()->getResultArray();
   }
 
@@ -185,12 +184,10 @@ class ListOutput extends OutputTemplate
       && array_key_exists('results', $featureLibrary->list($builder, $listSelectColumns, $this->parentId, $this->parentTable))
       && !empty($featureLibrary->list($builder, $listSelectColumns, $this->parentId, $this->parentTable)['result'])
     ) {
-      // log_message('error', 'Here');
       $feature_model_list_result = $featureLibrary->list($builder, $listSelectColumns, $this->parentId, $this->parentTable)['results'];
       // Allows empty result set
       $query_result = $feature_model_list_result; // A full user defined query result
     } else {
-      // log_message('error', 'There');
       // Get result from grants model if feature model list returns empty
       $query_result = $this->listInternalQueryResults($lookup_tables);
     }

@@ -641,7 +641,6 @@ class StatusLibrary extends GrantsLibrary
     function actionAfterInsert($post_array, $approval_id, $header_id): bool
     {
         $state = true;
-        // log_message('error', json_encode($post_array));
         // Get approve item name of the of the created status
         $builder = $this->write_db->table('status');
         $builder->join('approval_flow', 'approval_flow.approval_flow_id=status.fk_approval_flow_id');

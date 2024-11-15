@@ -75,9 +75,7 @@ class User extends WebController
           $context_id = $user_info['context_definition_id'];
           
           $user_office = $officeLibrary->userOffice($context_id, $user_id);
-          // log_message('error', json_encode($user_office));
           $result['edit_user_info']['user_office'] = $user_office;
-    
           $result['account_system_id'] = $user_info['account_system_id'];
     
           //Get user department

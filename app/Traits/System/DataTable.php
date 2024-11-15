@@ -66,7 +66,6 @@ trait DataTable {
     }
 
     function dataTableBuilder(\CodeIgniter\Database\BaseBuilder &$builder, string $tableName, array $selectColumns){
-        // log_message('error', json_encode($this->request->getPost()));
         if ($this->request->getPost('draw')) {
             // Limiting Server Datatable Results
             $this->setDatatableLimit($builder);

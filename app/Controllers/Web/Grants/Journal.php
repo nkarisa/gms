@@ -30,7 +30,6 @@ class Journal extends WebController
       
             $status_data = $this->libs->actionButtonData('voucher', $account_system_id);
             $result['vouchers']=$this->library->getVouchersOfTheMonth($office_id,$transacting_month,$journal_id);
-            log_message('error', json_encode($result['vouchers']));
             $result['status_data'] = $status_data;
             $result['transacting_month']=$transacting_month;
   

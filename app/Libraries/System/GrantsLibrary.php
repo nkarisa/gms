@@ -1965,8 +1965,6 @@ class GrantsLibrary
     $headerColumns[strtolower($this->controller) . '_created_by'] = session()->get('user_id');
     $headerColumns[strtolower($this->controller) . '_last_modified_by'] = session()->get('user_id');
 
-    // log_message('error', json_encode($headerColumns));
-
     // Insert the header record
     $this->write_db->table(strtolower($this->controller))->insert($headerColumns);
 
@@ -2012,8 +2010,6 @@ class GrantsLibrary
 
     $transactionValidateDuplicates = $this->transactionValidateDuplicates($this->controller, $header, $transactionValidateDuplicatesColumns);
     $transactionValidateByComputation = $this->transactionValidateByComputation($this->controller, $header);
-
-    // log_message('error', json_encode(compact('transactionValidateDuplicates', 'transactionValidateByComputation','headerColumns','headerId','approvalId')));
 
     return $this->transactionValidate([$transactionValidateDuplicates, $transactionValidateByComputation], $headerColumns, $headerId, $approvalId);
   }

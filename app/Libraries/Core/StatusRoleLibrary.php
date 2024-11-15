@@ -38,7 +38,6 @@ class StatusRoleLibrary extends GrantsLibrary
 
     function list($builder, array $listSelectColumns, string $parentId = null, string $parentTable = null): array
     {
-        // log_message('error', json_encode($this->tableLookUp($this->controller)));
         $this->dataTableBuilder($builder, $this->controller, $listSelectColumns);
         $builder->select($listSelectColumns);
         $builder->join('role', 'role.role_id=status_role.fk_role_id');
@@ -106,7 +105,6 @@ class StatusRoleLibrary extends GrantsLibrary
                     ->join('menu', 'menu.menu_id = permission.fk_menu_id');
             }
         }
-        // log_message('error', $builder->getCompiledSelect());
         $lookup_values['role'] = $builder->get()->getResultArray();
 
         return $lookup_values;

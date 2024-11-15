@@ -299,10 +299,7 @@ class FieldsBase
 
     $this->set_default_field_value();
 
-    // log_message('error', json_encode($this->default_field_value));
-
     $selected_option = ($selected_option == "" && $this->default_field_value !== 0) ? $this->default_field_value : $selected_option;
-
     $select2 = service("settings")->get("GrantsConfig.use_select2_plugin") ? 'select2 select2-offscreen' : 'no-select';
 
     $required = $this->is_field_required ? "required='required'" : '';
