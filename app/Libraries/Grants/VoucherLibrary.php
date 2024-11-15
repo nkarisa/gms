@@ -17,4 +17,8 @@ class VoucherLibrary extends GrantsLibrary {
 
         $this->table = 'voucher';
     }
+
+    function detachDetailTable(): bool{
+        return true;
+    }
 }
