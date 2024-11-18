@@ -498,10 +498,9 @@ class GrantsLibrary
       }
     } else {
       // This part of a code is meant to offer an alternative to lookup_tables 
-      // methods in models that overrided the MY_Model method
       $lookup_tables = $this->deriveLookupTables();
     }
-    //print_r($lookup_tables);exit;
+
     return $lookup_tables;
   }
 
@@ -1524,7 +1523,7 @@ class GrantsLibrary
 
     $lookup_values = [];
     $this->library = $this->loadLibrary($this->controller);
-
+    
     if (
       (
         method_exists($this->library, 'lookupValues')
@@ -1546,7 +1545,6 @@ class GrantsLibrary
   function getLookupValues($table)
   {
     $table = strtolower($table);
-
     $builder = $this->read_db->table($table);
 
     if (
@@ -1606,7 +1604,6 @@ class GrantsLibrary
       // This is converted from fk_xxxx_id where xxxx is the primary table name
       // The column should be in the name format and not id e.g. fk_user_id be user_name
       $lookup_table = strtolower(substr($column, 0, -5));
-
       return $f->$field($this->checkLookupValues($lookup_table), $field_value, $show_only_selected_value, '', $this->checkMultiSelectField($detail_table));
     } elseif (strrpos($column, '_is_') == true) {
 

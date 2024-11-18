@@ -26,4 +26,19 @@ class ChequeInjectionLibrary extends GrantsLibrary
         }
         return true;
     }
+
+    function getInjectedChequeLeaves($office_bank_id)
+    {
+        $cheque_injection = [];
+        $builder = $this->read_db->table('cheque_injection');
+        $builder->select(['cheque_injection_number']);
+        $builder->where(['fk_office_bank_id' => $office_bank_id]);
+        $cheque_injection_obj =  $builder->get();
+
+        if ($cheque_injection_obj->getNumRows() > 0) {
+            $cheque_injection = array_column($cheque_injection_obj->getResultArray(), "cheque_injection_number");
+        }
+
+        return $cheque_injection;
+    }
 }

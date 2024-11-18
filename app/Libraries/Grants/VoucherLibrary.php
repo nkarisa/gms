@@ -579,4 +579,264 @@ class VoucherLibrary extends GrantsLibrary
     
         return $change_field_type;
       }
+
+      /**
+     * Get Voucher Date
+     *
+     * This method computes the next valid vouching date for a given office
+     * @param int $office_id - The primary key of the office
+     * @return string - The next valid vouching date
+     *
+     */
+
+    public function getVoucherDate(int $office_id, string $journal_month = ''): String
+    {
+        $builder = $this->read_db->table('office');
+        $voucher_date = $builder->getWhere(array('office_id' => $office_id))->getRow()->office_start_date;
+        $office_transaction_date = $this->getOfficeTransactingMonth($office_id);
+
+        $getOfficeLastVoucher = $this->getOfficeLastVoucher($office_id);
+        if (count($getOfficeLastVoucher) > 0) {
+            $voucher_date = $getOfficeLastVoucher['voucher_date'];
+        }
+
+        if (strtotime($office_transaction_date) > strtotime($voucher_date)) {
+            $voucher_date = $office_transaction_date;
+        }
+
+        return $voucher_date;
+    }
+
+    /**
+     * Get Office Last Voucher
+     *
+     * The methods get the last voucher record for a given office
+     *
+     * @param int $office_id - Office in check
+     * @return array - a voucher record
+     */
+    public function getOfficeLastVoucher($office_id, $journal_month = '')
+    {
+        $last_voucher = [];
+        $office_has_started_transacting = $this->checkIfOfficeHasStartedTransacting($office_id);
+
+        if ($office_has_started_transacting) {
+            $financial_report_month = '';
+
+            //If voucher_reversal use the journal month and not report month
+            /*Scenerios:
+            Scenerio 1: Report where reversal is happening is submitted [Find latest report and insert voucher there. Date should be computed for latest month]
+            Scenerio 2: Repoert where reversal is happening is NOT submitted [Insert voucher in the same month where reversal happening
+             */
+
+            if ($journal_month != '') {
+                //Check if report is submitted;if submitted get the max report then get lastest voucher date and there insert voucher
+                $financialReportLibrary = new \App\Libraries\Grants\FinancialReportLibrary();
+                $mfr_submitted = $financialReportLibrary->checkIfFinancialReportIsSubmitted([$office_id], $journal_month);
+
+                if ($mfr_submitted == true) {
+                    //get max unsubmitted report and get the last transaction voucher
+                    $financial_report_month_obj = $this->selectMaxFinancialReport($office_id, true);
+                    //if >0 get the last voucher date
+                    if ($financial_report_month_obj->getNumRows() > 0) {
+                        $financial_report_month = $financial_report_month_obj->getRow()->financial_report_month;
+                        $last_voucher = $this->getMaxVoucher($office_id, $financial_report_month);
+
+                        if (empty($last_voucher)) {
+                            $last_voucher = $this->getCalculatedLastVoucher($office_id, $financial_report_month_obj->getRow()->financial_report_month);
+                        }
+                    }
+                } else {
+                    // Check the max voucher id of the oldest unsubmitted reporting month for the office
+                    $last_voucher = $this->getMaxVoucher($office_id, $journal_month);
+                }
+            } else {
+                // Get the oldest unsubmitted financial report for the office
+                $financial_report_month_obj = $this->selectMaxFinancialReport($office_id, false);
+                if ($financial_report_month_obj->getRow()->financial_report_month > 0) {
+                    //log_message('error','Has unsubmitted MFR');
+                    $financial_report_month = $financial_report_month_obj->getRow()->financial_report_month;
+                    // Check the max voucher id of the oldest unsubmitted reporting month for the office
+                    $last_voucher = $this->getMaxVoucher($office_id, $financial_report_month);
+
+                    // Retrieve the voucher record for oldest unsubmitted reporting month
+                    // If voucher_id is null then no vouchers in tha month [e.g. all month vouchers have been deleted]
+                    if (empty($last_voucher)) {
+
+                        $this->getCalculatedLastVoucher($office_id, $financial_report_month);
+                    }
+                } else {
+                    //Get max voucher_id based on max financial_report_month
+                    $financial_report_month_obj = $this->selectMaxFinancialReport($office_id, true);
+                    $financial_report_month = $financial_report_month_obj->getRow()->financial_report_month;
+                    $last_voucher = $this->getMaxVoucher($office_id, $financial_report_month);
+                }
+            }
+        }
+
+        return $last_voucher;
+    }
+
+        /**
+     * get_calculated_last_voucher
+     * Get the calculated last voucher of the months
+     * @param int $office_id, string $financial_report_month
+     * @author Livingstone Onduso.
+     * @date 2024-03-15
+     */
+    private function getCalculatedLastVoucher(int $office_id, string $financial_report_month)
+    {
+        $office_transacting_month = $this->read_db->table('office')->getWhere(array('office_id' => $office_id))->getRow()->office_start_date;
+        $start_office_month = date('Y-m-01', strtotime($office_transacting_month));
+        $calculated_month_from_voucher = date('Y-m-01', strtotime($financial_report_month . '- 1 months'));
+
+        //Check if the month calculated based on vouchers is below the office start date. If so use the the office_transacting_month to get the first voucher number
+        if ($calculated_month_from_voucher > $start_office_month) {
+            $builder = $this->read_db->table('voucher');
+            $builder->where([
+                'voucher_date >=' => date('Y-m-01', strtotime($financial_report_month . '- 1 months')),
+                'voucher_date <=' => date('Y-m-t', strtotime($financial_report_month . '- 1 months')),
+                'fk_office_id' => $office_id,
+            ]);
+
+            $voucher_id = $builder->selectMax('voucher_id')->get()->getRow()->voucher_id;
+            $last_voucher = $builder->getWhere(['voucher_id' => $voucher_id])->getRowArray();
+        } else {
+            //Construct the first voucher of the month
+            $year = date("y", strtotime($office_transacting_month));
+            $month = date('m', strtotime($office_transacting_month));
+            $voucher_number = $year . $month . '00';
+            $last_voucher = ['voucher_date' => $office_transacting_month, 'voucher_number' => $voucher_number];
+        }
+
+        return $last_voucher;
+    }
+
+    /**
+     * get_max_voucher
+     * Get the maximum voucher of the month
+     * @param int $office_id, string $financial_report_month
+     * @author Livingstone Onduso.
+     * @date 2024-03-15
+     */
+    private function getMaxVoucher(int $office_id, string $financial_report_month)
+    {
+        /**
+         * 
+         * PLEASE NOTE THE Query bellow to GET DATA HAS TO USE $this->write_db and NOT $this->read_db DUE TO WRITE and READ  DELAY !!!!!!
+         */
+
+         //Get the max voucher of the passed month
+         $builder = $this->read_db->table("voucher");
+         $builder->selectMax('voucher_id');
+         $builder->where([
+             'voucher.fk_office_id' => $office_id, 'voucher_date >=' => date('Y-m-01', strtotime($financial_report_month)),
+             'voucher_date <=' => date('Y-m-t', strtotime($financial_report_month))
+         ]);
+ 
+         $voucher_id = $builder->get()->getRow()->voucher_id;
+ 
+         $builder = $this->read_db->table('voucher');
+         $builder->select(['voucher_id', 'voucher_number', 'voucher_date']);
+         $builder->where(['voucher_id' => $voucher_id]);
+         return $builder->get()->getRowArray();
+    }
+
+
+        /**
+     * select_max_financial_report
+     * Get the maximum/minimum mfrs of the month
+     * @param int $office_id, bool $max_mfr
+     * @author Livingstone Onduso.
+     * @date 2024-03-15
+     */
+    private function selectMaxFinancialReport(int $office_id, bool $max_mfr)
+    {
+
+        //Get the Max mfr or Min depending on the boolean '$max_mfr'
+        $builder = $this->read_db->table("financial_report");
+        if ($max_mfr == true) {
+            $builder->selectMax('financial_report_month');
+            $builder->where(array('fk_office_id' => $office_id));
+            $financial_report_month_obj = $builder->get();
+        } else {
+            $builder->selectMin('financial_report_month');
+            $builder->where(array('financial_report_is_submitted' => 0, 'fk_office_id' => $office_id));
+            $financial_report_month_obj = $builder->get();
+        }
+
+        return $financial_report_month_obj;
+    }
+
+     /**
+     * Check if Office Has Started Transacting
+     *
+     * Finds out if the argument offfice has began raising vouchers
+     *
+     * @param int $office_id - Office in check
+     * @return bool - True if has began raising vouchers else false
+     */
+    public function checkIfOfficeHasStartedTransacting(Int $office_id): Bool
+    {
+        // If the office has not voucher yet, then the transacting month equals the office start date
+        $count_of_vouchers = $this->read_db->table('voucher')
+        ->getWhere( array('fk_office_id' => $office_id))->getNumRows();
+
+        return $count_of_vouchers > 0 ? true : false;
+    }
+
+     /**
+     * get_office_transacting_month
+     *
+     * This methods gives the date of the first day of the valid transaction month of an office
+     *
+     * @param int $office - Office in check
+     * @return string - Date of the first day of the valid transacting month
+     */
+    public function getOfficeTransactingMonth(Int $office_id): String
+    {
+        $office_transacting_month = date('Y-m-01');
+        //If count_of_vouchers eq to 0 then get the start date if the office
+        if (!$this->checkIfOfficeHasStartedTransacting($office_id)) {
+            $office_transacting_month = $this->read_db->table('office')->getWhere(array('office_id' => $office_id))->getRow()->office_start_date;
+        } else {
+            // Get the last office voucher date
+            $voucher_date = $this->getOfficeLastVoucher($office_id)['voucher_date'];
+            // Check if the transacting month has been closed based on the last voucher date
+            if ($this->checkIfOfficeTransactingMonthHasBeenClosed($office_id, $voucher_date)) {
+                // echo $voucher_date; exit();
+                $office_transacting_month = date('Y-m-d', strtotime('first day of next month', strtotime($voucher_date)));
+            } else {
+                $office_transacting_month = date('Y-m-01', strtotime($voucher_date));
+            }
+        }
+
+        return $office_transacting_month;
+    }
+
+        /**
+     * Check if Office Transaction Month Has Been Closed
+     *
+     * Finds out if the date passed as an argument belongs to a month whose vouching process has been closed based on whether the financial report (Bank Reconciliation)
+     * has been created and submitted.
+     *
+     * @param int $office_id - Office primary key
+     * @param string $date_of_month - Date of the month in check
+     * @return bool - True if reconciliation has been created else false
+     */
+    public function checkIfOfficeTransactingMonthHasBeenClosed(Int $office_id, String $date_of_month): Bool
+    {
+        // If the reconciliation of the max date month has been done and submitted,
+        // then use the start date of the next month as the transacting date
+        // *** Modify the query by checking if it has been submitted - Not yet done ****
+
+        $check_month_reconciliation = $this->read_db->table('financial_report')->getWhere(
+            array(
+                'financial_report_is_submitted' => 1, 'fk_office_id' => $office_id,
+                'financial_report_month' => date('Y-m-01', strtotime($date_of_month)),
+            )
+        )->getNumRows();
+
+        return $check_month_reconciliation > 0 ? true : false;
+    }
 }

@@ -262,8 +262,6 @@ class ListOutput extends OutputTemplate
     $fields_meta_data = $this->libs->fieldsMetaDataTypeAndName($this->controller);
     $this->updateListCustomColumnsValues($fields_meta_data, $table_body, $keys);
 
-    // log_message('error', json_encode($fields_meta_data));
-
     $total_records = $toggleListQueryResults['total_records'];
     $controller = $this->controller;
   

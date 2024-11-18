@@ -245,7 +245,7 @@ class FinancialReportLibrary extends GrantsLibrary
         return $bank_to_bank_contra_received_amounts;
     }
 
-    function bankToBankContraContributions($office_bank_ids = [], string $reporting_month): array
+    function bankToBankContraContributions($office_bank_ids = [], string $reporting_month = ""): array
     {
         $bank_to_bank_contra_contributed_amounts = [];
         $end_of_reporting_month = date('Y-m-t', strtotime($reporting_month));
@@ -592,12 +592,33 @@ class FinancialReportLibrary extends GrantsLibrary
 
     function computeCashAtHand($office_ids, $reporting_month, $project_ids = [], $office_bank_ids = [], $office_cash_id = 0, $retrieve_only_max_approved = true)
     {
-      $cash_transactions_to_date = $this->cashTransactionsToDate($office_ids, $reporting_month, $project_ids, $office_bank_ids, $office_cash_id, $retrieve_only_max_approved); 
-      $opening_cash_balance = $this->openingCashBalance($office_ids, $reporting_month, $project_ids, $office_bank_ids, $office_cash_id)['cash'];
-      $cash_income_to_date = isset($cash_transactions_to_date['cash']['income']) ? $cash_transactions_to_date['cash']['income'] : 0; 
-      $cash_expenses_to_date = isset($cash_transactions_to_date['cash']['expense']) ? $cash_transactions_to_date['cash']['expense'] : 0; 
-  
-      return $opening_cash_balance + $cash_income_to_date - $cash_expenses_to_date;
+        $cash_transactions_to_date = $this->cashTransactionsToDate($office_ids, $reporting_month, $project_ids, $office_bank_ids, $office_cash_id, $retrieve_only_max_approved);
+        $opening_cash_balance = $this->openingCashBalance($office_ids, $reporting_month, $project_ids, $office_bank_ids, $office_cash_id)['cash'];
+        $cash_income_to_date = isset($cash_transactions_to_date['cash']['income']) ? $cash_transactions_to_date['cash']['income'] : 0;
+        $cash_expenses_to_date = isset($cash_transactions_to_date['cash']['expense']) ? $cash_transactions_to_date['cash']['expense'] : 0;
+
+        return $opening_cash_balance + $cash_income_to_date - $cash_expenses_to_date;
     }
+
+
+    function checkIfFinancialReportIsBubmitted($office_ids, $reporting_month)
+    {
+        $report_is_submitted = false;
+
+        $builder = $this->read_db->table('financial_report');
+        $builder->select(['financial_report_is_submitted']);
+        $builder->where(['financial_report_month' => date('Y-m-01', strtotime($reporting_month)), 'fk_office_id' => $office_ids[0]]);
+        $financial_report_is_submitted_obj = $builder->get();
+
+        if ($financial_report_is_submitted_obj->getNumRows() > 0) {
+
+            if ($financial_report_is_submitted_obj->getRow()->financial_report_is_submitted == 1) {
+                $report_is_submitted = true;
+            }
+        }
+
+        return $report_is_submitted;
+    }
+
 
 }

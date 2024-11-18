@@ -18,6 +18,13 @@ if (!function_exists('get_phrase')) {
             }
         }
 
+        if(!empty($phrase_variables_values)){
+			foreach ($phrase_variables_values as $placeholder => $replacement) {
+				$placeholder = '{{' . $placeholder . '}}';
+				$translation = str_replace($placeholder, $replacement, $translation);
+			}
+		}
+
         return $translation;
     }
 }

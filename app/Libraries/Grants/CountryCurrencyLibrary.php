@@ -80,4 +80,21 @@ class CountryCurrencyLibrary extends GrantsLibrary
     return  $country_currency_id;
   }
 
+  public function getCountryCurrencyCodeByOfficeId($office_id){
+
+    $builder = $this->read_db->table('country_currency');
+    $builder->select(array('country_currency_code'));
+    $builder->join('office','office.fk_country_currency_id=country_currency.country_currency_id');
+    $builder->where(array('office_id' => $office_id));
+    $country_currency_obj = $builder->get();
+
+    $country_currency_code = '';
+
+    if($country_currency_obj->getNumRows() > 0){
+        $country_currency_code = $country_currency_obj->getRow()->country_currency_code;
+    }
+
+    return $country_currency_code;
+}
+
 }

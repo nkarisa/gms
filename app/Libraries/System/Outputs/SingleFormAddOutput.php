@@ -20,11 +20,9 @@ class SingleFormAddOutput extends OutputTemplate{
    */
   private function addFormFields(array $visible_columns_array): array
   {
-
     $fields = [];
-
+    
     foreach ($visible_columns_array as $table_name => $column) { // Some table names can be 0, 1, 3 for single_form_add_visible_columns or defined names for detail_tables_single_form_add_visible_columns
-      //if ($table_name !== 'status_role') continue;
       $field_value = '';
       $show_only_selected_value = false;
 
