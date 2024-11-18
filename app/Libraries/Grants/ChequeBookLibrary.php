@@ -184,7 +184,7 @@ class ChequeBookLibrary extends GrantsLibrary {
 
         if ($cancelled_cheque_numbers_obj->getNumRows() > 0) {
             $cancelled_cheque_numbers = array_column($cancelled_cheque_numbers_obj->getResultArray(), 'voucher_cheque_number');
-            $cancelled_cheque_numbers = array_map([$this, 'make_unsigned_values'], $cancelled_cheque_numbers);
+            $cancelled_cheque_numbers = array_map([$this, 'makeUnsignedValues'], $cancelled_cheque_numbers);
         }
        
         return $cancelled_cheque_numbers;
@@ -230,10 +230,15 @@ class ChequeBookLibrary extends GrantsLibrary {
 
         if ($reused_cheque_numbers_obj->getNumRows() > 0) {
             $reused_cheque_numbers = array_column($reused_cheque_numbers_obj->getResultArray(), 'voucher_cheque_number');
-            $reused_cheque_numbers = array_map([$this, 'make_unsigned_values'], $reused_cheque_numbers);
+            $reused_cheque_numbers = array_map([$this, 'makeUnsignedValues'], $reused_cheque_numbers);
         }
 
         return $reused_cheque_numbers;
+    }
+
+    function makeUnsignedValues($signed_cheque_number)
+    {
+        return abs($signed_cheque_number);
     }
 
     function getUsedReusedCheques($office_bank_id, $cheque_numbers_only = true)
@@ -256,7 +261,7 @@ class ChequeBookLibrary extends GrantsLibrary {
 
         if ($used_reused_cheque_numbers_obj->getNumRows() > 0) {
             $used_reused_cheque_numbers = array_column($used_reused_cheque_numbers_obj->getResultArray(), 'voucher_cheque_number');
-            $used_reused_cheque_numbers = array_map([$this, 'make_unsigned_values'], $used_reused_cheque_numbers);
+            $used_reused_cheque_numbers = array_map([$this, 'makeUnsignedValues'], $used_reused_cheque_numbers);
         }
 
         return $used_reused_cheque_numbers;

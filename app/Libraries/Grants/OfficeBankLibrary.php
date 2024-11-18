@@ -339,4 +339,21 @@ class OfficeBankLibrary extends GrantsLibrary
     return $message;
   }
 
+    /**
+   * get_active_cash_accounts(): get json string of voucher types
+   * @author  Livingstone Onduso
+   * @dated: 5/06/2023
+   * @access public
+   * @return array
+   * @param int $account_system_id
+   */
+  public function getActiveOfficeBank(int $office_id): array{
+
+    $builder = $this->read_db->table("office_bank");
+    $builder->select(['office_bank_id','office_bank_name']);
+    $builder->where(['office_bank_is_active'=>1,'fk_office_id'=>$office_id]);
+    $office_bank = $builder->get()->getResultArray();
+    return $office_bank;
+
+  }
 }

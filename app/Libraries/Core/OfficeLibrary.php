@@ -535,4 +535,38 @@ class OfficeLibrary extends GrantsLibrary
     return $reporting_context_definition;
   }
 
+      /**
+   * get_office_start_date_by_id
+   * 
+   * Get the start date of the office and first day of the start month by a given office Id
+   * 
+   * @author Nicodemus Karisa
+   * @authored_date 14th June 2023
+   * @reviewed_date None
+   * 
+   * @param int $office_id - Office Id
+   * 
+   * @return array - Returns 2 dates that is the first day of the office start month and the actual office start date with keys 
+   * actual_start_date and month_start_date respectively
+   */
+
+   public function getOfficeStartDateById(int $office_id):array{
+
+    $office_start_date = date('Y-m-01');
+    $office_start_month = date('Y-m-01');
+
+    $builder = $this->read_db->table('office');
+    $builder->where(array('office_id' => $office_id));
+    $office_start_date_obj = $builder->get();
+
+    if($office_start_date_obj->getNumRows() > 0){
+      $office_start_date = $office_start_date_obj->getRow()->office_start_date;
+      $office_start_month = date('Y-m-01', strtotime($office_start_date));
+    }
+
+    $dates = ['actual_start_date' => $office_start_date, 'month_start_date' => $office_start_month];
+
+    return $dates;
+  }
+
 }

@@ -621,4 +621,35 @@ class FinancialReportLibrary extends GrantsLibrary
     }
 
 
+    function monthUtilizedIncomeAccounts($office_ids, $start_date_of_month, $project_ids = [], $office_bank_ids = []){
+
+        $income_accounts =  $this->income_accounts($office_ids, $project_ids, $office_bank_ids);
+        
+        $all_accounts_month_opening_balance = $this->month_income_opening_balance($office_ids, $start_date_of_month, $project_ids, $office_bank_ids);
+        $all_accounts_month_income = $this->month_income_account_receipts($office_ids, $start_date_of_month, $project_ids, $office_bank_ids);
+        $all_accounts_month_expense = $this->month_income_account_expenses($office_ids, $start_date_of_month, $project_ids, $office_bank_ids);
+
+        $report = array();
+
+        foreach ($income_accounts as $account) {
+
+        $month_opening_balance = isset($all_accounts_month_opening_balance[$account['income_account_id']]) ? $all_accounts_month_opening_balance[$account['income_account_id']] : 0;
+        $month_income = isset($all_accounts_month_income[$account['income_account_id']]) ? $all_accounts_month_income[$account['income_account_id']] : 0;
+        $month_expense = isset($all_accounts_month_expense[$account['income_account_id']]) ? $all_accounts_month_expense[$account['income_account_id']] : 0;
+
+        if ($month_opening_balance == 0 && $month_income == 0 && $month_expense == 0) {
+            continue;
+        }
+
+        $report[] = [
+            'income_account_id' => $account['income_account_id'],
+            'income_account_name' => $account['income_account_name'],
+            'month_opening_balance' => $month_opening_balance,
+            'month_income' => $month_income,
+            'month_expense' => $month_expense,
+        ];
+        }
+
+        return $report;
+    }
 }
