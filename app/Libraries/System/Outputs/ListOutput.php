@@ -104,7 +104,7 @@ class ListOutput extends OutputTemplate
   {
     $builder = $this->read_db->table($table);
 
-    if (!$builder->get()) {
+    if (!$builder->limit(1)->get()) {
       $message = 'The table ' . $this->controller . ' has no relationship with ' . $table . '. Check the ' . $this->controller . '_model detail_tables method';
       throw new \CodeIgniter\Exceptions\PageNotFoundException($message);
     }
@@ -153,7 +153,7 @@ class ListOutput extends OutputTemplate
       );
 
       $this->libs->dataTableBuilder($builder, $table, $selected_columns);
-
+      
       return $builder->countAllResults();
     }
   }
@@ -262,9 +262,10 @@ class ListOutput extends OutputTemplate
     $fields_meta_data = $this->libs->fieldsMetaDataTypeAndName($this->controller);
     $this->updateListCustomColumnsValues($fields_meta_data, $table_body, $keys);
 
+    // log_message('error', json_encode($fields_meta_data));
+
     $total_records = $toggleListQueryResults['total_records'];
     $controller = $this->controller;
-    // $fields_meta_data = $this->libs->fieldsMetaDataTypeAndName($this->controller);
   
     return compact('table_body', 'total_records', 'keys', 'fields_meta_data', 'controller');
   }

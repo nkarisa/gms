@@ -376,20 +376,12 @@ trait SchemaTrait
 
     public function fieldsMetaDataTypeAndName($table)
     {
-
         $fields_meta_data = [];
-
-        $table_names = $this->lookupTables($table);
-
+        $table_names = $this->checkLookupTables($table);
         array_push($table_names, $table);
 
-        $feature_library = $this->loadlibrary($table);
-
         foreach ($table_names as $table_name) {
-
-            if ($table_name !== $table) {
-                $feature_library = $this->loadlibrary($table_name);
-            }
+            $feature_library = $this->loadlibrary($table_name);
 
             $meta_data = $this->tableFieldsMetadata($table_name);
             $names = array_column($meta_data, 'name');
@@ -407,7 +399,7 @@ trait SchemaTrait
                     method_exists($feature_library, 'changeFieldType') &&
                     array_key_exists($field_name, $feature_library->changeFieldType())
                 ) {
-                    $fields_meta_data[$field_name] = $$feature_library->changeFieldType()[$field_name]['field_type'];
+                    $fields_meta_data[$field_name] = $feature_library->changeFieldType()[$field_name]['field_type'];
                 }
             }
         }

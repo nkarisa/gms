@@ -569,47 +569,6 @@ class GrantsLibrary
     return $this->set_field_type;
   }
 
-  public function fieldsMetaDataTypeAndName($table)
-  {
-
-    $fields_meta_data = [];
-    $library = $this->loadLibrary($table);
-
-    $table_names = $this->checklookupTables($table);
-
-    array_push($table_names, $table);
-
-    foreach ($table_names as $table_name) {
-
-      if ($table_name !== $table) {
-        $library = $this->loadLibrary($table_name);
-      }
-
-      // $feature_library = $table_name . '_library';
-
-      $meta_data = $this->tableFieldsMetadata($table_name);
-      $names = array_column($meta_data, 'name');
-      $types = array_column($meta_data, 'type');
-      $fields_meta_data = array_merge($fields_meta_data, array_combine($names, $types));
-
-      foreach ($fields_meta_data as $field_name => $field_type) {
-        if (substr($field_name, 0, 3) == 'fk_') {
-          $_field_name = substr($field_name, 3, -3) . '_name';
-          unset($fields_meta_data[$field_name]);
-          $fields_meta_data[$_field_name] = 'varchar';
-        }
-
-        if (
-          method_exists($library, 'changeFieldType') &&
-          array_key_exists($field_name, $library->changeFieldType())
-        ) {
-          $fields_meta_data[$field_name] = $library->changeFieldType()[$field_name]['field_type'];
-        }
-      }
-    }
-
-    return $fields_meta_data;
-  }
 
   public function updateQueryResultForFieldsChangedToSelectType(string $table, array $query_result): array
   {
@@ -2622,4 +2581,7 @@ class GrantsLibrary
       return "";
     }
   }
+
+ 
+ 
 }

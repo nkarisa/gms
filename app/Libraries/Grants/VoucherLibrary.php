@@ -565,10 +565,18 @@ class VoucherLibrary extends GrantsLibrary
        return $columns;
      }
 
-    //  function listTableWhere(\CodeIgniter\Database\BaseBuilder $queryBuilder): void {
-    //     if(!$this->session->system_admin){
-    //         $statusLibrary = new \App\Libraries\Core\StatusLibrary();
-    //         $queryBuilder->where(['voucher.fk_status_id' => $statusLibrary->getMaxApprovalStatusId($this->controller)]);
-    //     }
-    //  }
+     function listTableWhere(\CodeIgniter\Database\BaseBuilder $queryBuilder): void {
+        // if(!$this->session->system_admin){
+        //     $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+        //     $queryBuilder->where(['voucher.fk_status_id >' => $statusLibrary->getMaxApprovalStatusId($this->controller)]);
+        // }
+     }
+
+    function changeFieldType(): array{
+        $change_field_type = array();
+    
+        $change_field_type['voucher_number']['field_type'] = 'text';
+    
+        return $change_field_type;
+      }
 }
