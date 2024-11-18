@@ -9,35 +9,60 @@ use Psr\Log\LoggerInterface;
 
 class Voucher extends WebController
 {
-    protected $library;
+  protected $library;
 
-    function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
-    {
-        parent::initController($request, $response, $logger);
+  function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
+  {
+    parent::initController($request, $response, $logger);
 
-        $this->library = new \App\Libraries\Grants\VoucherLibrary();
+    $this->library = new \App\Libraries\Grants\VoucherLibrary();
+  }
+
+  function result($id = "", $parentTable = null)
+  {
+    $result = parent::result($id, $parentTable);
+
+    $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+    $requestLibrary = new \App\Libraries\Grants\RequestLibrary();
+
+    if ($this->action == 'view') {
+      $result = $this->library->getTransactionVoucher($this->id);
+      $status_data = $this->libs->actionButtonData($this->controller, $result['account_system_id']);
+      $result['is_voucher_cancellable'] = $this->library->isVoucherCancellable($status_data, $result['header']);
+      $result['check_expenses_aganist_income'] = $this->library->checkPendingExpensesExceedsTotalIncome($result['header']);
+      $result['status_data'] = $status_data;
+      $result['voucher_status_is_max'] = $statusLibrary->isStatusIdMax('voucher', hash_id($this->id, 'decode'));
+    } elseif ($this->action == 'multiFormAdd') {
+      $result['office_has_request'] = $requestLibrary->getOfficeRequestCount() == 0 ? false : true;
+    } elseif ($this->action == 'edit') {
+      $result = [];
+      $result['voucher_header_info'] = $this->library->getVoucherHeaderToEdit(hash_id($this->id, 'decode'));
     }
 
-    function result($id = "", $parentTable = null){
-        $result = parent::result($id, $parentTable);
-        
-        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
-        $requestLibrary = new \App\Libraries\Grants\RequestLibrary();
+    return $result;
+  }
 
-        if ($this->action == 'view') {
-            $result = $this->library->getTransactionVoucher($this->id);      
-            $status_data = $this->libs->actionButtonData($this->controller, $result['account_system_id']);
-            $result['is_voucher_cancellable'] = $this->library->isVoucherCancellable($status_data, $result['header']);
-            $result['check_expenses_aganist_income'] = $this->library->checkPendingExpensesExceedsTotalIncome($result['header']);
-            $result['status_data'] = $status_data;
-            $result['voucher_status_is_max'] = $statusLibrary->isStatusIdMax('voucher', hash_id($this->id, 'decode'));
-          } elseif ($this->action == 'multiFormAdd') {
-            $result['office_has_request'] = $requestLibrary->getOfficeRequestCount() == 0 ? false : true;
-          } elseif ($this->action == 'edit') {
-            $result = [];
-            $result['voucher_header_info'] = $this->library->getVoucherHeaderToEdit(hash_id($this->id, 'decode'));
-          }
-        
-        return $result;
+  function printableVoucher()
+  {
+    $post = $this->request->getPost();
+    $vouchers_ids = $post['voucher_ids'];
+    $create_mass_vouchers = [];
+
+    $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+    $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+
+    foreach ($vouchers_ids as $voucher_id) {
+      $voucher = $voucherLibrary->getTransactionVoucher(hash_id($voucher_id, 'encode'));
+      $create_mass_vouchers[$voucher_id] = $voucher;
+      $status_data = $statusLibrary->actionButtonData('voucher', $voucher['account_system_id']);
+      $create_mass_vouchers[$voucher_id]['is_voucher_cancellable'] = $voucherLibrary->isVoucherCancellable($status_data, $voucher['header']);
+      $create_mass_vouchers[$voucher_id]['status_data'] = $status_data;
     }
+
+    $data['vouchers'] = $create_mass_vouchers;
+    $data['journal_id'] = $post['journal_id'];
+    $printable_vouchers = view('voucher/mass_print_voucher_view', $data);
+
+    return $printable_vouchers;
+  }
 }

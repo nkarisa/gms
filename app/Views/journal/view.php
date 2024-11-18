@@ -126,8 +126,7 @@ $(document).ready(function(){
       });
 
       $('#print_vouchers').on('click', function () {
-        // alert('Hello')
-        let url = '<?=base_url();?>voucher/printable_voucher'
+        let url = '<?=base_url();?>ajax/voucher/printableVoucher'
         let checkedCheckboxes = [];
         const journal_id = '<?=$id;?>'
         

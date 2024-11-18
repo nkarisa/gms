@@ -27,7 +27,7 @@ class VoucherLibrary extends GrantsLibrary
     /**
      * get_transaction_voucher
      * @param int $id
-     * @return Array
+     * @return array
      * @access private
      * @author: Livingstone Onduso
      * @Date: 24/9/2022
@@ -55,7 +55,7 @@ class VoucherLibrary extends GrantsLibrary
         $header['voucher_id'] = $raw_result[0]['voucher_id'];
         $header['voucher_date'] = $raw_result[0]['voucher_date'];
         $header['voucher_number'] = $raw_result[0]['voucher_number'];
-        $header['voucher_approvers'] = json_decode($raw_result[0]['voucher_approvers']);
+        $header['voucher_approvers'] = isset($raw_result[0]) && $raw_result[0]['voucher_approvers'] != null ? json_decode($raw_result[0]['voucher_approvers']): [];
 
         $header['voucher_type_name'] = $voucher_type->voucher_type_name;
 
