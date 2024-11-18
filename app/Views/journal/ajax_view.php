@@ -482,7 +482,7 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
                         <td class='align-right'><?= number_format($sum_bank_income[$office_bank_id], 2); ?></td>
                         <td class='align-right'><?= number_format($sum_bank_expense[$office_bank_id], 2); ?></td>
                         <td class='align-right'>
-                            <?= number_format(($running_bank_balance[$office_bank_id] == 0 && $sum_bank_expense[$office_bank_id] == 0) ? $month_opening_balance['balance'][$office_bank_id]['amount'] : $running_bank_balance[$office_bank_id], 2); ?>
+                            <?= number_format(($running_bank_balance[$office_bank_id] == 0 && $sum_bank_expense[$office_bank_id] == 0) && isset($month_opening_balance['balance']) ? $month_opening_balance['balance'][$office_bank_id]['amount'] : $running_bank_balance[$office_bank_id], 2); ?>
                         </td>
                     <?php } ?>
 
