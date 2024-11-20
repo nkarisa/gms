@@ -32,7 +32,7 @@ class GrantsLibrary
   protected $response;
   protected $set_field_type = [];
   protected $detail_tables = [];
-  protected $lookup_tables_with_null_values = [];
+  public $lookup_tables_with_null_values = [];
   protected $model = null;
   protected $library = null;
   public $dbSchema;
