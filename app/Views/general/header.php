@@ -54,13 +54,13 @@
 
 				<ul class="dropdown-menu <?php if ($text_align == 'right-to-left') echo 'pull-right'; else echo 'pull-left';?>">
 					<li>
-						<a href="<?php echo base_url();?>user/view/<?=$user_id;?>">
+						<a href="<?php echo base_url();?>user/view/<?=hash_id($user_id, 'encode');?>">
                         	<i class="fa fa-user"></i>
 							<span><?php echo get_phrase('your_profile');?></span>
 						</a>
 					</li>
 
-					<?php if($user_can_read_switch || $session->primary_user_data['user_id']){?>
+					<?php if($user_can_read_switch || $primary_user_data_id){?>
 					<li>
 						<a href="<?php echo base_url();?>user_switch/list">
                         	<i class="fa fa-toggle-on"></i>

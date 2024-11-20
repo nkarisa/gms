@@ -11,4 +11,20 @@ class Budget extends WebController {
         parent::initController($request, $response, $logger);
 
     }
+
+    function checkOfficePeriodBudgetExists($office_id){
+    
+        $budgetLibrary = new \App\Libraries\Grants\BudgetLibrary();
+        $budget = $budgetLibrary->getBudgetByOfficeCurrentTransactionDate($office_id);
+            
+        $check = false;
+    
+        if(count($budget) > 0){
+          $check = true;
+        }
+    
+        return $this->response->setJSON(compact('check'));
+      }
+
+ 
 }

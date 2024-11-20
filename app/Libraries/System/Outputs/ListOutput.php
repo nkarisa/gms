@@ -61,6 +61,8 @@ class ListOutput extends OutputTemplate
       $builder->where($foreignKeyField, hash_id($this->parentId, 'decode'));
     }
 
+    $this->libs->listTableWhere($builder);
+
     if (method_exists($featureLibrary, $where_method)) {
       $featureLibrary->$where_method($builder);
     }
@@ -83,10 +85,19 @@ class ListOutput extends OutputTemplate
         if(array_key_exists($lookup_table,$foreignKeyMappings)){
           $foreignKeyField = $foreignKeyMappings[$lookup_table];
         }
-        $builder->join($lookup_table, $lookup_table . '.' . $lookup_table_id . '=' . $table . '.' . $foreignKeyField);
+        $lookup_tables_with_null_values = [];
+        if(!empty(property_exists($featureLibrary, 'lookup_tables_with_null_values'))){
+          $lookup_tables_with_null_values = $featureLibrary->lookup_tables_with_null_values;
+        }
+        $joinType = in_array($lookup_table, $lookup_tables_with_null_values) ? 'LEFT': '';
+        $builder->join($lookup_table, $lookup_table . '.' . $lookup_table_id . '=' . $table . '.' . $foreignKeyField, $joinType);
       }
     }
 
+    if(method_exists($featureLibrary, 'customTableJoin')){
+      $featureLibrary->customTableJoin($builder);
+    }
+    
     // Apply ordering
     if (method_exists($featureLibrary, 'orderListPage')) {
       $builder->orderBy($featureLibrary->orderListPage());
@@ -114,7 +125,7 @@ class ListOutput extends OutputTemplate
 
   private function drawDatatableResults(string $table, array $selected_columns, array $lookup_tables, string $listTableWhere, array $filter_where_array): array
   {
-
+    // Column selection is not required for query
     $builder = $this->tableQueryBuilder($table);
     $this->runQueryBuilder(
       $builder,
@@ -126,7 +137,6 @@ class ListOutput extends OutputTemplate
 
     $this->libs->dataTableBuilder($builder, $table, $selected_columns);
 
-    $builder->select($selected_columns);
     return $builder->get()->getResultArray();
   }
 

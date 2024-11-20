@@ -15,6 +15,10 @@ class GrantsLibrary
   use \App\Traits\System\SchemaTrait;
   use \App\Traits\System\CrudTrait;
   use \App\Traits\System\DataTable;
+  use \App\Traits\System\SetupTrait;
+  use \App\Traits\System\ApprovalTrait;
+  use \App\Traits\System\FieldsTrait;
+  use \App\Traits\System\ManipulationTrait;
 
   protected $read_db;
   protected $write_db;
@@ -28,6 +32,7 @@ class GrantsLibrary
   protected $response;
   protected $set_field_type = [];
   protected $detail_tables = [];
+  protected $lookup_tables_with_null_values = [];
   protected $model = null;
   protected $library = null;
   public $dbSchema;
@@ -56,13 +61,13 @@ class GrantsLibrary
     $this->id = isset($segments[2]) && !$this->request->isAJAX() ? $segments[2] : 0;
 
     // if($this->request->isAJAX()){
-      if($this->controller == "ajax" || $this->controller == "ajaxRequest"){
-        $this->controller = isset($segments[1]) ? $segments[1] : 'dashboard';
-      }
+    if ($this->controller == "ajax" || $this->controller == "ajaxRequest") {
+      $this->controller = isset($segments[1]) ? $segments[1] : 'dashboard';
+    }
 
-      if($this->action == "showList"){
-        $this->action = 'list';
-      }
+    if ($this->action == "showList") {
+      $this->action = 'list';
+    }
     // }
 
     // Session 
@@ -147,39 +152,6 @@ class GrantsLibrary
     return $userContextDefinition;
   }
 
-  /**
-   * Creates the necessary directory structure for resource uploads.
-   *
-   * The function retrieves the names of all approveable items from the database,
-   * and creates a directory for each item under the 'uploads/attachments/' directory.
-   * If the 'uploads/' or 'uploads/attachments/' directories do not exist, they are created.
-   *
-   * @return void
-   */
-  function createResourceUploadDirectoryStructure()
-  {
-    $builder = $this->read_db->table('approve_item');
-
-    $builder->select(array('approve_item_name'));
-    $approveable_items = $builder->get()->getResultArray();
-
-    // Check if the 'uploads/' directory exists, and create it if not
-    if (!file_exists('uploads/')) {
-      mkdir('uploads/');
-    }
-
-    // Check if the 'uploads/attachments/' directory exists, and create it if not
-    if (!file_exists('uploads/attachments/')) {
-      mkdir('uploads/attachments/');
-    }
-
-    // Iterate through the approveable items and create a directory for each item
-    foreach ($approveable_items as $approveable_item) {
-      if (!file_exists('uploads/attachments/' . $approveable_item['approve_item_name'])) {
-        mkdir('uploads/attachments/' . $approveable_item['approve_item_name']);
-      }
-    }
-  }
 
   private function callbackTransactionValidateByComputation(string $table_name, array $insert_array)
   {
@@ -201,7 +173,7 @@ class GrantsLibrary
 
   final public function loadModel(string $table_name)
   {
-    $modules = decode_setting("GrantsConfig","modules"); // Assuming $config is an instance of Config\App
+    $modules = decode_setting("GrantsConfig", "modules"); // Assuming $config is an instance of Config\App
     $table_model = null;
     $table_model_name = pascalize($table_name) . 'Model';
     // Loop through the modules to find the appropriate library
@@ -232,7 +204,7 @@ class GrantsLibrary
    */
   final public function loadLibrary(string $table_name)
   {
-    $modules = decode_setting("GrantsConfig","modules"); // Assuming $config is an instance of Config\App
+    $modules = decode_setting("GrantsConfig", "modules"); // Assuming $config is an instance of Config\App
     $table_library = null;
     $table_library_name = pascalize($table_name) . 'Library';
     // Loop through the modules to find the appropriate library
@@ -295,7 +267,7 @@ class GrantsLibrary
         $newObj = new $class();
 
         if (method_exists($newObj, $method)) {
-          if (in_array($method, ['listOutput', 'viewOutput', 'editOutput', 'singleFormAddOutput'])) {
+          if (in_array($method, ['listOutput', 'viewOutput', 'editOutput', 'singleFormAddOutput', 'multiFormAddOutput'])) {
             return $newObj->$method($module, ...$args);
           }
           return $newObj->$method(...$args);
@@ -311,128 +283,6 @@ class GrantsLibrary
     }
   }
 
-  function create_missing_system_files_from_json_setup()
-  {
-    $specs_array = create_specs_array(); // file_get_contents(APPPATH . 'version' . DIRECTORY_SEPARATOR . 'spec.json');
-    $this->create_missing_system_files($specs_array);
-  }
-
-  function create_missing_system_files($table_array)
-  {
-    foreach ($table_array as $app_name => $app_tables) {
-      foreach ($app_tables['tables'] as $table_name => $setup) {
-        $this->create_missing_system_files_methods($table_name, $app_name);
-      }
-    }
-  }
-
-  function create_missing_system_files_methods($table_name, $app_name)
-  {
-
-    $table_name = pascalize($table_name);
-    $app_name = ucfirst($app_name);
-
-    $assets_temp_path = 'assets' . DIRECTORY_SEPARATOR . 'temp' . DIRECTORY_SEPARATOR;
-    $controllers_path = APPPATH . 'controllers' . DIRECTORY_SEPARATOR . $app_name . DIRECTORY_SEPARATOR;
-
-    if (!file_exists($controllers_path . $table_name . '.php')) {
-      $this->create_missing_controller($table_name, $assets_temp_path, $app_name);
-      $this->create_missing_model($table_name, $assets_temp_path, $app_name);
-      $this->create_missing_library($table_name, $assets_temp_path, $app_name);
-    }
-  }
-
-  function create_missing_controller($table, $assets_temp_path, $app_name)
-  {
-    $controllers_path = APPPATH . 'controllers' . DIRECTORY_SEPARATOR . 'web' . DIRECTORY_SEPARATOR . $app_name . DIRECTORY_SEPARATOR;
-    // Copy contents of assets/temp_library to the created file after the tag above
-    $replaceables = array("%cap_feature%" => $table, '%cap_module%' => $app_name);
-    $this->write_file_contents($table, $controllers_path, $assets_temp_path, $replaceables, 'Controller');
-  }
-
-  function create_missing_library($table, $assets_temp_path, $app_name)
-  {
-
-    $libararies_path = APPPATH . 'Libraries' . DIRECTORY_SEPARATOR . $app_name . DIRECTORY_SEPARATOR;
-    // Copy contents of assets/temp_library to the created file after the tag above
-    $replaceables = array("%cap_feature%" => $table, '%cap_module%' => $app_name, '%small_feature%' => strtolower($table));
-    $this->write_file_contents($table, $libararies_path, $assets_temp_path, $replaceables, 'Library');
-  }
-
-  function create_missing_model($table, $assets_temp_path, $app_name)
-  {
-
-    $models_path = APPPATH . 'Models' . DIRECTORY_SEPARATOR . $app_name . DIRECTORY_SEPARATOR;
-
-    $replaceables = array(
-      "%cap_module%" => $app_name,
-      "%cap_feature%" => $table,
-      '%small_feature%' => strtolower($table)
-    );
-
-    $this->write_file_contents($table, $models_path, $assets_temp_path, $replaceables, 'Model');
-  }
-
-  function write_file_contents($table, $sys_file_path, $assets_temp_path, $replaceables, $temp_type = 'Controller')
-  {
-
-    // Check if model is available and if not create the file
-    if (
-      (in_array($temp_type, ['Model', 'Library']) && !file_exists($sys_file_path . $table . $temp_type . '.php')) ||
-      ($temp_type == "Controller" && !file_exists($sys_file_path . $table . '.php'))
-    ) {
-
-      // Create the file  
-      $handle = null;
-
-      if ($temp_type == 'Model' || $temp_type == 'Library') {
-        $handle = fopen($sys_file_path . $table . $temp_type . '.php', "w") or die("Unable to open file!");
-      } else {
-        $handle = fopen($sys_file_path . $table . '.php', "w") or die("Unable to open file!");
-      }
-
-      // Add the PHP opening tag to the file 
-      $php_tag = '<?php';
-      fwrite($handle, $php_tag);
-
-      $replacefrom = array_keys($replaceables);
-
-      $replacedto = array_values($replaceables);
-
-      $file_raw_contents = file_get_contents($assets_temp_path . $temp_type . '.tpl');
-
-      $file_contents = str_replace($replacefrom, $replacedto, $file_raw_contents);
-
-      $file_code = "\n" . $file_contents;
-
-      fwrite($handle, $file_code);
-    }
-  }
-
-
-  function addMandatoryLookupTables(
-    &$existing_lookup_tables,
-    $mandatory_lookup_tables = ['status']
-  ) {
-    //$mandatory_lookup_tables = ['status', 'approval']
-    foreach ($mandatory_lookup_tables as $mandatory_lookup_table) {
-      if (!in_array($mandatory_lookup_table, $existing_lookup_tables)) {
-        array_push($existing_lookup_tables, $mandatory_lookup_table);
-      }
-    }
-  }
-
-  function removeMandatoryLookupTables(
-    &$existing_lookup_tables,
-    $mandatory_lookup_tables = ['status']
-  ) {
-    //$mandatory_lookup_tables = ['status', 'approval']
-    foreach ($mandatory_lookup_tables as $mandatory_lookup_table) {
-      if (in_array($mandatory_lookup_table, $existing_lookup_tables)) {
-        unset($existing_lookup_tables[array_search($mandatory_lookup_table, $existing_lookup_tables)]);
-      }
-    }
-  }
 
 
   /**
@@ -504,70 +354,6 @@ class GrantsLibrary
     return $lookup_tables;
   }
 
-  public function historyTrackingField(string $table_name, string $history_type): string
-  {
-
-    $featureLibrary = $this->loadLibrary($table_name);
-
-    $history_type_field = "";
-
-    if (property_exists($featureLibrary, $history_type . '_field')) {
-      $property = $history_type . '_field';
-      $history_type_field = $featureLibrary->$property;
-    } else {
-      $fields = $this->getAllTableFields($table_name);
-
-      if (in_array($table_name . '_' . $history_type, $fields)) {
-        $history_type_field = $table_name . '_' . $history_type;
-      }
-    }
-
-    return $history_type_field;
-  }
-
-
-  public function nameField(string $table_name = ""): string
-  {
-    $featureLibrary = $this->loadLibrary($table_name);
-
-    $name_field = "";
-
-    if (property_exists($featureLibrary, 'name_field')) {
-      $name_field = $featureLibrary->name_field;
-    } else {
-      $fields = $this->getAllTableFields($table_name);
-
-      if (in_array($table_name . '_name', $fields)) {
-        $name_field = $table_name . '_name';
-      }
-    }
-
-    return $name_field;
-  }
-
-  function setChangeFieldType($detail_table = "")
-  {
-
-    // Aray format for the changeFieldType method in feature library: 
-    //array('[field_name]'=>array('field_type'=>$new_type,'options'=>$options));
-
-    $featureLibary = $this->loadLibrary($this->controller);
-
-    if ($detail_table !== "") {
-      $featureLibary = $this->loadLibrary($detail_table);
-    }
-
-    if (
-      method_exists($featureLibary, 'changeFieldType') &&
-      is_array($featureLibary->changeFieldType())
-    ) {
-
-      $this->set_field_type = $featureLibary->changeFieldType();
-    }
-
-    return $this->set_field_type;
-  }
-
 
   public function updateQueryResultForFieldsChangedToSelectType(string $table, array $query_result): array
   {
@@ -607,28 +393,24 @@ class GrantsLibrary
   function checkDetailTables(string $table_name = ""): array
   {
     $featureLibrary = $this->loadLibrary($table_name);
-
     $uri = service('uri');
 
     if ($this->controller == 'approval' && $this->action == 'view') {
-      // This is specific to approval view, only to list the detail listing of the selected approveable 
-      // items
+      // This is specific to approval view, only to list the detail listing of the selected approveable items
       // This prevents the approval from listing the details tables instead of a specific approveable item
       $id = $uri->getSegment(3, 0);
-
       // This line needs to be moved to a model
       $builder = $this->read_db->table('approval');
       $builder->join('approve_item', 'approve_item.approve_item_id=approval.fk_approve_item_id');
       $detail_table = $builder->getWhere(['approval_id' => hash_id($id, 'decode')])->getRow()->approve_item_name;
-
       $this->detail_tables = [$detail_table];
     } elseif ($this->dependantTable($table_name) !== "") {
       // If dependant_table exists, you can't have more than one detail table. This piece nullifies the use
       // of the detail_tables feature model if set
       $this->detail_tables[] = $this->dependantTable($table_name);
     } elseif (
-      $this->action == 'view' && method_exists($featureLibrary, 'detailTables') &&
-      is_array($featureLibrary->detailTables()) && count($featureLibrary->detailTables()) > 0
+      method_exists($featureLibrary, 'detailTables') &&
+      is_array($featureLibrary->detailTables()) && !empty($featureLibrary->detailTables())
     ) {
       $this->detail_tables = $featureLibrary->detailTables();
     }
@@ -640,12 +422,15 @@ class GrantsLibrary
   {
 
     $table = $table_name == "" ? $this->controller : $table_name;
-
-    $all_detail_tables = $this->detailTables($table);
-
+    $all_detail_tables = $this->checkDetailTables($table);
+    $dependantTable = $this->dependantTable($table);
     $has_detail_table = false;
 
-    if (is_array($all_detail_tables) && in_array($this->dependantTable($table), $all_detail_tables)) {
+    if (
+      is_array($all_detail_tables)
+      && !empty(is_array($all_detail_tables))
+      && $dependantTable != ""
+    ) {
       $has_detail_table = true;
     }
 
@@ -748,7 +533,7 @@ class GrantsLibrary
     if (in_array('fk_office_id', $table_fields)) {
       $table_has_office_relationship = true;
     }
-    
+
     return $table_has_office_relationship;
   }
 
@@ -756,10 +541,10 @@ class GrantsLibrary
   {
 
     if ($this->checkIfTableHasOfficeRelationship($table)) {
-      $builder->whereIn("$table.fk_office_id", array_column($this->session->hierarchy_offices,'office_id'));
+      $builder->whereIn("$table.fk_office_id", array_column($this->session->hierarchy_offices, 'office_id'));
     }
   }
-  
+
   function joinTablesWithAccountSystem($builder, $table)
   {
 
@@ -783,489 +568,6 @@ class GrantsLibrary
     }
   }
 
-  public function getPackageSchema($package)
-  {
-    $packageSchema = $this->getSchema($package);
-    return $packageSchema;
-  }
-
-  /**
-   * is_primary_key_field
-   * 
-   * Check if a supplied field for a table is a primary key field
-   * @param string $table_name - The name of a table to check
-   * @param string $field - Field to check from the table
-   * 
-   * @return bool - True if Primary Key field else false
-   */
-  function isPrimaryKeyField(string $table_name, string $field): bool
-  {
-
-    $is_primary_key_field = false;
-
-    $metadata = $this->tableFieldsMetadata($table_name);
-
-    foreach ($metadata as $data) {
-      if ($data['primary_key'] == 1 && $data['name'] == $field) {
-        $is_primary_key_field = true;
-      }
-    }
-
-    return $is_primary_key_field;
-  }
-
-  function actionLabels($table, $primary_key)
-  {
-    return $this->displayApproverStatusAction(session()->get('role_ids'), $table, $primary_key);
-  }
-
-  /**
-   * get_status_id
-   * 
-   * Gives you the status id of a selected item
-   * 
-   * @param $table String
-   * 
-   * @param $primary  Int - Item primary key
-   * 
-   * @return int
-   */
-  function getStatusId(string $table, int $primaryKey): int
-  {
-    $fkStatusId = 0;
-
-    // Get database connection
-    $builder = $this->read_db->table($table);
-
-    // Run the query to get the record
-    $recordObject = $builder->getWhere([$table . '_id' => $primaryKey]);
-
-    // Check if the record exists and if 'fk_status_id' exists in the result
-    if ($recordObject->getNumRows() > 0 && array_key_exists('fk_status_id', (array) $recordObject->getRowArray())) {
-      $status_id = $recordObject->getRow()->fk_status_id;
-      $fkStatusId = $status_id != null ? $status_id : 0;
-    }
-
-    return $fkStatusId;
-  }
-
-  function currentApprovalActor($itemStatus)
-  {
-
-    $builder = $this->read_db->table('status');
-
-    // Fetch the status based on the item status
-    $builder->where(['status_id' => $itemStatus]);
-    $status = $builder->get()->getRow();
-
-    $roles = [];
-
-    if ($status) {
-      // Build the condition for approval direction
-      if ($status->status_approval_direction == 1 || $status->status_approval_direction == 0) {
-        $sequence = $status->status_approval_sequence;
-      } else {
-        $sequence = $status->status_backflow_sequence;
-      }
-
-      // Prepare query for roles
-      $builder = $this->read_db->table('status_role');
-      $builder->select('fk_role_id');
-      $builder->where([
-        'fk_approval_flow_id' => $status->fk_approval_flow_id,
-        'status_role_is_active' => 1,
-        'status_approval_direction' => 1,
-        'status_approval_sequence' => $sequence
-      ]);
-
-      $builder->join('status', 'status.status_id = status_role.status_role_status_id');
-      $rolesObj = $builder->get();
-
-      // Extract roles if they exist
-      if ($rolesObj->getNumRows() > 0) {
-        $roles = array_column($rolesObj->getResultArray(), 'fk_role_id');
-      }
-    }
-
-    // Return the roles array
-    return $roles;
-  }
-
-  function rangeOfStatusApprovalSequence($approveItemName)
-  {
-
-    $builder = $this->read_db->table('status');
-
-    // Select the max status approval sequence
-    $builder->select('MAX(status_approval_sequence) as status_approval_sequence');
-    $builder->join('approval_flow', 'approval_flow.approval_flow_id = status.fk_approval_flow_id');
-    $builder->join('approve_item', 'approve_item.approve_item_id = approval_flow.fk_approve_item_id');
-
-    $builder->where([
-      'approve_item_name' => $approveItemName,
-      'approval_flow.fk_account_system_id' => session()->get('user_account_system_id')
-    ]);
-
-    $maxRange = $builder->get()->getRow()->status_approval_sequence;
-
-    return $maxRange;
-  }
-
-  function getApproveableItemIdByStatus($itemStatus)
-  {
-
-    $builder = $this->read_db->table('approve_item');
-
-    // Select the approve item id
-    $builder->select('approve_item_id');
-    $builder->join('approval_flow', 'approval_flow.fk_approve_item_id = approve_item.approve_item_id');
-    $builder->join('status', 'status.fk_approval_flow_id = approval_flow.approval_flow_id');
-
-    $builder->where('status_id', $itemStatus);
-
-    $result = $builder->get()->getRow()->approve_item_id;
-
-    return $result;
-  }
-
-  function getApproveItemNameByStatus($itemStatus)
-  {
-    $builder = $this->read_db->table('approve_item');
-
-    // Select the approve item name
-    $builder->select('approve_item_name');
-    $builder->join('approval_flow', 'approval_flow.fk_approve_item_id = approve_item.approve_item_id');
-    $builder->join('status', 'status.fk_approval_flow_id = approval_flow.approval_flow_id');
-
-    $builder->where('status_id', $itemStatus);
-
-    $result = $builder->get()->getRow()->approve_item_name;
-
-    return $result;
-  }
-
-  function defaultRoleId()
-  {
-    $builder = $this->read_db->table('role');
-
-    // Get the role where role_is_new_status_default is true
-    $builder->where('role_is_new_status_default', 1);
-
-    $resultObj = $builder->get();
-
-    $defaultRoleId = 0;
-
-    if ($resultObj->getNumRows() > 0) {
-      $defaultRoleId = $resultObj->getRow()->role_id;
-    }
-
-    return $defaultRoleId;
-  }
-
-  function nextApprovalActor($itemStatus)
-  {
-    $builder = $this->read_db->table('status');
-
-    // Get approval item name using the status_id
-    $approveItemName = $this->getApproveItemNameByStatus($itemStatus);
-
-    // Get the range of status approval sequence
-    $rangeOfStatusApprovalSequence = $this->rangeOfStatusApprovalSequence($approveItemName);
-
-    // Get approveable item id
-    $approveableItemId = $this->getApproveableItemIdByStatus($itemStatus);
-
-    // Get the status record
-    $builder->where(['status_id' => $itemStatus]);
-    $statusRecord = $builder->get()->getRow();
-
-    // Check if the status record exists
-    if (!$statusRecord) {
-      return [$this->defaultRoleId()];
-    }
-
-    // Get the value of the approval direction
-    $statusApprovalDirection = $statusRecord->status_approval_direction;
-
-    // Calculate the next and previous possible sequence numbers
-    $nextPossibleSequenceNumber = $statusRecord->status_approval_sequence + 1;
-    // $previousPossibleSequenceNumber = $statusRecord->status_approval_sequence - 1;
-
-    $nextApprovalActorRoleIds = [$this->defaultRoleId()];
-
-    // Check if this is not the last status
-    if ($nextPossibleSequenceNumber <= $rangeOfStatusApprovalSequence) {
-
-      if ($statusApprovalDirection == 1) {
-        // Next approval step
-        $builder = $this->read_db->table('status');
-        $builder->select('status_role.fk_role_id as fk_role_id');
-        $builder->join('approval_flow', 'approval_flow.approval_flow_id = status.fk_approval_flow_id');
-        $builder->join('status_role', 'status_role.status_role_status_id = status.status_id');
-        $builder->where([
-          'status_approval_sequence' => $nextPossibleSequenceNumber,
-          'fk_approve_item_id' => $approveableItemId,
-          'approval_flow.fk_account_system_id' => session()->get('user_account_system_id')
-        ]);
-
-        $nextStatusRecordObj = $builder->get();
-        $nextApprovalActorRoleIds = $nextStatusRecordObj->getNumRows() > 0
-          ? array_unique(array_column($nextStatusRecordObj->getResultArray(), 'fk_role_id'))
-          : [$this->defaultRoleId()];
-
-      } elseif ($statusApprovalDirection == -1) {
-        // Backward approval step
-        $builder = $this->read_db->table('status');
-        $builder->select('status_role.fk_role_id as fk_role_id');
-        $builder->join('approval_flow', 'approval_flow.approval_flow_id = status.fk_approval_flow_id');
-        $builder->join('status_role', 'status_role.status_role_status_id = status.status_id');
-        $builder->where([
-          'status_approval_sequence' => $statusRecord->status_approval_sequence,
-          'fk_approve_item_id' => $approveableItemId,
-          'approval_flow.fk_account_system_id' => session()->get('user_account_system_id'),
-          'status_role_status_id' => $itemStatus
-        ]);
-
-        $nextStatusRecordObj = $builder->get();
-        $nextApprovalActorRoleIds = $nextStatusRecordObj->getNumRows() > 0
-          ? array_unique(array_column($nextStatusRecordObj->getResultArray(), 'fk_role_id'))
-          : [$this->defaultRoleId()];
-      }
-    }
-
-    return $nextApprovalActorRoleIds;
-  }
-
-
-  function getStatusName($itemStatus)
-  {
-
-    return $this->read_db->table('status')
-      ->getWhere(['status_id' => $itemStatus])
-      ->getRow()
-      ->status_name;
-  }
-
-  function userActionLabel($itemStatus)
-  {
-
-    $statusObj = $this->read_db->table('status')
-      ->where('status_id', $itemStatus)
-      ->get();
-
-    $label = '';
-
-    if ($statusObj->getNumRows() > 0) {
-      $status = $statusObj->getRow();
-      $label = $status->status_name;
-      if (!empty($status->status_button_label)) {
-        $label = $status->status_button_label;
-      }
-    }
-
-    return $label;
-  }
-
-  function showDeclineButton($itemStatus, $loggedRoleId)
-  {
-    $statusRecord = $this->read_db->table('status')
-      ->getWhere(['status_id' => $itemStatus])
-      ->getRow();
-
-    $approvalDirection = $statusRecord->status_approval_direction;
-    $hasDeclineButton = false;
-    $currentActors = $this->currentApprovalActor($itemStatus);
-
-    if (
-      ($approvalDirection == 1 || $approvalDirection == 0) &&
-      count($currentActors) > 0 &&
-      !empty(array_intersect($loggedRoleId, $currentActors)) &&
-      $statusRecord->status_approval_sequence != 1
-    ) {
-      $hasDeclineButton = true;
-    }
-
-    return $hasDeclineButton;
-  }
-
-  function nextStatus($itemStatus)
-  {
-    $nextStatusId = 0;
-
-    $approveItemName = $this->getApproveItemNameByStatus($itemStatus);
-    $rangeOfStatusApprovalSequence = $this->rangeOfStatusApprovalSequence($approveItemName);
-    $approveableItemId = $this->getApproveableItemIdByStatus($itemStatus);
-
-    $statusRecord = $this->read_db->table('status')
-      ->getWhere(['status_id' => $itemStatus])
-      ->getRow();
-
-    $statusApprovalSequence = $statusRecord->status_approval_sequence;
-    $backflowSequence = $statusRecord->status_backflow_sequence;
-
-    if (($statusApprovalSequence < $rangeOfStatusApprovalSequence) && $backflowSequence == 0) {
-      $nextApprovalSeq = $statusApprovalSequence + 1;
-
-      $nextStatusIdObj = $this->read_db->table('status')
-        ->join('approval_flow', 'approval_flow.approval_flow_id=status.fk_approval_flow_id')
-        ->where([
-          'status_approval_sequence' => $nextApprovalSeq,
-          'fk_approve_item_id' => $approveableItemId,
-          'approval_flow.fk_account_system_id' => session()->get('user_account_system_id')
-        ])->get();
-
-      if ($nextStatusIdObj->getNumRows() > 0) {
-        $nextStatusId = $nextStatusIdObj->getRow()->status_id;
-      }
-    } elseif (($statusApprovalSequence == $rangeOfStatusApprovalSequence) && $backflowSequence == 0) {
-      $nextStatusIdObj = $this->read_db->table('status')
-        ->join('approval_flow', 'approval_flow.approval_flow_id=status.fk_approval_flow_id')
-        ->where([
-          'status_approval_sequence' => $statusApprovalSequence,
-          'fk_approve_item_id' => $approveableItemId,
-          'approval_flow.fk_account_system_id' => session()->get('user_account_system_id'),
-          'status_approval_direction' => 1
-        ])->get();
-
-      if ($nextStatusIdObj->getNumRows() > 0) {
-        $nextStatusId = $nextStatusIdObj->getRow()->status_id;
-      }
-    }
-
-    if ($backflowSequence > 0) {
-      $rolesIds = $this->read_db->table('status')
-        ->join('approval_flow', 'approval_flow.approval_flow_id=status.fk_approval_flow_id')
-        ->join('status_role', 'status_role.status_role_status_id=status.status_id')
-        ->where([
-          'status_approval_sequence' => $backflowSequence,
-          'fk_role_id' => session()->get('role_id'),
-          'fk_account_system_id' => session()->get('user_account_system_id')
-        ])->get();
-
-      if ($rolesIds->getNumRows() > 0) {
-        $nextStatusId = $this->read_db->table('status')
-          ->join('approval_flow', 'approval_flow.approval_flow_id=status.fk_approval_flow_id')
-          ->where([
-            'status_approval_sequence' => $statusApprovalSequence,
-            'status_approval_direction' => 0,
-            'fk_approve_item_id' => $approveableItemId,
-            'approval_flow.fk_account_system_id' => session()->get('user_account_system_id')
-          ])->get()->getRow()->status_id;
-      } else {
-        $nextStatusId = $this->read_db->table('status')
-          ->join('approval_flow', 'approval_flow.approval_flow_id=status.fk_approval_flow_id')
-          ->where([
-            'status_approval_sequence' => $statusApprovalSequence,
-            'fk_approve_item_id' => $approveableItemId,
-            'status_approval_direction' => 1,
-            'approval_flow.fk_account_system_id' => session()->get('user_account_system_id')
-          ])->get()->getRow()->status_id;
-      }
-    }
-
-    return $nextStatusId;
-  }
-
-
-  function declineStatus($itemStatus)
-  {
-
-    $nextDeclineStatus = 0;
-
-    $statusRecord = $this->read_db->table('status')
-      ->getWhere(['status_id' => $itemStatus])
-      ->getRow();
-
-    $approveableItemId = $this->getApproveableItemIdByStatus($itemStatus);
-    $approvalSequence = $statusRecord->status_approval_sequence;
-
-    $declineStatusRecord = $this->read_db->table('status')
-      ->join('approval_flow', 'approval_flow.approval_flow_id=status.fk_approval_flow_id')
-      ->where([
-        'status_approval_sequence' => $approvalSequence,
-        'status_approval_direction' => -1,
-        'fk_approve_item_id' => $approveableItemId,
-        'approval_flow.fk_account_system_id' => session()->get('user_account_system_id')
-      ])->get();
-
-    if ($declineStatusRecord->getNumRows() > 0) {
-      $nextDeclineStatus = $declineStatusRecord->getRow()->status_id;
-    }
-
-    return $nextDeclineStatus;
-  }
-
-  function declineButtonLabel($itemStatus)
-  {
-
-    $statusObj = $this->read_db->table('status')
-      ->join('approval_flow', 'approval_flow.approval_flow_id=status.fk_approval_flow_id')
-      ->join('approve_item', 'approve_item.approve_item_id=approval_flow.fk_approve_item_id')
-      ->where('status_id', $itemStatus)->get();
-
-    $label = '';
-
-    if ($statusObj->getNumRows() > 0) {
-      $status = $statusObj->getRow();
-      $statusId = $status->status_id;
-      $statusDeclineButtonLabel = $status->status_decline_button_label;
-      $initialItemStatus = $this->initialItemStatus($status->approve_item_name);
-      $label = get_phrase('decline');
-
-      if (!empty($statusDeclineButtonLabel) && $initialItemStatus != $statusId) {
-        $label = $statusDeclineButtonLabel;
-      }
-    }
-
-    return $label;
-  }
-
-  function initialItemStatus($tableName = "", $accountSystemId = 0): int
-  {
-    // $this->read_db->resetQuery();
-
-    if ($accountSystemId == 0) {
-      $accountSystemId = session()->get('user_account_system_id');
-    }
-
-    $table = $tableName == "" ? $this->controller : $tableName;
-
-    $approveableItem = $this->read_db->table('approve_item')
-      ->getWhere(['approve_item_name' => $table]);
-
-    $statusId = 0;
-
-    if ($approveableItem->getNumRows() > 0) {
-      $approveableItemId = $approveableItem->getRow()->approve_item_id;
-      $approveableItemIsActive = $approveableItem->getRow()->approve_item_is_active;
-
-      // Initial condition array
-      $conditionArray = [
-        'fk_approve_item_id' => $approveableItemId,
-        'status_approval_sequence' => 1,
-        'fk_account_system_id' => $accountSystemId
-      ];
-
-      if (!$approveableItemIsActive) {
-        // Condition for fully approved status if the item is inactive
-        $conditionArray = [
-          'fk_approve_item_id' => $approveableItemId,
-          'status_is_requiring_approver_action' => 0,
-          'fk_account_system_id' => $accountSystemId
-        ];
-      }
-
-      $initialStatus = $this->read_db->table('status')
-        ->join('approval_flow', 'approval_flow.approval_flow_id = status.fk_approval_flow_id')
-        ->where($conditionArray)->get();
-
-      if ($initialStatus->getNumRows() > 0) {
-        $statusId = $initialStatus->getRow()->status_id;
-      }
-    }
-
-    return $statusId;
-  }
 
   function unsetLookupTablesIds(&$keys, $table_name = "")
   {
@@ -1305,131 +607,8 @@ class GrantsLibrary
     return $show_add_button;
   }
 
-  function showLabelAsButton($item_status, $logged_role_id, $table, $primary_key)
-  {
-    $statusLibrary = new \App\Libraries\Core\StatusLibrary();
-    $approveItemLibrary = new \App\Libraries\Core\ApproveItemLibrary();
-
-    $max_approval_status_id = $statusLibrary->getMaxApprovalStatusId($table)[0];
-    $current_approval_actors = $this->currentApprovalActor($item_status); // This is an array of current status role actors
-
-    $logged_user_centers = array_column($this->session->hierarchy_offices, 'office_id');
-
-    $is_approveable_item = $approveItemLibrary->approveableItem($table);
-
-    $show_label_as_button = false;
-
-    if (is_array($logged_role_id)) {
-      if (
-        (
-          (is_array($logged_user_centers) &&
-            (is_array($current_approval_actors) && !empty(array_intersect($logged_role_id, $current_approval_actors)))) &&
-          $is_approveable_item) || $this->session->system_admin
-      ) {
-        $show_label_as_button = true;
-      }
-    } else {
-      if (
-        (
-          (is_array($logged_user_centers) &&
-            (is_array($current_approval_actors) && in_array($logged_role_id, $current_approval_actors))) &&
-          $is_approveable_item) || $this->session->system_admin
-      ) {
-        $show_label_as_button = true;
-      }
-    }
-
-    if ($max_approval_status_id == $item_status) {
-      $show_label_as_button = false;
-    }
 
 
-    return $show_label_as_button;
-  }
-
-
-  function isMaxApprovalStatusId(string $approveable_item, int $status_id): bool
-  {
-    $is_max_status_id = false;
-
-    $statusLibrary = new \App\Libraries\Core\StatusLibrary();
-    $max_status_id = $statusLibrary->getMaxApprovalStatusId($approveable_item);
-
-    if ($status_id == $max_status_id) {
-      $is_max_status_id = true;
-    }
-
-    return $is_max_status_id;
-  }
-
-
-  function displayApproverStatusAction($logged_role_id, $table, $primary_key)
-  {
-    /**
-     * Given the status find the following:
-     * 
-     * - Who is the next actor? - The next actor is the role id represented by the next approval sequence number.
-     *    But if the next status has an approval direction of -1, then the next actor is the role_id directly
-     *    Next actor for all declines is derived by the value of backflow sequence status item of an item
-     *    the same approval sequence with a direction of -1, get the related role id
-     * 
-     * - What is the currect status label or both the actor and others viewers? For the actor use 
-     *  (Submit to or Decline to [role_name] and for  and for others use Submitted to or Declined to [role_name]
-     *  except for the last in the sequence to the label Completed) - Status Action Label field is redundant since labels will be generic
-     *  If status has backflow value > 0 then use Reinstate to [role_name] when accessing as s the current user
-     * 
-     * - Who is the current actor? Use the role id directly. But when value of approval direction is -1 and 
-     *  backflow sequence has a value, then used the role id represented by the value in the backflow sequence.
-     * 
-     * - Show a decline button when? Show when the current approval sequence has 1 0r 0 approval directions
-     * 
-     * - What is the next status? - Use the status id of the next approval sequence but if the 
-     *   approval direction is -1 then use the status represented by the backflow sequence
-     * 
-     * - The last status is irreversible
-     *  
-     */
-
-    $approval_button_info = [];
-
-    $item_status = $this->getStatusId($table, $primary_key);
-    //echo $primary_key;
-    if ($item_status > 0) {
-
-      $approval_button_info['current_actor_role_id'] = $this->currentApprovalActor($item_status);
-      $approval_button_info['next_actor_role_id'] = $this->nextApprovalActor($item_status);
-      $approval_button_info['status_name'] = $this->getStatusName($item_status);
-      $approval_button_info['button_label'] = $this->userActionLabel($item_status);
-      $approval_button_info['show_decline_button'] = $this->showDeclineButton($item_status, $logged_role_id);
-      $approval_button_info['next_approval_status'] = $this->nextStatus($item_status);
-      $approval_button_info['next_decline_status'] = $this->declineStatus($item_status);
-      $approval_button_info['show_label_as_button'] = $this->showLabelAsButton($item_status, $logged_role_id, $table, $primary_key);
-      $approval_button_info['is_max_approval_status'] = $this->isMaxApprovalStatusId($table, $item_status);
-      $approval_button_info['decline_button_label'] = $this->declineButtonLabel($item_status);
-    }
-    // print_r($approval_button_info);
-    // exit;
-    return $approval_button_info;
-  }
-
-  /**
-   * tables_name_fields
-   * 
-   * Get name fields of the supplied tables
-   * @param array $tables - Tables to get name fields for
-   * @return array - Name fields array
-   */
-  function tablesNameFields(array $tables): array
-  {
-    $table_name_fields = [];
-    if (is_array($tables) && count($tables) > 0) {
-      foreach ($tables as $table) {
-        array_push($table_name_fields, $this->nameField($table));
-      }
-    }
-
-    return $table_name_fields;
-  }
 
   function runMasterViewQuery($table, $selectedColumns, $lookupTables)
   {
@@ -1492,38 +671,12 @@ class GrantsLibrary
     return $data;
   }
 
-  function actionButtonData($item_type, $account_system_id)
-  {
-    $userLibrary = new \App\Libraries\Core\UserLibrary();
-    $statusLibrary = new \App\Libraries\Core\StatusLibrary();
-    $item_max_approval_status_ids = $statusLibrary->getMaxApprovalStatusId($item_type, [], $account_system_id);
-    $initial_item_status = $statusLibrary->initialItemStatus($item_type, $account_system_id);
-
-    $data['item_max_approval_status_ids'] = $item_max_approval_status_ids;
-    $data['item_status'] = $statusLibrary->itemStatus($item_type, $initial_item_status, $account_system_id);
-    $data['item_initial_item_status_id'] = $initial_item_status;
-    $data['permissions'] = [
-      'update' => $userLibrary->checkRoleHasPermissions($item_type, 'update'),
-      'delete' => $userLibrary->checkRoleHasPermissions($item_type, 'delete')
-    ];
-    $data['active_approval_actor'] = [];
-
-    return $data;
-  }
-
-  function tableSetup($table)
-  {
-    $statusLibrary = new \App\Libraries\Core\StatusLibrary;
-    $this->mandatoryFields($table);
-    $statusLibrary->insertStatusIfMissing($table);
-  }
-
   function checkLookupValues($table)
   {
 
     $lookup_values = [];
     $this->library = $this->loadLibrary($this->controller);
-    
+
     if (
       (
         method_exists($this->library, 'lookupValues')
@@ -1564,55 +717,7 @@ class GrantsLibrary
     return array_combine($ids_array, $value_array);
   }
 
-  /**
-   * header_row_field
-   * 
-   * This method populates the single_form_add or master part of the multi_form_add pages.
-   * It also checks if their is set_change_field_type of the current column from the feature library
-   * 
-   * @param $column String : A column from a table
-   * @param $field_value Mixed : Value of the field mainly from edit form
-   * @param bool $show_only_selected_value
-   * @return string
-   */
 
-  function headerRowField(string $column, string $field_value = null, bool $show_only_selected_value = false, $detail_table = ''): string
-  {
-
-    $f = new \App\Libraries\System\FieldsBase($column, $this->controller, true);
-
-    if ($detail_table != '') {
-      $f = new \App\Libraries\System\FieldsBase($column, $detail_table, false, true);
-    }
-
-    $this->setChangeFieldType();
-    $field_type = $f->field_type();
-    $field = $field_type . "_field";
-
-    if (array_key_exists($column, $this->set_field_type)) {
-
-      $field_type = $this->set_field_type[$column]['field_type'];
-      $field = $field_type . "_field";
-
-      if ($field_type == 'select' && count($this->set_field_type[$column]['options']) > 0) {
-        return $f->select_field($this->set_field_type[$column]['options'], $field_value, false, '', $this->checkMultiSelectField($detail_table));
-      } else {
-        return $f->$field($field_value);
-      }
-    } elseif ($field_type == 'select') {
-      // $column has a _name suffix if is a foreign key in the table
-      // This is converted from fk_xxxx_id where xxxx is the primary table name
-      // The column should be in the name format and not id e.g. fk_user_id be user_name
-      $lookup_table = strtolower(substr($column, 0, -5));
-      return $f->$field($this->checkLookupValues($lookup_table), $field_value, $show_only_selected_value, '', $this->checkMultiSelectField($detail_table));
-    } elseif (strrpos($column, '_is_') == true) {
-
-      $field_value = $f->set_default_field_value() !== null ? $f->set_default_field_value() : $field_value;
-      return $f->select_field([get_phrase('no'), get_phrase('yes')], $field_value, $show_only_selected_value);
-    } else {
-      return $f->$field($field_value);
-    }
-  }
 
   function checkMultiSelectField($table_name = "")
   {
@@ -1758,321 +863,6 @@ class GrantsLibrary
     return $single_form_add_visible_columns;
   }
 
-  function add()
-  {
-
-    // There are 3 insert scenarios
-    // Scenario 1: Master detail insert without a primary relationship and master requires approval
-    // Scenario 2: Master detail insert without a primary relationship and master doesn't require approval
-    // Scenario 3: Master detail insert with a primary relationship and master requires approval
-    // Scenario 4: Master detail insert with a primary relationship and master doesn't require approval
-    // Scenario 5: Single record insert that requires approval
-    // Scenario 6: Single record insert that doesn't require approval
-
-    // Asign the post input to $post_array
-    $post_array = $this->request->getPost();
-
-    // Check if there is a before insert method set in the feature model wrapped via grants model
-    $post_array = $this->actionBeforeInsert($post_array);
-
-    if (!array_key_exists('header', $post_array)) {
-      $message = get_phrase('add_operation_failed');
-      return $this->response->setJSON(['flag' => false, 'message' => isset($post_array['message']) ? $post_array['message'] : $message]);
-    }
-    //$detail = [];
-    // Extract the post array into header and detail variables
-    extract($post_array);
-
-    // Determine if the input post has details or not by checking if the detail variable is set
-    $post_has_detail = isset($detail) ? true : false;
-    $detail = $post_has_detail ? $detail : [];
-
-    // Check if the creation of the of the header and detail records requires an approval ticket
-    // $approveItemLibrary = new \App\Libraries\Core\ApproveItemLibrary();
-    // $header_record_requires_approval = $approveItemLibrary->approveableItem($this->controller);
-    //$detail_records_require_approval = $this->approveable_item($this->controller.'_detail');
-    // $detail_records_require_approval = $approveItemLibrary->approveableItem($this->dependantTable($this->controller));
-
-    // Get the table name of multi select field
-    $multi_select_field_name = 'fk_' . $this->multiSelectField() . '_id';
-
-    $multi_select_field_values = [];
-
-    if ($this->multiSelectField() != '') {
-      $multi_select_field_values = $header[$multi_select_field_name];
-    }
-
-    $message = "";
-    if (count($multi_select_field_values) > 0) {
-
-      unset($header[$multi_select_field_name]);
-
-      $onfly_created_multi_selects = [];
-
-      // Find any available on-fly multi select values from a model action_before_insert method
-      foreach ($header as $column_name => $form_values) {
-        if (is_array($form_values)) {
-          $onfly_created_multi_selects[$column_name] = $form_values;
-        }
-      }
-
-      $success = 0;
-      $failed = 0;
-      foreach ($multi_select_field_values as $multi_select_field_value) {
-
-        $header[$multi_select_field_name] = $multi_select_field_value;
-
-        if (!empty($onfly_created_multi_selects)) {
-          foreach ($onfly_created_multi_selects as $_column_name => $_column_values) {
-            $header[$_column_name] = $_column_values[$multi_select_field_value];
-          }
-        }
-
-        $returned_validation_message = $this->addInserts($post_has_detail, $header, $detail);
-        if ($returned_validation_message['flag'] == true) {
-          $success++;
-        } else {
-          $failed++;
-        }
-      }
-
-      $message .= $success . ' ' . str_replace('_', ' ', $this->controller) . ' inserted and ' . $failed . ' failed';
-
-      $message = ['flag' => true, 'message' => $message];
-
-    } else {
-
-      $message = $this->addInserts($post_has_detail, $header, $detail);
-    }
-
-    return $this->response->setJSON($message);
-  }
-
-  public function insertApprovalRecord($approveableItem)
-  {
-    // $this->write_db->resetQuery();
-    $insertId = 0;
-
-    // Prepare approval data
-    $approvalRandom = record_prefix('Approval') . '-' . rand(1000, 90000);
-    $approval = [
-      'approval_track_number' => $approvalRandom,
-      'approval_name' => 'Approval Ticket # ' . $approvalRandom,
-      'approval_created_by' => session()->get('user_id') ? session()->get('user_id') : 1,
-      'approval_created_date' => date('Y-m-d'),
-      'approval_last_modified_by' => session()->get('user_id') ? session()->get('user_id') : 1,
-      'fk_approve_item_id' => $this->write_db->table('approve_item')
-        ->getWhere(['approve_item_name' => strtolower($approveableItem)])
-        ->getRow()
-        ->approve_item_id,
-      'fk_status_id' => $this->initialItemStatus($approveableItem)
-    ];
-
-    // Insert approval record
-    $this->write_db->table('approval')->insert($approval);
-
-    // Get the insert ID
-    $insertId = $this->write_db->insertID();
-
-    return $insertId;
-  }
-
-
-  public function addInserts($postHasDetail, $header, $detail = []): array
-  {
-    $initialStatus = $this->initialItemStatus($this->controller);
-
-    $this->write_db->transBegin();
-
-    // Create the approval ticket if required by the header record
-    $approvalId = $this->insertApprovalRecord(strtolower($this->controller));
-
-    // $approval = [];
-    // $details = [];
-
-    if ($this->id) {
-      $decodedHashId = hash_id($this->id, 'decode');
-
-      $approvalId = $this->write_db->table(strtolower(session()->get('masterTable')))
-        ->getWhere([session()->get('masterTable') . '_id' => $decodedHashId])
-        ->getRow()
-        ->fk_approval_id;
-    }
-
-    // Prepare the header columns for insertion
-    $headerColumns = [];
-    $headerRandom = record_prefix($this->controller) . '-' . rand(1000, 90000);
-    $headerColumns[strtolower($this->controller) . '_track_number'] = $headerRandom;
-    $headerColumns[strtolower($this->controller) . '_name'] = $this->request->getPost($this->controller . '_name') != ""
-      ? $this->request->getPost($this->controller . '_name')
-      : ucfirst($this->controller) . ' # ' . $headerRandom;
-
-    foreach ($header as $key => $value) {
-      $headerColumns[$key] = $value;
-    }
-
-    if (session()->has('masterTable')) {
-      $headerColumns['fk_' . strtolower(session()->get('masterTable')) . '_id'] = hash_id($this->id, 'decode');
-    }
-
-    $headerColumns['fk_status_id'] = $this->controller != 'status' ? $initialStatus : NULL;
-    $headerColumns['fk_approval_id'] = $this->controller != 'status' ? $approvalId : NULL;
-    $headerColumns[strtolower($this->controller) . '_created_date'] = date('Y-m-d');
-    $headerColumns[strtolower($this->controller) . '_created_by'] = session()->get('user_id');
-    $headerColumns[strtolower($this->controller) . '_last_modified_by'] = session()->get('user_id');
-
-    // Insert the header record
-    $this->write_db->table(strtolower($this->controller))->insert($headerColumns);
-
-    // Get the inserted header record ID
-    $headerId = $this->write_db->insertID();
-    ;
-    // Proceed with inserting details if $postHasDetail is true
-    if ($postHasDetail) {
-      $detailArray = $detail;
-      $detailColumns = [];
-      $shiftedElement = array_shift($detail);
-
-      // Construct an insert batch array for details
-      for ($i = 0; $i < sizeof($shiftedElement); $i++) {
-        foreach ($detailArray as $column => $values) {
-          if (strpos($column, '_name') === true && $column !== $this->dependantTable($this->controller) . '_name') {
-            $column = 'fk_' . substr($column, 0, -5) . '_id';
-          }
-          $detailColumns[$i][$column] = $values[$i];
-
-          $detailRandom = record_prefix($this->dependantTable($this->controller)) . '-' . rand(1000, 90000);
-          $detailColumns[$i][$this->dependantTable($this->controller) . '_track_number'] = $detailRandom;
-          $detailColumns[$i]['fk_' . $this->controller . '_id'] = $headerId;
-
-          $detailColumns[$i]['fk_status_id'] = $this->initialItemStatus($this->dependantTable($this->controller));
-          $detailColumns[$i]['fk_approval_id'] = $approvalId;
-
-          $detailColumns[$i][$this->dependantTable($this->controller) . '_created_date'] = date('Y-m-d');
-          $detailColumns[$i][$this->dependantTable($this->controller) . '_created_by'] = session()->get('user_id');
-          $detailColumns[$i][$this->dependantTable($this->controller) . '_modified_by'] = session()->get('user_id');
-        }
-      }
-      // $details = $detailColumns;
-
-      // Insert the details using insert batch
-      $this->write_db->table($this->dependantTable($this->controller))->insertBatch($detailColumns);
-    }
-
-    $library = $this->loadLibrary($this->controller);
-    $transactionValidateDuplicatesColumns = is_array($library->transactionValidateDuplicatesColumns())
-      ? $library->transactionValidateDuplicatesColumns()
-      : [];
-
-    $transactionValidateDuplicates = $this->transactionValidateDuplicates($this->controller, $header, $transactionValidateDuplicatesColumns);
-    $transactionValidateByComputation = $this->transactionValidateByComputation($this->controller, $header);
-
-    return $this->transactionValidate([$transactionValidateDuplicates, $transactionValidateByComputation], $headerColumns, $headerId, $approvalId);
-  }
-
-  public function transactionValidateDuplicates(string $table_name, array $insert_array, array $validation_fields = [], int $allowable_records = 0): array
-  {
-
-    $validation_successful = true;
-    $failure_message = get_phrase('no_duplicate_records');
-
-    // $model = $table_name . "_model";
-    $library = $this->loadLibrary($table_name);
-
-    if (method_exists($library, 'transactionValidateDuplicatesColumns') && is_array($validation_fields) && count($validation_fields) > 0) {
-
-      $validate_duplicates_columns = $library->transactionValidateDuplicatesColumns();
-
-      $insert_array_keys = array_unique(array_merge(array_keys($insert_array), $validate_duplicates_columns));
-
-      foreach ($insert_array_keys as $insert_column) {
-
-        if (!array_key_exists($insert_column, $insert_array)) {
-          $missing_field_in_insert_array = [$insert_column => 1];
-          $insert_array = array_merge($insert_array, $missing_field_in_insert_array);
-        }
-
-        if (!in_array($insert_column, $validation_fields)) {
-          unset($insert_array[$insert_column]);
-        }
-      }
-
-      $result = $this->write_db->table($table_name)
-        ->where($insert_array)->get()->getNumRows();
-
-      if ($result > $allowable_records) {
-        $validation_successful = false; // Validation error flag
-
-        $failure_message = get_phrase('duplicate_entries_not_allowed');
-      }
-    }
-
-    return ['flag' => $validation_successful, 'error_message' => $failure_message];
-  }
-
-  function transactionValidateByComputation(string $table_name, array $insert_array): array
-  {
-
-    $validation_successful = true;
-    $failure_message = get_phrase('validation_failed');
-
-    $library = $this->loadLibrary($table_name);
-
-    if (method_exists($library, 'transactionValidateByComputationFlag')) {
-      if ($library->transactionValidateByComputationFlag($insert_array) == 'VALIDATION_ERROR') {
-        $validation_successful = false;
-      }
-    }
-
-    return ['flag' => $validation_successful, 'error_message' => $failure_message];
-
-  }
-
-  public function transactionValidate($validationFlagsAndFailureMessages, $postArray = [], $headerId = 0, $approvalId = 0): array
-  {
-    $message = '';
-    $messageAndFlag = [];
-    $messageAndFlag['flag'] = false;
-    $library = $this->loadLibrary($this->controller);
-
-    // Extract flags from validation
-    $validationFlags = array_column($validationFlagsAndFailureMessages, 'flag');
-
-    // Check if the transaction status is valid
-    if ($this->write_db->transStatus() === false) {
-      $this->write_db->transRollback();
-      $messageAndFlag['message'] = get_phrase('insert_failed');
-    } else {
-      // If any validation flag is false, rollback
-      if (in_array(false, $validationFlags)) {
-        $this->write_db->transRollback();
-
-        foreach ($validationFlagsAndFailureMessages as $validationCheck) {
-          if (!$validationCheck['flag']) {
-            $message .= $validationCheck['error_message'] . "\n";
-            $messageAndFlag['flag'] = $validationCheck['flag'];
-            $messageAndFlag['message'] = $message;
-          }
-        }
-      } else {
-        // If the insert action is successful
-        if ($library->actionAfterInsert($postArray, $approvalId, $headerId)) {
-          $this->write_db->transCommit();
-          $message = get_phrase('insert_successful');
-          $messageAndFlag['flag'] = true;
-          $messageAndFlag['message'] = $message;
-          $messageAndFlag['header_id'] = hash_id($headerId, 'encode');
-          $messageAndFlag['table'] = $this->controller;
-        } else {
-          $this->write_db->transRollback();
-          $message = get_phrase('insert_failed');
-          $messageAndFlag['message'] = $message;
-        }
-      }
-    }
-
-    return $messageAndFlag;
-  }
 
 
   public function checkEditVisibleColumns($table)
@@ -2149,175 +939,6 @@ class GrantsLibrary
     return $result;
   }
 
-
-  public function hasDuplicateRecord($table, $id, $checkDuplicateColumns, $postArray)
-  {
-    // This query is to extract data to cater for columns that are not sourced from the edit form
-    $builder = $this->read_db->table($table);
-    $builder->select($checkDuplicateColumns);
-    $builder->where([$table . '_id' => hash_id($id, 'decode')]);
-    $postedRecord = $builder->get()->getRowArray(); // Equivalent to row_array() in CI3
-
-    // Merge the posted array with the database record
-    $postArray = array_merge($postArray, $postedRecord);
-
-    // Initialize duplicate record flag
-    $hasDuplicateRecord = false;
-
-    if (count($checkDuplicateColumns) > 0) {
-      $cols = [];
-
-      // Loop through post data to build the query condition for duplicates
-      foreach ($postArray as $field => $value) {
-        if (in_array($field, $checkDuplicateColumns) || $field === 'fk_account_system_id') {
-          $cols[$field] = $value;
-        }
-      }
-
-      // Exclude the current record from the duplicate check
-      $builder = $this->read_db->table($table);
-      $builder->where($table . '_id !=', $id);
-
-      if (count($cols) > 0) {
-        // Apply the duplicate check condition
-        $builder->where($cols);
-        $numRows = $builder->countAllResults(); // Equivalent to num_rows() in CI3
-
-        // If the count of rows is greater than 0, mark as duplicate
-        if ($numRows > 0) {
-          $hasDuplicateRecord = true;
-        }
-      }
-    }
-    return $hasDuplicateRecord;
-  }
-
-  public function createChangeHistory(array $newData, bool $excludeUsingNewDataColumns = false, array $criticalColumnsToUnset = [], string $table = "", $itemId = 0)
-  {
-    // Determine the table name
-    $table = empty($table) ? $this->controller : $table;
-
-    // Determine the item ID
-    $itemId = $itemId == 0 ? $this->id : $itemId;
-
-    // Get table fields
-    $fields = $this->read_db->getFieldNames($table); // To be taken from the schema file instead of database table directly
-
-    $tableId = strtolower($table) . "_id";
-    $decodeId = is_numeric($itemId) ? $itemId : hash_id($itemId, 'decode'); // Assuming hash_id is still in use
-    $newData[$tableId] = $decodeId;
-
-    // Use fields from new data if not excluding
-    if (!$excludeUsingNewDataColumns) {
-      $fields = array_keys($newData);
-    }
-
-    // Determine which fields to include in the query by removing critical columns
-    $cols = array_diff($fields, $criticalColumnsToUnset);
-
-    // Select old data from the table
-    $builder = $this->read_db->table(strtolower($table));
-    $builder->select($cols);
-    $oldData = $builder->where([$tableId => $decodeId])
-      ->get()
-      ->getRowArray(); // CI4 equivalent of row_array()
-
-    // Prepare the update data for history table
-    $updateData = [
-      'fk_approve_item_id' => $this->read_db->table('approve_item')
-        ->select('approve_item_id')
-        ->where(['approve_item_name' => strtolower($table)])
-        ->get()
-        ->getRow()
-        ->approve_item_id,
-      'fk_user_id' => $this->session->get('user_id'),
-      'history_action' => 1, // 1 = Update, 2 = Delete
-      'history_current_body' => json_encode($oldData),
-      'history_updated_body' => json_encode($newData),
-      'history_created_date' => date('Y-m-d'),
-      'history_created_by' => $this->session->get('user_id'),
-      'history_last_modified_by' => $this->session->get('user_id'),
-    ];
-
-    // Insert update history into 'history' table
-    $builder = $this->write_db->table('history');
-    $builder->insert($updateData);
-  }
-
-  public function edit(string $id): \CodeIgniter\HTTP\Response
-  {
-
-    $library = $this->loadLibrary($this->controller);
-    $postArray = $this->request->getPost(); // Equivalent to $this->input->post() in CI3
-
-    // Call action_before_edit from grants service
-    $postArray = $library->actionBeforeEdit($postArray);
-
-    $flag = false;
-    $flagMessage = "";
-
-    if (is_array($postArray) && !empty($postArray) && !array_key_exists('error', $postArray)) {
-      extract($postArray);
-      // $id = hash_id($id, 'decode');
-      $data = $header;
-      $approvalId = 0; // To be evaluated later
-
-      $transactionValidateDuplicatesColumns = is_array($library->transactionValidateDuplicatesColumns())
-        ? $library->transactionValidateDuplicatesColumns()
-        : [];
-
-      $hasDuplicateRecord = $this->hasDuplicateRecord(
-        $this->controller,
-        $id,
-        $transactionValidateDuplicatesColumns,
-        $data
-      );
-
-      if (!$hasDuplicateRecord) {
-        $this->write_db->transBegin(); // Begin transaction
-        $this->write_db->table($this->controller)
-          ->where([$this->primaryKeyField($this->controller) => hash_id($id, 'decode')])
-          ->update($data); // Update the table
-
-        $this->createChangeHistory($data); // Create change history
-
-        if ($this->write_db->transStatus() === false) {
-          $this->write_db->transRollback();
-          $flagMessage = get_phrase('update_not_successful');
-        } else {
-          if ($library->actionAfterEdit($data, $approvalId, $id)) {
-            $this->write_db->transCommit();
-            $flag = true;
-            $flagMessage = get_phrase('update_completed');
-          } else {
-            $flag = false;
-            $flagMessage = get_phrase('update_not_successful');
-            $this->write_db->transRollback();
-          }
-        }
-      } else {
-        $flagMessage = get_phrase('duplicates_not_allowed');
-      }
-    } else {
-      $flagMessage = get_phrase('edit_not_allowed');
-      if (array_key_exists('error', $postArray)) {
-        $flagMessage = $postArray['error'];
-      }
-    }
-
-    // Return JSON response
-    return $this->response->setJSON(['flag' => $flag, 'message' => $flagMessage]);
-  }
-
-  function generateItemTrackNumberAndName($approveable_item)
-  {
-    $header_random = record_prefix($approveable_item) . '-' . rand(1000, 90000);
-    $columns[$approveable_item . '_track_number'] = $header_random;
-    $columns[$approveable_item . '_name'] = ucfirst($approveable_item) . ' # ' . $header_random;
-
-    return $columns;
-  }
-
   function getAccountSystemRoles($user_account_system_id)
   {
     $builder = $this->read_db->table('role');
@@ -2330,60 +951,6 @@ class GrantsLibrary
     $roles = $builder->get()->getResultArray();
 
     return $roles;
-  }
-
-
-  function selectField($column, $options)
-  {
-    $field = new FieldsBase($column, $this->controller, true);
-    return $field->select_field($options);
-  }
-
-  function emailField($field_name)
-  {
-    $field = new FieldsBase($field_name, $this->controller, true);
-    return $field->email_field();
-  }
-
-  function textField($field_name)
-  {
-    $field = new FieldsBase($field_name, $this->controller, true);
-    return $field->text_field();
-  }
-
-  function passwordField($field_name)
-  {
-    $field = new FieldsBase($field_name, $this->controller, true);
-    return $field->password_field();
-  }
-
-
-  function mergeWithHistoryFields(string $approve_item_name, array $array_to_merge, bool $add_name_to_array = true, $is_a_new_record = true)
-  {
-
-    $approvalLibrary = new \App\Libraries\Core\ApprovalLibrary();
-    $statusLibary = new \App\Libraries\Core\StatusLibrary();
-
-    $data = [];
-
-    if ($is_a_new_record) {
-
-      $data[$approve_item_name . '_track_number'] = $this->generateItemTrackNumberAndName($approve_item_name)[$approve_item_name . '_track_number'];
-      $data[$approve_item_name . '_created_by'] = $this->session->user_id ? $this->session->user_id : 1;
-      $data[$approve_item_name . '_created_date'] = date('Y-m-d');
-      $data['fk_approval_id'] = $approvalLibrary->insertApprovalRecord($approve_item_name);
-      $data['fk_status_id'] = $statusLibary->initialItemStatus($approve_item_name);
-
-    } else {
-      $data[$approve_item_name . '_last_modified_date'] = date('Y-m-d h:i:s');
-      $data[$approve_item_name . '_last_modified_by'] = $this->session->user_id ? $this->session->user_id : 1;
-    }
-
-    if ($add_name_to_array) {
-      $data[$approve_item_name . '_name'] = $this->generateItemTrackNumberAndName($approve_item_name)[$approve_item_name . '_name'];
-    }
-
-    return array_merge($array_to_merge, $data);
   }
 
 
@@ -2448,24 +1015,25 @@ class GrantsLibrary
     return $list_table_visible_columns;
   }
 
-  public function getListColumns(string $parentTable = null){
+  public function getListColumns(string $parentTable = null)
+  {
     $selectedColumns = $this->toggleListSelectColumns($parentTable);
     $library = $this->loadLibrary($this->controller);
-    
-    if(
-      method_exists($library, 'additionalListColumns') && 
+
+    if (
+      method_exists($library, 'additionalListColumns') &&
       is_array($columns = $library->additionalListColumns()) &&
       count($columns) > 0
-    ){
+    ) {
 
-      if(!empty($columns)){
-        foreach($columns as $newColumn => $positionAfter){
-            if($positionAfter != null){
-              $refIndex = array_search($positionAfter, $selectedColumns);
-              array_splice($selectedColumns, $refIndex + 1, 0, $newColumn);
-            }else{
-              array_push($selectedColumns, $newColumn );
-            }
+      if (!empty($columns)) {
+        foreach ($columns as $newColumn => $positionAfter) {
+          if ($positionAfter != null) {
+            $refIndex = array_search($positionAfter, $selectedColumns);
+            array_splice($selectedColumns, $refIndex + 1, 0, $newColumn);
+          } else {
+            array_push($selectedColumns, $newColumn);
+          }
         }
       }
     }
@@ -2515,70 +1083,24 @@ class GrantsLibrary
   }
 
 
-  function loadConfigurations()
+  function checkDataTableCondition(\CodeIgniter\Database\BaseBuilder $builder, $customFields)
   {
-    $grantsConfig = new GrantsConfig();
-    $settings = service('settings');
-    $settingsModel = new \App\Models\System\SettingsModel();
-
-    $globalConfigurations = get_object_vars($grantsConfig);
-    foreach ($globalConfigurations as $globalConfigurationKey => $globalConfigurationValue) {
-      // Check if the setting exists in the database
-      if (!$settingsModel->hasSetting("GrantsConfig", $globalConfigurationKey)) {
-        // If the setting does not exist, insert it into the database
-        $globalConfigurationValue = is_array($globalConfigurationValue) ? json_encode($globalConfigurationValue) : $globalConfigurationValue;
-        $settings->set("GrantsConfig.$globalConfigurationKey", $globalConfigurationValue);
-      }
-
-    }
-
-    $contextConfig = new \Config\ContextConfig();
-    $contextualConfigurations = get_object_vars($contextConfig);
-
-    foreach ($contextualConfigurations as $contextualConfigurationKey => $contextualConfigurationValue) {
-      if (!$settingsModel->hasSetting("ContextConfig", $contextualConfigurationKey) && is_array($contextualConfigurationValue)) {
-        $settings->set("ContextConfig.$contextualConfigurationKey", json_encode($contextualConfigurationValue));
-      }
-    }
-  }
-
-  function createTableApproversColumns(string $tableName)
-  {
-      $db_forge = \Config\Database::forge('write'); // Load the default database group
-  
-      if (!$this->write_db->fieldExists($tableName . '_approvers', $tableName)) {
-          // Define the column details
-          $fields = [
-              $tableName . '_approvers' => [
-                  'type' => 'JSON',
-                  'null' => true,
-              ],
-          ];
-  
-          // Add the column to the specified table
-          $db_forge->addColumn($tableName, $fields);
-      }
-  }
-
-  function checkDataTableCondition(\CodeIgniter\Database\BaseBuilder $builder, $customFields){
     $library = $this->loadLibrary($this->controller);
-    if(method_exists($library, 'dataTableCondition')){
+    if (method_exists($library, 'dataTableCondition')) {
       $library->dataTableCondition($builder, $customFields);
     }
   }
 
-  function getTypeNameById($type, $type_id = '', $field = '')
-  {
-    $field = $field == '' ? $type . '_name' : $field;
-    $builder = $this->read_db->table($type);
-    $queryResult = $builder->getWhere( array($type . '_id' => $type_id));
-    if ($queryResult->getNumRows() > 0) {
-      return $queryResult->getRow()->$field;
-    } else {
-      return "";
-    }
-  }
 
- 
- 
+  public function notExistsSubQuery($builder, string $lookupTable, string $associationTable, string $stringCondition = '')
+{
+
+    $subQuery = 'SELECT * FROM ' . $associationTable . 
+                ' WHERE ' . $associationTable . '.fk_' . $lookupTable . '_id = ' . 
+                $lookupTable . '.' . $lookupTable . '_id ' . $stringCondition;
+
+    $builder->where('NOT EXISTS (' . $subQuery . ')', null, false);
+
+}
+
 }

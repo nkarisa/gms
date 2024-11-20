@@ -623,11 +623,11 @@ class FinancialReportLibrary extends GrantsLibrary
 
     function monthUtilizedIncomeAccounts($office_ids, $start_date_of_month, $project_ids = [], $office_bank_ids = []){
 
-        $income_accounts =  $this->income_accounts($office_ids, $project_ids, $office_bank_ids);
+        $income_accounts =  $this->incomeAccounts($office_ids, $project_ids, $office_bank_ids);
         
-        $all_accounts_month_opening_balance = $this->month_income_opening_balance($office_ids, $start_date_of_month, $project_ids, $office_bank_ids);
-        $all_accounts_month_income = $this->month_income_account_receipts($office_ids, $start_date_of_month, $project_ids, $office_bank_ids);
-        $all_accounts_month_expense = $this->month_income_account_expenses($office_ids, $start_date_of_month, $project_ids, $office_bank_ids);
+        $all_accounts_month_opening_balance = $this->monthIncomeOpeningBalance($office_ids, $start_date_of_month, $project_ids, $office_bank_ids);
+        $all_accounts_month_income = $this->monthIncomeAccountReceipts($office_ids, $start_date_of_month, $project_ids, $office_bank_ids);
+        $all_accounts_month_expense = $this->monthIncomeAccountExpenses($office_ids, $start_date_of_month, $project_ids, $office_bank_ids);
 
         $report = array();
 
@@ -651,5 +651,304 @@ class FinancialReportLibrary extends GrantsLibrary
         }
 
         return $report;
+    }
+
+    public function createFinancialReport($financial_report_date, $office_id)
+  {
+    // Check if MFR exists
+    $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+    $budgetLibrary = new BudgetLibrary();
+
+    $initial_status = $statusLibrary->initialItemStatus('financial_report');
+
+    $financial_report_date = date('Y-m-01', strtotime($financial_report_date));
+
+    // Check if a journal for the same month and FCP exists
+    $builder = $this->write_db->table("financial_report");
+    $builder->where(array('fk_office_id' => $office_id, 'financial_report_month' => $financial_report_date));
+    $count_financial_report = $builder->get()->getNumRows();
+
+    if ($count_financial_report == 0) {
+      $new_mfr['financial_report_month'] = $financial_report_date;
+      $new_mfr['fk_office_id'] = $office_id;
+      $new_mfr['fk_status_id'] = $initial_status; //$this->grants->initial_item_status('financial_report');
+
+      $new_mfr_to_insert = $this->mergeWithHistoryFields('financial_report', $new_mfr);
+
+      $this->write_db->table("financial_report")->insert( $new_mfr_to_insert);
+
+      $report_id = $this->write_db->insertId(); 
+
+      $current_budget = $budgetLibrary->getBudgetByOfficeCurrentTransactionDate($office_id);
+
+      // Update the budget id for the newly created MFR
+      $update_data['fk_budget_id'] = $current_budget['budget_id'];
+
+      $builder = $this->write_db->table('financial_report');
+      $builder->where(array('financial_report_id' => $report_id));
+      $builder->update($update_data);
+    }
+  }
+
+  function incomeAccounts($office_ids, $project_ids = [], $office_bank_ids = [])
+    {
+        // Array of account system
+        $builder = $this->read_db->table("office");
+        $builder->select('fk_account_system_id');
+        $builder->whereIn('office_id', $office_ids);
+        $office_account_system_ids = $builder->get()->getResultArray();
+
+        $builder = $this->read_db->table("income_account");
+
+        if (count($project_ids) > 0) {    
+            $builder->whereIn('project.project_id', $project_ids);
+            $builder->join('project_income_account', 'project_income_account.fk_income_account_id=income_account.income_account_id');
+            $builder->join('project', 'project.project_id=project_income_account.fk_project_id');
+        }
+
+        if (count($office_bank_ids) > 0) {
+            $builder->join('project_income_account', 'project_income_account.fk_income_account_id=income_account.income_account_id');
+            $builder->join('project', 'project.project_id=project_income_account.fk_project_id');
+
+            $builder->join('project_allocation', 'project_allocation.fk_project_id=project.project_id');
+            $builder->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_project_allocation_id=project_allocation.project_allocation_id');
+            $builder->whereIn('fk_office_bank_id', $office_bank_ids);
+        }
+        
+        $builder->whereIn('income_account.fk_account_system_id', array_column($office_account_system_ids, 'fk_account_system_id'));
+        $builder->groupBy(array('income_account_id'));
+        $result = $builder->select(array('income_account_id', 'income_account_name','income_account_is_budgeted'))
+        ->get()->getResultArray();
+                
+        return $result;
+    }
+
+    function monthIncomeOpeningBalance($office_ids, $start_date_of_month, $project_ids = [], $office_bank_ids = [])
+    {
+        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+
+        $max_approval_status_ids = $statusLibrary->getMaxApprovalStatusId('voucher', $office_ids);
+        $initial_account_opening_balance = $this->initialOpeningAccountBalance($office_ids, $project_ids, $office_bank_ids);     
+        $account_last_month_income_to_date = $this->getAccountLastMonthIncomeToDate($office_ids, $start_date_of_month, $max_approval_status_ids, $project_ids, $office_bank_ids);
+        $account_last_month_expense_to_date = $this->getAccountLastMonthExpenseToDate($office_ids, $start_date_of_month, $max_approval_status_ids, $project_ids, $office_bank_ids);
+        $income_account_ids = array_unique(array_merge(array_keys($initial_account_opening_balance), array_keys($account_last_month_income_to_date), array_keys($account_last_month_expense_to_date)));
+
+        $account_opening_balance=[];
+        
+        foreach($income_account_ids as $income_account_id){
+            $opening = isset($initial_account_opening_balance[$income_account_id]) ? $initial_account_opening_balance[$income_account_id] : 0;
+            $income = isset($account_last_month_income_to_date[$income_account_id]) ? $account_last_month_income_to_date[$income_account_id] : 0;
+            $expense = isset($account_last_month_expense_to_date[$income_account_id]) ? $account_last_month_expense_to_date[$income_account_id] : 0;
+
+            $account_opening_balance[$income_account_id] = $opening  + ($income - $expense);
+        }
+
+        return $account_opening_balance;
+    }
+
+    function monthIncomeAccountReceipts($office_ids, $start_date_of_month, $project_ids = [], $office_bank_ids = [])
+    {
+
+        $income_accounts = $this->incomeAccounts($office_ids, $project_ids);
+
+        $month_income = [];
+
+        $bank_to_bank_contra_receipts = $this->bankToBankContraReceipts($office_bank_ids, $start_date_of_month);
+        $bank_to_bank_contra_contributions = $this->bankToBankContraContributions($office_bank_ids, $start_date_of_month);
+        $account_month_income = $this->getAccountMonthIncome($office_ids, $start_date_of_month, $project_ids, $office_bank_ids);
+
+        foreach ($income_accounts as $income_account) {
+            $month_income[$income_account['income_account_id']] = isset($account_month_income[$income_account['income_account_id']]) ? $account_month_income[$income_account['income_account_id']] : 0;
+
+            if(isset($this->bankToBankContraReceipts($office_bank_ids, $start_date_of_month)[$income_account['income_account_id']])){
+                $month_income[$income_account['income_account_id']] = $month_income[$income_account['income_account_id']] + $bank_to_bank_contra_receipts[$income_account['income_account_id']];
+            }
+
+            if(isset($this->bankToBankContraContributions($office_bank_ids, $start_date_of_month)[$income_account['income_account_id']])){
+                $month_income[$income_account['income_account_id']] = $month_income[$income_account['income_account_id']] - $bank_to_bank_contra_contributions[$income_account['income_account_id']];
+            }
+        }
+        
+        return $month_income;
+    }
+
+    function monthIncomeAccountExpenses($office_ids, $start_date_of_month, $project_ids = [], $office_bank_ids = [])
+    {
+
+        $income_accounts = $this->incomeAccounts($office_ids, $project_ids);
+        $expense_income = [];
+        $income_account_month_expense = $this->getIncomeAccountMonthExpense($office_ids, $start_date_of_month, $project_ids, $office_bank_ids);
+
+        foreach ($income_accounts as $income_account) {
+            $expense_income[$income_account['income_account_id']] = isset($income_account_month_expense[$income_account['income_account_id']]) ? $income_account_month_expense[$income_account['income_account_id']] : 0;
+        }
+
+        return $expense_income;
+    }
+
+    function initialOpeningAccountBalance($office_ids, $project_ids = [], $office_bank_ids = [])
+    {
+        $account_opening_balance = [];
+
+        $builder = $this->read_db->table('system_opening_balance');
+        $builder->select(array('opening_fund_balance.fk_income_account_id as fk_income_account_id'));
+        $builder->selectSum('opening_fund_balance_amount');
+        $builder->join('opening_fund_balance', 'opening_fund_balance.fk_system_opening_balance_id=system_opening_balance.system_opening_balance_id');
+
+        if (count($office_bank_ids) > 0) {
+            $builder->whereIn('opening_fund_balance.fk_office_bank_id', $office_bank_ids);
+        }
+
+        if (count($project_ids) > 0) {
+            $builder->whereIn('project.project_id', $project_ids);
+            $builder->join('income_account', 'income_account.income_account_id=opening_fund_balance.fk_income_account_id');
+            $builder->join('project_income_account', 'project_income_account.fk_income_account_id=income_account.income_account_id');
+            $builder->join('project', 'project.project_id=project_income_account.fk_project_id');
+        }
+
+        $builder->groupBy(array('fk_income_account_id'));
+        $builder->whereIn('system_opening_balance.fk_office_id', $office_ids);
+        $initial_account_opening_balance_obj = $builder->get();
+
+
+        if ($initial_account_opening_balance_obj->getNumRows() > 0) {
+            $account_opening_balance_array = $initial_account_opening_balance_obj->getResultArray();
+            
+            foreach($account_opening_balance_array as $row){
+                $account_opening_balance[$row['fk_income_account_id']] = $row['opening_fund_balance_amount'];
+            }
+        }
+
+        return $account_opening_balance;
+    }
+
+    function getAccountLastMonthIncomeToDate($office_ids, $start_date_of_month, $max_approval_status_ids, $project_ids = [], $office_bank_ids = [])
+    {
+
+        $previous_months_income_to_date = [];
+
+        $builder = $this->read_db->table("monthly_sum_income_per_center");
+        $builder->select(array('income_account_id'));
+        $builder->selectSum('amount');
+        $builder->whereIn('fk_office_id', $office_ids);
+
+        if (!empty($office_bank_ids)) {
+            $builder->whereIn('fk_office_bank_id', $office_bank_ids);
+        }
+
+        $builder->where(array('voucher_month < ' => $start_date_of_month));
+        $builder->groupBy(array('income_account_id'));
+        $builder->whereIn('fk_status_id', $max_approval_status_ids);
+        $previous_months_income_obj = $builder->get();
+
+        if ($previous_months_income_obj->getNumRows() > 0) {
+            $previous_months_income_to_date_arr = $previous_months_income_obj->getResultArray(); 
+            
+            foreach($previous_months_income_to_date_arr as $row){
+                $previous_months_income_to_date[$row['income_account_id']] = $row['amount'];
+            }
+        }
+
+        return $previous_months_income_to_date;
+    }
+
+    function getAccountLastMonthExpenseToDate($office_ids, $start_date_of_month,$max_approval_status_ids, $project_ids = [], $office_bank_ids = [])
+    {
+
+        $previous_months_expense_to_date = [];
+    
+        $builder = $this->read_db->table("monthly_sum_income_expense_per_center");
+        $builder->select(array('income_account_id'));
+        $builder->selectSum('amount');
+
+        $builder->whereIn('fk_office_id', $office_ids);
+
+        if (!empty($office_bank_ids)) {
+            $builder->whereIn('fk_office_bank_id', $office_bank_ids);
+        }
+
+        $builder->where(array('voucher_month < ' => $start_date_of_month));
+        $builder->groupBy(array('income_account_id'));
+        $builder->whereIn('fk_status_id', $max_approval_status_ids);
+        $previous_months_expense_obj = $builder->get();
+
+        if ($previous_months_expense_obj->getNumRows() > 0) {
+            $previous_months_expense_to_date_arr = $previous_months_expense_obj->getResultArray(); 
+            
+            foreach($previous_months_expense_to_date_arr as $row){
+                $previous_months_expense_to_date[$row['income_account_id']] = $row['amount'];
+            }
+        }
+
+        return $previous_months_expense_to_date;
+    }
+
+    function getAccountMonthIncome($office_ids, $start_date_of_month, $project_ids = [], $office_bank_ids = []){
+        
+        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+
+        $max_approval_status_ids = $statusLibrary->getMaxApprovalStatusId('voucher', $office_ids);
+        $month_income = [];
+
+        $builder = $this->read_db->table('monthly_sum_income_per_center');
+        $builder->select(array('income_account_id'));
+        $builder->selectSum('amount');
+
+        if (count($project_ids) > 0) {
+            $builder->whereIn('fk_project_id', $project_ids);
+        }
+
+        if (count($office_bank_ids) > 0) {
+            $builder->whereIn('fk_office_bank_id', $office_bank_ids);
+        }
+        
+        $builder->whereIn('fk_status_id', $max_approval_status_ids);
+        $builder->whereIn('fk_office_id', $office_ids);
+        $condition_array = array(
+             'voucher_month' => $start_date_of_month,
+        );
+        $builder->where($condition_array);
+        $builder->groupBy(array('income_account_id'));
+        $month_income_obj = $builder->get();
+
+        if ($month_income_obj->getNumRows() > 0) {
+            $month_income_arr = $month_income_obj->getResultArray();
+            foreach($month_income_arr as $row){
+                $month_income[$row['income_account_id']] = $row['amount'];
+            }
+        }
+        return $month_income;
+    }
+
+    function getIncomeAccountMonthExpense($office_ids, $start_date_of_month, $project_ids = [], $office_bank_ids = [])
+    {
+        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+        $expense_income = [];
+        $max_approval_status_ids = $statusLibrary->getMaxApprovalStatusId('voucher', $office_ids);
+
+        $builder = $this->read_db->table('monthly_sum_income_expense_per_center');
+        $builder->select(array('income_account_id'));
+        $builder->selectSum('amount');
+        $builder->whereIn('fk_status_id', $max_approval_status_ids);
+
+        if (count($office_bank_ids) > 0) {
+            $builder->whereIn('fk_office_bank_id', $office_bank_ids);
+        }
+
+        $builder->where(array('voucher_month' => $start_date_of_month));
+        $builder->groupBy(array('income_account_id'));
+        $builder->whereIn('fk_office_id', $office_ids);
+        $expense_income_obj = $builder->get();
+
+
+        if ($expense_income_obj->getNumRows() > 0) {
+            $expense_income_arr = $expense_income_obj->getResultArray();
+
+            foreach($expense_income_arr as $row){
+                $expense_income[$row['income_account_id']] = $row['amount'];
+            }
+        }
+
+        return $expense_income;
     }
 }

@@ -264,4 +264,23 @@ trait Extendable
   {
     return [];
   }
+
+  protected function transactionValidateDuplicatesColumns(): array
+  {
+      return [];
+  }
+
+  protected function transactionValidateByComputationFlag(array $arrayToCheck)
+  {
+      return VALIDATION_SUCCESS; // OR VALIDATION_ERROR
+  }
+
+  public function orderListPage(): string
+  {
+      return ''; // Example - 'status_approval_sequence ASC';
+  }
+
+  function customTableJoin(\CodeIgniter\Database\BaseBuilder $builder):void {
+
+  }
 }

@@ -1589,7 +1589,7 @@ class UserLibrary extends GrantsLibrary
         $builder->where(array($table_name . '_id' => $item_id));
         $existing_approvers = $builder->get()->getRow()->{$table_name . '_approvers'};
 
-        $approvers = json_encode($existing_approvers);
+        $approvers = $existing_approvers != NULL ? json_decode($existing_approvers): [];
 
         $new_approver = [
             'user_id' => $user_id,
@@ -1603,7 +1603,7 @@ class UserLibrary extends GrantsLibrary
             'approval_direction' => $next_approval_direction == 1 ? $current_approval_direction : $next_approval_direction,
             'reinstatement_status_id' => $reinstatement_status_id
         ];
-
+        // log_message('error', $approvers);
         if ($existing_approvers == "" || $existing_approvers == "[]" || $existing_approvers == NULL) {
             $approvers = [$new_approver];
         } else {

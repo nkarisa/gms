@@ -181,7 +181,7 @@ $columns = array_chunk($keys,service("settings")->get("GrantsConfig.master_table
             
             <?php
               if($show_add_button){
-                echo add_record_button($detail_table_name, $controller,$has_details_table,$uri->getSegment(3),$has_details_listing, $is_multi_row);// $details['is_multi_row']
+                echo add_record_button($detail_table_name, $controller,$uri->getSegment(3),$has_details_listing, $is_multi_row);// $details['is_multi_row']
               }
             ?>
           </div>

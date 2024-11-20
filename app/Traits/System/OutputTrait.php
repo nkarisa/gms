@@ -20,8 +20,13 @@ trait OutputTrait {
         return $listOutput->getOutput($args[0]);
     }
 
-    protected function SingleFormAddOutput($module, ...$args){
+    protected function singleFormAddOutput($module, ...$args){
         $listOutput = new Outputs\SingleFormAddOutput($module);
+        return $listOutput->getOutput($args);
+    }
+
+    protected function multiFormAddOutput($module, ...$args){
+        $listOutput = new Outputs\MultiFormAddOutput($module);
         return $listOutput->getOutput($args);
     }
 

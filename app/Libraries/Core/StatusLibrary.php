@@ -703,10 +703,7 @@ class StatusLibrary extends GrantsLibrary
       $array_of_role_ids = array_column($roles, 'role_id');
       $array_of_role_names = array_column($roles, 'role_name');
       $role_select_options = array_combine($array_of_role_ids, $array_of_role_names);
-  
-      // print_r($role_select_options);
-      // exit;
-  
+    
       $change_field_type['role_name']['field_type'] = 'select';
       $change_field_type['role_name']['options'] = $role_select_options;
   
@@ -990,6 +987,25 @@ class StatusLibrary extends GrantsLibrary
     }
 
     return $status;
+  }
+
+  function getDeclineStatusIds($approve_item){
+
+    $status_ids = []; 
+    $approve_item = strtolower($approve_item);
+
+    $builder = $this->read_db->table('status');
+    $builder->select(array('status_id'));
+    $builder->where(array('status_approval_direction' => -1, 'approve_item_name' => $approve_item));
+    $builder->join('approval_flow','approval_flow.approval_flow_id=status.fk_approval_flow_id');
+    $builder->join('approve_item','approve_item.approve_item_id=approval_flow.fk_approve_item_id');
+    $status_ids_obj = $builder->get();
+
+    if($status_ids_obj->getNumRows() > 0){
+      $status_ids = array_column($status_ids_obj->getResultArray(), 'status_id');
+    }
+
+    return $status_ids;
   }
 
 }

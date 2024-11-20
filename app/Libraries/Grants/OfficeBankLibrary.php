@@ -356,4 +356,75 @@ class OfficeBankLibrary extends GrantsLibrary
     return $office_bank;
 
   }
+
+      /**
+     * get_office_banks_for_office
+     * 
+     * @author Nicodemus Karisa Mwambire
+     * @reviewed_by None
+     * @reviewed_date None
+     * @access public
+     * 
+     * @param int $office_id - Office Id
+     * 
+     * @return array - List of office banks grouped in require_chequebook, is_active and is_default keys
+     * 
+     * @todo:
+     * Ready for Peer Review
+     */
+
+     public function getOfficeBanksForOffice($office_id): array {
+
+      // $office_banks = [];
+
+      $office_banks['chequebook_exemption_expiry_date'] = [];
+      $office_banks['is_active'] = [];
+      $office_banks['is_default'] = [];
+
+      // Check if the Office has atleast one bank that requires a cheque book
+      $builder = $this->read_db->table("office_bank");
+      $builder->where(array('fk_office_id' => $office_id));
+      $office_banks_obj = $builder->get();
+
+      if($office_banks_obj->getNumRows()){
+        $office_bank_raw = $office_banks_obj->getResultArray();
+
+        foreach($office_bank_raw as $office_bank){
+          $chequebook_exemption_expiry_date = isset($office_bank['office_bank_book_exemption_expiry_date']) ? $office_bank['office_bank_book_exemption_expiry_date']: NULL;
+          $is_active = $office_bank['office_bank_is_active'];
+          $is_default = $office_bank['office_bank_is_default'];
+
+          if($chequebook_exemption_expiry_date != NULL){
+            $office_banks['chequebook_exemption_expiry_date'][$office_bank['office_bank_id']] = $chequebook_exemption_expiry_date;
+          }
+
+          if($is_active){
+            $office_banks['is_active'][$office_bank['office_bank_id']] = $is_active;
+          }
+
+          if($is_default){
+            $office_banks['is_default'][$office_bank['office_bank_id']] = $is_default;
+          }
+        }
+      }
+
+      return $office_banks;
+    }
+
+    /**
+   * get_active_office_banks(): Returns an array of active banks
+   * @author  Livingstone Onduso
+   * @dated: 5/03/2024
+   * @access public
+   * @return array
+   * @param int $office_id
+   */
+  function getActiveOfficeBanks(int $office_id){
+    $builder = $this->read_db->table('office_bank');
+    $builder->select(array('office_bank_id','office_bank_name'));
+    $builder->where(['fk_office_id'=>$office_id,'office_bank_is_active'=>1]);
+    $office_banks = $builder->get()->getResultArray();
+
+    return $office_banks;
+  }
 }

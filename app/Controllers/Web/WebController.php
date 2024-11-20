@@ -213,7 +213,7 @@ class WebController extends BaseController
  */
   private function page_name(): string
   {
-    if ((hash_id($this->id, 'decode') == null && $this->action == 'view') || !$this->has_permission) {
+    if ((hash_id($this->id, 'decode') == null && $this->action == 'view') || (!$this->has_permission && !$this->session->has('primary_user_data'))) {
       return 'error';
     } else {
       return $this->action;
@@ -252,7 +252,7 @@ class WebController extends BaseController
     $page_name = $this->page_name();
     if (file_exists(VIEWPATH . $view_path . '/' . $this->session->user_account_system_code . '/' . $page_name . '.php') && $this->has_permission) {
       $view_path .= '/' . $this->session->user_account_system;
-    } elseif (!file_exists(VIEWPATH . $view_path . '/' . $page_name . '.php') || !$this->has_permission) {
+    } elseif (!file_exists(VIEWPATH . $view_path . '/' . $page_name . '.php') || (!$this->has_permission && !$this->session->has('primary_user_data'))) {
       $view_path = 'components';
     }
 
@@ -265,9 +265,9 @@ class WebController extends BaseController
    */
   private function user_info(): array
   {
-    $primary_user_data_id = 0;
     $session = session();
-    $user_can_read_switch = true;
+    $primary_user_data_id = $this->session->has('primary_user_data') ? $this->session->primary_user_data['user_id'] : 0;
+    $user_can_read_switch = $this->libs->loadLibrary('user')->checkRoleHasPermissions('user_switch', 'read');
     $languageLibrary = new \App\Libraries\Core\LanguageLibrary();
     $user_available_languages = $languageLibrary->getUserAvailableLanguages();
     $user_locale = $session->get('user_locale');
@@ -334,7 +334,6 @@ class WebController extends BaseController
       $keys = $this->libs->getListColumns();
       $page_data['keys'] = $keys;
       $page_data['is_multi_row'] = $this->libs::call($this->controller . '.checkIfTableIsMultiRow');
-      $page_data['has_details_table'] = $this->libs->checkIfTableHasDetailTable($this->controller);
       $page_data['has_details_listing'] = $this->libs->checkIfTableHasDetailListing($this->controller);
       $page_data['show_add_button'] = $show_add_button;
     }

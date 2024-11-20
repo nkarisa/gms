@@ -5,6 +5,12 @@ namespace App\Traits\System;
 trait SchemaTrait
 {
 
+    public function getPackageSchema($package)
+    {
+      $packageSchema = $this->getSchema($package);
+      return $packageSchema;
+    }
+    
     /**
      * Retrieves the schema of the database tables.
      *
@@ -401,6 +407,18 @@ trait SchemaTrait
                 ) {
                     $fields_meta_data[$field_name] = $feature_library->changeFieldType()[$field_name]['field_type'];
                 }
+            }
+        }
+
+        // Some columns are directly added to listTableVisibleColumns and therefore lack metadata type when drawing list tables
+        // This part adds a generic varch type to such columns
+
+        $library = $this->loadLibrary($table);
+        $selectColumnsMissingTypes = array_diff($library->listTableVisibleColumns(), $fields_meta_data);
+        
+        if(is_array($selectColumnsMissingTypes) && count($selectColumnsMissingTypes) > 0){
+            foreach($selectColumnsMissingTypes as $selectColumn){
+                $fields_meta_data[$selectColumn] = 'varchar';
             }
         }
 

@@ -638,4 +638,34 @@ class JournalLibrary extends GrantsLibrary
           
         return $spread_cells;
       }
+
+      public function createNewJournal($journal_date, $office_id)
+      {
+        $approvalLibrary = new \App\Libraries\Core\ApprovalLibrary();
+        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+
+        $new_journal = [];
+    
+        $journal_date = date('Y-m-01', strtotime($journal_date));
+        
+        // Check if a journal for the same month and FCP exists
+        $builder = $this->write_db->table('journal');
+        $builder->where(array('fk_office_id' => $office_id, 'journal_month' => $journal_date));
+        $count_journals = $builder->get()->getNumRows();
+    
+        //Create if CJ has not been created Other delete the duplicate record when > than 1
+        if ($count_journals == 0) {
+          $new_journal['journal_track_number'] = $this->generateItemTrackNumberAndName('journal')['journal_track_number'];
+          $new_journal['journal_name'] =  "Journal for the month of " . $journal_date;
+          $new_journal['journal_month'] = $journal_date;
+          $new_journal['fk_office_id'] = $office_id;
+          $new_journal['journal_created_date'] = date('Y-m-d');
+          $new_journal['journal_created_by'] = $this->session->user_id;
+          $new_journal['journal_last_modified_by'] = $this->session->user_id;
+          $new_journal['fk_approval_id'] = $approvalLibrary->insertApprovalRecord('journal');
+          $new_journal['fk_status_id'] = $statusLibrary->initialItemStatus('journal');
+        
+          $this->write_db->table('journal')->insert( $new_journal);
+        }
+      }
 }

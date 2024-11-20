@@ -30,7 +30,7 @@ if (!function_exists('get_phrase')) {
 }
 
 if (!function_exists('add_record_button')) {
-    function add_record_button($table_controller, $parent_controller, $has_details, $id = null, $has_listing = false, $is_multi_row = false)
+    function add_record_button($table_controller, $parent_controller, $id = null, $has_listing = false, $is_multi_row = false)
     {
         $add_view = $has_listing ? "multiFormAdd" : "singleFormAdd";
         $add_view = $is_multi_row ? "multiRowAdd" : $add_view;
@@ -876,3 +876,75 @@ if(!function_exists('approval_steps')){
         return $approval_steps;
     }
 }
+
+if(!function_exists('calculateFinancialYear')){
+    function calculateFinancialYear($inputDate, $startMonth = 7, $two_digit_year = true) {
+
+        $fyString = '';
+
+        // Parse the input date
+        $date = new DateTime($inputDate);
+        $year = (int)$date->format('Y');
+        $month = (int)$date->format('n');
+
+        // Maximum number of months in a year
+        $max_count = 12;
+
+        // Initialize variables
+        $range_of_months_in_year = [];
+        $current_month = $startMonth;
+
+        // Get the list of months with months after 12 get to 13, 14, 15 .....
+        for($i = 0; $i < $max_count; $i++){
+            $range_of_months_in_year[$i] = $current_month;
+            $current_month += 1;
+        }
+        
+        // Sanitize the months numbered beyond 12 to reset them to 1, 2,3 .....
+        for($x = 0; $x < count($range_of_months_in_year); $x++){
+            if($range_of_months_in_year[$x] > $max_count){
+                $range_of_months_in_year[$x] = $range_of_months_in_year[$x] - $max_count;
+            }
+        }
+
+        // Get the month positions for the month in input date and max month
+        $input_month_position = array_search($month, $range_of_months_in_year);
+        $max_month_position = array_search($max_count, $range_of_months_in_year);
+
+        // Check if fiscal year is in next year
+        $is_fiscal_year_in_next_year = $input_month_position > $max_month_position;
+        // 1,2,3,4,5,6,7,8,9,10,11,12
+
+        if($two_digit_year){
+            // The fiscal year ends in the next year 
+            $fy = $year % 100 + 1;
+
+            if($is_fiscal_year_in_next_year || $startMonth == 1){
+                // The fiscal year ends in the current year
+                $fy = $year % 100;
+            }
+
+            $fyString = str_pad($fy, 2, '0', STR_PAD_LEFT);
+        }else{
+            // The fiscal year ends in the next year 
+            $fyString = $year + 1;
+
+            if($is_fiscal_year_in_next_year || $startMonth == 1){
+                // The fiscal year ends in the current year
+                $fyString = $year;
+            }
+        }
+        
+
+        return  $fyString;
+    }}
+    
+
+    if(!function_exists('validate_date')){
+        function validate_date($date, $format = 'Y-m-d')
+        {
+            $d = DateTime::createFromFormat($format, $date);
+            // The Y ( 4 digits year ) returns TRUE for any integer with any number of digits so changing the comparison from == to === fixes the issue.
+            return $d && $d->format($format) === $date;
+        }
+    }

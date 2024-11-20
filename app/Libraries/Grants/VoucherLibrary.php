@@ -10,6 +10,9 @@ class VoucherLibrary extends GrantsLibrary
     protected $table;
     protected $voucherModel;
 
+    public $lookup_tables_with_null_values = ['office_bank','office_cash'];
+
+
     function __construct()
     {
         parent::__construct();
@@ -17,6 +20,8 @@ class VoucherLibrary extends GrantsLibrary
         $this->voucherModel = new VoucherModel();
 
         $this->table = 'voucher';
+
+        $this->dependant_table = "voucher_detail";
     }
 
     function detachDetailTable(): bool
@@ -55,7 +60,7 @@ class VoucherLibrary extends GrantsLibrary
         $header['voucher_id'] = $raw_result[0]['voucher_id'];
         $header['voucher_date'] = $raw_result[0]['voucher_date'];
         $header['voucher_number'] = $raw_result[0]['voucher_number'];
-        $header['voucher_approvers'] = isset($raw_result[0]) && $raw_result[0]['voucher_approvers'] != null ? json_decode($raw_result[0]['voucher_approvers']): [];
+        $header['voucher_approvers'] = isset($raw_result[0]) && $raw_result[0]['voucher_approvers'] != null ? json_decode($raw_result[0]['voucher_approvers']) : [];
 
         $header['voucher_type_name'] = $voucher_type->voucher_type_name;
 
@@ -328,7 +333,7 @@ class VoucherLibrary extends GrantsLibrary
     {
         $builder = $this->read_db->table('office');
         $builder->join('account_system', 'account_system.account_system_id=office.fk_account_system_id');
-        $office_accounting_system = $builder->getWhere( array('office_id' => $office_id))->getRow();
+        $office_accounting_system = $builder->getWhere(array('office_id' => $office_id))->getRow();
 
         return $office_accounting_system;
     }
@@ -371,102 +376,102 @@ class VoucherLibrary extends GrantsLibrary
     }
 
     function isVoucherCancellable($status_data, $voucher_data)
-  {
-    $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+    {
+        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
 
-    $is_voucher_cancellable = false;
-    $initial_item_status = $statusLibrary->initialItemStatus('Voucher');
-    $direction = $status_data['item_status'][$voucher_data['voucher_status_id']]['status_approval_direction'];
-    $roles = $status_data['item_status'][$voucher_data['voucher_status_id']]['status_role'];
-    $voucher_is_reversed = $voucher_data['voucher_is_reversed'];
+        $is_voucher_cancellable = false;
+        $initial_item_status = $statusLibrary->initialItemStatus('Voucher');
+        $direction = $status_data['item_status'][$voucher_data['voucher_status_id']]['status_approval_direction'];
+        $roles = $status_data['item_status'][$voucher_data['voucher_status_id']]['status_role'];
+        $voucher_is_reversed = $voucher_data['voucher_is_reversed'];
 
-    if (
-      ($voucher_data['voucher_status_id'] == $initial_item_status || $direction == -1)  &&
-      $voucher_is_reversed == 0  &&
-      array_intersect($roles, $this->session->role_ids)
-    ) {
-      $is_voucher_cancellable = true;
+        if (
+            ($voucher_data['voucher_status_id'] == $initial_item_status || $direction == -1) &&
+            $voucher_is_reversed == 0 &&
+            array_intersect($roles, $this->session->role_ids)
+        ) {
+            $is_voucher_cancellable = true;
+        }
+
+        return $is_voucher_cancellable;
     }
 
-    return $is_voucher_cancellable;
-  }
+    /**
+     * @todo Checkifincome or expense
+     */
 
-  /**
-   * @todo Checkifincome or expense
-   */
+    function checkPendingExpensesExceedsTotalIncome(array $voucher_data)
+    {
 
-   function checkPendingExpensesExceedsTotalIncome(array $voucher_data)
-   {
- 
-    $financialReportLibrary = new \App\Libraries\Grants\FinancialReportLibrary();
+        $financialReportLibrary = new \App\Libraries\Grants\FinancialReportLibrary();
 
-     $is_expense_more_than_income = false;
-     //Get the selected voucher total_cost_amount
-     $selected_voucher_income_amount = $this->selectedVoucherIncomeTotalCost(hash_id($this->id, 'decode'));
-      //Bank Income vs Expenses
-     if ($voucher_data['effect_type_code'] == 'income' && $voucher_data['account_type_code'] == 'bank') {
-       //Income Totals
-       $unapproved_income_voucher_total = $this->unapprovedMonthVouchers($voucher_data['office_id'], $voucher_data['voucher_date'], 'income', 'bank', $voucher_data['fk_office_cash_id'], $voucher_data['fk_office_bank_id']);
- 
-       $full_bank_income_voucher_total = $financialReportLibrary->computeCashAtBank([$voucher_data['office_id']], $voucher_data['voucher_date'], [], [$voucher_data['fk_office_bank_id']], true);
- 
-       $total_income_bal = $unapproved_income_voucher_total + $full_bank_income_voucher_total;
- 
-       //Get all expenses
-       $total_current_expense_voucher = $this->unapprovedMonthVouchers($voucher_data['office_id'], $voucher_data['voucher_date'], 'expense', 'bank', $voucher_data['fk_office_cash_id'], $voucher_data['fk_office_bank_id']);
- 
-       //Less amount of the selected voucher
-       $total_income_bal -= $selected_voucher_income_amount;
- 
-       if (($total_current_expense_voucher > $total_income_bal) && $total_current_expense_voucher > 0) {
- 
-         $is_expense_more_than_income = true;
-       }
-     } else if ($voucher_data['effect_type_code'] == 'bank_contra' && $voucher_data['account_type_code'] == 'bank') {
-       //Full cash vouchers
-       $full_cash_income_voucher_total = $financialReportLibrary->computeCashAtHand([$voucher_data['office_id']], $voucher_data['voucher_date'], [], [], $voucher_data['fk_office_cash_id'], true);
-       //Petty Cash Deposit
-       $total_petty_cash_deposit_voucher = $this->unapprovedMonthVouchers($voucher_data['office_id'], $voucher_data['voucher_date'], 'bank_contra', 'bank', $voucher_data['fk_office_cash_id'], $voucher_data['fk_office_bank_id']);
- 
-       if (($total_petty_cash_deposit_voucher < 0 && $full_cash_income_voucher_total >= 0) || ($total_petty_cash_deposit_voucher >= 0 && $total_petty_cash_deposit_voucher >= 0)) {
-         $total_petty_cash = $full_cash_income_voucher_total + $total_petty_cash_deposit_voucher;
-       } else if ($total_petty_cash_deposit_voucher >= 0 && $full_cash_income_voucher_total < 0 || ($total_petty_cash_deposit_voucher >= 0 && $total_petty_cash_deposit_voucher >= 0)) {
-         $total_petty_cash = $total_petty_cash_deposit_voucher + $full_cash_income_voucher_total;
-       }
- 
-       //Get all expenses
-       $total_current_expense_voucher = $this->unapprovedMonthVouchers($voucher_data['office_id'], $voucher_data['voucher_date'], 'expense', 'cash', $voucher_data['fk_office_cash_id'], $voucher_data['fk_office_bank_id']);
- 
-       //Check if total expenses > total cash
-       $total_petty_cash -= $selected_voucher_income_amount;
- 
-       if ((number_format($total_current_expense_voucher, 2) > number_format($total_petty_cash, 2)) && number_format($total_current_expense_voucher, 2) > 0) {
- 
-         $is_expense_more_than_income = true;
-       }
-     }
- 
-     return  $is_expense_more_than_income;
-   }
+        $is_expense_more_than_income = false;
+        //Get the selected voucher total_cost_amount
+        $selected_voucher_income_amount = $this->selectedVoucherIncomeTotalCost(hash_id($this->id, 'decode'));
+        //Bank Income vs Expenses
+        if ($voucher_data['effect_type_code'] == 'income' && $voucher_data['account_type_code'] == 'bank') {
+            //Income Totals
+            $unapproved_income_voucher_total = $this->unapprovedMonthVouchers($voucher_data['office_id'], $voucher_data['voucher_date'], 'income', 'bank', $voucher_data['fk_office_cash_id'], $voucher_data['fk_office_bank_id']);
 
-   /**
+            $full_bank_income_voucher_total = $financialReportLibrary->computeCashAtBank([$voucher_data['office_id']], $voucher_data['voucher_date'], [], [$voucher_data['fk_office_bank_id']], true);
+
+            $total_income_bal = $unapproved_income_voucher_total + $full_bank_income_voucher_total;
+
+            //Get all expenses
+            $total_current_expense_voucher = $this->unapprovedMonthVouchers($voucher_data['office_id'], $voucher_data['voucher_date'], 'expense', 'bank', $voucher_data['fk_office_cash_id'], $voucher_data['fk_office_bank_id']);
+
+            //Less amount of the selected voucher
+            $total_income_bal -= $selected_voucher_income_amount;
+
+            if (($total_current_expense_voucher > $total_income_bal) && $total_current_expense_voucher > 0) {
+
+                $is_expense_more_than_income = true;
+            }
+        } else if ($voucher_data['effect_type_code'] == 'bank_contra' && $voucher_data['account_type_code'] == 'bank') {
+            //Full cash vouchers
+            $full_cash_income_voucher_total = $financialReportLibrary->computeCashAtHand([$voucher_data['office_id']], $voucher_data['voucher_date'], [], [], $voucher_data['fk_office_cash_id'], true);
+            //Petty Cash Deposit
+            $total_petty_cash_deposit_voucher = $this->unapprovedMonthVouchers($voucher_data['office_id'], $voucher_data['voucher_date'], 'bank_contra', 'bank', $voucher_data['fk_office_cash_id'], $voucher_data['fk_office_bank_id']);
+
+            if (($total_petty_cash_deposit_voucher < 0 && $full_cash_income_voucher_total >= 0) || ($total_petty_cash_deposit_voucher >= 0 && $total_petty_cash_deposit_voucher >= 0)) {
+                $total_petty_cash = $full_cash_income_voucher_total + $total_petty_cash_deposit_voucher;
+            } else if ($total_petty_cash_deposit_voucher >= 0 && $full_cash_income_voucher_total < 0 || ($total_petty_cash_deposit_voucher >= 0 && $total_petty_cash_deposit_voucher >= 0)) {
+                $total_petty_cash = $total_petty_cash_deposit_voucher + $full_cash_income_voucher_total;
+            }
+
+            //Get all expenses
+            $total_current_expense_voucher = $this->unapprovedMonthVouchers($voucher_data['office_id'], $voucher_data['voucher_date'], 'expense', 'cash', $voucher_data['fk_office_cash_id'], $voucher_data['fk_office_bank_id']);
+
+            //Check if total expenses > total cash
+            $total_petty_cash -= $selected_voucher_income_amount;
+
+            if ((number_format($total_current_expense_voucher, 2) > number_format($total_petty_cash, 2)) && number_format($total_current_expense_voucher, 2) > 0) {
+
+                $is_expense_more_than_income = true;
+            }
+        }
+
+        return $is_expense_more_than_income;
+    }
+
+    /**
      *Selected_voucher_income_total_cost(): Returns cash recieved in the bank or cash deposit in petty cash box on the selected voucher
      * @author Livingstone Onduso: Dated 08-04-2023
      * @access public
-     * @param Int $voucher_id - voucher id
+     * @param int $voucher_id - voucher id
      * @return float - returns summed up cash
      */
 
-     public function selectedVoucherIncomeTotalCost(int $voucher_id): float
-     {
+    public function selectedVoucherIncomeTotalCost(int $voucher_id): float
+    {
         $builder = $this->read_db->table("voucher_detail");
         $builder->selectSum('voucher_detail_total_cost');
         $builder->where(['fk_voucher_id' => $voucher_id]);
- 
-        return $builder->get()->getRow()->voucher_detail_total_cost;
-     }
 
-      /**
+        return $builder->get()->getRow()->voucher_detail_total_cost;
+    }
+
+    /**
      *unapproved_month_vouchers(): Returns the total of unapproved vouchers for current month for an office
      *
      * @author Livingstone Onduso: Dated 08-04-2023
@@ -520,67 +525,69 @@ class VoucherLibrary extends GrantsLibrary
      * @return array - returns one row of array
      */
 
-     public function getVoucherHeaderToEdit(int $voucher_id): array
-     {
+    public function getVoucherHeaderToEdit(int $voucher_id): array
+    {
         $builder = $this->read_db->table("voucher");
-         $builder->select(['voucher_id', 'office_id', 'office_code', 'voucher_type_account_name', 'voucher_type_effect_name', 'voucher_type_is_cheque_referenced', 'voucher_number', 'voucher_date', 'fk_voucher_type_id', 'voucher_type_name', 'fk_office_bank_id', 'fk_office_cash_id', 'office_bank_name', 'voucher_cheque_number', 'voucher_vendor', 'voucher_vendor_address', 'voucher_description']);
-         $builder->join('office', 'office.office_id=voucher.fk_office_id');
-         $builder->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
-         $builder->join('voucher_type_account', 'voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
-         $builder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
-         $builder->join('office_bank', 'office_bank.office_bank_id=voucher.fk_office_bank_id');
-         $builder->where(['voucher_id' => $voucher_id]);
-         $voucher_to_edit = $builder->get()->getRowArray();
- 
-         //Add the office cash name in the array if fk_office_cash_id!=0
-         if ($voucher_to_edit['fk_office_cash_id'] != 0) {
+        $builder->select(['voucher_id', 'office_id', 'office_code', 'voucher_type_account_name', 'voucher_type_effect_name', 'voucher_type_is_cheque_referenced', 'voucher_number', 'voucher_date', 'fk_voucher_type_id', 'voucher_type_name', 'fk_office_bank_id', 'fk_office_cash_id', 'office_bank_name', 'voucher_cheque_number', 'voucher_vendor', 'voucher_vendor_address', 'voucher_description']);
+        $builder->join('office', 'office.office_id=voucher.fk_office_id');
+        $builder->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+        $builder->join('voucher_type_account', 'voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
+        $builder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+        $builder->join('office_bank', 'office_bank.office_bank_id=voucher.fk_office_bank_id');
+        $builder->where(['voucher_id' => $voucher_id]);
+        $voucher_to_edit = $builder->get()->getRowArray();
+
+        //Add the office cash name in the array if fk_office_cash_id!=0
+        if ($voucher_to_edit['fk_office_cash_id'] != 0) {
             $builder = $this->read_db->table("office_cash");
-             $builder->select(['office_cash_name']);
-             $builder->where(['office_cash_id' => $voucher_to_edit['fk_office_cash_id']]);
-             $office_cash_name = $builder->get()->getRowArray();
- 
-             $voucher_to_edit = array_merge($voucher_to_edit, $office_cash_name);
-         }
- 
-         return $voucher_to_edit;
-     }
+            $builder->select(['office_cash_name']);
+            $builder->where(['office_cash_id' => $voucher_to_edit['fk_office_cash_id']]);
+            $office_cash_name = $builder->get()->getRowArray();
+
+            $voucher_to_edit = array_merge($voucher_to_edit, $office_cash_name);
+        }
+
+        return $voucher_to_edit;
+    }
 
 
-     function listTableVisibleColumns(): array
-     {
-       $columns = [
-         'voucher_id',
-         'voucher_track_number',
-         'voucher_number',
-         'voucher_description',
-         'voucher_date',
-         'voucher_cheque_number',
-         'voucher_is_reversed',
-         'voucher_created_date',
-         'office_name',
-         'voucher_type_name',
-         'status_name',       
-       ];
-   
-       return $columns;
-     }
+    function listTableVisibleColumns(): array
+    {
+        $columns = [
+            'voucher_id',
+            'voucher_track_number',
+            'voucher_number',
+            'voucher_description',
+            'voucher_date',
+            'voucher_cheque_number',
+            'voucher_is_reversed',
+            'voucher_created_date',
+            'office_name',
+            'voucher_type_name',
+            'status_name',
+        ];
 
-     function listTableWhere(\CodeIgniter\Database\BaseBuilder $queryBuilder): void {
-        // if(!$this->session->system_admin){
-        //     $statusLibrary = new \App\Libraries\Core\StatusLibrary();
-        //     $queryBuilder->where(['voucher.fk_status_id >' => $statusLibrary->getMaxApprovalStatusId($this->controller)]);
-        // }
-     }
+        return $columns;
+    }
 
-    function changeFieldType(): array{
+    function listTableWhere(\CodeIgniter\Database\BaseBuilder $queryBuilder): void
+    {
+        // parent::listTableWhere($queryBuilder);
+        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+        $queryBuilder->whereNotIn('voucher.fk_status_id', $statusLibrary->getMaxApprovalStatusId($this->controller));
+        
+    }
+
+    function changeFieldType(): array
+    {
         $change_field_type = array();
-    
-        $change_field_type['voucher_number']['field_type'] = 'text';
-    
-        return $change_field_type;
-      }
 
-      /**
+        $change_field_type['voucher_number']['field_type'] = 'text';
+
+        return $change_field_type;
+    }
+
+    /**
      * Get Voucher Date
      *
      * This method computes the next valid vouching date for a given office
@@ -589,7 +596,7 @@ class VoucherLibrary extends GrantsLibrary
      *
      */
 
-    public function getVoucherDate(int $office_id, string $journal_month = ''): String
+    public function getVoucherDate(int $office_id, string $journal_month = ''): string
     {
         $builder = $this->read_db->table('office');
         $voucher_date = $builder->getWhere(array('office_id' => $office_id))->getRow()->office_start_date;
@@ -677,7 +684,7 @@ class VoucherLibrary extends GrantsLibrary
         return $last_voucher;
     }
 
-        /**
+    /**
      * get_calculated_last_voucher
      * Get the calculated last voucher of the months
      * @param int $office_id, string $financial_report_month
@@ -726,24 +733,25 @@ class VoucherLibrary extends GrantsLibrary
          * PLEASE NOTE THE Query bellow to GET DATA HAS TO USE $this->write_db and NOT $this->read_db DUE TO WRITE and READ  DELAY !!!!!!
          */
 
-         //Get the max voucher of the passed month
-         $builder = $this->read_db->table("voucher");
-         $builder->selectMax('voucher_id');
-         $builder->where([
-             'voucher.fk_office_id' => $office_id, 'voucher_date >=' => date('Y-m-01', strtotime($financial_report_month)),
-             'voucher_date <=' => date('Y-m-t', strtotime($financial_report_month))
-         ]);
- 
-         $voucher_id = $builder->get()->getRow()->voucher_id;
- 
-         $builder = $this->read_db->table('voucher');
-         $builder->select(['voucher_id', 'voucher_number', 'voucher_date']);
-         $builder->where(['voucher_id' => $voucher_id]);
-         return $builder->get()->getRowArray();
+        //Get the max voucher of the passed month
+        $builder = $this->read_db->table("voucher");
+        $builder->selectMax('voucher_id');
+        $builder->where([
+            'voucher.fk_office_id' => $office_id,
+            'voucher_date >=' => date('Y-m-01', strtotime($financial_report_month)),
+            'voucher_date <=' => date('Y-m-t', strtotime($financial_report_month))
+        ]);
+
+        $voucher_id = $builder->get()->getRow()->voucher_id;
+
+        $builder = $this->read_db->table('voucher');
+        $builder->select(['voucher_id', 'voucher_number', 'voucher_date']);
+        $builder->where(['voucher_id' => $voucher_id]);
+        return $builder->get()->getRowArray();
     }
 
 
-        /**
+    /**
      * select_max_financial_report
      * Get the maximum/minimum mfrs of the month
      * @param int $office_id, bool $max_mfr
@@ -768,7 +776,7 @@ class VoucherLibrary extends GrantsLibrary
         return $financial_report_month_obj;
     }
 
-     /**
+    /**
      * Check if Office Has Started Transacting
      *
      * Finds out if the argument offfice has began raising vouchers
@@ -776,16 +784,16 @@ class VoucherLibrary extends GrantsLibrary
      * @param int $office_id - Office in check
      * @return bool - True if has began raising vouchers else false
      */
-    public function checkIfOfficeHasStartedTransacting(Int $office_id): Bool
+    public function checkIfOfficeHasStartedTransacting(int $office_id): bool
     {
         // If the office has not voucher yet, then the transacting month equals the office start date
         $count_of_vouchers = $this->read_db->table('voucher')
-        ->getWhere( array('fk_office_id' => $office_id))->getNumRows();
+            ->getWhere(array('fk_office_id' => $office_id))->getNumRows();
 
         return $count_of_vouchers > 0 ? true : false;
     }
 
-     /**
+    /**
      * get_office_transacting_month
      *
      * This methods gives the date of the first day of the valid transaction month of an office
@@ -793,7 +801,7 @@ class VoucherLibrary extends GrantsLibrary
      * @param int $office - Office in check
      * @return string - Date of the first day of the valid transacting month
      */
-    public function getOfficeTransactingMonth(Int $office_id): String
+    public function getOfficeTransactingMonth(int $office_id): string
     {
         $office_transacting_month = date('Y-m-01');
         //If count_of_vouchers eq to 0 then get the start date if the office
@@ -814,7 +822,7 @@ class VoucherLibrary extends GrantsLibrary
         return $office_transacting_month;
     }
 
-        /**
+    /**
      * Check if Office Transaction Month Has Been Closed
      *
      * Finds out if the date passed as an argument belongs to a month whose vouching process has been closed based on whether the financial report (Bank Reconciliation)
@@ -824,7 +832,7 @@ class VoucherLibrary extends GrantsLibrary
      * @param string $date_of_month - Date of the month in check
      * @return bool - True if reconciliation has been created else false
      */
-    public function checkIfOfficeTransactingMonthHasBeenClosed(Int $office_id, String $date_of_month): Bool
+    public function checkIfOfficeTransactingMonthHasBeenClosed(int $office_id, string $date_of_month): bool
     {
         // If the reconciliation of the max date month has been done and submitted,
         // then use the start date of the next month as the transacting date
@@ -832,11 +840,656 @@ class VoucherLibrary extends GrantsLibrary
 
         $check_month_reconciliation = $this->read_db->table('financial_report')->getWhere(
             array(
-                'financial_report_is_submitted' => 1, 'fk_office_id' => $office_id,
+                'financial_report_is_submitted' => 1,
+                'fk_office_id' => $office_id,
                 'financial_report_month' => date('Y-m-01', strtotime($date_of_month)),
             )
         )->getNumRows();
 
         return $check_month_reconciliation > 0 ? true : false;
     }
+
+    function detailTables(): array
+    {
+        return ["voucher_detail"];
+    }
+
+    /**
+     * Get Voucher Number
+     *
+     * The method computes the next valid voucher number. The voucher numbers are in the format YYMMSS where YY is the fiscal year and MM is the month whe transaction
+     * belongs to. SS is the voucher serial number incremented from 1 (First Voucher of the month)
+     *
+     * @param int $office_id - The primary key of the office
+     * @return int - The next valid voucher number
+     */
+    public function getVoucherNumber(int $office_id, string $journal_month = ''): int
+    {
+
+        $financialReportLibrary = new FinancialReportLibrary();
+        $office_transacting_month = '';
+        $office_transacting_month = $this->getOfficeTransactingMonth($office_id);
+
+        /*New code added from here. Date of addition 26-02-2024
+        If reversal use the date of voucher as the transacting month else use the get_office_transacting_month to compute the transacting months.*/
+        /*If current month report is submitted=true get the date on curent month use it to compute next serial new CJ
+        If current month not submitted use it to get the last voucher date and use it to compute next serial
+
+         */
+
+        if ($journal_month != '') {
+
+            $mfr_submitted = $financialReportLibrary->checkIfFinancialReportIsSubmitted([$office_id], $journal_month);
+
+            if ($mfr_submitted != true) {
+                $office_transacting_month = $journal_month;
+            }
+        }
+        $next_serial_number = $this->getVoucherNextSerialNumber($office_id, $office_transacting_month);
+        return $this->computeVoucherNumber($office_transacting_month, $next_serial_number);
+    }
+
+
+    /**
+     * Compute Voucher Number
+     *
+     * This method computes the next valid voucher number by concatenating the YY, MM and SS together.
+     * YY - Vouching Year, MM - Vouching Month and SS - Voucher Serial Number in the month
+     *
+     * @param string $vouching_month - Date the voucher is being raised
+     * @param int $next_voucher_serial - Next valid voucher serial number
+     * @return int - A Voucher number
+     */
+    public function computeVoucherNumber(string $vouching_month, int $next_voucher_serial = 1): string
+    {
+
+        $chunk_year_from_date = date('y', strtotime($vouching_month));
+        $chunk_month_from_date = date('m', strtotime($vouching_month));
+
+        if ($next_voucher_serial < 10) {
+            $next_voucher_serial = '0' . $next_voucher_serial;
+        }
+
+        return $chunk_year_from_date . $chunk_month_from_date . $next_voucher_serial;
+    }
+
+
+    /**
+     * Get Voucher Next Serial Number
+     *
+     * Computes the next voucher serial number i.e. The 5th + digits in a voucher number
+     *
+     * @param int $office_id - Office in Check
+     * @return int - Next voucher serial number
+     */
+    public function getVoucherNextSerialNumber(int $office_id, string $journal_month = ''): int
+    {
+        // Set default serial number to 1 unless adding to a series in a month
+        $next_serial = 1;
+        $last_voucher = $this->getOfficeLastVoucher($office_id, $journal_month);
+        // Start checking if the office has a last voucher record
+        if (count((array) $last_voucher) > 0) {
+            $last_voucher_number = $last_voucher['voucher_number'];
+            $last_voucher_date = $last_voucher['voucher_date'];
+
+            $transacting_month_has_been_closed = $this->checkIfOfficeTransactingMonthHasBeenClosed($office_id, $last_voucher_date);
+            if (!$transacting_month_has_been_closed) {
+                // Get the serial number of the last voucher, replace the month and year part of the
+                // voucher number with an empty string to remain with only the voucher serial number
+                //voucher format - yymmss or yymmsss
+                $current_voucher_serial_number = substr_replace($last_voucher_number, '', 0, 4);
+                $next_serial = $current_voucher_serial_number + 1;
+            }
+        }
+
+        return $next_serial;
+    }
+
+    function getActiveVoucherTypes($account_system_id, $office_id, $transaction_date)
+    {
+
+        $officeBankLibrary = new OfficeBankLibrary();
+        $chequeBookLibrary = new ChequeBookLibrary();
+
+        $office_banks_for_office = $officeBankLibrary->getOfficeBanksForOffice($office_id);
+        // Do not show bank_to_bank_contra voucher effect types if the office has only 1 bank
+        $builder = $this->read_db->table("voucher_type");
+        if (count($office_banks_for_office['is_active']) < 2) {
+            $builder->whereNotIn('voucher_type_effect_code', ['bank_to_bank_contra']);
+        }
+
+        if (!empty($office_banks_for_office['chequebook_exemption_expiry_date'])) {
+
+            foreach ($office_banks_for_office['chequebook_exemption_expiry_date'] as $office_bank_id => $chequebook_exemption_expiry_date) {
+                if ($chequebook_exemption_expiry_date > $transaction_date) {
+                    $leaves = $chequeBookLibrary->getRemainingUnusedChequeLeaves($office_bank_id);
+                    if (empty($leaves)) {
+                        $builder->where(['voucher_type_is_cheque_referenced' => 0]);
+                    }
+                    break;
+                }
+            }
+
+        }
+
+        $builder->select(array('voucher_type_id', 'voucher_type_name', 'voucher_type_account_code', 'voucher_type_effect_code'));
+        $builder->join('account_system', 'account_system.account_system_id=voucher_type.fk_account_system_id');
+        $builder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+        $builder->join('voucher_type_account', 'voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
+        $voucher_types = $builder->getWhere(array('voucher_type_is_active' => 1, 'voucher_type_is_hidden' => 0, 'fk_account_system_id' => $account_system_id))
+            ->getResultObject();
+
+        return $voucher_types;
+    }
+
+    function voucherTypeRequiresChequeReferencing($voucher_type_id)
+    {
+        $builder = $this->read_db->table('voucher_type');
+        $builder->select(array('voucher_type_is_cheque_referenced'));
+        $voucher_type_is_cheque_referenced = $builder->getWhere(array('voucher_type_id' => $voucher_type_id))
+            ->getRow()->voucher_type_is_cheque_referenced;
+
+        return $voucher_type_is_cheque_referenced;
+    }
+
+    function voucherTypeEffectAndCode($voucher_type_id)
+    {
+        $builder = $this->read_db->table('voucher_type');
+        $builder->select(array('voucher_type_account_code', 'voucher_type_effect_code'));
+        $builder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+        $builder->join('voucher_type_account', 'voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
+        $voucher_type_effect_and_code = $builder->getWhere(array('voucher_type_id' => $voucher_type_id))->getRow();
+
+        return $voucher_type_effect_and_code;
+    }
+
+    function getOfficeBanks($office_id)
+    {
+        $builder = $this->read_db->table('office_bank');
+        $builder->select(array('DISTINCT(office_bank_id) as item_id', 'bank_name', 'office_bank_name as item_name', 'office_bank_account_number '));
+        $builder->join('bank', 'bank.bank_id=office_bank.fk_bank_id');
+        $builder->join('office_bank_project_allocation', 'office_bank.office_bank_id=office_bank_project_allocation.fk_office_bank_id');
+
+        $office_banks = $builder->getWhere(
+            array('fk_office_id' => $office_id, 'office_bank_is_active' => 1)
+        )->getResultObject();
+
+        return $office_banks;
+    }
+
+    /**
+     * get_count_of_request
+     * @param
+     * @return int
+     * @author: Onduso
+     * @Date: 4/12/2020
+     */
+    public function getCountOfUnvouchedRequest($office_id): int
+    {
+        $builder = $this->read_db->table("request");
+        $builder->join('request_detail', 'request.request_id=request_detail.fk_request_id');
+        $builder->where(array('fk_office_id' => $office_id));
+        $builder->where(array('request_is_fully_vouched' => 0));
+        $builder->where(array('fk_voucher_id' => 0));
+
+        $unvouched_request = $builder->get()->getNumRows();
+
+        return $unvouched_request;
+    }
+
+    /**
+     *total_cost_for_voucher_to_edit(): Returns the total cost for the voicuher being edited
+     * @author Livingstone Onduso: Dated 03-11-2023
+     * @access public
+     * @return float - json string
+     */
+    public function totalCostForVoucherToEdit(int $voucher_id): float
+    {
+        //Get the sum of voucher_detail_total_cost
+        $total_cost = 0.00;
+
+        $builder = $this->read_db->table("voucher_detail");
+        $builder->selectsum('voucher_detail_total_cost');
+        $builder->where(['fk_voucher_id' => $voucher_id]);
+        $arr_result = $builder->get()->getResultArray();
+
+        if ($arr_result[0]['voucher_detail_total_cost'] != null) {
+            $total_cost = $arr_result[0]['voucher_detail_total_cost'];
+        }
+
+        return $total_cost;
+    }
+
+    /**
+     * Get Approved Unvouched Request Details
+     *
+     * List all the request details that have been finalised in the approval workflow
+     * @return Array
+     */
+    public function getApprovedUnvouchedRequestDetails($office_id): array
+    {
+        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+
+        $max_approval_status_ids = $statusLibrary->getMaxApprovalStatusId('request');
+
+        $builder = $this->read_db->table("request_detail");
+        $builder->select(array('request_detail_id', 'request_track_number', 'request_detail_description', 'request_detail_quantity', 'request_detail_unit_cost', 'request_detail_total_cost', 'expense_account_name', 'project_name'));
+        $builder->join('expense_account', 'expense_account.expense_account_id=request_detail.fk_expense_account_id');
+        $builder->join('project_allocation', 'project_allocation.project_allocation_id=request_detail.fk_project_allocation_id');
+        $builder->join('project', 'project.project_id=project_allocation.fk_project_id');
+        $builder->join('request', 'request.request_id=request_detail.fk_request_id');
+        $builder->join('status', 'status.status_id=request.fk_status_id');
+        $builder->whereIn('request.fk_status_id', $max_approval_status_ids);
+        $builder->where(array('fk_voucher_id' => 0));
+        return $builder->get()->getResultArray();
+    }
+
+    public function getDuplicateChequesForAnOffice($office_id, $cheque_number, $office_bank_id, $hold_cheque_number_for_edit = 0, $has_eft = 0)
+    {
+
+        $duplicate_cheque_exist = 0;
+
+        //get duplicate cheques
+        $builder = $this->read_db->table("voucher");
+        $builder->select(array('voucher_cheque_number'));
+        $builder->where(array('fk_office_id' => $office_id, 'voucher_cheque_number' => $cheque_number, 'fk_office_bank_id' => $office_bank_id));
+
+        //Added by Onduso on 24th May 2023 to seperate EFT numbers with cheques
+        if ($has_eft == 1) {
+            $builder->where(['voucher_type_is_cheque_referenced' => 0]);
+        } else {
+            $builder->where(['voucher_type_is_cheque_referenced' => 1]);
+        }
+        $builder->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+
+        //End of addition
+        $duplicate_cheque_number = $builder->get()->getNumRows();
+        if ($hold_cheque_number_for_edit != $cheque_number) {
+            //get duplicate cheques
+            $builder = $this->read_db->table("voucher");
+            $builder->select(array('voucher_cheque_number'));
+            $builder->where(array('fk_office_id' => $office_id, 'voucher_cheque_number' => $cheque_number, 'fk_office_bank_id' => $office_bank_id));
+            $duplicate_cheque_number = $builder->get()->getNumRows();
+
+            //if greater than zero then duplicates exists
+            if ($duplicate_cheque_number > 0) {
+                $duplicate_cheque_exist = 1;
+            }
+        }
+
+        return $duplicate_cheque_exist;
+    }
+
+    /**
+     *get_effect_code_and_account_code(): Returns a row of voucher_type_effect_code and voucher_type_account_code
+     * @author Livingstone Onduso: Dated 08-04-2023
+     * @access public
+     * @param int $voucher_type_id - voucher type id id
+     * @return object - returns a row with effect code and account code
+     */
+    public function getAccountAndEffectCodes(int $voucher_type_id): object
+    {
+        $builder = $this->read_db->table("voucher_type");
+        $builder->select(array('voucher_type_effect_code', 'voucher_type_account_code'));
+        $builder->where(array('voucher_type_id' => $voucher_type_id));
+        $builder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+        $builder->join('voucher_type_account', 'voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
+        return $builder->get()->getRow();
+    }
+
+    function add()
+    {
+
+        $journalLibrary = new JournalLibrary();
+        $financialReportLibrary = new FinancialReportLibrary();
+        $chequeInjectionLibrary = new ChequeInjectionLibrary();
+        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+        $approvalLibrary = new \App\Libraries\Core\ApprovalLibrary();
+        $expenseAccountLibrary = new ExpenseAccountLibrary();
+
+        $flag = false;
+        $message = get_phrase('voucher_creation_failed');
+
+        $header = [];
+        $detail = [];
+        $row = [];
+        $office_id = $this->request->getPost('fk_office_id');
+        $voucher_number = $this->request->getPost('voucher_number');
+        $voucher_date = $this->request->getPost('voucher_date');
+
+        $builder = $this->write_db->table("voucher");
+        $builder->where(array('fk_office_id' => $office_id, 'voucher_number' => $voucher_number));
+        $voucher_obj = $builder->get();
+
+        if ($voucher_obj->getNumRows() > 0) {
+            $voucher_number = $this->getVoucherNumber($office_id);
+        }
+
+        $this->write_db->transBegin();
+
+        // Check if this is the first voucher in the month, if so create a new journal record for the month
+        // This must be run before a voucher is created
+        if (!$this->officeHasVouchersForTheTransactingMonth($office_id, $voucher_date)) {
+
+            // Create a journal record
+            $journalLibrary->createNewJournal(date("Y-m-01", strtotime($voucher_date)), $office_id);
+
+            // Insert the month MFR Record
+            $financialReportLibrary->createFinancialReport(date("Y-m-01", strtotime($voucher_date)), $office_id);
+        }
+
+        //Retry ro Create new_journal_of_month and MFR if it was not created on the first instance when creating first voucher of the month 
+        $journal_of_month_exists_flag = $this->getJournalForCurrentVouchingMonth(date("Y-m-01", strtotime($voucher_date)), $office_id);
+
+        $finacial_report_of_month_exists_flag = $this->getFinancialReportForCurrentVouchingMonth(date("Y-m-01", strtotime($voucher_date)), $office_id);
+
+        if (!$journal_of_month_exists_flag) {
+            // Create a journal record
+            $journalLibrary->createNewJournal(date("Y-m-01", strtotime($voucher_date)), $office_id);
+        }
+
+        if (!$finacial_report_of_month_exists_flag) {
+            // Create financial report record
+            $financialReportLibrary->createFinancialReport(date("Y-m-01", strtotime($voucher_date)), $office_id);
+        }
+
+        // Check voucher type
+
+        $voucher_type_effect_and_account = $this->voucherTypeEffectAndCode($this->request->getPost('fk_voucher_type_id'));
+        $voucher_type_effect_code = $voucher_type_effect_and_account->voucher_type_effect_code;
+        $voucher_type_account_code = $voucher_type_effect_and_account->voucher_type_account_code;
+
+        $track = $this->generateItemTrackNumberAndName('voucher');
+        $header['voucher_track_number'] = $track['voucher_track_number'];
+        $header['voucher_name'] = $track['voucher_name'];
+
+        $header['fk_office_id'] = $office_id;
+        $header['voucher_date'] = $voucher_date;
+        $header['voucher_number'] = $voucher_number; //$this->input->post('voucher_number');
+        $header['fk_voucher_type_id'] = $this->request->getPost('fk_voucher_type_id');
+
+        $office_bank_id = $this->getOfficeBankIdToPost($office_id);
+        $header['fk_office_bank_id'] = $office_bank_id;
+
+        $header['fk_office_cash_id'] = $this->request->getPost('fk_office_cash_id') == null ? 0 : $this->request->getPost('fk_office_cash_id');
+        // log_message('error', json_encode($this->input->post('fk_office_cash_id')));
+        $voucher_cheque_number = $this->request->getPost('voucher_cheque_number') == null ? 0 : $this->request->getPost('voucher_cheque_number');
+        $header['voucher_cheque_number'] = $voucher_cheque_number;
+        
+        $chequeInjectionLibrary->updateInjectedChequeStatus($office_bank_id, $voucher_cheque_number);
+        $chequeBookLibary = new ChequeBookLibrary();
+        $header['fk_cheque_book_id'] = $this->isVoucherTypeChequeReferenced($header['fk_voucher_type_id']) ? $chequeBookLibary->getChequeBookIdForChequeNumber($header['voucher_cheque_number'], $header['fk_office_bank_id']) : NULL;
+        // $header['fk_cheque_book_id'] = $this->verify_cheque_book_id_by_voucher_type_id($header['fk_voucher_type_id'], $header['voucher_cheque_number'], $header['fk_office_bank_id']);
+        $header['voucher_vendor'] = $this->request->getPost('voucher_vendor');
+        $header['voucher_vendor_address'] = $this->request->getPost('voucher_vendor_address');
+        $header['voucher_description'] = $this->request->getPost('voucher_description');
+
+        $header['voucher_created_by'] = $this->session->user_id;
+        $header['voucher_created_date'] = date('Y-m-d');
+        $header['voucher_last_modified_by'] = $this->session->user_id;
+
+        $header['fk_approval_id'] = $approvalLibrary->insertApprovalRecord('voucher');
+        $header['fk_status_id'] = $statusLibrary->initialItemStatus('voucher');
+
+        $this->write_db->table('voucher')->insert( $header);
+
+        $header_id = $this->write_db->insertId();
+
+        if ($header['fk_cheque_book_id'] != NULL) {
+            $builder = $this->write_db->table('cheque_book');
+            $builder->where(array('cheque_book_id' => $header['fk_cheque_book_id']));
+            $builder->update( ['cheque_book_is_used' => 1]);
+        }
+
+        if ($this->request->getPost('cash_recipient_account') !== null) {
+            $this->createCashRecipientAccountRecord($header_id, $this->request->getPost());
+        }
+
+        if (!empty($this->request->getPost('voucher_detail_quantity'))) {
+            for ($i = 0; $i < sizeof($this->request->getPost('voucher_detail_quantity')); $i++) {
+                $voucher_detail_quantity = str_replace(",", "", $this->request->getPost('voucher_detail_quantity')[$i]);
+                $voucher_detail_unit_cost = str_replace(",", "", $this->request->getPost('voucher_detail_unit_cost')[$i]);
+                $voucher_detail_total_cost = str_replace(",", "", $this->request->getPost('voucher_detail_total_cost')[$i]);
+
+                $detail['fk_voucher_id'] = $header_id;
+                $tracking = $this->generateItemTrackNumberAndName('voucher_detail');
+                $detail['voucher_detail_track_number'] = $tracking['voucher_detail_track_number'];
+                $detail['voucher_detail_name'] = $tracking['voucher_detail_name'];
+
+                $detail['voucher_detail_quantity'] = $voucher_detail_quantity;
+                $detail['voucher_detail_description'] = $this->request->getPost('voucher_detail_description')[$i];
+                $detail['voucher_detail_unit_cost'] = $voucher_detail_unit_cost;
+                $detail['voucher_detail_total_cost'] = $voucher_detail_total_cost;
+                // log_message('error', json_encode(['voucher_type_effect_code' => $voucher_type_effect_code, 'detail' => $detail]));
+                if ($voucher_type_effect_code == 'expense') {
+                    $expense_account_id = $this->request->getPost('voucher_detail_account')[$i];
+                    $detail['fk_expense_account_id'] = $expense_account_id;
+                    $detail['fk_income_account_id'] = $expenseAccountLibrary->getExpenseIncomeAccountId($expense_account_id);
+                    $detail['fk_contra_account_id'] = 0;
+                } elseif ($voucher_type_effect_code == 'income' || $voucher_type_effect_code == 'bank_to_bank_contra') {
+                    $detail['fk_expense_account_id'] = 0;
+                    $detail['fk_income_account_id'] = $this->request->getPost('voucher_detail_account')[$i];
+                    $detail['fk_contra_account_id'] = 0;
+                } elseif ($voucher_type_effect_code == 'bank_contra' || $voucher_type_effect_code == 'cash_contra') {
+                    $detail['fk_expense_account_id'] = 0;
+                    $detail['fk_income_account_id'] = 0;
+                    $detail['fk_contra_account_id'] = $this->request->getPost('voucher_detail_account')[$i];
+                } elseif ($voucher_type_account_code == 'cash' || $voucher_type_effect_code == 'cash_contra') {
+                    $detail['fk_expense_account_id'] = 0;
+                    $detail['fk_income_account_id'] = 0;
+                    $detail['fk_contra_account_id'] = $this->request->getPost('voucher_detail_account')[$i];
+                }
+
+
+                $detail['fk_project_allocation_id'] = isset($this->request->getPost('fk_project_allocation_id')[$i]) ? $this->request->getPost('fk_project_allocation_id')[$i] : 0;
+                $detail['fk_request_detail_id'] = isset($this->request->getPost('fk_request_detail_id')[$i]) ? $this->request->getPost('fk_request_detail_id')[$i] : 0;
+                $detail['fk_approval_id'] = $approvalLibrary->insertApprovalRecord('voucher_detail');
+                $detail['fk_status_id'] = $statusLibrary->initialItemStatus('voucher_detail');
+
+                // if request_id > 0 give the item the final status
+                if (isset($this->request->getPost('fk_request_detail_id')[$i]) && $this->request->getPost('fk_request_detail_id')[$i] > 0) {
+                    $this->updateRequestDetailStatusOnVouching($this->request->getPost('fk_request_detail_id')[$i], $header_id);
+                    // Check if all request detail items in the request has the last status and update the request to last status too
+                    $this->updateRequestOnPayingAllDetails($this->request->getPost('fk_request_detail_id')[$i]);
+                }
+
+                $row[] = $detail;
+            }
+
+            $this->write_db->table('voucher_detail')->insertBatch( $row);
+        }
+
+        if ($this->write_db->transStatus() === FALSE || empty($this->request->getPost('voucher_detail_quantity'))) {
+            $this->write_db->transRollback();
+        } else {
+            $this->write_db->transCommit();
+            $flag = true;
+            $message = get_phrase('voucher_creation_success');
+        }
+
+        return $this->response->setJSON(['flag' => $flag,'message' => $message]);
+    }
+
+    public function officeHasVouchersForTheTransactingMonth($office_id, $transacting_month)
+    {
+
+        $month_start_date = date('Y-m-01', strtotime($transacting_month));
+        $month_end_date = date('Y-m-t', strtotime($transacting_month));
+
+        $voucher_count_for_the_month = $this->read_db->table(    'voucher')->getWhere(
+            array('fk_office_id' => $office_id, 'voucher_date>=' => $month_start_date, 'voucher_date<=' => $month_end_date)
+        )->getNumRows();
+
+        $journal_count_for_the_month = $this->read_db->table( 'journal')->getWhere(
+            array('fk_office_id' => $office_id, 'journal_month' => $month_start_date)
+        )->getNumRows();
+
+        $financial_report_count_for_the_month = $this->read_db->table('financial_report')->getWhere(
+            array('fk_office_id' => $office_id, 'financial_report_month' => $month_start_date)
+        )->getNumRows();
+
+        $office_has_vouchers_for_the_transacting_month = false;
+
+        if ($voucher_count_for_the_month > 0 && $journal_count_for_the_month > 0 && $financial_report_count_for_the_month > 0) {
+            $office_has_vouchers_for_the_transacting_month = true;
+        }
+
+        return $office_has_vouchers_for_the_transacting_month;
+    }
+
+    public function getJournalForCurrentVouchingMonth($voucher_date, $office_id)
+    {
+        $builder = $this->read_db->table('journal');
+        $builder->select(['journal_month']);
+        $builder->where(['fk_office_id' => $office_id]);
+        $builder->where(['journal_month' => $voucher_date]);
+        $this_month_journal_obj = $builder->get();
+
+        $this_month_journal = [];
+
+        if ($this_month_journal_obj->getNumRows() > 0) {
+            $this_month_journal = $this_month_journal_obj->getRowArray();
+        }
+
+        //check if journal exists
+        $journal_exists = false;
+
+        if (sizeof($this_month_journal) == 1) {
+            $journal_exists = true;
+        }
+
+        return $journal_exists;
+    }
+
+    public function getFinancialReportForCurrentVouchingMonth($voucher_date, $office_id)
+    {
+        $builder = $this->read_db->table("financial_report");
+        $builder->select(['financial_report_month']);
+        $builder->where(['fk_office_id' => $office_id]);
+        $builder->where(['financial_report_month' => $voucher_date]);
+        $this_month_mfr_obj = $builder->get();
+
+        $this_month_mfr = [];
+
+        if ($this_month_mfr_obj->getNumRows() > 0) {
+            $this_month_mfr = $this_month_mfr_obj->getRowArray();
+        }
+
+        $financial_report_exists = false;
+
+        if (sizeof($this_month_mfr) == 1) {
+
+            $financial_report_exists = true;
+        }
+
+        return $financial_report_exists;
+    }
+
+    function getOfficeBankIdToPost($office_id)
+    {
+        
+    $officeBankLibrary = new OfficeBankLibrary();
+
+      $office_bank_id =  $this->request->getPost('fk_office_bank_id') == null ? 0 : $this->request->getPost('fk_office_bank_id');
+  
+      if ($office_bank_id == 0) {
+        // Get id of active office bank
+        $office_bank_id = $officeBankLibrary->getActiveOfficeBanks($office_id)[0]['office_bank_id'];
+      }
+  
+      return $office_bank_id;
+    }
+
+     /**
+   * Check if the voucher type id provided is set to be requiring a cheque number reference
+   * @author Nicodemus Kairsa Mwambire nkarisa@ke.ci.org
+   * @date 18th March 2024
+   * @param integer voucher_type_id  - Country voucher type id
+   * @return bool
+   * @source master-record-cheque-id
+   * @version v24.3.0.1
+   */
+  public function isVoucherTypeChequeReferenced($voucher_type_id): bool{
+    $is_voucher_type_cheque_referenced = false;
+    $builder = $this->read_db->table("voucher_type");
+    $builder->where(['voucher_type_id' => $voucher_type_id, 'voucher_type_is_cheque_referenced' => 1]);
+    $voucher_type_obj = $builder->get();
+ 
+    if($voucher_type_obj->getNumRows() > 0){
+      $is_voucher_type_cheque_referenced = true;
+    }
+ 
+    return $is_voucher_type_cheque_referenced;
+  }
+
+  function createCashRecipientAccountRecord($voucher_id, $post)
+  {
+    $approvalLibrary = new \App\Libraries\Core\ApprovalLibrary();
+    $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+
+    $tracking = $this->generateItemTrackNumberAndName('cash_recipient_account');
+    $cash_recipient_account_data['cash_recipient_account_name'] = $tracking['cash_recipient_account_name'];
+    $cash_recipient_account_data['cash_recipient_account_track_number'] = $tracking['cash_recipient_account_track_number'];
+    $cash_recipient_account_data['fk_voucher_id'] = $voucher_id;
+
+    if (isset($post['fk_office_bank_id']) && $post['fk_office_bank_id'] > 0) {
+      $cash_recipient_account_data['fk_office_bank_id'] = $post['cash_recipient_account'];
+    } elseif ($post['fk_office_cash_id'] > 0) {
+      $cash_recipient_account_data['fk_office_cash_id'] = $post['cash_recipient_account'];
+    }
+
+    $cash_recipient_account_data['cash_recipient_account_created_date'] = date('Y-m-d');
+    $cash_recipient_account_data['cash_recipient_account_created_by'] = $this->session->user_id;
+    $cash_recipient_account_data['cash_recipient_account_last_modified_by'] = $this->session->user_id;
+
+    $cash_recipient_account_data['fk_approval_id'] = $approvalLibrary->insertApprovalRecord('cash_recipient_account');
+    $cash_recipient_account_data['fk_status_id'] = $statusLibrary->initialItemStatus('cash_recipient_account');
+
+    $this->write_db->table('cash_recipient_account')->insert( $cash_recipient_account_data);
+  }
+
+  function updateRequestDetailStatusOnVouching($request_detail_id, $voucher_id)
+  {
+    // Update the request detail record
+    $builder = $this->write_db->table("request_detail");
+    $builder->where(array('request_detail_id' => $request_detail_id));
+    $builder->update(array('fk_voucher_id' => $voucher_id));
+  }
+
+  function updateRequestOnPayingAllDetails($request_detail_id)
+  {
+    $request_id = $this->read_db->table('request_detail')->getWhere( array('request_detail_id' => $request_detail_id))->getRow()->fk_request_id;
+    $unpaid_request_details = $this->read_db->table('request_detail')->getWhere( array('fk_request_id' => $request_id, 'fk_voucher_id' => 0))->getNumRows();
+
+    if ($unpaid_request_details == 0) {
+        $builder = $this->write_db->table("request");
+        $builder->where(array('request_id' => $request_id));
+        $builder->update( array('request_is_fully_vouched' => 1));
+    }
+  }
+
+  function additionalListColumns(): array {
+    $additional = [
+        'action' => 'voucher_id'
+    ];
+
+    return $additional;
+  }
+
+  function formatColumnsValues($columnsName, $columnsValues, $rowData): mixed {
+
+    $is_voided_chq = false;
+
+    if($columnsName == 'action'){
+        $officeLibrary = new \App\Libraries\Core\OfficeLibrary();
+        $office_account_system_id = $officeLibrary->getOfficeAccountSystem($rowData['office_id'])['account_system_id'];
+        $status_data = $this->actionButtonData($this->controller, $office_account_system_id);
+        extract($status_data);
+        $columnsValues = approval_action_button($this->controller, $item_status, $rowData['voucher_id'], $rowData['status_id'], $item_initial_item_status_id, $item_max_approval_status_ids,false, true,'', $is_voided_chq);
+    }
+
+    return $columnsValues;
+  }
+
+
 }

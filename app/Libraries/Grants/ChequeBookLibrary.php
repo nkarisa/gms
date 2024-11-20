@@ -266,4 +266,85 @@ class ChequeBookLibrary extends GrantsLibrary {
 
         return $used_reused_cheque_numbers;
     }
+
+    function deactivateChequeBook($office_bank_id)
+    {
+
+        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+        
+        $success = true;
+        $max_status_id = $statusLibrary->getMaxApprovalStatusId('Cheque_book');
+        $condition = array('fk_office_bank_id' => $office_bank_id, 'cheque_book_is_active' => 1);
+
+        $builder = $this->read_db->table("cheque_book");
+        $builder->where($condition);
+        $max_approved_active_book_count = $builder->get()->getNumRows();
+
+        if ($max_approved_active_book_count > 0) {
+            $data['cheque_book_is_active'] = 0;
+            $data['fk_status_id'] = $max_status_id[0]; // Make all deactivated book be fully approved automatically
+            
+            $builder = $this->write_db->table("cheque_book");
+            $builder->where($condition);
+            $builder->update($data);
+
+            if ($this->write_db->affectedRows() > 0) {
+                $success = true;
+            }
+        }
+
+        return $success;
+    }
+
+    function checkActiveChequeBookForOfficeBankExist($office_bank_id)
+    {
+        $builder = $this->read_db->table("cheque_book");
+        $builder->where(array('cheque_book.fk_office_bank_id' => $office_bank_id, 'cheque_book.cheque_book_is_active' => 1));
+        return $builder->get();
+    }
+
+     /**
+     * Gets the cheque book id of a given cheque number for cheque books in a given office bank
+     * @author Nicodemus Karisa Mwambire
+     * @date 18th March 2024
+     * @param int cheque_number - Provide cheque number
+     * @param int office_bank_id - Given office bank
+     * @return int Cheque Book Id
+     * @source master-record-cheque-id
+     * @version v24.3.0.1
+     */
+    public function getChequeBookIdForChequeNumber(int $cheque_number, int $office_bank_id):int{
+        $chequeInjectionLibrary = new ChequeInjectionLibrary();
+        $cheque_book_id = 0;
+        $is_injected_cheque_number = $chequeInjectionLibrary->isInjectedChequeNumber($office_bank_id, $cheque_number);
+        
+        $builder = $this->read_db->table("cheque_book");
+        $builder->select(['cheque_book_id', 'cheque_book_start_serial_number', 'cheque_book_count_of_leaves']);
+        $builder->where(array('fk_office_bank_id' => $office_bank_id));
+        $office_bank_cheque_books_obj = $builder->get();
+       
+        if($office_bank_cheque_books_obj->getNumRows() > 0){
+            $cheque_books = $office_bank_cheque_books_obj->getResultArray();
+ 
+            foreach($cheque_books as $cheque_book){
+                $cheque_book_pages = range($cheque_book['cheque_book_start_serial_number'], $cheque_book['cheque_book_start_serial_number'] + ($cheque_book['cheque_book_count_of_leaves'] - 1));
+                if(in_array($cheque_number, $cheque_book_pages)){
+                    $cheque_book_id = $cheque_book['cheque_book_id'];
+                    break;
+                }
+            }
+        }
+
+        // We only get to this independent if clause if the leaf is injected and missing in all the books e.g. Bank Slips
+        if($cheque_book_id == 0 && $is_injected_cheque_number == true){
+            $builder = $this->read_db->table("cheque_book");
+            $builder->where(array('fk_office_bank_id' => $office_bank_id));
+            $builder->limit(1);
+            $builder->orderBy('cheque_book_id desc');
+            $cheque_book_id = $builder->get()->getRow()->cheque_book_id;
+        }
+        
+        return $cheque_book_id;
+    }
+
 }

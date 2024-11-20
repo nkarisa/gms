@@ -151,7 +151,7 @@ extract($result['status_data']);
                             <div class='text-center'>
                                 <?php 
                                 if($userLibrary->checkRoleHasPermissions(ucfirst('context_'.$context_definition_name.'_user'), 'create')){
-                                    echo add_record_button('context_'.$context_definition_name.'_user',false,$id,false,false);
+                                    echo add_record_button('context_'.$context_definition_name.'_user','',$id,false,false);
                                 }
                                 ?>
                             </div>
