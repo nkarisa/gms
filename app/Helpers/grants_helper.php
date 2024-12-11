@@ -41,6 +41,17 @@ if (!function_exists('add_record_button')) {
             $link = '<a style="margin-bottom:-70px;z-index:100;position:relative;" href="' . base_url() . $table_controller . '/' . $add_view . '" class="btn btn-default hidden-print ">' . get_phrase('add_' . strtolower($table_controller)) . '</a>';
         }
 
+        $grantsLibrary = service('grantslib');
+        $featureLibrary = $grantsLibrary->loadLibrary($table_controller);
+
+        if(method_exists($featureLibrary,'showAddButton')){
+            $showAddButton = $featureLibrary->showAddButton();
+
+            if(!$showAddButton){
+                $link = "";
+            }
+        }
+
         return $link;
     }
 }
