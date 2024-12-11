@@ -191,8 +191,9 @@ trait Extendable
    *  - 'results': An array of records to be displayed in the list table.
    */
 
-  public function list($datatableBuilder, array $listSelectColumns, string $parentId = null, string $parentTable = null): array
+  public function list(\CodeIgniter\Database\BaseBuilder $datatableBuilder, array $listSelectColumns, string $parentId = null, string $parentTable = null): array
   {
+
     return ['results' => []];
   }
 

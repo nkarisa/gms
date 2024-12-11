@@ -319,6 +319,38 @@ class GrantsLibrary
     return $lookup_tables_fields;
   }
 
+  protected function lookupJoins(\CodeIgniter\Database\BaseBuilder $builder, $table = ""){
+    
+    $lookup_tables = $this->lookupTables();
+    $table =  $table == "" ? $this->controller : $table;
+
+    $featureLibrary = $this->loadLibrary($table );
+    $foreignKeyMappings = $featureLibrary->lookUpTablesForeignKeyMappings;
+
+    if (is_array($lookup_tables) && count($lookup_tables) > 0) {
+      foreach ($lookup_tables as $lookup_table) {
+        // Check if lookup table exists
+        if (!$this->read_db->tableExists($lookup_table)) {
+          $message = "The table " . $lookup_table . " doesn't exist in the database. Check the lookup_tables function in the " . $table . "_model";
+          throw new \CodeIgniter\Exceptions\PageNotFoundException($message);
+        }
+
+        $lookup_table_id = $lookup_table . '_id';
+        $foreignKeyField = 'fk_' . $lookup_table_id;
+
+        if(array_key_exists($lookup_table,$foreignKeyMappings)){
+          $foreignKeyField = $foreignKeyMappings[$lookup_table];
+        }
+        $lookup_tables_with_null_values = [];
+        if(!empty(property_exists($featureLibrary, 'lookup_tables_with_null_values'))){
+          $lookup_tables_with_null_values = $featureLibrary->lookup_tables_with_null_values;
+        }
+        $joinType = in_array($lookup_table, $lookup_tables_with_null_values) ? 'LEFT': '';
+        $builder->join($lookup_table, $lookup_table . '.' . $lookup_table_id . '=' . $table . '.' . $foreignKeyField, $joinType);
+      }
+    }
+  }
+
   function lookupTables(): array
   {
     $lookUpTables = $this->checkLookupTables();

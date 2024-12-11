@@ -39,6 +39,7 @@ class ListOutput extends OutputTemplate
     return $selected_results;
   }
 
+
   private function runQueryBuilder(
     BaseBuilder $builder,
     string $table,
