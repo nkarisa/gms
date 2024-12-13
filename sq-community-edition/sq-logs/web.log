@@ -1,0 +1,632 @@
+2024.12.13 15:25:33 INFO  web[][o.s.p.ProcessEntryPoint] Starting Web Server
+2024.12.13 15:25:33 INFO  web[][o.s.s.a.TomcatHttpConnectorFactory] Starting Tomcat on port 9000
+2024.12.13 15:25:34 INFO  web[][o.s.s.p.LogServerVersion] SonarQube Server / 24.12.0.100206 / ce887e85cc5dea7dc3b7718b6b104cc83eca9a89
+2024.12.13 15:25:34 INFO  web[][o.s.d.DefaultDatabase] Create JDBC data source for jdbc:postgresql://db:5432/sonar
+2024.12.13 15:25:34 INFO  web[][c.z.h.HikariDataSource] HikariPool-1 - Starting...
+2024.12.13 15:25:35 INFO  web[][c.z.h.p.HikariPool] HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@61f3fbb8
+2024.12.13 15:25:35 INFO  web[][c.z.h.HikariDataSource] HikariPool-1 - Start completed.
+2024.12.13 15:25:36 INFO  web[][o.s.s.p.ServerFileSystemImpl] SonarQube home: /opt/sonarqube
+2024.12.13 15:25:36 INFO  web[][o.s.s.u.SystemPasscodeImpl] System authentication by passcode is disabled
+2024.12.13 15:25:36 INFO  web[][o.s.s.p.d.m.h.MigrationHistoryTableImpl] Creating table schema_migrations
+2024.12.13 15:25:36 INFO  web[][o.s.s.p.ServerPluginManager] Deploy C# Code Quality and Security / 10.3.0.106239 / d03cce2708b983694c343d86111fabaf9073721c
+2024.12.13 15:25:36 INFO  web[][o.s.s.p.ServerPluginManager] Deploy Clean as You Code / 2.4.0.2018 / c2f7910f6ecac6faa73001eeac4bd79a2db98cd3
+2024.12.13 15:25:36 INFO  web[][o.s.s.p.ServerPluginManager] Deploy Flex Code Quality and Security / 2.14.0.5032 / 005476cddc54a18b78eca55d10338702eb31e4b0
+2024.12.13 15:25:36 INFO  web[][o.s.s.p.ServerPluginManager] Deploy Go Code Quality and Security / 1.18.0.240 / 09e16bcebbc987dadc860ccfd9de9fe00f8e59f4
+2024.12.13 15:25:36 INFO  web[][o.s.s.p.ServerPluginManager] Deploy HTML Code Quality and Security / 3.17.0.5548 / cad4bcc0d77f656688edf0fba51bce4339674dae
+2024.12.13 15:25:36 INFO  web[][o.s.s.p.ServerPluginManager] Deploy IaC Code Quality and Security / 1.39.0.13718 / null
+2024.12.13 15:25:36 INFO  web[][o.s.s.p.ServerPluginManager] Deploy JaCoCo / 1.3.0.1538 / 74a7798c7cea687c72ed9df40c93eb7ea2a58c49
+2024.12.13 15:25:36 INFO  web[][o.s.s.p.ServerPluginManager] Deploy Java Advanced Code Quality Analyzer / 8.7.0.37452 / 7f648a979f612a412e1650b44e6ba7653985360f
+2024.12.13 15:25:36 INFO  web[][o.s.s.p.ServerPluginManager] Deploy Java Code Quality and Security / 8.7.0.37452 / 7f648a979f612a412e1650b44e6ba7653985360f
+2024.12.13 15:25:36 INFO  web[][o.s.s.p.ServerPluginManager] Deploy JavaScript/TypeScript/CSS Code Quality and Security / 10.18.0.28572 / 4ad3e466134f67e43b366ac2ab2e64de3503bb00
+2024.12.13 15:25:36 INFO  web[][o.s.s.p.ServerPluginManager] Deploy Kotlin Code Quality and Security / 2.21.0.5736 / fd8ef1923e353b073d9d61b79e1c4e1dfa9958db
+2024.12.13 15:25:36 INFO  web[][o.s.s.p.ServerPluginManager] Deploy PHP Code Quality and Security / 3.40.0.12590 / null
+2024.12.13 15:25:36 INFO  web[][o.s.s.p.ServerPluginManager] Deploy Python Code Quality and Security / 4.24.0.18631 / 1c8f65d137298c0650e6718d4aac7a0e62086831
+2024.12.13 15:25:36 INFO  web[][o.s.s.p.ServerPluginManager] Deploy Ruby Code Quality and Security / 1.18.0.234 / 1f01fec0f8f7f5dc1b81463c09c41099674e04c0
+2024.12.13 15:25:36 INFO  web[][o.s.s.p.ServerPluginManager] Deploy Scala Code Quality and Security / 1.18.0.266 / 74ab5c801fc5876ffde218d96e74e87f43efee85
+2024.12.13 15:25:36 INFO  web[][o.s.s.p.ServerPluginManager] Deploy Text Code Quality and Security / 2.19.0.4883 / null
+2024.12.13 15:25:36 INFO  web[][o.s.s.p.ServerPluginManager] Deploy VB.NET Code Quality and Security / 10.3.0.106239 / d03cce2708b983694c343d86111fabaf9073721c
+2024.12.13 15:25:36 INFO  web[][o.s.s.p.ServerPluginManager] Deploy XML Code Quality and Security / 2.12.0.5749 / 67cf0668dd25562b98d230d08013e9f08861f79a
+2024.12.13 15:25:40 INFO  web[][o.s.s.p.d.m.c.PostgresCharsetHandler] Verify that database charset supports UTF8
+2024.12.13 15:25:40 INFO  web[][o.s.s.e.EsClientProvider] Connected to local Elasticsearch: [http://localhost:9001]
+2024.12.13 15:25:41 INFO  web[][o.s.s.p.d.m.AutoDbMigration] Automatically perform DB migration on fresh install
+2024.12.13 15:25:41 INFO  web[][DbMigrations] Executing 175 DB migrations...
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 1/175 #1 'Create initial schema'...
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 1/175 #1 'Create initial schema': success | time=603ms
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 2/175 #2 'Populate initial schema'...
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 2/175 #2 'Populate initial schema': success | time=39ms
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 3/175 #100000 'Remove orphan rules in Quality Profiles'...
+2024.12.13 15:25:41 INFO  web[][o.s.s.p.d.m.s.MassUpdate] 0 rows processed (0 items/sec)
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 3/175 #100000 'Remove orphan rules in Quality Profiles': success | time=7ms
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 4/175 #100001 'Drop index 'projects_module_uuid' in the 'Components' table'...
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 4/175 #100001 'Drop index 'projects_module_uuid' in the 'Components' table': success | time=10ms
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 5/175 #100002 'Drop column 'module_uuid' in the 'Components' table'...
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 5/175 #100002 'Drop column 'module_uuid' in the 'Components' table': success | time=9ms
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 6/175 #100003 'Drop column 'module_uuid_path' in the 'Components' table'...
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 6/175 #100003 'Drop column 'module_uuid_path' in the 'Components' table': success | time=7ms
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 7/175 #100004 'Drop column 'b_module_uuid' in the 'Components' table'...
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 7/175 #100004 'Drop column 'b_module_uuid' in the 'Components' table': success | time=21ms
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 8/175 #100005 'Drop column 'b_module_uuid_path' in the 'Components' table'...
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 8/175 #100005 'Drop column 'b_module_uuid_path' in the 'Components' table': success | time=9ms
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 9/175 #100006 'Drop index 'projects_root_uuid' in the 'Components' table'...
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 9/175 #100006 'Drop index 'projects_root_uuid' in the 'Components' table': success | time=6ms
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 10/175 #100007 'Drop column 'root_uuid' in the 'Components' table'...
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 10/175 #100007 'Drop column 'root_uuid' in the 'Components' table': success | time=5ms
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 11/175 #100008 'Update value of 'user_local' in the 'users' table'...
+2024.12.13 15:25:41 INFO  web[][o.s.s.p.d.m.s.MassUpdate] 0 rows processed (0 items/sec)
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 11/175 #100008 'Update value of 'user_local' in the 'users' table': success | time=4ms
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 12/175 #100009 'Make column 'user_local' not nullable in the 'users' table'...
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 12/175 #100009 'Make column 'user_local' not nullable in the 'users' table': success | time=6ms
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 13/175 #100010 'Create 'scim_groups' table'...
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 13/175 #100010 'Create 'scim_groups' table': success | time=8ms
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 14/175 #100011 'Create unique index on scim_groups.group_uuid'...
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 14/175 #100011 'Create unique index on scim_groups.group_uuid': success | time=8ms
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 15/175 #100012 'Log a warning message if 'sonar.scim.enabled' is used'...
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 15/175 #100012 'Log a warning message if 'sonar.scim.enabled' is used': success | time=5ms
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 16/175 #100013 'Drop 'sonar.scim.enabled' property'...
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 16/175 #100013 'Drop 'sonar.scim.enabled' property': success | time=2ms
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 17/175 #100014 'Drop any SCIM User provisioning, turning all users local'...
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 17/175 #100014 'Drop any SCIM User provisioning, turning all users local': success | time=3ms
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 18/175 #100015 'Add ncloc to 'Projects' table'...
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 18/175 #100015 'Add ncloc to 'Projects' table': success | time=9ms
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 19/175 #100016 'Populate ncloc in 'Projects' table'...
+2024.12.13 15:25:41 INFO  web[][o.s.s.p.d.m.s.MassUpdate] 0 rows processed (0 items/sec)
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 19/175 #100016 'Populate ncloc in 'Projects' table': success | time=11ms
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 20/175 #101000 'Add 'scm_accounts' table'...
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 20/175 #101000 'Add 'scm_accounts' table': success | time=6ms
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 21/175 #101001 'Migrate scm accounts from 'users' to 'scm_accounts' table'...
+2024.12.13 15:25:41 INFO  web[][o.s.s.p.d.m.s.MassRowSplitter] 1 rows processed (0 items/sec)
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 21/175 #101001 'Migrate scm accounts from 'users' to 'scm_accounts' table': success | time=14ms
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 22/175 #101002 'Add index on 'scm_accounts.scm_account''...
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 22/175 #101002 'Add index on 'scm_accounts.scm_account'': success | time=21ms
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 23/175 #101003 'Add index on 'users.email''...
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 23/175 #101003 'Add index on 'users.email'': success | time=19ms
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 24/175 #101004 'Drop 'scm_accounts' column in 'users' table'...
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 24/175 #101004 'Drop 'scm_accounts' column in 'users' table': success | time=8ms
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 25/175 #101005 'Add column 'is_main' to 'project_branches' table'...
+2024.12.13 15:25:41 INFO  web[][DbMigrations] 25/175 #101005 'Add column 'is_main' to 'project_branches' table': success | time=7ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 26/175 #101006 'Update value of 'is_main' in 'project_branches' table'...
+2024.12.13 15:25:42 INFO  web[][o.s.s.p.d.m.s.MassUpdate] 0 rows processed (0 items/sec)
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 26/175 #101006 'Update value of 'is_main' in 'project_branches' table': success | time=5ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 27/175 #101007 'Alter column 'is_main' in 'project_branches' table - make it not nullable'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 27/175 #101007 'Alter column 'is_main' in 'project_branches' table - make it not nullable': success | time=3ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 28/175 #101008 'Increase size of 'internal_properties.kee' from 20 to 40 characters'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 28/175 #101008 'Increase size of 'internal_properties.kee' from 20 to 40 characters': success | time=2ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 29/175 #101009 'Create column 'project_uuid' in 'user_tokens'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 29/175 #101009 'Create column 'project_uuid' in 'user_tokens': success | time=15ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 30/175 #101010 'Remove user tokens linked to unexistent project'...
+2024.12.13 15:25:42 INFO  web[][o.s.s.p.d.m.s.MassUpdate] 0 rows processed (0 items/sec)
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 30/175 #101010 'Remove user tokens linked to unexistent project': success | time=9ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 31/175 #101011 'Populate 'project_key' in 'user_tokens''...
+2024.12.13 15:25:42 INFO  web[][o.s.s.p.d.m.s.MassUpdate] 0 rows processed (0 items/sec)
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 31/175 #101011 'Populate 'project_key' in 'user_tokens'': success | time=21ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 32/175 #101012 'Drop column 'project_key' in 'user_tokens'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 32/175 #101012 'Drop column 'project_key' in 'user_tokens': success | time=8ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 33/175 #101013 'Increase size of 'ce_queue.task_type' from 15 to 40 characters'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 33/175 #101013 'Increase size of 'ce_queue.task_type' from 15 to 40 characters': success | time=3ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 34/175 #101014 'Increase size of 'ce_activity.task_type' from 15 to 40 characters'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 34/175 #101014 'Increase size of 'ce_activity.task_type' from 15 to 40 characters': success | time=4ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 35/175 #101015 'Add 'external_groups' table.'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 35/175 #101015 'Add 'external_groups' table.': success | time=14ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 36/175 #101016 'Add index on 'external_groups(external_identity_provider, external_id).'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 36/175 #101016 'Add index on 'external_groups(external_identity_provider, external_id).': success | time=30ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 37/175 #101017 'Add 'code_variants' column in 'issues' table'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 37/175 #101017 'Add 'code_variants' column in 'issues' table': success | time=13ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 38/175 #101018 'Fix different uuids for subportfolios'...
+2024.12.13 15:25:42 INFO  web[][o.s.s.p.d.m.s.MassUpdate] 0 rows processed (0 items/sec)
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 38/175 #101018 'Fix different uuids for subportfolios': success | time=17ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 39/175 #101019 'Add report_schedules table'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 39/175 #101019 'Add report_schedules table': success | time=12ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 40/175 #101020 'Add report_subscriptions table'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 40/175 #101020 'Add report_subscriptions table': success | time=10ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 41/175 #101021 'Add report_schedules unique index'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 41/175 #101021 'Add report_schedules unique index': success | time=12ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 42/175 #101022 'Add report_subscriptions unique index'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 42/175 #101022 'Add report_subscriptions unique index': success | time=27ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 43/175 #101023 'Rename column 'component_uuid' to 'entity_uuid' in the 'properties' table'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 43/175 #101023 'Rename column 'component_uuid' to 'entity_uuid' in the 'properties' table': success | time=11ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 44/175 #101024 'Populate report_schedules table'...
+2024.12.13 15:25:42 INFO  web[][o.s.s.p.d.m.s.MassUpdate] 0 rows processed (0 items/sec)
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 44/175 #101024 'Populate report_schedules table': success | time=6ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 45/175 #101025 'Populate report_subscriptions table'...
+2024.12.13 15:25:42 INFO  web[][o.s.s.p.d.m.s.MassUpdate] 0 rows processed (0 items/sec)
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 45/175 #101025 'Populate report_subscriptions table': success | time=7ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 46/175 #101026 'Remove report properties'...
+2024.12.13 15:25:42 INFO  web[][o.s.s.p.d.m.s.MassUpdate] 0 rows processed (0 items/sec)
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 46/175 #101026 'Remove report properties': success | time=7ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 47/175 #102000 'Rename 'component_uuid' in 'user_roles' table to 'entity_uuid''...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 47/175 #102000 'Rename 'component_uuid' in 'user_roles' table to 'entity_uuid'': success | time=12ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 48/175 #102001 'Rename 'component_uuid' in 'group_roles' table to 'entity_uuid''...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 48/175 #102001 'Rename 'component_uuid' in 'group_roles' table to 'entity_uuid'': success | time=24ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 49/175 #102002 'Drop index 'group_roles_component_uuid' in 'group_roles''...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 49/175 #102002 'Drop index 'group_roles_component_uuid' in 'group_roles'': success | time=9ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 50/175 #102003 'Create index 'entity_uuid_user_roles' in 'group_roles' table'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 50/175 #102003 'Create index 'entity_uuid_user_roles' in 'group_roles' table': success | time=15ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 51/175 #102004 'Drop index 'user_roles_component_uuid' in 'user_roles' table'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 51/175 #102004 'Drop index 'user_roles_component_uuid' in 'user_roles' table': success | time=6ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 52/175 #102005 'Create index 'user_roles_entity_uuid' in 'user_roles''...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 52/175 #102005 'Create index 'user_roles_entity_uuid' in 'user_roles'': success | time=12ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 53/175 #102006 'Drop index 'ce_activity_component' in 'ce_activity''...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 53/175 #102006 'Drop index 'ce_activity_component' in 'ce_activity'': success | time=14ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 54/175 #102007 'Rename 'main_component_uuid' in 'ce_activity' table to 'entity_uuid''...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 54/175 #102007 'Rename 'main_component_uuid' in 'ce_activity' table to 'entity_uuid'': success | time=19ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 55/175 #102008 'Create index 'ce_activity_entity_uuid' in 'ce_activity' table''...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 55/175 #102008 'Create index 'ce_activity_entity_uuid' in 'ce_activity' table'': success | time=8ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 56/175 #102009 'Drop index 'ce_queue_main_component' in 'ce_queue' table'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 56/175 #102009 'Drop index 'ce_queue_main_component' in 'ce_queue' table': success | time=10ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 57/175 #102010 'Rename 'main_component_uuid' in 'ce_queue' table to 'entity_uuid''...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 57/175 #102010 'Rename 'main_component_uuid' in 'ce_queue' table to 'entity_uuid'': success | time=11ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 58/175 #102011 'Create index 'ce_queue_entity_uuid' in 'ce_queue' table'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 58/175 #102011 'Create index 'ce_queue_entity_uuid' in 'ce_queue' table': success | time=7ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 59/175 #102012 'Drop 'project_mappings' table'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 59/175 #102012 'Drop 'project_mappings' table': success | time=7ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 60/175 #102013 'Drop index on 'components.main_branch_project_uuid'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 60/175 #102013 'Drop index on 'components.main_branch_project_uuid': success | time=6ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 61/175 #102014 'Drop column 'main_branch_project_uuid' in the components table'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 61/175 #102014 'Drop column 'main_branch_project_uuid' in the components table': success | time=12ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 62/175 #102015 'Drop index 'component_uuid' in 'webhook_deliveries' table'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 62/175 #102015 'Drop index 'component_uuid' in 'webhook_deliveries' table': success | time=13ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 63/175 #102016 'Rename 'component_uuid' in 'webhook_deliveries' table to 'project_uuid''...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 63/175 #102016 'Rename 'component_uuid' in 'webhook_deliveries' table to 'project_uuid'': success | time=16ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 64/175 #102018 'Drop index 'component_uuid' in 'snapshots' table'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 64/175 #102018 'Drop index 'component_uuid' in 'snapshots' table': success | time=11ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 65/175 #102019 'Rename 'component_uuid' in 'snapshots' table to 'root_component_uuid''...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 65/175 #102019 'Rename 'component_uuid' in 'snapshots' table to 'root_component_uuid'': success | time=11ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 66/175 #102020 'Create index 'snapshots_root_component_uuid' in 'snapshots' table'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 66/175 #102020 'Create index 'snapshots_root_component_uuid' in 'snapshots' table': success | time=8ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 67/175 #102021 'Create 'purged' column in 'snapshots' table'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 67/175 #102021 'Create 'purged' column in 'snapshots' table': success | time=75ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 68/175 #102022 'Populate 'purged' column in 'snapshots' table'...
+2024.12.13 15:25:42 INFO  web[][o.s.s.p.d.m.s.MassUpdate] 0 rows processed (0 items/sec)
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 68/175 #102022 'Populate 'purged' column in 'snapshots' table': success | time=142ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 69/175 #102023 'Make 'purged' column not nullable in 'snapshots' table'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 69/175 #102023 'Make 'purged' column not nullable in 'snapshots' table': success | time=158ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 70/175 #102024 'Drop 'purge_status' column in 'snapshots' table'...
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 70/175 #102024 'Drop 'purge_status' column in 'snapshots' table': success | time=22ms
+2024.12.13 15:25:42 INFO  web[][DbMigrations] 71/175 #102025 'Rename 'build_date' in 'snapshots' table to 'analysis_date'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 71/175 #102025 'Rename 'build_date' in 'snapshots' table to 'analysis_date': success | time=64ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 72/175 #102030 'Create table 'anticipated_transitions''...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 72/175 #102030 'Create table 'anticipated_transitions'': success | time=42ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 73/175 #102031 'Increase size of 'ce_queue.is_last_key' from 55 to 80 characters'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 73/175 #102031 'Increase size of 'ce_queue.is_last_key' from 55 to 80 characters': success | time=27ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 74/175 #102032 'Increase size of 'ce_queue.main_is_last_key' from 55 to 80 characters'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 74/175 #102032 'Increase size of 'ce_queue.main_is_last_key' from 55 to 80 characters': success | time=15ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 75/175 #102033 'Add column 'clean_code_attribute' in 'rules' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 75/175 #102033 'Add column 'clean_code_attribute' in 'rules' table': success | time=22ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 76/175 #102034 'Populate 'clean_code_attribute' column in 'rules' table'...
+2024.12.13 15:25:43 INFO  web[][o.s.s.p.d.m.s.MassUpdate] 0 rows processed (0 items/sec)
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 76/175 #102034 'Populate 'clean_code_attribute' column in 'rules' table': success | time=6ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 77/175 #102036 'Create 'rules_default_impacts' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 77/175 #102036 'Create 'rules_default_impacts' table': success | time=8ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 78/175 #102037 'Create unique constraint index on 'rules_default_impacts' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 78/175 #102037 'Create unique constraint index on 'rules_default_impacts' table': success | time=6ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 79/175 #102038 'Create 'issues_impacts' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 79/175 #102038 'Create 'issues_impacts' table': success | time=8ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 80/175 #102039 'Create unique constraint index on 'issues_impacts' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 80/175 #102039 'Create unique constraint index on 'issues_impacts' table': success | time=10ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 81/175 #102040 'Populate default impacts for existing rules'...
+2024.12.13 15:25:43 INFO  web[][o.s.s.p.d.m.s.MassUpdate] 0 rows processed (0 items/sec)
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 81/175 #102040 'Populate default impacts for existing rules': success | time=5ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 82/175 #102041 'Fix sqale_index metric description in 'metrics' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 82/175 #102041 'Fix sqale_index metric description in 'metrics' table': success | time=3ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 83/175 #102042 'Create table 'github_orgs_groups''...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 83/175 #102042 'Create table 'github_orgs_groups'': success | time=10ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 84/175 #102043 'Create 'previous_non_compliant_value' in 'new_code_periods' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 84/175 #102043 'Create 'previous_non_compliant_value' in 'new_code_periods' table': success | time=25ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 85/175 #102044 'Update column 'value' and populate column 'previous_non_compliant_value' in 'new_code_periods' table'...
+2024.12.13 15:25:43 INFO  web[][o.s.s.p.d.m.s.MassUpdate] 0 rows processed (0 items/sec)
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 85/175 #102044 'Update column 'value' and populate column 'previous_non_compliant_value' in 'new_code_periods' table': success | time=13ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 86/175 #102045 'Alter 'project_uuid' in 'user_dismissed_messages' - make it nullable'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 86/175 #102045 'Alter 'project_uuid' in 'user_dismissed_messages' - make it nullable': success | time=6ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 87/175 #102046 'Create index 'project_branches_project_uuid' in 'project_branches' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 87/175 #102046 'Create index 'project_branches_project_uuid' in 'project_branches' table': success | time=11ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 88/175 #102047 'Drop index 'idx_wbhk_dlvrs_wbhk_uuid' in 'webhook_deliveries''...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 88/175 #102047 'Drop index 'idx_wbhk_dlvrs_wbhk_uuid' in 'webhook_deliveries'': success | time=5ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 89/175 #102048 'Create index 'wb_webhook_uuid_created_at' in 'webhook_deliveries''...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 89/175 #102048 'Create index 'wb_webhook_uuid_created_at' in 'webhook_deliveries'': success | time=36ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 90/175 #102049 'Drop index 'wd_project_uuid' in 'webhook_deliveries''...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 90/175 #102049 'Drop index 'wd_project_uuid' in 'webhook_deliveries'': success | time=18ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 91/175 #102050 'Create index 'wd_project_uuid_created_at' in 'webhook_deliveries''...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 91/175 #102050 'Create index 'wd_project_uuid_created_at' in 'webhook_deliveries'': success | time=10ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 92/175 #102051 'Drop index 'ce_task_uuid' in 'webhook_deliveries''...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 92/175 #102051 'Drop index 'ce_task_uuid' in 'webhook_deliveries'': success | time=6ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 93/175 #102052 'Create index 'wd_task_uuid_created_at' in 'webhook_deliveries''...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 93/175 #102052 'Create index 'wd_task_uuid_created_at' in 'webhook_deliveries'': success | time=6ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 94/175 #102053 'Create index 'wd_created_at' in 'webhook_deliveries''...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 94/175 #102053 'Create index 'wd_created_at' in 'webhook_deliveries'': success | time=11ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 95/175 #102054 'Insert property github.userConsentementForPermissionProvisioningRequired'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 95/175 #102054 'Insert property github.userConsentementForPermissionProvisioningRequired': success | time=5ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 96/175 #103000 'Set 'sonar.qualityProfiles.allowDisableInheritedRules' to false for upgraded instances'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 96/175 #103000 'Set 'sonar.qualityProfiles.allowDisableInheritedRules' to false for upgraded instances': success | time=6ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 97/175 #103001 'Add table 'github_perms_mapping''...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 97/175 #103001 'Add table 'github_perms_mapping'': success | time=12ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 98/175 #103002 'Create unique index on 'github_perms_mapping''...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 98/175 #103002 'Create unique index on 'github_perms_mapping'': success | time=7ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 99/175 #103003 'Add default mappings to 'github_perms_mapping''...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 99/175 #103003 'Add default mappings to 'github_perms_mapping'': success | time=10ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 100/175 #103004 'Add 'clean_code_attribute' column in 'issues' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 100/175 #103004 'Add 'clean_code_attribute' column in 'issues' table': success | time=6ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 101/175 #103005 'Add 'creation_method' column in 'projects' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 101/175 #103005 'Add 'creation_method' column in 'projects' table': success | time=6ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 102/175 #103006 'Populate 'creation_method' column in 'projects' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 102/175 #103006 'Populate 'creation_method' column in 'projects' table': success | time=2ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 103/175 #103007 'Make 'creation_method' column in 'projects' table non-nullable'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 103/175 #103007 'Make 'creation_method' column in 'projects' table non-nullable': success | time=5ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 104/175 #103008 'Add 'rule_changes_uuid' column in 'qprofile_changes''...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 104/175 #103008 'Add 'rule_changes_uuid' column in 'qprofile_changes'': success | time=13ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 105/175 #103009 'Create table 'rule_changes''...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 105/175 #103009 'Create table 'rule_changes'': success | time=7ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 106/175 #103010 'Create table 'rule_impact_changes''...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 106/175 #103010 'Create table 'rule_impact_changes'': success | time=5ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 107/175 #103011 'Create index for 'rule_impact_changes''...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 107/175 #103011 'Create index for 'rule_impact_changes'': success | time=7ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 108/175 #103012 'Add 'sq_version' column in 'qprofile_changes' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 108/175 #103012 'Add 'sq_version' column in 'qprofile_changes' table': success | time=12ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 109/175 #103013 'Deduplicate potential records in 'properties' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 109/175 #103013 'Deduplicate potential records in 'properties' table': success | time=27ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 110/175 #103014 'Create unique index to 'properties' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 110/175 #103014 'Create unique index to 'properties' table': success | time=9ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 111/175 #104000 'Delete redundant Failed Alerts for Applications'...
+2024.12.13 15:25:43 INFO  web[][o.s.s.p.d.m.s.MassUpdate] 0 rows processed (0 items/sec)
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 111/175 #104000 'Delete redundant Failed Alerts for Applications': success | time=6ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 112/175 #104001 'Rename metric 'wont_fix_issues' to 'accepted_issues''...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 112/175 #104001 'Rename metric 'wont_fix_issues' to 'accepted_issues'': success | time=3ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 113/175 #104002 'Create table 'rules_tags''...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 113/175 #104002 'Create table 'rules_tags'': success | time=15ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 114/175 #104003 'Populate 'rule_tags' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 114/175 #104003 'Populate 'rule_tags' table': success | time=6ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 115/175 #104004 'Drop column 'tags' in the 'rules' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 115/175 #104004 'Drop column 'tags' in the 'rules' table': success | time=7ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 116/175 #104005 'Drop column 'system_tags' in the 'rules' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 116/175 #104005 'Drop column 'system_tags' in the 'rules' table': success | time=4ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 117/175 #104006 'Add 'uuid' column to 'groups_users''...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 117/175 #104006 'Add 'uuid' column to 'groups_users'': success | time=7ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 118/175 #104007 'Populate 'uuid' column in 'groups_users''...
+2024.12.13 15:25:43 INFO  web[][o.s.s.p.d.m.s.MassUpdate] 2 rows processed (0 items/sec)
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 118/175 #104007 'Populate 'uuid' column in 'groups_users'': success | time=4ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 119/175 #104008 'Make 'uuid' column in 'groups_users' table non-nullable'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 119/175 #104008 'Make 'uuid' column in 'groups_users' table non-nullable': success | time=2ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 120/175 #104009 'Create primary key on 'groups_users.uuid''...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 120/175 #104009 'Create primary key on 'groups_users.uuid'': success | time=11ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 121/175 #104010 'Set nulls in 'clean_code_attribute' column of 'rules' table for security hotspots'...
+2024.12.13 15:25:43 INFO  web[][o.s.s.p.d.m.s.MassUpdate] 0 rows processed (0 items/sec)
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 121/175 #104010 'Set nulls in 'clean_code_attribute' column of 'rules' table for security hotspots': success | time=3ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 122/175 #104011 'Create 'issues_fixed' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 122/175 #104011 'Create 'issues_fixed' table': success | time=6ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 123/175 #105000 'Drop constraint on 'uuid' from 'issues_impacts' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 123/175 #105000 'Drop constraint on 'uuid' from 'issues_impacts' table': success | time=18ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 124/175 #105001 'Drop constraint on 'uuid' from 'rules_default_impacts' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 124/175 #105001 'Drop constraint on 'uuid' from 'rules_default_impacts' table': success | time=9ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 125/175 #105002 'Drop column 'uuid' from 'issues_impacts' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 125/175 #105002 'Drop column 'uuid' from 'issues_impacts' table': success | time=6ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 126/175 #105003 'Drop column 'uuid' from 'rules_default_impacts' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 126/175 #105003 'Drop column 'uuid' from 'rules_default_impacts' table': success | time=7ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 127/175 #105004 'Create primary key on 'issues_impacts' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 127/175 #105004 'Create primary key on 'issues_impacts' table': success | time=7ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 128/175 #105005 'Create primary key on 'rules_default_impacts' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 128/175 #105005 'Create primary key on 'rules_default_impacts' table': success | time=6ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 129/175 #105006 'Delete 'languageSpecificParameters' property set from 'properties' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 129/175 #105006 'Delete 'languageSpecificParameters' property set from 'properties' table': success | time=3ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 130/175 #106000 'Add 'prioritized_rule' column to 'issues' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 130/175 #106000 'Add 'prioritized_rule' column to 'issues' table': success | time=5ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 131/175 #106001 'Add 'prioritized_rule' column to 'active_rules' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 131/175 #106001 'Add 'prioritized_rule' column to 'active_rules' table': success | time=5ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 132/175 #106002 'Ensure 'value' column is resized to 400 in 'rule_tags' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 132/175 #106002 'Ensure 'value' column is resized to 400 in 'rule_tags' table': success | time=2ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 133/175 #107000 'Create 'telemetry_metrics_sent' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 133/175 #107000 'Create 'telemetry_metrics_sent' table': success | time=4ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 134/175 #107001 'sonar.auth.gitlab.userConsentForPermissionProvisioningRequired'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 134/175 #107001 'sonar.auth.gitlab.userConsentForPermissionProvisioningRequired': success | time=2ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 135/175 #107002 'Migrate SMTP configuration into internal_properties'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 135/175 #107002 'Migrate SMTP configuration into internal_properties': success | time=6ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 136/175 #107003 'Drop 'github_perms_mapping' table if exists and 'devops_perms_mapping' table exists'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 136/175 #107003 'Drop 'github_perms_mapping' table if exists and 'devops_perms_mapping' table exists': success | time=8ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 137/175 #107004 'Rename 'github_perms_mapping' table to 'devops_perms_mapping''...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 137/175 #107004 'Rename 'github_perms_mapping' table to 'devops_perms_mapping'': success | time=6ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 138/175 #107005 'Rename 'github_role' column to 'devops_platform_role' in devops_perms_mapping'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 138/175 #107005 'Rename 'github_role' column to 'devops_platform_role' in devops_perms_mapping': success | time=8ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 139/175 #107006 'Add 'devops_platform' column to 'devops_perms_mapping' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 139/175 #107006 'Add 'devops_platform' column to 'devops_perms_mapping' table': success | time=36ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 140/175 #107007 'Drop constraint on 'uuid' for 'devops_perms_mapping' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 140/175 #107007 'Drop constraint on 'uuid' for 'devops_perms_mapping' table': success | time=8ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 141/175 #107008 'Create primary key on 'devops_perms_mapping.uuid''...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 141/175 #107008 'Create primary key on 'devops_perms_mapping.uuid'': success | time=15ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 142/175 #107009 'Drop index 'uniq_github_perm_mappings' in the 'devops_perms_mapping' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 142/175 #107009 'Drop index 'uniq_github_perm_mappings' in the 'devops_perms_mapping' table': success | time=10ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 143/175 #107010 'Create uniq index on 'devops_perms_mapping' table for columns 'devops_platform_role', 'sonarqube_permission' and 'devops_platform''...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 143/175 #107010 'Create uniq index on 'devops_perms_mapping' table for columns 'devops_platform_role', 'sonarqube_permission' and 'devops_platform'': success | time=16ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 144/175 #107011 'Add default permissions for GitLab in 'devops_perms_mapping''...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 144/175 #107011 'Add default permissions for GitLab in 'devops_perms_mapping'': success | time=21ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 145/175 #107012 'Create 'cves' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 145/175 #107012 'Create 'cves' table': success | time=18ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 146/175 #107013 'Create 'cve_cwe' table'...
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 146/175 #107013 'Create 'cve_cwe' table': success | time=27ms
+2024.12.13 15:25:43 INFO  web[][DbMigrations] 147/175 #107014 'Create 'issues_dependency' table'...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 147/175 #107014 'Create 'issues_dependency' table': success | time=16ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 148/175 #107015 'Add 'ai_code_assurance' column to 'projects' table'...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 148/175 #107015 'Add 'ai_code_assurance' column to 'projects' table': success | time=17ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 149/175 #108000 'Create 'measures' table'...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 149/175 #108000 'Create 'measures' table': success | time=20ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 150/175 #108001 'Add 'measures_migrated' column on 'project_branches' table'...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 150/175 #108001 'Add 'measures_migrated' column on 'project_branches' table': success | time=13ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 151/175 #108002 'Create index on 'project_branches.measures_migrated''...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 151/175 #108002 'Create index on 'project_branches.measures_migrated'': success | time=13ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 152/175 #108003 'Migrate the content of 'live_measures' to 'measures' for branches'...
+2024.12.13 15:25:44 INFO  web[][o.s.s.p.d.m.v.v.AbstractMigrateLiveMeasuresToMeasures] Starting the migration of 0 branchs (total number of branchs: 0)
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 152/175 #108003 'Migrate the content of 'live_measures' to 'measures' for branches': success | time=15ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 153/175 #108004 'Add 'measures_migrated' column on 'portfolios' table'...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 153/175 #108004 'Add 'measures_migrated' column on 'portfolios' table': success | time=20ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 154/175 #108005 'Create index on 'portfolios.measures_migrated''...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 154/175 #108005 'Create index on 'portfolios.measures_migrated'': success | time=10ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 155/175 #108006 'Migrate the content of 'live_measures' to 'measures' for portfolios'...
+2024.12.13 15:25:44 INFO  web[][o.s.s.p.d.m.v.v.AbstractMigrateLiveMeasuresToMeasures] Starting the migration of 0 portfolios (total number of portfolios: 0)
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 155/175 #108006 'Migrate the content of 'live_measures' to 'measures' for portfolios': success | time=9ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 156/175 #108007 'Create primary key on 'measures' table'...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 156/175 #108007 'Create primary key on 'measures' table': success | time=36ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 157/175 #108008 'Create index on column 'branch_uuid' in 'measures' table'...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 157/175 #108008 'Create index on column 'branch_uuid' in 'measures' table': success | time=13ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 158/175 #108009 'Drop column 'from_hotspot' in the 'issues' table'...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 158/175 #108009 'Drop column 'from_hotspot' in the 'issues' table': success | time=5ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 159/175 #108010 'Drop 'live_measures' table'...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 159/175 #108010 'Drop 'live_measures' table': success | time=8ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 160/175 #108011 'Drop index on 'portfolios.measures_migrated''...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 160/175 #108011 'Drop index on 'portfolios.measures_migrated'': success | time=4ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 161/175 #108012 'Drop 'measures_migrated' column on 'portfolios' table'...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 161/175 #108012 'Drop 'measures_migrated' column on 'portfolios' table': success | time=10ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 162/175 #108013 'Drop index on 'project_branches.measures_migrated''...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 162/175 #108013 'Drop index on 'project_branches.measures_migrated'': success | time=9ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 163/175 #108014 'Drop 'measures_migrated' column on 'project_branches' table'...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 163/175 #108014 'Drop 'measures_migrated' column on 'project_branches' table': success | time=9ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 164/175 #108015 'Add column 'impacts' in 'active_rules' table'...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 164/175 #108015 'Add column 'impacts' in 'active_rules' table': success | time=7ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 165/175 #108016 'Create 'project_dependencies' table'...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 165/175 #108016 'Create 'project_dependencies' table': success | time=10ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 166/175 #108017 'Enable specific MQR mode'...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 166/175 #108017 'Enable specific MQR mode': success | time=6ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 167/175 #108018 'Make columns 'published_at' and 'last_modified_at' nullable on the 'cves' table'...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 167/175 #108018 'Make columns 'published_at' and 'last_modified_at' nullable on the 'cves' table': success | time=11ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 168/175 #108019 'Delete Software Quality ratings from project_measures'...
+2024.12.13 15:25:44 INFO  web[][o.s.s.p.d.m.s.MassUpdate] 0 rows processed (0 items/sec)
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 168/175 #108019 'Delete Software Quality ratings from project_measures': success | time=273ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 169/175 #108020 'Create new software quality metrics'...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 169/175 #108020 'Create new software quality metrics': success | time=58ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 170/175 #108021 'Migrate deprecated project_measures to replacement metrics'...
+2024.12.13 15:25:44 INFO  web[][o.s.s.p.d.m.s.MassUpdate] 0 rows processed (0 items/sec)
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 170/175 #108021 'Migrate deprecated project_measures to replacement metrics': success | time=10ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 171/175 #108022 'Add 'manual_severity' column in 'issues_impacts' table'...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 171/175 #108022 'Add 'manual_severity' column in 'issues_impacts' table': success | time=11ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 172/175 #108023 'Add 'ai_code_fix_enabled' column to 'projects' table'...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 172/175 #108023 'Add 'ai_code_fix_enabled' column to 'projects' table': success | time=19ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 173/175 #108024 'Migrate boolean values of 'sonar.ai.suggestions.enabled' property to new enum values'...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 173/175 #108024 'Migrate boolean values of 'sonar.ai.suggestions.enabled' property to new enum values': success | time=8ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 174/175 #108025 'Add 'ai_code_supported' column in 'quality_gates' table'...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 174/175 #108025 'Add 'ai_code_supported' column in 'quality_gates' table': success | time=14ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 175/175 #108026 'Rename 'ai_code_assurance' column in 'projects' table to 'contains_ai_code'...
+2024.12.13 15:25:44 INFO  web[][DbMigrations] 175/175 #108026 'Rename 'ai_code_assurance' column in 'projects' table to 'contains_ai_code': success | time=17ms
+2024.12.13 15:25:44 INFO  web[][DbMigrations] Executed 175/175 DB migrations: success | time=3641ms
+2024.12.13 15:25:44 INFO  web[][o.s.s.p.Platform] Database has been automatically updated
+2024.12.13 15:25:44 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.platform.web.WebServiceFilter@609b041c [pattern=UrlPattern{inclusions=[/api/system/migrate_db.*, ...], exclusions=[/api/components/update_key, ...]}]
+2024.12.13 15:25:45 INFO  web[][o.s.s.p.DetectPluginChange] Detect plugin changes
+2024.12.13 15:25:47 INFO  web[][o.h.v.i.util.Version] HV000001: Hibernate Validator null
+2024.12.13 15:25:47 INFO  web[][o.s.s.e.IndexCreator] Create index [metadatas]
+2024.12.13 15:25:48 INFO  web[][o.s.s.e.IndexCreator] Create mapping metadatas
+2024.12.13 15:25:49 INFO  web[][o.s.s.e.IndexCreator] Create index [components]
+2024.12.13 15:25:50 INFO  web[][o.s.s.e.IndexCreator] Create mapping components
+2024.12.13 15:25:50 INFO  web[][o.s.s.e.IndexCreator] Create index [projectmeasures]
+2024.12.13 15:25:50 INFO  web[][o.s.s.e.IndexCreator] Create mapping projectmeasures
+2024.12.13 15:25:50 INFO  web[][o.s.s.e.IndexCreator] Create index [rules]
+2024.12.13 15:25:51 INFO  web[][o.s.s.e.IndexCreator] Create mapping rules
+2024.12.13 15:25:51 INFO  web[][o.s.s.e.IndexCreator] Create index [issues]
+2024.12.13 15:25:51 INFO  web[][o.s.s.e.IndexCreator] Create mapping issues
+2024.12.13 15:25:52 INFO  web[][o.s.s.e.IndexCreator] Create index [views]
+2024.12.13 15:25:52 INFO  web[][o.s.s.e.IndexCreator] Create mapping views
+2024.12.13 15:25:52 INFO  web[][o.s.s.s.LogServerId] Server ID: 243B8A4D-AZPAoDWKBg_iEEIimt7m
+2024.12.13 15:25:52 WARN  web[][o.s.s.a.LogOAuthWarning] For security reasons, OAuth authentication should use HTTPS. You should set the property 'Administration > Configuration > Server base URL' to an HTTPS URL.
+2024.12.13 15:25:52 INFO  web[][o.s.s.p.UpdateCenterClient] Update center: https://downloads.sonarsource.com/sonarqube/update/update-center.properties
+2024.12.13 15:25:54 INFO  web[][o.s.s.a.p.ExpiredSessionsCleaner] Purge of expired session tokens has removed 0 elements
+2024.12.13 15:25:54 INFO  web[][o.s.s.a.p.ExpiredSessionsCleaner] Purge of expired SAML message ids has removed 0 elements
+2024.12.13 15:25:54 INFO  web[][o.s.s.n.NotificationDaemon] Notification service started (delay 60 sec.)
+2024.12.13 15:25:54 INFO  web[][o.s.t.TelemetryDaemon] Sharing of SonarQube statistics is enabled.
+2024.12.13 15:25:54 INFO  web[][o.s.s.r.r.RulesRegistrant] Register rules
+2024.12.13 15:26:16 INFO  web[][o.s.s.s.RegisterMetrics] Register metrics
+2024.12.13 15:26:17 INFO  web[][o.s.s.q.RegisterQualityGates] Quality Gate's conditions of [Sonar way] has been updated
+2024.12.13 15:26:17 INFO  web[][o.s.s.q.b.BuiltInQProfileRepositoryImpl] Load quality profiles
+2024.12.13 15:26:17 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register quality profiles
+2024.12.13 15:26:17 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile kubernetes/Sonar way
+2024.12.13 15:26:17 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile css/Sonar way
+2024.12.13 15:26:17 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile scala/Sonar way
+2024.12.13 15:26:17 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile jsp/Sonar way
+2024.12.13 15:26:17 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile js/Sonar way
+2024.12.13 15:26:17 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile py/Sonar way
+2024.12.13 15:26:18 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile docker/Sonar way
+2024.12.13 15:26:18 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile java/Sonar way
+2024.12.13 15:26:18 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile web/Sonar way
+2024.12.13 15:26:18 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile xml/Sonar way
+2024.12.13 15:26:18 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile flex/Sonar way
+2024.12.13 15:26:18 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile json/Sonar way
+2024.12.13 15:26:18 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile ipynb/Sonar way
+2024.12.13 15:26:19 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile text/Sonar way
+2024.12.13 15:26:19 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile vbnet/Sonar way
+2024.12.13 15:26:19 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile cloudformation/Sonar way
+2024.12.13 15:26:19 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile yaml/Sonar way
+2024.12.13 15:26:19 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile kotlin/Sonar way
+2024.12.13 15:26:19 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile go/Sonar way
+2024.12.13 15:26:19 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile secrets/Sonar way
+2024.12.13 15:26:19 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile ruby/Sonar way
+2024.12.13 15:26:19 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile cs/Sonar way
+2024.12.13 15:26:20 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile php/Sonar way
+2024.12.13 15:26:20 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile terraform/Sonar way
+2024.12.13 15:26:20 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile azureresourcemanager/Sonar way
+2024.12.13 15:26:20 INFO  web[][o.s.s.q.RegisterQualityProfiles] Register profile ts/Sonar way
+2024.12.13 15:26:20 INFO  web[][o.s.s.s.RegisterPermissionTemplates] Register permission templates
+2024.12.13 15:26:20 INFO  web[][o.s.s.s.RenameDeprecatedPropertyKeys] Rename deprecated property keys
+2024.12.13 15:26:20 INFO  web[][o.s.s.s.RegisterPlugins] Register plugins
+2024.12.13 15:26:20 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.platform.web.SonarLintConnectionFilter@594574f0 [pattern=UrlPattern{inclusions=[/api/*], exclusions=[/api/v2/*]}]
+2024.12.13 15:26:20 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.platform.web.WebServiceFilter@10cfbed1 [pattern=UrlPattern{inclusions=[/api/issues/delete_comment.*, ...], exclusions=[/api/authentication/login.*, ...]}]
+2024.12.13 15:26:20 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.platform.web.WebServiceReroutingFilter@7e68e2c [pattern=UrlPattern{inclusions=[/api/components/update_key, ...], exclusions=[]}]
+2024.12.13 15:26:20 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.authentication.DefaultAdminCredentialsVerifierFilter@406a12f9 [pattern=UrlPattern{inclusions=[/*], exclusions=[*.css, ...]}]
+2024.12.13 15:26:20 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.authentication.InitFilter@327a0cf0 [pattern=UrlPattern{inclusions=[/sessions/init/*], exclusions=[]}]
+2024.12.13 15:26:20 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.authentication.SamlValidationRedirectionFilter@5f2e1558 [pattern=UrlPattern{inclusions=[/oauth2/callback/saml], exclusions=[]}]
+2024.12.13 15:26:21 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.authentication.OAuth2CallbackFilter@6c8a777f [pattern=UrlPattern{inclusions=[/oauth2/callback/*], exclusions=[]}]
+2024.12.13 15:26:21 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.authentication.ResetPasswordFilter@7c674dcd [pattern=UrlPattern{inclusions=[/*], exclusions=[*.css, ...]}]
+2024.12.13 15:26:21 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.authentication.ws.LoginAction@2f853be [pattern=UrlPattern{inclusions=[/api/authentication/login], exclusions=[]}]
+2024.12.13 15:26:21 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.authentication.ws.LogoutAction@4baf5232 [pattern=UrlPattern{inclusions=[/api/authentication/logout], exclusions=[]}]
+2024.12.13 15:26:21 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.authentication.ws.ValidateAction@50cd8dfd [pattern=UrlPattern{inclusions=[/api/authentication/validate], exclusions=[]}]
+2024.12.13 15:26:21 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.saml.ws.ValidationInitAction@2e321f50 [pattern=UrlPattern{inclusions=[/saml/validation_init], exclusions=[]}]
+2024.12.13 15:26:21 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.saml.ws.ValidationAction@1f3df666 [pattern=UrlPattern{inclusions=[/saml/validation], exclusions=[]}]
+2024.12.13 15:26:21 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.user.ws.ChangePasswordAction@1e18c33d [pattern=UrlPattern{inclusions=[/api/users/change_password], exclusions=[]}]
+2024.12.13 15:26:21 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.plugins.PluginsRiskConsentFilter@31338173 [pattern=UrlPattern{inclusions=[/*], exclusions=[*.css, ...]}]
+2024.12.13 15:26:21 INFO  web[][o.s.s.e.IndexerStartupTask] Indexing of type [projectmeasures/auth/projectmeasure]...
+2024.12.13 15:26:21 INFO  web[][o.s.s.e.IndexerStartupTask] Indexing of type [projectmeasures/auth/projectmeasure] done | time=320ms
+2024.12.13 15:26:21 INFO  web[][o.s.s.e.IndexerStartupTask] Indexing of type [components/auth/component]...
+2024.12.13 15:26:21 INFO  web[][o.s.s.e.IndexerStartupTask] Indexing of type [components/auth/component] done | time=255ms
+2024.12.13 15:26:21 INFO  web[][o.s.s.e.IndexerStartupTask] Indexing of type [views/view]...
+2024.12.13 15:26:22 INFO  web[][o.s.s.e.IndexerStartupTask] Indexing of type [views/view] done | time=580ms
+2024.12.13 15:26:22 INFO  web[][o.s.s.e.IndexerStartupTask] Trigger asynchronous indexing of type [issues/auth/issue]...
+2024.12.13 15:26:22 INFO  web[][o.s.s.i.i.AsyncIssueIndexingImpl] 0 pending indexing task found to be deleted...
+2024.12.13 15:26:22 INFO  web[][o.s.s.i.i.AsyncIssueIndexingImpl] 0 completed indexing task found to be deleted...
+2024.12.13 15:26:22 INFO  web[][o.s.s.i.i.AsyncIssueIndexingImpl] Indexing task deletion complete.
+2024.12.13 15:26:22 INFO  web[][o.s.s.i.i.AsyncIssueIndexingImpl] Deleting tasks characteristics...
+2024.12.13 15:26:22 INFO  web[][o.s.s.i.i.AsyncIssueIndexingImpl] Tasks characteristics deletion complete.
+2024.12.13 15:26:22 INFO  web[][o.s.s.i.i.AsyncIssueIndexingImpl] 0 branch found in need of issue sync.
+2024.12.13 15:26:22 INFO  web[][o.s.s.e.IndexerStartupTask] Trigger asynchronous indexing of type [issues/auth/issue] done | time=129ms
+2024.12.13 15:26:22 INFO  web[][o.s.s.e.IndexerStartupTask] Indexing of types [components/auth],[projectmeasures/auth],[issues/auth]...
+2024.12.13 15:26:22 INFO  web[][o.s.s.e.IndexerStartupTask] Indexing of types [components/auth],[projectmeasures/auth],[issues/auth] done | time=196ms
+2024.12.13 15:26:22 INFO  web[][o.s.s.p.p.PlatformLevelStartup] Running Community Edition
+2024.12.13 15:26:24 INFO  web[][o.s.s.p.Platform] Web Server is operational
+2024.12.13 15:37:26 INFO  web[][o.s.p.ProcessEntryPoint] Gracefully stopping process
+2024.12.13 15:37:26 INFO  web[][o.s.s.n.NotificationDaemon] Notification service stopped
+2024.12.13 15:37:27 INFO  web[][c.z.h.HikariDataSource] HikariPool-1 - Shutdown initiated...
+2024.12.13 15:37:27 INFO  web[][c.z.h.HikariDataSource] HikariPool-1 - Shutdown completed.
+2024.12.13 15:37:27 INFO  web[][o.s.s.app.WebServer] Web Server stopped
+2024.12.13 15:38:18 INFO  web[][o.s.p.ProcessEntryPoint] Starting Web Server
+2024.12.13 15:38:18 INFO  web[][o.s.s.a.TomcatHttpConnectorFactory] Starting Tomcat on port 9000
+2024.12.13 15:38:19 INFO  web[][o.s.s.p.LogServerVersion] SonarQube Server / 24.12.0.100206 / ce887e85cc5dea7dc3b7718b6b104cc83eca9a89
+2024.12.13 15:38:19 INFO  web[][o.s.d.DefaultDatabase] Create JDBC data source for jdbc:postgresql://db:5432/sonar
+2024.12.13 15:38:19 INFO  web[][c.z.h.HikariDataSource] HikariPool-1 - Starting...
+2024.12.13 15:38:19 INFO  web[][c.z.h.p.HikariPool] HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@60e5272
+2024.12.13 15:38:19 INFO  web[][c.z.h.HikariDataSource] HikariPool-1 - Start completed.
+2024.12.13 15:38:21 INFO  web[][o.s.s.p.ServerFileSystemImpl] SonarQube home: /opt/sonarqube
+2024.12.13 15:38:21 INFO  web[][o.s.s.u.SystemPasscodeImpl] System authentication by passcode is disabled
+2024.12.13 15:38:21 INFO  web[][o.s.s.p.ServerPluginManager] Deploy C# Code Quality and Security / 10.3.0.106239 / d03cce2708b983694c343d86111fabaf9073721c
+2024.12.13 15:38:21 INFO  web[][o.s.s.p.ServerPluginManager] Deploy Clean as You Code / 2.4.0.2018 / c2f7910f6ecac6faa73001eeac4bd79a2db98cd3
+2024.12.13 15:38:21 INFO  web[][o.s.s.p.ServerPluginManager] Deploy Flex Code Quality and Security / 2.14.0.5032 / 005476cddc54a18b78eca55d10338702eb31e4b0
+2024.12.13 15:38:21 INFO  web[][o.s.s.p.ServerPluginManager] Deploy Go Code Quality and Security / 1.18.0.240 / 09e16bcebbc987dadc860ccfd9de9fe00f8e59f4
+2024.12.13 15:38:21 INFO  web[][o.s.s.p.ServerPluginManager] Deploy HTML Code Quality and Security / 3.17.0.5548 / cad4bcc0d77f656688edf0fba51bce4339674dae
+2024.12.13 15:38:21 INFO  web[][o.s.s.p.ServerPluginManager] Deploy IaC Code Quality and Security / 1.39.0.13718 / null
+2024.12.13 15:38:21 INFO  web[][o.s.s.p.ServerPluginManager] Deploy JaCoCo / 1.3.0.1538 / 74a7798c7cea687c72ed9df40c93eb7ea2a58c49
+2024.12.13 15:38:21 INFO  web[][o.s.s.p.ServerPluginManager] Deploy Java Advanced Code Quality Analyzer / 8.7.0.37452 / 7f648a979f612a412e1650b44e6ba7653985360f
+2024.12.13 15:38:21 INFO  web[][o.s.s.p.ServerPluginManager] Deploy Java Code Quality and Security / 8.7.0.37452 / 7f648a979f612a412e1650b44e6ba7653985360f
+2024.12.13 15:38:21 INFO  web[][o.s.s.p.ServerPluginManager] Deploy JavaScript/TypeScript/CSS Code Quality and Security / 10.18.0.28572 / 4ad3e466134f67e43b366ac2ab2e64de3503bb00
+2024.12.13 15:38:21 INFO  web[][o.s.s.p.ServerPluginManager] Deploy Kotlin Code Quality and Security / 2.21.0.5736 / fd8ef1923e353b073d9d61b79e1c4e1dfa9958db
+2024.12.13 15:38:21 INFO  web[][o.s.s.p.ServerPluginManager] Deploy PHP Code Quality and Security / 3.40.0.12590 / null
+2024.12.13 15:38:21 INFO  web[][o.s.s.p.ServerPluginManager] Deploy Python Code Quality and Security / 4.24.0.18631 / 1c8f65d137298c0650e6718d4aac7a0e62086831
+2024.12.13 15:38:21 INFO  web[][o.s.s.p.ServerPluginManager] Deploy Ruby Code Quality and Security / 1.18.0.234 / 1f01fec0f8f7f5dc1b81463c09c41099674e04c0
+2024.12.13 15:38:21 INFO  web[][o.s.s.p.ServerPluginManager] Deploy Scala Code Quality and Security / 1.18.0.266 / 74ab5c801fc5876ffde218d96e74e87f43efee85
+2024.12.13 15:38:21 INFO  web[][o.s.s.p.ServerPluginManager] Deploy Text Code Quality and Security / 2.19.0.4883 / null
+2024.12.13 15:38:21 INFO  web[][o.s.s.p.ServerPluginManager] Deploy VB.NET Code Quality and Security / 10.3.0.106239 / d03cce2708b983694c343d86111fabaf9073721c
+2024.12.13 15:38:21 INFO  web[][o.s.s.p.ServerPluginManager] Deploy XML Code Quality and Security / 2.12.0.5749 / 67cf0668dd25562b98d230d08013e9f08861f79a
+2024.12.13 15:38:24 INFO  web[][o.s.s.p.d.m.c.PostgresCharsetHandler] Verify that database charset supports UTF8
+2024.12.13 15:38:24 INFO  web[][o.s.s.e.EsClientProvider] Connected to local Elasticsearch: [http://localhost:9001]
+2024.12.13 15:38:25 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.platform.web.WebServiceFilter@53016b11 [pattern=UrlPattern{inclusions=[/api/system/migrate_db.*, ...], exclusions=[/api/components/update_key, ...]}]
+2024.12.13 15:38:25 INFO  web[][o.s.s.p.DetectPluginChange] Detect plugin changes
+2024.12.13 15:38:26 INFO  web[][o.s.s.p.DetectPluginChange] No plugin change detected
+2024.12.13 15:38:28 INFO  web[][o.h.v.i.util.Version] HV000001: Hibernate Validator null
+2024.12.13 15:38:29 INFO  web[][o.s.s.s.LogServerId] Server ID: 243B8A4D-AZPAoDWKBg_iEEIimt7m
+2024.12.13 15:38:30 WARN  web[][o.s.s.a.LogOAuthWarning] For security reasons, OAuth authentication should use HTTPS. You should set the property 'Administration > Configuration > Server base URL' to an HTTPS URL.
+2024.12.13 15:38:30 INFO  web[][o.s.s.p.UpdateCenterClient] Update center: https://downloads.sonarsource.com/sonarqube/update/update-center.properties
+2024.12.13 15:38:33 INFO  web[][o.s.s.a.p.ExpiredSessionsCleaner] Purge of expired session tokens has removed 0 elements
+2024.12.13 15:38:33 INFO  web[][o.s.s.a.p.ExpiredSessionsCleaner] Purge of expired SAML message ids has removed 0 elements
+2024.12.13 15:38:33 INFO  web[][o.s.s.n.NotificationDaemon] Notification service started (delay 60 sec.)
+2024.12.13 15:38:33 INFO  web[][o.s.t.TelemetryDaemon] Sharing of SonarQube statistics is enabled.
+2024.12.13 15:38:33 INFO  web[][o.s.s.s.RegisterPermissionTemplates] Register permission templates
+2024.12.13 15:38:33 INFO  web[][o.s.s.s.RenameDeprecatedPropertyKeys] Rename deprecated property keys
+2024.12.13 15:38:34 INFO  web[][o.s.s.s.RegisterPlugins] Register plugins
+2024.12.13 15:38:34 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.platform.web.SonarLintConnectionFilter@6c12a227 [pattern=UrlPattern{inclusions=[/api/*], exclusions=[/api/v2/*]}]
+2024.12.13 15:38:34 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.platform.web.WebServiceFilter@62b8bf67 [pattern=UrlPattern{inclusions=[/api/issues/delete_comment.*, ...], exclusions=[/api/authentication/login.*, ...]}]
+2024.12.13 15:38:34 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.platform.web.WebServiceReroutingFilter@4679e6f8 [pattern=UrlPattern{inclusions=[/api/components/update_key, ...], exclusions=[]}]
+2024.12.13 15:38:34 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.authentication.DefaultAdminCredentialsVerifierFilter@4c53a308 [pattern=UrlPattern{inclusions=[/*], exclusions=[*.css, ...]}]
+2024.12.13 15:38:34 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.authentication.InitFilter@35a9233f [pattern=UrlPattern{inclusions=[/sessions/init/*], exclusions=[]}]
+2024.12.13 15:38:34 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.authentication.SamlValidationRedirectionFilter@12cde16a [pattern=UrlPattern{inclusions=[/oauth2/callback/saml], exclusions=[]}]
+2024.12.13 15:38:34 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.authentication.OAuth2CallbackFilter@1b0a8bed [pattern=UrlPattern{inclusions=[/oauth2/callback/*], exclusions=[]}]
+2024.12.13 15:38:34 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.authentication.ResetPasswordFilter@4a103067 [pattern=UrlPattern{inclusions=[/*], exclusions=[*.css, ...]}]
+2024.12.13 15:38:34 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.authentication.ws.LoginAction@3d2f4ed4 [pattern=UrlPattern{inclusions=[/api/authentication/login], exclusions=[]}]
+2024.12.13 15:38:34 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.authentication.ws.LogoutAction@50934802 [pattern=UrlPattern{inclusions=[/api/authentication/logout], exclusions=[]}]
+2024.12.13 15:38:34 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.authentication.ws.ValidateAction@49af42e7 [pattern=UrlPattern{inclusions=[/api/authentication/validate], exclusions=[]}]
+2024.12.13 15:38:34 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.saml.ws.ValidationInitAction@521e3a13 [pattern=UrlPattern{inclusions=[/saml/validation_init], exclusions=[]}]
+2024.12.13 15:38:34 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.saml.ws.ValidationAction@1887bb0a [pattern=UrlPattern{inclusions=[/saml/validation], exclusions=[]}]
+2024.12.13 15:38:34 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.user.ws.ChangePasswordAction@36dc42c1 [pattern=UrlPattern{inclusions=[/api/users/change_password], exclusions=[]}]
+2024.12.13 15:38:34 INFO  web[][o.s.s.p.w.MasterServletFilter] Initializing servlet filter org.sonar.server.plugins.PluginsRiskConsentFilter@4b6723c1 [pattern=UrlPattern{inclusions=[/*], exclusions=[*.css, ...]}]
+2024.12.13 15:38:34 INFO  web[][o.s.s.p.p.PlatformLevelStartup] Running Community Edition
+2024.12.13 15:38:34 INFO  web[][o.s.s.p.Platform] Web Server is operational
+2024.12.13 15:40:16 INFO  web[1982fd0f-52c8-4d8e-b5cc-086420a4a756][o.s.u.c.UpdateCenter] The plugin 'cayc' version : 2.4.0.2018 has not been found on the update center.
+2024.12.13 15:40:16 INFO  web[1982fd0f-52c8-4d8e-b5cc-086420a4a756][o.s.u.c.UpdateCenter] The plugin 'csharp' version : 10.3.0.106239 has not been found on the update center.
+2024.12.13 15:40:16 INFO  web[1982fd0f-52c8-4d8e-b5cc-086420a4a756][o.s.u.c.UpdateCenter] The plugin 'flex' version : 2.14.0.5032 has not been found on the update center.
+2024.12.13 15:40:16 INFO  web[1982fd0f-52c8-4d8e-b5cc-086420a4a756][o.s.u.c.UpdateCenter] The plugin 'go' version : 1.18.0.240 has not been found on the update center.
+2024.12.13 15:40:16 INFO  web[1982fd0f-52c8-4d8e-b5cc-086420a4a756][o.s.u.c.UpdateCenter] The plugin 'iac' version : 1.39.0.13718 has not been found on the update center.
+2024.12.13 15:40:16 INFO  web[1982fd0f-52c8-4d8e-b5cc-086420a4a756][o.s.u.c.UpdateCenter] The plugin 'jacoco' version : 1.3.0.1538 has not been found on the update center.
+2024.12.13 15:40:16 INFO  web[1982fd0f-52c8-4d8e-b5cc-086420a4a756][o.s.u.c.UpdateCenter] The plugin 'java' version : 8.7.0.37452 has not been found on the update center.
+2024.12.13 15:40:16 INFO  web[1982fd0f-52c8-4d8e-b5cc-086420a4a756][o.s.u.c.UpdateCenter] The plugin 'javascript' version : 10.18.0.28572 has not been found on the update center.
+2024.12.13 15:40:16 INFO  web[1982fd0f-52c8-4d8e-b5cc-086420a4a756][o.s.u.c.UpdateCenter] The plugin 'javasymbolicexecution' version : 8.7.0.37452 has not been found on the update center.
+2024.12.13 15:40:16 INFO  web[1982fd0f-52c8-4d8e-b5cc-086420a4a756][o.s.u.c.UpdateCenter] The plugin 'kotlin' version : 2.21.0.5736 has not been found on the update center.
+2024.12.13 15:40:16 INFO  web[1982fd0f-52c8-4d8e-b5cc-086420a4a756][o.s.u.c.UpdateCenter] The plugin 'php' version : 3.40.0.12590 has not been found on the update center.
+2024.12.13 15:40:16 INFO  web[1982fd0f-52c8-4d8e-b5cc-086420a4a756][o.s.u.c.UpdateCenter] The plugin 'python' version : 4.24.0.18631 has not been found on the update center.
+2024.12.13 15:40:16 INFO  web[1982fd0f-52c8-4d8e-b5cc-086420a4a756][o.s.u.c.UpdateCenter] The plugin 'ruby' version : 1.18.0.234 has not been found on the update center.
+2024.12.13 15:40:16 INFO  web[1982fd0f-52c8-4d8e-b5cc-086420a4a756][o.s.u.c.UpdateCenter] The plugin 'sonarscala' version : 1.18.0.266 has not been found on the update center.
+2024.12.13 15:40:16 INFO  web[1982fd0f-52c8-4d8e-b5cc-086420a4a756][o.s.u.c.UpdateCenter] The plugin 'text' version : 2.19.0.4883 has not been found on the update center.
+2024.12.13 15:40:16 INFO  web[1982fd0f-52c8-4d8e-b5cc-086420a4a756][o.s.u.c.UpdateCenter] The plugin 'vbnet' version : 10.3.0.106239 has not been found on the update center.
+2024.12.13 15:40:16 INFO  web[1982fd0f-52c8-4d8e-b5cc-086420a4a756][o.s.u.c.UpdateCenter] The plugin 'web' version : 3.17.0.5548 has not been found on the update center.
+2024.12.13 15:40:16 INFO  web[1982fd0f-52c8-4d8e-b5cc-086420a4a756][o.s.u.c.UpdateCenter] The plugin 'xml' version : 2.12.0.5749 has not been found on the update center.
+2024.12.13 15:44:37 INFO  web[76d63d34-203c-4b33-8ee9-0e5adb40b357][o.s.u.c.UpdateCenter] The plugin 'cayc' version : 2.4.0.2018 has not been found on the update center.
+2024.12.13 15:44:37 INFO  web[76d63d34-203c-4b33-8ee9-0e5adb40b357][o.s.u.c.UpdateCenter] The plugin 'csharp' version : 10.3.0.106239 has not been found on the update center.
+2024.12.13 15:44:37 INFO  web[76d63d34-203c-4b33-8ee9-0e5adb40b357][o.s.u.c.UpdateCenter] The plugin 'flex' version : 2.14.0.5032 has not been found on the update center.
+2024.12.13 15:44:37 INFO  web[76d63d34-203c-4b33-8ee9-0e5adb40b357][o.s.u.c.UpdateCenter] The plugin 'go' version : 1.18.0.240 has not been found on the update center.
+2024.12.13 15:44:37 INFO  web[76d63d34-203c-4b33-8ee9-0e5adb40b357][o.s.u.c.UpdateCenter] The plugin 'iac' version : 1.39.0.13718 has not been found on the update center.
+2024.12.13 15:44:37 INFO  web[76d63d34-203c-4b33-8ee9-0e5adb40b357][o.s.u.c.UpdateCenter] The plugin 'jacoco' version : 1.3.0.1538 has not been found on the update center.
+2024.12.13 15:44:37 INFO  web[76d63d34-203c-4b33-8ee9-0e5adb40b357][o.s.u.c.UpdateCenter] The plugin 'java' version : 8.7.0.37452 has not been found on the update center.
+2024.12.13 15:44:37 INFO  web[76d63d34-203c-4b33-8ee9-0e5adb40b357][o.s.u.c.UpdateCenter] The plugin 'javascript' version : 10.18.0.28572 has not been found on the update center.
+2024.12.13 15:44:37 INFO  web[76d63d34-203c-4b33-8ee9-0e5adb40b357][o.s.u.c.UpdateCenter] The plugin 'javasymbolicexecution' version : 8.7.0.37452 has not been found on the update center.
+2024.12.13 15:44:37 INFO  web[76d63d34-203c-4b33-8ee9-0e5adb40b357][o.s.u.c.UpdateCenter] The plugin 'kotlin' version : 2.21.0.5736 has not been found on the update center.
+2024.12.13 15:44:37 INFO  web[76d63d34-203c-4b33-8ee9-0e5adb40b357][o.s.u.c.UpdateCenter] The plugin 'php' version : 3.40.0.12590 has not been found on the update center.
+2024.12.13 15:44:37 INFO  web[76d63d34-203c-4b33-8ee9-0e5adb40b357][o.s.u.c.UpdateCenter] The plugin 'python' version : 4.24.0.18631 has not been found on the update center.
+2024.12.13 15:44:37 INFO  web[76d63d34-203c-4b33-8ee9-0e5adb40b357][o.s.u.c.UpdateCenter] The plugin 'ruby' version : 1.18.0.234 has not been found on the update center.
+2024.12.13 15:44:37 INFO  web[76d63d34-203c-4b33-8ee9-0e5adb40b357][o.s.u.c.UpdateCenter] The plugin 'sonarscala' version : 1.18.0.266 has not been found on the update center.
+2024.12.13 15:44:37 INFO  web[76d63d34-203c-4b33-8ee9-0e5adb40b357][o.s.u.c.UpdateCenter] The plugin 'text' version : 2.19.0.4883 has not been found on the update center.
+2024.12.13 15:44:37 INFO  web[76d63d34-203c-4b33-8ee9-0e5adb40b357][o.s.u.c.UpdateCenter] The plugin 'vbnet' version : 10.3.0.106239 has not been found on the update center.
+2024.12.13 15:44:37 INFO  web[76d63d34-203c-4b33-8ee9-0e5adb40b357][o.s.u.c.UpdateCenter] The plugin 'web' version : 3.17.0.5548 has not been found on the update center.
+2024.12.13 15:44:37 INFO  web[76d63d34-203c-4b33-8ee9-0e5adb40b357][o.s.u.c.UpdateCenter] The plugin 'xml' version : 2.12.0.5749 has not been found on the update center.
+2024.12.13 15:48:27 INFO  web[c259bd51-dee2-45ea-846f-5cfae9b5cb9b][o.s.u.c.UpdateCenter] The plugin 'cayc' version : 2.4.0.2018 has not been found on the update center.
+2024.12.13 15:48:27 INFO  web[c259bd51-dee2-45ea-846f-5cfae9b5cb9b][o.s.u.c.UpdateCenter] The plugin 'csharp' version : 10.3.0.106239 has not been found on the update center.
+2024.12.13 15:48:27 INFO  web[c259bd51-dee2-45ea-846f-5cfae9b5cb9b][o.s.u.c.UpdateCenter] The plugin 'flex' version : 2.14.0.5032 has not been found on the update center.
+2024.12.13 15:48:27 INFO  web[c259bd51-dee2-45ea-846f-5cfae9b5cb9b][o.s.u.c.UpdateCenter] The plugin 'go' version : 1.18.0.240 has not been found on the update center.
+2024.12.13 15:48:27 INFO  web[c259bd51-dee2-45ea-846f-5cfae9b5cb9b][o.s.u.c.UpdateCenter] The plugin 'iac' version : 1.39.0.13718 has not been found on the update center.
+2024.12.13 15:48:27 INFO  web[c259bd51-dee2-45ea-846f-5cfae9b5cb9b][o.s.u.c.UpdateCenter] The plugin 'jacoco' version : 1.3.0.1538 has not been found on the update center.
+2024.12.13 15:48:27 INFO  web[c259bd51-dee2-45ea-846f-5cfae9b5cb9b][o.s.u.c.UpdateCenter] The plugin 'java' version : 8.7.0.37452 has not been found on the update center.
+2024.12.13 15:48:27 INFO  web[c259bd51-dee2-45ea-846f-5cfae9b5cb9b][o.s.u.c.UpdateCenter] The plugin 'javascript' version : 10.18.0.28572 has not been found on the update center.
+2024.12.13 15:48:27 INFO  web[c259bd51-dee2-45ea-846f-5cfae9b5cb9b][o.s.u.c.UpdateCenter] The plugin 'javasymbolicexecution' version : 8.7.0.37452 has not been found on the update center.
+2024.12.13 15:48:27 INFO  web[c259bd51-dee2-45ea-846f-5cfae9b5cb9b][o.s.u.c.UpdateCenter] The plugin 'kotlin' version : 2.21.0.5736 has not been found on the update center.
+2024.12.13 15:48:27 INFO  web[c259bd51-dee2-45ea-846f-5cfae9b5cb9b][o.s.u.c.UpdateCenter] The plugin 'php' version : 3.40.0.12590 has not been found on the update center.
+2024.12.13 15:48:27 INFO  web[c259bd51-dee2-45ea-846f-5cfae9b5cb9b][o.s.u.c.UpdateCenter] The plugin 'python' version : 4.24.0.18631 has not been found on the update center.
+2024.12.13 15:48:27 INFO  web[c259bd51-dee2-45ea-846f-5cfae9b5cb9b][o.s.u.c.UpdateCenter] The plugin 'ruby' version : 1.18.0.234 has not been found on the update center.
+2024.12.13 15:48:27 INFO  web[c259bd51-dee2-45ea-846f-5cfae9b5cb9b][o.s.u.c.UpdateCenter] The plugin 'sonarscala' version : 1.18.0.266 has not been found on the update center.
+2024.12.13 15:48:27 INFO  web[c259bd51-dee2-45ea-846f-5cfae9b5cb9b][o.s.u.c.UpdateCenter] The plugin 'text' version : 2.19.0.4883 has not been found on the update center.
+2024.12.13 15:48:27 INFO  web[c259bd51-dee2-45ea-846f-5cfae9b5cb9b][o.s.u.c.UpdateCenter] The plugin 'vbnet' version : 10.3.0.106239 has not been found on the update center.
+2024.12.13 15:48:27 INFO  web[c259bd51-dee2-45ea-846f-5cfae9b5cb9b][o.s.u.c.UpdateCenter] The plugin 'web' version : 3.17.0.5548 has not been found on the update center.
+2024.12.13 15:48:27 INFO  web[c259bd51-dee2-45ea-846f-5cfae9b5cb9b][o.s.u.c.UpdateCenter] The plugin 'xml' version : 2.12.0.5749 has not been found on the update center.
+2024.12.13 16:27:55 INFO  web[f17f640b-e8fe-4366-bb87-0301ade63bf7][o.s.u.c.UpdateCenter] The plugin 'cayc' version : 2.4.0.2018 has not been found on the update center.
+2024.12.13 16:27:55 INFO  web[f17f640b-e8fe-4366-bb87-0301ade63bf7][o.s.u.c.UpdateCenter] The plugin 'csharp' version : 10.3.0.106239 has not been found on the update center.
+2024.12.13 16:27:55 INFO  web[f17f640b-e8fe-4366-bb87-0301ade63bf7][o.s.u.c.UpdateCenter] The plugin 'flex' version : 2.14.0.5032 has not been found on the update center.
+2024.12.13 16:27:55 INFO  web[f17f640b-e8fe-4366-bb87-0301ade63bf7][o.s.u.c.UpdateCenter] The plugin 'go' version : 1.18.0.240 has not been found on the update center.
+2024.12.13 16:27:55 INFO  web[f17f640b-e8fe-4366-bb87-0301ade63bf7][o.s.u.c.UpdateCenter] The plugin 'iac' version : 1.39.0.13718 has not been found on the update center.
+2024.12.13 16:27:55 INFO  web[f17f640b-e8fe-4366-bb87-0301ade63bf7][o.s.u.c.UpdateCenter] The plugin 'jacoco' version : 1.3.0.1538 has not been found on the update center.
+2024.12.13 16:27:55 INFO  web[f17f640b-e8fe-4366-bb87-0301ade63bf7][o.s.u.c.UpdateCenter] The plugin 'java' version : 8.7.0.37452 has not been found on the update center.
+2024.12.13 16:27:56 INFO  web[f17f640b-e8fe-4366-bb87-0301ade63bf7][o.s.u.c.UpdateCenter] The plugin 'javascript' version : 10.18.0.28572 has not been found on the update center.
+2024.12.13 16:27:56 INFO  web[f17f640b-e8fe-4366-bb87-0301ade63bf7][o.s.u.c.UpdateCenter] The plugin 'javasymbolicexecution' version : 8.7.0.37452 has not been found on the update center.
+2024.12.13 16:27:56 INFO  web[f17f640b-e8fe-4366-bb87-0301ade63bf7][o.s.u.c.UpdateCenter] The plugin 'kotlin' version : 2.21.0.5736 has not been found on the update center.
+2024.12.13 16:27:56 INFO  web[f17f640b-e8fe-4366-bb87-0301ade63bf7][o.s.u.c.UpdateCenter] The plugin 'php' version : 3.40.0.12590 has not been found on the update center.
+2024.12.13 16:27:56 INFO  web[f17f640b-e8fe-4366-bb87-0301ade63bf7][o.s.u.c.UpdateCenter] The plugin 'python' version : 4.24.0.18631 has not been found on the update center.
+2024.12.13 16:27:56 INFO  web[f17f640b-e8fe-4366-bb87-0301ade63bf7][o.s.u.c.UpdateCenter] The plugin 'ruby' version : 1.18.0.234 has not been found on the update center.
+2024.12.13 16:27:56 INFO  web[f17f640b-e8fe-4366-bb87-0301ade63bf7][o.s.u.c.UpdateCenter] The plugin 'sonarscala' version : 1.18.0.266 has not been found on the update center.
+2024.12.13 16:27:56 INFO  web[f17f640b-e8fe-4366-bb87-0301ade63bf7][o.s.u.c.UpdateCenter] The plugin 'text' version : 2.19.0.4883 has not been found on the update center.
+2024.12.13 16:27:56 INFO  web[f17f640b-e8fe-4366-bb87-0301ade63bf7][o.s.u.c.UpdateCenter] The plugin 'vbnet' version : 10.3.0.106239 has not been found on the update center.
+2024.12.13 16:27:56 INFO  web[f17f640b-e8fe-4366-bb87-0301ade63bf7][o.s.u.c.UpdateCenter] The plugin 'web' version : 3.17.0.5548 has not been found on the update center.
+2024.12.13 16:27:56 INFO  web[f17f640b-e8fe-4366-bb87-0301ade63bf7][o.s.u.c.UpdateCenter] The plugin 'xml' version : 2.12.0.5749 has not been found on the update center.

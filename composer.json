@@ -46,6 +46,6 @@
         "sort-packages": true
     },
     "scripts": {
-        "test": "phpunit --coverage-html ./build/logs/coverage"
+        "test": "phpunit --coverage-html ./build/logs/coverage --coverage-xml ./build/logs/coveragexml"
     }
 }
