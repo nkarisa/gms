@@ -4,13 +4,17 @@ namespace Tests\Support\Libraries\Core;
 
 use CodeIgniter\Test\CIUnitTestCase;
 use App\Libraries\System\GrantsLibrary;
-use CodeIgniter\Test\ControllerTestTrait;
+// use CodeIgniter\Test\ControllerTestTrait;
 use PHPUnit\Framework\Attributes\Depends;
+use CodeIgniter\Test\DatabaseTestTrait;
+use Tests\Support\Database\Seeds\ContextDefinitionSeeder;
 
 class GrantsLibraryTest extends CIUnitTestCase {
 
-    use ControllerTestTrait;
+    // use ControllerTestTrait;
+    use DatabaseTestTrait;
     private $grantsLibrary;
+    protected $seed = ContextDefinitionSeeder::class;
 
     function setUp(): void{
         parent::setUp();
