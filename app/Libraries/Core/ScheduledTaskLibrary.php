@@ -4,7 +4,7 @@ namespace App\Libraries\Core;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Core\ScheduledTaskModel;
-class ScheduledTaskLibrary extends GrantsLibrary
+class ScheduledTaskLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
     protected $table;

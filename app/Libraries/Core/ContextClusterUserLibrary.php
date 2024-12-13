@@ -4,7 +4,7 @@ namespace App\Libraries\Core;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Core\ContextClusterUserModel;
-class ContextClusterUserLibrary extends GrantsLibrary
+class ContextClusterUserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
     protected $table;

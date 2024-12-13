@@ -4,7 +4,7 @@ namespace App\Libraries\Grants;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\RequestTypeDepartmentModel;
-class RequestTypeDepartmentLibrary extends GrantsLibrary
+class RequestTypeDepartmentLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
     protected $table;

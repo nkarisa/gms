@@ -4,7 +4,7 @@ namespace App\Libraries\Grants;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\ReimbursementDiagnosisTypeModel;
-class ReimbursementDiagnosisTypeLibrary extends GrantsLibrary
+class ReimbursementDiagnosisTypeLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
     protected $table;

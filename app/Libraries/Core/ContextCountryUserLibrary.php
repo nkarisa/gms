@@ -4,7 +4,7 @@ namespace App\Libraries\Core;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Core\ContextCountryUserModel;
-class ContextCountryUserLibrary extends GrantsLibrary
+class ContextCountryUserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
     protected $table;

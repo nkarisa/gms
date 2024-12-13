@@ -5,7 +5,7 @@ namespace App\Libraries\Grants;
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\VoucherDetailModel;
 
-class VoucherDetailLibrary extends GrantsLibrary {
+class VoucherDetailLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface {
     protected $table;
     protected $voucherDetailModel;
 

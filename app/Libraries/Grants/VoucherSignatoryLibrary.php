@@ -4,7 +4,7 @@ namespace App\Libraries\Grants;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\VoucherSignatoryModel;
-class VoucherSignatoryLibrary extends GrantsLibrary
+class VoucherSignatoryLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
     protected $table;

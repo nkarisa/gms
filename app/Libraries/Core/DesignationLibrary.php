@@ -4,7 +4,7 @@ namespace App\Libraries\Core;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Core\DesignationModel;
-class DesignationLibrary extends GrantsLibrary
+class DesignationLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
     protected $table;

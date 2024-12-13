@@ -4,7 +4,7 @@ namespace App\Libraries\Grants;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\MedicalClaimAdminSettingModel;
-class MedicalClaimAdminSettingLibrary extends GrantsLibrary
+class MedicalClaimAdminSettingLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
     protected $table;

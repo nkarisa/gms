@@ -4,7 +4,7 @@ namespace App\Libraries\Grants;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\ExpenseAccountOfficeAssociationModel;
-class ExpenseAccountOfficeAssociationLibrary extends GrantsLibrary
+class ExpenseAccountOfficeAssociationLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
     protected $table;

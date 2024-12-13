@@ -4,7 +4,7 @@ namespace App\Libraries\Core;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Core\UserAccountActivationModel;
-class UserAccountActivationLibrary extends GrantsLibrary
+class UserAccountActivationLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
     protected $table;

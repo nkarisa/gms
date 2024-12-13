@@ -9,7 +9,7 @@ use App\Libraries\Core\StatusLibrary;
 use App\Models\Core\UserModel;
 use CodeIgniter\Database\ResultInterface;
 
-class UserLibrary extends GrantsLibrary
+class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
     protected $table;
     protected $userModel;

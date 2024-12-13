@@ -6,7 +6,7 @@ use App\Libraries\System\GrantsLibrary;
 use App\Models\Core\StatusModel;
 use CodeIgniter\HTTP\RedirectResponse;
 
-class StatusLibrary extends GrantsLibrary
+class StatusLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
     protected $table;
     protected $statusModel;

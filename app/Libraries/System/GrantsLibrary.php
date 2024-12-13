@@ -92,23 +92,23 @@ class GrantsLibrary
     return $columns;
   }
 
-  private function callbackMultiSelectField($table_name): string
-  {
-    $library = $this->loadLibrary($table_name);
+  // private function callbackMultiSelectField($table_name): string
+  // {
+  //   $library = $this->loadLibrary($table_name);
 
-    $multi_select_field = '';
+  //   $multi_select_field = '';
 
-    if (
-      method_exists($library, 'multiSelectField') &&
-      strlen($library->multiSelectField()) > 0 &&
-      $this->action !== 'edit'
-    ) {
+  //   if (
+  //     method_exists($library, 'multiSelectField') &&
+  //     strlen($library->multiSelectField()) > 0 &&
+  //     $this->action !== 'edit'
+  //   ) {
 
-      $multi_select_field = $library->multiSelectField();
-    }
+  //     $multi_select_field = $library->multiSelectField();
+  //   }
 
-    return $multi_select_field;
-  }
+  //   return $multi_select_field;
+  // }
 
 
   /**
@@ -302,18 +302,29 @@ class GrantsLibrary
       }
     }
 
+    $visible_columns = array_values($visible_columns);
+
     return $visible_columns;
   }
 
 
-  public function lookupTablesFields(string $table): array
+  public function lookupTablesFields(\App\Interfaces\LibraryInterface $library, array $deriveLookupTables): array
   {
     $lookup_tables_fields = array();
+   
+    // $deriveLookupTables = $this->deriveLookupTables($tableName);
+    $featureLibraryLookUpTables = $library->lookupTables();
 
-    if (is_array($this->loadLibrary($table)->lookupTables()) && count($this->loadLibrary($table)->lookupTables()) > 0) {
-      foreach ($this->loadLibrary($table)->lookupTables() as $lookup_table) {
-        $lookup_tables_fields = array_merge($lookup_tables_fields, $this->getAllTableFields($lookup_table));
-      }
+    if (
+        (is_array($featureLibraryLookUpTables) && count($featureLibraryLookUpTables) > 0) ||
+        (is_array($deriveLookupTables) && count($deriveLookupTables) > 0)
+      ) {
+        
+        $lookupTables = array_unique(array_merge($featureLibraryLookUpTables, $deriveLookupTables));
+
+        foreach ($lookupTables as $lookup_table) {
+          $lookup_tables_fields = array_merge($lookup_tables_fields, $this->getAllTableFields($lookup_table));
+        }
     }
 
     return $lookup_tables_fields;
@@ -777,11 +788,12 @@ class GrantsLibrary
   function deriveLookupTables($table_name = "")
   {
 
-    if ($table_name == '')
+    if ($table_name == ''){
       $table_name = $this->controller;
-
+    }
+    
     $fields = $this->getAllTableFields($table_name);
-
+    
     $foreign_tables_array_padded_with_false = array_map(function ($elem) {
       return substr($elem, 0, 3) == 'fk_' ? substr($elem, 3, -3) : false;
     }, $fields);
@@ -799,6 +811,7 @@ class GrantsLibrary
 
     // Add look up tables from the schema
     $tableLookUp = $this->tableLookUp($table_name);
+    
     $foreign_tables_array = array_unique(array_merge($foreign_tables_array, $tableLookUp));
 
     // Hide status and approval columns if the active controller/table is not approveable
@@ -810,7 +823,6 @@ class GrantsLibrary
     }
 
     return $foreign_tables_array;
-
 
   }
 
@@ -990,18 +1002,21 @@ class GrantsLibrary
   {
     $list_table_visible_columns = [];
     $list_table_visible_columns_method = 'listTableVisibleColumns';
+
     if ($parentTable != null) {
       $list_table_visible_columns_method = 'detailListTableVisibleColumns';
     }
-    $currentLibrary = $this->loadLibrary($this->controller);
 
+    $currentLibrary = $this->loadLibrary($this->controller);
+    $approveItemLibrary = $this->loadLibrary('approve_item');
+    
     if (
       method_exists($currentLibrary, $list_table_visible_columns_method) &&
       is_array($currentLibrary->$list_table_visible_columns_method())
     ) {
       $list_table_visible_columns = $currentLibrary->$list_table_visible_columns_method();
 
-      if (!$this->loadLibrary('approve_item')->approveableItem(strtolower($this->controller))) {
+      if (!$approveItemLibrary->approveableItem(strtolower($this->controller))) {
         $columns = ['status_name', 'approval_name'];
 
         foreach ($columns as $column) {
@@ -1030,7 +1045,9 @@ class GrantsLibrary
 
         //Add the lookup table name to the all fields array
         $all_fields = $this->getAllTableFields($this->controller);
-        $all_lookup_fields = $this->lookupTablesFields($this->controller);
+
+        $deriveLookupTables = $this->deriveLookupTables($this->controller);
+        $all_lookup_fields = $this->lookupTablesFields($currentLibrary, $deriveLookupTables);
         $all_fields = array_merge($all_fields, $all_lookup_fields);
         $lookup_tables = $this->checkLookupTables($this->controller);
 

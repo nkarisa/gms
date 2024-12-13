@@ -5,7 +5,7 @@ namespace App\Libraries\Grants;
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\ChequeBookModel;
 
-class ChequeBookLibrary extends GrantsLibrary {
+class ChequeBookLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface {
     protected $table;
     protected $chequeBookModel;
 

@@ -3,7 +3,7 @@ namespace App\Libraries\%cap_module%;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\%cap_module%\%cap_feature%Model;
-class %cap_feature%Library extends GrantsLibrary
+class %cap_feature%Library extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
     protected $table;

@@ -6,7 +6,7 @@ use App\Libraries\System\GrantsLibrary;
 use App\Models\Core\MenuModel;
 use App\Libraries\Core\UniqueIdentifierLibrary;
 
-class MenuLibrary extends GrantsLibrary
+class MenuLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
     protected $table;

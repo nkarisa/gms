@@ -5,7 +5,7 @@ namespace App\Libraries\Core;
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Core\OfficeModel;
 
-class OfficeLibrary extends GrantsLibrary
+class OfficeLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
   protected $table;

@@ -4,7 +4,7 @@ namespace App\Libraries\Grants;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\ProjectAllocationDetailModel;
-class ProjectAllocationDetailLibrary extends GrantsLibrary
+class ProjectAllocationDetailLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
     protected $table;

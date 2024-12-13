@@ -4,7 +4,7 @@ namespace App\Libraries\Grants;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\OpeningOutstandingChequeModel;
-class OpeningOutstandingChequeLibrary extends GrantsLibrary
+class OpeningOutstandingChequeLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
     protected $table;

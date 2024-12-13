@@ -5,7 +5,7 @@ namespace App\Libraries\Grants;
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\BankModel;
 
-class BankLibrary extends GrantsLibrary {
+class BankLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface {
     protected $table;
     protected $bankModel;
 

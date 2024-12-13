@@ -4,7 +4,7 @@ namespace App\Libraries\Grants;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\OpeningAllocationBalanceModel;
-class OpeningAllocationBalanceLibrary extends GrantsLibrary
+class OpeningAllocationBalanceLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
     protected $table;

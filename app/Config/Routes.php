@@ -9,6 +9,8 @@ use App\Controllers\Web\Core\Login;
 
 // Web routes
 
+// helper('grants');
+
 $routes->get('/', [Login::class, 'index']);
 
 $routes->group('ajax/login', static function ($routes) {

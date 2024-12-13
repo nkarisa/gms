@@ -6,7 +6,7 @@ use App\Libraries\System\GrantsLibrary;
 use App\Models\Core\ApprovalModel;
 use App\Libraries\Core\StatusLibrary;
 
-class ApprovalLibrary extends GrantsLibrary
+class ApprovalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
     protected $table;

@@ -4,7 +4,7 @@ namespace App\Libraries\Grants;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\OpeningCashBalanceModel;
-class OpeningCashBalanceLibrary extends GrantsLibrary
+class OpeningCashBalanceLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
     protected $table;

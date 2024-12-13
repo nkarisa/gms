@@ -5,7 +5,7 @@ namespace App\Libraries\Grants;
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\FinancialReportModel;
 
-class FinancialReportLibrary extends GrantsLibrary
+class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
     protected $table;
     protected $financialReportModel;

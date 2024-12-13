@@ -4,7 +4,7 @@ namespace App\Libraries\Grants;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\CurrencyConversionDetailModel;
-class CurrencyConversionDetailLibrary extends GrantsLibrary
+class CurrencyConversionDetailLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
     protected $table;

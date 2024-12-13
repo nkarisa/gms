@@ -4,7 +4,7 @@ namespace App\Libraries\Core;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Core\MenuUserOrderModel;
-class MenuUserOrderLibrary extends GrantsLibrary
+class MenuUserOrderLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
     protected $table;
