@@ -185,4 +185,10 @@ class LanguageLibrary extends GrantsLibrary implements \App\Interfaces\LibraryIn
           $builder->insert( $data);
         }
       }
+
+      function getLanguages(){
+        $this->languageBuilder->select('language_id, language_name');
+        $languages = $this->languageBuilder->get()->getResultArray();
+        return $languages;
+      }
 }

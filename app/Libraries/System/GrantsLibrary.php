@@ -2,6 +2,7 @@
 
 namespace App\Libraries\System;
 
+use App\Traits\System;
 use Config\GrantsConfig;
 use BadMethodCallException;
 use InvalidArgumentException;
@@ -9,16 +10,18 @@ use InvalidArgumentException;
 class GrantsLibrary
 {
 
-  use \App\Traits\System\OutputTrait;
-  use \App\Traits\System\CallbackTrait;
-  use \App\Traits\System\Extendable;
-  use \App\Traits\System\SchemaTrait;
-  use \App\Traits\System\CrudTrait;
-  use \App\Traits\System\DataTable;
-  use \App\Traits\System\SetupTrait;
-  use \App\Traits\System\ApprovalTrait;
-  use \App\Traits\System\FieldsTrait;
-  use \App\Traits\System\ManipulationTrait;
+  use System\OutputTrait;
+  use System\CallbackTrait;
+  use System\Extendable;
+  use System\SchemaTrait;
+  use System\CrudTrait;
+  use System\DataTable;
+  use System\SetupTrait;
+  use System\ApprovalTrait;
+  use System\FieldsTrait;
+  use System\ManipulationTrait;
+  use System\BuilderTrait;
+  use System\LibraryInitTrait;
 
   protected $read_db;
   protected $write_db;
@@ -42,6 +45,10 @@ class GrantsLibrary
 
   function __construct()
   {
+
+    $this->initBuilders();
+    // $this->initLibraries();
+    
     // Load grants config
     $this->config = config(GrantsConfig::class);
     // Load default helpers
@@ -78,19 +85,19 @@ class GrantsLibrary
 
   }
 
-  private function callbackTransactionValidateDuplicatesColumns($table_name)
-  {
+  // private function callbackTransactionValidateDuplicatesColumns($table_name)
+  // {
 
-    $featureLibrary = $this->loadLibrary($table_name);
+  //   $featureLibrary = $this->loadLibrary($table_name);
 
-    $columns = array();
+  //   $columns = array();
 
-    if (method_exists($featureLibrary, 'transactionValidateDuplicatesColumns')) {
-      $columns = $featureLibrary->transactionValidateDuplicatesColumns();
-    }
+  //   if (method_exists($featureLibrary, 'transactionValidateDuplicatesColumns')) {
+  //     $columns = $featureLibrary->transactionValidateDuplicatesColumns();
+  //   }
 
-    return $columns;
-  }
+  //   return $columns;
+  // }
 
   // private function callbackMultiSelectField($table_name): string
   // {

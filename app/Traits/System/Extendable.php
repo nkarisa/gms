@@ -266,7 +266,7 @@ trait Extendable
     return [];
   }
 
-  protected function transactionValidateDuplicatesColumns(): array
+  public function transactionValidateDuplicatesColumns(): array
   {
       return [];
   }

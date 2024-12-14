@@ -50,6 +50,12 @@ class GrantsLibraryTest extends CIUnitTestCase {
     public function testDeriveLookupTablesReturnsAllLookupTablesForValidTableName(): array 
     {
         $tableName = 'cancel_cheque';
+        
+        // $approveItemLibrary = $this->createMock(\App\Libraries\Core\ApproveItemLibrary::class);
+        // $approveItemLibrary = $this->createStub(\App\Libraries\Core\ApproveItemLibrary::class);
+        // $approveItemLibrary->method('approveableItem')->willReturn(false);
+
+
         $lookupTables = $this->grantsLibrary->deriveLookupTables($tableName);
 
         $this->assertIsArray($lookupTables);

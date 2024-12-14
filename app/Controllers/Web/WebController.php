@@ -10,10 +10,14 @@ use CodeIgniter\HTTP\RequestInterface;
 use Psr\Log\LoggerInterface;
 use Config\GrantsConfig;
 use App\Libraries\System\GrantsLibrary;
+use \App\Traits\System;
 
 
 class WebController extends BaseController
 {
+
+  use System\BuilderTrait;
+  use System\LibraryInitTrait;
   /**
    * Instance of the main Request object.
    *
@@ -75,6 +79,9 @@ class WebController extends BaseController
     // Do Not Edit This Line
     parent::initController($request, $response, $logger);
 
+    $this->initBuilders();
+    // $this->initLibraries();
+    
     // Preload any models, libraries, etc, here.
 
     $this->session = \Config\Services::session();

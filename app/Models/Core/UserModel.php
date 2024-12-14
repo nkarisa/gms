@@ -13,12 +13,12 @@ class UserModel extends Model implements ModelInterface
     protected $returnType       = 'array';
     protected $useSoftDeletes   = true;
     protected $protectFields    = true;
-    protected $DBGroup = 'write';
+    // protected $DBGroup = 'write';
     protected $allowedFields    = [
         'user_id', 'user_firstname', 'user_lastname', 'user_name', 'user_email', 'user_is_context_manager', 
         'user_is_system_admin', 'user_is_active', 'fk_context_definition_id', 'fk_language_id', 'fk_role_id', 
         'fk_account_system_id', 'fk_country_currency_id', 'fk_status_id', 'user_employment_date', 'user_unique_identifier', 
-        'user_password', 'user_personal_data_consent_date', 'user_is_switchable'
+        'user_password', 'user_personal_data_consent_date', 'user_is_switchable','user_created_date'
     ];
     
 
@@ -43,7 +43,7 @@ class UserModel extends Model implements ModelInterface
 
     // Callbacks
     protected $allowCallbacks = true;
-    protected $beforeInsert   = ['append_creator_id'];
+    protected $beforeInsert   = []; //['append_creator_id'];
     protected $afterInsert    = [];
     protected $beforeUpdate   = [];
     protected $afterUpdate    = [];

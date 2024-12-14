@@ -1,45 +1,47 @@
 <?php
 
 use CodeIgniter\Test\CIUnitTestCase;
+use Tests\Support\Database\Seeds\UserSeeder;
+use Tests\Support\Models\UserModel;
 use CodeIgniter\Test\DatabaseTestTrait;
-use Tests\Support\Database\Seeds\ExampleSeeder;
-use Tests\Support\Models\ExampleModel;
 
 /**
  * @internal
  */
-final class ExampleDatabaseTest extends CIUnitTestCase
+final class UserDatabaseTest extends CIUnitTestCase
 {
     use DatabaseTestTrait;
-
-    protected $seed = ExampleSeeder::class;
+    protected $seed = UserSeeder::class;
 
     public function testModelFindAll(): void
     {
-        $model = new ExampleModel();
+        $model = new UserModel();
 
         // Get every row created by ExampleSeeder
         $objects = $model->findAll();
 
+        // print_r($objects);
+
         // Make sure the count is as expected
         $this->assertCount(3, $objects);
+        $this->assertEquals('joedoe', $objects[0]->user_name);
     }
 
     public function testSoftDeleteLeavesRow(): void
     {
-        $model = new ExampleModel();
+        $model = new UserModel();
         $this->setPrivateProperty($model, 'useSoftDeletes', true);
-        $this->setPrivateProperty($model, 'tempUseSoftDeletes', true);
+        // $this->setPrivateProperty($model, 'tempUseSoftDeletes', true);
 
         /** @var stdClass $object */
         $object = $model->first();
-        $model->delete($object->id);
+        $model->delete($object->user_id);
 
         // The model should no longer find it
-        $this->assertNull($model->find($object->id));
+        $this->assertNull($model->find($object->user_id));
 
         // ... but it should still be in the database
-        $result = $model->builder()->where('id', $object->id)->get()->getResult();
+        $result = $model->builder()->where('user_id', $object->user_id)->get()->getResult();
 
         $this->assertCount(1, $result);
     }

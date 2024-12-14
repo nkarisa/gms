@@ -569,4 +569,7 @@ class OfficeLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
     return $dates;
   }
 
+  function transactionValidateDuplicatesColumns(): array{
+    return ['office_code'];
+  }
 }

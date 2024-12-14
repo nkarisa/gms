@@ -2,9 +2,11 @@
 
 namespace Tests\Support\Models;
 
-use CodeIgniter\Model;
+use App\Models\Core\ContextDefinitionModel as DefinitionModel;
+use CodeIgniter\Test\Fabricator;
+use Faker\Generator;
 
-class ContextDefinitionModel extends Model
+class ContextDefinitionModel extends DefinitionModel
 {
     protected $table          = 'context_definition';
     protected $primaryKey     = 'context_definition_id';
@@ -31,4 +33,5 @@ class ContextDefinitionModel extends Model
     protected $createdField  = 'context_definition_created_date';
     protected $updatedField  = 'context_definition_last_modified_date';
     protected $deletedField  = 'context_definition_deleted_at';
+
 }

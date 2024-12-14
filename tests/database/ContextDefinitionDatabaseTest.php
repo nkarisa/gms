@@ -11,6 +11,7 @@ final class ContextDefinitionDatabaseTest extends CIUnitTestCase
 {
 
     protected $seed = ContextDefinitionSeeder::class;
+    // protected $seedOnce = false;
 
     public function testModelFindAll(): void
     {

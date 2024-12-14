@@ -1,11 +1,6 @@
 <?php 
-// $cancelChequeLibrary = new \App\Libraries\Grants\CancelChequeLibrary();
-// $lookupTablesFields = $cancelChequeLibrary->lookupTablesFields($cancelChequeLibrary,"cancel_cheque");
-// echo json_encode($lookupTablesFields);
-
-// $grantsLibrary = new \App\Libraries\System\GrantsLibrary();
-// $lookupTables = $grantsLibrary->deriveLookupTables("cancel_cheque");
-// echo json_encode($lookupTables);
+// $languageLibrary = new \App\Libraries\Core\LanguageLibrary();
+// echo json_encode($languageLibrary->getLanguages());
 ?>
 <div class = 'row'>
     <div class="col-sm-12">
