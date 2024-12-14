@@ -3,12 +3,15 @@
 namespace Tests\Support\Database\Seeds;
 
 use CodeIgniter\Database\Seeder;
+// use Faker\Factory;
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
         $userLibrary = new \App\Libraries\Core\UserLibrary();
         $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+
+        $faker = \Faker\Factory::create();
 
         $users = [
             [
