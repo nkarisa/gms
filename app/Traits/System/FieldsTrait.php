@@ -167,10 +167,10 @@ trait FieldsTrait {
    function headerRowField(string $column, string $field_value = null, bool $show_only_selected_value = false, $detail_table = ''): string
    {
  
-     $f = new \App\Libraries\System\FieldsBase($column, $this->controller, true);
+     $f = new FieldsBase($column, $this->controller, true);
  
      if ($detail_table != '') {
-       $f = new \App\Libraries\System\FieldsBase($column, $detail_table, false, true);
+       $f = new FieldsBase($column, $detail_table, false, true);
      }
  
      $this->setChangeFieldType();

@@ -338,7 +338,8 @@ class WebController extends BaseController
 
     if ($this->action == 'list') {
       $show_add_button = $this->libs::call($this->controller . '.checkShowAddButton', [$this->controller]);
-      $keys = $this->libs->getListColumns();
+      $keys = $this->libs->columnAliases();
+
       $page_data['keys'] = $keys;
       $page_data['is_multi_row'] = $this->libs::call($this->controller . '.checkIfTableIsMultiRow');
       $page_data['has_details_listing'] = $this->libs->checkIfTableHasDetailListing($this->controller);

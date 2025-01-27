@@ -67,7 +67,8 @@ class Element{
       return $row;
     }
   
-    function form_group($form_group_input, int $input_holder_size = 12, int $label_size = 0, String $label_name = ''){
+    function form_group($form_group_input, int $input_holder_size = 12, int $label_size = 0, string $label_name = ''){
+
       if($input_holder_size == 12){
         $label_size = 0;
       }elseif($input_holder_size + $label_size > 12){
@@ -104,18 +105,25 @@ class Element{
       
       $add_form = form_open('' , array('id'=>$form_id,'class' => 'form-horizontal form-groups-bordered', 'enctype' => 'multipart/form-data'));
       $lib = new \App\Libraries\System\GrantsLibrary();
-
+      // $grantsLibrary = new \App\Libraries\System\GrantsLibrary();
+      // $columnAliases = $grantsLibrary->columnAliases();
+      
       foreach ($fields as $column => $field) {
-  
         if( $lib->isPrimaryKeyField($table,$column) == true ||
             $lib->isHistoryTrackingField($table,$column) ||
             $column == 'approval_name' ||
             ($column == 'status_name' && $table != 'status')
         ){
           continue;
-        }
-  
-        $add_form .= $this->form_group($field,9,3,get_phrase($column));
+        } 
+
+        $labelText = get_phrase($column);
+
+        // if(array_key_exists($column, $columnAliases)){
+        //   $labelText = $columnAliases[$column];
+        // }
+
+        $add_form .= $this->form_group($field,9,3,$labelText);
   
       }
   

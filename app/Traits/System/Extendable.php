@@ -284,4 +284,33 @@ trait Extendable
   function customTableJoin(\CodeIgniter\Database\BaseBuilder $builder):void {
 
   }
+
+  function columnAliases(): array{
+    $columns = array_values($this->getListColumns());
+
+    $tableName = $this->controller;
+    $featureLib = $this->loadLibrary($tableName);
+    $primaryKeyField = $this->primaryKeyField($tableName);
+
+    if (method_exists($featureLib, 'columnAliases')) {
+      $aliases = $featureLib->columnAliases();
+      
+      $key_values = array_map(function($key) use($primaryKeyField){
+        $humanize = humanize($key);
+        if($key == $primaryKeyField){
+          $humanize = $key;
+        }
+        return $humanize;
+      },$columns);
+      
+      $flipped_keys = array_combine($columns,$key_values);
+      $intersected_keys_aliases = array_intersect_key($aliases, $flipped_keys);
+      
+      if(sizeof($intersected_keys_aliases)){
+        $columns = array_replace($flipped_keys, $intersected_keys_aliases);
+      }
+    }
+
+    return $columns;
+  }
 }

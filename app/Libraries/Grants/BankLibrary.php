@@ -28,4 +28,8 @@ class BankLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
         return ['office_bank'];
     }
 
+    // function columnAliases(): array{
+    //     return ['bank_name' => 'My Banking'];
+    // }
+
 }
