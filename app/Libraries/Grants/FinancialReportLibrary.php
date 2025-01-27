@@ -4,51 +4,26 @@ namespace App\Libraries\Grants;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\FinancialReportModel;
+use App\Libraries\Core\StatusLibrary;
 
 class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
     protected $table;
     protected $financialReportModel;
+    protected $customFinancialYearLibrary;
+    protected $statusLibrary;
 
     function __construct()
     {
         parent::__construct();
 
         $this->financialReportModel = new FinancialReportModel();
-
+        $this->statusLibrary = new StatusLibrary();
+        $this->customFinancialYearLibrary = new \App\Libraries\Grants\CustomFinancialYearLibrary();
+        
         $this->table = 'financial_report';
     }
 
-    function compute_cash_at_bank($office_ids, $reporting_month, $project_ids = [], $office_bank_ids = [], $retrieve_only_max_approved = true)
-    {
-        $to_date_cancelled_opening_oustanding_cheques = $this->getMonthCancelledOpeningOutstandingCheques($office_ids, $reporting_month, $project_ids, $office_bank_ids, 'to_date');
-
-        $office_ids = array_unique($office_ids); // Find out why office_ids come in duplicates
-
-        $opening_bank_balance = $this->openingCashBalance($office_ids, $reporting_month, $project_ids, $office_bank_ids)['bank'];
-
-        $bank_to_bank_contra_receipts = $this->bankToBankContraReceipts($office_bank_ids, $reporting_month);
-        $bank_to_bank_contra_contributions = $this->bankToBankContraContributions($office_bank_ids, $reporting_month);
-
-        $cash_transactions_to_date = $this->cashTransactionsToDate($office_ids, $reporting_month, $project_ids, $office_bank_ids, 0, $retrieve_only_max_approved);
-
-        $bank_income_to_date = isset($cash_transactions_to_date['bank']['income']) ? $cash_transactions_to_date['bank']['income'] : 0;
-        $bank_expenses_to_date = isset($cash_transactions_to_date['bank']['expense']) ? $cash_transactions_to_date['bank']['expense'] : 0;
-
-        $computed_cash_at_bank = $opening_bank_balance + $bank_income_to_date - $bank_expenses_to_date;
-
-        if ($bank_to_bank_contra_receipts > 0) {
-            $computed_cash_at_bank = $computed_cash_at_bank + array_sum($bank_to_bank_contra_receipts);
-        }
-
-        if ($bank_to_bank_contra_contributions > 0) {
-            $computed_cash_at_bank = $computed_cash_at_bank - array_sum($bank_to_bank_contra_contributions);
-        }
-
-        $computed_cash_at_bank = $computed_cash_at_bank + $to_date_cancelled_opening_oustanding_cheques;
-
-        return $computed_cash_at_bank;
-    }
 
     function getMonthCancelledOpeningOutstandingCheques($office_ids, $start_date_of_month, $project_ids, $office_bank_ids, $aggregation_period = 'current_month')
     { // Options: current_month, past_months, to_date
@@ -590,6 +565,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
         return $computed_cash_at_bank;
     }
 
+
     function computeCashAtHand($office_ids, $reporting_month, $project_ids = [], $office_bank_ids = [], $office_cash_id = 0, $retrieve_only_max_approved = true)
     {
         $cash_transactions_to_date = $this->cashTransactionsToDate($office_ids, $reporting_month, $project_ids, $office_bank_ids, $office_cash_id, $retrieve_only_max_approved);
@@ -951,4 +927,432 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
 
         return $expense_income;
     }
+
+        /**
+     * list_cleared_effects + list_oustanding_cheques_and_deposits can be normalized
+     */
+
+     function listClearedEffects($office_ids, $reporting_month, $transaction_type, $contra_type, $voucher_type_account_code, $project_ids = [], $office_bank_ids = [])
+     {
+        
+ 
+         if (count($project_ids) > 0) {
+            $builder = $this->read_db->table('office_bank');
+            $builder->select(array('office_bank.office_bank_id'));
+            $builder->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_office_bank_id=office_bank.office_bank_id');
+            $builder->join('project_allocation', 'project_allocation.project_allocation_id=office_bank_project_allocation.fk_project_allocation_id');
+            $builder->whereIn('fk_project_id', $project_ids);
+            $office_bank_ids = array_column($builder->get('office_bank')->getResultArray(), 'office_bank_id');
+         }
+ 
+         if (!empty($office_bank_ids)) {
+             $builder->whereIn('office_bank_id', $office_bank_ids);
+         }
+ 
+ 
+         $list_cleared_effects = [];
+         $builder2 = $this->read_db->table('voucher_detail');
+         //return 145890.00;
+         //$cleared_condition = " `voucher_cleared` = 1 AND `voucher_cleared_month` = '".date('Y-m-t',strtotime($reporting_month))."' ";
+         $builder2->selectSum('voucher_detail_total_cost');
+ 
+         $builder2->groupStart();
+           $builder2->where(array('voucher_type_is_hidden' => 0));
+           $builder2->orWhere(['voucher_type_is_hidden' => 2]);//Voided cheque
+         $builder2->groupEnd();
+ 
+         $builder2->select(array(
+             'voucher_id', 'voucher_number', 'voucher_cheque_number', 'voucher_description','voucher_vendor',
+             'voucher_cleared', 'office_code', 'office_name', 'voucher_date', 'voucher_cleared',
+             'office_bank_id', 'office_bank_name', 'voucher_is_reversed','voucher_type_name'
+         ));
+         $builder2->groupBy('voucher_id');
+         $builder2->whereIn('voucher.fk_office_id', $office_ids);
+         
+         //$this->read_db->where_in('voucher.fk_office_id', $office_ids);
+ 
+     
+         if ($voucher_type_account_code == 'bank' && $transaction_type == 'income') {
+             $cond_string = "((voucher_type_account_code = 'bank' AND  voucher_type_effect_code = '" . $transaction_type . "') OR (voucher_type_account_code = 'cash' AND  voucher_type_effect_code = 'cash_contra'))";
+             $builder2->where($cond_string);
+         } elseif ($voucher_type_account_code == 'bank' && $transaction_type == 'expense') {
+             $cond_string = "((voucher_type_account_code = 'bank' AND  voucher_type_effect_code = '" . $transaction_type . "') OR (voucher_type_account_code = 'bank' AND  voucher_type_effect_code = 'bank_contra') OR (voucher_type_account_code = 'bank' AND  voucher_type_effect_code = 'bank_refund'))";
+             $builder2->where($cond_string);
+         } elseif ($voucher_type_account_code == 'cash' && $transaction_type == 'income') {
+             $cond_string = "((voucher_type_account_code = 'cash' AND  voucher_type_effect_code = '" . $transaction_type . "') OR (voucher_type_account_code = 'bank' AND  voucher_type_effect_code = 'bank_contra'))";
+             $builder2->where($cond_string);
+         } elseif ($voucher_type_account_code == 'cash' && $transaction_type == 'expense') {
+             $cond_string = "((voucher_type_account_code = 'cash' AND  voucher_type_effect_code = '" . $transaction_type . "') OR (voucher_type_account_code = 'cash' AND  voucher_type_effect_code = 'cash_contra'))";
+             $builder2->where($cond_string);
+         }
+         
+         //$this->read_db->where(array('voucher_cleared' => 1 , 'voucher_date<=' => date('Y-m-t', strtotime($reporting_month)), 'voucher_cleared_month' => date('Y-m-t', strtotime($reporting_month))));
+         $builder2->where(['voucher_cleared' => 1]);
+         $builder2->where(['voucher_date<=' => date('Y-m-t', strtotime($reporting_month))]);
+         $builder2->where(['voucher_cleared_month' => date('Y-m-t', strtotime($reporting_month))]);
+ 
+         $builder2->join('voucher', 'voucher.voucher_id=voucher_detail.fk_voucher_id');
+         $builder2->join('office', 'office.office_id=voucher.fk_office_id');
+         $builder2->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+         $builder2->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+         $builder2->join('voucher_type_account', 'voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
+         $builder2->join('office_bank', 'office_bank.office_bank_id=voucher.fk_office_bank_id');
+ 
+         if (count($project_ids) > 0) {
+             $builder2->whereIn('voucher.fk_office_bank_id', $office_bank_ids);
+         }
+ 
+         $list_cleared_effects = $builder2->get('voucher_detail')->getresultArray();
+ 
+         if ($transaction_type == 'expense') {
+             $list_cleared_effects = array_merge($list_cleared_effects, $this->getUnclearedAndClearedOpeningOutstandingCheques($office_ids, $reporting_month, 'cleared', $office_bank_ids));
+         } else {
+             $list_cleared_effects = array_merge($list_cleared_effects, $this->getUnclearedAndClearedDepositInTransit($office_ids, $reporting_month, $office_bank_ids, 'cleared'));
+         }
+ 
+         return $list_cleared_effects;
+     }
+
+     function monthExpenseByExpenseAccount($office_ids, $reporting_month, $project_ids = [], $office_bank_ids = [])
+     {
+ 
+         $max_approval_status_ids = $this->statusLibrary->getMaxApprovalStatusId('voucher', $office_ids);
+ 
+         $start_date_of_reporting_month = date('Y-m-01', strtotime($reporting_month));
+         $end_date_of_reporting_month = date('Y-m-t', strtotime($reporting_month));
+         $get_office_bank_project_allocation = $this->getOfficeBankProjectAllocation($office_bank_ids);
+ 
+         $builder = $this->read_db->table('voucher_detail');
+         $builder->selectSum('voucher_detail_total_cost');
+         $builder->select(array('income_account_id', 'expense_account_id'));
+         $builder->groupBy('expense_account_id');
+         $builder->whereIn('voucher.fk_office_id', $office_ids);
+         $builder->where(array('voucher_date>=' => $start_date_of_reporting_month,
+             'voucher_date<=' => $end_date_of_reporting_month
+         ));
+         $builder->whereIn('voucher_type_effect_code', ['expense', 'bank_refund']);
+ 
+         $builder->join('voucher', 'voucher.voucher_id=voucher_detail.fk_voucher_id');
+         $builder->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+         $builder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+         $builder->join('expense_account', 'expense_account.expense_account_id=voucher_detail.fk_expense_account_id');
+         $builder->join('income_account', 'income_account.income_account_id=expense_account.fk_income_account_id');
+ 
+         if (count($project_ids) > 0) {
+             $builder->whereIn('fk_project_id', $project_ids);
+             $builder->join('project_allocation', 'project_allocation.project_allocation_id=voucher_detail.fk_project_allocation_id');
+         }
+ 
+         if (!empty($office_bank_ids)) {
+             $builder->groupStart();
+             $builder->whereIn('voucher.fk_office_bank_id', $office_bank_ids);
+             $builder->whereIn('voucher_detail.fk_project_allocation_id', $get_office_bank_project_allocation);
+             $builder->groupEnd();
+         }
+ 
+         $builder->whereIn('voucher.fk_status_id', $max_approval_status_ids);
+ 
+         $result = $builder->get('voucher_detail');
+         
+ 
+         $order_array = [];
+ 
+         if ($result->getNumRows() > 0) {
+             $rows = $result->getResultArray();
+ 
+             foreach ($rows as $record) {
+                 $order_array[$record['income_account_id']][$record['expense_account_id']] = $record['voucher_detail_total_cost'];
+             }
+         }
+ 
+         return $order_array;
+     }
+
+     function expenseToDateByExpenseAccount($office_ids, $reporting_month, $project_ids = [], $office_bank_ids = [])
+     {
+ 
+         $custom_financial_year = $this->customFinancialYearLibrary->getDefaultCustomFinancialYearIdByOffice($office_ids[0], true);
+ 
+         // $max_approval_status_ids = $this->general_model->get_max_approval_status_id('voucher');
+         $max_approval_status_ids = $this->statusLibrary->getMaxApprovalStatusId('voucher', $office_ids);
+         
+         $fy_start_date = fy_start_date($reporting_month, $custom_financial_year);
+         $end_date_of_reporting_month = date('Y-m-t', strtotime($reporting_month));
+         $get_office_bank_project_allocation = $this->getOfficeBankProjectAllocation($office_bank_ids);
+ 
+         $builder = $this->read_db->table('voucher_detail');
+
+         $builder->selectSum('voucher_detail_total_cost');
+         $builder->select(array('income_account_id', 'expense_account_id'));
+         $builder->groupBy('expense_account_id');
+         $builder->whereIn('voucher.fk_office_id', $office_ids);
+         $builder->where(array('voucher_date>=' => $fy_start_date,
+             'voucher_date<=' => $end_date_of_reporting_month
+         ));
+         
+         $builder->whereIn('voucher_type_effect_code', ['expense','bank_refund']);
+ 
+         $builder->join('voucher', 'voucher.voucher_id=voucher_detail.fk_voucher_id');
+         $builder->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+         $builder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+         $builder->join('expense_account', 'expense_account.expense_account_id=voucher_detail.fk_expense_account_id');
+         $builder->join('income_account', 'income_account.income_account_id=expense_account.fk_income_account_id');
+ 
+         if (count($project_ids) > 0) {
+             $builder->whereIn('fk_project_id', $project_ids);
+             $builder->join('project_allocation', 'project_allocation.project_allocation_id=voucher_detail.fk_project_allocation_id');
+         }
+ 
+         if (!empty($office_bank_ids)) {
+             $builder->groupStart();
+             $builder->whereIn('voucher.fk_office_bank_id', $office_bank_ids);
+             $builder->whereIn('voucher_detail.fk_project_allocation_id', $get_office_bank_project_allocation);
+             $builder->groupEnd();
+         }
+ 
+         $builder->whereIn('voucher.fk_status_id', $max_approval_status_ids);
+ 
+         $result = $builder->get('voucher_detail');
+ 
+         $order_array = [];
+ 
+         if ($result->getNumRows() > 0) {
+             $rows = $result->getResultArray();
+ 
+             foreach ($rows as $record) {
+                 $order_array[$record['income_account_id']][$record['expense_account_id']] = $record['voucher_detail_total_cost'];
+             }
+         }
+ 
+         return $order_array;
+     }
+
+     function budgetToDateByExpenseAccount($office_ids, $reporting_month, $project_ids = [], $office_bank_ids = []){
+
+        $max_approval_status_ids = $this->statusLibrary->getMaxApprovalStatusId('budget_item', $office_ids);
+
+        $budget_ids = [];
+
+        $builder = $this->read_db->table('financial_report');
+        $builder->select(array('fk_budget_id'));
+        $builder->whereIn('fk_office_id', $office_ids);
+        $builder->where(array('financial_report_month' => date('Y-m-01',strtotime($reporting_month))));
+        $financial_report_obj = $builder->get('financial_report');
+
+        if($financial_report_obj->getNumRows() > 0){
+            $budget_ids = array_column($financial_report_obj->getResultArray(),'fk_budget_id');
+        }
+
+        $month_number = date('m', strtotime($reporting_month));
+        $custom_financial_year = $this->customFinancialYearLibrary->getDefaultCustomFinancialYearIdByOffice($office_ids[0], true);
+        $month_list = year_month_order($custom_financial_year);
+        
+        // log_message('error', json_encode($month_list));
+        // log_message('error', json_encode($reporting_month));
+        $current_month = date('m', strtotime($reporting_month));
+        // log_message('error', json_encode($current_month));
+
+        $listed_months = [];
+
+        for($i = 0; $i < count($month_list); $i++){
+            $listed_months[$i] = $month_list[$i];
+            if($month_list[$i] == $month_number){
+                break;
+            }
+        }
+
+        $get_office_bank_project_allocation = $this->getOfficeBankProjectAllocation($office_bank_ids);
+
+        $builder2 = $this->read_db->table('financial_report');
+        $builder2->selectSum('budget_item_detail_amount');
+        $builder2->select(array(
+            'month_number',
+            'income_account.income_account_id as income_account_id',
+            'expense_account.expense_account_id as expense_account_id'
+        ));
+
+        $builder2->groupBy('month_number,expense_account.expense_account_id');
+        $builder2->whereIn('budget.fk_office_id', $office_ids);
+
+        // $this->read_db->where(array('month_order<=' => $month_order));
+        $builder2->whereIn('month_id',  $listed_months);
+        
+        $builder2->whereIn('budget_id', $budget_ids);
+
+        $builder2->join('budget_item', 'budget_item.budget_item_id=budget_item_detail.fk_budget_item_id');
+        $builder2->join('budget', 'budget.budget_id=budget_item.fk_budget_id');
+        $builder2->join('month', 'month.month_id=budget_item_detail.fk_month_id');
+        $builder2->join('expense_account', 'expense_account.expense_account_id=budget_item.fk_expense_account_id');
+        $builder2->join('income_account', 'income_account.income_account_id=expense_account.fk_income_account_id');
+
+        if (count($project_ids) > 0) {
+            $builder2->whereIn('project_allocation.fk_project_id', $project_ids);
+            $builder2->join('project_allocation', 'project_allocation.project_allocation_id=budget_item.fk_project_allocation_id');
+        }
+
+        if (!empty($office_bank_ids)) {
+            $builder2->whereIn('budget_item.fk_project_allocation_id', $get_office_bank_project_allocation);
+        }
+
+
+        $builder2->whereIn('budget_item.fk_status_id', $max_approval_status_ids);
+
+        $result = $builder2->get('budget_item_detail');
+
+        $order_array = [];
+
+        if ($result->getNumRows() > 0) {
+            $rows = $result->getResultArray();
+            foreach ($rows as $record) {
+                $order_array[$record['income_account_id']][$record['month_number']][$record['expense_account_id']] = $record['budget_item_detail_amount'];
+            }
+        }
+        
+        // log_message('error', json_encode($order_array));
+        // return $order_array;
+
+        $rst = [];
+        foreach($order_array as $income_account_id => $expense_month_listing){
+            $rst['month'][$income_account_id] = [];
+            $rst['to_date'][$income_account_id] = [];
+            foreach($expense_month_listing as $listed_month_number => $expense_budget){
+                if($month_number == $listed_month_number){
+                    $rst['month'][$income_account_id] = $expense_budget;
+                }
+                foreach($expense_budget as $expense_account_id => $month_expense_budget_amount){
+                    $rst['to_date'][$income_account_id][$expense_account_id][] = $month_expense_budget_amount;
+                }
+            }
+        }
+
+        if(!empty($rst['to_date'])){
+            foreach($rst['to_date'] as $income_account_id => $expense_budget){
+                foreach($expense_budget as $expense_account_id => $budget_items){
+                    $rst['to_date'][$income_account_id][$expense_account_id] = array_sum($budget_items);
+                }
+            }
+        }
+        
+        return $rst;
+    }
+
+    function getMonthActiveProjects($office_ids, $reporting_month, $show_active_only = false)
+    {
+
+        $date_condition_string = "(project_end_date >= '" . $reporting_month . "' OR  project_allocation_extended_end_date >= '" . $reporting_month . "')";
+        $builder = $this->read_db->table('project');
+        $builder->select(array('project_id', 'project_name'));
+
+        if ($show_active_only) {
+            $builder->where($date_condition_string);
+        }
+
+        $builder->whereIn('fk_office_id', $office_ids);
+        $builder->join('project_allocation', 'project_allocation.fk_project_id=project.project_id');
+        $projects = $builder->get('project')->getResultArray();
+
+        return $projects;
+    }
+
+    function getOfficeBanks($office_ids, $project_ids = [], $office_bank_ids = []){
+
+        $builder = $this->read_db->table('office_bank_project_allocation');
+        $builder->select(array('DISTINCT(office_bank_id)', 'office_bank_name'));
+        $builder->whereIn('fk_office_id' ,$office_ids);
+        $builder->join('office_bank', 'office_bank.office_bank_id=office_bank_project_allocation.fk_office_bank_id');
+
+        if (!empty($office_bank_ids)) {
+            $builder->whereIn('fk_office_bank_id', $office_bank_ids);
+        }
+
+        $office_banks = $builder->get('office_bank_project_allocation')->getResultArray();
+        
+    
+        return $office_banks;
+    }
+
+    function getOpeningOustandingCheque($cheque_id)
+    {
+        $builder = $this->read_db->table('opening_outstanding_cheque');
+        $builder->select(array('opening_outstanding_cheque_amount','opening_outstanding_cheque_id','opening_outstanding_cheque_bounced_flag','opening_outstanding_cheque_description','opening_outstanding_cheque_is_cleared','opening_outstanding_cheque_cleared_date','opening_outstanding_cheque_number'));
+        $builder->where(array('opening_outstanding_cheque_id' => $cheque_id));
+        $bounced_chq_record = $builder->get('opening_outstanding_cheque')->getRowArray();
+
+
+        return $bounced_chq_record;
+    }
+
+    function updateBankSupportFundsAndOustandingChequeOpeningBalances($office_bank_id, $cheque_id,$reporting_month, $bounce_chq)
+    {
+        //Get the a given selected outstanding cheque and compute the the total amount for funds
+        $bounced_chq_record = $this->getOpeningOustandingCheque($cheque_id);
+
+        
+        $builder = $this->read_db->table('opening_outstanding_cheque');
+        $this->read_db->transBegin();
+
+
+
+        
+        //Update Openning outstanding balance
+        
+        $cheque_cleared=$bounced_chq_record['opening_outstanding_cheque_is_cleared']==1?0:1;
+        $bounce_flag=$bounced_chq_record['opening_outstanding_cheque_bounced_flag']==1?0:1;       
+        $cheque_cleared_date = $bounced_chq_record['opening_outstanding_cheque_cleared_date']== '0000-00-00' || $bounced_chq_record['opening_outstanding_cheque_cleared_date'] == NULL ? date('Y-m-t', strtotime($reporting_month)): NULL;
+
+        $opening_oustanding_chq_balance_data = array(
+            'opening_outstanding_cheque_is_cleared'=>$cheque_cleared,
+            'opening_outstanding_cheque_cleared_date' => $cheque_cleared_date,
+            'opening_outstanding_cheque_bounced_flag'=>$bounce_flag
+        );
+
+        $builder->where('opening_outstanding_cheque_id', $cheque_id);
+        $builder->update('opening_outstanding_cheque',  $opening_oustanding_chq_balance_data);
+
+        $this->read_db->transComplete();
+
+        if ($this->write_db->transStatus() == FALSE) {
+            $this->write_db->transRollback();
+             return false;
+        } else {
+
+            $this->write_db->transCommit();
+            return true;
+        }
+    }
+
+    function getOfficeBankProjectAllocation($office_bank_ids)
+    {
+
+        if (!empty($office_bank_ids)) {
+            $builder = $this->read_db->table('office_bank_project_allocation');
+            $builder->select(array('fk_project_allocation_id'));
+            $builder->whereIn('fk_office_bank_id', $office_bank_ids);
+            $result =  $builder->get('office_bank_project_allocation')->getResultArray();
+
+            return array_column($result, 'fk_project_allocation_id');
+        } else {
+            return [];
+        }
+    }
+
+    public function showAddButton(): bool
+    {
+      return false;
+    }
+
+    function showListEditAction(array $record): bool
+    {
+      return false;
+    }
+
+    public function listTableVisibleColumns(): array
+    {
+      return ['financial_report_track_number', 'office_name', 'financial_report_is_submitted', 'financial_report_month', 'financial_report_submitted_date', 'status_name'];
+    }
+
+    function pagePosition(){
+        $widget['position_1']['list'] = view("financial_report/show_hide_columns");
+        return $widget;
+      }
 }

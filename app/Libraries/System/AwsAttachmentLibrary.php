@@ -205,7 +205,7 @@ class AwsAttachmentLibrary {
     }
 
 
-    public function upload_files(string $storeFolder, array $additionalAttachmentTableInsertData, array $attachmentWhereConditionArray = []): array
+    public function uploadFiles(string $storeFolder, array $additionalAttachmentTableInsertData, array $attachmentWhereConditionArray = []): array
     {
         $preassignedUrls = [];
         $files = service('request')->getFiles();

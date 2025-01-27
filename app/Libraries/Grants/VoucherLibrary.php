@@ -9,6 +9,8 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 {
     protected $table;
     protected $voucherModel;
+    protected $voucherTypeLibrary;
+    protected $journalLibrary;
 
     public $lookup_tables_with_null_values = ['office_bank','office_cash'];
 
@@ -22,6 +24,8 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $this->table = 'voucher';
 
         $this->dependant_table = "voucher_detail";
+        $this->voucherTypeLibrary = new \App\Libraries\Grants\VoucherTypeLibrary();
+        $this->journalLibrary = new \App\Libraries\Grants\JournalLibrary();
     }
 
     function detachDetailTable(): bool
@@ -1490,6 +1494,126 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
     return $columnsValues;
   }
+
+  public function monthFundsTransferVouchers($office_ids, $reporting_month)
+  {
+
+      $voucher_type_ids = $this->voucherTypeLibrary->officeHiddenBankVoucherTypes($office_ids[0]);
+
+      $vouchers = [];
+
+      // log_message('error', json_encode($voucher_type_ids));
+
+      if (count($voucher_type_ids) > 0) {
+        $builder = $this->read_db->table('voucher');
+          $builder->select(
+              [
+                  'voucher_date',
+                  'voucher_number',
+                  'voucher_id',
+                  'funds_transfer_source_account_id',
+                  'funds_transfer_target_account_id',
+                  'funds_transfer_amount',
+                  'funds_transfer_id',
+                  'funds_transfer_created_date',
+                  'funds_transfer_type',
+                  'voucher_created_date',
+              ]
+          );
+          $builder->where(array('voucher_date>=' => date('Y-m-01', strtotime($reporting_month)), 'voucher_date<=' => date('Y-m-t', strtotime($reporting_month))));
+          $builder->whereIn('fk_voucher_type_id', $voucher_type_ids);
+          $builder->join('funds_transfer', 'funds_transfer.fk_voucher_id=voucher.voucher_id');
+          $builder->whereIn('voucher.fk_office_id', $office_ids);
+          $vouchers_obj = $builder->get('voucher');
+
+          if ($vouchers_obj->getNumRows() > 0) {
+              $unformatted_accounts_vouchers = $vouchers_obj->getResultArray();
+
+              $vouchers = $this->formatAccountsNumbers($unformatted_accounts_vouchers);
+          }
+      }
+      // log_message('error', json_encode($reporting_month));
+      return $vouchers;
+  }
+
+  public function formatAccountsNumbers($vouchers)
+    {
+
+        $income_accounts = [];
+        $expense_accounts = [];
+        // $accounts = [];
+
+        $cnt = 0;
+        foreach ($vouchers as $voucher) {
+            if ($voucher['funds_transfer_type'] == 1) {
+                $income_accounts[$voucher['funds_transfer_source_account_id']] = $voucher['funds_transfer_source_account_id'];
+                $income_accounts[$voucher['funds_transfer_target_account_id']] = $voucher['funds_transfer_target_account_id'];
+            } else {
+                $expense_accounts[$voucher['funds_transfer_source_account_id']] = $voucher['funds_transfer_source_account_id'];
+                $expense_accounts[$voucher['funds_transfer_target_account_id']] = $voucher['funds_transfer_target_account_id'];
+            }
+            $cnt++;
+        }
+
+        // log_message('error',json_encode($income_accounts));
+        // log_message('error',json_encode($expense_accounts));
+
+        if (!empty($income_accounts)) {
+            $builder = $this->read_db->table('expense_account');
+            $builder->select(array('income_account_id', 'income_account_name'));
+            $builder->whereIn('income_account_id', $income_accounts);
+            $income_accounts = $builder->get('income_account')->getResultArray();
+
+            $income_account_ids = array_column($income_accounts, 'income_account_id');
+            $income_account_names = array_column($income_accounts, 'income_account_name');
+
+            $income_accounts = array_combine($income_account_ids, $income_account_names);
+        }
+
+        if (!empty($expense_accounts)) {
+            $builder->select(array('expense_account_id', 'expense_account_name'));
+            $builder->whereIn('expense_account_id', $expense_accounts);
+            $expense_accounts = $builder->get('expense_account')->getResultArray();
+
+            $expense_account_ids = array_column($expense_accounts, 'expense_account_id');
+            $expense_account_names = array_column($expense_accounts, 'expense_account_name');
+
+            $expense_accounts = array_combine($expense_account_ids, $expense_account_names);
+        }
+
+        for ($i = 0; $i < sizeof($vouchers); $i++) {
+            if ($vouchers[$i]['funds_transfer_type'] == 1) {
+                $vouchers[$i]['funds_transfer_source_account_id'] = $income_accounts[$vouchers[$i]['funds_transfer_source_account_id']];
+                $vouchers[$i]['funds_transfer_target_account_id'] = $income_accounts[$vouchers[$i]['funds_transfer_target_account_id']];
+            } else {
+                $vouchers[$i]['funds_transfer_source_account_id'] = $expense_accounts[$vouchers[$i]['funds_transfer_source_account_id']];
+                $vouchers[$i]['funds_transfer_target_account_id'] = $expense_accounts[$vouchers[$i]['funds_transfer_target_account_id']];
+            }
+        }
+
+        return $vouchers;
+    }
+
+    public function checkIfMonthVouchersAreApproved($office_id, $month)
+    {
+ 
+        $start_month_date = date('Y-m-01', strtotime($month));
+        $end_month_date = date('Y-m-t', strtotime($month));
+ 
+        $approved_vouchers = count($this->journalLibrary->journalRecords($office_id, $month));
+ 
+        //return $approved_vouchers;
+        $builder = $this->read_db->table('voucher');
+        $count_of_month_raised_vouchers = $builder->getWhere(
+            array(
+                'fk_office_id' => $office_id,
+                'voucher_date>=' => $start_month_date,
+                'voucher_date<=' => $end_month_date,
+            )
+        )->getNumRows();
+ 
+        return ($approved_vouchers == $count_of_month_raised_vouchers) && $count_of_month_raised_vouchers > 0 ? true : false;
+    }
 
 
 }

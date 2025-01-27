@@ -50,4 +50,6 @@ class GrantsConfig extends BaseConfig
     public $use_default_logo = false;
     public $append_office_code_to_voucher_number = true;
     public $toggle_accounts_by_allocation = true; 
+    public $fy_year_digits = 2;
+    public $fy_year_reference = 'next';
 }

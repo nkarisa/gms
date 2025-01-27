@@ -9,12 +9,16 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 {
     protected $table;
     protected $journalModel;
+    protected $OfficeCashJournal;
+    protected $OfficeBankJournal;
 
     function __construct()
     {
         parent::__construct();
 
         $this->journalModel = new JournalModel();
+        $this->OfficeCashJournal = new \App\Libraries\Grants\OfficeCashLibrary();
+        $this->OfficeBankJournal = new \App\Libraries\Grants\OfficeBankLibrary();
 
         $this->table = 'journal';
     }
@@ -667,5 +671,84 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         
           $this->write_db->table('journal')->insert( $new_journal);
         }
+      }
+
+      public function cashBreakdown($office_id, $transacting_month){
+        
+        $cash_breakdown = [];
+        $sum_cash_breakdown = [];
+    
+        $month_vouchers = $this->getAllOfficeMonthVouchers($office_id, $transacting_month);
+    
+        $all_office_cash_accounts = $this->OfficeCashJournal->getActiveOfficeCashByOfficeId($office_id);
+        $all_office_bank_accounts = $this->OfficeBankJournal->getActiveOfficeBank($office_id);
+    
+        $month_opening_bank_cash_balance = $this->monthOpeningBankCashBalance($office_id, $transacting_month);
+    
+        foreach($all_office_bank_accounts as $office_bank){
+          $sum_cash_breakdown['cash_at_bank'][$office_bank['office_bank_id']]['office_bank_name'] = $office_bank['office_bank_name'];
+          $sum_cash_breakdown['cash_at_bank'][$office_bank['office_bank_id']]['opening'] = 0;
+    
+          if(isset($month_opening_bank_cash_balance['bank'][$office_bank['office_bank_id']])){
+            $sum_cash_breakdown['cash_at_bank'][$office_bank['office_bank_id']]['opening'] = $month_opening_bank_cash_balance['bank'][$office_bank['office_bank_id']]['amount'];
+          }
+        }
+    
+        foreach($all_office_cash_accounts as $office_cash){
+          $sum_cash_breakdown['cash_at_hand'][$office_cash['office_cash_id']]['office_cash_name'] = $office_cash['office_cash_name'];
+          $sum_cash_breakdown['cash_at_hand'][$office_cash['office_cash_id']]['opening'] = 0;
+          
+          if(isset($month_opening_bank_cash_balance['cash'][$office_cash['office_cash_id']])){
+            $sum_cash_breakdown['cash_at_hand'][$office_cash['office_cash_id']]['opening'] = $month_opening_bank_cash_balance['cash'][$office_cash['office_cash_id']]['amount'];
+          }
+        }
+    
+        foreach($month_vouchers as $month_voucher){
+          if($month_voucher['voucher_type_account_code'] == 'bank') {
+            if($month_voucher['voucher_type_effect_code'] == 'income' || $month_voucher['voucher_type_effect_code'] == 'cash_contra'){
+              $cash_breakdown['cash_at_bank'][$month_voucher['fk_office_bank_id']]['income'][] = $month_voucher['voucher_detail_total_cost']; 
+              if(isset($cash_breakdown['cash_at_bank'][$month_voucher['fk_office_bank_id']]['income'])){
+                $sum_cash_breakdown['cash_at_bank'][$month_voucher['fk_office_bank_id']]['income'] = array_sum($cash_breakdown['cash_at_bank'][$month_voucher['fk_office_bank_id']]['income']);
+              }
+            }elseif($month_voucher['voucher_type_effect_code'] == 'expense'){
+              $cash_breakdown['cash_at_bank'][$month_voucher['fk_office_bank_id']]['expense'][] = $month_voucher['voucher_detail_total_cost']; 
+              if(isset($cash_breakdown['cash_at_bank'][$month_voucher['fk_office_bank_id']]['expense'])){
+                $sum_cash_breakdown['cash_at_bank'][$month_voucher['fk_office_bank_id']]['expense'] = array_sum($cash_breakdown['cash_at_bank'][$month_voucher['fk_office_bank_id']]['expense']);
+              }
+            }elseif($month_voucher['voucher_type_effect_code'] == 'bank_contra'){
+              $cash_breakdown['cash_at_hand'][$month_voucher['fk_office_cash_id']]['income'][] = $month_voucher['voucher_detail_total_cost']; 
+              if(isset($cash_breakdown['cash_at_hand'][$month_voucher['fk_office_cash_id']]['income'])){
+                $sum_cash_breakdown['cash_at_hand'][$month_voucher['fk_office_cash_id']]['income'] = array_sum($cash_breakdown['cash_at_hand'][$month_voucher['fk_office_cash_id']]['income']);
+              }
+            }
+          }elseif($month_voucher['voucher_type_account_code'] == 'cash'){
+            if($month_voucher['voucher_type_effect_code'] == 'income'){
+              $cash_breakdown['cash_at_hand'][$month_voucher['fk_office_cash_id']]['income'][] = $month_voucher['voucher_detail_total_cost']; 
+              if(isset($cash_breakdown['cash_at_hand'][$month_voucher['fk_office_cash_id']]['income'])){
+                $sum_cash_breakdown['cash_at_hand'][$month_voucher['fk_office_cash_id']]['income'] = array_sum($cash_breakdown['cash_at_hand'][$month_voucher['fk_office_cash_id']]['income']);
+              }
+            }elseif($month_voucher['voucher_type_effect_code'] == 'expense' || $month_voucher['voucher_type_effect_code'] == 'cash_contra'){
+              $cash_breakdown['cash_at_hand'][$month_voucher['fk_office_cash_id']]['expense'][] = $month_voucher['voucher_detail_total_cost']; 
+              if(isset($cash_breakdown['cash_at_hand'][$month_voucher['fk_office_cash_id']]['expense'])){
+                $sum_cash_breakdown['cash_at_hand'][$month_voucher['fk_office_cash_id']]['expense'] = array_sum($cash_breakdown['cash_at_hand'][$month_voucher['fk_office_cash_id']]['expense']);
+              }
+            }
+          }
+    
+        }
+    
+        $cash_breakdown_with_closing = [];
+    
+        foreach($sum_cash_breakdown as $cash_type => $cash_type_details){
+          foreach($cash_type_details as $detail_id => $detail){
+            $cash_breakdown_with_closing[$cash_type][$detail_id] = $detail;
+            $opening = isset($detail['opening']) ? $detail['opening'] : 0;
+            $income = isset($detail['income']) ? $detail['income'] : 0;
+            $expense = isset($detail['expense']) ? $detail['expense'] : 0;
+            $cash_breakdown_with_closing[$cash_type][$detail_id]['closing'] =  $opening + $income - $expense;
+          }
+        }
+    
+        return $cash_breakdown_with_closing;
       }
 }

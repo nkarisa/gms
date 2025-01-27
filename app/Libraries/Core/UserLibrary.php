@@ -1785,4 +1785,10 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
             
     }
 
+    function getLowestOfficeContext()
+    {
+        $builder = $this->read_db->table('context_definition');
+        return $builder->getWhere(array('context_definition_level' => 1))->getRow();
+    }
+
 }
