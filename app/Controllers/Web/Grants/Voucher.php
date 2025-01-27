@@ -90,7 +90,7 @@ class Voucher extends WebController
    * @dated: 4/06/2023
    * @access public
    * @return void
-   * @param int $$office_id, $transaction_date
+   * @param int $office_id, $transaction_date
    */
   function getActiveVoucherTypes(int $office_id, string $transaction_date): ResponseInterface
   {

@@ -75,6 +75,7 @@ foreach ($modules as $module){
             $routes->post('(:segment)/(:any)/(:any)',$module.'\\'.$controllerName.'::$1/$2/$2/$3');
             $routes->post('(:segment)/(:any)/(:any)/(:any)',$module.'\\'.$controllerName.'::$1/$2/$3/$4');
 
+             //ajax/budgetItem/projectBudgetableExpenseAccounts/11824'
             $routes->get('(:segment)',$module.'\\'.$controllerName.'::$1');
             $routes->get('(:segment)/(:any)',$module.'\\'.$controllerName.'::$1/$2');
             $routes->get('(:segment)/(:any)/(:any)',$module.'\\'.$controllerName.'::$1/$2/$2/$3');

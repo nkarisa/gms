@@ -832,10 +832,7 @@ class GrantsLibrary
     }
 
     return $foreign_tables_array;
-
   }
-
-
 
   function listTableWhereByAccountSystem($builder, $tableName)
   {
@@ -1151,14 +1148,38 @@ class GrantsLibrary
 
 
   public function notExistsSubQuery($builder, string $lookupTable, string $associationTable, string $stringCondition = '')
-{
+  {
 
-    $subQuery = 'SELECT * FROM ' . $associationTable . 
-                ' WHERE ' . $associationTable . '.fk_' . $lookupTable . '_id = ' . 
-                $lookupTable . '.' . $lookupTable . '_id ' . $stringCondition;
+    $subQuery = 'SELECT * FROM ' . $associationTable .
+      ' WHERE ' . $associationTable . '.fk_' . $lookupTable . '_id = ' .
+      $lookupTable . '.' . $lookupTable . '_id ' . $stringCondition;
 
     $builder->where('NOT EXISTS (' . $subQuery . ')', null, false);
+  }
 
+  function accountSystemDeclineStates($approve_item, $account_system_id)
+  {
+
+    // Query Builder
+    $builder = $this->read_db->table('status');
+    $builder->join('approval_flow', 'approval_flow.approval_flow_id = status.fk_approval_flow_id');
+    $builder->join('approve_item', 'approve_item.approve_item_id = approval_flow.fk_approve_item_id');
+    $builder->where('approve_item.approve_item_name', $approve_item);
+    $builder->where('approval_flow.fk_account_system_id', $account_system_id);
+    $builder->where('status_approval_direction', -1);
+
+    // Execute the query
+    $status_obj = $builder->get();
+
+    $decline_states = [];
+    if ($status_obj->getNumRows() > 0) {
+      foreach ($status_obj->getResult() as $row) {
+        $decline_states[] = $row->status_id;
+      }
+    }
+
+    return $decline_states;
+  }
 }
 
     function itemHasDeclinedState($item_id, $table){

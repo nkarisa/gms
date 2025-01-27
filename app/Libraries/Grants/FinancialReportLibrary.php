@@ -24,6 +24,85 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
         $this->table = 'financial_report';
     }
 
+    /**
+     *getOffice():This method return and office/fcp.
+     * @author Livingstone Onduso: Dated 06-05-2024
+     * @access public
+     * @return object 
+     * @param float $budget_id
+     */
+    public function getOffice(float  $budget_id): object
+    {
+        // Query
+        $builder = $this->read_db->table('office');
+        $builder->select([
+            'office_id',
+            'office_name',
+            'office_code',
+            'budget_year',
+            'office.fk_account_system_id as account_system_id',
+            'budget.fk_status_id as budget_status_id',
+            'fk_custom_financial_year_id as custom_financial_year_id'
+        ]);
+        $builder->join('budget', 'budget.fk_office_id = office.office_id');
+        $builder->where('budget_id', $budget_id);
+        $office = $builder->get()->getRow();
+
+        return $office;
+    }
+
+    /**
+     *allOfficeFinancialReportSubmitted():This method true or false if office has the financial reports.
+     * @author Livingstone Onduso: Dated 06-05-2024
+     * @access public
+     * @return bool 
+     * @param float $office_id
+     */
+    public function allOfficeFinancialReportSubmitted(float $office_id): bool
+    {
+        // Query Builder
+        $builder = $this->read_db->table('financial_report');
+        $builder->where('fk_office_id', $office_id);
+        $builder->where('financial_report_is_submitted', 0);
+
+        // Count the rows
+        $not_submitted_mfrs_count = $builder->countAllResults();
+
+        // Return the result
+        return $not_submitted_mfrs_count > 0 ? false : true;
+    }
+
+
+    function compute_cash_at_bank($office_ids, $reporting_month, $project_ids = [], $office_bank_ids = [], $retrieve_only_max_approved = true)
+    {
+        $to_date_cancelled_opening_oustanding_cheques = $this->getMonthCancelledOpeningOutstandingCheques($office_ids, $reporting_month, $project_ids, $office_bank_ids, 'to_date');
+
+        $office_ids = array_unique($office_ids); // Find out why office_ids come in duplicates
+
+        $opening_bank_balance = $this->openingCashBalance($office_ids, $reporting_month, $project_ids, $office_bank_ids)['bank'];
+
+        $bank_to_bank_contra_receipts = $this->bankToBankContraReceipts($office_bank_ids, $reporting_month);
+        $bank_to_bank_contra_contributions = $this->bankToBankContraContributions($office_bank_ids, $reporting_month);
+
+        $cash_transactions_to_date = $this->cashTransactionsToDate($office_ids, $reporting_month, $project_ids, $office_bank_ids, 0, $retrieve_only_max_approved);
+
+        $bank_income_to_date = isset($cash_transactions_to_date['bank']['income']) ? $cash_transactions_to_date['bank']['income'] : 0;
+        $bank_expenses_to_date = isset($cash_transactions_to_date['bank']['expense']) ? $cash_transactions_to_date['bank']['expense'] : 0;
+
+        $computed_cash_at_bank = $opening_bank_balance + $bank_income_to_date - $bank_expenses_to_date;
+
+        if ($bank_to_bank_contra_receipts > 0) {
+            $computed_cash_at_bank = $computed_cash_at_bank + array_sum($bank_to_bank_contra_receipts);
+        }
+
+        if ($bank_to_bank_contra_contributions > 0) {
+            $computed_cash_at_bank = $computed_cash_at_bank - array_sum($bank_to_bank_contra_contributions);
+        }
+
+        $computed_cash_at_bank = $computed_cash_at_bank + $to_date_cancelled_opening_oustanding_cheques;
+
+        return $computed_cash_at_bank;
+    }
 
     function getMonthCancelledOpeningOutstandingCheques($office_ids, $start_date_of_month, $project_ids, $office_bank_ids, $aggregation_period = 'current_month')
     { // Options: current_month, past_months, to_date
@@ -163,7 +242,6 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
             if ($financial_report_is_submitted_obj->getRow()->financial_report_is_submitted == 1) {
                 $report_is_submitted = true;
             }
-
         }
 
         return $report_is_submitted;
@@ -213,7 +291,6 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
                         $bank_to_bank_contra_received_amounts[$row['income_account_id']] = $row['voucher_detail_total_cost'] ? $row['voucher_detail_total_cost'] : 0;
                     }
                 }
-
             }
         }
 
@@ -309,7 +386,6 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
                 if (($row['voucher_type_account_code'] == 'cash' && $row['voucher_type_effect_code'] == 'expense') || ($row['voucher_type_account_code'] == 'cash' && $row['voucher_type_effect_code'] == 'cash_to_cash_contra') || ($row['voucher_type_account_code'] == 'cash' && $row['voucher_type_effect_code'] == 'cash_contra')) {
                     $cash_transactions_to_date['cash']['expense'] += $row['amount'];
                 }
-
             }
         }
 
@@ -597,10 +673,11 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
     }
 
 
-    function monthUtilizedIncomeAccounts($office_ids, $start_date_of_month, $project_ids = [], $office_bank_ids = []){
+    function monthUtilizedIncomeAccounts($office_ids, $start_date_of_month, $project_ids = [], $office_bank_ids = [])
+    {
 
         $income_accounts =  $this->incomeAccounts($office_ids, $project_ids, $office_bank_ids);
-        
+
         $all_accounts_month_opening_balance = $this->monthIncomeOpeningBalance($office_ids, $start_date_of_month, $project_ids, $office_bank_ids);
         $all_accounts_month_income = $this->monthIncomeAccountReceipts($office_ids, $start_date_of_month, $project_ids, $office_bank_ids);
         $all_accounts_month_expense = $this->monthIncomeAccountExpenses($office_ids, $start_date_of_month, $project_ids, $office_bank_ids);
@@ -609,64 +686,64 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
 
         foreach ($income_accounts as $account) {
 
-        $month_opening_balance = isset($all_accounts_month_opening_balance[$account['income_account_id']]) ? $all_accounts_month_opening_balance[$account['income_account_id']] : 0;
-        $month_income = isset($all_accounts_month_income[$account['income_account_id']]) ? $all_accounts_month_income[$account['income_account_id']] : 0;
-        $month_expense = isset($all_accounts_month_expense[$account['income_account_id']]) ? $all_accounts_month_expense[$account['income_account_id']] : 0;
+            $month_opening_balance = isset($all_accounts_month_opening_balance[$account['income_account_id']]) ? $all_accounts_month_opening_balance[$account['income_account_id']] : 0;
+            $month_income = isset($all_accounts_month_income[$account['income_account_id']]) ? $all_accounts_month_income[$account['income_account_id']] : 0;
+            $month_expense = isset($all_accounts_month_expense[$account['income_account_id']]) ? $all_accounts_month_expense[$account['income_account_id']] : 0;
 
-        if ($month_opening_balance == 0 && $month_income == 0 && $month_expense == 0) {
-            continue;
-        }
+            if ($month_opening_balance == 0 && $month_income == 0 && $month_expense == 0) {
+                continue;
+            }
 
-        $report[] = [
-            'income_account_id' => $account['income_account_id'],
-            'income_account_name' => $account['income_account_name'],
-            'month_opening_balance' => $month_opening_balance,
-            'month_income' => $month_income,
-            'month_expense' => $month_expense,
-        ];
+            $report[] = [
+                'income_account_id' => $account['income_account_id'],
+                'income_account_name' => $account['income_account_name'],
+                'month_opening_balance' => $month_opening_balance,
+                'month_income' => $month_income,
+                'month_expense' => $month_expense,
+            ];
         }
 
         return $report;
     }
 
     public function createFinancialReport($financial_report_date, $office_id)
-  {
-    // Check if MFR exists
-    $statusLibrary = new \App\Libraries\Core\StatusLibrary();
-    $budgetLibrary = new BudgetLibrary();
+    {
+        // Check if MFR exists
+        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+        $budgetLibrary = new BudgetLibrary();
 
-    $initial_status = $statusLibrary->initialItemStatus('financial_report');
+        $initial_status = $statusLibrary->initialItemStatus('financial_report');
 
-    $financial_report_date = date('Y-m-01', strtotime($financial_report_date));
+        $financial_report_date = date('Y-m-01', strtotime($financial_report_date));
 
-    // Check if a journal for the same month and FCP exists
-    $builder = $this->write_db->table("financial_report");
-    $builder->where(array('fk_office_id' => $office_id, 'financial_report_month' => $financial_report_date));
-    $count_financial_report = $builder->get()->getNumRows();
+        // Check if a journal for the same month and FCP exists
+        $builder = $this->write_db->table("financial_report");
+        $builder->where(array('fk_office_id' => $office_id, 'financial_report_month' => $financial_report_date));
+        $count_financial_report = $builder->get()->getNumRows();
 
-    if ($count_financial_report == 0) {
-      $new_mfr['financial_report_month'] = $financial_report_date;
-      $new_mfr['fk_office_id'] = $office_id;
-      $new_mfr['fk_status_id'] = $initial_status; //$this->grants->initial_item_status('financial_report');
+        if ($count_financial_report == 0) {
+            $new_mfr['financial_report_month'] = $financial_report_date;
+            $new_mfr['fk_office_id'] = $office_id;
+            $new_mfr['fk_status_id'] = $initial_status; //$this->grants->initial_item_status('financial_report');
 
-      $new_mfr_to_insert = $this->mergeWithHistoryFields('financial_report', $new_mfr);
+            $new_mfr_to_insert = $this->mergeWithHistoryFields('financial_report', $new_mfr);
 
-      $this->write_db->table("financial_report")->insert( $new_mfr_to_insert);
+            $this->write_db->table("financial_report")->insert($new_mfr_to_insert);
 
-      $report_id = $this->write_db->insertId(); 
+            $report_id = $this->write_db->insertId();
 
-      $current_budget = $budgetLibrary->getBudgetByOfficeCurrentTransactionDate($office_id);
+            $current_budget = $budgetLibrary->getBudgetByOfficeCurrentTransactionDate($office_id);
 
-      // Update the budget id for the newly created MFR
-      $update_data['fk_budget_id'] = $current_budget['budget_id'];
+            // Update the budget id for the newly created MFR
+            $update_data['fk_budget_id'] = $current_budget['budget_id'];
 
-      $builder = $this->write_db->table('financial_report');
-      $builder->where(array('financial_report_id' => $report_id));
-      $builder->update($update_data);
+            $builder = $this->write_db->table('financial_report');
+            $builder->where(array('financial_report_id' => $report_id));
+            $builder->update($update_data);
+        }
     }
-  }
 
-  function incomeAccounts($office_ids, $project_ids = [], $office_bank_ids = [])
+    function incomeAccounts($office_ids, $project_ids = [], $office_bank_ids = [])
     {
         // Array of account system
         $builder = $this->read_db->table("office");
@@ -676,7 +753,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
 
         $builder = $this->read_db->table("income_account");
 
-        if (count($project_ids) > 0) {    
+        if (count($project_ids) > 0) {
             $builder->whereIn('project.project_id', $project_ids);
             $builder->join('project_income_account', 'project_income_account.fk_income_account_id=income_account.income_account_id');
             $builder->join('project', 'project.project_id=project_income_account.fk_project_id');
@@ -690,12 +767,12 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
             $builder->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_project_allocation_id=project_allocation.project_allocation_id');
             $builder->whereIn('fk_office_bank_id', $office_bank_ids);
         }
-        
+
         $builder->whereIn('income_account.fk_account_system_id', array_column($office_account_system_ids, 'fk_account_system_id'));
         $builder->groupBy(array('income_account_id'));
-        $result = $builder->select(array('income_account_id', 'income_account_name','income_account_is_budgeted'))
-        ->get()->getResultArray();
-                
+        $result = $builder->select(array('income_account_id', 'income_account_name', 'income_account_is_budgeted'))
+            ->get()->getResultArray();
+
         return $result;
     }
 
@@ -704,14 +781,14 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
         $statusLibrary = new \App\Libraries\Core\StatusLibrary();
 
         $max_approval_status_ids = $statusLibrary->getMaxApprovalStatusId('voucher', $office_ids);
-        $initial_account_opening_balance = $this->initialOpeningAccountBalance($office_ids, $project_ids, $office_bank_ids);     
+        $initial_account_opening_balance = $this->initialOpeningAccountBalance($office_ids, $project_ids, $office_bank_ids);
         $account_last_month_income_to_date = $this->getAccountLastMonthIncomeToDate($office_ids, $start_date_of_month, $max_approval_status_ids, $project_ids, $office_bank_ids);
         $account_last_month_expense_to_date = $this->getAccountLastMonthExpenseToDate($office_ids, $start_date_of_month, $max_approval_status_ids, $project_ids, $office_bank_ids);
         $income_account_ids = array_unique(array_merge(array_keys($initial_account_opening_balance), array_keys($account_last_month_income_to_date), array_keys($account_last_month_expense_to_date)));
 
-        $account_opening_balance=[];
-        
-        foreach($income_account_ids as $income_account_id){
+        $account_opening_balance = [];
+
+        foreach ($income_account_ids as $income_account_id) {
             $opening = isset($initial_account_opening_balance[$income_account_id]) ? $initial_account_opening_balance[$income_account_id] : 0;
             $income = isset($account_last_month_income_to_date[$income_account_id]) ? $account_last_month_income_to_date[$income_account_id] : 0;
             $expense = isset($account_last_month_expense_to_date[$income_account_id]) ? $account_last_month_expense_to_date[$income_account_id] : 0;
@@ -736,15 +813,15 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
         foreach ($income_accounts as $income_account) {
             $month_income[$income_account['income_account_id']] = isset($account_month_income[$income_account['income_account_id']]) ? $account_month_income[$income_account['income_account_id']] : 0;
 
-            if(isset($this->bankToBankContraReceipts($office_bank_ids, $start_date_of_month)[$income_account['income_account_id']])){
+            if (isset($this->bankToBankContraReceipts($office_bank_ids, $start_date_of_month)[$income_account['income_account_id']])) {
                 $month_income[$income_account['income_account_id']] = $month_income[$income_account['income_account_id']] + $bank_to_bank_contra_receipts[$income_account['income_account_id']];
             }
 
-            if(isset($this->bankToBankContraContributions($office_bank_ids, $start_date_of_month)[$income_account['income_account_id']])){
+            if (isset($this->bankToBankContraContributions($office_bank_ids, $start_date_of_month)[$income_account['income_account_id']])) {
                 $month_income[$income_account['income_account_id']] = $month_income[$income_account['income_account_id']] - $bank_to_bank_contra_contributions[$income_account['income_account_id']];
             }
         }
-        
+
         return $month_income;
     }
 
@@ -789,8 +866,8 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
 
         if ($initial_account_opening_balance_obj->getNumRows() > 0) {
             $account_opening_balance_array = $initial_account_opening_balance_obj->getResultArray();
-            
-            foreach($account_opening_balance_array as $row){
+
+            foreach ($account_opening_balance_array as $row) {
                 $account_opening_balance[$row['fk_income_account_id']] = $row['opening_fund_balance_amount'];
             }
         }
@@ -818,9 +895,9 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
         $previous_months_income_obj = $builder->get();
 
         if ($previous_months_income_obj->getNumRows() > 0) {
-            $previous_months_income_to_date_arr = $previous_months_income_obj->getResultArray(); 
-            
-            foreach($previous_months_income_to_date_arr as $row){
+            $previous_months_income_to_date_arr = $previous_months_income_obj->getResultArray();
+
+            foreach ($previous_months_income_to_date_arr as $row) {
                 $previous_months_income_to_date[$row['income_account_id']] = $row['amount'];
             }
         }
@@ -828,11 +905,11 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
         return $previous_months_income_to_date;
     }
 
-    function getAccountLastMonthExpenseToDate($office_ids, $start_date_of_month,$max_approval_status_ids, $project_ids = [], $office_bank_ids = [])
+    function getAccountLastMonthExpenseToDate($office_ids, $start_date_of_month, $max_approval_status_ids, $project_ids = [], $office_bank_ids = [])
     {
 
         $previous_months_expense_to_date = [];
-    
+
         $builder = $this->read_db->table("monthly_sum_income_expense_per_center");
         $builder->select(array('income_account_id'));
         $builder->selectSum('amount');
@@ -849,9 +926,9 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
         $previous_months_expense_obj = $builder->get();
 
         if ($previous_months_expense_obj->getNumRows() > 0) {
-            $previous_months_expense_to_date_arr = $previous_months_expense_obj->getResultArray(); 
-            
-            foreach($previous_months_expense_to_date_arr as $row){
+            $previous_months_expense_to_date_arr = $previous_months_expense_obj->getResultArray();
+
+            foreach ($previous_months_expense_to_date_arr as $row) {
                 $previous_months_expense_to_date[$row['income_account_id']] = $row['amount'];
             }
         }
@@ -859,8 +936,9 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
         return $previous_months_expense_to_date;
     }
 
-    function getAccountMonthIncome($office_ids, $start_date_of_month, $project_ids = [], $office_bank_ids = []){
-        
+    function getAccountMonthIncome($office_ids, $start_date_of_month, $project_ids = [], $office_bank_ids = [])
+    {
+
         $statusLibrary = new \App\Libraries\Core\StatusLibrary();
 
         $max_approval_status_ids = $statusLibrary->getMaxApprovalStatusId('voucher', $office_ids);
@@ -877,11 +955,11 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
         if (count($office_bank_ids) > 0) {
             $builder->whereIn('fk_office_bank_id', $office_bank_ids);
         }
-        
+
         $builder->whereIn('fk_status_id', $max_approval_status_ids);
         $builder->whereIn('fk_office_id', $office_ids);
         $condition_array = array(
-             'voucher_month' => $start_date_of_month,
+            'voucher_month' => $start_date_of_month,
         );
         $builder->where($condition_array);
         $builder->groupBy(array('income_account_id'));
@@ -889,7 +967,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
 
         if ($month_income_obj->getNumRows() > 0) {
             $month_income_arr = $month_income_obj->getResultArray();
-            foreach($month_income_arr as $row){
+            foreach ($month_income_arr as $row) {
                 $month_income[$row['income_account_id']] = $row['amount'];
             }
         }
@@ -920,17 +998,13 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
         if ($expense_income_obj->getNumRows() > 0) {
             $expense_income_arr = $expense_income_obj->getResultArray();
 
-            foreach($expense_income_arr as $row){
+            foreach ($expense_income_arr as $row) {
                 $expense_income[$row['income_account_id']] = $row['amount'];
             }
         }
 
         return $expense_income;
     }
-
-        /**
-     * list_cleared_effects + list_oustanding_cheques_and_deposits can be normalized
-     */
 
      function listClearedEffects($office_ids, $reporting_month, $transaction_type, $contra_type, $voucher_type_account_code, $project_ids = [], $office_bank_ids = [])
      {

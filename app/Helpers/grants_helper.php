@@ -80,7 +80,7 @@ if (!function_exists('list_table_edit_action')) {
     function list_table_edit_action($table_controller, $primary_key, $status_id = 0)
     {
 
-        $string = '<a class="list_edit_link" href="' . base_url() . ucfirst($table_controller) . '/edit/' . hash_id($primary_key, 'encode') . '">' . get_phrase("edit") . '</a>';
+        $string = '<a class="list_edit_link" href="' . base_url() . $table_controller . '/edit/' . hash_id($primary_key, 'encode') . '">' . get_phrase("edit") . '</a>';
 
         return $string;
     }
@@ -959,3 +959,104 @@ if(!function_exists('calculateFinancialYear')){
             return $d && $d->format($format) === $date;
         }
     }
+
+    if(!function_exists('alias_columns')){
+        function alias_columns($columns, $special_separator = 'as'){
+        
+            $cols = [];
+        
+            for($i = 0; $i < sizeof($columns); $i++){
+              $col_explode = explode($special_separator, $columns[$i]);
+            //   log_message('error', json_encode($col_explode));
+              $cols[$i]['query_columns'] = trim($col_explode[0]);
+              $cols[$i]['list_columns'] = isset($col_explode[1]) ? trim($col_explode[1]) : trim($col_explode[0]);
+            }
+    
+            // log_message('error', json_encode($cols));
+            return $cols;
+          }
+    }
+
+    /**
+ * month_order
+ * 
+ * @author Nicodemus Karisa
+ * @date 18th APril 2023
+ * @reviewer None
+ * @reviewed_date None
+ * 
+ * @param int office_id - Office Id 
+ * 
+ * @return array list of months in a year in order of an FCP
+ * 
+ * @todo:
+ * Ready for Peer Review
+ */
+
+if(!function_exists('month_order')){
+	function month_order($office_id, $budget_id = 0): array {
+
+        $db = \Config\Database::connect('read');
+		$months = [];
+
+        $builderMonth = $db->table('month');
+        $builderCustomFY = $db->table('custom_financial_year');
+
+		// log_message('error', json_encode([$office_id, $budget_id]));
+		
+		if($office_id == 0){
+            
+			$builderMonth->select(array('month_id','month_order','month_number','month_name'));
+			$builderMonth->orderBy('month_order', 'ASC');
+			$months_array = $builderMonth->get()->getResultArray();
+			
+			// $months = array_column($months_array, 'month_number');
+			foreach($months_array as $month){
+				$months[$month['month_order']] = $month;
+			}
+		}else{
+			$office_fy_start_month = 7; // This is July - Default system year start month
+            
+			$builderCustomFY->select(array('custom_financial_year_start_month'));
+            $builderCustomFY->where(array('custom_financial_year.fk_office_id' => $office_id, 'custom_financial_year_is_default' => 1));
+
+			if($budget_id > 0){
+                $builderCustomFY->join('budget','budget.fk_custom_financial_year_id=custom_financial_year.custom_financial_year_id');
+                $builderCustomFY->where(array('budget_id' => $budget_id));
+			}
+			
+			$office_fy_start_month_obj =  $builderCustomFY->get();
+	
+			if($office_fy_start_month_obj->getNumRows() > 0){
+				$office_fy_start_month = $office_fy_start_month_obj->getRow()->custom_financial_year_start_month;
+			}
+	
+            $builderMonth->select(array('month_id','month_order','month_number','month_name'));
+			$months_array_query =  $builderMonth->get();
+
+            $months_array =$months_array_query->getResultArray();
+	
+			// log_message('error', json_encode($office_fy_start_month));
+
+			$init_month_order = 1;
+	
+			$extended_month_order = (12 - $office_fy_start_month) + 2;
+	
+			foreach($months_array as $month){
+				if($month['month_number'] < $office_fy_start_month){
+					$months[$extended_month_order] = $month;
+					$extended_month_order++;
+				}else{
+					$months[$init_month_order] = $month;
+					$init_month_order++;
+				}
+			}
+	
+			ksort($months);
+		}
+
+		// log_message('error', json_encode($months));
+
+		return $months;
+	}
+}

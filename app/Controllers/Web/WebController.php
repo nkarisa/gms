@@ -218,7 +218,7 @@ class WebController extends BaseController
  *
  * @return string The action name or "view_ajax" if the action is "view" and the request is an AJAX request.
  */
-  private function page_name(): string
+  protected function page_name(): string
   {
     if ((hash_id($this->id, 'decode') == null && $this->action == 'view') || (!$this->has_permission && !$this->session->has('primary_user_data'))) {
       return 'error';

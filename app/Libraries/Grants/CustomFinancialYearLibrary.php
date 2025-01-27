@@ -129,5 +129,20 @@ class CustomFinancialYearLibrary extends GrantsLibrary implements \App\Interface
 
         return $months;
     }
+
+    function listTableVisibleColumns(): array {
+      return [
+      'custom_financial_year_id',
+      'custom_financial_year_track_number as track_number',
+      'office_name',
+      'custom_financial_year_start_month as start_month',
+      'custom_financial_year_reset_date as reset_date',
+      'custom_financial_year_is_active as is_active',
+      'custom_financial_year_is_default as is_default',
+      'custom_financial_year_created_date as created_date',];
+    }
+
+
+    
     
 }
