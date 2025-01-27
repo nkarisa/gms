@@ -338,7 +338,7 @@ class WebController extends BaseController
 
     if ($this->action == 'list') {
       $show_add_button = $this->libs::call($this->controller . '.checkShowAddButton', [$this->controller]);
-      $keys = $this->libs->columnAliases();
+      $keys = $this->columnAliases();
 
       $page_data['keys'] = $keys;
       $page_data['is_multi_row'] = $this->libs::call($this->controller . '.checkIfTableIsMultiRow');
@@ -348,6 +348,35 @@ class WebController extends BaseController
 
     // Can be overrode in a specific controller
     return view('general/index', $page_data);
+  }
+
+  function columnAliases(): array{
+    $columns = array_values($this->libs->getListColumns());
+
+    $tableName = $this->controller;
+    $featureLib = $this->libs->loadLibrary($tableName);
+    $primaryKeyField = $this->libs->primaryKeyField($tableName);
+
+    if (method_exists($featureLib, 'columnAliases')) {
+      $aliases = $featureLib->columnAliases();
+      
+      $key_values = array_map(function($key) use($primaryKeyField){
+        $humanize = humanize($key);
+        if($key == $primaryKeyField){
+          $humanize = $key;
+        }
+        return $humanize;
+      },$columns);
+      
+      $flipped_keys = array_combine($columns,$key_values);
+      $intersected_keys_aliases = array_intersect_key($aliases, $flipped_keys);
+      
+      if(sizeof($intersected_keys_aliases)){
+        $columns = array_replace($flipped_keys, $intersected_keys_aliases);
+      }
+    }
+
+    return $columns;
   }
 
   /**

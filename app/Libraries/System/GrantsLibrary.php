@@ -1204,4 +1204,5 @@ class GrantsLibrary
 
     return $item_has_declined_state;
 }
+
 }
