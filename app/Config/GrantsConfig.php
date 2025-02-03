@@ -52,4 +52,6 @@ class GrantsConfig extends BaseConfig
     public $toggle_accounts_by_allocation = true; 
     public $fy_year_digits = 2;
     public $fy_year_reference = 'next';
+    public $show_all_budget_tags=true;
+    public $size_in_months_of_a_budget_review_period=3;
 }

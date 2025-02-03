@@ -96,6 +96,7 @@ class FieldsBase
       $this->column = 'fk_' . substr($this->column, 0, -5) . '_id';
     }
 
+    
     if (array_key_exists($this->column, $name_types)) {
       $column_type  = $name_types[$this->column];
   
@@ -104,7 +105,7 @@ class FieldsBase
         $field_type = "number";
 
         // All fields of format fk_xxx_id are select types
-        if (strpos($this->column, '_id') == true && substr($this->column, 0, 3) == 'fk_') {
+        if (strpos($this->column, '_id') == true && substr($this->column, 0, 3) == 'fk_')  {
           $field_type = "select";
         }
       } elseif ($column_type == 'varchar') {
@@ -117,6 +118,7 @@ class FieldsBase
         $field_type = "email";
       } else {
         $field_type = "text";
+        //$field_type = "select";
       }
     }
 

@@ -64,7 +64,7 @@
             })
         }
 
-        const action  = '<?=$this->action?>';
+        const action  = '<?=$action?>';
 
         if(action == 'edit'){
             $("#fk_office_id").prop('disabled','disabled')
@@ -84,7 +84,7 @@
     })
 
     $('.save_new').on('click', function () {
-        const budget_id = sub_action == 'budget' ? '<?=hash_id($this->id,'decode');?>' : $("#fk_budget_id").val();
+        const budget_id = sub_action == 'budget' ? '<?=hash_id($id,'decode');?>' : $("#fk_budget_id").val();
         get_update_budget_limit_list(budget_id)
     })
 

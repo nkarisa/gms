@@ -124,5 +124,33 @@ class BudgetLimitLibrary extends GrantsLibrary implements \App\Interfaces\Librar
         return $budget_limits;
     }
 
+    public function lookupValues(): array
+  {
+    $lookup_values = [];
+
+    // if (!session()->get('system_admin')) {
+
+    // /**
+    //  * 
+    //  */
+    //   $builder = $this->read_db->table('income_account');  // Query builder for 'office' table
+
+    //   // Apply WHERE IN condition for office_id
+    //   $builder->join('office', 'office.fk_account_system_id=income_account.fk_account_system_id');
+    //   $builder->whereIn('office_id', array_column(session()->get('hierarchy_offices'), 'office_id'));
+    //   $builder->where([
+    //     'income_account_is_active ' => 1,
+       
+    //   ]);
+
+    //   // Fetch results
+    //   $lookup_values['fk_income_account_id'] = $builder->get()->getResultArray();
+
+    // }
+
+    // log_message('error',json_encode($lookup_values));
+    return $lookup_values;
+  }
+
     
 }

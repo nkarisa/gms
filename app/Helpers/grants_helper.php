@@ -29,6 +29,26 @@ if (!function_exists('get_phrase')) {
     }
 }
 
+ //Formerly as budget_review_buffer_month
+ if (! function_exists('month_after_adding_size_of_budget_review_period')) {
+    function month_after_adding_size_of_budget_review_period($current_month)
+    {
+
+        $current_month_with_buffer = $current_month + service("settings")->get("GrantsConfig.size_in_months_of_a_budget_review_period");
+
+        if ($current_month_with_buffer > 12) {
+
+            if ($current_month_with_buffer > 24) {
+                $current_month_with_buffer = $current_month_with_buffer % 12;
+            } else {
+                $current_month_with_buffer = $current_month_with_buffer - 12;
+            }
+        }
+
+        return $current_month_with_buffer;
+    }
+}
+
 if (!function_exists('add_record_button')) {
     function add_record_button($table_controller, $parent_controller, $id = null, $has_listing = false, $is_multi_row = false)
     {

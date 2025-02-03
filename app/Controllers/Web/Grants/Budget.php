@@ -8,21 +8,28 @@ use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use App\Libraries\Grants;
 use App\Libraries\Core\StatusLibrary;
-
+use App\Libraries\Grants\IncomeAccountLibrary;
+use App\Traits\System\SetupTrait;
+use App\Traits\System\ApprovalTrait;
 class Budget extends WebController
 {
-  protected $library;
+  use SetupTrait;
+  use ApprovalTrait;
+  protected $budgetLib;
   protected $statusLib;
+  protected $incomeAccountLib;
 
   function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
   {
     parent::initController($request, $response, $logger);
 
-    $this->library = new Grants\BudgetLibrary();
+    $this->budgetLib = new Grants\BudgetLibrary();
 
     $this->statusLib=new StatusLibrary();
 
-    $this->action='multiFormAdd';
+    $this->incomeAccountLib=new IncomeAccountLibrary();
+
+    //$this->action='multiFormAdd';
   }
 
   // public function result($id = '', $parentTable = null){
@@ -41,7 +48,7 @@ class Budget extends WebController
   {
 
     //$budgetLibrary = new \App\Libraries\Grants\BudgetLibrary();
-    $budget = $this->library->getBudgetByOfficeCurrentTransactionDate($office_id);
+    $budget = $this->budgetLib->getBudgetByOfficeCurrentTransactionDate($office_id);
 
     $check = false;
 
@@ -83,7 +90,7 @@ class Budget extends WebController
   function result($id = "", $parentTable = null)
   {
 
-    $result = parent::result($id, $parentTable);
+    // $result = parent::result($id, $parentTable);
   
    // $segment_budget_view_type = $this->request->getUri()->getSegment(4, 'summary');
 
@@ -100,8 +107,7 @@ class Budget extends WebController
 
     if ($this->action == 'view') {
 
-      
-
+    
       $customFy = new Grants\CustomFinancialYearLibrary();
       $financial_report = new Grants\FinancialReportLibrary();
       $statusId=$this->statusLib->initialItemStatus($this->controller);
@@ -185,7 +191,7 @@ class Budget extends WebController
         $result['budget_message'] = get_phrase('all_mfrs_submitted_message', 'Make sure all financial reports are submitted in order to change the budget approval status or sign off the budget. This is due to newly activated custom financial year.');
       }
 
-      $item_budget_approved = $this->library->checkIfAllBudgetItemsAreApproved($budget_id);
+      $item_budget_approved = $this->budgetLib->checkIfAllBudgetItemsAreApproved($budget_id);
 
       if (!$item_budget_approved) {
         $result['action_button_disabled'] = true;
@@ -197,12 +203,14 @@ class Budget extends WebController
       $result['status_data'] = $this->libs->actionButtonData('Budget', $office->account_system_id);
       $result['budget_status_id'] = $office->budget_status_id;
     }
-     elseif($this->action=='multiFormAdd'){
-      //$result=parent::result($id, $parentTable);
+     else{
+      $result=parent::result($id, $parentTable);
 
-      $columns=$this->library->singleFormAddVisibleColumns();
+      $columns=$this->budgetLib->singleFormAddVisibleColumns();
 
       $result['fields']=$this->addFormFields($columns);
+
+
     
      
     }
@@ -245,7 +253,7 @@ class Budget extends WebController
         }
 
 
-        $fields[$column] = $this->library->headerRowField($column, $field_value, $show_only_selected_value);
+        $fields[$column] = $this->budgetLib->headerRowField($column, $field_value, $show_only_selected_value);
       } else {
 
         $detail_table = '';
@@ -255,7 +263,7 @@ class Budget extends WebController
         }
 
         foreach ($column as $detail_column) {
-          $fields[$detail_column] = $this->library->headerFowField($detail_column, $field_value, $show_only_selected_value, $detail_table);
+          $fields[$detail_column] = $this->budgetLib->headerFowField($detail_column, $field_value, $show_only_selected_value, $detail_table);
         }
       }
     }
@@ -531,7 +539,7 @@ class Budget extends WebController
   private function budgetHeaderInformation($budget_year = '')
   {
 
-    $budget_office = $this->library->budgetOffice();
+    $budget_office = $this->budgetLib->budgetOffice();
 
     $budget_year = 0;
     $office_id = 0;
@@ -549,7 +557,7 @@ class Budget extends WebController
       $budget_status_id = $budget_office->status_id;
     }
 
-    $projects = $this->library->getProjects($office_id);
+    $projects = $this->budgetLib->getProjects($office_id);
 
     $data = [];
 
@@ -568,4 +576,128 @@ class Budget extends WebController
 
     return $data;
   }
+
+  /**
+   *listValidBudgetYearsForOffice():This method give budget years as json object.
+   * @author Livingstone Onduso: Dated 30-01-2025
+   * @access public
+   * @return array 
+   */
+  function listValidBudgetYearsForOffice()
+  {
+    //$post = $this->request->getPost('office_id');
+
+    $office_id = $this->request->getPost('office_id');//$post['office_id'];
+
+    $valid_budget_years = $this->budgetLib->validBudgetYears($office_id);
+
+    echo json_encode($valid_budget_years);
+  }
+
+ /**
+   *listBudgetableIncomeAccount():This method give income accounts years as json object.
+   * @author Livingstone Onduso: Dated 30-01-2025
+   * @access public
+   * @param int $office_id
+   */
+  public function listBudgetableIncomeAccount(int $office_id)
+  {
+
+    $income_accounts = $this->incomeAccountLib->incomeAccountByOfficeId($office_id);
+
+    echo json_encode($income_accounts);
+  }
+
+  /**
+   *getOfficeBudgetTags():This method give income accounts years as json object.
+   * @author Livingstone Onduso: Dated 30-01-2025
+   * @access public
+   */
+  public function getOfficeBudgetTags()
+  {
+
+    $office_id = $this->request->getPost('office_id') ;
+    $budget_year =$this->request->getPost('budget_year') ;
+
+    $valid_budget_tags = $this->budgetLib->validBudgetTags($office_id, $budget_year);
+
+    echo json_encode($valid_budget_tags);
+  }
+
+  public function postBudget()
+{
+   
+    $session = session();
+
+    $post = $this->request->getPost(); 
+
+    $this->write_db->transBegin(); 
+
+    $actionBeforeInsert =$this->budgetLib->actionBeforeInsert($post);
+    extract($post);
+    if (!array_key_exists('header', $actionBeforeInsert)) {
+        echo $this->response->setJSON($actionBeforeInsert);
+
+        return false;
+    }
+
+    
+    // Insert the budget
+    $tracking = $this->generateItemTrackNumberAndName('budget');
+
+    $budgetInsertData = [
+        'budget_track_number' => $tracking['budget_track_number'],
+        'budget_name' => $tracking['budget_name'],
+        'fk_office_id' => $actionBeforeInsert['header']['fk_office_id'],
+        'budget_year' => $actionBeforeInsert['header']['budget_year'],
+        'fk_budget_tag_id' => $actionBeforeInsert['header']['fk_budget_tag_id'],
+        'fk_status_id' => $this->initialItemStatus('budget'),
+        'budget_created_by' => $session->get('user_id'),
+        'budget_created_date' => date('Y-m-d'),
+        'budget_last_modified_by' => $session->get('user_id'),
+        'budget_last_modified_date' => date('Y-m-d H:i:s'),
+    ];
+
+    $this->write_db->table('budget')->insert($budgetInsertData);
+    $budgetId = $this->write_db->insertID();
+    $hashedBudgetId = hash_id($budgetId, 'encode');
+
+    // Insert budget limits
+    $budgetLimitInsertData = [];
+    $incomeAccountIds = $actionBeforeInsert['details']['fk_income_account_id'] ?? [];
+
+    foreach ($incomeAccountIds as $index => $incomeAccountId) {
+        $budgetLimitTracking = $this->generateItemTrackNumberAndName('budget_limit');
+
+        $budgetLimitInsertData[] = [
+            'budget_limit_track_number' => $budgetLimitTracking['budget_limit_track_number'],
+            'budget_limit_name' => $budgetLimitTracking['budget_limit_name'],
+            'fk_income_account_id' => $incomeAccountId,
+            'budget_limit_amount' => $actionBeforeInsert['details']['budget_limit_amount'][$index] ?? 0,
+            'fk_budget_id' => $budgetId,
+            'fk_status_id' => $this->initialItemStatus('budget_limit'),
+            'budget_limit_created_by' => $session->get('user_id'),
+            'budget_limit_created_date' => date('Y-m-d'),
+            'budget_limit_last_modified_by' => $session->get('user_id'),
+            'budget_limit_last_modified_date' => date('Y-m-d H:i:s'),
+        ];
+    }
+
+    if (!empty($budgetLimitInsertData)) {
+        $this->write_db->table('budget_limit')->insertBatch($budgetLimitInsertData);
+    }
+
+    $post['header']['fk_budget_id'] = $budgetId;
+    $actionAfterInsert = $this->budgetLib->actionAfterInsert($post['header'], 0, $budgetId);
+
+    if ($this->write_db->transStatus() === false || !$actionAfterInsert) {
+        $this->write_db->transRollback();
+        echo $this->response->setJSON(["message" => "Budget record failed to create"]);
+    } else {
+        $this->write_db->transCommit();
+        echo $this->response->setJSON(["budget_id" => $hashedBudgetId]);
+    }
+}
+
+
 }

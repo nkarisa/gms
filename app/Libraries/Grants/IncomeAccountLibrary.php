@@ -4,26 +4,28 @@ namespace App\Libraries\Grants;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\IncomeAccountModel;
+
 class IncomeAccountLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
-    protected $table;
-    protected $incomeAccountModel;
+  protected $table;
+  protected $incomeAccountModel;
 
-    function __construct()
-    {
-        parent::__construct();
+  function __construct()
+  {
+    parent::__construct();
 
-        $this->incomeAccountModel = new IncomeAccountModel();
+    $this->incomeAccountModel = new IncomeAccountModel();
 
-        $this->table = 'income_account';
-    }
+    $this->table = 'income_account';
+  }
 
-    function detailTables(): array {
-        return ['expense_account'];
-    }
+  function detailTables(): array
+  {
+    return ['expense_account'];
+  }
 
-    /**
+  /**
    * income_account_missing_project_allocation
    * 
    * Get income accounts at opening that lack project assignment
@@ -38,7 +40,8 @@ class IncomeAccountLibrary extends GrantsLibrary implements \App\Interfaces\Libr
    * @return array - List of income accounts missing project assignment
    */
 
-  function incomeAccountMissingProjectAllocation(int $office_id, array $office_bank_ids):array {
+  function incomeAccountMissingProjectAllocation(int $office_id, array $office_bank_ids): array
+  {
 
     $income_accounts_with_allocation = [];
 
@@ -48,19 +51,18 @@ class IncomeAccountLibrary extends GrantsLibrary implements \App\Interfaces\Libr
     $office_start_dates = $officeLibrary->getOfficeStartDateById($office_id);
     $office_start_month = $office_start_dates['month_start_date'];
 
-    $all_financial_report_income_accounts = $financialReportLibrary->monthUtilizedIncomeAccounts([$office_id],$office_start_month,[],[]);
-    $office_bank_financial_report_income_accounts = $financialReportLibrary->monthUtilizedIncomeAccounts([$office_id],$office_start_month,[],$office_bank_ids);
+    $all_financial_report_income_accounts = $financialReportLibrary->monthUtilizedIncomeAccounts([$office_id], $office_start_month, [], []);
+    $office_bank_financial_report_income_accounts = $financialReportLibrary->monthUtilizedIncomeAccounts([$office_id], $office_start_month, [], $office_bank_ids);
 
     $all_income_account_ids = array_column($all_financial_report_income_accounts, 'income_account_id');
     $office_bank_all_income_account_ids = array_column($office_bank_financial_report_income_accounts, 'income_account_id');
 
-    $income_accounts_with_allocation = array_diff($all_income_account_ids,$office_bank_all_income_account_ids);
+    $income_accounts_with_allocation = array_diff($all_income_account_ids, $office_bank_all_income_account_ids);
 
     return $income_accounts_with_allocation;
-
   }
 
-  public function list($builder, array $selectColumns, $parentId = null, $parentTable = null):array
+  public function list($builder, array $selectColumns, $parentId = null, $parentTable = null): array
   {
     $this->lookupJoins($builder);
 
@@ -77,5 +79,30 @@ class IncomeAccountLibrary extends GrantsLibrary implements \App\Interfaces\Libr
 
     return compact('results');
   }
-   
+
+ /**
+   *incomeAccountByOfficeId():This method returns array of income accounts.
+   * @author Livingstone Onduso: Dated 30-01-2025
+   * @access public
+   * @param int $office_id
+   */
+  public function incomeAccountByOfficeId(int $office_id):array
+  {
+    $builder = $this->read_db->table('income_account');
+
+    $builder->select(['income_account_id', 'income_account_name']);
+    $builder->where([
+      'income_account_is_budgeted' => 1,
+      'income_account_is_active'   => 1,
+      'office_id'                  => $office_id
+    ]);
+
+    $builder->join('account_system', 'account_system.account_system_id = income_account.fk_account_system_id');
+    $builder->join('office', 'office.fk_account_system_id = account_system.account_system_id');
+
+    $query = $builder->get();
+    $income_accounts = $query->getResultArray();
+
+    return $income_accounts;//$this->response->setJSON($income_accounts);
+  }
 }

@@ -10,7 +10,10 @@
 
 <?php 
     extract($result);
+   
     echo hash_id($id, 'decode');
+
+    //log_message('error',json_encode($result));
 ?>
 
 <div class='row'>
@@ -127,7 +130,7 @@
     $('.fk_office_id').on('change', function () {
         // alert('Hello')
         const office_id = $(this).val()
-        const url = "<?=base_url();?>budget/list_budgetable_income_account/" + office_id
+        const url = "<?=base_url();?>ajax/budget/listBudgetableIncomeAccount/" + office_id
 
         $.get(url, function (resp) {
             const obj = JSON.parse(resp)
@@ -188,7 +191,7 @@
     })
 
     $('.save').on('click', function (){
-        const url = "<?=base_url();?>budget/post_budget"
+        const url = "<?=base_url();?>ajax/budget/postBudget"
         const data = $('#frm_budget').serializeArray()
 
         const cnfrm = confirm('<?=get_phrase('confirm_budget_submit', 'Are you sure you want to create this budget record?');?>')
@@ -215,7 +218,7 @@
         const office_id = $('#fk_office_id').val()
         const budget_year = $('#budget_year').val()
         const budget_tag_id = $(this).val()
-        const url = '<?=base_url();?>/budget_limit/get_set_budget_limit'
+        const url = '<?=base_url();?>ajax/budget_limit/getSetBudgetLimit'
         const data = {
             office_id,
             budget_year,

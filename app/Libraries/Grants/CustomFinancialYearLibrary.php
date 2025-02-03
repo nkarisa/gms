@@ -20,7 +20,14 @@ class CustomFinancialYearLibrary extends GrantsLibrary implements \App\Interface
         $this->table = 'custom_financial_year';
     }
 
-    public function getDefaultCustomFinancialYearIdByOffice($office_id){
+    /**
+     *getDefaultCustomFinancialYearIdByOffice():This method returns arow of custom financial years.
+     * @author Livingstone Onduso: Dated 30-01-2025
+     * @access public
+    * @return array 
+    * @param int $office_id
+   */
+    public function getDefaultCustomFinancialYearIdByOffice(int $office_id){
 
         // $custom_financial_year_start_month = 7;
         $custom_financial_year = ['custom_financial_year_start_month' => 7, 'custom_financial_year_id' => NULL, 'custom_financial_year_is_active' => 0, 'custom_financial_year_reset_date' => NULL];

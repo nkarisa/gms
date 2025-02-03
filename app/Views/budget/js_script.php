@@ -9,10 +9,13 @@
 
     function onchange_fk_office_id(elem){
         const office_id = $(elem).val();
-        const url = "<?=base_url();?>budget/list_valid_budget_years_for_office"
+       
+        const url = "<?=base_url();?>ajax/budget/listValidBudgetYearsForOffice";
         const data = {
             office_id: office_id
         }
+
+        //console.log(data);
 
         $("#budget_year").html('');
         $("#fk_budget_tag_id").html('');
@@ -41,7 +44,7 @@
             budget_year:budget_year
         }
 
-        const url = "<?=base_url();?>budget/get_office_budget_tags";
+        const url = "<?=base_url();?>ajax/budget/getOfficeBudgetTags";
 
         $.post(url,data,function(tags){
             let options = "<option value=''><?=get_phrase('select_budget_tag');?></option>";

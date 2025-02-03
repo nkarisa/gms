@@ -335,6 +335,7 @@ class WebController extends BaseController
     $page_data['config'] = $this->config;
     $page_data['libs'] = $this->libs;
     $page_data['settings'] = $this->settings;
+    $page_data['subAction']= $this->subAction;
 
     if ($this->action == 'list') {
       $show_add_button = $this->libs::call($this->controller . '.checkShowAddButton', [$this->controller]);

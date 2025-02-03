@@ -19,6 +19,7 @@ class BudgetItem extends WebController
         parent::initController($request, $response, $logger);
 
         $this->budgetItemLib = new Grants\BudgetItemLibrary();
+
     }
 
 
@@ -49,7 +50,7 @@ class BudgetItem extends WebController
             $id = $this->request->getUri()->getSegment(3);
             if ($this->action == 'multiFormAdd') {
 
-                
+
                 $budget_id = hash_id($id, 'decode');
                 $builder->where(array('budget_id' => $budget_id));
             } else {
@@ -104,7 +105,7 @@ class BudgetItem extends WebController
                 $builder_income->join('expense_account', 'expense_account.fk_income_account_id = income_account.income_account_id');
                 $builder_income->join('budget_item', 'budget_item.fk_expense_account_id = expense_account.expense_account_id');
                 $builder_income->where('budget_item_id', hash_id($id, 'decode'));
-                
+
                 $income_account = $builder_income->get()->getRow();
 
                 // Get Expense Accounts
@@ -129,7 +130,7 @@ class BudgetItem extends WebController
 
                 $budget_limit_amount = $budgetLimitLib->budgetLimitRemainingAmount($budget_item->fk_budget_id, $budget_item->fk_income_account_id);
 
-                
+
 
                 $builder_budget_item = $this->read_db->table('budget_item_detail');
                 $builder_budget_item->select(array(
@@ -216,4 +217,6 @@ class BudgetItem extends WebController
 
         echo $budgetLimitLib->budgetLimitRemainingAmount($budget_id, $expense_account_id);
     }
+
+    
 }

@@ -168,6 +168,7 @@ trait FieldsTrait {
    {
  
      $f = new FieldsBase($column, $this->controller, true);
+     //log_message('error',json_encode($this->controller));
  
      if ($detail_table != '') {
        $f = new FieldsBase($column, $detail_table, false, true);
