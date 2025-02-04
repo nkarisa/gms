@@ -14,13 +14,13 @@
 # ENVIRONMENT
 #--------------------------------------------------------------------
 
-#CI_ENVIRONMENT = development
+CI_ENVIRONMENT = production
 
 #--------------------------------------------------------------------
 # APP
 #--------------------------------------------------------------------
 
-#app.baseURL = 'http://localhost:8000/'
+app.baseURL = 'http://localhost:8000/'
 # If you have trouble with `.`, you could also use `_`.
 # app_baseURL = ''
 # app.forceGlobalSecureRequests = false
@@ -29,6 +29,14 @@
 #--------------------------------------------------------------------
 # DATABASE
 #--------------------------------------------------------------------
+
+database.default.hostname = localhost
+database.default.database = toolkit
+database.default.username = admin
+database.default.password = 
+database.default.DBDriver = MySQLi
+database.default.DBPrefix =
+database.default.port = 3306
 
 database.read.hostname = localhost
 database.read.database = toolkit
@@ -80,11 +88,11 @@ database.write.port = 3306
 # Password salting 
 #--------------------------------------------------------------------
 
-#SHA256-PASSWORD-SALT=compassion_international_mission_2022m_@_SaLT
+SHA256-PASSWORD-SALT=<<YOUR PASSWORD SALT>>
 
 #----------------------------------------------------------------
 # AWS CREDENTIALS 
 #--------------------------------------------------------------------
 
-# aws.credentials_profile = <<YOUR AWS PROFILE>>
-# aws.region = <<YOUR AWS REGION>>
+aws.credentials_profile = <<YOUR AWS PROFILE>>
+aws.region = <<YOUR AWS REGION>>
