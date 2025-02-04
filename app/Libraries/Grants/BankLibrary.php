@@ -9,6 +9,13 @@ class BankLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
     protected $table;
     protected $bankModel;
 
+    public array $lookUpTablesForeignKeyMappings = [
+        'user' => [
+            'bank_last_modified_by',
+            'bank_created_by'
+        ]
+    ];
+
     function __construct()
     {
         parent::__construct();
@@ -31,5 +38,28 @@ class BankLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
     // function columnAliases(): array{
     //     return ['bank_name' => 'My Banking'];
     // }
+
+
+    function listTableVisibleColumns(): array {
+        return ['bank_track_number', 'bank_name', 'bank_swift_code', 'bank_is_active','account_system_name','bank_last_modified_by'];
+    }
+
+    function formatColumnsValues(string $columnName, mixed $columnValue, array $rowArray): mixed {
+        switch($columnName){
+            case "bank_last_modified_by":
+                $columnValue = $rowArray['user_firstname'] . ' ' . $rowArray['user_lastname'];
+                break;
+            default:
+                break;
+        }
+  
+        return $columnValue;
+      }
+
+
+function  setDatatableSearching(\CodeIgniter\Database\BaseBuilder $builder, array $selectColumns, array $extraColumns = []){
+    $extraColumns = ['user_firstname','user_lastname'];
+    return parent::setDatatableSearching($builder, $selectColumns, $extraColumns);
+}
 
 }

@@ -1053,7 +1053,7 @@ class GrantsLibrary
 
         //Add the lookup table name to the all fields array
         $all_fields = $this->getAllTableFields($this->controller);
-
+        
         $deriveLookupTables = $this->deriveLookupTables($this->controller);
         $all_lookup_fields = $this->lookupTablesFields($currentLibrary, $deriveLookupTables);
         $all_fields = array_merge($all_fields, $all_lookup_fields);

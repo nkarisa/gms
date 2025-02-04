@@ -86,12 +86,21 @@ class ListOutput extends OutputTemplate
         if(array_key_exists($lookup_table,$foreignKeyMappings)){
           $foreignKeyField = $foreignKeyMappings[$lookup_table];
         }
+
         $lookup_tables_with_null_values = [];
         if(!empty(property_exists($featureLibrary, 'lookup_tables_with_null_values'))){
           $lookup_tables_with_null_values = $featureLibrary->lookup_tables_with_null_values;
         }
+        
         $joinType = in_array($lookup_table, $lookup_tables_with_null_values) ? 'LEFT': '';
-        $builder->join($lookup_table, $lookup_table . '.' . $lookup_table_id . '=' . $table . '.' . $foreignKeyField, $joinType);
+
+        if(is_array($foreignKeyField)){
+          foreach($foreignKeyField as $value){
+            $builder->join($lookup_table.' '.$value, $value . '.' . $lookup_table_id . '=' . $table . '.' . $value, $joinType);
+          }
+        }else{
+          $builder->join($lookup_table, $lookup_table . '.' . $lookup_table_id . '=' . $table . '.' . $foreignKeyField, $joinType);
+        }
       }
     }
 
@@ -193,7 +202,7 @@ class ListOutput extends OutputTemplate
       method_exists($featureLibrary, 'list')
       && is_array($featureLibrary->list($builder, $listSelectColumns, $this->parentId, $this->parentTable))
       && array_key_exists('results', $featureLibrary->list($builder, $listSelectColumns, $this->parentId, $this->parentTable))
-      && !empty($featureLibrary->list($builder, $listSelectColumns, $this->parentId, $this->parentTable)['result'])
+      && !empty($featureLibrary->list($builder, $listSelectColumns, $this->parentId, $this->parentTable)['results'])
     ) {
       $feature_model_list_result = $featureLibrary->list($builder, $listSelectColumns, $this->parentId, $this->parentTable)['results'];
       // Allows empty result set

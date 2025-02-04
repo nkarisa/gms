@@ -32,11 +32,17 @@ trait DataTable {
         return $builder;
     }
 
-    function setDatatableSearching(\CodeIgniter\Database\BaseBuilder $builder, array $selectColumns){
+    function setDatatableSearching(\CodeIgniter\Database\BaseBuilder $builder, array $selectColumns, array $extraColumns = []){
         $search = $this->request->getPost('search');
         $value = isset($search['value']) ? $search['value'] : '';
 
         array_pop($selectColumns);
+
+        if(!empty($extraColumns)){
+            array_push($selectColumns, $extraColumns);
+        }
+        
+        array_push($selectColumns, 'user_firstname','user_lastname');
 
         if (!empty($value)) {
             $builder->groupStart();

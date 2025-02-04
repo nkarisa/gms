@@ -493,6 +493,7 @@ class WebController extends BaseController
     $columns = $results['keys'];
 
     $cnt = 0;
+    // log_message('error', json_encode($data));
     foreach ($data as $row) {
       $cols = 0;
       $primary_key = 0;

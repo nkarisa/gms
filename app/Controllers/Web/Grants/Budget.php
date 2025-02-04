@@ -66,7 +66,7 @@ class Budget extends WebController
 
     $segments = $this->request->getUri()->getSegments();
 
-    log_message('error', json_encode($segments));
+    // log_message('error', json_encode($segments));
 
     if ($this->action == 'view') {
 
