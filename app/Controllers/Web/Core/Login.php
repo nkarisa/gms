@@ -42,6 +42,8 @@ class Login extends WebController
         // Check if user is already authenticated
         if ($this->session->has('user_is_authenticated')) {
 
+ $grantsLibrary = new \App\Libraries\System\GrantsLibrary();
+
             if (parse_url(base_url())['host'] == 'localhost' && $this->session->system_admin) {
                 $grantsLibrary = new \App\Libraries\System\GrantsLibrary();
                 $grantsLibrary->create_missing_system_files_from_json_setup();
@@ -84,13 +86,14 @@ class Login extends WebController
         // Validate the login credentials
         $login_status = $this->validate_login(strtolower(trim($email)), $password);
 
+
         // Add the login status to the response array
         $response['login_status'] = $login_status;
 
         // If the login status is 'success', add an empty redirect URL to the response array
         if ($login_status == 'success') {
             $response['redirect_url'] = '';
-        }
+        } 
 
         // Send the JSON response to the client
         return $this->response->setJSON($response);
@@ -195,13 +198,13 @@ class Login extends WebController
     private function password_salt(string $password): string
     {
         // Initialize the AWS Parameter Store client
-        $store = new AwsParameterStore();
+       // $store = new AwsParameterStore();
 
         // Fetch the salt from AWS Parameter Store
-        $salt = $store->getParameterValue('sha256-password-salt');
+       // $salt = $store->getParameterValue('sha256-password-salt');
 
         // Hash the password with the salt using SHA256 algorithm
-        $hashed = hash('sha256', $password . $salt);
+        $hashed = hash('sha256', $password . 'compassion_international_mission_2022m_@_SaLT');
 
         // Return the hashed password
         return $hashed;

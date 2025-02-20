@@ -225,7 +225,7 @@
 	<script src="<?php echo base_url(); ?>assets/js/resizeable.js"></script>
 	<script src="<?php echo base_url(); ?>assets/js/neon-api.js"></script>
 	<script src="<?php echo base_url(); ?>assets/js/jquery.validate.min.js"></script>
-	<script src="<?php echo base_url(); ?>assets/js/neon-login.js"></script>
+	<script src="<?php echo base_url(); ?>assets/js/neon-login.js?<?=date('Ymds')?>"></script>
 	<script src="<?php echo base_url(); ?>assets/js/neon-custom.js"></script>
 	<script src="<?php echo base_url(); ?>assets/js/neon-demo.js"></script>
 
