@@ -258,7 +258,7 @@ class WebController extends BaseController
     $view_path = strtolower($this->controller);
     $page_name = $this->page_name();
     if (file_exists(VIEWPATH . $view_path . '/' . $this->session->user_account_system_code . '/' . $page_name . '.php') && $this->has_permission) {
-      $view_path .= '/' . $this->session->user_account_system;
+      $view_path .= '/' . $this->session->user_account_system_code;
     } elseif (!file_exists(VIEWPATH . $view_path . '/' . $page_name . '.php') || (!$this->has_permission && !$this->session->has('primary_user_data'))) {
       $view_path = 'components';
     }
