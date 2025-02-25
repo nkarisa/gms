@@ -162,7 +162,9 @@ class WebController extends BaseController
       $this->id = hash_id(isset($this->segments[2]) ? $this->segments[2] : null, 'decode'); // Not sure what's this line does
     } elseif ($this->action == 'singleFormAdd' && count($this->uri->getSegments()) == 4) {
       $this->session->set('masterTable', $this->uri->getSegment(4));
-      $this->id = hash_id(isset($this->segments[2]) ? $this->segments[2] : 0, 'decode'); // Not sure what's this line does
+      // log_message('error', $this->session->masterTable);
+      // $this->id = $this->uri->getSegment(3);
+      $this->id = isset($this->segments[2]) ? $this->segments[2] : null; // Used for example when adding a newr permission to a role
     } elseif ($this->action == 'list') {
       $this->session->set('masterTable', null);
       $this->id = hash_id(isset($this->segments[2]) ? $this->segments[2] : 0, 'decode');
@@ -486,6 +488,8 @@ class WebController extends BaseController
 
     $results = $this->result($parentId, $parentTable);
     $draw = intval($this->request->getPost('draw'));
+    $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+
     $data = $results['table_body'];
     $total_records = $results['total_records'];
 

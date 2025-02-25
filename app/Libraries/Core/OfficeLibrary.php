@@ -572,4 +572,13 @@ class OfficeLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
   function transactionValidateDuplicatesColumns(): array{
     return ['office_code'];
   }
+
+  public function getOfficeById($office_id):array {
+    $officeReadBuilder = $this->read_db->table('office');
+    $officeReadBuilder->select(['office_id', 'office_code', 'fk_account_system_id as account_system_id']);
+    $officeReadBuilder->where(['office_id' => $office_id]);
+    $office = $officeReadBuilder->get()->getRowArray();
+
+    return  $office;
+  }
 }

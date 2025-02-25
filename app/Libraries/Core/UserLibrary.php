@@ -1791,4 +1791,11 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
         return $builder->getWhere(array('context_definition_level' => 1))->getRow();
     }
 
+    function getUserFullName($user_id)
+    {
+      $user = $this->read_db->table('user')
+      ->where(array('user_id' => $user_id))->get()->getRow();
+  
+      return $user->user_firstname . ' ' . $user->user_lastname;
+    }
 }

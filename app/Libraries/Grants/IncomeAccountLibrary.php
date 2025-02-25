@@ -105,4 +105,15 @@ class IncomeAccountLibrary extends GrantsLibrary implements \App\Interfaces\Libr
 
     return $income_accounts;//$this->response->setJSON($income_accounts);
   }
+
+  function getExpenseIncomeAccount($expense_income_id)
+  {
+    $builder = $this->read_db->table("income_account");
+    $builder->select(array('income_account_id', 'income_account_name'));
+    $builder->join('expense_account', 'expense_account.fk_income_account_id=income_account.income_account_id');
+    $builder->where(array('expense_account_id' => $expense_income_id));
+    $income_account = $builder->get()->getRow();
+
+    return $income_account;
+  }
 }

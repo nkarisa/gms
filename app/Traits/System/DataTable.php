@@ -42,7 +42,7 @@ trait DataTable {
             array_push($selectColumns, $extraColumns);
         }
         
-        array_push($selectColumns, 'user_firstname','user_lastname');
+        // array_push($selectColumns, 'user_firstname','user_lastname');
 
         if (!empty($value)) {
             $builder->groupStart();

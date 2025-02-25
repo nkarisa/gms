@@ -1615,5 +1615,360 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return ($approved_vouchers == $count_of_month_raised_vouchers) && $count_of_month_raised_vouchers > 0 ? true : false;
     }
 
+    /**
+     * Modified:documentation
+     * get_office_voucher_date
+     * @param int $office_id
+     * @return array
+     * @access public
+     * @author: Livingstone Onduso
+     * @Date: 4/12/2022
+     */
+    public function getOfficeVoucherDate($office_id)
+    {
+        
+        $next_vouching_date = $this->getVoucherDate($office_id);
+        $last_vouching_month_date = date('Y-m-t', strtotime($next_vouching_date));
 
+        $voucher_date_field_dates = ['next_vouching_date' => $next_vouching_date, 'last_vouching_month_date' => $last_vouching_month_date];
+
+        return $voucher_date_field_dates;
+    }
+
+    public function createVoucher($data)
+    {
+
+        $voucher_id = 0;
+
+        extract($data);
+
+        $this->write_db->transStart();
+
+        $this->write_db->table('voucher')->insert( $header);
+
+        $header_id = $this->write_db->insertId();
+
+        for ($i = 0; $i < sizeof($detail); $i++) {
+            $detail[$i]['fk_voucher_id'] = $header_id;
+        }
+
+        $this->write_db->table('voucher_detail')->insertBatch($detail);
+
+        $this->write_db->transComplete();
+
+        if ($this->write_db->transStatus() != false) {
+            $voucher_id = $header_id;
+        }
+
+        return $voucher_id;
+    }
+
+        /**
+     * Modified:documentation
+     * create_report_and_journal
+     * @param int $office_id, $last_vouching_month_date
+     * @return void
+     * @access public
+     * @author: Livingstone Onduso
+     * @Date: 4/12/2022
+     */
+    public function createReportAndJournal($office_id, $last_vouching_month_date):void
+    {
+        $office_has_this_month_voucher=$this->officeHasVouchersForTheTransactingMonth($office_id, $last_vouching_month_date);
+
+        if (!$office_has_this_month_voucher) {
+
+            // Create a month journal record
+            $this->createNewJournal($office_id, date("Y-m-01", strtotime($last_vouching_month_date)));
+
+            // Create the month MFR Record
+            $this->createFinancialReport($office_id, date("Y-m-01", strtotime($last_vouching_month_date)));
+        }
+    }
+
+      /**
+     * Modified:documentation
+     * create_new_journal
+     * @param int $office_id, $journal_date
+     * @return void
+     * @access public
+     * @author: Livingstone Onduso
+     * @Date: 4/12/2022
+     */
+    public function createNewJournal($office_id, $journal_date):void
+    {
+        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+        $new_journal = [];
+
+       // Check if a journal for the same month and FCP exists
+
+       $cash_journal_exists=$this->monthJournalExists($office_id, $journal_date);
+
+        if ($cash_journal_exists) {
+            $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('journal');
+            $new_journal['journal_track_number'] = $itemTrackNumberAndName['journal_track_number'];
+            $new_journal['journal_name'] = "Journal for the month of " . $journal_date;
+            $new_journal['journal_month'] = $journal_date;
+            $new_journal['fk_office_id'] = $office_id;
+            $new_journal['journal_created_date'] = date('Y-m-d');
+            $new_journal['journal_created_by'] = $this->session->user_id;
+            $new_journal['journal_last_modified_by'] = $this->session->user_id;
+            // $new_journal['fk_approval_id'] = $this->grants_model->insert_approval_record('journal');
+            $new_journal['fk_status_id'] = $statusLibrary->initialItemStatus('journal');
+
+            $this->write_db->table('journal')->insert($new_journal);
+        }
+    }
+
+    /**
+     * Modified:documentation
+     * create_financial_report
+     * @param int $office_id, $financial_report_date
+     * @return void
+     * @access public
+     * @author: Livingstone Onduso
+     * @Date: 4/12/2022
+     */
+    public function createFinancialReport($office_id, $financial_report_date)
+    {
+        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+        // Check if a journal for the same month and FCP exists
+       
+        $month_mfr_exists=$this->monthMfrExists($office_id, $financial_report_date);
+
+        if ( $month_mfr_exists) {
+            $new_mfr['financial_report_month'] = $financial_report_date;
+            $new_mfr['fk_office_id'] = $office_id;
+            $new_mfr['fk_status_id'] = $statusLibrary->initialItemStatus('financial_report');
+
+            $new_mfr_to_insert = $this->mergeWithHistoryFields('financial_report', $new_mfr);
+
+            $this->write_db->table('financial_report')->insert( $new_mfr_to_insert);
+        }
+    }
+
+
+      /**
+     * month_journal_exists
+     * @param int $office_id, string $journal_date
+     * @return bool
+     * @access private
+     * @author: Livingstone Onduso
+     * @Date: 19/09/2024
+     */
+    private function monthJournalExists($office_id,$journal_date):bool{
+
+        //for this case use $this->write_db connection and not $this->read_db
+        $builder = $this->write_db->table('journal');
+        $builder->where(array('fk_office_id' => $office_id, 'journal_month' => $journal_date));
+        $cash_journal_count=$builder->get()->getNumRows();
+
+        return $cash_journal_count===0?true:false;
+    }
+   /**
+     * month_mfr_exists
+     * @param int $office_id, string $financial_report_date
+     * @return bool
+     * @access private
+     * @author: Livingstone Onduso
+     * @Date: 19/09/2024
+     */
+    private function monthMfrExists($office_id,$financial_report_date):bool{
+       
+        //for this case use $this->write_db connection and not $this->read_db
+        $builder = $this->write_db->table('financial_report');
+        $builder->where(array('fk_office_id' => $office_id, 'financial_report_month' => $financial_report_date));
+
+        $count_financial_report = $builder->get()->getNumRows();
+
+        return $count_financial_report===0?true:false;
+    }
+
+        /**
+     * Duplicated in the journal model - To be removed from here in the later versions
+     * Update: This method differs in implementation as used in the journal controller. It not found in the journal model as indicated.
+     * The use in the funds transfer model differ to some extent with the use in the journal countroller.
+     * The teo methods need to be reviewed and refactored or rename one if the need is different.
+     */
+
+     function reverseVoucher($voucher_id, $reuse_cheque = 1)
+     {
+ 
+         $message = get_phrase("reversal_completed");
+ 
+         // Get the voucher and voucher details
+         $voucher = $this->read_db->table('voucher')->where(
+             array('voucher_id' => $voucher_id)
+         )->get()->getRowArray();
+ 
+         $this->write_db->transStart();
+ 
+         $new_voucher_id = $this->insertVoucherReversalRecord($voucher, $reuse_cheque);
+ 
+         $this->updateCashRecipientAccount($new_voucher_id, $voucher);
+ 
+         $this->write_db->transComplete();
+ 
+         if ($this->write_db->transStatus() == false) {
+             $message = get_phrase("reversal_failed");
+         }
+         // log_message('error', $message);
+         return $message;
+     }
+
+     public function insertVoucherReversalRecord($voucher, $reuse_cheque, $journal_month = '')
+    {
+
+        //Unset the primary key field
+        $voucher_id = array_shift($voucher);
+
+        $voucher_details = $this->read_db->table('voucher_detail')->where(
+            array('fk_voucher_id' => $voucher_id)
+        )->get()->getResultArray();
+
+        //log_message('error', json_encode(['Test' => $journal_month]));
+        // Get next voucher number
+        $next_voucher_number = $this->getVoucherNumber($voucher['fk_office_id'], $journal_month);
+        $next_voucher_date = $this->getVoucherDate($voucher['fk_office_id'], $journal_month);
+
+        // Replace the voucher number in selected voucher with the next voucher number
+        $cleared_date = $voucher['voucher_transaction_cleared_date'];
+        $cleared_month = $voucher['voucher_transaction_cleared_month'];
+        $voucher_description = '<strike>' . $voucher['voucher_description'] . '</strike> [Reversal of voucher number ' . $voucher['voucher_number'] . ']';
+        $voucher_transaction_cleared_date = $cleared_date == '0000-00-00' || $cleared_date == null ? null : $voucher['voucher_transaction_cleared_date'];
+        $voucher_transaction_cleared_month = $cleared_month == '0000-00-00' || $cleared_month == null ? null : $voucher['voucher_transaction_cleared_month'];
+
+        // $chequeNumberIsValidNumber = is_int((int)$voucher['voucher_cheque_number']) && $voucher['voucher_cheque_number'] > 0;
+    
+        // $voucher = array_replace($voucher, ['voucher_vendor' => '<strike>' . $voucher['voucher_vendor'] . '<strike>', 'voucher_is_reversed' => 1, 'voucher_reversal_from' => $voucher_id, 'voucher_cleared' => 1, 'voucher_date' => $next_voucher_date, 'voucher_cleared_month' => date('Y-m-t', strtotime($next_voucher_date)), 'voucher_number' => $next_voucher_number, 'voucher_description' => $voucher_description, 'voucher_transaction_cleared_date' => $voucher_transaction_cleared_date, 'voucher_transaction_cleared_month' => $voucher_transaction_cleared_month, 'voucher_cheque_number' => is_int($voucher['voucher_cheque_number']) && $voucher['voucher_cheque_number'] > 0 ? -$voucher['voucher_cheque_number'] : $voucher['voucher_cheque_number']]);
+        $voucher = array_replace($voucher, ['voucher_vendor' => '<strike>' . $voucher['voucher_vendor'] . '<strike>', 'voucher_is_reversed' => 1, 'voucher_reversal_from' => $voucher_id, 'voucher_cleared' => 1, 'voucher_date' => $next_voucher_date, 'voucher_cleared_month' => date('Y-m-t', strtotime($next_voucher_date)), 'voucher_number' => $next_voucher_number, 'voucher_description' => $voucher_description, 'voucher_transaction_cleared_date' => $voucher_transaction_cleared_date, 'voucher_transaction_cleared_month' => $voucher_transaction_cleared_month, 'voucher_cheque_number' => $voucher['voucher_cheque_number'] != 0 && $voucher['voucher_cheque_number'] != NULL  ? "-".$voucher['voucher_cheque_number'] : $voucher['voucher_cheque_number']]);
+        
+        //Insert the next voucher record and get the insert id
+        $this->write_db->table('voucher')->insert( $voucher);
+
+        $new_voucher_id = $this->write_db->insertId();
+
+        // Update details array and insert
+
+        $updated_voucher_details = [];
+
+        foreach ($voucher_details as $voucher_detail) {
+            unset($voucher_detail['voucher_detail_id']);
+            $updated_voucher_details[] = array_replace($voucher_detail, ['fk_voucher_id' => $new_voucher_id, 'voucher_detail_unit_cost' => -$voucher_detail['voucher_detail_unit_cost'], 'voucher_detail_total_cost' => -$voucher_detail['voucher_detail_total_cost']]);
+        }
+
+        $this->write_db->table('voucher_detail')->insertBatch( $updated_voucher_details);
+
+        // Update the original voucher record by flagging it reversed
+        $voucherWriteBuilder = $this->write_db->table('voucher');
+        $voucherWriteBuilder->where(array('voucher_id' => $voucher_id));
+        $update_data['voucher_is_reversed'] = 1;
+        $update_data['voucher_cleared'] = 1;
+        $update_data['voucher_cleared_month'] = date('Y-m-t', strtotime($next_voucher_date));
+        //This was commented to remove the BUG DE3458 "Where the cancel function of a voucher with chq# was settin the for re-use"
+        // $update_data['voucher_cheque_number'] = $voucher['voucher_cheque_number'] > 0 ? -$voucher['voucher_cheque_number'] : $voucher['voucher_cheque_number'];
+        $update_data['voucher_reversal_to'] = $new_voucher_id;
+        $voucherWriteBuilder->update($update_data);
+
+        return ['new_voucher_id' => $new_voucher_id, 'new_voucher' => $voucher, 'next_voucher_number' => $next_voucher_number];
+        //return $new_voucher_id;
+    }
+
+     public function updateCashRecipientAccount($new_voucher_id, $voucher)
+    {
+
+        $voucher_id = array_shift($voucher);
+        // Insert a cash_recipient_account record if reversing voucher is bank to bank contra
+
+        $voucherTypeEffectBuilder = $this->read_db->table('voucher_type_effect');
+        $voucherTypeEffectBuilder->where(array('voucher_type_id' => $voucher['fk_voucher_type_id']));
+        $voucherTypeEffectBuilder->join('voucher_type', 'voucher_type.fk_voucher_type_effect_id=voucher_type_effect.voucher_type_effect_id');
+        $voucher_type_effect_code = $voucherTypeEffectBuilder->get()->getRow()->voucher_type_effect_code;
+
+        if ($voucher_type_effect_code == 'bank_to_bank_contra') {
+
+            $cashRecipientAccountReadBuilder = $this->read_db->table('cash_recipient_account');
+            $cashRecipientAccountReadBuilder->where(array('fk_voucher_id' => $voucher_id));
+            $original_cash_recipient_account = $cashRecipientAccountReadBuilder->get()->getRowArray();
+
+            $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('cash_recipient_account');
+            $cash_recipient_account_data['cash_recipient_account_name'] = $itemTrackNumberAndName['cash_recipient_account_name'];
+            $cash_recipient_account_data['cash_recipient_account_track_number'] = $itemTrackNumberAndName['cash_recipient_account_track_number'];
+            $cash_recipient_account_data['fk_voucher_id'] = $new_voucher_id;
+
+            if ($voucher['fk_office_bank_id'] > 0) {
+                $cash_recipient_account_data['fk_office_bank_id'] = $original_cash_recipient_account['fk_office_bank_id'];
+            } elseif ($voucher['fk_office_cash_id'] > 0) {
+                $cash_recipient_account_data['fk_office_cash_id'] = $original_cash_recipient_account['fk_office_cash_id'];
+            }
+
+            $cash_recipient_account_data['cash_recipient_account_created_date'] = date('Y-m-d');
+            $cash_recipient_account_data['cash_recipient_account_created_by'] = $this->session->user_id;
+            $cash_recipient_account_data['cash_recipient_account_last_modified_by'] = $this->session->user_id;
+
+            $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+            $cash_recipient_account_data['fk_approval_id'] = $this->insertApprovalRecord('cash_recipient_account');
+            $cash_recipient_account_data['fk_status_id'] = $statusLibrary->initialItemStatus('cash_recipient_account');
+
+            $this->write_db->table('cash_recipient_account')->insert( $cash_recipient_account_data);
+        }
+    }
+
+     public function insert_voucher_reversal_record($voucher, $reuse_cheque, $journal_month = '')
+    {
+
+        //Unset the primary key field
+        $voucher_id = array_shift($voucher);
+
+        $voucher_details = $this->read_db->table('voucher_detail')->where(
+            array('fk_voucher_id' => $voucher_id)
+        )->get()->getResultArray();
+
+        //log_message('error', json_encode(['Test' => $journal_month]));
+        // Get next voucher number
+        $next_voucher_number = $this->getVoucherNumber($voucher['fk_office_id'], $journal_month);
+        $next_voucher_date = $this->getVoucherDate($voucher['fk_office_id'], $journal_month);
+
+        // Replace the voucher number in selected voucher with the next voucher number
+        $cleared_date = $voucher['voucher_transaction_cleared_date'];
+        $cleared_month = $voucher['voucher_transaction_cleared_month'];
+        $voucher_description = '<strike>' . $voucher['voucher_description'] . '</strike> [Reversal of voucher number ' . $voucher['voucher_number'] . ']';
+        $voucher_transaction_cleared_date = $cleared_date == '0000-00-00' || $cleared_date == null ? null : $voucher['voucher_transaction_cleared_date'];
+        $voucher_transaction_cleared_month = $cleared_month == '0000-00-00' || $cleared_month == null ? null : $voucher['voucher_transaction_cleared_month'];
+
+        // $chequeNumberIsValidNumber = is_int((int)$voucher['voucher_cheque_number']) && $voucher['voucher_cheque_number'] > 0;
+    
+        // $voucher = array_replace($voucher, ['voucher_vendor' => '<strike>' . $voucher['voucher_vendor'] . '<strike>', 'voucher_is_reversed' => 1, 'voucher_reversal_from' => $voucher_id, 'voucher_cleared' => 1, 'voucher_date' => $next_voucher_date, 'voucher_cleared_month' => date('Y-m-t', strtotime($next_voucher_date)), 'voucher_number' => $next_voucher_number, 'voucher_description' => $voucher_description, 'voucher_transaction_cleared_date' => $voucher_transaction_cleared_date, 'voucher_transaction_cleared_month' => $voucher_transaction_cleared_month, 'voucher_cheque_number' => is_int($voucher['voucher_cheque_number']) && $voucher['voucher_cheque_number'] > 0 ? -$voucher['voucher_cheque_number'] : $voucher['voucher_cheque_number']]);
+        $voucher = array_replace($voucher, ['voucher_vendor' => '<strike>' . $voucher['voucher_vendor'] . '<strike>', 'voucher_is_reversed' => 1, 'voucher_reversal_from' => $voucher_id, 'voucher_cleared' => 1, 'voucher_date' => $next_voucher_date, 'voucher_cleared_month' => date('Y-m-t', strtotime($next_voucher_date)), 'voucher_number' => $next_voucher_number, 'voucher_description' => $voucher_description, 'voucher_transaction_cleared_date' => $voucher_transaction_cleared_date, 'voucher_transaction_cleared_month' => $voucher_transaction_cleared_month, 'voucher_cheque_number' => $voucher['voucher_cheque_number'] != 0 && $voucher['voucher_cheque_number'] != NULL  ? -$voucher['voucher_cheque_number'] : $voucher['voucher_cheque_number']]);
+        
+        //Insert the next voucher record and get the insert id
+        $this->write_db->table('voucher')->insert( $voucher);
+
+        $new_voucher_id = $this->write_db->insertId();
+
+        // Update details array and insert
+
+        $updated_voucher_details = [];
+
+        foreach ($voucher_details as $voucher_detail) {
+            unset($voucher_detail['voucher_detail_id']);
+            $updated_voucher_details[] = array_replace($voucher_detail, ['fk_voucher_id' => $new_voucher_id, 'voucher_detail_unit_cost' => -$voucher_detail['voucher_detail_unit_cost'], 'voucher_detail_total_cost' => -$voucher_detail['voucher_detail_total_cost']]);
+        }
+
+        $this->write_db->table('voucher_detail')->insertBatch( $updated_voucher_details);
+
+        // Update the original voucher record by flagging it reversed
+        $voucherWriteBuilder = $this->write_db->table('voucher');
+        $voucherWriteBuilder->where(array('voucher_id' => $voucher_id));
+        $update_data['voucher_is_reversed'] = 1;
+        $update_data['voucher_cleared'] = 1;
+        $update_data['voucher_cleared_month'] = date('Y-m-t', strtotime($next_voucher_date));
+        //This was commented to remove the BUG DE3458 "Where the cancel function of a voucher with chq# was settin the for re-use"
+        // $update_data['voucher_cheque_number'] = $voucher['voucher_cheque_number'] > 0 ? -$voucher['voucher_cheque_number'] : $voucher['voucher_cheque_number'];
+        $update_data['voucher_reversal_to'] = $new_voucher_id;
+        $voucherWriteBuilder->update( $update_data);
+
+        return ['new_voucher_id' => $new_voucher_id, 'new_voucher' => $voucher, 'next_voucher_number' => $next_voucher_number];
+        //return $new_voucher_id;
+    }
 }

@@ -8,15 +8,15 @@ class RoleLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
 {
 
     protected $table;
-    protected $coreModel;
+    protected $roleModel;
 
     function __construct()
     {
         parent::__construct();
 
-        $this->coreModel = new RoleModel();
+        $this->roleModel = new RoleModel();
 
-        $this->table = 'core';
+        $this->table = 'role';
     }
 
     function retrieveRoles($context_definition){

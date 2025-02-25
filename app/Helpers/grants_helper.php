@@ -1080,3 +1080,16 @@ if(!function_exists('month_order')){
 		return $months;
 	}
 }
+
+if(!function_exists('transfer_types')){
+    function transfer_types(){
+        //Income Transfer value
+        $income_transfer='income_transfer';//get_phrase('income_transfer', 'Income Transfer');
+
+
+        //Expense Transfer value
+        $expense_transfer='expense_transfer';//get_phrase('expense_transfer', 'Expense Transfer');
+
+        return [1 => $income_transfer, 2 =>  $expense_transfer];
+    }
+}

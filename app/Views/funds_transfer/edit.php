@@ -15,7 +15,6 @@ $destination_accounts = [];
 $source_fund_balance = 0;
 $destination_fund_balance = 0;
 
-
 if (!empty($result['transfer_request'])) {
     extract($result['transfer_request']);
     $allocation_codes = $result['allocation_codes'];
@@ -32,17 +31,17 @@ if (!empty($result['transfer_request'])) {
         <div class="panel panel-default" data-collapsed="0">
             <div class="panel-heading">
                 <div class="panel-title">
-                    <i class="entypo-plus-circled"></i>
-                    <?php echo get_phrase('new_funds_transfer', 'New funds transfer'); ?>
+                    <i class="fa fa-pencil"></i>
+                    <?php echo get_phrase('edit_funds_transfer'); ?>
                 </div>
             </div>
             <div class="panel-body" style="max-width:50; overflow: auto;">
-                <a href="<?= base_url(); ?>funds_transfer/list" class="btn btn-primary" id="list_transfer"><?=get_phrase('list_fund_transfer_requests', 'List fund transfer requests.');?></a>
+                <a href="<?= base_url(); ?>funds_transfer/list" class="btn btn-primary" id="list_transfer"><?=get_phrase('list_fund_transfer_requests','List fund transfer requests.');?></a>
                 <hr />
                 <table class="table table-striped">
                     <tbody>
                         <tr>
-                            <td colspan='2'><?= get_phrase("office_name", "Office Name"); ?></td>
+                            <td colspan='2'><?= get_phrase("office_name", 'Office Name'); ?></td>
                             <td colspan='2'>
                                 <select class='form-control required' id='office_id' name='fk_office_id' required>
                                     <option value=""><?= get_phrase('select_office', 'Select Office'); ?></option>
@@ -57,41 +56,41 @@ if (!empty($result['transfer_request'])) {
                         </tr>
                         <tr>
                             <td colspan='2'>
-                                <?= get_phrase("transfer_type", 'Transfer Type'); ?>
+                                <?= get_phrase("transfer_type", "Transfer Type"); ?>
                             </td>
                             <td colspan='2'>
                                 <select class="form-control" <?= $funds_transfer_type == 0 ? "disabled" : null ?> name="transfer_type" id="transfer_type" required>
-                                    <option value="0"><?= get_phrase('select_transfer_type', 'Select transfer type'); ?></option>
-                                    <option value="<?=array_search('income_transfer',transfer_types());?>" <?= $funds_transfer_type == array_search('income_transfer',transfer_types()) ? "selected" : null; ?>><?= get_phrase(transfer_types()[1]); ?></option>
-                                    <option value="<?=array_search('expense_transfer',transfer_types());?>" <?= $funds_transfer_type == array_search('expense_transfer',transfer_types()) ? "selected" : null; ?>><?= get_phrase(transfer_types()[2]); ?></option>
+                                    <option value="0"><?= get_phrase('select_transfer_type','Select transfer type'); ?></option>
+                                    <option value="<?=array_search('income_transfer',transfer_types());?>" <?= $funds_transfer_type == array_search('income_transfer',transfer_types()) ? 'selected' : null; ?>><?= get_phrase(transfer_types()[1]); ?></option>
+                                    <option value="<?=array_search('expense_transfer',transfer_types());?>" <?= $funds_transfer_type == array_search('expense_transfer',transfer_types()) ? 'selected' : null; ?>><?= get_phrase(transfer_types()[2]); ?></option>
                                 </select>
                             </td>
                         </tr>
 
                         <tr>
                             <td colspan="4">
-                                <textarea class="form-control" required name="transfer_description" id="transfer_description" rows="5" placeholder="<?= get_phrase('enter_transfer_details_here', 'Enter transfer details here.'); ?>"><?= $funds_transfer_description != null ? $funds_transfer_description : null; ?></textarea>
+                                <textarea class="form-control" required name="transfer_description" id="transfer_description" rows="5" placeholder="<?= get_phrase('enter_transfer_details_here', 'Enter transfer details here'); ?>"><?= $funds_transfer_description != null ? $funds_transfer_description : null; ?></textarea>
                             </td>
                         </tr>
 
                         <tr>
-                            <td style="font-weight:bold;"><?=get_phrase('transfer_order', 'Transfer Order');?></td>
+                            <td style="font-weight:bold;"><?=get_phrase('transfer_order','Transfer Order');?></td>
                             <td style="font-weight:bold;"><?=get_phrase('allocation_code', 'Allocation Code');?></td>
                             <td style="font-weight:bold;"><?=get_phrase('account', 'Account');?></td>
-                            <td style="font-weight:bold;"><?=get_phrase('current_fund_balance', 'Current Fund Balance');?></td>
+                            <td style="font-weight:bold;"><?=get_phrase('current_fund_balance', 'Current fund balance');?></td>
                         </tr>
 
                         <tr>
-                            <td style="font-weight:bold;"><?=get_phrase('transfer_source','Transfer Source');?></td>
+                            <td style="font-weight:bold;"><?=get_phrase('transfer_source', 'Transfer Source');?></td>
                             <td>
-                                <select class="form-control allocation_code type_dependant allocations" name="source_allocation" id="source_allocation" <?= $funds_transfer_type == 0 ? "disabled" : null ?> required >
-                                    <option value="0"><?=get_phrase('select_source_allocation_code', 'Select Source Allocation Code');?></option>
+                                <select class="form-control allocation_code type_dependant" name="source_allocation" id="source_allocation" <?= $funds_transfer_type == 0 ? "disabled" : null ?> required >
+                                    <option value="0"><?=get_phrase('select_source_allocation_code', 'Select source allocation code');?></option>
                                     
                                     <?php 
                                         if($funds_transfer_type > 0){
                                             foreach($allocation_codes as $allocation_id => $allocation_code){
                                     ?>
-                                        <option value="<?=$allocation_id;?>" <?=$allocation_id == $funds_transfer_source_project_allocation_id ?  get_phrase('selected',"Selected"): '';?>><?=$allocation_code;?></option>
+                                        <option value="<?=$allocation_id;?>" <?=$allocation_id == $funds_transfer_source_project_allocation_id ? "selected": '';?>><?=$allocation_code;?></option>
                                     <?php 
                                             }
                                         }   
@@ -101,12 +100,12 @@ if (!empty($result['transfer_request'])) {
                             </td>
                             <td>
                                 <select class="form-control type_dependant type_dependant_select accounts" name="source_account" id="source_account" <?= $funds_transfer_type == 0 ? "disabled" : null ?> required >
-                                    <option value=""><?= get_phrase("select_source_account", 'Select Source Account'); ?></option>
+                                    <option value=""><?= get_phrase("select_source_account", "Select source account"); ?></option>
                                     <?php
                                     if (!empty($source_accounts)) {
                                         foreach ($source_accounts as $source_account_item => $source_account_code) {
                                     ?>
-                                            <option value="<?= $source_account_item; ?>" <?= $source_account_item == $funds_transfer_source_account_id ?  get_phrase('selected',"Selected") : ''; ?>><?= $source_account_code; ?> </option>
+                                            <option value="<?= $source_account_item; ?>" <?= $source_account_item == $funds_transfer_source_account_id ? get_phrase("selected","Selected") : ''; ?>><?= $source_account_code; ?> </option>
                                     <?php
                                         }
                                     }
@@ -120,14 +119,14 @@ if (!empty($result['transfer_request'])) {
                         <tr>
                             <td style="font-weight:bold;"><?=get_phrase('transfer_destination','Transfer Destination');?></td>
                             <td>
-                                <select class="form-control allocation_code type_dependant allocations" name="destination_allocation" id="destination_allocation" <?= $funds_transfer_type == 0 ? "disabled" : null ?> required >
-                                    <option value="0"><?=get_phrase('select_destination_allocation_code', 'Select Destination Allocation Code');?></option>
+                                <select class="form-control allocation_code type_dependant" name="destination_allocation" id="destination_allocation" <?= $funds_transfer_type == 0 ? "disabled" : null ?> required >
+                                    <option value="0"><?=get_phrase('select_destination_allocation_code','Select Destination Allocation Code');?></option>
                                     
                                     <?php 
                                         if($funds_transfer_type > 0){
                                             foreach($allocation_codes as $allocation_id => $allocation_code){
                                     ?>
-                                        <option value="<?=$allocation_id;?>" <?=$allocation_id == $funds_transfer_target_project_allocation_id ?  get_phrase('selected',"Selected") : '';?> ><?=$allocation_code;?></option>
+                                        <option value="<?=$allocation_id;?>" <?=$allocation_id == $funds_transfer_target_project_allocation_id ? get_phrase("selected","Selected") : '';?> ><?=$allocation_code;?></option>
                                     <?php 
                                             }
                                         }   
@@ -136,13 +135,13 @@ if (!empty($result['transfer_request'])) {
                             </td>
                             <td>
                                 <select class="form-control type_dependant type_dependant_select accounts" name="destination_account" id="destination_account" <?= $funds_transfer_type == 0 ? "disabled" : null ?> required >
-                                    <option value=""><?= get_phrase("select_destination_account", "Select Destination Account"); ?></option>
+                                    <option value=""><?= get_phrase("select_destination_account", 'Select Destination Account'); ?></option>
                                     <?php
                                     if (!empty($destination_accounts)) {
                                         foreach ($destination_accounts as $destination_account_item => $destination_account_code) {
                                             
                                     ?>
-                                            <option value="<?= $destination_account_item; ?>" <?= $destination_account_item == $funds_transfer_target_account_id ? get_phrase('selected',"Selected") : ''; ?>><?= $destination_account_code; ?></option>
+                                            <option value="<?= $destination_account_item; ?>" <?= $destination_account_item == $funds_transfer_target_account_id ? get_phrase("selected","Selected") : ''; ?>><?= $destination_account_code; ?></option>
                                     <?php
                                         }
                                     }
@@ -153,7 +152,7 @@ if (!empty($result['transfer_request'])) {
                         </tr>
 
                         <tr>
-                            <td colspan='2' style="font-weight:bold;"><?= get_phrase("amount_to_be_transferred", "Amount to be transferred"); ?></td>
+                            <td colspan='2' style="font-weight:bold;"><?= get_phrase("amount_to_be_transferred","Amount to be transfered"); ?></td>
                             <td colspan='2'>
                                 <input type="text" required class="form-control type_dependant type_dependant_input" name="transfer_amount" id="transfer_amount" value="<?= $funds_transfer_amount != null ? $funds_transfer_amount : 0; ?>" <?= $funds_transfer_type == 0 ? "disabled" : null ?> />
                             </td>
@@ -162,8 +161,8 @@ if (!empty($result['transfer_request'])) {
                     <tfoot>
                         <tr>
                             <td colspan="4">
-                                <button <?= $funds_transfer_type == 0 ? "disabled" : null ?> id="submit" class="btn btn-success"><?= get_phrase("save", "Save"); ?></button>
-                                <button id="clear" class="btn btn-success"><?= get_phrase("clear", "Clear"); ?></button>
+                                <button <?= $funds_transfer_type == 0 ? "disabled" : null ?> id="submit" class="btn btn-success"><?= get_phrase("save",'Save'); ?></button>
+                                <button id="clear" class="btn btn-success"><?= get_phrase("clear", 'Clear'); ?></button>
                             </td>
                         </tr>
                     </tfoot>
@@ -196,6 +195,7 @@ if (!empty($result['transfer_request'])) {
         //remove allocation code options
         $('#source_allocation').find('option').not(':first').remove();
         $('#destination_allocation').find('option').not(':first').remove();
+
 
         // Reset the accounts and allocation code selections and disable amount field
         $('.accounts option').filter(function(){
@@ -253,58 +253,60 @@ if (!empty($result['transfer_request'])) {
     })
 
     $("#transfer_type").on('change',function(){
-        reset_allocation_code_accounts_and_amount()
 
+        reset_allocation_code_accounts_and_amount()
         if($("#transfer_type").val() == 0){
             //prevent the form from submitting
             $("#submit").attr('disabled','disabled');
         }else{
+
             // Set Variables for Post
             
             const office_id = $("#office_id").val()
 
             const data = {office_id: office_id}
-            const url = '<?= base_url(); ?>ajax/funds_transfer/fundsTransferAllocationCodes'
+            const url = '<?= base_url(); ?>funds_transfer/funds_transfer_allocation_codes'
 
             // AJAX Post call
 
             $.post(url, data, function(response){
-            
+
                 // Enable allocation code fields
                 $(".allocation_code").removeAttr('disabled');
                 
-                // const response_json = JSON.parse(response);
+                const response_json = JSON.parse(response);
 
-                $.each(response, function(allocation_id, project_name) {
+                $.each(response_json, function(allocation_id, project_name) {
                     $(".allocation_code").append("<option value='" + allocation_id + "'>" + project_name + "</option>");
                 })
             });
+
         }
-
-
     })
 
-    $('.allocations, .accounts').on('change', function () {
-        let source_allocation = $('#source_allocation').val()
-        let destination_allocation = $('#destination_allocation').val()
 
-        let source_account = $('#source_account').val()
-        let destination_account = $('#destination_account').val()
-
-        if(source_allocation != "" && destination_allocation != "" && source_account != "" && destination_account != ""){
-            if((destination_account == source_account) && (destination_allocation == source_allocation)){
-                alert('<?=get_phrase('mismatch_tranfers_accounts_and_allocations','You cannot have the same allocations and accounts codes for both transfer source and destination');?>');
-                $('.accounts').prop('selectedIndex', 0)
-                $('.fund_balance').html("")
-            }
-        }
-
-    })
 
     $(".accounts").on('change',function(){
-
+        let first_account = 0
+        let second_account = 0
+        
         const fund_balance_td = $(this).parent().next('td')
         const project_td = $(this).parent().prev('td')
+
+        $(".accounts").each(function(i,e){
+            const selected_account = $(e).val()
+
+            if(first_account == 0){
+                first_account = selected_account
+            }else{
+                second_account =selected_account
+            }
+
+            if(first_account == second_account){
+                alert('<?=get_phrase('same_source_and_destination_accounts','Cannot have same source and destination accounts.');?>');
+                $(e).prop('selectedIndex', 0)
+            }
+        })
 
         // Get the fund balance for the income account
         const funds_transfer_type = $("#transfer_type").val()
@@ -312,11 +314,6 @@ if (!empty($result['transfer_request'])) {
         const office_id = $('#office_id').val()
         const project_allocation_id = project_td.find('.allocation_code').val()
 
-        // alert(project_id)
-
-        if(account_id == ""){
-            return false;
-        }
         const data = {account_id: account_id, funds_transfer_type: funds_transfer_type, office_id: office_id, project_allocation_id: project_allocation_id}
 
         const url = "<?=base_url();?>ajax/funds_transfer/incomeAccountFundBalance"
@@ -325,8 +322,6 @@ if (!empty($result['transfer_request'])) {
             fund_balance_td.html(response)
         })
     })
-
-    
 
     $(".allocation_code").on('change',function(){
 
@@ -365,13 +360,13 @@ if (!empty($result['transfer_request'])) {
 
                 $("#destination_account").removeAttr('disabled');
             
-                // const response_json = JSON.parse(response);
+                const response_json = JSON.parse(response);
 
                 $('#destination_account option').filter(function(){
                     return parseInt(this.value,10) > 0;
                 }).remove();
 
-                $.each(response, function(account_id, account_name) {
+                $.each(response_json, function(account_id, account_name) {
                     $("#destination_account").append("<option value='" + account_id + "'>" + account_name + "</option>");
                 })
 

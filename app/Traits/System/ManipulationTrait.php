@@ -157,6 +157,7 @@ trait ManipulationTrait {
       }
   
       if (session()->has('masterTable')) {
+        log_message('error', session()->get('masterTable'));
         $headerColumns['fk_' . strtolower(session()->get('masterTable')) . '_id'] = hash_id($this->id, 'decode');
       }
   

@@ -1429,4 +1429,167 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
         $widget['position_1']['list'] = view("financial_report/show_hide_columns");
         return $widget;
       }
+
+      function getFundBalanceByAccount($office_id, $income_account_id,$reporting_month, $project_id = 0){
+        
+        $null_balances = ['month_opening_balance' => 0, 'month_income' => 0, 'month_expense' => 0];
+
+        $fund_balance_report = $this->fundBalanceReport([$office_id],$reporting_month, [$project_id]);
+        
+        // log_message('error', json_encode($fund_balance_report));
+
+        $income_account_balances = isset($fund_balance_report[$income_account_id]) ? $fund_balance_report[$income_account_id] : $null_balances;
+
+        $income_account_month_opening_balance = $income_account_balances['month_opening_balance'];
+        $income_account_month_sum_income = $income_account_balances['month_income'];
+        $income_account_month_sum_expense = $income_account_balances['month_expense'];
+        $income_account_month_closing_balance = $income_account_month_opening_balance + $income_account_month_sum_income - $income_account_month_sum_expense;
+
+        return $income_account_month_closing_balance;
+      }
+
+
+      function fundBalanceReport($office_ids, $start_date_of_month, $project_ids = [], $office_bank_ids = [])
+      {
+
+        $income_accounts =  $this->incomeAccounts($office_ids, $project_ids, $office_bank_ids);
+        //print_r($income_accounts);exit;
+        $all_accounts_month_opening_balance = $this->monthIncomeOpeningBalance($office_ids, $start_date_of_month, $project_ids, $office_bank_ids);
+        $all_accounts_month_income = $this->monthIncomeAccountReceipts($office_ids, $start_date_of_month, $project_ids, $office_bank_ids);
+        $all_accounts_month_expense = $this->monthIncomeAccountExpenses($office_ids, $start_date_of_month, $project_ids, $office_bank_ids);
+    
+        $report = array();
+    
+        foreach ($income_accounts as $account) {
+    
+          $month_opening_balance = isset($all_accounts_month_opening_balance[$account['income_account_id']]) ? $all_accounts_month_opening_balance[$account['income_account_id']] : 0;
+          $month_income = isset($all_accounts_month_income[$account['income_account_id']]) ? $all_accounts_month_income[$account['income_account_id']] : 0;
+          $month_expense = isset($all_accounts_month_expense[$account['income_account_id']]) ? $all_accounts_month_expense[$account['income_account_id']] : 0;
+    
+          if ($month_opening_balance == 0 && $month_income == 0 && $month_expense == 0) {
+            continue;
+          }
+    
+          $report[$account['income_account_id']] = [
+            'account_name' => $account['income_account_name'],
+            'month_opening_balance' => $month_opening_balance,
+            'month_income' => $month_income,
+            'month_expense' => $month_expense,
+          ];
+        }
+
+    
+        //If the mfr has been submitted. Adjust the child support fund by taking away exact amount of bounced opening chqs This code was added during enhancement for cancelling opening outstanding chqs
+    
+        if ($this->checkIfFinancialReportIsSubmitted($office_ids, $start_date_of_month) == true) {
+    
+          $sum_of_bounced_cheques=$this->getTotalSumOfBouncedOpeningCheques($office_ids, $start_date_of_month);
+    
+          $total_amount_bounced=$sum_of_bounced_cheques[0]['opening_outstanding_cheque_amount'];
+          $bounced_date=$sum_of_bounced_cheques[0]['opening_outstanding_cheque_cleared_date'];
+          $mfr_report_month= date('Y-m-t', strtotime($start_date_of_month));
+          
+          if($total_amount_bounced>0 &&  $bounced_date > $mfr_report_month ){
+    
+            $month_opening=$report[0]['month_opening_balance'];
+          
+            $report[0]['month_opening_balance']=$month_opening-$total_amount_bounced;
+          }
+         
+        }
+        
+        return $report;
+      }
+
+    // public function fundBalanceReport()
+    // {
+
+    //     $post = $this->request->getPost();
+
+    //     $office_ids = [$post['office_id']];
+    //     $reporting_month = $post['reporting_month'];
+    //     $project_ids = [];
+    //     $office_bank_ids = [];
+
+    //     $office_banks = $this->getOfficeBanks($office_ids, $reporting_month);
+
+    //     if (count($office_banks) > 1) {
+    //         // log_message('error', json_encode($office_banks));
+    //         $project_ids = isset($post['project_ids']) && $post['project_ids'] != "" ? explode(",", $post['project_ids']) : [];
+    //         $office_bank_ids = isset($post['office_bank_ids']) && $post['office_bank_ids'] != "" ? explode(",", $post['office_bank_ids']) : [];
+    //     }
+
+    //     // log_message('error', json_encode($office_banks));
+
+    //     $data['result']['fund_balance_report'] = $this->_fundBalanceReport($office_ids, $reporting_month, $project_ids, $office_bank_ids);
+
+    //     return view('financial_report/includes/include_fund_balance_report.php', $data);
+    // }
+
+    private function _fundBalanceReport($office_ids, $start_date_of_month, $project_ids = [], $office_bank_ids = [])
+  {
+
+    // log_message('error', json_encode($office_bank_ids));
+    $income_accounts =  $this->incomeAccounts($office_ids, $project_ids, $office_bank_ids);
+    // log_message('error', json_encode($income_accounts));
+    $all_accounts_month_opening_balance = $this->monthIncomeOpeningBalance($office_ids, $start_date_of_month, $project_ids, $office_bank_ids);
+    $all_accounts_month_income = $this->monthIncomeAccountReceipts($office_ids, $start_date_of_month, $project_ids, $office_bank_ids);
+    $all_accounts_month_expense = $this->monthIncomeAccountExpenses($office_ids, $start_date_of_month, $project_ids, $office_bank_ids);
+
+    $report = array();
+
+    $month_cancelled_opening_oustanding_cheques = $this->getMonthCancelledOpeningOutstandingCheques($office_ids, $start_date_of_month, $project_ids, $office_bank_ids);
+    $past_months_cancelled_opening_oustanding_cheques = $this->getMonthCancelledOpeningOutstandingCheques($office_ids, $start_date_of_month, $project_ids, $office_bank_ids, 'past_months');
+
+    $itr = 0;
+
+    foreach ($income_accounts as $account) {
+
+      $month_opening_balance = isset($all_accounts_month_opening_balance[$account['income_account_id']]) ? $all_accounts_month_opening_balance[$account['income_account_id']] : 0;
+      $month_income = isset($all_accounts_month_income[$account['income_account_id']]) ? $all_accounts_month_income[$account['income_account_id']] : 0;
+      $month_expense = isset($all_accounts_month_expense[$account['income_account_id']]) ? $all_accounts_month_expense[$account['income_account_id']] : 0;
+
+      if ($month_opening_balance == 0 && $month_income == 0 && $month_expense == 0) {
+        continue;
+      }
+
+      if ($itr == 0) {
+        $month_opening_balance = $month_opening_balance + $past_months_cancelled_opening_oustanding_cheques;
+        $month_income = $month_income + $month_cancelled_opening_oustanding_cheques;
+      }
+
+      $report[] = [
+        'account_id' => $account['income_account_id'],
+        'account_name' => $account['income_account_name'],
+        'month_opening_balance' => $month_opening_balance,
+        'month_income' => $month_income,
+        'month_expense' => $month_expense,
+        'month_closing_balance' => ($month_opening_balance + $month_income - $month_expense)
+      ];
+
+      $itr++;
+    }
+
+    //If the mfr has been submitted. Adjust the child support fund by taking away exact amount of bounced opening chqs This code was added during enhancement for cancelling opening outstanding chqs
+
+    if ($this->checkIfFinancialReportIsSubmitted($office_ids, $start_date_of_month) == true) {
+
+      $sum_of_bounced_cheques = $this->getTotalSumOfBouncedOpeningCheques($office_ids, $start_date_of_month);
+
+      $total_amount_bounced = isset($sum_of_bounced_cheques[0]['opening_outstanding_cheque_amount']) ? $sum_of_bounced_cheques[0]['opening_outstanding_cheque_amount'] : 0;
+      $bounced_date = isset($sum_of_bounced_cheques[0]['opening_outstanding_cheque_cleared_date']) ? $sum_of_bounced_cheques[0]['opening_outstanding_cheque_cleared_date'] : NULL;
+      $mfr_report_month = date('Y-m-t', strtotime($start_date_of_month));
+
+      if ($total_amount_bounced > 0 &&  $bounced_date > $mfr_report_month && sizeof($report) > 0) {
+
+        $month_opening = $report[0]['month_opening_balance'];
+
+        $report[0]['month_opening_balance'] = $month_opening - $total_amount_bounced;
+      }
+
+    }
+
+    return $report;
+  }
+
 }

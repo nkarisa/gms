@@ -67,7 +67,11 @@ class GrantsLibrary
 
     $this->controller = isset($segments[0]) ? $segments[0] : 'dashboard';
     $this->action = isset($segments[1]) && !$this->request->isAJAX() ? $segments[1] : 'list';
-    $this->id = isset($segments[2]) && !$this->request->isAJAX() ? $segments[2] : 0;
+    $this->id = isset($segments[2]) ? $segments[2] : 0;
+
+    if ($this->action == 'singleFormAdd' && count($this->uri->getSegments()) == 4) {
+      session()->set('masterTable', $segments[3]);
+    }
 
     // if($this->request->isAJAX()){
     if ($this->controller == "ajax" || $this->controller == "ajaxRequest") {
