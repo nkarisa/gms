@@ -116,11 +116,11 @@ $primary_key = hash_id($id, 'decode');
 
                 if (cnfrm) {
                     // Zero is a flag meanign that the request is for a cancelled voucher, otherwise 1 would mean the request is for a re-use voucher
-                    var url = "<?= base_url(); ?>Journal/reverse_voucher/" + voucher_id + "/0"; 
+                    var url = "<?= base_url(); ?>ajax/journal/reverseVoucher/" + voucher_id + "/0"; 
 
-                    $.get(url, function(response) {
+                    $.get(url, function(obj) {
 
-                        const obj = JSON.parse(response);
+                        // const obj = JSON.parse(response);
 
                         alert(obj.message);
 

@@ -103,7 +103,7 @@ trait Extendable
    * @param array $rowArray
    * @return mixed
    */
-  function formatColumnsValues(string $columnName, mixed $columnValue, array $rowArray): mixed
+  function formatColumnsValues(string $columnName, mixed $columnValue, array $rowArray, array $dependancyData = []): mixed
   {
     return $columnValue;
   }
@@ -283,6 +283,10 @@ trait Extendable
 
   function customTableJoin(\CodeIgniter\Database\BaseBuilder $builder):void {
 
+  }
+
+  function formatColumnsValuesDependancyData(array $data): array{
+    return [];
   }
 
 }

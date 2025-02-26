@@ -239,7 +239,7 @@ class ListOutput extends OutputTemplate
                   array_splice($keys, $refIndex + 1, 0, $newColumn);
                   
                   $values = array_values($selectedRecords[$i]);
-                  array_splice($values, $refIndex + 1, 0, get_phrase('value_not_set'));
+                  array_splice($values, $refIndex + 1, 0, ''); // get_phrase('value_not_set')
         
                   $selectedRecords[$i] = array_combine($keys, $values);
                   }

@@ -31,7 +31,7 @@ class ReimbursementClaimLibrary extends GrantsLibrary implements \App\Interfaces
         return $columns;
     }
 
-    function formatColumnsValues(string $columnName, mixed $columnValue, array $rowArray): mixed {
+    function formatColumnsValues(string $columnName, mixed $columnValue, array $rowArray, array $dependancyData = []): mixed {
 
         $statusLibrary = new StatusLibrary();
 

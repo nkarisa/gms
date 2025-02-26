@@ -764,7 +764,7 @@ class ChequeBookLibrary extends GrantsLibrary implements \App\Interfaces\Library
      * This method counts the number of reuesed of cancalled cheque transactions.
      * The name needs to be update since its misleading
      */
-    public function get_reused_cheque_count($office_bank_id, $cheque_number, $reusing_and_cancel_eft_or_chq = '')
+    public function getReusedChequeCount($office_bank_id, $cheque_number, $reusing_and_cancel_eft_or_chq = '')
     {
 
         // log_message('error', json_encode([$office_bank_id,$cheque_number]));
@@ -774,24 +774,25 @@ class ChequeBookLibrary extends GrantsLibrary implements \App\Interfaces\Library
         $count = 0;
 
         if ($cheque_number != 0) {
-            $this->read_db->select('voucher_cheque_number');
+            $voucherReadBuilder = $this->read_db->table('voucher');
+            $voucherReadBuilder->select('voucher_cheque_number');
             //Added by Onduso on 26th May 2023
-            $this->read_db->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+            $voucherReadBuilder->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
 
             if ($reusing_and_cancel_eft_or_chq == 'cheque') {
 
-                $this->read_db->where(array('voucher_type_is_cheque_referenced' => 1)); //get Only chq numbers and NOT Eft numbers
+                $voucherReadBuilder->where(array('voucher_type_is_cheque_referenced' => 1)); //get Only chq numbers and NOT Eft numbers
             } else if ($reusing_and_cancel_eft_or_chq == 'eft') {
-                $this->read_db->where(array('voucher_type_is_cheque_referenced' => 0)); //get Only eft numbers and NOT chq numbers
+                $voucherReadBuilder->where(array('voucher_type_is_cheque_referenced' => 0)); //get Only eft numbers and NOT chq numbers
             }
 
             //End
-            $this->read_db->where(array('voucher_cheque_number' => $cheque_number, 'fk_office_bank_id' => $office_bank_id));
-            $cancelled_cheque_numbers_obj = $this->read_db->get('voucher');
+            $voucherReadBuilder->where(array('voucher_cheque_number' => $cheque_number, 'fk_office_bank_id' => $office_bank_id));
+            $cancelled_cheque_numbers_obj = $voucherReadBuilder->get();
 
             // $cancelled_cheque_numbers_obj = $this->read_db->query($sql);
 
-            if ($cancelled_cheque_numbers_obj->num_rows() > 0) {
+            if ($cancelled_cheque_numbers_obj->getNumRows() > 0) {
                 $cancelled_cheque_numbers = array_column($cancelled_cheque_numbers_obj->result_array(), 'voucher_cheque_number');
                 $cancelled_cheque_numbers = array_map([$this, 'make_unsigned_values'], $cancelled_cheque_numbers);
 

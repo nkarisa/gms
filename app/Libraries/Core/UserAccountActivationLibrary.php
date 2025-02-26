@@ -26,7 +26,7 @@ class UserAccountActivationLibrary extends GrantsLibrary implements \App\Interfa
     return $additionalListColumns;
   }
 
-  function formatColumnsValues(string $column, mixed $columnValue, array $rowArray): mixed
+  function formatColumnsValues(string $column, mixed $columnValue, array $rowArray, array $dependancyData = []): mixed
   {
       if ($column == 'activate_or_reject_user') {
           $columnValue = '<div style="white-space:nowrap;"><input class="form-check-input" type="checkbox" value="" id="chechbox_' . $rowArray['user_account_activation_id'] . '"> <button class="btn btn-success"  id="activate_' . $rowArray['user_account_activation_id'] . '">Activate?</button> <button class="btn btn-danger"  id="reject_' . $rowArray['user_account_activation_id'] . '">Reject?</button> </div>';

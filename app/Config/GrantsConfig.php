@@ -54,4 +54,5 @@ class GrantsConfig extends BaseConfig
     public $fy_year_reference = 'next';
     public $show_all_budget_tags=true;
     public $size_in_months_of_a_budget_review_period=3;
+    public $cheque_cancel_and_resuse_limit = 4;
 }

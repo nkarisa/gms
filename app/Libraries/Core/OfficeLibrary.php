@@ -226,7 +226,7 @@ class OfficeLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
       return ['office_track_number', 'office_name', 'office_is_active', 'office_is_suspended','office_start_date', 'office_end_date', 'context_definition_name', 'account_system_name'];
     }
 
-    function formatColumnsValues(string $columnName, mixed $columnValue, array $rowArray): mixed {
+    function formatColumnsValues(string $columnName, mixed $columnValue, array $rowArray, array $dependancyData = []): mixed {
       switch($columnName){
         case "office_end_date":
           $columnValue = $columnValue == "0000-00-00" ? get_phrase('value_not_set') : $columnValue;

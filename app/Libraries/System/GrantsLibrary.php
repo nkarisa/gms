@@ -42,8 +42,9 @@ class GrantsLibrary
   protected $library = null;
   public $dbSchema;
   private $uri;
-
   public array $lookUpTablesForeignKeyMappings = [];
+
+  // protected $statusLibrary;
 
   function __construct()
   {
@@ -88,6 +89,8 @@ class GrantsLibrary
 
     // Response 
     $this->response = service('response'); // Services::response()
+
+    // $this->statusLibrary = new StatusLibrary(); 
 
   }
 

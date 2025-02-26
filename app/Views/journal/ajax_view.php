@@ -662,7 +662,7 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
                     if (journal_month == '') {
                         journal_month = 0;
                     }
-                    var url = "<?= base_url(); ?>Journal/reverse_voucher/" + voucher_id + "/" + is_reuse_cheque_transaction + "/" + reusing_eft_or_chq_number + "/" + journal_month;
+                    var url = "<?= base_url(); ?>ajax/journal/reverseVoucher/" + voucher_id + "/" + is_reuse_cheque_transaction + "/" + reusing_eft_or_chq_number + "/" + journal_month;
 
                     $.get(url, function (response) {
 

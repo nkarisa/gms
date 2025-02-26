@@ -489,8 +489,9 @@ class WebController extends BaseController
     $results = $this->result($parentId, $parentTable);
     $draw = intval($this->request->getPost('draw'));
     $statusLibrary = new \App\Libraries\Core\StatusLibrary();
-
+    
     $data = $results['table_body'];
+    $dependancyData = $this->library->formatColumnsValuesDependancyData($data);
     $total_records = $results['total_records'];
 
     $records = [];
@@ -531,7 +532,7 @@ class WebController extends BaseController
         }
 
         if (method_exists($this->library, 'formatColumnsValues')) {
-          $row[$column] = $this->library->formatColumnsValues($column, $row[$column], $row);
+          $row[$column] = $this->library->formatColumnsValues($column, $row[$column], $row, $dependancyData);
         }
 
         $records[$cnt][$cols] = $row[$column];

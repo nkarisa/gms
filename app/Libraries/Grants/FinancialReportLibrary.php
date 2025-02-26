@@ -709,7 +709,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
     public function createFinancialReport($financial_report_date, $office_id)
     {
         // Check if MFR exists
-        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+        $statusLibrary = new StatusLibrary();
         $budgetLibrary = new BudgetLibrary();
 
         $initial_status = $statusLibrary->initialItemStatus('financial_report');
