@@ -1415,7 +1415,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
       return false;
     }
 
-    function showListEditAction(array $record): bool
+    function showListEditAction(array $record, array $dependancyData = []): bool
     {
       return false;
     }

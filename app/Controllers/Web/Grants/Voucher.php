@@ -25,6 +25,7 @@ class Voucher extends WebController
 
     $statusLibrary = new Core\StatusLibrary();
     $requestLibrary = new Grants\RequestLibrary();
+    
     if ($this->action == 'view') {
       $result = $this->library->getTransactionVoucher($this->id);
       $status_data = $this->libs->actionButtonData($this->controller, $result['account_system_id']);
@@ -656,5 +657,410 @@ class Voucher extends WebController
         echo "No Duplicate CJ exists";
       }
     }
+  }
+
+  /**
+   *voucher_header_records(): Returns a rows of voucher details information from voucher_detail table
+   * @author Livingstone Onduso: Dated 08-05-2023
+   * @access public
+   * @param int $voucher_id - voucher id
+   * @return void 
+   */
+  function voucherHeaderRecords(int $voucher_id): ResponseInterface
+  {
+    $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+    $voucher_records_to_edit = $voucherLibrary->getVoucherHeaderToEdit($voucher_id);
+
+    return $this->response->setJSON($voucher_records_to_edit);
+  }
+
+  /**
+   * get_active_office_bank(): get json string of voucher types
+   * @author  Livingstone Onduso
+   * @dated: 5/06/2023
+   * @param int $office_id
+   * @access public
+   * @return void
+   */
+  function getActiveOfficeBank(int $office_id): ResponseInterface
+  {
+    $officeBankLibrary = new \App\Libraries\Grants\OfficeBankLibrary();
+    $office_bank = $officeBankLibrary->getActiveOfficeBank($office_id);
+
+    return $this->response->setJSON($office_bank);
+  }
+
+  /**
+   *get_voucher_detail_to_edit(): Returns a rows of voucher details information from voucher_detail table
+   * @author Livingstone Onduso: Dated 08-05-2023
+   * @access public
+   * @param Int $voucher_id - voucher id
+   * @return void
+   */
+  function getVoucherDetailToEdit(int $voucher_id, string $voucher_type_effect_name): ResponseInterface
+  {
+    $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+    $voucher_detail_records_to_edit = $voucherLibrary->getVoucherDetailToEdit($voucher_id, $voucher_type_effect_name);
+
+    return $this->response->setJSON($voucher_detail_records_to_edit);
+  }
+
+  function checkEftValidity()
+  {
+    $post = $this->request->getPost();
+    $is_valid = true;
+
+    $cheque_number = $post['cheque_number'];
+    $office_bank_id = $post['bank_id'];
+
+    $voucherReadBuilder = $this->read_db->table('voucher');
+    $voucherReadBuilder->select(array('voucher_cheque_number'));
+    $voucherReadBuilder->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+    $voucherReadBuilder->where(array('fk_office_bank_id' => $office_bank_id, 'voucher_cheque_number' => $cheque_number, 'voucher_type_is_cheque_referenced' => 0));
+    $used_eft_ref = $voucherReadBuilder->get();
+
+    if ($used_eft_ref->getNumRows() > 0) {
+      $is_valid = false;
+    }
+
+    echo $is_valid;
+  }
+
+  /**
+   * get_active_project_expenses_accounts
+   * @date: 13 Nov 2023
+   * 
+   * @return void
+   * @author Onduso
+   */
+  function get_active_project_expenses_accounts(int $project_id, int $voucher_type_id): ResponseInterface
+  {
+    $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+    $account_ids_and_names = $voucherLibrary->getActiveProjectExpensesAccounts($project_id, $voucher_type_id);
+    return $this->response->setJSON($account_ids_and_names);
+  }
+
+  function getApproveRequestDetails($office_id)
+  {
+    //echo "Approved request details";
+    $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+    $result = $this->approvedUnvouchedRequestDetails($office_id);
+    return $this->response->setJSON(compact('result'));
+  }
+
+  function approvedUnvouchedRequestDetails($office_id){
+    $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+    $data['result'] = $voucherLibrary->getApprovedUnvouchedRequestDetails($office_id);
+    return view('voucher/unvouched_request_details',$data);
+  }
+
+    /**
+   * get_voucher_type_effect
+   * 
+   * The method gives the voucher type effsct code for a give voucher type.
+   * Each voucher type has an associated effect and an account. 
+   * 
+   * There are 4 voucher type effects with codes income, expense, bank_contra 
+   * [bank_contra - is for monies taken from bank to petty cash box] and 
+   * cash_contra [is for monies rebanked from petty cash box to bank]
+   * 
+   * There are 2 voucher type accounts with codes names bank [holds bank transactions] and cash [petty cash transactions]
+   * 
+   * A valid combination for a voucher type can therefore be Bank Account with Effect of Expense
+   * 
+   * @param int $voucher_type_id - Is an primary key of a certain voucher type
+   * 
+   * @return string - Voucher Type Effect of a given voucher type id
+   * 
+   * @author Nicodemus Karisa Mwambire
+   * 
+   */
+  function getVoucherTypeEffect(int $voucher_type_id): ResponseInterface
+  {
+    $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+    $result = $voucherLibrary->getVoucherTypeEffect($voucher_type_id)['voucher_type_effect_code'];
+    return $this->response->setJSON(compact('result'));
+  }
+
+   /**
+   * get_active_office_cash(): get json string of voucher types
+   * @author  Livingstone Onduso
+   * @dated: 4/06/2023
+   * @access public
+   * @return void
+   */
+  function getActiveOfficeCash(): ResponseInterface
+  {
+
+    $account_system_id = $this->session->user_account_system_id;
+
+    $officeCashLibrary = new \App\Libraries\Grants\OfficeCashLibrary();
+    $office_cash_accounts = $officeCashLibrary->getActiveOfficeCash($account_system_id);
+
+    return $this->response->setJSON($office_cash_accounts);
+  }
+
+    /**
+   * get_active_recipient_bank(): get json string of voucher types
+   * @author  Livingstone Onduso
+   * @dated: 5/03/2024
+   * @param int $voucher_id
+   * @access public
+   * @return void
+   */
+  function getActiveRecipientBank(int $voucher_id): ResponseInterface
+  {
+
+    $officeBankLibrary = new \App\Libraries\Grants\OfficeBankLibrary();
+    $recipient_office_bank = $officeBankLibrary->getActiveRecipientBank($voucher_id);
+
+    return $this->response->setJSON($recipient_office_bank);
+  }
+
+    /**
+   *unapproved_month_vouchers(): Returns the total of unapproved vouchers for current month for an office
+   *
+   * @author Livingstone Onduso: Dated 08-04-2023
+   * @access public
+   * @param int $office_id - Office primary key
+   * @param string $reporting_month - Date of the month
+   * @param string $effect_code - Effect code e.g. income or expense
+   * @param string $account_code - Account code e.g cash or bank
+   * @param int $cash_type_id - Cash type e.g. petty cash
+   * @param int $office_bank_id - Cash type e.g. bank 1 
+   * @return float - True if reconciliation has been created else false
+   */
+
+   public function unapprovedMonthVouchers(int $office_id, string $reporting_month, string $effect_code, string $account_code, int $cash_type_id = 0, int $office_bank_id = 0): ResponseInterface
+   {
+    
+    $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+     $unproved_expense_vouchers = $voucherLibrary->unapprovedMonthVouchers($office_id, $reporting_month, $effect_code, $account_code, $cash_type_id, $office_bank_id);
+ 
+     return $this->response->setJSON($unproved_expense_vouchers);
+   }
+
+     /**
+   * get_cheques_for_office
+   * 
+   * This return list of cheques
+   * 
+   * @return array - Array
+   * @author Onduso
+   */
+  function getChequesForOffice(Int $office, Int $bank_office_id, Int $cheque_number): ResponseInterface
+  {
+
+    $cheque_number_exists = false;
+    $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+    $cheque_numbers = $voucherLibrary->getChequesForOffice($office, $bank_office_id, $cheque_number);
+
+    if ($cheque_numbers > 0) {
+      $cheque_number_exists = true;
+    }
+    return $this->response->setJSON(['result' => $cheque_number_exists]);
+  }
+
+  function voucherTypeRequiresChequeReferencing($voucher_type_id)
+  {
+    $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+    $result = $voucherLibrary->voucherTypeRequiresChequeReferencing($voucher_type_id);
+    
+    return $this->response->setJSON(compact('result'));
+  }
+
+  /**
+   * get_active_project_expenses_accounts
+   * @date: 13 Nov 2023
+   * 
+   * @return void
+   * @author Onduso
+   */
+  function getActiveProjectExpensesAccounts(int $project_id, int $voucher_type_id): ResponseInterface
+  {
+    $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+    $account_ids_and_names = $voucherLibrary->getActiveProjectExpensesAccounts($project_id, $voucher_type_id);
+    return $this->response->setJSON($account_ids_and_names);
+  }
+
+    /**
+   *edit_voucher(): It modifies a voucher and saves it
+   *
+   * @author Livingstone Onduso: Dated 08-04-2023
+   * @access public
+   * @param Int $voucher_id - Office primary key
+   * @return void - True if reconciliation has been created else false
+   */
+
+   public function editVoucher(int $voucher_id): void
+   {
+ 
+     $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+     $voucherTypeLibrary = new \App\Libraries\Grants\VoucherTypeLibrary();
+     $voucherWriteBuilder = $this->write_db->table('voucher');
+     $voucherDetailWriteBuilder = $this->write_db->table('voucher_detail');
+     $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+     $post = $this->request->getPost();
+     
+     $voucher_type_effect_code = $voucherLibrary->voucherTypeEffectAndCode($post['fk_voucher_type_id'])->voucher_type_effect_code;
+     $office_cash_id = 0;
+     $cheque_number = 0;
+     $fk_voucher_type_id = $post['fk_voucher_type_id'];
+     $original_voucher_type_effect_before_edit = $post['hold_voucher_type_effect_for_edit'];
+     
+     $this->write_db->transBegin();
+
+     //Voucher header details
+     if (isset($post['fk_office_cash_id'])) {
+       $office_cash_id = $post['fk_office_cash_id'] == null ? 0 : $post['fk_office_cash_id'];
+     }
+     if (isset($post['voucher_cheque_number'])) {
+       $cheque_number = $post['voucher_cheque_number'] == null ? 0 : $post['voucher_cheque_number'];
+     }
+     $voucher_header_data = [
+       'fk_office_id' => $post['fk_office_id'],
+       'voucher_date' => $post['voucher_date'],
+       'fk_voucher_type_id' => $fk_voucher_type_id,
+       'fk_office_bank_id' => $this->getOfficeBankIdToPost($post['fk_office_id']),
+       'fk_office_cash_id' => $office_cash_id,
+       'voucher_cheque_number' => $cheque_number,
+       'voucher_vendor' => $post['voucher_vendor'],
+       'voucher_vendor_address' => $post['voucher_vendor_address'],
+       'voucher_description' => $post['voucher_description'],
+       'voucher_last_modified_by' => $this->session->user_id
+     ];
+ 
+     $is_voucher_type_affects_bank = $voucherTypeLibrary->isVoucherTypeAffectsBank($fk_voucher_type_id);
+ 
+     if ($is_voucher_type_affects_bank) { 
+       $voucher_header_data['voucher_cleared'] = 0;
+       $voucher_header_data['voucher_cleared_month'] = NULL;
+     }
+
+     $quantity = count($post['voucher_detail_quantity']);
+ 
+     if ($quantity > 0) {
+       //Update Voucher Table
+       $voucherWriteBuilder->where(['voucher_id' => $voucher_id]);
+       $voucherWriteBuilder->update($voucher_header_data);
+ 
+       $detail = [];
+ 
+       //Loop to update Voucher Details
+       for ($i = 0; $i <  $quantity; $i++) {
+ 
+         $voucher_detail_quantity = str_replace(",", "", $post['voucher_detail_quantity'][$i]);
+         $voucher_detail_unit_cost = str_replace(",", "", $post['voucher_detail_unit_cost'][$i]);
+         $voucher_detail_total_cost = str_replace(",", "", $post['voucher_detail_total_cost'][$i]);
+ 
+         $detail['voucher_detail_quantity'] = $voucher_detail_quantity;
+         $detail['voucher_detail_description'] = $post['voucher_detail_description'][$i];
+         $detail['voucher_detail_unit_cost'] = $voucher_detail_unit_cost; 
+         $detail['voucher_detail_total_cost'] = $voucher_detail_total_cost;
+ 
+         //if original_voucher_type_effect_before_edit is EMPTY it means voucher type effect didn't change since the voucher type dropdown was not toggled
+         $voucher_detail_id = '';
+         if ($original_voucher_type_effect_before_edit == $voucher_type_effect_code || $original_voucher_type_effect_before_edit == '') {
+           $voucher_detail_id = $post['hold_voucher_detail_id'][$i];
+         }
+  
+         if ($voucher_type_effect_code == 'expense') {
+           $detail['fk_expense_account_id'] = $post['voucher_detail_account'][$i];
+           $detail['fk_contra_account_id'] = 0;
+           $detail['fk_income_account_id'] = $post['store_income_account_id'][$i];
+         } elseif ($voucher_type_effect_code == 'income' || $voucher_type_effect_code == 'bank_to_bank_contra') {
+           $detail['fk_expense_account_id'] = 0;
+           $detail['fk_contra_account_id'] = 0;
+           $detail['fk_income_account_id'] = $post['store_income_account_id'][$i];
+         } elseif ($voucher_type_effect_code == 'bank_contra' || $voucher_type_effect_code == 'cash_contra') {
+           $detail['fk_expense_account_id'] = 0;
+           $detail['fk_contra_account_id'] = $post['voucher_detail_account'][$i];
+         }
+         $detail['fk_project_allocation_id'] = isset($post['fk_project_allocation_id'][$i]) ? $post['fk_project_allocation_id'][$i] : 0;
+         $detail['fk_request_detail_id'] =  isset($post['fk_request_detail_id'][$i]) ? $post['fk_request_detail_id'][$i] : 0;
+ 
+         if ($voucher_detail_id != '') {
+           //update the voucher_detail table
+           $voucherDetailWriteBuilder->where(['voucher_detail_id' => $voucher_detail_id]);
+           $voucherDetailWriteBuilder->update($detail);
+         } else {
+           //Insert newlt added detail row
+           $itemTrackNumberAndName = $this->libs->generateItemTrackNumberAndName('voucher_detail');
+           $detail['fk_voucher_id'] = $voucher_id;
+           $detail['voucher_detail_track_number'] = $itemTrackNumberAndName['voucher_detail_track_number'];
+           $detail['voucher_detail_name'] = $itemTrackNumberAndName['voucher_detail_name'];
+           $detail['fk_approval_id'] = $this->libs->insertApprovalRecord('voucher_detail');
+           $detail['fk_status_id'] = $statusLibrary->initialItemStatus('voucher_detail');
+           $voucherDetailWriteBuilder->insert($detail);
+         }
+       }
+ 
+       // This is to be used in the future as a replacement for inserting in the details
+       $voucher_posting_condition = $this->voucherPostingCondition($post);
+ 
+       if ($this->write_db->transStatus() === FALSE || !$voucher_posting_condition) {
+         $this->write_db->transRollback();
+         echo 0; //"Voucher Update failed"
+       } else {
+         $this->write_db->transCommit();
+         echo 1; //"Voucher Updated successfully";
+       }
+     }
+   }
+
+   private function voucherPostingCondition($post){
+    $checkResult = true;
+    $has_details = count($post['voucher_detail_quantity']) > 0 ? true : false;
+    $all_details_have_accounts = $this->allDetailsHaveAccounts($post['voucher_detail_account']);
+
+    if(!$has_details || !$all_details_have_accounts){
+      $checkResult = false;
+    }
+
+    return $checkResult;
+  }
+
+  private function allDetailsHaveAccounts($detailsAccounts){
+    $checkResult =  true;
+
+    foreach($detailsAccounts as $detailsAccount){
+      if(!$detailsAccount || $detailsAccount == 0){
+        $checkResult = false;
+        break;
+      }
+    }
+    return $checkResult;
+  }
+
+   function getOfficeBankIdToPost($office_id)
+   {
+
+    $post = $this->request->getPost();
+    $officeBankLibrary = new \App\Libraries\Grants\OfficeBankLibrary();
+ 
+     $office_bank_id = $post['fk_office_bank_id'] == null ? 0 : $post['fk_office_bank_id'];
+ 
+     if ($office_bank_id == 0) {
+       // Get id of active office bank
+       $office_bank_id = $officeBankLibrary->getActiveOfficeBanks($office_id)[0]['office_bank_id'];
+     }
+ 
+     return $office_bank_id;
+   }
+
+     /**
+   * Enhancement
+   *get_project_allocation_income_account(): Returns  income account numeric value
+   * @author Livingstone Onduso: Dated 29-06-2023
+   * @access public
+   * @param Int Int $project_allocation_id
+   * @return int
+   **/
+  function getProjectAllocationIncomeAccount(int $project_allocation_id): void
+  {
+    $incomeAccountLibrary = new \App\Libraries\Grants\IncomeAccountLibrary();
+    $income_account_id = $incomeAccountLibrary->getProjectAllocationIncomeAccount($project_allocation_id);
+
+    echo $income_account_id;
   }
 }

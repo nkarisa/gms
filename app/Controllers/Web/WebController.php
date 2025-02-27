@@ -488,10 +488,11 @@ class WebController extends BaseController
 
     $results = $this->result($parentId, $parentTable);
     $draw = intval($this->request->getPost('draw'));
-    $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+    // $statusLibrary = new \App\Libraries\Core\StatusLibrary();
     
     $data = $results['table_body'];
-    $dependancyData = $this->library->formatColumnsValuesDependancyData($data);
+    $formatColumnValuesdependancyData = $this->library->formatColumnsValuesDependancyData($data);
+    $showListEditActionDependancyData = $this->library->showListEditActionDependancyData($data);
     $total_records = $results['total_records'];
 
     $records = [];
@@ -513,7 +514,7 @@ class WebController extends BaseController
           if (
             $this->session->system_admin ||
             (
-              $this->library->showListEditAction($row) &&
+              $this->library->showListEditAction($row, $showListEditActionDependancyData) &&
               $this->libs->loadLibrary('user')->checkRoleHasPermissions(strtolower($this->controller), 'update')
             )
           ) {
@@ -532,7 +533,7 @@ class WebController extends BaseController
         }
 
         if (method_exists($this->library, 'formatColumnsValues')) {
-          $row[$column] = $this->library->formatColumnsValues($column, $row[$column], $row, $dependancyData);
+          $row[$column] = $this->library->formatColumnsValues($column, $row[$column], $row, $formatColumnValuesdependancyData);
         }
 
         $records[$cnt][$cols] = $row[$column];

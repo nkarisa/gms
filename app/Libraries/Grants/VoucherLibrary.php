@@ -995,6 +995,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
         return $voucher_type_is_cheque_referenced;
     }
+    
 
     function voucherTypeEffectAndCode($voucher_type_id)
     {
@@ -1976,8 +1977,23 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         }
     }
 
-    function showListEditAction($row): bool{
-        return false;
+    function showListEditActionDependancyData(array $vouchers): array{
+        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+        $maxApprovalStatus = $statusLibrary->getMaxApprovalStatusId($this->controller);
+        $initialItemStatus = $this->initialItemStatus('voucher');
+        return compact('vouchers','maxApprovalStatus','initialItemStatus');
+    }
+
+    function showListEditAction(array $row, array $dependancyData = []): bool{
+        $current_status_id = $row['status_id'];
+        $max_approval_status = $dependancyData['maxApprovalStatus'];
+        $initialItemStatus = $dependancyData['initialItemStatus'];
+
+        if(in_array($current_status_id, $max_approval_status) || $initialItemStatus != $current_status_id){
+            return false;
+        }
+
+        return true;
     }
 
      /**
@@ -2042,4 +2058,226 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
              }
          }
      }
+
+     /**
+     *is_voucher_missing_voucher_details(): Returns a bool [false means voucher has voucher details and true=missing voucher details]
+     * @author Livingstone Onduso: Dated 08-05-2023
+     * @access public
+     * @param int $voucher_id
+     * @return bool - returns bool
+     */
+
+    public function isVoucherMissingVoucherDetails(int $voucher_id): bool
+    {
+        //If no record of passed voucher_id means detail deleted
+        $voucherDetailReadBuilder = $this->read_db->table('voucher_detail');
+        $voucherDetailReadBuilder->select(['fk_voucher_id']);
+        $voucherDetailReadBuilder->where(['fk_voucher_id' => $voucher_id]);
+        $vouchers_with_voucher_detail = $voucherDetailReadBuilder->get()->getResultArray();
+
+        if (empty($vouchers_with_voucher_detail)) {
+            return true;
+        }
+
+        return false;
+    }
+    /**
+     *get_voucher_detail_to_edit(): Returns a rows of voucher details information from voucher_detail table
+     * @author Livingstone Onduso: Dated 08-05-2023
+     * @access public
+     * @param Int $voucher_id - voucher id String voucher_effect_name
+     * @return array - returns array
+     */
+    public function getVoucherDetailToEdit(int $voucher_id, string $voucher_effect_name): array
+    {
+        $voucherDetailReadBuilder = $this->read_db->table('voucher_detail');
+
+        $voucherDetailReadBuilder->select(['voucher_detail_id', 'voucher_detail_quantity', 'voucher_detail_unit_cost', 'voucher_detail_total_cost', 'voucher_detail_description', 'fk_project_allocation_id', 'project_name', 'fk_contra_account_id', 'project_id']);
+        
+        //Check if contra or expense. Always transaction will account_id so no need to check if income
+        
+        if ($voucher_effect_name == 'Expense') {
+            $voucherDetailReadBuilder->select(['fk_expense_account_id', 'expense_account_name', 'expense_account.fk_income_account_id', 'income_account_name']);
+            $voucherDetailReadBuilder->join('expense_account', 'expense_account.expense_account_id=voucher_detail.fk_expense_account_id','left');
+            $voucherDetailReadBuilder->join('income_account', 'income_account.income_account_id=voucher_detail.fk_income_account_id','left');
+        } elseif ($voucher_effect_name == 'Cash_contra' || $voucher_effect_name == 'Bank_contra') {
+            $voucherDetailReadBuilder->select(['contra_account_name']);
+            $voucherDetailReadBuilder->join('contra_account', 'contra_account.contra_account_id=voucher_detail.fk_contra_account_id');
+        } elseif ($voucher_effect_name == 'Income') {
+            $voucherDetailReadBuilder->select(array('income_account_name', 'fk_income_account_id'));
+            $voucherDetailReadBuilder->join('income_account', 'income_account.income_account_id=voucher_detail.fk_income_account_id','left');
+        }
+
+        $voucherDetailReadBuilder->join('project_allocation', 'project_allocation.project_allocation_id=voucher_detail.fk_project_allocation_id');
+        $voucherDetailReadBuilder->join('project', 'project.project_id=project_allocation.fk_project_id');
+        $voucherDetailReadBuilder->where(['fk_voucher_id' => $voucher_id]);
+        $voucher_detail_to_edit = $voucherDetailReadBuilder->get()->getResultArray();
+
+        $voucher_total_amount = 0;
+        foreach ($voucher_detail_to_edit as $voucher_detail) {
+            $voucher_total_amount += $voucher_detail['voucher_detail_total_cost'];
+        }
+
+        $amount['total_voucher_amount'] = $voucher_total_amount;
+
+        array_push($voucher_detail_to_edit, $amount);
+
+        return $voucher_detail_to_edit;
+    }
+
+        /**
+     * get_active_project_expenses_accounts
+     * @date: 13 Nov 2023
+     *
+     * @return Array
+     * @author Onduso
+     */
+    public function getActiveProjectExpensesAccounts(int $project_id, int $voucher_type_id = 0): array
+    {
+        //Get the voucher_type
+        $voucher_type_effect = $this->getVoucherTypeEffect($voucher_type_id)['voucher_type_effect_code'];
+
+        //Get incomes for a given project then loop to regroup them
+        $projectIncomeAccountReadBuilder = $this->read_db->table('project_income_account');
+        $projectIncomeAccountReadBuilder->select(['fk_income_account_id']);
+        $projectIncomeAccountReadBuilder->where(['fk_project_id' => $project_id]);
+        $project_income_account_ids = $projectIncomeAccountReadBuilder->get()->getResultArray();
+
+        $income_ids = [];
+
+        foreach ($project_income_account_ids as $project_income_account_id) {
+            $income_ids[] = $project_income_account_id['fk_income_account_id'];
+        }
+
+        //if voucher_type=income get the income names and codes
+        if ($voucher_type_effect == 'income') {
+            $accounts_ids_and_names = $this->getAccountsIdsAndName('income_account', 'income_account_id', $income_ids); //array_combine($income_acc_ids,$income_acc_names);
+
+        } else if ($voucher_type_effect == 'expense') {
+
+            // //Get the expenses for each of the income_accounts
+            $accounts_ids_and_names = $this->getAccountsIdsAndName('expense_account', 'fk_income_account_id', $income_ids, true);
+        } else if ($voucher_type_effect == 'bank_to_bank_contra') {
+
+            //what of contra
+            $accounts_ids_and_names = $this->getAccountsIdsAndName('contra_account', 'contra_account_id', $income_ids);
+        }
+
+        return $accounts_ids_and_names;
+    }
+
+    /**
+     * get_voucher_type_effect
+     * @param int $voucher_type_id
+     * @return array
+     * @access public
+     * @author: Livingstone Onduso
+     * @Date: 4/12/2022
+     */
+    public function getVoucherTypeEffect(int $voucher_type_id): array
+    {
+        $voucherTypeEffectReadBuilder = $this->read_db->table('voucher_type_effect');
+        $voucherTypeEffectReadBuilder->select(array('voucher_type_effect_code', 'voucher_type_id', 'voucher_type_effect_id'));
+        $voucherTypeEffectReadBuilder->join('voucher_type', 'voucher_type.fk_voucher_type_effect_id=voucher_type_effect.voucher_type_effect_id');
+        return $voucherTypeEffectReadBuilder->where(array('voucher_type_id' => $voucher_type_id))->get()->getRowArray();
+    }
+
+    /**
+     * get_accounts_ids_and_name
+     * @date: 18 Dec 2023
+     *
+     * @return array
+     * @access private
+     * @author Onduso
+     * @param : string $table, string $income_account_id_col, array $income_ids, $remove_T_expense_name=false
+     */
+    private function getAccountsIdsAndName(string $table, string $income_account_id_col, array $income_ids, $remove_T_expense_name = false): array
+    {
+
+        $genericTableReadBuilder = $this->read_db->table($table);
+
+        $genericTableReadBuilder->select([$table . '_id', $table . '_name']);
+        $genericTableReadBuilder->whereIn($income_account_id_col, $income_ids);
+
+        if ($table != 'contra_account') {
+            $genericTableReadBuilder->where([$table . '_is_active' => 1]);
+        }
+
+        if ($remove_T_expense_name == true) {
+            $genericTableReadBuilder->notLike($table . '_name', 'T', 'after');
+        }
+
+        $accounts = $genericTableReadBuilder->get()->getResultArray();
+
+        $account_ids = array_column($accounts, $table . '_id');
+        $account_names = array_column($accounts, $table . '_name');
+
+        $accounts_ids_and_names = array_combine($account_ids, $account_names);
+
+        return $accounts_ids_and_names;
+    }
+
+        /**
+     *unapproved_month_vouchers(): Returns the total of unapproved vouchers for current month for an office
+     *
+     * @author Livingstone Onduso: Dated 08-04-2023
+     * @access public
+     * @param Int $office_id - Office primary key
+     * @param String $reporting_month - Date of the month
+     * @param String $effect_code - Effect code e.g. income or expense
+     * @param String $account_code - Account code e.g cash or bank
+     * @param Int $cash_type_id - Cash type e.g. petty cash
+     * @param Int $office_bank_id - Cash type e.g. bank 1
+     * @return float - True if reconciliation has been created else false
+     */
+    public function unapproved_month_vouchers(int $office_id, string $reporting_month, string $effect_code, string $account_code, int $cash_type_id = 0, int $office_bank_id = 0): float
+    {
+        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+        $max_approval_status_ids = $statusLibrary->getMaxApprovalStatusId('voucher');
+
+        $start_of_reporting_month = date('Y-m-01', strtotime($reporting_month));
+
+        $end_of_reporting_month = date('Y-m-t', strtotime($reporting_month));
+
+        $voucherDetailReadBuilder = $this->read_db->table('voucher_detail');
+        $voucherDetailReadBuilder->selectSum('voucher_detail_total_cost');
+        $voucherDetailReadBuilder->join('voucher', 'voucher.voucher_id=voucher_detail.fk_voucher_id');
+        $voucherDetailReadBuilder->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+        $voucherDetailReadBuilder->join('voucher_type_account', 'voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
+        $voucherDetailReadBuilder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+        $voucherDetailReadBuilder->where(['voucher.fk_office_id' => $office_id, 'voucher.voucher_date >=' => $start_of_reporting_month, 'voucher.voucher_date <=' => $end_of_reporting_month, 'voucher.fk_status_id!=' => $max_approval_status_ids[0]]);
+        $voucherDetailReadBuilder->where(['voucher_type_effect_code' => $effect_code, 'voucher_type_account_code' => $account_code]);
+
+        if ($cash_type_id != 0) {
+            $voucherDetailReadBuilder->where(['fk_office_cash_id' => $cash_type_id]);
+        } else if ($office_bank_id != 0) {
+            $voucherDetailReadBuilder->where(['fk_office_bank_id' => $office_bank_id]);
+        }
+
+        $voucherDetailReadBuilder->groupBy(array('voucher_detail.fk_voucher_id'));
+        $results = $voucherDetailReadBuilder->get()->getResultArray();
+        $totals_arr = array_column($results, 'voucher_detail_total_cost');
+
+        return array_sum($totals_arr);
+    }
+
+        /**
+     * Get the get_cheques_for_office
+     *
+     * Gives an array of the voucher signitories
+     *
+     * @param int $office - the id office
+     * @return array - An array
+     * @author LOnduso
+     */
+    public function getChequesForOffice(Int $office, Int $bank_office_id, Int $cheque_number): int
+    {
+        //Get the cheque numbers for an office for a given bank office
+        $voucherReadBuilder = $this->read_db->table('voucher');
+        $voucherReadBuilder->select(array('voucher_cheque_number'));
+        $voucherReadBuilder->where(array('fk_office_id' => $office, 'fk_office_bank_id' => $bank_office_id, 'voucher_cheque_number' => $cheque_number));
+        $cheque_numbers = $voucherReadBuilder->get()->getNumRows();
+
+        return $cheque_numbers;
+    }
 }

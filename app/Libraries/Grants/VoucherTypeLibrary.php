@@ -198,5 +198,27 @@ class VoucherTypeLibrary extends GrantsLibrary implements \App\Interfaces\Librar
     
         return $voucher_type;
       }
+
+  function isVoucherTypeAffectsBank(int $voucher_type_id): bool
+  {
+
+    $is_voucher_type_affects_bank = false;
+
+    $voucherTypeReadBuilder = $this->read_db->table('voucher_type');
+    $voucherTypeReadBuilder->where(['voucher_type_id' => $voucher_type_id]);
+    $voucherTypeReadBuilder->groupStart();
+    $voucherTypeReadBuilder->where(['voucher_type_account_code' => 'bank']);
+    $voucherTypeReadBuilder->orWhere(['voucher_type_effect_code' => 'cash_contra']);
+    $voucherTypeReadBuilder->groupEnd();
+    $voucherTypeReadBuilder->join('voucher_type_account', 'voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
+    $voucherTypeReadBuilder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+    $voucher_obj = $voucherTypeReadBuilder->get();
+
+    if ($voucher_obj->getNumRows() > 0) {
+      $is_voucher_type_affects_bank = true;
+    }
+
+    return $is_voucher_type_affects_bank;
+  }
    
 }

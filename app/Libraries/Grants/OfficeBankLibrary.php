@@ -449,4 +449,25 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
       }
     }
   }
+
+    /**
+   * get_active_recipient_bank(): get json string of voucher types
+   * @author  Livingstone Onduso
+   * @dated: 5/06/2023
+   * @access public
+   * @return array
+   * @param int $fk_voucher_id
+   */
+  public function getActiveRecipientBank(int $fk_voucher_id){
+
+    $officeBankReadBuilder = $this->read_db->table('office_bank');
+    
+    $officeBankReadBuilder->select(['office_bank_id','office_bank_name']);
+    $officeBankReadBuilder->join('cash_recipient_account','cash_recipient_account.fk_office_bank_id =office_bank.office_bank_id');
+    $officeBankReadBuilder->where(['office_bank_is_active'=>1,'fk_voucher_id'=>$fk_voucher_id]);
+    $recipient_bank=$officeBankReadBuilder->get()->getResultArray();
+
+    return $recipient_bank;
+
+  }
 }

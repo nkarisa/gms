@@ -154,7 +154,7 @@ trait Extendable
    * @return bool - True, if the edit button is enabled
    */
 
-  function showListEditAction(array $record): bool
+  function showListEditAction(array $record, array $dependancyData = []): bool
   {
     return true;
   }
@@ -285,7 +285,18 @@ trait Extendable
 
   }
 
+  /**
+   * @return array<string, mixed> // Enforces an associative array
+   */
   function formatColumnsValuesDependancyData(array $data): array{
+    return [];
+  }
+
+  /**
+   * @return array<string, mixed> // Enforces an associative array
+   */
+  function showListEditActionDependancyData(array $data): array
+  {
     return [];
   }
 

@@ -372,7 +372,7 @@ class FundsTransferLibrary extends GrantsLibrary implements \App\Interfaces\Libr
         return $approver_data;
       }
 
-    function showListEditAction($row): bool{
+    function showListEditAction(array $row, array $dependancyData = []): bool{
         $bool = false;
         
         if($row['status_approval_sequence'] == 1){

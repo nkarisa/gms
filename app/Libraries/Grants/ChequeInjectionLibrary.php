@@ -20,7 +20,7 @@ class ChequeInjectionLibrary extends GrantsLibrary implements \App\Interfaces\Li
     }
 
 
-    public function showListEditAction(array $record): bool {
+    public function showListEditAction(array $record,  array $dependancyData = []): bool {
         if(!isset($record['cheque_injection_is_active']) || $record['cheque_injection_is_active'] == 0){
             return false;
         }

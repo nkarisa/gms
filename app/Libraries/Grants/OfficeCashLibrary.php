@@ -26,10 +26,27 @@ class OfficeCashLibrary extends GrantsLibrary implements \App\Interfaces\Library
         $builder->where(['office_cash_is_active' => 1,'office_id'=>$office_id]);
         $builder->join('account_system','account_system.account_system_id=office_cash.fk_account_system_id');
         $builder->join('office','office.fk_account_system_id=account_system.account_system_id');
-        $cash_accounts=$builder->get('office_cash')->getResultArray();
+        $cash_accounts=$builder->get()->getResultArray();
   
         return $cash_accounts;
       }
 
+        /**
+   * get_active_office_cash(): get json string of voucher types
+   * @author  Livingstone Onduso
+   * @dated: 4/06/2023
+   * @access public
+   * @return array
+   * @param int $account_system_id
+   */
+    public function getActiveOfficeCash(int $account_system_id): array{
+        $officeCashReadBuilder = $this->read_db->table('office_cash');
+        $officeCashReadBuilder->select(['office_cash_id','office_cash_name']);
+        $officeCashReadBuilder->where(['office_cash_is_active'=>1,'fk_account_system_id'=>$account_system_id]);
+        $cash_accounts=$officeCashReadBuilder->get()->getResultArray();
+  
+        return $cash_accounts;
+  
+      }
    
 }

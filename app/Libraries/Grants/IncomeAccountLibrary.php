@@ -116,4 +116,23 @@ class IncomeAccountLibrary extends GrantsLibrary implements \App\Interfaces\Libr
 
     return $income_account;
   }
+
+   /**
+  * Enhancement
+   *get_project_allocation_income_account(): Returns  income account numeric value
+   * @author Livingstone Onduso: Dated 29-06-2023
+   * @access public
+   * @param int Int $project_allocation_id
+   * @return int
+   **/
+  function getProjectAllocationIncomeAccount(int $project_allocation_id):int
+  {
+    $projectIncomeAccountReadBuilder = $this->read_db->table('project_income_account');
+    $projectIncomeAccountReadBuilder->select(['fk_income_account_id']);
+    $projectIncomeAccountReadBuilder->join('project_allocation', 'project_allocation.fk_project_id=project_income_account.fk_project_id');
+    $projectIncomeAccountReadBuilder->where(['project_allocation_id' => $project_allocation_id]);
+    $income_account_id=$projectIncomeAccountReadBuilder->get()->getRow()->fk_income_account_id;
+
+    return $income_account_id;
+  }
 }

@@ -75,5 +75,4 @@ class OfficeBank extends WebController
         $count  = $officeBankLibrary->getActiveOfficeBank($office_id);
         return $this->response->setJSON(compact('count'));
       }
-
 }
