@@ -328,8 +328,8 @@ $voucher_missing_details = $voucherLibrary->isVoucherMissingVoucherDetails($vouc
 
         var office = $('#office').val();
         var voucher_type_id = $(this).val();
-        var active_request_url = "<?= base_url(); ?>ajax/oucher/getCountOfUnvouchedRequest/" + office;
-        var url = "<?= base_url(); ?>ajx/oucher/checkVoucherTypeAffectsBank/" + office + "/" + voucher_type_id;
+        var active_request_url = "<?= base_url(); ?>ajax/voucher/getCountOfUnvouchedRequest/" + office;
+        var url = "<?= base_url(); ?>ajax/voucher/checkVoucherTypeAffectsBank/" + office + "/" + voucher_type_id;
 
 
         if (!voucher_type_id) {
@@ -1702,17 +1702,15 @@ $voucher_missing_details = $voucherLibrary->isVoucherMissingVoucherDetails($vouc
 
 
     function updateAccountAndAllocationField() {
-        var office_id = $("#office").val();
-
-        var transaction_date = $("#transaction_date").val();
-
-        var voucher_type_id = $("#voucher_type").val(); // Can be expense, income, cash_contra or bank_contra
-        var office_bank_id = !$("#bank").attr('disabled') ? $("#bank").val() : 0;
-        var extra_data = {
+        const office_id = $("#office").val();
+        const transaction_date = $("#transaction_date").val();
+        const voucher_type_id = $("#voucher_type").val(); // Can be expense, income, cash_contra or bank_contra
+        const office_bank_id = !$("#bank").attr('disabled') ? $("#bank").val() : 0;
+        const extra_data = {
             'office_bank_id': office_bank_id,
             'bank_refund_from': $('#bank_refund').length > 0 && $('#bank_refund').val() > 0 ? $('#bank_refund').val() : 0
         };
-        var url = "<?= base_url(); ?>Voucher/get_voucher_accounts_and_allocation/" + office_id + "/" + voucher_type_id + "/" + transaction_date + "/" + office_bank_id;
+        const url = "<?= base_url(); ?>ajax/voucher/getVoucherAccountsAndAllocation/" + office_id + "/" + voucher_type_id + "/" + transaction_date + "/" + office_bank_id;
 
 
         $.ajax({
@@ -1722,24 +1720,15 @@ $voucher_missing_details = $voucherLibrary->isVoucherMissingVoucherDetails($vouc
             beforeSend: function() {
 
             },
-            success: function(response) {
+            success: function(response_objects) {
 
-                var account_select_option = "<option value=''>Select an account</option>";
-
-                var allocation_select_option = "<option value=''>Select an allocation code</option>";
-
-                var response_objects = JSON.parse(response);
-
-                //var response_accounts = response_objects['accounts'];
-                var response_allocation = response_objects['project_allocation'];
-
-                var response_is_contra = response_objects['is_contra'];
-
+                let account_select_option = "<option value=''>Select an account</option>";
+                let allocation_select_option = "<option value=''>Select an allocation code</option>";
+                let response_allocation = response_objects['project_allocation'];
+                let response_is_contra = response_objects['is_contra'];
                 //alert(response);
                 insertRow(response_is_contra);
-
                 create_allocation_select_options(response_allocation);
-
             },
             error: function() {
                 alert('Error occurred');
