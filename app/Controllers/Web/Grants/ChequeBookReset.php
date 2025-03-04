@@ -18,7 +18,7 @@ class ChequeBookReset extends WebController
 
     function index(){}
 
-    function result($id = 0){
+    function result($id = 0, $parentTable = null){
 
         $result = [];
 
@@ -166,7 +166,8 @@ class ChequeBookReset extends WebController
         return $count_all_results;
     }
 
-    function show_list(){
+    function showList(): ResponseInterface
+    {
 
         $draw =intval($this->input->post('draw'));
         $cheque_book_resets = $this->get_cheque_book_resets();
@@ -195,6 +196,7 @@ class ChequeBookReset extends WebController
         ];
 
         echo json_encode($response);
+        return
     }
 
     function validate_cheque_book_reset_timeframe($office_bank_id){

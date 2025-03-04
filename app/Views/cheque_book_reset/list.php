@@ -1,9 +1,11 @@
 <div class="row" style="margin-bottom:25px;">
   <div class="col-xs-12" style="text-align:center;">
-        <?php 
+        <?php
+        use App\Libraries\Core\UserLibrary;
             extract($result);
-            if($show_add_button && $this->user_model->check_role_has_permissions(ucfirst($this->controller),'create')){
-                echo add_record_button($this->controller, $has_details_table,null,$has_details_listing, $is_multi_row);
+            $userLibrary = new UserLibrary();
+            if($show_add_button && $userLibrary->checkRoleHasPermissions(ucfirst($controller),'create')){
+                echo add_record_button($controller, $has_details_table,null,$has_details_listing, $is_multi_row);
               }
         ?>
     </div>
@@ -33,7 +35,7 @@
 
 <script>
     //$(document).ready(function(){
-        var url = "<?=base_url();?><?=$this->controller;?>/show_list";
+        var url = "<?=base_url();?><?=$controller;?>/show_list";
         const datatable = $("#datatable").DataTable({
             dom: 'lBfrtip',
             buttons: [

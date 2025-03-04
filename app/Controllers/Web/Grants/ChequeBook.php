@@ -87,21 +87,33 @@ class ChequeBook extends WebController
     }
     function get_active_chequebooks($office_bank_id){
 
+        $chequeBookLibrary = new ChequeBookLibrary();
+
         $active_cheque_book_exists = 0;
 
         // Deactivate active cheque book that were not deactivated when creating reset since they were not fully approved.
         // This is a workaround for a legacy error but has been resolved by uptdating the method deactivate_cheque_book in cheque_book_model
 
         // First check if we have any active cheque book reset before doing the deactivate
-        $this->read_db->where(array('fk_office_bank_id' => $office_bank_id, 'cheque_book_reset_is_active' => 1));
-        $ctive_cheque_book_reset_obj = $this->read_db->get('cheque_book_reset');
+        //$this->read_db->where(array('fk_office_bank_id' => $office_bank_id, 'cheque_book_reset_is_active' => 1));
+        $active_cheque_book_reset_obj = $this->read_db->get('cheque_book_reset');
 
-        if($ctive_cheque_book_reset_obj->num_rows() > 0){
-            $this->load->model('cheque_book_model');
-            $this->cheque_book_model->deactivate_cheque_book($office_bank_id);
+        $query_builder = $this->read_db->table('cheque_book_reset')
+            ->where(array('fk_office_bank_id' => $office_bank_id, 'cheque_book_reset_is_active' => 1));
+        $active_cheque_book_reset_obj = $query_builder->get();
+
+
+        if($active_cheque_book_reset_obj->getNumRows() > 0){
+
+            $chequeBookLibrary = new ChequeBookLibrary();
+
+            //$this->load->model('cheque_book_model');
+            //$this->cheque_book_model->deactivate_cheque_book($office_bank_id);
+
+            $this->$chequeBookLibrary->deactivateChequeBook($office_bank_id);
         }
 
-        $active_cheque_book_exists=$this->cheque_book_model->get_active_chequebooks($office_bank_id);
+        $active_cheque_book_exists=$chequeBookLibrary->getActivechequebooks($office_bank_id);
 
         echo json_encode($active_cheque_book_exists);
     }
