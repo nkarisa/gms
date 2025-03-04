@@ -15,4 +15,8 @@ class MessageDetail extends WebController
         parent::initController($request, $response, $logger);
 
     }
+
+    
 }
+
+

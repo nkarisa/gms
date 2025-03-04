@@ -185,9 +185,11 @@ extract($result);
         });
 
         $("#fk_expense_account_id").on('change', function() {
-            var url = "<?= base_url(); ?>ajax/budget_item/budgetLimitRemainingAmount/<?= hash_id($id, 'decode'); ?>/" + $(this).val();
+            let url = "<?= base_url(); ?>ajax/budget_item/budgetLimitRemainingAmount/<?= hash_id($id, 'decode'); ?>/" + $(this).val();
 
             $.get(url, function(response) {
+                // console.log(url);
+                // console.log(response);
                 $("#budget_limit_amount").val(response);
             });
         });
@@ -367,7 +369,7 @@ extract($result);
             }
 
 
-            var url = "<?= base_url(); ?>budget_item/get_budget_limit_remaining_amount/<?= hash_id($id, 'decode'); ?>/" +  $("#fk_expense_account_id").val();
+            var url = "<?= base_url(); ?>ajax/budget_item/getBudgetLimitRemainingAmount/<?= hash_id($id, 'decode'); ?>/" +  $("#fk_expense_account_id").val();
 
             getRequest(url,function(response){
                 $('#budget_limit_amount').val(response);
@@ -417,7 +419,7 @@ extract($result);
 
             let data = frm.serializeArray();
 
-            let url = "<?= base_url(); ?>budget_item/insert_budget_item";
+            let url = "<?= base_url(); ?>ajax/budget_item/insertBudgetItem";
 
             postRequest(url,data, function(response) {
                     alert(response);

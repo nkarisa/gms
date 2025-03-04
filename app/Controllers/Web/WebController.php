@@ -18,6 +18,7 @@ class WebController extends BaseController
 
   use System\BuilderTrait;
   use System\LibraryInitTrait;
+  use System\ManipulationTrait;
   /**
    * Instance of the main Request object.
    *
@@ -61,6 +62,7 @@ class WebController extends BaseController
   protected $subAction = null;
   protected $library;
   protected $settings;
+  protected $awsAttachmentLibrary;
   
   /**
  * Initializes the controller with necessary configurations and dependencies.
@@ -81,6 +83,8 @@ class WebController extends BaseController
 
     $this->initBuilders();
     // $this->initLibraries();
+
+    $this->awsAttachmentLibrary = new \App\Libraries\System\AwsAttachmentLibrary();
     
     // Preload any models, libraries, etc, here.
 
@@ -650,6 +654,106 @@ class WebController extends BaseController
     }
 
     echo $buttons;
+  }
+
+  /**
+   *getCurrentStatusOfItem():This method returns the currents status of an item.
+   * @author Livingstone Onduso: Dated 30-01-2025
+   * @access public
+   * @return void 
+   */
+  public function getCurrentStatusOfItem():void
+  {
+
+    //Get initial status
+    $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+    $initial_status = $statusLibrary->initialItemStatus($this->controller);;
+
+    //Get the item url and get the item ID
+    $get_current_url =  $this->request->getServer('HTTP_REFERER');//$_SERVER['HTTP_REFERER'];
+    
+    $get_item_id = explode('/', $get_current_url)[5];
+
+    $item_id = hash_id($get_item_id, 'decode');
+
+    $reader_builder=$this->read_db->table($this->controller);
+    $reader_builder->select(['fk_status_id']);
+    $reader_builder->where([$this->controller.'_id' => $item_id]);
+    $current_status = $reader_builder->get()->getRow()->fk_status_id;
+    
+
+    if($initial_status==$current_status){
+      echo 1;
+    }else{
+      echo -1;
+    }
+
+  }
+
+  /**
+   *getUploadedS3Documents():This method gets uploaded docs.
+   * @author Livingstone Onduso: Dated 30-01-2025
+   * @access public
+   * @return void 
+   */
+  function getUploadedS3Documents($attachement_id = ''):void
+  {
+
+    $attachment_library=new \App\Libraries\Core\AttachmentLibrary();
+
+    $uploaded_docs = [];
+    //Get the item_id from URL if attachement_id='' otherwise use the passed argument
+    if ($attachement_id == '') {
+
+      $get_current_url =  $this->request->getServer('HTTP_REFERER');;
+      // log_message('error', json_encode($get_current_url));
+      $get_current_url_arr = explode('/', $get_current_url);
+
+     
+      //log_message('error',json_encode($get_current_url_arr));
+
+      $get_items_id = isset($get_current_url_arr[6]) ? $get_current_url_arr[6] : 0;
+
+      $approve_item_name = isset($get_current_url_arr[4]) ? $get_current_url_arr[4] : ucwords($this->controller);
+      
+      $attachment_id_picked_from_url_id = hash_id($get_items_id, 'decode');
+
+      if ($attachment_id_picked_from_url_id!=null) {
+
+
+        $uploaded_docs = $attachment_library->getUploadedS3Documents($attachment_id_picked_from_url_id, $approve_item_name);
+      }
+
+    } else {
+      
+      $uploaded_docs =  $attachment_library->getUploadedS3Documents($attachement_id, ucwords($this->controller));
+    }
+    //echo json_encode($uploaded_docs);
+    
+    //Loop and repopulate the array with attachements from the table to display
+
+    $reconstruct_attachments_array = [];
+
+    if ($uploaded_docs > 0) {
+      foreach ($uploaded_docs as $uploaded_doc) {
+
+        $attachment_url = $uploaded_doc['attachment_url'];
+
+        $objectKey = $attachment_url . '/' . $uploaded_doc['attachment_name'];
+
+       $upload_files_to_s3= service("settings")->get("GrantsConfig.upload_files_to_s3");
+
+        $url = $upload_files_to_s3 ? $this->awsAttachmentLibrary ->s3PreassignedUrl($objectKey) : $attachment_library->getLocalFilesystemAttachmentUrl($objectKey);
+
+        $uploaded_doc['attachment_url'] = $url;
+
+        $reconstruct_attachments_array[] = $uploaded_doc;
+      }
+    }
+
+    echo json_encode($reconstruct_attachments_array);
+
+    
   }
 
 }

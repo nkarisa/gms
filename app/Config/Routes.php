@@ -55,6 +55,8 @@ foreach ($modules as $module){
             $routes->get('list', $module.'\\'.$controllerName.'::list'); 
             $routes->get('view/(:segment)', $module.'\\'.$controllerName.'::view/$1');
             $routes->get('singleFormAdd', $module.'\\'.$controllerName.'::singleFormAdd'); 
+            //$routes->get('budget/view/(:segment)/summary/(:segment)', $module.'\\'.$controllerName.'::view/$1/$2');
+
             $routes->get('singleFormAdd/(:segment)/(:segment)', $module.'\\'.$controllerName.'::singleFormAdd/$1/$2'); 
             $routes->get('multiFormAdd', $module.'\\'.$controllerName.'::multiFormAdd'); 
             $routes->get('multiFormAdd/(:segment)/(:segment)', $module.'\\'.$controllerName.'::multiFormAdd/$1/$2'); 

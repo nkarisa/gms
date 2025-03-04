@@ -201,9 +201,9 @@
             return false;
         }
 
-        $.post(url, data, function (resp) {
+        $.post(url, data, function (obj) {
 
-            const obj = JSON.parse(resp)
+            //const obj = JSON.parse(resp)
 
             if(Object.keys(obj).includes('budget_id')){
                 window.location.replace('<?=base_url();?>budget/view/' + obj.budget_id); 

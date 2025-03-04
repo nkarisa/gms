@@ -137,7 +137,7 @@
                 }
             }
             //get uploaded documents
-            let attachment_url = '<?= base_url() . $controller ?>/get_uploaded_S3_documents/';
+            let attachment_url = '<?= base_url() .'ajax/'. $controller ?>/getUploadedS3Documents/';
             $.get(attachment_url, function (re) {
                 //Draw html table and populate it with uploaded docs from S3
                 let uploded_docs = JSON.parse(re);

@@ -4,6 +4,8 @@ namespace App\Libraries\Core;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Core\AttachmentModel;
+use Config\Session;
+
 class AttachmentLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
@@ -104,5 +106,26 @@ class AttachmentLibrary extends GrantsLibrary implements \App\Interfaces\Library
  
      return $attachment_type_id;
    }
+
+   function getUploadedS3Documents($attachment_id, $approve_item_name)
+  {
+
+    $reader_builder=$this->$this->read_db->table('attachment');
+
+    $reader_builder->select(['attachment_id', 'attachment_name', 'attachment_url']);
+    $reader_builder->where([
+      'fk_account_system_id' => $this->session->user_account_system_id, 
+      'attachment_primary_id' => $attachment_id,
+      'approve_item_name' => $approve_item_name
+    ]);
+    $reader_builder->join('approve_item','approve_item.approve_item_id=attachment.fk_approve_item_id');
+    $uploaded_docs =  $reader_builder->get()->getResultArray();
+
+    return $uploaded_docs;
+  }
+
+  public function getLocalFilesystemAttachmentUrl($objectKey){
+    return base_url().$objectKey;
+  }
    
 }

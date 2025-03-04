@@ -37,6 +37,8 @@ $total = array_sum(array_column($budget_item_details,'budget_item_detail_amount'
             <div class="panel-body"  style="max-width:50; overflow: auto;">	
                 <?php echo form_open("" , array('id'=>'frm_budget_item','class' => 'form-horizontal form-groups-bordered validate', 'enctype' => 'multipart/form-data'));?>
                     
+                   <!-- <input type='text' name='source_budget_item_id' value=''/>
+                   <input type='text' name='budget_item_marked_for_review' value='0'/> -->
                     <div class='form-group'>
                         <div class='col-xs-12 center'>
                             <div class='btn btn-icon pull-left' id='btn_back'><i class='fa fa-arrow-left'></i></div>
@@ -318,6 +320,8 @@ $(".btn-save-new").on('click',function(){
     resetForm();
 });
 
+
+
 $(".btn-save").on('click',function(){
 
     let count_spread_cell_with_amount_gt_zero = $('.month_spread').filter(function() {
@@ -381,9 +385,12 @@ function compute_totals_match(){
 }
 
 function save(go_back = true){
+
     let frm = $("#frm_budget_item");
 
     let data = frm.serializeArray();
+
+    
 
     const source_budget_item_id = {
         name: 'source_budget_item_id',
@@ -397,14 +404,14 @@ function save(go_back = true){
 
     const budget_item_id = '<?=hash_id($id,'decode');?>';
 
-    data.push(source_budget_item_id);
-    data.push(budget_item_marked_for_review);
+     data.push(source_budget_item_id);
+     data.push(budget_item_marked_for_review);
 
-    // console.log(data)
+    //console.log(data)
     
     // return false;
 
-    let url = "<?=base_url();?>budget_item/update_budget_item/"+budget_item_id;
+    let url = "<?=base_url();?>ajax/budget_item/updateBudgetItem/"+budget_item_id;
 
     $.ajax({
         url:url,

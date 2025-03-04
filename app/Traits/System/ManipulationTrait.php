@@ -365,6 +365,8 @@ trait ManipulationTrait {
     public function createChangeHistory(array $newData, bool $excludeUsingNewDataColumns = false, array $criticalColumnsToUnset = [], string $table = "", $itemId = 0)
     {
       // Determine the table name
+      //log_message('error', json_encode(0));
+
       $table = empty($table) ? $this->controller : $table;
   
       // Determine the item ID
@@ -393,25 +395,40 @@ trait ManipulationTrait {
         ->getRowArray(); // CI4 equivalent of row_array()
   
       // Prepare the update data for history table
-      $updateData = [
-        'fk_approve_item_id' => $this->read_db->table('approve_item')
-          ->select('approve_item_id')
-          ->where(['approve_item_name' => strtolower($table)])
-          ->get()
-          ->getRow()
-          ->approve_item_id,
-        'fk_user_id' => $this->session->get('user_id'),
-        'history_action' => 1, // 1 = Update, 2 = Delete
-        'history_current_body' => json_encode($oldData),
-        'history_updated_body' => json_encode($newData),
-        'history_created_date' => date('Y-m-d'),
-        'history_created_by' => $this->session->get('user_id'),
-        'history_last_modified_by' => $this->session->get('user_id'),
-      ];
+      // $bld=$this->read_db->table('approve_item')->select(['approve_item_id'])->where(['approve_item_name' => strtolower($table)]);
+      // $approve_item_id=$bld->get()->getRow()->approve_item_id;
+
+      
+
+      $update_data['fk_approve_item_id'] = $this->read_db->table('approve_item')->where('approve_item_name', strtolower($table))->get()->getRow()->approve_item_id;
+      
+
+      $update_data['fk_user_id'] = $this->session->user_id;
+      $update_data['history_action'] = 1; // 1 = Update, 2 = Delete
+      $update_data['history_current_body'] = json_encode($oldData);
+      $update_data['history_updated_body'] = json_encode($newData);
+      $update_data['history_created_date'] = date('Y-m-d');
+      $update_data['history_created_by'] = $this->session->user_id;
+      $update_data['history_last_modified_by'] = $this->session->user_id;
+
+      //log_message('error',json_encode($update_data));
+      
+      //log_message('error',json_encode($update_data));
+      // $updateData = [
+      //   'fk_approve_item_id' => $approve_item_id,
+      //   'fk_user_id' => $this->session->get('user_id'),
+      //   'history_action' => 1, // 1 = Update, 2 = Delete
+      //   'history_current_body' => json_encode($oldData),
+      //   'history_updated_body' => json_encode($newData),
+      //   'history_created_date' => date('Y-m-d'),
+      //   'history_created_by' => $this->session->get('user_id'),
+      //   'history_last_modified_by' => $this->session->get('user_id'),
+      // ];
   
       // Insert update history into 'history' table
-      $builder = $this->write_db->table('history');
-      $builder->insert($updateData);
+      log_message('error', json_encode($update_data));
+      $builder_arr = $this->write_db->table('history');
+      $builder_arr->insert($update_data);
     }
   
     public function edit(string $id): \CodeIgniter\HTTP\Response

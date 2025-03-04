@@ -111,7 +111,7 @@
 
 				alert('Document Deleted');
 
-				var attachment_url = '<?= base_url() . $controller ?>/get_uploaded_S3_documents/';
+				var attachment_url = '<?= base_url() .'ajax/'. $controller ?>/getUploadedS3Documents/';
 
 				$.get(attachment_url, function(re) {
 
@@ -184,7 +184,7 @@
 
 			if (attachment_primary_id != 0) {
 
-				var attachment_url = '<?= base_url() . $controller ?>/get_uploaded_S3_documents/' + attachment_primary_id;
+				var attachment_url = '<?= base_url() . $controller ?>/getUploadedS3Documents/' + attachment_primary_id;
 
 				$.get(attachment_url, function(res) {
 
@@ -218,7 +218,7 @@
 
 
 		//get uploaded documents
-		var attachment_url = '<?= base_url() . $controller ?>/get_uploaded_S3_documents/';
+		var attachment_url = '<?= base_url() .'ajax/'. $controller ?>/getUploadedS3Documents/';
 
 		$.get(attachment_url, function(re) {
 
@@ -313,7 +313,7 @@
 
 
 
-		var url = '<?= base_url() . $controller ?>/get_current_status_of_item';
+		var url = '<?= base_url() .'ajax/'. $controller ?>/getCurrentStatusOfItem';
 		$.get(url, function(response) {
 
 			var disable = ''

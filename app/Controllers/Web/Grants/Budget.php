@@ -630,19 +630,19 @@ class Budget extends WebController
     $session = session();
 
     $post = $this->request->getPost(); 
-
+    
     $this->write_db->transBegin(); 
 
     $actionBeforeInsert =$this->budgetLib->actionBeforeInsert($post);
+    
     extract($post);
     if (!array_key_exists('header', $actionBeforeInsert)) {
-        echo $this->response->setJSON($actionBeforeInsert);
+        return $this->response->setJSON($actionBeforeInsert);
 
-        return false;
     }
 
-    
     // Insert the budget
+    $statusLib=new \App\Libraries\Core\StatusLibrary();
     $tracking = $this->generateItemTrackNumberAndName('budget');
 
     $budgetInsertData = [
@@ -651,20 +651,21 @@ class Budget extends WebController
         'fk_office_id' => $actionBeforeInsert['header']['fk_office_id'],
         'budget_year' => $actionBeforeInsert['header']['budget_year'],
         'fk_budget_tag_id' => $actionBeforeInsert['header']['fk_budget_tag_id'],
-        'fk_status_id' => $this->initialItemStatus('budget'),
+        'fk_status_id' => $statusLib->initialItemStatus('budget'),
         'budget_created_by' => $session->get('user_id'),
         'budget_created_date' => date('Y-m-d'),
         'budget_last_modified_by' => $session->get('user_id'),
         'budget_last_modified_date' => date('Y-m-d H:i:s'),
     ];
 
+   
     $this->write_db->table('budget')->insert($budgetInsertData);
     $budgetId = $this->write_db->insertID();
     $hashedBudgetId = hash_id($budgetId, 'encode');
 
     // Insert budget limits
     $budgetLimitInsertData = [];
-    $incomeAccountIds = $actionBeforeInsert['details']['fk_income_account_id'] ?? [];
+    $incomeAccountIds = isset($actionBeforeInsert['details']['fk_income_account_id']) ? $actionBeforeInsert['details']['fk_income_account_id']: [];
 
     foreach ($incomeAccountIds as $index => $incomeAccountId) {
         $budgetLimitTracking = $this->generateItemTrackNumberAndName('budget_limit');
@@ -673,9 +674,9 @@ class Budget extends WebController
             'budget_limit_track_number' => $budgetLimitTracking['budget_limit_track_number'],
             'budget_limit_name' => $budgetLimitTracking['budget_limit_name'],
             'fk_income_account_id' => $incomeAccountId,
-            'budget_limit_amount' => $actionBeforeInsert['details']['budget_limit_amount'][$index] ?? 0,
+            'budget_limit_amount' => isset($actionBeforeInsert['details']['budget_limit_amount'][$index])? $actionBeforeInsert['details']['budget_limit_amount'][$index]: 0,
             'fk_budget_id' => $budgetId,
-            'fk_status_id' => $this->initialItemStatus('budget_limit'),
+            'fk_status_id' => $statusLib->initialItemStatus('budget_limit'),
             'budget_limit_created_by' => $session->get('user_id'),
             'budget_limit_created_date' => date('Y-m-d'),
             'budget_limit_last_modified_by' => $session->get('user_id'),
@@ -692,10 +693,10 @@ class Budget extends WebController
 
     if ($this->write_db->transStatus() === false || !$actionAfterInsert) {
         $this->write_db->transRollback();
-        echo $this->response->setJSON(["message" => "Budget record failed to create"]);
+        return $this->response->setJSON(["message" => "Budget record failed to create"]);
     } else {
         $this->write_db->transCommit();
-        echo $this->response->setJSON(["budget_id" => $hashedBudgetId]);
+        return $this->response->setJSON(["budget_id" => $hashedBudgetId]);
     }
 }
 

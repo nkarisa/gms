@@ -693,7 +693,7 @@ class BudgetLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
   }
 
 
-  function actionBeforeInsert($post_array): array
+  function actionBeforeInsert(array $post_array): array
   {
     
     $office_id  = $post_array['header']['fk_office_id'];

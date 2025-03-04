@@ -55,4 +55,6 @@ class GrantsConfig extends BaseConfig
     public $show_all_budget_tags=true;
     public $size_in_months_of_a_budget_review_period=3;
     public $cheque_cancel_and_resuse_limit = 4;
+    public $review_last_quarter_after_mark_for_review=true;
+    public $upload_files_to_s3=true;
 }
