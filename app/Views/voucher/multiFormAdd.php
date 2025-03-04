@@ -124,6 +124,16 @@ extract($result);
                     </span>
 
 
+                    <span class='hidden'>
+                        <label class='control-label col-xs-1'><?= get_phrase('refund_from'); ?> </label>
+                        <div class='col-xs-2'>
+                            <input style="clear:right;float:left;max-width:90%;" type='text' placeholder="<?=get_phrase('enter_bank_expense_voucher_number');?>" name='bank_refund' id='bank_refund' disabled='disabled' class='form-control required account_fields' />
+                            <i style="cursor: pointer;float:right" id="bank_refund_search" class = 'fa fa-search'></i>
+                            <span id = "bank_refund_error" style = 'color:red;'></span>
+                        </div>
+                    </span>
+
+
                 </div>
 
                 <div class='form-group'>
@@ -137,10 +147,10 @@ extract($result);
                         <div class='col-xs-2'><input id='unapproved_and_approved_vouchers_cash_balance' name='unapproved_and_approved_vouchers' class='form-control' value='0' onkeydown="return false" /></div>
                     </span>
 
-                    <!-- <span class='hidden'>
-                        <label class='control-label col-xs-1'><?= get_phrase('journal_cash_balance', 'Journal Cash Bal.'); ?></label>
-                        <div class='col-xs-2'><input id='approved_vouchers_cash_balance' class='form-control' value='0' onkeydown="return false" /></div>
-                    </span> -->
+                    <span class='hidden'>
+                        <label class='control-label col-xs-1'><?= get_phrase('refund_voucher_amount'); ?></label>
+                        <div class='col-xs-2'><input onkeydown="return false" id='refund_voucher_amount' name='refund_voucher_amount' class='form-control' value='0' onkeydown="return false" /></div>
+                    </span>
 
                 </div>
 
@@ -310,20 +320,24 @@ extract($result);
         $("#bank_balance, #approved_vouchers_cash_balance").closest('span').addClass('hidden');
         $("#bank_balance, #approved_vouchers_cash_balance").val(0);
 
+        $("#refund_voucher_amount").closest('span').addClass('hidden');
+        $("#refund_voucher_amount").val(0);
+
         $("#cash_account").val(0);
 
         checkIfDateIsSelected() ? getRequest(url, function(response_objects) {
 
             // var response_objects = JSON.parse(response);
-            var response_office_cash = response_objects['office_cash'];
-            var response_office_bank = response_objects['office_banks'];
-            var response_is_transfer_contra = response_objects['is_transfer_contra'];
-            var response_is_bank_payment = response_objects['is_bank_payment'];
-            var response_is_voucher_type_requires_cheque_referencing = response_objects['voucher_type_requires_cheque_referencing'];
+            let response_office_cash = response_objects['office_cash'];
+            let response_office_bank = response_objects['office_banks'];
+            let response_is_transfer_contra = response_objects['is_transfer_contra'];
+            let response_is_bank_payment = response_objects['is_bank_payment'];
+            let response_is_bank_refund = response_objects['is_bank_refund'];
+            let response_is_voucher_type_requires_cheque_referencing = response_objects['voucher_type_requires_cheque_referencing'];
 
 
             $.get(active_request_url, office, function(response) {
-                var badges = $(".requests_badge");
+                let badges = $(".requests_badge");
                 badges.html(response);
 
             })
@@ -366,7 +380,16 @@ extract($result);
                 $("#cheque_number option:first").attr('selected', 'selected');
             }
 
-            if (voucher_type_id) {
+            if(response_is_bank_refund){
+                $("#bank_refund, #refund_voucher_amount, #bank_balance").closest('span').removeClass('hidden');
+                // $("#refund_voucher_amount").closest('span').addClass('hidden');
+                $("#refund_voucher_amount").val(0)
+            }else{
+                $("#bank_refund").closest('span').addClass('hidden');
+                $("#bank_refund option:first").attr('selected', 'selected');
+            }
+
+            if (voucher_type_id && !response_is_bank_refund) {
                 //update_request_details_count_on_badge();
                 $(".btn-insert").show();
                 $(".btn-retrieve-request").show();
@@ -595,6 +618,9 @@ extract($result);
             // alert('Hellooo');
             $("#cheque_number").removeAttr('disabled');
             $("#cheque_number").removeAttr('readonly');
+
+            $("#bank_refund").removeAttr('disabled');
+            $("#bank_refund").removeAttr('readonly');
 
             $("#bank_balance").closest('span').removeClass('hidden');
 
@@ -848,6 +874,13 @@ extract($result);
 
     $('#transaction_date').on('change', function() {
         getActiveVoucherTypes();
+
+        if($('#bank_refund').length > 0){
+            hide_buttons()
+            $('#bank_refund').val('')
+            $("#refund_voucher_amount").val(0);
+            $('#bank_refund_error').html('')  
+        }
     })
 
     function getActiveVoucherTypes() {
@@ -1345,7 +1378,8 @@ extract($result);
         var voucher_type_id = $("#voucher_type").val(); // Can be expense, income, cash_contra or bank_contra
         var office_bank_id = !$("#bank").attr('disabled') ? $("#bank").val() : 0;
         var extra_data = {
-            'office_bank_id': office_bank_id
+            'office_bank_id': office_bank_id,
+            'bank_refund_from': $('#bank_refund').length > 0 && $('#bank_refund').val() > 0 ? $('#bank_refund').val() : 0
         };
         var url = "<?= base_url(); ?>ajax/voucher/getVoucherAccountsAndAllocation/" + office_id + "/" + voucher_type_id + "/" + transaction_date + "/" + office_bank_id;
 
@@ -1469,16 +1503,12 @@ extract($result);
 
     $(document).on('change', '.account', function() {
 
-        var office_id = $("#office").val();
-        var account_id = $(this).val();
-        var voucher_type_id = $("#voucher_type").val();
-        var transaction_date = $("#transaction_date").val();
-
-        var url = "<?= base_url(); ?>voucher/get_project_details_account/";
-
-        var office_bank_id = !$("#bank").attr('disabled') ? $("#bank").val() : 0;
-
-        //var toggle_accounts_by_allocation = '<?= service("settings")->get("GrantsConfig.toggle_accounts_by_allocation"); ?>';
+        const office_id = $("#office").val();
+        const account_id = $(this).val();
+        const voucher_type_id = $("#voucher_type").val();
+        const transaction_date = $("#transaction_date").val();
+        const url = "<?= base_url(); ?>ajax/voucher/getProjectDetailsAccount/";
+        const office_bank_id = !$("#bank").attr('disabled') ? $("#bank").val() : 0;
 
         if (!toggle_accounts_by_allocation) {
 
@@ -1492,11 +1522,11 @@ extract($result);
                     'office_bank_id': office_bank_id
                 },
                 type: "POST",
-                success: function(response) {
+                success: function(response_allocation) {
 
-                    var response_allocation = JSON.parse(response);
+                    // var response_allocation = JSON.parse(response);
 
-                    var allocation_select_option = "<option value=''>Select an allocation code</option>";
+                    let allocation_select_option = "<option value=''>Select an allocation code</option>";
 
                     if (response_allocation.length > 0) {
                         $(".allocation").removeAttr('disabled');
@@ -1528,7 +1558,8 @@ extract($result);
             'allocation_id': allocation_id,
             'voucher_type_id': voucher_type_id,
             'transaction_date': transaction_date,
-            'office_bank_id': office_bank_id
+            'office_bank_id': office_bank_id,
+            'bank_refund_from': $('#bank_refund').length > 0 && $('#bank_refund').val() > 0 ? $('#bank_refund').val() : 0
         };
         //console.log(data);
 
@@ -1798,4 +1829,123 @@ extract($result);
             $(this).removeAttr('style');
         }
     });
+
+
+    $(document).on('change', '.account', function() {
+        
+        if($('#bank_refund').closest('span').hasClass('hidden')){
+            return false;
+        }
+
+        const row_index = $(this).closest('td').parent().index();
+        const tbody = $('#tbl_tbody').find('tr')
+        const raw_quantity_elem = $(this).closest('tr').find('.quantity');
+        const raw_unitcost_elem = $(this).closest('tr').find('.unitcost');
+        const raw_account_elem = $(this).closest('tr').find('.account');
+        const raw_totalcost_elem = $(this).closest('tr').find('.totalcost');
+        
+        const qty = unformat_number(raw_quantity_elem.val()) > 0 ? parseFloat(unformat_number(raw_quantity_elem.val())) : 0;
+        const unitcost = unformat_number(raw_unitcost_elem.val()) ? parseFloat(unformat_number(raw_unitcost_elem.val())) : 0;
+        const totalcost = parseFloat(qty * unitcost)
+        const url = "<?=base_url();?>ajax/voucher/validateRefundLimit"
+        const data = {
+            totalcost,
+            office_id: $('#office').val(),
+            account_id: $(this).val(),
+            bank_refund_from : $('#bank_refund').length > 0 && $('#bank_refund').val() > 0 ? $('#bank_refund').val() : 0,
+            refund_voucher_amount: $("#refund_voucher_amount").length > 0 && unformat_number($("#refund_voucher_amount").val()) > 0 ? unformat_number($("#refund_voucher_amount").val()) : 0
+        }
+
+        postRequest(url, data, function (response){
+            // console.log(response);
+            if(response.is_refundable == 0){
+                alert("<?=get_phrase('exceed_refund_amount','Amount being refunded is greater that the detail amount');?>");
+                raw_unitcost_elem.val('')
+                raw_totalcost_elem.val('')
+                raw_account_elem.val($("#target option:first").val());
+            }else{
+
+                let account_sum = 0;
+                let account_id = response.post['account_id']
+                
+                tbody.each((index, elem) => {
+                    // alert(row_index + ' - ' + index)
+                    let account_id_in_row = $(elem).find('.account').val()
+                    if(account_id_in_row == account_id && row_index != index){
+                        account_sum += parseFloat(unformat_number($(elem).find('.quantity').val())) * parseFloat(unformat_number($(elem).find('.unitcost').val()))
+                    }
+                });
+                
+                sum_in_rows = parseFloat(account_sum) + parseFloat(response.post['totalcost'])
+                if(parseFloat(response.detail_amount) < sum_in_rows){
+                    alert("<?=get_phrase('exceed_refund_amount','Amount being refunded is greater that the detail amount');?>");
+                    raw_unitcost_elem.val('')
+                    raw_totalcost_elem.val('')
+                    raw_account_elem.val($("#target option:first").val());
+                }
+            }
+
+        })
+    })
+
+    $('#bank_refund').on('keypress', function() {
+        hide_buttons();
+        $("#refund_voucher_amount").val(0);
+        $('#bank_refund_error').html('')
+    });
+
+    $(document).keypress('#bank_refund',function (e) {
+        let key = e.which;
+        if(key == 13)  // the enter key code
+        {
+            search_voucher_amount();
+        }
+    })
+    
+    $("#bank_refund_search").on('click', function(){
+        search_voucher_amount();
+    });
+
+    $("#bank_refund").on('change', function(){
+        search_voucher_amount();
+    });
+
+    function search_voucher_amount(){
+        let voucher_type_id = $("#voucher_type").val()
+        let bank_refund_voucher = $('#bank_refund').val()
+        let office_id = $('#office').val()
+        let data = {
+            bank_refund_voucher,
+            office_id
+        }
+        let url = "<?=base_url();?>ajax/voucher/validateRefundFromVoucher/" + office_id
+        
+        if(bank_refund_voucher.length == 0){
+            alert('<?=get_phrase('bank_refund_voucher_error','You MUST provide an unrefunded bank expense voucher');?>');
+            return false;
+        }
+
+        $('#bank_refund_error').html('')
+
+        postRequest(url, data, function (response){
+            hide_buttons();
+            $("#refund_voucher_amount").val(0);
+            $("#bank_refund").val('');
+
+            if(voucher_type_id){
+                if(response.message == 'success'){
+                    $(".btn-insert").show();
+                    $(".btn-retrieve-request").show();
+
+                    $("#refund_voucher_amount").closest('span').removeClass('hidden');
+                    $("#refund_voucher_amount").val(format_number(response.voucher_cost));
+                    $("#bank_refund").val(response.voucher_number);
+                }else{
+                    $('#bank_refund_error').html(response.message)
+                }
+            }else{
+                $('#bank_refund_error').html('<?=get_phrase("choose_valid_voucher_type", "Choose A valid Vocuher Type.");?>')
+            }
+        })
+    }
 </script>

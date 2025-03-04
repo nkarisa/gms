@@ -1151,6 +1151,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $statusLibrary = new \App\Libraries\Core\StatusLibrary();
         $approvalLibrary = new \App\Libraries\Core\ApprovalLibrary();
         $expenseAccountLibrary = new ExpenseAccountLibrary();
+        $post = $this->request->getPost();
 
         $flag = false;
         $message = get_phrase('voucher_creation_failed');
@@ -1158,12 +1159,13 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $header = [];
         $detail = [];
         $row = [];
-        $office_id = $this->request->getPost('fk_office_id');
-        $voucher_number = $this->request->getPost('voucher_number');
-        $voucher_date = $this->request->getPost('voucher_date');
+        $office_id = $post['fk_office_id'];
+        $voucher_number = $post['voucher_number'];
+        $voucher_date = $post['voucher_date'];
 
         $builder = $this->write_db->table("voucher");
-        $builder->where(array('fk_office_id' => $office_id, 'voucher_number' => $voucher_number));
+        $builder->where(array('fk_office_id' => $office_id, 
+        'voucher_number' => $voucher_number));
         $voucher_obj = $builder->get();
 
         if ($voucher_obj->getNumRows() > 0) {
@@ -1200,7 +1202,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
         // Check voucher type
 
-        $voucher_type_effect_and_account = $this->voucherTypeEffectAndCode($this->request->getPost('fk_voucher_type_id'));
+        $voucher_type_effect_and_account = $this->voucherTypeEffectAndCode($post['fk_voucher_type_id']);
         $voucher_type_effect_code = $voucher_type_effect_and_account->voucher_type_effect_code;
         $voucher_type_account_code = $voucher_type_effect_and_account->voucher_type_account_code;
 
@@ -1211,27 +1213,45 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $header['fk_office_id'] = $office_id;
         $header['voucher_date'] = $voucher_date;
         $header['voucher_number'] = $voucher_number; //$this->input->post('voucher_number');
-        $header['fk_voucher_type_id'] = $this->request->getPost('fk_voucher_type_id');
+        $header['fk_voucher_type_id'] = $post['fk_voucher_type_id'];
 
         $office_bank_id = $this->getOfficeBankIdToPost($office_id);
         $header['fk_office_bank_id'] = $office_bank_id;
 
-        $header['fk_office_cash_id'] = $this->request->getPost('fk_office_cash_id') == null ? 0 : $this->request->getPost('fk_office_cash_id');
+        $header['fk_office_cash_id'] = !isset($post['fk_office_cash_id']) ? 0 : $post['fk_office_cash_id'];
         // log_message('error', json_encode($this->input->post('fk_office_cash_id')));
-        $voucher_cheque_number = $this->request->getPost('voucher_cheque_number') == null ? 0 : $this->request->getPost('voucher_cheque_number');
+        $voucher_cheque_number = !isset($post['voucher_cheque_number']) ? 0 : $post['voucher_cheque_number'];
         $header['voucher_cheque_number'] = $voucher_cheque_number;
         
         $chequeInjectionLibrary->updateInjectedChequeStatus($office_bank_id, $voucher_cheque_number);
         $chequeBookLibary = new ChequeBookLibrary();
         $header['fk_cheque_book_id'] = $this->isVoucherTypeChequeReferenced($header['fk_voucher_type_id']) ? $chequeBookLibary->getChequeBookIdForChequeNumber($header['voucher_cheque_number'], $header['fk_office_bank_id']) : NULL;
         // $header['fk_cheque_book_id'] = $this->verify_cheque_book_id_by_voucher_type_id($header['fk_voucher_type_id'], $header['voucher_cheque_number'], $header['fk_office_bank_id']);
-        $header['voucher_vendor'] = $this->request->getPost('voucher_vendor');
-        $header['voucher_vendor_address'] = $this->request->getPost('voucher_vendor_address');
-        $header['voucher_description'] = $this->request->getPost('voucher_description');
+        $header['voucher_vendor'] = $post['voucher_vendor'];
+        $header['voucher_vendor_address'] = $post['voucher_vendor_address'];
+        $header['voucher_description'] = $post['voucher_description'];
 
         $header['voucher_created_by'] = $this->session->user_id;
         $header['voucher_created_date'] = date('Y-m-d');
         $header['voucher_last_modified_by'] = $this->session->user_id;
+
+        $reverse_from_voucher_id = 0;
+        $reverse_from_voucher_number = '';
+        
+        if($voucher_type_effect_code == 'bank_refund') {
+        
+        $reverse_from_voucher = $this->getRefundFromVoucher($office_id, $post['bank_refund']);
+        $reverse_from_voucher_number = $reverse_from_voucher['voucher_number'];
+        $reverse_from_voucher_id = $reverse_from_voucher['voucher_id'];
+
+        $header['voucher_reversal_from'] = $reverse_from_voucher_id;
+        $header['voucher_description'] = '<strike>'.$post['voucher_description'].'</strike>';
+        $header['voucher_is_reversed'] = 1;
+        // $header['voucher_cleared'] = 1;
+        // $header['voucher_cleared_month'] = date('Y-m-t', strtotime($voucher_date));
+        }else{
+        $header['voucher_description'] = $post['voucher_description'];
+        }
 
         $header['fk_approval_id'] = $approvalLibrary->insertApprovalRecord('voucher');
         $header['fk_status_id'] = $statusLibrary->initialItemStatus('voucher');
@@ -1250,6 +1270,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             $this->createCashRecipientAccountRecord($header_id, $this->request->getPost());
         }
 
+        $total_voucher_cost = 0;
         if (!empty($this->request->getPost('voucher_detail_quantity'))) {
             for ($i = 0; $i < sizeof($this->request->getPost('voucher_detail_quantity')); $i++) {
                 $voucher_detail_quantity = str_replace(",", "", $this->request->getPost('voucher_detail_quantity')[$i]);
@@ -1266,7 +1287,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
                 $detail['voucher_detail_unit_cost'] = $voucher_detail_unit_cost;
                 $detail['voucher_detail_total_cost'] = $voucher_detail_total_cost;
                 // log_message('error', json_encode(['voucher_type_effect_code' => $voucher_type_effect_code, 'detail' => $detail]));
-                if ($voucher_type_effect_code == 'expense') {
+                if ($voucher_type_effect_code == 'expense' || $voucher_type_effect_code == 'bank_refund') {
                     $expense_account_id = $this->request->getPost('voucher_detail_account')[$i];
                     $detail['fk_expense_account_id'] = $expense_account_id;
                     $detail['fk_income_account_id'] = $expenseAccountLibrary->getExpenseIncomeAccountId($expense_account_id);
@@ -1298,13 +1319,21 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
                     $this->updateRequestOnPayingAllDetails($this->request->getPost('fk_request_detail_id')[$i]);
                 }
 
+                $total_voucher_cost += $voucher_detail_total_cost;
+
                 $row[] = $detail;
             }
 
             $this->write_db->table('voucher_detail')->insertBatch( $row);
         }
 
-        if ($this->write_db->transStatus() === FALSE || empty($this->request->getPost('voucher_detail_quantity'))) {
+        if($voucher_type_effect_code == 'bank_refund') {
+            $this->updateReversalFromVoucher($reverse_from_voucher_id, $header_id, $reverse_from_voucher_number, $header['voucher_description'], $total_voucher_cost);
+          }
+      
+          $voucher_posting_condition = $this->voucherPostingCondition($post);
+
+        if ($this->write_db->transStatus() === FALSE  || !$voucher_posting_condition) {
             $this->write_db->transRollback();
         } else {
             $this->write_db->transCommit();
@@ -1314,6 +1343,81 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
         return $this->response->setJSON(['flag' => $flag,'message' => $message]);
     }
+
+    private function voucherPostingCondition($post){
+        $checkResult = true;
+        $has_details = count($post['voucher_detail_quantity']) > 0 ? true : false;
+        $all_details_have_accounts = $this->allDetailsHaveAccounts($post['voucher_detail_account']);
+    
+        if(!$has_details || !$all_details_have_accounts){
+          $checkResult = false;
+        }
+    
+        return $checkResult;
+      }
+
+      private function allDetailsHaveAccounts($detailsAccounts){
+        $checkResult =  true;
+    
+        foreach($detailsAccounts as $detailsAccount){
+          if(!$detailsAccount || $detailsAccount == 0){
+            $checkResult = false;
+            break;
+          }
+        }
+        return $checkResult;
+      }
+
+    function updateReversalFromVoucher($from_id, $to_id, $voucher_number_from, $new_voucher_description, $total_voucher_cost){
+
+        $unrefunded_amount = $this->unrefundedAmountByFromVoucherId($from_id);
+        
+        // Get existing voucher_refunding_to ids
+        $voucher_refunding_to_json = $this->read_db->table('voucher')->where( ['voucher_id' => $from_id])
+        ->get()->getRow()->voucher_refunding_to;
+        
+        $voucher_refunding_to_ids = [];
+
+        if($voucher_refunding_to_json != null){
+            $voucher_refunding_to_ids = json_decode($voucher_refunding_to_json);
+            array_push($voucher_refunding_to_ids, $to_id);
+        }else{
+            $voucher_refunding_to_ids = [$to_id];
+        }
+
+        $data['voucher_refunding_to'] = json_encode($voucher_refunding_to_ids);
+        $voucherWriteBuilder = $this->write_db->table('voucher');
+
+        if(($total_voucher_cost - $unrefunded_amount) == 0){
+          $desc['voucher_description'] = "$new_voucher_description [Refunded to $voucher_number_from]";
+          
+          $voucherWriteBuilder->where('voucher_id', $to_id);
+          $voucherWriteBuilder->update($desc);
+      
+          $data['voucher_reversal_to'] = $to_id;
+          $data['voucher_is_reversed'] = 1;
+        }
+        
+        $voucherWriteBuilder->where(['voucher_id' => $from_id]);
+        $voucherWriteBuilder->update( $data);
+        
+        
+      }
+
+    function getRefundFromVoucher($office_id, $reverse_from_voucher_number){
+        $voucherReadBuilder = $this->read_db->table('voucher');
+        $voucherReadBuilder->select(['voucher_id', 'voucher_number']);
+        $voucherReadBuilder->where(['fk_office_id' => $office_id, 'voucher_number' => $reverse_from_voucher_number]);
+        $voucher_obj = $voucherReadBuilder->get();
+    
+        $voucher = [];
+    
+        if($voucher_obj->getNumRows() > 0){
+          $voucher = $voucher_obj->getRowArray();
+        }
+    
+        return $voucher;
+      }
 
     public function officeHasVouchersForTheTransactingMonth($office_id, $transacting_month)
     {
@@ -2280,4 +2384,36 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
         return $cheque_numbers;
     }
+
+    public function unrefundedAmountByFromVoucherId($from_voucher_id){
+
+        $voucherReadBuilder = $this->read_db->table('voucher');
+
+        $voucherReadBuilder->select("voucher_detail_total_cost");
+        $voucherReadBuilder->where(array('voucher_id' => $from_voucher_id));
+        $voucherReadBuilder->join('voucher_detail', 'voucher_detail.fk_voucher_id = voucher.voucher_id');
+        $voucher_amount_obj = $voucherReadBuilder->get();
+
+        $voucher_amount = 0;
+        if($voucher_amount_obj->getNumRows() > 0){
+          $voucher_details = $voucher_amount_obj->getResultArray();
+          $voucher_amount = abs(array_sum(array_column($voucher_details, 'voucher_detail_total_cost')));
+        }
+
+        $voucherReadBuilder->select("voucher_detail_total_cost");
+        $voucherReadBuilder->where(array('voucher_reversal_from' => $from_voucher_id));
+        $voucherReadBuilder->join('voucher_detail', 'voucher_detail.fk_voucher_id = voucher.voucher_id');
+        $total_refund_amount_obj = $voucherReadBuilder->get();
+    
+        $total_refund_amount = 0;
+    
+        if($total_refund_amount_obj->getNumRows() > 0){
+          $refunded_to_vouchers = $total_refund_amount_obj->getResultArray();
+          $total_refund_amount = abs(array_sum(array_column($refunded_to_vouchers, 'voucher_detail_total_cost')));
+        }
+
+        $unrefunded_amount = $voucher_amount - $total_refund_amount;
+    
+        return $unrefunded_amount;
+      }
 }

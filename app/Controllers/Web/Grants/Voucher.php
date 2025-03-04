@@ -108,6 +108,7 @@ class Voucher extends WebController
     $response['office_banks'] = [];
     $response['office_cash'] = [];
     $response['is_bank_payment'] = false;
+    $response['is_bank_refund'] = false;
 
     $officeBankLibrary = new Grants\OfficeBankLibrary();
 
@@ -142,6 +143,10 @@ class Voucher extends WebController
 
     if ($voucher_type_effect == 'bank_to_bank_contra' || $voucher_type_effect == 'bank_contra' || ($voucher_type_account == 'bank' && $voucher_type_effect == 'expense')) {
       $response['is_bank_payment'] = true;
+    }
+
+    if($voucher_type_effect == 'bank_refund'){
+      $response['is_bank_refund'] = true;
     }
 
     return $this->response->setJSON($response);
@@ -360,6 +365,9 @@ class Voucher extends WebController
     $response['project_allocation'] = [];
     $response['is_contra'] = false;
     $response['project_allocation'] = [];
+    $post = $this->request->getPost();
+    $bank_refund_from = $post['bank_refund_from'];
+    // $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
 
     if (!validate_date($transaction_date)) {
       $transaction_date = date('Y-m-d');
@@ -368,11 +376,28 @@ class Voucher extends WebController
     $office_accounting_system = $this->library->officeAccountSystem($office_id);
 
     $project_allocation = [];
+    $voucher_type_effect_and_code = $this->library->voucherTypeEffectAndCode($voucher_type_id);
+
 
     if (
       !$office_accounting_system->account_system_is_allocation_linked_to_account ||
       service("settings")->get("GrantsConfig.toggle_accounts_by_allocation")
     ) {
+
+      if($voucher_type_effect_and_code->voucher_type_effect_code == 'bank_refund'){
+        $voucherDetailReadBuilder = $this->read_db->table('voucher_detail');
+        $voucherDetailReadBuilder->select(['DISTINCT(project_allocation_id) as project_allocation_id','project_name as project_allocation_name']);
+        $voucherDetailReadBuilder->where(['voucher_number' => $bank_refund_from, 'voucher.fk_office_id' => $office_id]);
+        $voucherDetailReadBuilder->join('voucher','voucher.voucher_id=voucher_detail.fk_voucher_id');
+        $voucherDetailReadBuilder->join('project_allocation','project_allocation.project_allocation_id=voucher_detail.fk_project_allocation_id'); 
+        $voucherDetailReadBuilder->join('project','project.project_id=project_allocation.fk_project_id');
+        $project_allocation_obj = $voucherDetailReadBuilder->get();
+
+        if ($project_allocation_obj->getNumRows() > 0) {
+          $project_allocation = $project_allocation_obj->getResultObject();
+        }
+       
+      }else{
       //Working as expected
       $query_condition = "fk_office_id = " . $office_id . " AND (project_end_date >= '" . $transaction_date . "' OR  project_allocation_extended_end_date >= '" . $transaction_date . "' OR project_end_date LIKE '0000-00-00' || project_end_date IS NULL) AND project_start_date <= '" . $transaction_date . "'";
       
@@ -391,6 +416,7 @@ class Voucher extends WebController
 
       if ($project_allocation_obj->getNumRows() > 0) {
         $project_allocation = $project_allocation_obj->getResultObject();
+      }
       }
     }
 
@@ -414,53 +440,76 @@ class Voucher extends WebController
   {
     $officeGroupLibrary = new Core\OfficeGroupLibrary();
     $contraAccountLibrary = new Grants\ContraAccountLibrary();
+    $officeBankReadBuilder = $this->read_db->table('office_bank');
+    $contraAccountReadBuilder = $this->read_db->table('contra_account');
+    $expenseAccountReadBuilder = $this->read_db->table("expense_account");
+    $incomeAccountReadBuilder = $this->read_db->table("income_account");
 
     $post = $this->request->getPost();
     $voucher_type_effect_and_code = $this->library->voucherTypeEffectAndCode($post['voucher_type_id']);
+    $bank_refund_from = $post['bank_refund_from'];
+    $office_id = $post['office_id'];
+
     $voucher_type_effect = $voucher_type_effect_and_code->voucher_type_effect_code;
 
-    $accounts_obj = [];
+    $accounts_obj = null;
 
     $project_allocation_id = $post['allocation_id'];
     $office_bank_id = $post['office_bank_id'];
     $office_accounting_system = $this->library->officeAccountSystem($this->request->getPost('office_id'));
 
-    if ($voucher_type_effect == 'expense') {
+    if ($voucher_type_effect == 'expense' || $voucher_type_effect == 'bank_refund') {
       // Check if the office is a lead in an office group
       $is_office_group_lead = $officeGroupLibrary->checkIfOfficeIsOfficeGroupLead($this->request->getPost('office_id'));
 
-      $builder = $this->read_db->table("expense_account");
       if (!$is_office_group_lead) {
         $string_condition = 'AND expense_account_office_association_is_active = 1';
-        $this->libs->notExistsSubQuery($builder, 'expense_account', 'expense_account_office_association', $string_condition);
+        $this->libs->notExistsSubQuery($expenseAccountReadBuilder, 'expense_account', 'expense_account_office_association', $string_condition);
       }
 
-      $builder->join('income_account', 'income_account.income_account_id=expense_account.fk_income_account_id');
-      $builder->join('project_income_account', 'project_income_account.fk_income_account_id=income_account.income_account_id');
-      $builder->join('project', 'project.project_id=project_income_account.fk_project_id');
-      $builder->join('project_allocation', 'project_allocation.fk_project_id=project.project_id');
-      $builder->where(array('project_allocation_id' => $project_allocation_id, 'expense_account_is_active' => 1));
-      $builder->where(array('fk_account_system_id' => $office_accounting_system->account_system_id));
-      $builder->select(array('expense_account_id as account_id', 'expense_account_name as account_name'));
-      $accounts_obj = $builder->get();
+      if($voucher_type_effect == 'bank_refund'){
+        $expenseAccountReadBuilder->join('voucher_detail','voucher_detail.fk_expense_account_id=expense_account.expense_account_id');
+        $expenseAccountReadBuilder->join('project_allocation', 'project_allocation.project_allocation_id=voucher_detail.fk_project_allocation_id');
+        $expenseAccountReadBuilder->join('voucher','voucher.voucher_id=voucher_detail.fk_voucher_id');
+        $expenseAccountReadBuilder->where(['voucher_number' => $bank_refund_from, 'voucher.fk_office_id' => $office_id, 'fk_project_allocation_id' => $project_allocation_id]);
+      }else{
+        $expenseAccountReadBuilder->join('income_account', 'income_account.income_account_id=expense_account.fk_income_account_id');
+        $expenseAccountReadBuilder->join('project_income_account', 'project_income_account.fk_income_account_id=income_account.income_account_id');
+        $expenseAccountReadBuilder->join('project', 'project.project_id=project_income_account.fk_project_id');
+        $expenseAccountReadBuilder->join('project_allocation', 'project_allocation.fk_project_id=project.project_id');
+        $expenseAccountReadBuilder->where(array('project_allocation_id' => $project_allocation_id, 'expense_account_is_active' => 1));
+        $expenseAccountReadBuilder->where(array('fk_account_system_id' => $office_accounting_system->account_system_id));
+      }
+      $expenseAccountReadBuilder->select(array('expense_account_id as account_id', 'expense_account_name as account_name'));
+      $accounts_obj = $expenseAccountReadBuilder->get();
+      
+
+      // $expenseAccountReadBuilder->join('income_account', 'income_account.income_account_id=expense_account.fk_income_account_id');
+      // $expenseAccountReadBuilder->join('project_income_account', 'project_income_account.fk_income_account_id=income_account.income_account_id');
+      // $expenseAccountReadBuilder->join('project', 'project.project_id=project_income_account.fk_project_id');
+      // $expenseAccountReadBuilder->join('project_allocation', 'project_allocation.fk_project_id=project.project_id');
+      // $expenseAccountReadBuilder->where(array('project_allocation_id' => $project_allocation_id, 'expense_account_is_active' => 1));
+      // $expenseAccountReadBuilder->where(array('fk_account_system_id' => $office_accounting_system->account_system_id));
+      // $expenseAccountReadBuilder->select(array('expense_account_id as account_id', 'expense_account_name as account_name'));
+      // $accounts_obj = $expenseAccountReadBuilder->get();
     } elseif ($voucher_type_effect == 'income' || $voucher_type_effect == 'bank_to_bank_contra') {
-      $builder = $this->read_db->table("income_account");
-      $builder->where(array('project_allocation_id' => $project_allocation_id, 'income_account_is_active' => 1));
-      $builder->where(array('fk_account_system_id' => $office_accounting_system->account_system_id));
-      $builder->join('project_income_account', 'project_income_account.fk_income_account_id=income_account.income_account_id');
-      $builder->join('project', 'project.project_id=project_income_account.fk_project_id');
-      $builder->join('project_allocation', 'project_allocation.fk_project_id=project.project_id');
-      $builder->select(array('income_account_id as account_id', 'income_account_name as account_name'));
-      $accounts_obj = $builder->get();
+      // $builder = $this->read_db->table("income_account");
+      $incomeAccountReadBuilder->where(array('project_allocation_id' => $project_allocation_id, 'income_account_is_active' => 1));
+      $incomeAccountReadBuilder->where(array('fk_account_system_id' => $office_accounting_system->account_system_id));
+      $incomeAccountReadBuilder->join('project_income_account', 'project_income_account.fk_income_account_id=income_account.income_account_id');
+      $incomeAccountReadBuilder->join('project', 'project.project_id=project_income_account.fk_project_id');
+      $incomeAccountReadBuilder->join('project_allocation', 'project_allocation.fk_project_id=project.project_id');
+      $incomeAccountReadBuilder->select(array('income_account_id as account_id', 'income_account_name as account_name'));
+      $accounts_obj = $incomeAccountReadBuilder->get();
     } elseif ($voucher_type_effect == 'cash_contra') {
       $accounts = $contraAccountLibrary->addContraAccount($office_bank_id);
 
-      $builder = $this->read_db->table('contra_account');
-      $builder->select(array('contra_account_id as account_id', 'contra_account_name as account_name', 'contra_account_code as account_code'));
-      $builder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=contra_account.fk_voucher_type_effect_id');
-      $builder->join('office_bank', 'office_bank.office_bank_id=contra_account.fk_office_bank_id');
-      $builder->where(array('fk_account_system_id' => $office_accounting_system->account_system_id));
-      $accounts_obj = $builder->getWhere(
+      // $builder = $this->read_db->table('contra_account');
+      $contraAccountReadBuilder->select(array('contra_account_id as account_id', 'contra_account_name as account_name', 'contra_account_code as account_code'));
+      $contraAccountReadBuilder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=contra_account.fk_voucher_type_effect_id');
+      $contraAccountReadBuilder->join('office_bank', 'office_bank.office_bank_id=contra_account.fk_office_bank_id');
+      $contraAccountReadBuilder->where(array('fk_account_system_id' => $office_accounting_system->account_system_id));
+      $accounts_obj = $contraAccountReadBuilder->getWhere(
         array(
           'voucher_type_effect_code' => 'cash_contra',
           'office_bank_is_active' => 1,
@@ -470,40 +519,38 @@ class Voucher extends WebController
     } elseif ($voucher_type_effect == 'bank_contra') {
       $contraAccountLibrary->addContraAccount($office_bank_id);
 
-      $builder = $this->read_db->table("contra_account");
-      $builder->select(array('contra_account_id as account_id', 'contra_account_name as account_name', 'contra_account_code as account_code'));
-      $builder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=contra_account.fk_voucher_type_effect_id');
-      $builder->join('office_bank', 'office_bank.office_bank_id=contra_account.fk_office_bank_id');
-      $builder->where(array('fk_account_system_id' => $office_accounting_system->account_system_id));
-      $builder->where(array(
+      // $builder = $this->read_db->table("contra_account");
+      $contraAccountReadBuilder->select(array('contra_account_id as account_id', 'contra_account_name as account_name', 'contra_account_code as account_code'));
+      $contraAccountReadBuilder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=contra_account.fk_voucher_type_effect_id');
+      $contraAccountReadBuilder->join('office_bank', 'office_bank.office_bank_id=contra_account.fk_office_bank_id');
+      $contraAccountReadBuilder->where(array('fk_account_system_id' => $office_accounting_system->account_system_id));
+      $contraAccountReadBuilder->where(array(
         'voucher_type_effect_code' => 'bank_contra',
         'office_bank_is_active' => 1,
         'office_bank_id' => $office_bank_id
       ));
-      $accounts_obj = $builder->get();
+      $accounts_obj = $contraAccountReadBuilder->get();
     } elseif ($voucher_type_effect == 'cash_to_cash_contra') {
 
       $this->makeAtleastOneOfficeBankDefaultIfOneMissing($this->request->getPost('office_id'));
 
       $contraAccountLibrary->addContraAccount($office_bank_id);
 
-      $builder = $this->read_db->table('office_bank');
-      $builder->where(array('fk_office_id' => $this->request->getPost('office_id'), 'office_bank_is_active' => 1, 'office_bank_is_default' => 1));
-      $office_bank_id = $builder->get()->getRow()->office_bank_id;
-
-      $builder = $this->read_db->table('contra_account');
-      $builder->select(array('contra_account_id as account_id', 'contra_account_name as account_name', 'contra_account_code as account_code'));
-      $builder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=contra_account.fk_voucher_type_effect_id');
-      $builder->join('office_bank', 'office_bank.office_bank_id=contra_account.fk_office_bank_id');
-      $builder->where(array('fk_account_system_id' => $office_accounting_system->account_system_id));
-      $accounts_obj = $builder->getWhere(
+      $officeBankReadBuilder->where(array('fk_office_id' => $this->request->getPost('office_id'), 'office_bank_is_active' => 1, 'office_bank_is_default' => 1));
+      $office_bank_id = $officeBankReadBuilder->get()->getRow()->office_bank_id;
+      
+      $contraAccountReadBuilder->select(array('contra_account_id as account_id', 'contra_account_name as account_name', 'contra_account_code as account_code'));
+      $contraAccountReadBuilder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=contra_account.fk_voucher_type_effect_id');
+      $contraAccountReadBuilder->join('office_bank', 'office_bank.office_bank_id=contra_account.fk_office_bank_id');
+      $contraAccountReadBuilder->where(array('fk_account_system_id' => $office_accounting_system->account_system_id));
+      $accounts_obj = $contraAccountReadBuilder->where(
         array(
           'voucher_type_effect_code' => 'cash_to_cash_contra',
           'fk_account_system_id' => $office_accounting_system->account_system_id,
           'office_bank_is_active' => 1,
           'office_bank_id' => $office_bank_id
         )
-      );
+      )->get();
     }
 
     $expense_or_income_accounts_array = [];
@@ -1075,5 +1122,156 @@ class Voucher extends WebController
     $income_account_id = $incomeAccountLibrary->getProjectAllocationIncomeAccount($project_allocation_id);
 
     echo $income_account_id;
+  }
+
+  private function officeAccountSystem($office_id)
+  {
+    $officeReadBuilder = $this->read_db->table('office');
+    $officeReadBuilder->join('account_system', 'account_system.account_system_id=office.fk_account_system_id');
+    $office_accounting_system = $officeReadBuilder->where(array('office_id' => $office_id))->get()->getRow();
+
+    return $office_accounting_system;
+  }
+
+  public function getProjectDetailsAccount(): ResponseInterface
+  {
+
+    $post = $this->request->getPost();
+    $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+
+    $voucher_type_effect_and_code = $voucherLibrary->voucherTypeEffectAndCode($post['voucher_type_id']);
+
+    $voucher_type_effect = $voucher_type_effect_and_code->voucher_type_effect_code;
+    $voucher_type_account = $voucher_type_effect_and_code->voucher_type_account_code;
+
+    $project_allocation = [];
+
+    $income_account_id = $post['account_id'];
+
+    $office_accounting_system = $this->officeAccountSystem($post['office_id']);
+
+    if ($voucher_type_effect == 'expense') {
+      $expenseAccountReadBuilder = $this->read_db->table('expense_account');
+      $expenseAccountReadBuilder->select('income_account_id');
+      $expenseAccountReadBuilder->join('income_account', 'income_account.income_account_id=expense_account.fk_income_account_id');
+      $income_account_id = $expenseAccountReadBuilder->where(
+        array('expense_account_id' => $post['account_id'])
+      )->get()->getRow()->income_account_id;
+    }
+
+    if ($voucher_type_effect == 'expense' || $voucher_type_effect == 'income') {
+      $projectAllocationReadBuilder = $this->read_db->table('project_allocation');
+      $query_condition = "fk_office_id = " . $post['office_id'] . " AND (project_end_date >= '" . $post['transaction_date'] . "' OR  project_allocation_extended_end_date >= '" . $post['transaction_date'] . "')";
+      $projectAllocationReadBuilder->select(array('project_allocation_id', 'project_allocation_name'));
+      $projectAllocationReadBuilder->join('project', 'project.project_id=project_allocation.fk_project_id');
+
+      if ($post['office_bank_id']) {
+        $projectAllocationReadBuilder->where(array('fk_office_bank_id' => $post['office_bank_id']));
+        $projectAllocationReadBuilder->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_project_allocation_id=project_allocation.project_allocation_id');
+      }
+
+      if ($office_accounting_system->account_system_is_allocation_linked_to_account) {
+        $projectAllocationReadBuilder->where(array('fk_income_account_id' => $income_account_id));
+      }
+
+      $projectAllocationReadBuilder->where($query_condition);
+      $project_allocation = $projectAllocationReadBuilder->get('project_allocation')->getResultObject();
+    }
+
+
+    return $this->response->setJSON($project_allocation);
+  }
+
+  public function validateRefundLimit(): ResponseInterface{
+    $post = $this->request->getPost();
+
+    $account_id = $post['account_id'];
+    $bank_refund_from = $post['bank_refund_from'];
+    $office_id = $post['office_id'];
+    $refund_voucher_amount = $post['refund_voucher_amount'];
+    $totalcost = $post['totalcost'];
+    $is_refundable = 0;
+    $detail_amount = 0;
+
+    $voucherDetailReadBuilder = $this->read_db->table('voucher_detail');
+    $voucherDetailReadBuilder->selectSum('voucher_detail_total_cost');
+    $voucherDetailReadBuilder->where(['fk_expense_account_id' => $account_id, 'voucher.fk_office_id' => $office_id, 'voucher_number' => $bank_refund_from, 'voucher_type_is_hidden' => 0]);
+    $voucherDetailReadBuilder->where(['voucher_cleared' => 1]);
+    $voucherDetailReadBuilder->where(['voucher_reversal_from' => 0, 'voucher_reversal_to' => 0, 'voucher_type_account_code' => 'bank', 'voucher_type_effect_code' => 'expense']);
+    $voucherDetailReadBuilder->join('voucher','voucher.voucher_id=voucher_detail.fk_voucher_id');
+    $voucherDetailReadBuilder->join('voucher_type','voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+    $voucherDetailReadBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+    $voucherDetailReadBuilder->join('voucher_type_account','voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
+    $voucher_detail_total_cost_obj = $voucherDetailReadBuilder->get();
+
+    if($voucher_detail_total_cost_obj->getNumRows() > 0){
+      $result = $voucher_detail_total_cost_obj->getRowArray();
+      if(isset($result['voucher_detail_total_cost'])){
+        $detail_amount = $result['voucher_detail_total_cost'];
+        if($detail_amount >= $totalcost && $refund_voucher_amount >= $totalcost){
+          $is_refundable = 1;
+        }
+      }
+    }
+
+    $output = compact('is_refundable','detail_amount','post');
+    
+    return $this->response->setJSON($output);
+  }
+
+  function validateRefundFromVoucher(){
+
+    $message = 'failed';
+    $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+    $post = $this->request->getPost();
+    $voucher_number = $post['bank_refund_voucher'];
+    $office_id = $post['office_id'];
+    $next_vouching_date = $voucherLibrary->getVoucherDate($office_id);
+    $max_date_of_reversable_voucher = date('Y-m-01', strtotime('-6 months', strtotime($next_vouching_date)));
+
+    $invalid_reasons = "a) A bank refund should only be for bank expenses\n
+    b) Expense MUST be have been done within 6 months\n
+    c) A voucher can only be refunded once\n
+    d) A voucher MUST be cleared in the bank reconciliation";
+
+    $message = get_phrase('invalid_refund_voucher','Voucher number {{voucher_number}} is invalid for the following reasons {{invalid_reasons}}', ['voucher_number' => $voucher_number, 'invalid_reasons' => $invalid_reasons]);
+
+    $voucherReadBuilder = $this->read_db->table('voucher');
+    $voucherReadBuilder->selectSum('voucher_detail_total_cost');
+    $voucherReadBuilder->where(['fk_office_id' => $office_id, 'voucher_date <= ' => $next_vouching_date, 'voucher_date >=' => $max_date_of_reversable_voucher]);
+    $voucherReadBuilder->where(['voucher_cleared' => 1]);
+    $voucherReadBuilder->where(['voucher_reversal_from' => 0, 'voucher_reversal_to' => 0, 'voucher_number' => $voucher_number, 'voucher_type_is_hidden' => 0]);
+    $voucherReadBuilder->where(['voucher_type_account_code' => 'bank', 'voucher_type_effect_code' => 'expense']);
+    $voucherReadBuilder->join('voucher_detail','voucher_detail.fk_voucher_id=voucher.voucher_id');
+    $voucherReadBuilder->join('voucher_type','voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+    $voucherReadBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+    $voucherReadBuilder->join('voucher_type_account','voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
+    $voucher_obj = $voucherReadBuilder->get();
+
+    // $voucher_cost = 0;
+
+    if($voucher_obj->getNumRows() > 0){
+      $voucher_cost_array = $voucher_obj->getRowArray();
+      if(isset($voucher_cost_array['voucher_detail_total_cost'])){
+          $message = 'success';
+      }
+    }
+
+    $from_voucher_obj = $voucherReadBuilder->select('voucher_id')
+    ->where(array('voucher_number' => $voucher_number, 'fk_office_id' =>$office_id))->get();
+
+    $from_voucher_id = 0;
+    $voucher_cost = 0;
+
+    if($from_voucher_obj->getNumRows() > 0){
+      $from_voucher_id = $from_voucher_obj->getRowArray()['voucher_id'];
+      // Compute unrefunded amount
+      $voucher_cost = $voucherLibrary->unrefundedAmountByFromVoucherId($from_voucher_id);
+    }
+  
+
+    $output = compact('message', 'voucher_cost', 'voucher_number');
+
+    return $this->response->setJSON($output);
   }
 }
