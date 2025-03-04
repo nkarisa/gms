@@ -901,6 +901,8 @@ class Voucher extends WebController
      $voucherDetailWriteBuilder = $this->write_db->table('voucher_detail');
      $statusLibrary = new \App\Libraries\Core\StatusLibrary();
      $post = $this->request->getPost();
+
+    //  log_message('error', json_encode($post));
      
      $voucher_type_effect_code = $voucherLibrary->voucherTypeEffectAndCode($post['fk_voucher_type_id'])->voucher_type_effect_code;
      $office_cash_id = 0;
@@ -945,7 +947,7 @@ class Voucher extends WebController
        $voucherWriteBuilder->update($voucher_header_data);
  
        $detail = [];
- 
+       $detail_ids = [];
        //Loop to update Voucher Details
        for ($i = 0; $i <  $quantity; $i++) {
  
@@ -962,6 +964,7 @@ class Voucher extends WebController
          $voucher_detail_id = '';
          if ($original_voucher_type_effect_before_edit == $voucher_type_effect_code || $original_voucher_type_effect_before_edit == '') {
            $voucher_detail_id = $post['hold_voucher_detail_id'][$i];
+           $detail_ids[$i] = $voucher_detail_id;
          }
   
          if ($voucher_type_effect_code == 'expense') {
@@ -992,8 +995,18 @@ class Voucher extends WebController
            $detail['fk_approval_id'] = $this->libs->insertApprovalRecord('voucher_detail');
            $detail['fk_status_id'] = $statusLibrary->initialItemStatus('voucher_detail');
            $voucherDetailWriteBuilder->insert($detail);
+           $detail_ids[$i] = $this->write_db->insertId();
          }
        }
+
+
+       if(count($detail_ids) > 0){
+          // Delete where not in $detail_ids
+          $voucherDetailWriteBuilder->where('voucher_detail_id NOT IN ('. implode(',', $detail_ids). ')');
+          $voucherDetailWriteBuilder->where(['fk_voucher_id' => $voucher_id]);  // delete the details that are not in the $detail_ids array
+          $voucherDetailWriteBuilder->delete();  // delete the rest of the details that are not in the $detail_ids array
+       }
+      //  log_message('error', json_encode($detail_ids));
  
        // This is to be used in the future as a replacement for inserting in the details
        $voucher_posting_condition = $this->voucherPostingCondition($post);
