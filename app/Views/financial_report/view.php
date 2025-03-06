@@ -2,6 +2,7 @@
 
 // $os_effects = $this->financial_report_model->grouped_list_oustanding_cheques_and_deposits([14],'2023-03-01');
 
+use \App\Libraries\System\Widgets\WidgetBase;
 
 extract($result);
 
@@ -39,12 +40,12 @@ extract($result);
 
 <?php
 // echo get_phrase('my_greetings', 'My name is {{name}} and Iam {{age}} years old', ['name' => 'Karisa', 'age' => 40]);
-$is_status_id_max = $this->general_model->is_status_id_max('financial_report',hash_id($this->id,'decode'));
+// $is_status_id_max = $this->general_model->is_status_id_max('financial_report',hash_id($this->id,'decode'));
 ?>
 
 <div class="row">
     <div class="col-xs-12">
-        <?= Widget_base::load('comment'); ?>
+        <?= WidgetBase::load('comment'); ?>
     </div>
 </div>
 
@@ -52,7 +53,7 @@ $is_status_id_max = $this->general_model->is_status_id_max('financial_report',ha
     <div class="col-xs-12">
         <?php
         if (is_office_in_context_offices($office_ids[0])) {
-            echo Widget_base::load('position', 'position_1');
+            echo WidgetBase::load('position', 'position_1');
         }
 
         ?>
@@ -88,7 +89,7 @@ $is_status_id_max = $this->general_model->is_status_id_max('financial_report',ha
 
 <div class="row">
     <div class="col-xs-12" style="text-align: center;font-size:35px;color:blue;">
-        <?= get_phrase("report_status") . ": " . $this->general_model->user_action_label($this->general_model->get_status_id($table, $primary_key)); ?>
+        <?= get_phrase("report_status") . ": " . $action_lable; ?>
     </div>
 </div>
 
@@ -112,12 +113,17 @@ $is_status_id_max = $this->general_model->is_status_id_max('financial_report',ha
 <div class='row'>
     <div class='col-xs-12'>
         <?php 
-                $this->read_db->where(array('financial_report_id' => hash_id($this->id, 'decode')));
-                 $id = $this->read_db->get('financial_report')->row()->fk_office_id;
+                // $builder = $this->read_db->table('financial_report');
+                // $builder->select('fk_office_id');
+                // $builder->where('financial_report_id' , hash_id($this->id, 'decode'));
+                // $id = $builder->get()->getRow()->fk_office_id;
+
+                // $this->read_db->where(array('financial_report_id' => hash_id($this->id, 'decode')));
+                //  $id = $this->read_db->get('financial_report')->row()->fk_office_id;
 
                 if(
                     count($office_banks) > 1 
-                    || (count($month_active_projects) > 0 && !$this->config->item('allow_a_bank_to_be_linked_to_many_projects')))
+                    || (count($month_active_projects) > 0 && !$this->config->allow_a_bank_to_be_linked_to_many_projects))
                 { ?>
         
                 <form id='frm_selected_offices' action='<?= base_url(); ?>financial_report/filter_financial_report' method='POST'>
@@ -125,7 +131,7 @@ $is_status_id_max = $this->general_model->is_status_id_max('financial_report',ha
                         <label class='col-xs-2 control-label'><?= get_phrase('report_filter'); ?></label>
 
                             <!--Implement appending to searializeArray later to avoid hidden fields -->
-                            <input type='hidden' id = "report_id" value='<?= $this->id ?>' name='report_id' />
+                            <input type='hidden' id = "report_id" value='<?= $report_id ?>' name='report_id' />
                             <input type='hidden' id = "reporting_month" value='<?= $reporting_month; ?>' name='reporting_month' />
 
                                 <?php 
@@ -136,7 +142,7 @@ $is_status_id_max = $this->general_model->is_status_id_max('financial_report',ha
                                         foreach ($offices as $office) {
             
                                             if(in_array($office['office_id'], $office_ids)){
-                                                $id =  $office['office_id'];
+                                                $office_id =  $office['office_id'];
                                             }
 
                                         ?>
@@ -147,10 +153,10 @@ $is_status_id_max = $this->general_model->is_status_id_max('financial_report',ha
                                  
                                 <?php } ?>
         
-                            <input type='hidden' name='office_ids[]' id='office_ids' class = 'form-control' value = '<?=$id;?>' />
+                            <input type='hidden' name='office_ids[]' id='office_ids' class = 'form-control' value = '<?=$office_id;?>' />
        
 
-                        <?php if (!$this->config->item('allow_a_bank_to_be_linked_to_many_projects')) { ?>
+                        <?php if (!$this->config->allow_a_bank_to_be_linked_to_many_projects) { ?>
                             <div class='col-xs-4'>
                                 <select name='project_ids[]' id='project_ids' class='form-control select2' multiple><?= get_phrase('select_projects'); ?>
                                     <?php foreach ($month_active_projects as $month_active_project) { ?>
@@ -362,7 +368,7 @@ $is_status_id_max = $this->general_model->is_status_id_max('financial_report',ha
     //     }); 
 
     $("#decline_button").on('click', function() {
-        let url = "<?= base_url(); ?>financial_report/reverse_mfr_submission/<?= hash_id($this->id, 'decode'); ?>"
+        let url = "<?= base_url(); ?>financial_report/reverseMfrSubmission/<?= $report_id ?>"
         $.get(url, function(response) {
             //if (response == 1) {
             alert(response);

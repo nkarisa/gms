@@ -1,5 +1,6 @@
 <?php
 // echo json_encode($clear_outstanding_cheques);
+$userLibrary = new \App\Libraries\Core\UserLibrary();
 ?>
 <table class="table table-striped tbl_outstanding_cheque_connector" id="tbl_cleared_outstanding_cheque">
     <thead>
@@ -68,12 +69,12 @@
                 <td class = 'no-print'>
 
                 <?php if (($clear_outstanding_cheque['voucher_id'] >0)||($clear_outstanding_cheque['voucher_id']==0 && $clear_outstanding_cheque['voucher_cleared']==1 && $clear_outstanding_cheque['bounce_flag']==0)  ) { ?>
-                    <div <?=$style_btn;?> data-data-opening_deposit_transit_id="0" data-opening_outstanding_cheque_id="<?= isset($clear_outstanding_cheque['opening_outstanding_cheque_id']) ? $clear_outstanding_cheque['opening_outstanding_cheque_id'] : 0; ?>" id="<?= $clear_outstanding_cheque['voucher_id']; ?>" class='btn btn-<?= $clear_outstanding_cheque_state_color; ?> clear_btn <?= ($allow_mfr_reconciliation && $this->user_model->check_role_has_permissions(ucfirst($this->controller), 'update'))&& trim($voucher_type_name) != 'Voided Cheque' ? '' : 'disabled'; ?> <?= $clear_outstanding_cheque_state_clear_class; ?> cleared_outstanding_cheque cleared_effect state_<?= $clear_outstanding_cheque['voucher_cleared']; ?> <?= isset($clear_outstanding_cheque['voucher_is_reversed']) &&  $clear_outstanding_cheque['voucher_is_reversed'] ? 'hidden' : '' ?>'>
+                    <div <?=$style_btn;?> data-data-opening_deposit_transit_id="0" data-opening_outstanding_cheque_id="<?= isset($clear_outstanding_cheque['opening_outstanding_cheque_id']) ? $clear_outstanding_cheque['opening_outstanding_cheque_id'] : 0; ?>" id="<?= $clear_outstanding_cheque['voucher_id']; ?>" class='btn btn-<?= $clear_outstanding_cheque_state_color; ?> clear_btn <?= ($allow_mfr_reconciliation && $userLibrary->checkRoleHasPermissions('finacial_report', 'update'))&& trim($voucher_type_name) != 'Voided Cheque' ? '' : 'disabled'; ?> <?= $clear_outstanding_cheque_state_clear_class; ?> cleared_outstanding_cheque cleared_effect state_<?= $clear_outstanding_cheque['voucher_cleared']; ?> <?= isset($clear_outstanding_cheque['voucher_is_reversed']) &&  $clear_outstanding_cheque['voucher_is_reversed'] ? 'hidden' : '' ?>'>
                         <?= $clear_outstanding_cheque_state_label; ?>
                     </div>
                     <?php }
                     elseif($clear_outstanding_cheque['voucher_id']==0 && $clear_outstanding_cheque['bounce_flag']==1){?>
-                       <div data-data-opening_deposit_transit_id="0" data-opening_outstanding_cheque_id="<?= isset($clear_outstanding_cheque['opening_outstanding_cheque_id']) ? $clear_outstanding_cheque['opening_outstanding_cheque_id'].'_unbounce' : 0; ?>" id="<?= $clear_outstanding_cheque['voucher_id']; ?>" class=' <?=$financial_report_submitted==true?$disable_undo_if_mfr_submitted:'';?> btn btn-<?= $oustanding_state_color; ?> <?= $allow_mfr_reconciliation && $this->user_model->check_role_has_permissions(ucfirst($this->controller), 'update') ? '' : 'disabled'; ?> cancel_btn <?= $oustanding_state_clear_class; ?> outstanding_cheque cleared_effect state_<?= $clear_outstanding_cheque['voucher_cleared']; ?>'>
+                       <div data-data-opening_deposit_transit_id="0" data-opening_outstanding_cheque_id="<?= isset($clear_outstanding_cheque['opening_outstanding_cheque_id']) ? $clear_outstanding_cheque['opening_outstanding_cheque_id'].'_unbounce' : 0; ?>" id="<?= $clear_outstanding_cheque['voucher_id']; ?>" class=' <?=$financial_report_submitted==true?$disable_undo_if_mfr_submitted:'';?> btn btn-<?= $oustanding_state_color; ?> <?= $allow_mfr_reconciliation && $userLibrary->checkRoleHasPermissions('financial_report', 'update') ? '' : 'disabled'; ?> cancel_btn <?= $oustanding_state_clear_class; ?> outstanding_cheque cleared_effect state_<?= $clear_outstanding_cheque['voucher_cleared']; ?>'>
                             <?= get_phrase('undo'); ?>
                             <i class='fa fa-undo' style='cursor:pointer;'></i>
                         </div>

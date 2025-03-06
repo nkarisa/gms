@@ -33,7 +33,7 @@ class VoucherTypeLibrary extends GrantsLibrary implements \App\Interfaces\Librar
         $builder2->where(array('voucher_type_is_active' => 1, 'voucher_type_is_hidden' => 1));
         $builder2->where(array('voucher_type_account_code' => 'bank'));
         $builder2->where(array('fk_account_system_id' => $account_system_id));
-        $voucher_types = $builder2->get('voucher_type');
+        $voucher_types = $builder2->get();
     
     
         

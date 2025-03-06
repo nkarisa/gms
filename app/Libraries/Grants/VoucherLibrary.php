@@ -1692,7 +1692,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
           $builder->whereIn('fk_voucher_type_id', $voucher_type_ids);
           $builder->join('funds_transfer', 'funds_transfer.fk_voucher_id=voucher.voucher_id');
           $builder->whereIn('voucher.fk_office_id', $office_ids);
-          $vouchers_obj = $builder->get('voucher');
+          $vouchers_obj = $builder->get();
 
           if ($vouchers_obj->getNumRows() > 0) {
               $unformatted_accounts_vouchers = $vouchers_obj->getResultArray();

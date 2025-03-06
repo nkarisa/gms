@@ -1,5 +1,6 @@
 <?php
 //print_r($cleared_deposit_in_transit);
+    $userLibrary = new \App\Libraries\Core\UserLibrary();
 ?>
 <table class="table table-striped tbl_transit_deposit_connector" id='tbl_cleared_transit_deposit'>
     <thead>
@@ -29,7 +30,7 @@
 
                 ?>
                 <td class = 'no-print'>
-                    <div data-opening_outstanding_cheque_id="0" data-opening_deposit_transit_id="<?= isset($cleared_deposit_in_transit_row['opening_deposit_transit_id']) ? $cleared_deposit_in_transit_row['opening_deposit_transit_id'] : 0; ?>" id="<?= $cleared_deposit_in_transit_row['voucher_id']; ?>" class='btn btn-<?= $cleared_deposit_in_transit_state_color; ?> clear_btn <?= $allow_mfr_reconciliation && $this->user_model->check_role_has_permissions(ucfirst($this->controller), 'update') ? '' : 'disabled'; ?> <?= $cleared_deposit_in_transit_state_clear_class; ?> deposit_in_transit cleared_effect state_<?= $cleared_deposit_in_transit_row['voucher_cleared']; ?> <?= $cleared_deposit_in_transit_row['voucher_is_reversed'] ? 'hidden' : '' ?>'>
+                    <div data-opening_outstanding_cheque_id="0" data-opening_deposit_transit_id="<?= isset($cleared_deposit_in_transit_row['opening_deposit_transit_id']) ? $cleared_deposit_in_transit_row['opening_deposit_transit_id'] : 0; ?>" id="<?= $cleared_deposit_in_transit_row['voucher_id']; ?>" class='btn btn-<?= $cleared_deposit_in_transit_state_color; ?> clear_btn <?= $allow_mfr_reconciliation && $userLibrary->checkRoleHasPermissions('financial_report', 'update') ? '' : 'disabled'; ?> <?= $cleared_deposit_in_transit_state_clear_class; ?> deposit_in_transit cleared_effect state_<?= $cleared_deposit_in_transit_row['voucher_cleared']; ?> <?= $cleared_deposit_in_transit_row['voucher_is_reversed'] ? 'hidden' : '' ?>'>
                         <?= $cleared_deposit_in_transit_state_label; ?>
                     </div>
                 </td>

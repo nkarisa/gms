@@ -91,7 +91,7 @@ class WebController extends BaseController
     $this->session = \Config\Services::session();
 
     // Load default helpers
-    helper(['grants', 'form', 'elements']);
+    helper(['grants', 'form', 'elements', 'financial']);
 
     // Load database
     $this->read_db = \Config\Database::connect('read');

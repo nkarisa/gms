@@ -40,7 +40,7 @@ class VarianceCommentLibrary extends GrantsLibrary implements \App\Interfaces\Li
         $builder->select(array('fk_income_account_id as income_account_id','fk_expense_account_id as expense_account_id','variance_comment_text'));
         $builder->where(['fk_budget_id'=>$budget_id,'fk_financial_report_id'=>$report_id]);
         $builder->join('expense_account','expense_account.expense_account_id=variance_comment.fk_expense_account_id');
-        $variance_comment_obj = $builder->get('variance_comment');
+        $variance_comment_obj = $builder->get();
 
         if($variance_comment_obj->getNumRows() > 0){
             $variance_comments = $variance_comment_obj->getResultArray();

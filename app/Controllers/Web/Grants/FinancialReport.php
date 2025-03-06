@@ -25,6 +25,7 @@ class FinancialReport extends WebController
     private $journalLibrary;
     private $grantsLibrary;
     protected $statusLibrary;
+    // private $config;
 
     
     
@@ -45,6 +46,7 @@ class FinancialReport extends WebController
         $this->journalLibrary = new \App\Libraries\Grants\JournalLibrary();
         $this->statusLibrary = new \App\Libraries\Core\StatusLibrary();
         $this->grantsLibrary = new \App\Libraries\System\GrantsLibrary();
+        // $this->config = config('GrantsConfig');
         
         
         
@@ -201,7 +203,7 @@ class FinancialReport extends WebController
           'financial_report_month' => date('Y-m-t', strtotime($reporting_month))
         ));
         $builder->join('financial_report', 'financial_report.financial_report_id=reconciliation.fk_financial_report_id');
-        $reconciliation_reporting_month_obj = $builder->get('reconciliation');
+        $reconciliation_reporting_month_obj = $builder->get();
   
         if ($reconciliation_reporting_month_obj->getNumRows() > 0) {
           $reconciliation_reporting_month = $reconciliation_reporting_month_obj->getRow()->financial_report_month;
@@ -236,7 +238,7 @@ class FinancialReport extends WebController
         $builder->whereIn('reconciliation.fk_office_bank_id', $office_bank_ids);
       }
   
-      $financial_report_statement_amount_obj = $builder->get('financial_report');
+      $financial_report_statement_amount_obj = $builder->get();
   
       if ($financial_report_statement_amount_obj->getNumRows() > 0) {
         $financial_report_statement_amount = $financial_report_statement_amount_obj->getRow()->reconciliation_statement_balance;
@@ -377,10 +379,8 @@ class FinancialReport extends WebController
         $builder = $this->read_db->table('expense_account');
         $builder->select(array('expense_account_id', 'expense_account_code', 'expense_account_name'));
   
-        $expense_accounts[$income_account['income_account_id']]['expense_accounts'] = $builder->getWhere(
-          'expense_account',
-          array('fk_income_account_id' => $income_account['income_account_id'])
-        )->getResultArray();
+        $expense_accounts[$income_account['income_account_id']]['expense_accounts'] = $builder->where(
+          'fk_income_account_id' , $income_account['income_account_id'])->get()->getResultArray();
       }
   
       return $expense_accounts;
@@ -423,8 +423,8 @@ class FinancialReport extends WebController
         }
       }
   
-  
-      if ($this->config->item('only_combined_center_financial_reports')) {
+      
+      if ($this->config->only_combined_center_financial_reports) {
         $centers = $user_office_hierarchy[$this->userLibrary->getLowestOfficeContext()->context_definition_name];
         unset($user_office_hierarchy);
         $user_office_hierarchy[$this->userLibrary->getLowestOfficeContext()->context_definition_name] = $centers;
@@ -438,10 +438,16 @@ class FinancialReport extends WebController
       $context_ungrouped_user_hierarchy_offices = $this->userLibrary->userHierarchyOffices($this->session->user_id);
   
       $offices_ids = array_column($context_ungrouped_user_hierarchy_offices, 'office_id');
-  
-      $this->read_db->select('fk_office_id');
-      $this->read_db->where_in('fk_office_id', $offices_ids);
-      $office_ids_with_report = $this->read_db->get_where('financial_report', array('financial_report_month' => $reporting_month))->result_array();
+      $office_builder = $this->read_db->table('financial_report');
+      $office_builder->select('fk_office_id');
+      $office_builder->whereIn('fk_office_id', $offices_ids);
+      $office_builder->where('financial_report_month' , $reporting_month);
+      $office_builder_result = $office_builder->get();
+      $office_ids_with_report = $office_builder_result->getResultArray();
+
+      // $this->read_db->select('fk_office_id');
+      // $this->read_db->where_in('fk_office_id', $offices_ids);
+      // $office_ids_with_report = $this->read_db->get_where('financial_report', array('financial_report_month' => $reporting_month))->result_array();
   
       return array_column($office_ids_with_report, 'fk_office_id');
     }
@@ -467,7 +473,12 @@ class FinancialReport extends WebController
       $multiple_projects_report = false;
   
       if (count($office_ids) == 1) {
-        $count_of_office_banks = $this->read_db->get_where('office_bank', array('fk_office_id', $office_ids[0]))->num_rows();
+        $office_builder = $this->read_db->table("office_bank");
+        $office_builder->select('fk_office_id');
+        $office_builder->where('fk_office_id' , $office_ids[0]);
+        $office_results = $office_builder->get(); 
+        $count_of_office_banks = $office_results->getNumRows();
+        // $count_of_office_banks = $this->read_db->get_where('office_bank', array('fk_office_id', $office_ids[0]))->num_rows();
   
         if ((isset($_POST['project_ids']) && count($_POST['project_ids']) == $count_of_office_banks) || ($count_of_office_banks > 1 && !isset($_POST['project_ids']))) {
           $multiple_projects_report = true;
@@ -539,12 +550,19 @@ class FinancialReport extends WebController
       $has_submitted_report_ahead = false;
       $financial_report_initial_status = $this->statusLibrary->initialItemStatus('financial_report');
   
-      $this->read_db->where(array(
+      $financial_report_builder = $this->read_db->table("financial_report");
+      $financial_report_builder->where(array(
         'financial_report_month > ' => $reporting_month,
         'fk_status_id<>' => $financial_report_initial_status, 'fk_office_id' => $office_id
       ));
-      $this->read_db->from('financial_report');
-      $count_all_results = $this->read_db->count_all_results();
+      $count_all_results = $financial_report_builder->countAllResults();
+
+      // $this->read_db->where(array(
+      //   'financial_report_month > ' => $reporting_month,
+      //   'fk_status_id<>' => $financial_report_initial_status, 'fk_office_id' => $office_id
+      // ));
+      // $this->read_db->from('financial_report');
+      // $count_all_results = $this->read_db->count_all_results();
   
       if ($count_all_results > 0) {
         $has_submitted_report_ahead = true;
@@ -557,9 +575,15 @@ class FinancialReport extends WebController
     {
   
       $budget_id = 0;
-  
-      $this->read_db->where(array('financial_report_id' => $report_id));
-      $budget_id = $this->read_db->get('financial_report')->row()->fk_budget_id;
+      $financial_report_builder = $this->read_db->table('financial_report');
+      $financial_report_builder->select('fk_budget_id');
+      $financial_report_builder->where('financial_report_id' , $report_id);
+      $financial_report_results = $financial_report_builder->get(); 
+      $budget_id_result = $financial_report_results->getRow();
+      $budget_id = $budget_id_result->fk_budget_id;
+
+      // $this->read_db->where(array('financial_report_id' => $report_id));
+      // $budget_id = $this->read_db->get('financial_report')->row()->fk_budget_id;
   
       if ($budget_id == NULL || $budget_id == 0) {
         // $this->load->model('budget_model');
@@ -567,8 +591,15 @@ class FinancialReport extends WebController
   
         if(!empty($current_budget)){
           $budget_id = $current_budget['budget_id'];
-          $this->write_db->where(array('financial_report_id' => $report_id));
-          $this->write_db->update('financial_report',['fk_budget_id' => $budget_id]);
+
+          $update_data['fk_budget_id'] = $budget_id;
+
+          $update_financial_report_builder = $this->write_db->table('financial_report');
+          $update_financial_report_builder->where('financial_report_id' , $report_id);
+          $update_financial_report_builder->update($update_data);
+
+          // $this->write_db->where(array('financial_report_id' => $report_id));
+          // $this->write_db->update('financial_report',['fk_budget_id' => $budget_id]);
         }
       }
   
@@ -603,28 +634,41 @@ class FinancialReport extends WebController
     $admin_ratio = 0; // Compute admin ratio
 
     // Get all admin expense accounts ids
-    $this->read_db->select(array('expense_account_id'));
-    $this->read_db->where(array('expense_account_is_admin' => 1, 'income_account.fk_account_system_id' => $account_system_id));
-    $this->read_db->where_in('fk_income_account_id', $support_income_account_ids);
-    $this->read_db->join('income_account','income_account.income_account_id=expense_account.fk_income_account_id');
-    $expense_account_obj = $this->read_db->get('expense_account');
+    $expense_account_builder = $this->read_db->table('expense_account');
+    $expense_account_builder->select('expense_account_id');
+    $expense_account_builder->where(array('expense_account_is_admin' => 1, 'income_account.fk_account_system_id' => $account_system_id));
+    $expense_account_builder->whereIn('fk_income_account_id', $support_income_account_ids);
+    $expense_account_builder->join('income_account','income_account.income_account_id=expense_account.fk_income_account_id');
+    $expense_account_obj = $expense_account_builder->get();
+
+    // $this->read_db->select(array('expense_account_id'));
+    // $this->read_db->where(array('expense_account_is_admin' => 1, 'income_account.fk_account_system_id' => $account_system_id));
+    // $this->read_db->where_in('fk_income_account_id', $support_income_account_ids);
+    // $this->read_db->join('income_account','income_account.income_account_id=expense_account.fk_income_account_id');
+    // $expense_account_obj = $this->read_db->get('expense_account');
 
     $admin_expense_account_ids = [];
 
-    if($expense_account_obj->num_rows() > 0){
-      $admin_expense_account_ids = array_column($expense_account_obj->result_array(), 'expense_account_id');
+    if($expense_account_obj->getNumRows() > 0){
+      $admin_expense_account_ids = array_column($expense_account_obj->getResultArray(), 'expense_account_id');
     }
 
     // Sum past month all support costs and admin costs
-    $this->read_db->select(array('financial_report_month','closing_expense_report_data '));
-    $this->read_db->where(array('financial_report_month >=' => $fy_start_date, 
+    $financial_report_builder = $this->read_db->table('financial_report');
+    $financial_report_builder->select(['financial_report_month','closing_expense_report_data ']);
+    $financial_report_builder->where(array('financial_report_month >=' => $fy_start_date, 
     'financial_report_month <' => $reporting_month, 'fk_office_id' => $office_id));
-    $closing_expense_report_data_obj = $this->read_db->get('financial_report');
+    $closing_expense_report_data_obj = $financial_report_builder->get();
+
+    // $this->read_db->select(array('financial_report_month','closing_expense_report_data '));
+    // $this->read_db->where(array('financial_report_month >=' => $fy_start_date, 
+    // 'financial_report_month <' => $reporting_month, 'fk_office_id' => $office_id));
+    // $closing_expense_report_data_obj = $this->read_db->get('financial_report');
 
     $closing_expense_report_data  = [];
 
-    if($closing_expense_report_data_obj->num_rows() > 0){
-      $closing_expense_report_data_raw = $closing_expense_report_data_obj->result_array();
+    if($closing_expense_report_data_obj->getNumRows() > 0){
+      $closing_expense_report_data_raw = $closing_expense_report_data_obj->getResultArray();
 
       for($i = 0; $i < count($closing_expense_report_data_raw); $i++){
         $closing_expense_report_data[$i]['financial_report_month'] = $closing_expense_report_data_raw[$i]['financial_report_month'];
@@ -759,15 +803,20 @@ private function monthFundBalanceReportData(
   ): array {
 
   // Get the past month fund balance report data to date (Immidiate last month)
-  $this->read_db->select(array('financial_report_month','month_fund_balance_report_data'));
-  $this->read_db->where(array('financial_report_month >=' => $fy_start_date, 
+  $builder = $this->read_db->table('financial_report');
+  $builder->select(['financial_report_month','month_fund_balance_report_data']);
+  $builder->where(array('financial_report_month >=' => $fy_start_date, 
   'financial_report_month <' => $reporting_month, 'fk_office_id' => $office_id));
-  $month_fund_balance_report_data_obj = $this->read_db->get('financial_report');
+  $month_fund_balance_report_data_obj = $builder->get();
+  // $this->read_db->select(array('financial_report_month','month_fund_balance_report_data'));
+  // $this->read_db->where(array('financial_report_month >=' => $fy_start_date, 
+  // 'financial_report_month <' => $reporting_month, 'fk_office_id' => $office_id));
+  // $month_fund_balance_report_data_obj = $this->read_db->get('financial_report');
 
   $month_fund_balance_report_data = [];
 
-  if($month_fund_balance_report_data_obj->num_rows() > 0){
-    $month_fund_balance_report_data_raw = $month_fund_balance_report_data_obj->result_array();
+  if($month_fund_balance_report_data_obj->getNumRows() > 0){
+    $month_fund_balance_report_data_raw = $month_fund_balance_report_data_obj->getResultArray();
 
     for($i = 0; $i < count($month_fund_balance_report_data_raw); $i++){
       $month_fund_balance_report_data[$i]['financial_report_month'] = $month_fund_balance_report_data_raw[$i]['financial_report_month'];
@@ -900,17 +949,22 @@ private function incomeAccountIdsByFundingStreams(
   int $account_system_id
   ): array {
   // funding streams can support,local,gift,individual and ongoing 
-
-  $this->read_db->select(array('income_account_id','funding_stream_code'));
-  $this->read_db->join('income_vote_heads_category','income_vote_heads_category.income_vote_heads_category_id=income_account.fk_income_vote_heads_category_id');
-  $this->read_db->join('funding_stream','funding_stream.funding_stream_id=income_vote_heads_category.fk_funding_stream_id');
-  $this->read_db->where(array('fk_account_system_id' => $account_system_id));
-  $income_account_obj = $this->read_db->get('income_account');
+    $builder =$this->read_db->table('income_account');
+    $builder->select(['income_account.income_account_id','funding_stream.funding_stream_code']);
+    $builder->join('income_vote_heads_category','income_vote_heads_category.income_vote_heads_category_id=income_account.fk_income_vote_heads_category_id');
+    $builder->join('funding_stream','funding_stream.funding_stream_id=income_vote_heads_category.fk_funding_stream_id');
+    $builder->where('income_account.fk_account_system_id' , $account_system_id);
+    $income_account_obj = $builder->get();
+  // $this->read_db->select(array('income_account_id','funding_stream_code'));
+  // $this->read_db->join('income_vote_heads_category','income_vote_heads_category.income_vote_heads_category_id=income_account.fk_income_vote_heads_category_id');
+  // $this->read_db->join('funding_stream','funding_stream.funding_stream_id=income_vote_heads_category.fk_funding_stream_id');
+  // $this->read_db->where(array('fk_account_system_id' => $account_system_id));
+  // $income_account_obj = $this->read_db->get('income_account');
 
   $income_account_ids = [];
 
-  if($income_account_obj->num_rows() > 0){
-    $income_accounts = $income_account_obj->result_array();
+  if($income_account_obj->getNumRows() > 0){
+    $income_accounts = $income_account_obj->getResultArray();
     // $income_account_ids = array_column($income_account_obj->result_array(), 'income_account_id');
     for($i = 0; $i < count($income_accounts); $i++){
       $income_account_ids[$income_accounts[$i]['funding_stream_code']][] = $income_accounts[$i]['income_account_id'];
@@ -995,9 +1049,10 @@ private function toDateFinancialRatios(
   $month_expenses = $this->reorganizeMonthExpenseReport($month_expenses);
 
   // Get the office account system id
-  $this->read_db->select(array('fk_account_system_id'));
-  $this->read_db->where(array('office_id' => $office_id));
-  $account_system_id = $this->read_db->get('office')->row()->fk_account_system_id;
+  $office_builder = $this->read_db->table('office');
+  $office_builder->select('fk_account_system_id');
+  $office_builder->where('office_id' , $office_id);
+  $account_system_id = $office_builder->get()->getRow()->fk_account_system_id;
 
   // Compute the financial year start date for the office
   $custom_financial_year = $this->customFinancialYearLibrary->getDefaultCustomFinancialYearIdByOffice($office_id, true);
@@ -1034,210 +1089,220 @@ private function toDateFinancialRatios(
   ];
 }
 
-// function result($id = '', $parentId = null)
-// {
-//   $result = parent::result($id, $parentId);
+function result($id = '', $parentId = null)
+{
+  $result = parent::result($id, $parentId);
 
-//   if ($this->action == 'view') {
+  if ($this->action == 'view') {
 
-//     $report = $this->financialReportInformation($this->id);
-//     extract($report);
+    $report = $this->financialReportInformation($this->id);
+    extract($report);
 
+    // check if report has budget id if not update it
+    $budget_id = $this->updateFinancialReportBudgetId(hash_id($this->id,'decode'), $office_ids[0]);
+    $budget_tag_name = '';
 
-//     // check if report has budget id if not update it
-//     $budget_id = $this->updateFinancialReportBudgetId(hash_id($this->id,'decode'), $office_ids[0]);
-//     $budget_tag_name = '';
+    if($budget_id == 0){
+      // $this->load->model('budget_tag_model');
+      // $this->load->model('custom_financial_year_model');
 
-//     if($budget_id == 0){
-//       // $this->load->model('budget_tag_model');
-//       // $this->load->model('custom_financial_year_model');
+      $custom_financial_year = $this->customFinancialYearLibrary->getDefaultCustomFinancialYearIdByOffice($office_ids[0], true);
+      $budget_tag_name = $this->budgetTagLibrary->getBudgetTagIdBasedOnReportingMonth($office_ids[0],$reporting_month, $custom_financial_year)['budget_tag_name'];
+    }
+    // log_message('error', json_encode($budget_id));
 
-//       $custom_financial_year = $this->customFinancialYearLibrary->getDefaultCustomFinancialYearIdByOffice($office_ids[0], true);
-//       $budget_tag_name = $this->budgetTagLibrary->getBudgetTagIdBasedOnReportingMonth($office_ids[0],$reporting_month, $custom_financial_year)['budget_tag_name'];
-//     }
-//     // log_message('error', json_encode($budget_id));
+    $month_expenses = $this->expenseReport($office_ids, $reporting_month);
+    $fund_balances = $this->fundBalanceReport($office_ids, $reporting_month);
+    $action_label = $this->libs->actionLabels('financial_report', hash_id($this->id, 'decode'));
+    return array_merge([
+      'test' => [],
+      "financial_ratios" => $this->toDateFinancialRatios($office_ids[0],$reporting_month , $month_expenses, $fund_balances),
+      'report_id' => hash_id($this->id,'decode'),
+      'budget_id' => $budget_id,
+      'budget_tag_name' => $budget_tag_name,
+      'allow_mfr_reconciliation' => ($multiple_offices_report || $multiple_projects_report || count($this->getOfficeBanks($office_ids, $reporting_month)) > 1) ? false : true,
+      'month_active_projects' => $this->getMonthActiveProjects($office_ids, $reporting_month),
+      'office_banks' => $this->getOfficeBanks($office_ids, $reporting_month),
+      'multiple_offices_report' => $multiple_offices_report,
+      'multiple_projects_report' => $multiple_projects_report,
+      'financial_report_submitted' => $this->checkIfFinancialReportIsSubmitted($office_ids, $reporting_month),
+      'has_submitted_report_ahead' => $this->hasSubmittedReportAhead($report),
+      'user_office_hierarchy' => $this->financialReportOfficeHierarchy($reporting_month),
+      'office_names' => $office_names,
+      'office_ids' => $office_ids,
+      'reporting_month' => $reporting_month,
+      'fund_balance_report' => $fund_balances,
+      'projects_balance_report' => $this->projectsBalanceReport($office_ids, $reporting_month),
+      'proof_of_cash' => $this->_proofOfCash($office_ids, $reporting_month),
+      'bank_statements_uploads' => $this->bankStatementsUploads($office_ids, $reporting_month),
+      'bank_reconciliation' => $this->bankReconciliation($office_ids, $reporting_month, $multiple_offices_report, $multiple_projects_report),
+      'outstanding_cheques' => $this->financialReportLibrary->listOustandingChequesAndDeposits($office_ids, $reporting_month, 'expense', 'bank_contra', 'bank'),
+      'clear_outstanding_cheques' => $this->listClearedEffects($office_ids, $reporting_month, 'expense', 'bank_contra', 'bank'),
+      'deposit_in_transit' => $this->financialReportLibrary->listOustandingChequesAndDeposits($office_ids, $reporting_month, 'income', 'cash_contra', 'bank'), //$this->_deposit_in_transit($office_ids,$reporting_month),
+      'cleared_deposit_in_transit' => $this->listClearedEffects($office_ids, $reporting_month, 'income', 'cash_contra', 'bank'),
+      'expense_report' => $month_expenses, //$this->_expense_report($office_ids, $reporting_month),
+      'logged_role_id' => $this->session->role_ids,
+      'table' => 'financial_report',
+      'primary_key' => hash_id($this->id, 'decode'),
+      'financial_report_status' => $status_id,
+      'funds_transfers' => $this->voucherLibrary->monthFundsTransferVouchers($office_ids, $reporting_month),
+      'is_status_id_max' => $this->statusLibrary->isStatusIdMax('financial_report', hash_id($this->id, 'decode')),
+      'office_id' =>$this->getOfficeId(),
+      'action_lable'=>$action_label['status_name'],
+    ], $this->grantsLibrary->actionButtonData($this->controller, $account_system_id));
+  } elseif ($this->action == 'list') {
+    $columns = $this->columns();
+    unset($columns[array_search('fk_account_system_id', $columns)]);
+    array_shift($columns);
+    $result['columns'] = $columns;
+    $result['has_details_table'] = false;
+    $result['has_details_listing'] = false;
+    $result['is_multi_row'] = false;
+    $result['show_add_button'] = false;
 
-//     $month_expenses = $this->expenseReport($office_ids, $reporting_month);
-//     $fund_balances = $this->fundBalanceReport($office_ids, $reporting_month);
+    return $result;
+  } else {
+    return parent::result($id);
+  }
+}
 
-//     return array_merge([
-//       'test' => [],
-//       "financial_ratios" => $this->toDateFinancialRatios($office_ids[0],$reporting_month , $month_expenses, $fund_balances),
-//       'report_id' => hash_id($this->id,'decode'),
-//       'budget_id' => $budget_id,
-//       'budget_tag_name' => $budget_tag_name,
-//       'allow_mfr_reconciliation' => ($multiple_offices_report || $multiple_projects_report || count($this->getOfficeBanks($office_ids, $reporting_month)) > 1) ? false : true,
-//       'month_active_projects' => $this->getMonthActiveProjects($office_ids, $reporting_month),
-//       'office_banks' => $this->getOfficeBanks($office_ids, $reporting_month),
-//       'multiple_offices_report' => $multiple_offices_report,
-//       'multiple_projects_report' => $multiple_projects_report,
-//       'financial_report_submitted' => $this->checkIfFinancialReportIsSubmitted($office_ids, $reporting_month),
-//       'has_submitted_report_ahead' => $this->hasSubmittedReportAhead($report),
-//       'user_office_hierarchy' => $this->financialReportOfficeHierarchy($reporting_month),
-//       'office_names' => $office_names,
-//       'office_ids' => $office_ids,
-//       'reporting_month' => $reporting_month,
-//       'fund_balance_report' => $fund_balances,
-//       'projects_balance_report' => $this->projectsBalanceReport($office_ids, $reporting_month),
-//       'proof_of_cash' => $this->_proofOfCash($office_ids, $reporting_month),
-//       'bank_statements_uploads' => $this->bankStatementsUploads($office_ids, $reporting_month),
-//       'bank_reconciliation' => $this->bankReconciliation($office_ids, $reporting_month, $multiple_offices_report, $multiple_projects_report),
-//       'outstanding_cheques' => $this->financialReportLibrary->listOustandingChequesAndDeposits($office_ids, $reporting_month, 'expense', 'bank_contra', 'bank'),
-//       'clear_outstanding_cheques' => $this->listClearedEffects($office_ids, $reporting_month, 'expense', 'bank_contra', 'bank'),
-//       'deposit_in_transit' => $this->financialReportLibrary->listOustandingChequesAndDeposits($office_ids, $reporting_month, 'income', 'cash_contra', 'bank'), //$this->_deposit_in_transit($office_ids,$reporting_month),
-//       'cleared_deposit_in_transit' => $this->listClearedEffects($office_ids, $reporting_month, 'income', 'cash_contra', 'bank'),
-//       'expense_report' => $month_expenses, //$this->_expense_report($office_ids, $reporting_month),
-//       'logged_role_id' => $this->session->role_ids,
-//       'table' => 'financial_report',
-//       'primary_key' => hash_id($this->id, 'decode'),
-//       'financial_report_status' => $status_id,
-//       'funds_transfers' => $this->voucherLibrary->monthFundsTransferVouchers($office_ids, $reporting_month),
-//     ], $this->grantsLibrary->actionButtonData($this->controller, $account_system_id));
-//   } elseif ($this->action == 'list') {
-//     // $columns = $this->columns();
-//     // unset($columns[array_search('fk_account_system_id', $columns)]);
-//     // array_shift($columns);
-//     // $result['columns'] = $columns;
-//     // $result['has_details_table'] = false;
-//     // $result['has_details_listing'] = false;
-//     // $result['is_multi_row'] = false;
-//     // $result['show_add_button'] = false;
+function columns()
+{
+  $columns = [
+    'financial_report_id',
+    'financial_report_track_number',
+    'office_name',
+    'financial_report_is_submitted',
+    'financial_report_month',
+    'financial_report_submitted_date',
+    //'financial_report_created_date',
+    'status_name',
+    'fk_account_system_id',
+  ];
 
-//     // return $result;
-//   } else {
-//     return parent::result($id);
-//   }
-// }
+  return $columns;
+}
 
-// function columns()
-// {
-//   $columns = [
-//     'financial_report_id',
-//     'financial_report_track_number',
-//     'office_name',
-//     'financial_report_is_submitted',
-//     'financial_report_month',
-//     'financial_report_submitted_date',
-//     //'financial_report_created_date',
-//     'status_name',
-//     'fk_account_system_id',
-//   ];
+function getOfficeId(){
+  $builder = $this->read_db->table('financial_report');
+  $builder->select('fk_office_id');
+  $builder->where('financial_report_id' , hash_id($this->id, 'decode'));
+  $id = $builder->get()->getRow()->fk_office_id;
+  return $id;
+}
+function getFinancialReports()
+{
 
-//   return $columns;
-// }
+  $columns = $this->columns();
+  array_push($columns, 'status_id');
+  $search_columns = $columns;
 
-// function getFinancialReports()
-// {
+  // Limiting records
+  $start = intval($this->request->getPost('start'));
+  $length = intval($this->request->getPost('length'));
+  $financial_report_builder = $this->read_db->table('financial_report');
+  $financial_report_builder->limit($length, $start);
 
-//   $columns = $this->columns();
-//   array_push($columns, 'status_id');
-//   $search_columns = $columns;
+  // Ordering records
 
-//   // Limiting records
-//   $start = intval($this->request->getPost('start'));
-//   $length = intval($this->request->getPost('length'));
+  $order = $this->request->getPost('order');
+  $col = '';
+  $dir = 'desc';
 
-//   $this->read_db->limit($length, $start);
+  if (!empty($order)) {
+    $col = $order[0]['column'];
+    $dir = $order[0]['dir'];
+  }
 
-//   // Ordering records
+  if ($col == '') {
+    $financial_report_builder->orderBy('financial_report_id DESC');
+  } else {
+    $financial_report_builder->orderBy($columns[$col], $dir);
+  }
 
-//   $order = $this->request->getPost('order');
-//   $col = '';
-//   $dir = 'desc';
+  // $this->searchbuilder->searchbuilder_query_group($this->columns());
 
-//   if (!empty($order)) {
-//     $col = $order[0]['column'];
-//     $dir = $order[0]['dir'];
-//   }
+  $financial_report_builder->select($columns);
+  $financial_report_builder->join('status', 'status.status_id=financial_report.fk_status_id');
+  $financial_report_builder->join('office', 'office.office_id=financial_report.fk_office_id');
 
-//   if ($col == '') {
-//     $this->read_db->order_by('financial_report_id DESC');
-//   } else {
-//     $this->read_db->order_by($columns[$col], $dir);
-//   }
+  if (!$this->session->system_admin) {
+    $financial_report_builder->whereIn('financial_report.fk_office_id', array_column($this->session->hierarchy_offices, 'office_id'));
+  }
 
-//   $this->searchbuilder->searchbuilder_query_group($this->columns());
+  $result_obj = $financial_report_builder->get();
 
-//   $this->read_db->select($columns);
-//   $this->read_db->join('status', 'status.status_id=financial_report.fk_status_id');
-//   $this->read_db->join('office', 'office.office_id=financial_report.fk_office_id');
+  $results = [];
 
-//   if (!$this->session->system_admin) {
-//     $this->read_db->where_in('financial_report.fk_office_id', array_column($this->session->hierarchy_offices, 'office_id'));
-//   }
+  if ($result_obj->getNumRows() > 0) {
+    $results = $result_obj->getResultArray();
+  }
 
-//   $result_obj = $this->read_db->get('financial_report');
+  return $results;
+}
 
-//   $results = [];
+function countFinancialReports()
+{
 
-//   if ($result_obj->num_rows() > 0) {
-//     $results = $result_obj->result_array();
-//   }
+  $columns = $this->columns();
+  $search_columns = $columns;
 
-//   return $results;
-// }
+  // $this->searchbuilder->searchbuilder_query_group($this->columns());
+  $builder = $this->read_db->table('financial_report');
+  if (!$this->session->system_admin) {
+    $builder->whereIn('financial_report.fk_office_id', array_column($this->session->hierarchy_offices, 'office_id'));
+  }
 
-// function countFinancialReports()
-// {
+  $builder->join('status', 'status.status_id=financial_report.fk_status_id');
+  $builder->join('office', 'office.office_id=financial_report.fk_office_id');
+  $builder->get();
+  $count_all_results = $builder->countAllResults();
 
-//   $columns = $this->columns();
-//   $search_columns = $columns;
+  return $count_all_results;
+}
 
-//   $this->searchbuilder->searchbuilder_query_group($this->columns());
+function showList():ResponseInterface
+{
 
-//   if (!$this->session->system_admin) {
-//     $this->read_db->where_in('financial_report.fk_office_id', array_column($this->session->hierarchy_offices, 'office_id'));
-//   }
+  $draw = intval($this->request->getPost('draw'));
+  $financial_reports = $this->getFinancialReports();
+  $count_financial_reports = $this->countFinancialReports();
 
-//   $this->read_db->join('status', 'status.status_id=financial_report.fk_status_id');
-//   $this->read_db->join('office', 'office.office_id=financial_report.fk_office_id');
-//   $this->read_db->from('financial_report');
-//   $count_all_results = $this->read_db->count_all_results();
+  $result = [];
 
-//   return $count_all_results;
-// }
+  $cnt = 0;
+  foreach ($financial_reports as $financial_report) {
 
-// function showList()
-// {
+    $status_data = $this->grantsLibrary->actionButtonData($this->controller, $financial_report['fk_account_system_id']);
+    extract($status_data);
 
-//   $draw = intval($this->request->getPost('draw'));
-//   $financial_reports = $this->getFinancialReports();
-//   $count_financial_reports = $this->countFinancialReports();
+    $financial_report_id = array_shift($financial_report);
+    $financial_status = array_pop($financial_report);
 
-//   $result = [];
+    $financial_report_track_number = $financial_report['financial_report_track_number'];
+    $financial_report['financial_report_track_number'] = '<a target="_blank" href="' . base_url() . $this->controller . '/view/' . hash_id($financial_report_id) . '">' . $financial_report_track_number . '</a>';
+    $financial_report['financial_report_is_submitted'] = $financial_report['financial_report_is_submitted'] == 1 ? get_phrase('yes') :  get_phrase('no');
+    $row = array_values($financial_report);
 
-//   $cnt = 0;
-//   foreach ($financial_reports as $financial_report) {
+    $action = ''; //approval_action_button($this->controller, $item_status, $financial_report_id, $financial_status, $item_initial_item_status_id, $item_max_approval_status_ids);
 
-//     $status_data = $this->grantsLibrary->actionButtonData($this->controller, $financial_report['fk_account_system_id']);
-//     extract($status_data);
+    array_unshift($row, $action);
 
-//     $financial_report_id = array_shift($financial_report);
-//     $financial_status = array_pop($financial_report);
+    $result[$cnt] = $row;
 
-//     $financial_report_track_number = $financial_report['financial_report_track_number'];
-//     $financial_report['financial_report_track_number'] = '<a target="__blank" href="' . base_url() . $this->controller . '/view/' . hash_id($financial_report_id) . '">' . $financial_report_track_number . '</a>';
-//     $financial_report['financial_report_is_submitted'] = $financial_report['financial_report_is_submitted'] == 1 ? get_phrase('yes') :  get_phrase('no');
-//     $row = array_values($financial_report);
+    $cnt++;
+  }
 
-//     $action = ''; //approval_action_button($this->controller, $item_status, $financial_report_id, $financial_status, $item_initial_item_status_id, $item_max_approval_status_ids);
+  $response = [
+    'draw' => $draw,
+    'recordsTotal' => $count_financial_reports,
+    'recordsFiltered' => $count_financial_reports,
+    'data' => $result
+  ];
 
-//     array_unshift($row, $action);
-
-//     $result[$cnt] = $row;
-
-//     $cnt++;
-//   }
-
-//   $response = [
-//     'draw' => $draw,
-//     'recordsTotal' => $count_financial_reports,
-//     'recordsFiltered' => $count_financial_reports,
-//     'data' => $result
-//   ];
-
-//   echo json_encode($response);
-// }
+  // echo json_encode($response);
+  return $this->response->setJSON($response);
+}
 
 function resultArray($report_id, $office_ids, $reporting_month, $project_ids = [], $office_bank_ids = [])
 {
@@ -1275,19 +1340,19 @@ function resultArray($report_id, $office_ids, $reporting_month, $project_ids = [
   ];
 }
 
-// function ajaxTest()
-// {
+function ajaxTest()
+{
 
-//   $report_id = '8zoLYo3YXb';
-//   $office_ids = [1];
-//   $reporting_month = '2020-04-01';
-//   $project_ids = [5];
+  $report_id = '8zoLYo3YXb';
+  $office_ids = [1];
+  $reporting_month = '2020-04-01';
+  $project_ids = [5];
 
-//   $result = $this->resultArray($report_id, $office_ids, $reporting_month, $project_ids);
-//   //$result = $this->_fund_balance_report($office_ids,$reporting_month,$project_ids);
+  $result = $this->resultArray($report_id, $office_ids, $reporting_month, $project_ids);
+  //$result = $this->_fund_balance_report($office_ids,$reporting_month,$project_ids);
 
-//   echo json_encode($result);
-// }
+  echo json_encode($result);
+}
 
 function filterFinancialReport()
 {
@@ -1326,37 +1391,54 @@ function bankStatementsUploads($office_ids, $reporting_month, $project_ids = [],
 {
 
   $reconciliation_ids = [];
+  $reconciliation_builder = $this->read_db->table('reconciliation');
+  $reconciliation_builder->select('reconciliation_id');
+  $reconciliation_builder->whereIn('fk_office_id', $office_ids);
+  $reconciliation_builder->where(array('financial_report_month' => date('Y-m-01', strtotime($reporting_month))));
+  $reconciliation_builder->join('financial_report', 'financial_report.financial_report_id=reconciliation.fk_financial_report_id');
 
-  $this->read_db->select(array('reconciliation_id'));
-  $this->read_db->where_in('fk_office_id', $office_ids);
-  $this->read_db->where(array('financial_report_month' => date('Y-m-01', strtotime($reporting_month))));
-  $this->read_db->join('financial_report', 'financial_report.financial_report_id=reconciliation.fk_financial_report_id');
+  // $this->read_db->select(array('reconciliation_id'));
+  // $this->read_db->where_in('fk_office_id', $office_ids);
+  // $this->read_db->where(array('financial_report_month' => date('Y-m-01', strtotime($reporting_month))));
+  // $this->read_db->join('financial_report', 'financial_report.financial_report_id=reconciliation.fk_financial_report_id');
 
   if (!empty($office_bank_ids)) {
-    $this->read_db->where_in('reconciliation.fk_office_bank_id', $office_bank_ids);
+    $reconciliation_builder->whereIn('reconciliation.fk_office_bank_id', $office_bank_ids);
+    // $this->read_db->where_in('reconciliation.fk_office_bank_id', $office_bank_ids);
   }
 
   if (!empty($project_ids)) {
-    $this->read_db->join('office_bank', 'office_bank.office_bank_id=reconciliation.office_bank_id');
-    $this->read_db->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_office_bank_id=office_bank.office_bank_id');
-    $this->read_db->join('project_allocation', 'project_allocation.project_allocation_id=office_bank_project_allocation.fk_project_allocation_id');
-    $this->read_db->where_in('project_allocation.fk_project_id', $project_ids);
+    $reconciliation_builder->join('office_bank', 'office_bank.office_bank_id=reconciliation.office_bank_id');
+    $reconciliation_builder->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_office_bank_id=office_bank.office_bank_id');
+    $reconciliation_builder->join('project_allocation', 'project_allocation.project_allocation_id=office_bank_project_allocation.fk_project_allocation_id');
+    $reconciliation_builder->whereIn('project_allocation.fk_project_id', $project_ids);
+
+    // $this->read_db->join('office_bank', 'office_bank.office_bank_id=reconciliation.office_bank_id');
+    // $this->read_db->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_office_bank_id=office_bank.office_bank_id');
+    // $this->read_db->join('project_allocation', 'project_allocation.project_allocation_id=office_bank_project_allocation.fk_project_allocation_id');
+    // $this->read_db->where_in('project_allocation.fk_project_id', $project_ids);
   }
 
-  $reconciliation_ids_obj = $this->read_db->get('reconciliation');
+  $reconciliation_ids_obj = $reconciliation_builder->get();
 
-  if ($reconciliation_ids_obj->num_rows() > 0) {
-    $reconciliation_ids = $reconciliation_ids_obj->result_array();
+  if ($reconciliation_ids_obj->getNumRows() > 0) {
+    $reconciliation_ids = $reconciliation_ids_obj->getResultArray();
   }
 
   $attachment_where_condition_array = [];
 
   $approve_item_name = 'reconciliation';
+  $approve_item_builder = $this->read_db->table('approve_item');
+  $approve_item_builder->select('approve_item_id');
+  $approve_item_builder->where('approve_item_name' , $approve_item_name);
+  $approve_item_builder_id = $approve_item_builder->get();
 
-  $approve_item_id = $this->read_db->get_where(
-    'approve_item',
-    array('approve_item_name' => $approve_item_name)
-  )->row()->approve_item_id;
+  $approve_item_id = $approve_item_builder_id->getRow()->approve_item_id;
+
+  // $approve_item_id = $this->read_db->get_where(
+  //   'approve_item',
+  //   array('approve_item_name' => $approve_item_name)
+  // )->row()->approve_item_id;
 
   //print_r(array_column($reconciliation_ids,'reconciliation_id'));exit;
 
@@ -1386,7 +1468,7 @@ function projectsBalanceReport($office_ids, $reporting_month, $project_ids = [],
     // $body[$project_id]['allocation_target'] = $this->_projects_allocation_target([$project['office_id']], [$project_id], $office_bank_ids) == null ? 0 : $this->_projects_allocation_target([$project['office_id']], [$project_id], $office_bank_ids);
   }
 
-  if ($this->config->item('funding_balance_report_aggregate_method') == 'receipt') {
+  if ($this->config->funding_balance_report_aggregate_method == 'receipt') {
     $headers = [
       "funder" => get_phrase("funder"),
       "project" => get_phrase("project"),
@@ -1402,7 +1484,7 @@ function projectsBalanceReport($office_ids, $reporting_month, $project_ids = [],
       $body[$project_id]['month_income'] = $this->projectsMonthIncome([$project['office_id']], $reporting_month, [$project_id], $office_bank_ids) == null ? 0 : $this->projectsMonthIncome([$project['office_id']], $reporting_month, [$project_id], $office_bank_ids);
       $body[$project_id]['closing_balance'] = $this->projectsReceiptClosingBalance([$project['office_id']], $reporting_month, [$project_id], $office_bank_ids) == null ? 0 : $this->projectsReceiptClosingBalance([$project['office_id']], $reporting_month, [$project_id], $office_bank_ids);
     }
-  } elseif ($this->config->item('funding_balance_report_aggregate_method') == 'allocation') {
+  } elseif ($this->config->funding_balance_report_aggregate_method == 'allocation') {
     $headers = [
       "funder" => get_phrase("funder"),
       "project" => get_phrase("project"),
@@ -1509,28 +1591,46 @@ function projectsMonthIncome($office_ids, $reporting_month, $project_ids = [], $
   $end_date_of_reporting_month = date('Y-m-t', strtotime($reporting_month));
   $max_approval_status_ids = $this->statusLibrary->getMaxApprovalStatusId('voucher', $office_ids);
 
-  $this->read_db->select_sum('voucher_detail_total_cost');
-  $this->read_db->where(array('voucher_type_effect_code' => 'income'));
-  $this->read_db->where_in('voucher.fk_office_id', $office_ids);
-  $this->read_db->where(array('voucher.voucher_date>=' => $start_date_of_reporting_month, 'voucher.voucher_date<=' => $end_date_of_reporting_month));
+  $builder = $this->read_db->table('voucher_detail');
+  $builder->selectSum('voucher_detail_total_cost');
+  $builder->where('voucher_type_effect_code' , 'income');
+  $builder->whereIn('voucher.fk_office_id', $office_ids);
+  $builder->where(array('voucher.voucher_date>=' => $start_date_of_reporting_month, 'voucher.voucher_date<=' => $end_date_of_reporting_month));
 
-  $this->read_db->where_in('voucher.fk_status_id', $max_approval_status_ids);
+  $builder->whereIn('voucher.fk_status_id', $max_approval_status_ids);
 
-  $this->read_db->join('voucher', 'voucher.voucher_id=voucher_detail.fk_voucher_id');
-  $this->read_db->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
-  $this->read_db->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+  $builder->join('voucher', 'voucher.voucher_id=voucher_detail.fk_voucher_id');
+  $builder->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+  $builder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+
+  // $this->read_db->select_sum('voucher_detail_total_cost');
+  // $this->read_db->where(array('voucher_type_effect_code' => 'income'));
+  // $this->read_db->where_in('voucher.fk_office_id', $office_ids);
+  // $this->read_db->where(array('voucher.voucher_date>=' => $start_date_of_reporting_month, 'voucher.voucher_date<=' => $end_date_of_reporting_month));
+
+  // $this->read_db->where_in('voucher.fk_status_id', $max_approval_status_ids);
+
+  // $this->read_db->join('voucher', 'voucher.voucher_id=voucher_detail.fk_voucher_id');
+  // $this->read_db->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+  // $this->read_db->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
 
   if (!empty($project_ids)) {
-    $this->read_db->join('project_allocation', 'project_allocation.project_allocation_id=voucher_detail.fk_project_allocation_id');
-    $this->read_db->where_in('project_allocation.fk_project_id', $project_ids);
+    $builder->join('project_allocation', 'project_allocation.project_allocation_id=voucher_detail.fk_project_allocation_id');
+    $builder->whereIn('project_allocation.fk_project_id', $project_ids);
+
+    // $this->read_db->join('project_allocation', 'project_allocation.project_allocation_id=voucher_detail.fk_project_allocation_id');
+    // $this->read_db->where_in('project_allocation.fk_project_id', $project_ids);
   }
 
   if (!empty($office_bank_ids)) {
-    $this->read_db->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_project_allocation_id=project_allocation.project_allocation_id');
-    $this->read_db->where_in('office_bank_project_allocation.fk_office_bank_id', $office_bank_ids);
+    $builder->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_project_allocation_id=project_allocation.project_allocation_id');
+    $builder->whereIn('office_bank_project_allocation.fk_office_bank_id', $office_bank_ids);
+
+    // $this->read_db->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_project_allocation_id=project_allocation.project_allocation_id');
+    // $this->read_db->where_in('office_bank_project_allocation.fk_office_bank_id', $office_bank_ids);
   }
 
-  $voucher_detail_total_cost = $this->read_db->get('voucher_detail')->row()->voucher_detail_total_cost;
+  $voucher_detail_total_cost = $builder->get()->getRow()->voucher_detail_total_cost;
 
   return $voucher_detail_total_cost;
 }
@@ -1539,15 +1639,21 @@ private function projectAllocationSystemOpeningBalance($office_ids, $reporting_m
   $opening_balances = 0;
 
   // log_message('error', json_encode(['office_ids' => $office_ids, 'project_ids' => $project_ids]));
+  $builder = $this->read_db->table('opening_fund_balance');
+  $builder->selectSum('opening_fund_balance_amount');
+  $builder->whereIn('system_opening_balance.fk_office_id', $office_ids);
+  $builder->whereIn('opening_fund_balance.fk_project_id', $project_ids);
+  $builder->join('system_opening_balance', 'system_opening_balance.system_opening_balance_id=opening_fund_balance.fk_system_opening_balance_id');
+  $opening_fund_balance_obj = $builder->get();
 
-  $this->read_db->select_sum('opening_fund_balance_amount');
-  $this->read_db->where_in('system_opening_balance.fk_office_id', $office_ids);
-  $this->read_db->where_in('opening_fund_balance.fk_project_id', $project_ids);
-  $this->read_db->join('system_opening_balance', 'system_opening_balance.system_opening_balance_id=opening_fund_balance.fk_system_opening_balance_id');
-  $opening_fund_balance_obj = $this->read_db->get('opening_fund_balance');
+  // $this->read_db->select_sum('opening_fund_balance_amount');
+  // $this->read_db->where_in('system_opening_balance.fk_office_id', $office_ids);
+  // $this->read_db->where_in('opening_fund_balance.fk_project_id', $project_ids);
+  // $this->read_db->join('system_opening_balance', 'system_opening_balance.system_opening_balance_id=opening_fund_balance.fk_system_opening_balance_id');
+  // $opening_fund_balance_obj = $this->read_db->get('opening_fund_balance');
 
-  if($opening_fund_balance_obj->num_rows() > 0){
-    $opening_balances = $opening_fund_balance_obj->row()->opening_fund_balance_amount;
+  if($opening_fund_balance_obj->getNumRows() > 0){
+    $opening_balances = $opening_fund_balance_obj->getRow()->opening_fund_balance_amount;
   }
   // log_message('error', json_encode($opening_balances));
   return $opening_balances;
@@ -1568,26 +1674,42 @@ function projectsPreviousMonthsIncomeToDate($office_ids, $reporting_month, $proj
 {
   $start_of_reporting_month = date('Y-m-01', strtotime($reporting_month));
 
-  $this->read_db->select_sum('voucher_detail_total_cost');
-  $this->read_db->where(array('voucher_type_effect_code' => 'income'));
-  $this->read_db->where(array('voucher_date<' => $start_of_reporting_month));
-  $this->read_db->where_in('voucher.fk_office_id', $office_ids);
+  $builder = $this->read_db->table('voucher_detail');
+  $builder->selectSum('voucher_detail_total_cost');
+  $builder->where('voucher_type_effect_code' , 'income');
+  $builder->where('voucher_date<' , $start_of_reporting_month);
+  $builder->whereIn('voucher.fk_office_id', $office_ids);
 
-  $this->read_db->join('voucher', 'voucher.voucher_id=voucher_detail.fk_voucher_id');
-  $this->read_db->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
-  $this->read_db->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+  $builder->join('voucher', 'voucher.voucher_id=voucher_detail.fk_voucher_id');
+  $builder->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+  $builder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+
+  // $this->read_db->select_sum('voucher_detail_total_cost');
+  // $this->read_db->where(array('voucher_type_effect_code' => 'income'));
+  // $this->read_db->where(array('voucher_date<' => $start_of_reporting_month));
+  // $this->read_db->where_in('voucher.fk_office_id', $office_ids);
+
+  // $this->read_db->join('voucher', 'voucher.voucher_id=voucher_detail.fk_voucher_id');
+  // $this->read_db->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+  // $this->read_db->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
 
   if (!empty($project_ids)) {
-    $this->read_db->join('project_allocation', 'project_allocation.project_allocation_id=voucher_detail.fk_project_allocation_id');
-    $this->read_db->where_in('project_allocation.fk_project_id', $project_ids);
+    $builder->join('project_allocation', 'project_allocation.project_allocation_id=voucher_detail.fk_project_allocation_id');
+    $builder->whereIn('project_allocation.fk_project_id', $project_ids);
+
+    // $this->read_db->join('project_allocation', 'project_allocation.project_allocation_id=voucher_detail.fk_project_allocation_id');
+    // $this->read_db->where_in('project_allocation.fk_project_id', $project_ids);
   }
 
   if (!empty($office_bank_ids)) {
-    $this->read_db->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_project_allocation_id=project_allocation.project_allocation_id');
-    $this->read_db->where_in('office_bank_project_allocation.fk_office_bank_id', $office_bank_ids);
+    $builder->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_project_allocation_id=project_allocation.project_allocation_id');
+    $builder->whereIn('office_bank_project_allocation.fk_office_bank_id', $office_bank_ids);
+
+    // $this->read_db->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_project_allocation_id=project_allocation.project_allocation_id');
+    // $this->read_db->where_in('office_bank_project_allocation.fk_office_bank_id', $office_bank_ids);
   }
 
-  $voucher_detail_total_cost = $this->read_db->get('voucher_detail')->row()->voucher_detail_total_cost;
+  $voucher_detail_total_cost = $builder->get()->getRow()->voucher_detail_total_cost;
 
   return $voucher_detail_total_cost;
 }
@@ -1597,26 +1719,42 @@ function projectsPreviousMonthsExpenseToDate($office_ids, $reporting_month, $pro
 
   $start_of_reporting_month = date('Y-m-01', strtotime($reporting_month));
 
-  $this->read_db->select_sum('voucher_detail_total_cost');
-  $this->read_db->where(array('voucher_type_effect_code' => 'expense'));
-  $this->read_db->where(array('voucher_date<' => $start_of_reporting_month));
-  $this->read_db->where_in('voucher.fk_office_id', $office_ids);
+  $builder = $this->read_db->table('voucher_detail');
+  $builder->selectSum('voucher_detail_total_cost');
+  $builder->where('voucher_type_effect_code' , 'expense');
+  $builder->where('voucher_date<' , $start_of_reporting_month);
+  $builder->whereIn('voucher.fk_office_id', $office_ids);
 
-  $this->read_db->join('voucher', 'voucher.voucher_id=voucher_detail.fk_voucher_id');
-  $this->read_db->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
-  $this->read_db->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+  $builder->join('voucher', 'voucher.voucher_id=voucher_detail.fk_voucher_id');
+  $builder->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+  $builder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+
+  // $this->read_db->select_sum('voucher_detail_total_cost');
+  // $this->read_db->where(array('voucher_type_effect_code' => 'expense'));
+  // $this->read_db->where(array('voucher_date<' => $start_of_reporting_month));
+  // $this->read_db->where_in('voucher.fk_office_id', $office_ids);
+
+  // $this->read_db->join('voucher', 'voucher.voucher_id=voucher_detail.fk_voucher_id');
+  // $this->read_db->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+  // $this->read_db->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
 
   if (!empty($project_ids)) {
-    $this->read_db->join('project_allocation', 'project_allocation.project_allocation_id=voucher_detail.fk_project_allocation_id');
-    $this->read_db->where_in('project_allocation.fk_project_id', $project_ids);
+    $builder->join('project_allocation', 'project_allocation.project_allocation_id=voucher_detail.fk_project_allocation_id');
+    $builder->whereIn('project_allocation.fk_project_id', $project_ids);
+
+    // $this->read_db->join('project_allocation', 'project_allocation.project_allocation_id=voucher_detail.fk_project_allocation_id');
+    // $this->read_db->where_in('project_allocation.fk_project_id', $project_ids);
   }
 
   if (!empty($office_bank_ids)) {
-    $this->read_db->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_project_allocation_id=project_allocation.project_allocation_id');
-    $this->read_db->where_in('office_bank_project_allocation.fk_office_bank_id', $office_bank_ids);
+    $builder->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_project_allocation_id=project_allocation.project_allocation_id');
+    $builder->whereIn('office_bank_project_allocation.fk_office_bank_id', $office_bank_ids);
+
+    // $this->read_db->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_project_allocation_id=project_allocation.project_allocation_id');
+    // $this->read_db->where_in('office_bank_project_allocation.fk_office_bank_id', $office_bank_ids);
   }
 
-  $voucher_detail_total_cost = $this->read_db->get('voucher_detail')->row()->voucher_detail_total_cost;
+  $voucher_detail_total_cost = $builder->get()->getRow()->voucher_detail_total_cost;
 
   return $voucher_detail_total_cost;
 }
@@ -1630,30 +1768,45 @@ function projectsMonthExpense($office_ids, $reporting_month, $project_ids = [], 
 
   // log_message('error',json_encode($max_approval_status_ids));
   $builder= $this->read_db->table('voucher_detail');
-  $this->read_db->select_sum('voucher_detail_total_cost');
-  $this->read_db->where_in('voucher_type_effect_code', ['expense', 'bank_refund']);
-  $this->read_db->where_in('voucher.fk_office_id', $office_ids);
-  $this->read_db->where(array('voucher.voucher_date>=' => $start_date_of_reporting_month, 'voucher.voucher_date<=' => $end_date_of_reporting_month));
+  $builder->selectSum('voucher_detail_total_cost');
+  $builder->whereIn('voucher_type_effect_code', ['expense', 'bank_refund']);
+  $builder->whereIn('voucher.fk_office_id', $office_ids);
+  $builder->where(array('voucher.voucher_date>=' => $start_date_of_reporting_month, 'voucher.voucher_date<=' => $end_date_of_reporting_month));
 
-  $this->read_db->join('voucher', 'voucher.voucher_id=voucher_detail.fk_voucher_id');
-  $this->read_db->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
-  $this->read_db->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+  $builder->join('voucher', 'voucher.voucher_id=voucher_detail.fk_voucher_id');
+  $builder->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+  $builder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+
+  // $this->read_db->select_sum('voucher_detail_total_cost');
+  // $this->read_db->where_in('voucher_type_effect_code', ['expense', 'bank_refund']);
+  // $this->read_db->where_in('voucher.fk_office_id', $office_ids);
+  // $this->read_db->where(array('voucher.voucher_date>=' => $start_date_of_reporting_month, 'voucher.voucher_date<=' => $end_date_of_reporting_month));
+
+  // $this->read_db->join('voucher', 'voucher.voucher_id=voucher_detail.fk_voucher_id');
+  // $this->read_db->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+  // $this->read_db->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
 
 
   if (!empty($project_ids)) {
-    $this->read_db->join('project_allocation', 'project_allocation.project_allocation_id=voucher_detail.fk_project_allocation_id');
-    $this->read_db->where_in('project_allocation.fk_project_id', $project_ids);
+    $builder->join('project_allocation', 'project_allocation.project_allocation_id=voucher_detail.fk_project_allocation_id');
+    $builder->whereIn('project_allocation.fk_project_id', $project_ids);
+
+    // $this->read_db->join('project_allocation', 'project_allocation.project_allocation_id=voucher_detail.fk_project_allocation_id');
+    // $this->read_db->where_in('project_allocation.fk_project_id', $project_ids);
   }
 
   if (!empty($office_bank_ids)) {
-    $this->read_db->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_project_allocation_id=project_allocation.project_allocation_id');
-    $this->read_db->where_in('office_bank_project_allocation.fk_office_bank_id', $office_bank_ids);
+    $builder->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_project_allocation_id=project_allocation.project_allocation_id');
+    $builder->whereIn('office_bank_project_allocation.fk_office_bank_id', $office_bank_ids);
+
+    // $this->read_db->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_project_allocation_id=project_allocation.project_allocation_id');
+    // $this->read_db->where_in('office_bank_project_allocation.fk_office_bank_id', $office_bank_ids);
   }
 
-  
-  $this->read_db->where_in('voucher.fk_status_id', $max_approval_status_ids);
+  $builder->whereIn('voucher.fk_status_id', $max_approval_status_ids);
+  // $this->read_db->where_in('voucher.fk_status_id', $max_approval_status_ids);
 
-  $voucher_detail_total_cost = $this->read_db->get('voucher_detail')->row()->voucher_detail_total_cost;
+  $voucher_detail_total_cost = $builder->get()->getRow()->voucher_detail_total_cost;
 
   return $voucher_detail_total_cost;
 }
@@ -1665,32 +1818,42 @@ function officeProjects($office_ids, $reporting_month, $project_ids = [], $offic
 
   $start_date_of_reporting_month = date('Y-m-01', strtotime($reporting_month));
   // $end_date_of_reporting_month = date('Y-m-t', strtotime($reporting_month));
-
-  $this->read_db->select(array('project_id', 'project_name', 'funder_name', 'fk_office_id', 'project_allocation_amount'));
-  $this->read_db->where_in('fk_office_id', $office_ids);
-  // $query_condition = "(project_end_date >= '" . $start_date_of_reporting_month . "' OR  project_allocation_extended_end_date >= '" . $start_date_of_reporting_month . "')";
+  $builder = $this->read_db->table('project_allocation');
+  $builder->select(['project_id', 'project_name', 'funder_name', 'fk_office_id', 'project_allocation_amount']);
+  $builder->whereIn('fk_office_id', $office_ids);
   $query_condition = "(project_start_date <= '" . $start_date_of_reporting_month . "' AND project_end_date IS NOT NULL AND project_end_date NOT LIKE '0000-00-00')";
-  $this->read_db->where($query_condition);
+  $builder->where($query_condition);
+  $builder->where('project_is_default' , 0);
+  $builder->join('project', 'project.project_id=project_allocation.fk_project_id');
 
-  // Only list non default projects. There can be only 1 default project per accouting system
-  $this->read_db->where(array('project_is_default' => 0));
 
-  $this->read_db->join('project', 'project.project_id=project_allocation.fk_project_id');
+  // $this->read_db->select(array('project_id', 'project_name', 'funder_name', 'fk_office_id', 'project_allocation_amount'));
+  // $this->read_db->where_in('fk_office_id', $office_ids);
+  // // $query_condition = "(project_end_date >= '" . $start_date_of_reporting_month . "' OR  project_allocation_extended_end_date >= '" . $start_date_of_reporting_month . "')";
+  // $query_condition = "(project_start_date <= '" . $start_date_of_reporting_month . "' AND project_end_date IS NOT NULL AND project_end_date NOT LIKE '0000-00-00')";
+  // $this->read_db->where($query_condition);
+
+  // // Only list non default projects. There can be only 1 default project per accouting system
+  // $this->read_db->where(array('project_is_default' => 0));
+
+  // $this->read_db->join('project', 'project.project_id=project_allocation.fk_project_id');
 
 
   if (!empty($project_ids)) {
-
-    $this->read_db->where_in('project_id', $project_ids);
+    $builder->whereIn('project_id', $project_ids);
+    // $this->read_db->where_in('project_id', $project_ids);
   }
 
   if (!empty($office_bank_ids)) {
-    $this->read_db->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_project_allocation_id=project_allocation.project_allocation_id');
-    $this->read_db->where_in('office_bank_project_allocation.fk_office_bank_id', $office_bank_ids);
+    $builder->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_project_allocation_id=project_allocation.project_allocation_id');
+    $builder->whereIn('office_bank_project_allocation.fk_office_bank_id', $office_bank_ids);
+    // $this->read_db->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_project_allocation_id=project_allocation.project_allocation_id');
+    // $this->read_db->where_in('office_bank_project_allocation.fk_office_bank_id', $office_bank_ids);
   }
+  $builder->join('funder', 'funder.funder_id=project.fk_funder_id');
+  // $this->read_db->join('funder', 'funder.funder_id=project.fk_funder_id');
 
-  $this->read_db->join('funder', 'funder.funder_id=project.fk_funder_id');
-
-  $projects = $this->read_db->get('project_allocation')->result_array();
+  $projects = $builder->get()->getResultArray();
 
   $ordered_array = [];
 
@@ -1754,8 +1917,10 @@ function clearTransactions()
 {
   $post = $this->request->getPost();
 
-  $this->write_db->trans_start();
-
+  $db = $this->write_db;
+  
+  $db->transStart();
+  $builder = $this->write_db->table('opening_outstanding_cheque');
   if (isset($post['opening_deposit_transit_id']) && $post['opening_deposit_transit_id'] > 0) {
 
     $update_data['opening_deposit_transit_is_cleared'] = 1;
@@ -1766,8 +1931,8 @@ function clearTransactions()
       $update_data['opening_deposit_transit_cleared_date'] = null;
     }
 
-    $this->write_db->where(array('opening_deposit_transit_id' => $post['opening_deposit_transit_id']));
-    $this->write_db->update('opening_deposit_transit', $update_data);
+    $builder->where(array('opening_deposit_transit_id' => $post['opening_deposit_transit_id']));
+    $builder->update('opening_deposit_transit', $update_data);
   } elseif (isset($post['opening_outstanding_cheque_id']) && $post['opening_outstanding_cheque_id'] > 0) {
     $update_data['opening_outstanding_cheque_is_cleared'] = 1;
     $update_data['opening_outstanding_cheque_cleared_date'] = date('Y-m-t', strtotime($post['reporting_month'])); //date('Y-m-t');
@@ -1778,8 +1943,8 @@ function clearTransactions()
       $update_data['opening_outstanding_cheque_bounced_flag'] = 0;
     }
 
-    $this->write_db->where(array('opening_outstanding_cheque_id' => $post['opening_outstanding_cheque_id']));
-    $this->write_db->update('opening_outstanding_cheque', $update_data);
+    $builder->where(array('opening_outstanding_cheque_id' => $post['opening_outstanding_cheque_id']));
+    $builder->update( $update_data);
   } else {
     $update_data['voucher_cleared'] = 1;
     $update_data['voucher_cleared_month'] = date('Y-m-t', strtotime($post['reporting_month'])); //date('Y-m-t');
@@ -1788,15 +1953,15 @@ function clearTransactions()
       $update_data['voucher_cleared'] = 0;
       $update_data['voucher_cleared_month'] = null;
     }
+    $builder2 = $this->write_db->table('voucher');
+    $builder2->where(array('voucher_id' => $post['voucher_id']));
 
-    $this->write_db->where(array('voucher_id' => $post['voucher_id']));
-
-    $this->write_db->update('voucher', $update_data);
+    $builder2->update($update_data);
   }
 
-  $this->write_db->trans_complete();
+  $db->transComplete();
 
-  if ($this->write_db->trans_status() == false) {
+  if ($db->transStatus() == false) {
     echo false;
   } else {
     echo true;
@@ -1884,10 +2049,11 @@ function reverseMfrSubmission($report_id)
   $success = get_phrase("financial_report_not_declined");
 
   $data['financial_report_is_submitted'] = 0;
-  $this->write_db->where(array('financial_report_id' => $report_id));
-  $this->write_db->update('financial_report', $data);
-
-  if ($this->write_db->affected_rows() > 0) {
+  $builder = $this->write_db->table('financial_report');
+  $builder->where(array('financial_report_id' => $report_id));
+  $builder_result = $builder->update($data);
+  
+  if ($builder_result->getAffectedRows() > 0) {
     $success = get_phrase("financial_report_declined");
   }
 
@@ -1917,7 +2083,7 @@ function submitFinancialReport()
 
   $budget_is_active = $this->checkIfBudgetIsActive($post['office_id'], $post['reporting_month']);
 
-  if ((!$report_reconciled  || !$is_proof_of_cash_correct || !$vouchers_approved || !$bank_statements_uploaded || !$budget_is_active) && !$this->config->item('submit_mfr_without_controls')) {
+  if ((!$report_reconciled  || !$is_proof_of_cash_correct || !$vouchers_approved || !$bank_statements_uploaded || !$budget_is_active) && !$this->config->submit_mfr_without_controls) {
     $message = "You have missing requirements and report is not submitted. Check the following items:\n";
     $items = "";
 
@@ -2236,21 +2402,31 @@ function submitFinancialReport()
      $active_budget_status_ids = $this->getActiveBudgetStatusId($office_id);
  
      // log_message('error', json_encode(['budget_tag_id' => $budget_tag_id, 'budget_year' => $budget_year, 'active_budget_status_ids' => $active_budget_status_ids]));
+      $budget_builder = $this->read_db->table('budget');
+      $budget_builder->select('budget_id');
+      $budget_builder->where(
+        array(
+        'fk_office_id' => $office_id,
+        'fk_budget_tag_id' => $budget_tag_id,
+        'budget_year' => $budget_year
+      )); 
+      $budget_builder->whereIn('fk_status_id', $active_budget_status_ids); 
+      $budget_obj = $budget_builder->get();
+
+    //  $this->read_db->where(
+    //    array(
+    //      'fk_office_id' => $office_id,
+    //      'fk_budget_tag_id' => $budget_tag_id,
+    //      'budget_year' => $budget_year
+    //    )
+    //  );
  
-     $this->read_db->where(
-       array(
-         'fk_office_id' => $office_id,
-         'fk_budget_tag_id' => $budget_tag_id,
-         'budget_year' => $budget_year
-       )
-     );
+    //  $this->read_db->where_in('fk_status_id', $active_budget_status_ids);
  
-     $this->read_db->where_in('fk_status_id', $active_budget_status_ids);
- 
-     $budget_obj = $this->read_db->get('budget');
+    //  $budget_obj = $this->read_db->get('budget');
  
  
-     if ($budget_obj->num_rows() > 0) {
+     if ($budget_obj->getNumRows() > 0) {
        // log_message('error', json_encode($budget_obj->result_array()));
        $flag = true;
      }
@@ -2338,38 +2514,56 @@ function submitFinancialReport()
 
    function checkIfBankStatementsAreUploaded($office_id, $reporting_month)
    {
- 
-     $this->read_db->select(array('office_bank_id'));
-     $this->read_db->where(array('fk_office_id' => $office_id, 'office_bank_is_active' => 1));
-     $office_bank = $this->read_db->get('office_bank');
+    $office_bank_builder = $this->read_db->table('office_bank');
+    $office_bank_builder->select('office_bank_id');
+    $office_bank_builder->where(array('fk_office_id' => $office_id, 'office_bank_is_active' => 1));
+    $office_bank_builder_result = $office_bank_builder->get();
+    //  $this->read_db->select(array('office_bank_id'));
+    //  $this->read_db->where(array('fk_office_id' => $office_id, 'office_bank_is_active' => 1));
+    //  $office_bank = $this->read_db->get('office_bank');
  
      $statements_uploaded = true;
  
-     $reconciliation_approve_item_id = $this->read_db->get_where(
-       'approve_item',
-       array('approve_item_name' => 'reconciliation')
-     )->row()->approve_item_id;
+     $approve_item_builder = $this->read_db->table('approve_item');
+     $approve_item_builder->select('approve_item_id');
+     $approve_item_builder->where(array('approve_item_name' => 'reconciliation'));
+     $reconciliation_approve_item_id = $approve_item_builder->get()->getRow()->approve_item_id;
+    //  $reconciliation_approve_item_id = $this->read_db->get_where(
+    //    'approve_item',
+    //    array('approve_item_name' => 'reconciliation')
+    //  )->row()->approve_item_id;
  
      
-     foreach ($office_bank->result_object() as $office_bank) {
+     foreach ($office_bank_builder_result->getResultObject() as $office_bank) {
  
        $is_office_bank_obselete = $this->officeBankLibrary->isOfficeBankObselete($office_bank->office_bank_id, $reporting_month);
  
        if($is_office_bank_obselete){
          continue;
        }
+       
+       $attachment_builder = $this->read_db->table('attachment');
+       $attachment_builder->select('attachment.attachment_id');
+       $attachment_builder->where(array(
+        'reconciliation.fk_office_bank_id' => $office_bank->office_bank_id,
+        'attachment.fk_approve_item_id' => $reconciliation_approve_item_id,
+        'financial_report_month' => $reporting_month
+      ));
+      $attachment_builder->join('reconciliation', 'reconciliation.reconciliation_id=attachment.attachment_primary_id');
+      $attachment_builder->join('financial_report', 'financial_report.financial_report_id=reconciliation.fk_financial_report_id');
+      $attachment_obj = $attachment_builder->get();
+
+      //  $this->read_db->where(array(
+      //    'reconciliation.fk_office_bank_id' => $office_bank->office_bank_id,
+      //    'attachment.fk_approve_item_id' => $reconciliation_approve_item_id,
+      //    'financial_report_month' => $reporting_month
+      //  ));
  
-       $this->read_db->where(array(
-         'reconciliation.fk_office_bank_id' => $office_bank->office_bank_id,
-         'attachment.fk_approve_item_id' => $reconciliation_approve_item_id,
-         'financial_report_month' => $reporting_month
-       ));
+      //  $this->read_db->join('reconciliation', 'reconciliation.reconciliation_id=attachment.attachment_primary_id');
+      //  $this->read_db->join('financial_report', 'financial_report.financial_report_id=reconciliation.fk_financial_report_id');
+      //  $attachment_obj = $this->read_db->get('attachment');
  
-       $this->read_db->join('reconciliation', 'reconciliation.reconciliation_id=attachment.attachment_primary_id');
-       $this->read_db->join('financial_report', 'financial_report.financial_report_id=reconciliation.fk_financial_report_id');
-       $attachment_obj = $this->read_db->get('attachment');
- 
-       if ($attachment_obj->num_rows() == 0) {
+       if ($attachment_obj->getNumRows() == 0) {
          $statements_uploaded = false;
          break;
        }
@@ -2378,12 +2572,14 @@ function submitFinancialReport()
      return $statements_uploaded;
    }
 
+
    function updateBankReconciliationBalance()
    {
      $post = $_POST;
  
-     $this->write_db->trans_start();
- 
+     $db = $this->write_db;
+     $db->transStart();
+    // log_message('error', json_encode($post));
  
      if (
        count($post['office_ids']) > 1 ||
@@ -2393,11 +2589,17 @@ function submitFinancialReport()
        // This piece f code will never run since the statement balance field is not present in the view when the above is met
        echo "Cannot update balances when multiple offices, banks or projects are selected";
      } else {
- 
-       $financial_report_id = $this->read_db->get_where(
-         'financial_report',
-         array('financial_report_month' => $post['reporting_month'], 'fk_office_id' => $post['office_ids'][0])
-       )->row()->financial_report_id;
+      //  $financial_report_builder1 = $this->read_db->table('financial_report');
+      //  $financial_report_builder1->select('financial_report_id');
+      //  $financial_report_builder1->where(array('financial_report_month' => $post['reporting_month'], 'fk_office_id' => hash_id($post['office_ids'][0], 'decode')));
+      //  $financial_report_result = $financial_report_builder1->get();
+      //  $financial_report_id = $financial_report_result->getResultArray();
+      //  log_message('error', json_encode(array('financial_report_month' => $post['reporting_month'], 'offices' => hash_id($post['office_ids'][0], 'decode'), 'financial_report_id' => $financial_report_id, 'id'=>$this->id, 'id2'=>hash_id('ZY6pAN7LOq', 'decode'))));
+      $financial_report_id = hash_id($post['office_ids'][0], 'decode');
+      // $financial_report_id = $this->read_db->get_where(
+      //    'financial_report',
+      //    array('financial_report_month' => $post['reporting_month'], 'fk_office_id' => $post['office_ids'][0])
+      //  )->row()->financial_report_id;
  
        $office_bank_id = 0;
  
@@ -2406,15 +2608,17 @@ function submitFinancialReport()
  
          $condition_array = array('fk_financial_report_id' => $financial_report_id, 'fk_office_bank_id' => $office_bank_id);
        } elseif (isset($post['project_ids'])  && is_array($post['project_ids']) && !empty($post['project_ids'])) {
- 
-         $this->read_db->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_office_bank_id=office_bank.office_bank_id');
-         $this->read_db->join('project_allocation', 'project_allocation.project_allocation_id=office_bank_project_allocation.fk_project_allocation_id');
- 
- 
-         $office_bank_id = $this->read_db->get_where(
-           'office_bank',
-           array('fk_project_id' => $post['project_ids'][0])
-         )->row()->office_bank_id;
+          $builder2 = $this->read_db->table('office_bank');
+          $builder2->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_office_bank_id=office_bank.office_bank_id');
+          $builder2->join('project_allocation', 'project_allocation.project_allocation_id=office_bank_project_allocation.fk_project_allocation_id');
+          $builder2->select('office_bank_id');
+          $builder2->where(array('fk_project_id' => $post['project_ids'][0]));
+          $office_bank_id_result = $builder2->get();
+          $office_bank_id = $office_bank_id_result->getRow()->office_bank_id;
+        //  $office_bank_id = $this->read_db->get_where(
+        //    'office_bank',
+        //    array('fk_project_id' => $post['project_ids'][0])
+        //  )->row()->office_bank_id;
  
          $condition_array = array('fk_financial_report_id' => $financial_report_id, 'fk_office_bank_id' => $office_bank_id);
        } else {
@@ -2422,45 +2626,66 @@ function submitFinancialReport()
          $condition_array = array('fk_financial_report_id' => $financial_report_id);
        }
        // Check if reconciliation record exists and update else create
- 
-       $reconciliation_record = $this->read_db->get_where('reconciliation', $condition_array)->num_rows();
- 
+       $builder3 = $this->read_db->table('reconciliation');
+       $builder3->select('*');
+       $builder3->where($condition_array);
+       $reconciliation_record_result = $builder3->get();
+       $reconciliation_record = $reconciliation_record_result->getNumRows();
+      //  $reconciliation_record = $this->read_db->get_where('reconciliation', $condition_array)->num_rows();
+      
+      $builder4 = $this->write_db->table('reconciliation');
        if ($reconciliation_record == 0) {
+        $data = [
+          'reconciliation_track_number'=>$this->grantsLibrary->generateItemTrackNumberAndName('reconciliation')['reconciliation_track_number'],
+          'reconciliation_name'=>$this->grantsLibrary->generateItemTrackNumberAndName('reconciliation')['reconciliation_name'],
+          'fk_financial_report_id'=>$financial_report_id,
+          'fk_office_bank_id'=>$office_bank_id,
+          'reconciliation_statement_balance'=>$post['balance'],
+          'reconciliation_suspense_amount'=>0,
+          'reconciliation_created_by'=>$this->session->user_id,
+          'reconciliation_created_date'=>date('Y-m-d'),
+          'reconciliation_last_modified_by'=>$this->session->user_id,
+          'fk_approval_id'=>$this->grantsLibrary->insertApprovalRecord('reconciliation'),
+          'fk_status_id'=>$this->statusLibrary->initialItemStatus('reconciliation')
+
+        ];
+        //  $data['reconciliation_track_number'] = $this->grantsLibrary->generateItemTrackNumberAndName('reconciliation')['reconciliation_track_number'];
+        //  $data['reconciliation_name'] = $this->grantsLibrary->generateItemTrackNumberAndName('reconciliation')['reconciliation_name'];
  
-         $data['reconciliation_track_number'] = $this->grantsLibrary->generateItemTrackNumberAndName('reconciliation')['reconciliation_track_number'];
-         $data['reconciliation_name'] = $this->grantsLibrary->generateItemTrackNumberAndName('reconciliation')['reconciliation_name'];
+        //  $data['fk_financial_report_id'] = $financial_report_id;
+        //  $data['fk_office_bank_id'] = $office_bank_id;
+        //  $data['reconciliation_statement_balance'] = $post['balance'];
+        //  $data['reconciliation_suspense_amount'] = 0;
  
-         $data['fk_financial_report_id'] = $financial_report_id;
-         $data['fk_office_bank_id'] = $office_bank_id;
-         $data['reconciliation_statement_balance'] = $post['balance'];
-         $data['reconciliation_suspense_amount'] = 0;
+        //  $data['reconciliation_created_by'] = $this->session->user_id;
+        //  $data['reconciliation_created_date'] = date('Y-m-d');
+        //  $data['reconciliation_last_modified_by'] = $this->session->user_id;
  
-         $data['reconciliation_created_by'] = $this->session->user_id;
-         $data['reconciliation_created_date'] = date('Y-m-d');
-         $data['reconciliation_last_modified_by'] = $this->session->user_id;
- 
-         $data['fk_approval_id'] = $this->grantsLibrary->insertApprovalRecord('reconciliation');
-         $data['fk_status_id'] = $this->statusLibrary->initialItemStatus('reconciliation');
+        //  $data['fk_approval_id'] = $this->grantsLibrary->insertApprovalRecord('reconciliation');
+        //  $data['fk_status_id'] = $this->statusLibrary->initialItemStatus('reconciliation');
  
          //echo $this->grants_model->initial_item_status('reconciliation'); exit(); 1534
- 
-         $this->write_db->insert('reconciliation', $data);
+         
+         $builder4->insert($data);
+        //  $this->write_db->insert('reconciliation', $data);
        } else {
  
-         //$condition_array = array('fk_financial_report_id'=>$financial_report_id);
+         $condition_array = array('fk_financial_report_id'=>$financial_report_id);
          //  print_r($condition_array) ;exit();
  
-         $this->write_db->where($condition_array);
+         $builder4->where($condition_array);
  
-         $data['reconciliation_statement_balance'] = $post['balance'];
-         $this->write_db->update('reconciliation', $data);
+         $data = [
+            'reconciliation_statement_balance' => $post['balance']
+         ];
+         $builder4->update($data);
        }
  
  
  
-       $this->write_db->trans_complete();
+       $db->transComplete();
  
-       if ($this->write_db->trans_status() == false) {
+       if ($db->transStatus() == false) {
          echo "Error in updating bank reconciliation balance";
        } else {
          echo "Update completed";

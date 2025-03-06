@@ -5,6 +5,7 @@
 //print_r($this->financial_report_model->get_office_bank_project_allocation(1));
 // $status_data = $this->general_model->action_button_data('financial_report');
 // echo json_encode($status_data);
+$userLibrary = new \App\Libraries\Core\UserLibrary(); 
 
 
 
@@ -100,7 +101,7 @@
 
 <hr />
 <?php //if(!$multiple_offices_report && $multiple_projects_report && !$financial_report_submitted) 
-if (!$financial_report_submitted && $this->user_model->check_role_has_permissions(ucfirst($this->controller), 'update')) {
+if (!$financial_report_submitted && $userLibrary->checkRoleHasPermissions('financial_report','update')) {
 ?>
     <div class="row">
         <div class="col-xs-12" style="text-align:center;">
@@ -113,7 +114,7 @@ if (!$financial_report_submitted && $this->user_model->check_role_has_permission
 
     $(document).on('click', "#submit_report",function(ev) {
         
-        var url = "<?= base_url(); ?>Financial_report/submit_financial_report";
+        var url = "<?= base_url(); ?>ajax/financial_report/submitFinancialReport";
         
         var data = {
             'office_id': <?= $office_ids[0]; ?>,
@@ -466,7 +467,7 @@ if (!$financial_report_submitted && $this->user_model->check_role_has_permission
     function clear_effect(btn) {
         // var btn = $(this);
         var id = btn.attr('id');
-        var url = "<?= base_url(); ?>financial_report/clear_transactions";
+        var url = "<?= base_url(); ?>ajax/financial_report/clearTransactions";
         var voucher_state = btn.hasClass('state_0') ? 0 : 1; //$(this).attr('data-state');
         var opening_outstanding_cheque_id = btn.data('opening_outstanding_cheque_id');
         var opening_deposit_transit_id = btn.data('opening_deposit_transit_id');
@@ -577,57 +578,57 @@ if (!$financial_report_submitted && $this->user_model->check_role_has_permission
     }
 
 
-    $(document).ready(function() {
-        Dropzone.autoDiscover = false;
-    });
-
-    var myDropzone = new Dropzone("#drop_statements", {
-        url: "<?= base_url() ?>financial_report/upload_statements",
-        paramName: "file", // The name that will be used to transfer the file
-        params: {
-            'office_id': <?= $office_ids[0]; ?>,
-            'reporting_month': '<?= $reporting_month; ?>',
-            'project_id': $("#project_ids").val() ? $("#project_ids").val() : '',
-            'office_bank_ids': $("#office_bank_ids").val() ? $("#office_bank_ids").val() : ''
-        },
-        maxFilesize: 50, // MB
-        uploadMultiple: true,
-        parallelUploads: 5,
-        maxFiles: 5,
-        acceptedFiles: 'image/*,application/pdf',
-    });
-
-    // myDropzone.on("sending", function(file, xhr, formData) { 
-    // // Will sendthe filesize along with the file as POST data.
-    // formData.append("filesize", file.size);  
-
+    // $(document).ready(function() {
+    //     Dropzone.autoDiscover = false;
     // });
 
-    myDropzone.on("complete", function(file) {
-        //myDropzone.removeFile(file);
-        myDropzone.removeAllFiles();
-        //alert(myDropzone.getAcceptedFiles());
-    });
+    // var myDropzone = new Dropzone("#drop_statements", {
+    //     url: "<?= base_url() ?>financial_report/upload_statements",
+    //     paramName: "file", // The name that will be used to transfer the file
+    //     params: {
+    //         'office_id': <?= $office_ids[0]; ?>,
+    //         'reporting_month': '<?= $reporting_month; ?>',
+    //         'project_id': $("#project_ids").val() ? $("#project_ids").val() : '',
+    //         'office_bank_ids': $("#office_bank_ids").val() ? $("#office_bank_ids").val() : ''
+    //     },
+    //     maxFilesize: 50, // MB
+    //     uploadMultiple: true,
+    //     parallelUploads: 5,
+    //     maxFiles: 5,
+    //     acceptedFiles: 'image/*,application/pdf',
+    // });
 
-    myDropzone.on('error', function(file, response) {
-        // $(file.previewElement).find('.dz-error-message').text(response);
-        console.log(response);
-    });
+    // // myDropzone.on("sending", function(file, xhr, formData) { 
+    // // // Will sendthe filesize along with the file as POST data.
+    // // formData.append("filesize", file.size);  
 
-    myDropzone.on("success", function(file, response) {
-        console.log(response);
-        if (response == 0) {
-            alert('Error in uploading files');
-            return false;
-        }
-        var table_tbody = $("#tbl_list_statements tbody");
-        var obj = JSON.parse(response);
+    // // });
 
-        $.each(obj, function(i, elem) {
-            table_tbody.append('<tr><td><a href="#" class="fa fa-trash-o delete_statement" id=""></a></td><td><a target="__blank" href="' + elem.s3_preassigned_url + '">' + elem.attachment_name + '</a></td><td>' + elem.attachment_size + '</td><td>' + elem.attachment_last_modified_date + '</td></tr>');
-        });
+    // myDropzone.on("complete", function(file) {
+    //     //myDropzone.removeFile(file);
+    //     myDropzone.removeAllFiles();
+    //     //alert(myDropzone.getAcceptedFiles());
+    // });
 
-    });
+    // myDropzone.on('error', function(file, response) {
+    //     // $(file.previewElement).find('.dz-error-message').text(response);
+    //     console.log(response);
+    // });
+
+    // myDropzone.on("success", function(file, response) {
+    //     console.log(response);
+    //     if (response == 0) {
+    //         alert('Error in uploading files');
+    //         return false;
+    //     }
+    //     var table_tbody = $("#tbl_list_statements tbody");
+    //     var obj = JSON.parse(response);
+
+    //     $.each(obj, function(i, elem) {
+    //         table_tbody.append('<tr><td><a href="#" class="fa fa-trash-o delete_statement" id=""></a></td><td><a target="__blank" href="' + elem.s3_preassigned_url + '">' + elem.attachment_name + '</a></td><td>' + elem.attachment_size + '</td><td>' + elem.attachment_last_modified_date + '</td></tr>');
+    //     });
+
+    // });
 
 
     $(document).on('click', '.delete_statement', function() {

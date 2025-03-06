@@ -1,3 +1,6 @@
+<?php 
+$userLibrary = new \App\Libraries\Core\UserLibrary(); 
+?>
 <table class="table table-striped">
     <thead>
     </thead>
@@ -16,7 +19,7 @@
         <tr>
             <td><?= get_phrase('bank_statement_closing_balance'); ?></td>
             <td id='td_bank_reconciliation_balance'>
-                <?php if (!$allow_mfr_reconciliation || !$this->user_model->check_role_has_permissions(ucfirst($this->controller), 'update')) { ?>
+                <?php if (!$allow_mfr_reconciliation || !$userLibrary->checkRoleHasPermissions('financial_report', 'update')) { ?>
                     <?= number_format($bank_reconciliation['bank_statement_balance'], 2); ?> <i class='fa fa-info-circle' style='color:red;' title='<?= get_phrase('choose_one_bank_account_to_reconcile'); ?>'></i>
                 <?php } else { ?>
                     <input type="number" class="form-control" id="bank_statement_balance" value="<?= $bank_reconciliation['bank_statement_balance']; ?>" />
@@ -83,7 +86,7 @@
     });
 
     $("#bank_statement_balance").on('change', function() {
-        var url = "<?= base_url(); ?>financial_report/update_bank_reconciliation_balance";
+        var url = "<?= base_url(); ?>ajax/financial_report/updateBankReconciliationBalance";
         var office_ids = Array.isArray($('#office_ids').val()) ? $('#office_ids').val() : [$('#office_ids').val()];
         var project_ids = $('#project_ids').val();
         var office_bank_ids = Array.isArray($('#office_bank_ids').val() ) ? $('#office_bank_ids').val()  : [$('#office_bank_ids').val()];

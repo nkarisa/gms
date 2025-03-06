@@ -1,3 +1,6 @@
+<?php 
+    $userLibrary = new \App\Libraries\Core\UserLibrary(); 
+?>
 <table class="table table-striped tbl_cleared_outstanding_cheque_connector" id='tbl_outstanding_cheque'>
     <thead>
         <tr>
@@ -47,13 +50,13 @@
                         //$oustanding_state_label = get_phrase('unclear');
                     } ?>
                     <td nowrap class = 'no-print'>
-                        <div data-data-opening_deposit_transit_id="0" data-opening_outstanding_cheque_id="<?= isset($outstanding_cheque['opening_outstanding_cheque_id']) ? $outstanding_cheque['opening_outstanding_cheque_id'] : 0; ?>" id="<?= $outstanding_cheque['voucher_id']; ?>" class='btn btn-<?= $oustanding_state_color; ?> <?= $allow_mfr_reconciliation && $this->user_model->check_role_has_permissions(ucfirst($this->controller), 'update') ? '' : 'disabled'; ?> clear_btn <?= $oustanding_state_clear_class; ?> outstanding_cheque active_effect state_<?= $outstanding_cheque['voucher_cleared']; ?>'>
+                        <div data-data-opening_deposit_transit_id="0" data-opening_outstanding_cheque_id="<?= isset($outstanding_cheque['opening_outstanding_cheque_id']) ? $outstanding_cheque['opening_outstanding_cheque_id'] : 0; ?>" id="<?= $outstanding_cheque['voucher_id']; ?>" class='btn btn-<?= $oustanding_state_color; ?> <?= $allow_mfr_reconciliation && $userLibrary->checkRoleHasPermissions('financial_report', 'update') ? '' : 'disabled'; ?> clear_btn <?= $oustanding_state_clear_class; ?> outstanding_cheque active_effect state_<?= $outstanding_cheque['voucher_cleared']; ?>'>
                             <?= $oustanding_state_label; ?>
                         </div>
                         <?php
                         //Openning Outstanding Label
                         if ($outstanding_cheque['voucher_id'] == 0 && $financial_report_submitted != true) { ?>
-                            <div data-data-opening_deposit_transit_id="0" data-opening_outstanding_cheque_id="<?= isset($outstanding_cheque['opening_outstanding_cheque_id']) ? $outstanding_cheque['opening_outstanding_cheque_id'] . '_bounce' : 0; ?>" id="<?= $outstanding_cheque['voucher_id']; ?>" class='btn btn-<?= $oustanding_state_color; ?> <?= $allow_mfr_reconciliation && $this->user_model->check_role_has_permissions(ucfirst($this->controller), 'update') ? '' : 'disabled'; ?> cancel_btn <?= $oustanding_state_clear_class; ?> outstanding_cheque active_effect state_<?= $outstanding_cheque['voucher_cleared']; ?>'>
+                            <div data-data-opening_deposit_transit_id="0" data-opening_outstanding_cheque_id="<?= isset($outstanding_cheque['opening_outstanding_cheque_id']) ? $outstanding_cheque['opening_outstanding_cheque_id'] . '_bounce' : 0; ?>" id="<?= $outstanding_cheque['voucher_id']; ?>" class='btn btn-<?= $oustanding_state_color; ?> <?= $allow_mfr_reconciliation && $userLibrary->checkRoleHasPermissions('financial_report', 'update') ? '' : 'disabled'; ?> cancel_btn <?= $oustanding_state_clear_class; ?> outstanding_cheque active_effect state_<?= $outstanding_cheque['voucher_cleared']; ?>'>
                                 <?= get_phrase('cancel'); ?>
                             </div>
                         <?php } ?>

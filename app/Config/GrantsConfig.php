@@ -57,4 +57,8 @@ class GrantsConfig extends BaseConfig
     public $cheque_cancel_and_resuse_limit = 4;
     public $review_last_quarter_after_mark_for_review=true;
     public $upload_files_to_s3=true;
+    public $only_combined_center_financial_reports = false;
+    public $submit_mfr_without_controls=false;
+    public $funding_balance_report_aggregate_method = "receipt";
+    public $allow_a_bank_to_be_linked_to_many_projects = true;
 }

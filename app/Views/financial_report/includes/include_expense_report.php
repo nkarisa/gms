@@ -8,13 +8,13 @@
     <?php 
     
     $check_sum = array_column($expense_report,'check_sum');
-
+    $userLibrary = new \App\Libraries\Core\UserLibrary();
     $cnt = 0;
     //log_message('error', json_encode($expense_report));
     
     foreach($expense_report as $income_record){
         $cnt++;
-        if($check_sum[$cnt - 1] == 0 && $this->config->item('skip_empty_expense_reports')) continue;  // Skips expense tables that lack records
+        if($check_sum[$cnt - 1] == 0 && $this->config->skip_empty_expense_reports) continue;  // Skips expense tables that lack records
         $is_budgetable = $income_record['income_account']['income_account_is_budgeted'];
     ?>
     <div class="row">
@@ -55,7 +55,7 @@
                             $expense_account['month_expense'] == 0
                             && $expense_account['month_expense_to_date'] == 0
                                 && $expense_account['budget_to_date'] == 0
-                                && !$this->config->item('show_empty_rows_in_expense_report')
+                                && !$this->config->show_empty_rows_in_expense_report
                         ) continue;
                 ?>
                     <tr>
@@ -156,7 +156,7 @@
 <input type="hidden" id="variance_comment_id" value="0"/>
 
 <div id="note_area_holder" class="col-xs-4 hidden">
-    <textarea class="form-control" class="note_area" <?=!$this->user_model->check_role_has_permissions(ucfirst($this->controller),'create')?'disabled':'';?>
+    <textarea class="form-control" class="note_area" <?=!$userLibrary->checkRoleHasPermissions('financial_report','create')?'disabled':'';?>
     placeholder="Put your notes here" rows="10"></textarea>
 </div>
 
@@ -168,7 +168,7 @@ $(document).on('change','.active_note_area > textarea',function(){
     var url = "<?=base_url();?>Financial_report/post_expense_account_comment";
     var office_id = $("#office_ids").val();
     var reporting_month = '<?=$reporting_month;?>';
-    var report_id = '<?=hash_id($this->id,'decode');?>';
+    var report_id = '<?=$report_id;?>';
     var data = {'expense_account_id':expense_account_id,'office_id':office_id,'report_id':report_id,'reporting_month':reporting_month,'variance_comment_text':comment};
     // console.log(data);
     $.post(url,data,function(response){
@@ -234,7 +234,7 @@ function update_notes_area(row){
     var expense_account_id = $(".is_clicked").first().data('account_id');
     var office_id = $("#office_ids").val();
     var reporting_month = '<?=$reporting_month;?>';
-    var report_id = '<?=hash_id($this->id,'decode');?>';
+    var report_id = '<?=$report_id;?>';
     var data = {'expense_account_id':expense_account_id,'office_id':office_id,'report_id':report_id,'reporting_month':reporting_month};
     
     var url = "<?=base_url();?>Financial_report/get_expense_account_comment";

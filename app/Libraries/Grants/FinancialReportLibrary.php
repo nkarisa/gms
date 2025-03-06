@@ -515,7 +515,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
             ]
         );
 
-        $builder->whereIn('system_opening_balance.fk_office_id', $office_ids);
+        $builder->where('system_opening_balance.fk_office_id', $office_ids);
 
         if ($state == 'uncleared') {
             $builder->groupStart();
@@ -536,7 +536,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
         }
 
         if (!empty($office_bank_ids)) {
-            $builder->whereIn('opening_deposit_transit.fk_office_bank_id', $office_bank_ids);
+            $builder->where('opening_deposit_transit.fk_office_bank_id', $office_bank_ids);
         }
 
         $builder->join('system_opening_balance', 'system_opening_balance.system_opening_balance_id=opening_deposit_transit.fk_system_opening_balance_id');
@@ -1016,7 +1016,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
             $builder->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_office_bank_id=office_bank.office_bank_id');
             $builder->join('project_allocation', 'project_allocation.project_allocation_id=office_bank_project_allocation.fk_project_allocation_id');
             $builder->whereIn('fk_project_id', $project_ids);
-            $office_bank_ids = array_column($builder->get('office_bank')->getResultArray(), 'office_bank_id');
+            $office_bank_ids = array_column($builder->get()->getResultArray(), 'office_bank_id');
          }
  
          if (!empty($office_bank_ids)) {
@@ -1076,7 +1076,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
              $builder2->whereIn('voucher.fk_office_bank_id', $office_bank_ids);
          }
  
-         $list_cleared_effects = $builder2->get('voucher_detail')->getresultArray();
+         $list_cleared_effects = $builder2->get()->getresultArray();
  
          if ($transaction_type == 'expense') {
              $list_cleared_effects = array_merge($list_cleared_effects, $this->getUnclearedAndClearedOpeningOutstandingCheques($office_ids, $reporting_month, 'cleared', $office_bank_ids));
@@ -1126,7 +1126,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
  
          $builder->whereIn('voucher.fk_status_id', $max_approval_status_ids);
  
-         $result = $builder->get('voucher_detail');
+         $result = $builder->get();
          
  
          $order_array = [];
@@ -1186,7 +1186,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
  
          $builder->whereIn('voucher.fk_status_id', $max_approval_status_ids);
  
-         $result = $builder->get('voucher_detail');
+         $result = $builder->get();
  
          $order_array = [];
  
@@ -1211,7 +1211,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
         $builder->select(array('fk_budget_id'));
         $builder->whereIn('fk_office_id', $office_ids);
         $builder->where(array('financial_report_month' => date('Y-m-01',strtotime($reporting_month))));
-        $financial_report_obj = $builder->get('financial_report');
+        $financial_report_obj = $builder->get();
 
         if($financial_report_obj->getNumRows() > 0){
             $budget_ids = array_column($financial_report_obj->getResultArray(),'fk_budget_id');
@@ -1237,7 +1237,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
 
         $get_office_bank_project_allocation = $this->getOfficeBankProjectAllocation($office_bank_ids);
 
-        $builder2 = $this->read_db->table('financial_report');
+        $builder2 = $this->read_db->table('budget_item_detail');
         $builder2->selectSum('budget_item_detail_amount');
         $builder2->select(array(
             'month_number',
@@ -1246,7 +1246,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
         ));
 
         $builder2->groupBy('month_number,expense_account.expense_account_id');
-        $builder2->whereIn('budget.fk_office_id', $office_ids);
+        $builder2->where('budget.fk_office_id', $office_ids);
 
         // $this->read_db->where(array('month_order<=' => $month_order));
         $builder2->whereIn('month_id',  $listed_months);
@@ -1265,13 +1265,13 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
         }
 
         if (!empty($office_bank_ids)) {
-            $builder2->whereIn('budget_item.fk_project_allocation_id', $get_office_bank_project_allocation);
+            $builder2->where('budget_item.fk_project_allocation_id', $get_office_bank_project_allocation);
         }
 
 
-        $builder2->whereIn('budget_item.fk_status_id', $max_approval_status_ids);
+        $builder2->where('budget_item.fk_status_id', $max_approval_status_ids);
 
-        $result = $builder2->get('budget_item_detail');
+        $result = $builder2->get();
 
         $order_array = [];
 
@@ -1323,7 +1323,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
 
         $builder->whereIn('fk_office_id', $office_ids);
         $builder->join('project_allocation', 'project_allocation.fk_project_id=project.project_id');
-        $projects = $builder->get('project')->getResultArray();
+        $projects = $builder->get()->getResultArray();
 
         return $projects;
     }
@@ -1339,7 +1339,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
             $builder->whereIn('fk_office_bank_id', $office_bank_ids);
         }
 
-        $office_banks = $builder->get('office_bank_project_allocation')->getResultArray();
+        $office_banks = $builder->get()->getResultArray();
         
     
         return $office_banks;
@@ -1350,7 +1350,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
         $builder = $this->read_db->table('opening_outstanding_cheque');
         $builder->select(array('opening_outstanding_cheque_amount','opening_outstanding_cheque_id','opening_outstanding_cheque_bounced_flag','opening_outstanding_cheque_description','opening_outstanding_cheque_is_cleared','opening_outstanding_cheque_cleared_date','opening_outstanding_cheque_number'));
         $builder->where(array('opening_outstanding_cheque_id' => $cheque_id));
-        $bounced_chq_record = $builder->get('opening_outstanding_cheque')->getRowArray();
+        $bounced_chq_record = $builder->get()->getRowArray();
 
 
         return $bounced_chq_record;
@@ -1402,7 +1402,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
             $builder = $this->read_db->table('office_bank_project_allocation');
             $builder->select(array('fk_project_allocation_id'));
             $builder->whereIn('fk_office_bank_id', $office_bank_ids);
-            $result =  $builder->get('office_bank_project_allocation')->getResultArray();
+            $result =  $builder->get()->getResultArray();
 
             return array_column($result, 'fk_project_allocation_id');
         } else {

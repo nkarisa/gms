@@ -49,7 +49,8 @@
         <?php
             //  }
       
-            if($this->user_model->check_role_has_permissions(ucfirst('fund_balance_summary_report'),'read')){
+            // if($this->user_model->check_role_has_permissions(ucfirst('fund_balance_summary_report'),'read')){
+            if($userLibrary->checkRoleHasFieldPermission(ucfirst('fund_balance_summary_report'),'read', '')){
         ?>
             <!-- <span class = 'summary_reports'></span> -->
             <a class = "btn btn-default" href = '<?=base_url()?>fund_balance_summary_report/list'><?=get_phrase('fund_balance_summary_report');?></a>
@@ -117,7 +118,7 @@
 
     $(document).ready(function(){
 
-        var url = "<?=base_url();?><?=$this->controller;?>/show_list";
+        var url = "<?=base_url();?>ajax/financial_report/showList";
         const datatable = $("#datatable").DataTable({
             // dom: 'lBfrtip',
             dom: 'QlBtip', //'QBfrtip' lrt
@@ -210,7 +211,7 @@
 
         function clearLocalStorage(){
             // localStorage.removeItem("DataTables_datatable_/grants/Financial_report/list");
-            localStorage.removeItem("DataTables_datatable_/<?=explode('/',FCPATH)[4];?>/<?=ucfirst($this->controller);?>/list");
+            localStorage.removeItem("DataTables_datatable_/<?=explode('/',FCPATH)[4];?>/FinancialReport/list");
             alert('Filters reset successfully');
             window.location.reload()
         }

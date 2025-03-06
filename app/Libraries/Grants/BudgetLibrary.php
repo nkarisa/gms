@@ -1272,4 +1272,30 @@ class BudgetLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
 
     return $budgets->getNumRows() > 0 ? $budgets->getRowArray() : [];
   }
+
+  function getBudgetIdBasedOnMonth($office_id, $reporting_month)
+  {
+
+    $custom_financial_year = $this->customFinancialYearLibrary->getDefaultCustomFinancialYearIdByOffice($office_id, true);
+    $budget_tag_id = $this->budgetTagLibrary->getBudgetTagIdBasedOnReportingMonth($office_id, $reporting_month, $custom_financial_year)['budget_tag_id'];
+    // log_message('error', json_encode($budget_tag_id));
+    $budget_id = 0;
+
+    $budget_year = get_fy($reporting_month);
+
+    $builder = $this->read_db->table('budget');
+    $builder->select('budget_id');
+    $builder->where(
+      array(
+      'fk_budget_tag_id' => $budget_tag_id,
+      'fk_office_id' => $office_id, 'budget_year' => $budget_year
+      )
+    );
+    $budget_id_obj = $builder->get();
+    if ($budget_id_obj->getNumRows() > 0) {
+      $budget_id =  $budget_id_obj->getRow()->budget_id;
+    }
+
+    return $budget_id;
+  }
 }

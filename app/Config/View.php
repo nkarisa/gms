@@ -59,4 +59,8 @@ class View extends BaseView
      * @var list<class-string<ViewDecoratorInterface>>
      */
     public array $decorators = [];
+
+    public $allow_a_bank_to_be_linked_to_many_projects = true;
+    public $skip_empty_expense_reports = true;
+    public $show_empty_rows_in_expense_report = false;
 }
