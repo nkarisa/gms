@@ -1620,6 +1620,21 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return $vouchers_ids;
     }
 
+    function getAttachments($approve_item_id, $record_id){
+        $awsAttachmentLibrary = new \App\Libraries\System\AwsAttachmentLibrary();
+        $attachment_where_condition_array['fk_approve_item_id'] = $approve_item_id;
+        $attachment_where_condition_array['attachment_primary_id'] = $record_id;
+        $attachments = $awsAttachmentLibrary->retrieveFileUploadsInfo($attachment_where_condition_array);
+        $attachmentLibrary = new \App\Libraries\Core\AttachmentLibrary();
+
+        for($i = 0; $i < sizeof($attachments); $i++){
+          $objectKey = $attachments[$i]['attachment_url'].'/'.$attachments[$i]['attachment_name'];
+          $attachments[$i]['attachment_url'] = $this->config->upload_files_to_s3 ? $awsAttachmentLibrary->s3PreassignedUrl($objectKey) : $attachmentLibrary->getLocalFilesystemAttachmentUrl($objectKey);
+        }
+    
+        return $attachments;
+      }
+
     function formatColumnsValuesDependancyData(array $vouchers): array
     {
         $month_cancelled_vouchers = [];
@@ -1638,23 +1653,58 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             }
         }
 
-        return compact('month_cancelled_vouchers', 'voucher_attachments_required');
+        $approve_item_id = $this->read_db->table('approve_item')->where(['approve_item_name' => 'voucher'])
+        ->get()->getRow()->approve_item_id;
+
+        $userLibrary = new \App\Libraries\Core\UserLibrary();
+
+        $user_has_voucher_update_permission = $userLibrary->checkRoleHasPermissions(ucfirst('voucher'), 'update');
+        
+        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+        $initial_record_status_id = $statusLibrary->initialItemStatus('voucher');
+
+        return compact('initial_record_status_id','month_cancelled_vouchers', 'voucher_attachments_required','approve_item_id','user_has_voucher_update_permission');
     }
 
   function formatColumnsValues(string $columnsName, mixed $columnsValues, array $rowData, array $dependancyData = []): mixed {
 
     $is_voided_chq = false;
+    $accountSystemSettingLibrary = new \App\Libraries\Core\AccountSystemSettingLibrary();
     
     extract($dependancyData);
 
     if($columnsName == 'action'){
         $officeLibrary = new \App\Libraries\Core\OfficeLibrary();
         $office_account_system_id = $officeLibrary->getOfficeAccountSystem($rowData['office_id'])['account_system_id'];
+
+        $account_system_settings = $accountSystemSettingLibrary->getAccountSystemSettings($office_account_system_id);
+        $voucher_attachments_required = false;
+
+        if(
+            array_key_exists('voucher_attachments_required',$account_system_settings) && 
+            $account_system_settings['voucher_attachments_required'] == 1        ){
+            $voucher_attachments_required = true;
+        }
+
+        $voucher_attachments = $this->getAttachments($approve_item_id, $rowData['voucher_id']);
+        $count_of_attachments = count($voucher_attachments);
+        $btn_color = $count_of_attachments == 0 ? 'btn-danger' : 'btn-success';
+        $btn_label = $count_of_attachments == 0 ? get_phrase('attach_documents','Attach Support Documents') : get_phrase('show_documents','Show Support Documents');
+        // $disable_approval_button = $count_of_attachments == 0 && $voucher_attachments_required ? true : false;
+                
+        $officeLibrary = new \App\Libraries\Core\OfficeLibrary();
+        $office_account_system_id = $officeLibrary->getOfficeAccountSystem($rowData['office_id'])['account_system_id'];
         $status_data = $this->actionButtonData($this->controller, $office_account_system_id);
+        $status_info = $status_data['item_status'];
         extract($status_data);
+        $voucher_status = $rowData['fk_status_id'];
+        $status_approval_direction = isset($status_info[$voucher_status]['status_approval_direction']) ? $status_info[$voucher_status]['status_approval_direction'] : $status_info[$initial_record_status_id]['status_approval_direction'];
+        
+        $can_delete_attachment = ($rowData['fk_status_id'] == $item_initial_item_status_id || $status_approval_direction == '-1') && $user_has_voucher_update_permission ? true : false;
+
         if (is_array($month_cancelled_vouchers) && !in_array($rowData['voucher_id'], $month_cancelled_vouchers)) {
             if($voucher_attachments_required){
-              $columnsValues .= '<div class = "btn '.$btn_color.' dt-control" id = "dt-control-'.$rowData['voucher_id'].'">' . $btn_label . '</div> ';
+                $columnsValues .= '<div data-attachments="'.json_encode($voucher_attachments).'" data-can_delete_attachment="'.$can_delete_attachment.'" data-voucher_id="'.$rowData['voucher_id'].'" class = "btn '.$btn_color.' dt-control" id = "dt-control-'.$rowData['voucher_id'].'">' . $btn_label . '</div> ';
             }
             $columnsValues .= approval_action_button($this->controller, $item_status, $rowData['voucher_id'], $rowData['status_id'], $item_initial_item_status_id, $item_max_approval_status_ids, false, true,'', $is_voided_chq);
         }
@@ -2085,15 +2135,29 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $statusLibrary = new \App\Libraries\Core\StatusLibrary();
         $maxApprovalStatus = $statusLibrary->getMaxApprovalStatusId($this->controller);
         $initialItemStatus = $this->initialItemStatus('voucher');
-        return compact('vouchers','maxApprovalStatus','initialItemStatus');
+
+        $reversedVouchers = array_filter($vouchers, function($voucher){
+            if($voucher['voucher_is_reversed'] == 1){
+                return $voucher;
+            }
+        });
+
+        $reversedVouchersIds = array_column($reversedVouchers, 'voucher_id');
+
+        $isVoucherReversed = false; //$vouchers['voucher_is_reversed'] ? true : false;
+        return compact('vouchers','maxApprovalStatus','initialItemStatus','reversedVouchersIds');
     }
 
     function showListEditAction(array $row, array $dependancyData = []): bool{
         $current_status_id = $row['status_id'];
         $max_approval_status = $dependancyData['maxApprovalStatus'];
         $initialItemStatus = $dependancyData['initialItemStatus'];
+        $reversedVouchersIds = $dependancyData['reversedVouchersIds'];
 
-        if(in_array($current_status_id, $max_approval_status) || $initialItemStatus != $current_status_id){
+        if(
+            in_array($current_status_id, $max_approval_status) || 
+            in_array($row['voucher_id'], $reversedVouchersIds) || 
+            $initialItemStatus != $current_status_id){
             return false;
         }
 

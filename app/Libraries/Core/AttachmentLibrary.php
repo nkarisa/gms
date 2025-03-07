@@ -102,7 +102,7 @@ class AttachmentLibrary extends GrantsLibrary implements \App\Interfaces\Library
      }
      
      $builder->join('approve_item', 'approve_item.approve_item_id=attachment_type.fk_approve_item_id');
-     $attachment_type_id = $builder->get('attachment_type')->getRow()->attachment_type_id;
+     $attachment_type_id = $builder->get()->getRow()->attachment_type_id;
  
      return $attachment_type_id;
    }
@@ -126,6 +126,24 @@ class AttachmentLibrary extends GrantsLibrary implements \App\Interfaces\Library
 
   public function getLocalFilesystemAttachmentUrl($objectKey){
     return base_url().$objectKey;
+  }
+
+  function deleteUploadedDocument($uploaded_image_id)
+  {
+
+    $this->write_db->transStart();
+
+    $attachmentWriteBuilder = $this->write_db->table('attachment');
+    $attachmentWriteBuilder->where(['attachment_id' => $uploaded_image_id]);
+    $attachmentWriteBuilder->delete();
+
+    $this->write_db->transComplete();
+
+    if ($this->write_db->transStatus() == FALSE) {
+      return 0;
+    } else {
+      return 1;
+    }
   }
    
 }

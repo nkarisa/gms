@@ -1142,7 +1142,7 @@ class Voucher extends WebController
     $voucher_type_effect_and_code = $voucherLibrary->voucherTypeEffectAndCode($post['voucher_type_id']);
 
     $voucher_type_effect = $voucher_type_effect_and_code->voucher_type_effect_code;
-    $voucher_type_account = $voucher_type_effect_and_code->voucher_type_account_code;
+    // $voucher_type_account = $voucher_type_effect_and_code->voucher_type_account_code;
 
     $project_allocation = [];
 
@@ -1219,7 +1219,7 @@ class Voucher extends WebController
     return $this->response->setJSON($output);
   }
 
-  function validateRefundFromVoucher(){
+  function validateRefundFromVoucher(): ResponseInterface{
 
     $message = 'failed';
     $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
@@ -1273,5 +1273,77 @@ class Voucher extends WebController
     $output = compact('message', 'voucher_cost', 'voucher_number');
 
     return $this->response->setJSON($output);
+  }
+
+  function uploadReceipts(): ResponseInterface{
+
+    $post = $this->request->getPost();
+    $voucher_id = $post['voucher_id'];
+
+    // Query Builders
+    $voucherReadBuilder = $this->read_db->table('voucher');
+    $approveItemReadBuilder = $this->read_db->table('approve_item');
+    
+    $voucherReadBuilder->select(['account_system_code','office_code','voucher_number']);
+    $voucherReadBuilder->where(['voucher_id' => $voucher_id]);
+    $voucherReadBuilder->join('office','office.office_id = voucher.fk_office_id');
+    $voucherReadBuilder->join('account_system','account_system.account_system_id = office.fk_account_system_id');
+    $voucher = $voucherReadBuilder->get()->getRow();
+
+    $account_system_code = $voucher->account_system_code;
+    $office_code = $voucher->office_code;
+    $voucher_number = $voucher->voucher_number;
+
+    $storeFolder = upload_url('voucher', '', ['voucher_docs',$account_system_code,$office_code,$voucher_number,$voucher_id]);
+
+    $approve_item_id = $approveItemReadBuilder->where(array('approve_item_name' => 'voucher'))
+    ->get()
+    ->getRow()->approve_item_id;
+
+    $additional_attachment_table_insert_data = [];
+ 
+    $itemTrackNumberAndName = $this->libs->generateItemTrackNumberAndName('attachment');
+    $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+    $attachmentLibrary = new \App\Libraries\Core\AttachmentLibrary();
+    $awsAttachmentLibrary = new \App\Libraries\System\AwsAttachmentLibrary();
+
+    $additional_attachment_table_insert_data['fk_approve_item_id'] = $approve_item_id;
+    $additional_attachment_table_insert_data['attachment_primary_id'] = $voucher_id;
+    $additional_attachment_table_insert_data['attachment_is_s3_upload'] = 1;
+    $additional_attachment_table_insert_data['attachment_created_by'] = $this->session->user_id;
+    $additional_attachment_table_insert_data['attachment_last_modified_by'] = $this->session->user_id;
+    $additional_attachment_table_insert_data['attachment_created_date'] = date('Y-m-d');
+    $additional_attachment_table_insert_data['attachment_track_number'] = $itemTrackNumberAndName['attachment_track_number'];
+    $additional_attachment_table_insert_data['fk_approval_id'] = $this->libs->insertApprovalRecord('attachment');
+    $additional_attachment_table_insert_data['fk_status_id'] = $statusLibrary->initialItemStatus('attachment');
+    $additional_attachment_table_insert_data['fk_attachment_type_id'] = $attachmentLibrary->getAttachmentTypeId('voucher_receipts');
+
+    $attachment_where_condition_array = [];
+
+    $attachment_where_condition_array = array(
+      'fk_approve_item_id' => $approve_item_id,
+      'attachment_primary_id' => $voucher_id
+    );
+
+    $preassigned_urls = $awsAttachmentLibrary->uploadFiles($storeFolder, $additional_attachment_table_insert_data, $attachment_where_condition_array);
+    
+    return $this->response->setJSON($preassigned_urls);
+  }
+
+  function deleteAttachment($attachment_id, $voucher_id){
+    $approve_item_id = $this->read_db->table('approve_item')
+    ->where(['approve_item_name' => 'voucher'])
+    ->get()
+    ->getRow()->approve_item_id;
+
+    $attachments = [];
+    $attachmentLibrary = new \App\Libraries\Core\AttachmentLibrary();
+    $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+
+    if($attachmentLibrary->deleteUploadedDocument($attachment_id)){
+      $attachments = $voucherLibrary->getAttachments($approve_item_id, $voucher_id);
+    }
+    
+    return $this->response->setJSON($attachments);
   }
 }
