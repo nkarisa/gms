@@ -8,137 +8,144 @@ use App\Models\Grants\CustomFinancialYearModel;
 class CustomFinancialYearLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
-    protected $table;
-    protected $customFinancialYearModel;
+  protected $table;
+  protected $customFinancialYearModel;
 
-    function __construct()
-    {
-        parent::__construct();
+  function __construct()
+  {
+    parent::__construct();
 
-        $this->customFinancialYearModel = new CustomFinancialYearModel();
+    $this->customFinancialYearModel = new CustomFinancialYearModel();
 
-        $this->table = 'custom_financial_year';
-    }
+    $this->table = 'custom_financial_year';
+  }
 
-    /**
-     *getDefaultCustomFinancialYearIdByOffice():This method returns arow of custom financial years.
-     * @author Livingstone Onduso: Dated 30-01-2025
-     * @access public
-    * @return array 
-    * @param int $office_id
+  /**
+   *getDefaultCustomFinancialYearIdByOffice():This method returns arow of custom financial years.
+   * @author Livingstone Onduso: Dated 30-01-2025
+   * @access public
+   * @return array 
+   * @param int $office_id
    */
-    public function getDefaultCustomFinancialYearIdByOffice(int $office_id){
+  public function getDefaultCustomFinancialYearIdByOffice(int $office_id)
+  {
 
-        // $custom_financial_year_start_month = 7;
-        $custom_financial_year = ['custom_financial_year_start_month' => 7, 'custom_financial_year_id' => NULL, 'custom_financial_year_is_active' => 0, 'custom_financial_year_reset_date' => NULL];
-    
-        $builder = $this->read_db->table("custom_financial_year");
-        $builder->select(array('custom_financial_year_start_month','custom_financial_year_id', 'custom_financial_year_is_active', 'custom_financial_year_reset_date'));
-        $builder->where(array('custom_financial_year_is_default'=> 1,'fk_office_id' => $office_id));
-        $custom_financial_year_obj = $builder->get();
-        
-        if($custom_financial_year_obj->getNumRows() > 0){
-          // log_message('error', json_encode($custom_financial_year_obj->row()));
-          $custom_financial_year = $custom_financial_year_obj->getRowArray();
-        }
-    
-        return $custom_financial_year;
-      }
+    // $custom_financial_year_start_month = 7;
+    $custom_financial_year = ['custom_financial_year_start_month' => 7, 'custom_financial_year_id' => NULL, 'custom_financial_year_is_active' => 0, 'custom_financial_year_reset_date' => NULL];
 
-      function getCustomFinancialYearById($custom_financial_year_id){
-        $custom_financial_year = [];
-    
-        $builder = $this->read_db->table('custom_financial_year');
-        $builder->select(array('custom_financial_year_id','custom_financial_year_start_month', 'custom_financial_year_is_active'));
-        $builder->where(array('custom_financial_year_id' => $custom_financial_year_id));
-        $custom_financial_year_obj = $builder->get();
-    
-        if($custom_financial_year_obj->getNumRows() > 0){
-          $custom_financial_year = $custom_financial_year_obj->getRowArray();
-        }
-    
-        return $custom_financial_year;
+    $builder = $this->read_db->table("custom_financial_year");
+    $builder->select(array('custom_financial_year_start_month', 'custom_financial_year_id', 'custom_financial_year_is_active', 'custom_financial_year_reset_date'));
+    $builder->where(array('custom_financial_year_is_default' => 1, 'fk_office_id' => $office_id));
+    $custom_financial_year_obj = $builder->get();
+
+    if ($custom_financial_year_obj->getNumRows() > 0) {
+      // log_message('error', json_encode($custom_financial_year_obj->row()));
+      $custom_financial_year = $custom_financial_year_obj->getRowArray();
     }
 
-    function transactionPeriodBehindDefaultCustomFyResetDate($next_vouching_date,$custom_financial_year){
+    return $custom_financial_year;
+  }
 
-        $transaction_period_behind_default_custom_fy_reset_date = false;
-        // log_message('error', json_encode(['office_id' => $office_id, 'next_vouching_date' => $next_vouching_date, 'custom_financial_year' => $custom_financial_year]));
-      
-        $custom_financial_year_id = $custom_financial_year['custom_financial_year_id'];
-    
-        if($custom_financial_year_id != null){
-          $next_vouching_date_stamp = strtotime('first day of this  month', strtotime($next_vouching_date));
-          $custom_financial_year_reset_date_stamp = strtotime('first day of this month', strtotime($custom_financial_year['custom_financial_year_reset_date']));
-    
-          // log_message('error', json_encode([$next_vouching_date_stamp, $custom_financial_year_reset_date_stamp]));
-    
-          if($custom_financial_year_reset_date_stamp > $next_vouching_date_stamp){
-            $transaction_period_behind_default_custom_fy_reset_date = true;
-          }
-        }
-    
-        return $transaction_period_behind_default_custom_fy_reset_date;
-      }
+  function getCustomFinancialYearById($custom_financial_year_id)
+  {
+    $custom_financial_year = [];
 
-      function getPreviousCustomFinancialYearByCurrentId($office_id, $current_custom_financial_year_id){
-    
-        $builder = $this->read_db->table("custom_financial_year");
-        $builder->select(array('custom_financial_year_id','custom_financial_year_start_month','custom_financial_year_is_active','custom_financial_year_reset_date'));
-        $builder->where(array('fk_office_id' => $office_id, 'custom_financial_year_id <> ' => $current_custom_financial_year_id));
-        $builder->orderBy('custom_financial_year_id ASC');
-        $custom_financial_year_obj = $builder->get();
-    
-        $previous_custom_financial_year = ['custom_financial_year_start_month' => 7, 'custom_financial_year_id' => NULL, 'custom_financial_year_is_active' => 0, 'custom_financial_year_reset_date' => NULL];
-    
-        if($custom_financial_year_obj->getNumRows() > 0){
-          $previous_custom_financial_year = $custom_financial_year_obj->getRowArray();
-        }
-    
-        return $previous_custom_financial_year;
-      }
+    $builder = $this->read_db->table('custom_financial_year');
+    $builder->select(array('custom_financial_year_id', 'custom_financial_year_start_month', 'custom_financial_year_is_active'));
+    $builder->where(array('custom_financial_year_id' => $custom_financial_year_id));
+    $custom_financial_year_obj = $builder->get();
 
-      function officeCustomFinancialYears($office_id){
-
-        $custom_financial_years = [];
-
-        $builder = $this->read_db->table("custom_financial_year");
-        $builder->where(array('fk_office_id' => $office_id));
-        $builder->orderBy('custom_financial_year_id ASC');
-        $custom_financial_years_obj = $builder->get();
-
-        if($custom_financial_years_obj->getNumRows() > 0){
-            $custom_financial_years = $custom_financial_years_obj->getResultArray();
-        }
-
-        return $custom_financial_years;
+    if ($custom_financial_year_obj->getNumRows() > 0) {
+      $custom_financial_year = $custom_financial_year_obj->getRowArray();
     }
 
-    function getMonthsOrderForCustomYear($custom_financial_year_id){
+    return $custom_financial_year;
+  }
 
-        $start_month = 7; 
-        
-        $builder = $this->read_db->table("custom_financial_year");
-        $builder->select(array('custom_financial_year_start_month'));
-        $builder->where(array('custom_financial_year_id' => $custom_financial_year_id));
-        $start_month_obj = $builder->get();
+  function transactionPeriodBehindDefaultCustomFyResetDate($next_vouching_date, $custom_financial_year)
+  {
 
-        if($start_month_obj->getNumRows() > 0){
-            $start_month =  $start_month_obj->getRow()->custom_financial_year_start_month;
-        }
-        
-        $months = range($start_month, 12);
+    $transaction_period_behind_default_custom_fy_reset_date = false;
+    // log_message('error', json_encode(['office_id' => $office_id, 'next_vouching_date' => $next_vouching_date, 'custom_financial_year' => $custom_financial_year]));
 
-        if(count($months) < 12){
-            $months_in_next_year = range(1, (12 - count($months)));
-            $months = array_merge($months,$months_in_next_year);
-        }
+    $custom_financial_year_id = $custom_financial_year['custom_financial_year_id'];
 
-        return $months;
+    if ($custom_financial_year_id != null) {
+      $next_vouching_date_stamp = strtotime('first day of this  month', strtotime($next_vouching_date));
+      $custom_financial_year_reset_date_stamp = strtotime('first day of this month', strtotime($custom_financial_year['custom_financial_year_reset_date']));
+
+      // log_message('error', json_encode([$next_vouching_date_stamp, $custom_financial_year_reset_date_stamp]));
+
+      if ($custom_financial_year_reset_date_stamp > $next_vouching_date_stamp) {
+        $transaction_period_behind_default_custom_fy_reset_date = true;
+      }
     }
 
-    function listTableVisibleColumns(): array {
-      return [
+    return $transaction_period_behind_default_custom_fy_reset_date;
+  }
+
+  function getPreviousCustomFinancialYearByCurrentId($office_id, $current_custom_financial_year_id)
+  {
+
+    $builder = $this->read_db->table("custom_financial_year");
+    $builder->select(array('custom_financial_year_id', 'custom_financial_year_start_month', 'custom_financial_year_is_active', 'custom_financial_year_reset_date'));
+    $builder->where(array('fk_office_id' => $office_id, 'custom_financial_year_id <> ' => $current_custom_financial_year_id));
+    $builder->orderBy('custom_financial_year_id ASC');
+    $custom_financial_year_obj = $builder->get();
+
+    $previous_custom_financial_year = ['custom_financial_year_start_month' => 7, 'custom_financial_year_id' => NULL, 'custom_financial_year_is_active' => 0, 'custom_financial_year_reset_date' => NULL];
+
+    if ($custom_financial_year_obj->getNumRows() > 0) {
+      $previous_custom_financial_year = $custom_financial_year_obj->getRowArray();
+    }
+
+    return $previous_custom_financial_year;
+  }
+
+  function officeCustomFinancialYears($office_id)
+  {
+
+    $custom_financial_years = [];
+
+    $builder = $this->read_db->table("custom_financial_year");
+    $builder->where(array('fk_office_id' => $office_id));
+    $builder->orderBy('custom_financial_year_id ASC');
+    $custom_financial_years_obj = $builder->get();
+
+    if ($custom_financial_years_obj->getNumRows() > 0) {
+      $custom_financial_years = $custom_financial_years_obj->getResultArray();
+    }
+
+    return $custom_financial_years;
+  }
+
+  function getMonthsOrderForCustomYear($custom_financial_year_id)
+  {
+
+    $start_month = 7;
+
+    $builder = $this->read_db->table("custom_financial_year");
+    $builder->select(array('custom_financial_year_start_month'));
+    $builder->where(array('custom_financial_year_id' => $custom_financial_year_id));
+    $start_month_obj = $builder->get();
+
+    if ($start_month_obj->getNumRows() > 0) {
+      $start_month =  $start_month_obj->getRow()->custom_financial_year_start_month;
+    }
+
+    $months = range($start_month, 12);
+
+    if (count($months) < 12) {
+      $months_in_next_year = range(1, (12 - count($months)));
+      $months = array_merge($months, $months_in_next_year);
+    }
+
+    return $months;
+  }
+
+  function listTableVisibleColumns(): array
+  {
+    return [
       'custom_financial_year_id',
       'custom_financial_year_track_number as track_number',
       'office_name',
@@ -146,10 +153,68 @@ class CustomFinancialYearLibrary extends GrantsLibrary implements \App\Interface
       'custom_financial_year_reset_date as reset_date',
       'custom_financial_year_is_active as is_active',
       'custom_financial_year_is_default as is_default',
-      'custom_financial_year_created_date as created_date',];
+      'custom_financial_year_created_date as created_date',
+    ];
+  }
+
+
+  public function changeFieldType(): array
+  {
+    $fields = [];
+
+    $builder = $this->read_db->table('month');
+    $builder->select(['month_number', 'month_name']);
+    $months = $builder->get()->getResultArray();
+
+    $fields['custom_financial_year_start_month']['field_type'] = 'select';
+
+    foreach ($months as $month) {
+      $fields['custom_financial_year_start_month']['options'][$month['month_number']] = $month['month_name'];
+    }
+
+    // $fields['custom_financial_year_reset_date']['field_type'] = 'text';
+
+    return $fields;
+  }
+
+
+
+  public function lookupValues(): array
+  {
+    $lookupValues = [];
+
+    $offices = [];
+
+    //Offices of the users.
+    $office_hierachy=array_column(session()->get('hierarchy_offices'),'office_id');
+
+    if (!session()->get('system_admin')) {
+
+      $builder = $this->read_db->table('office');
+      $builder->select(['office_id', 'office_name']);
+      $builder->where(['fk_context_definition_id' => 1, 'office_is_active' => 1]);
+      $builder->whereIn('office_id',$office_hierachy);
+      //$builder->orWhere('office_is_readonly', 0);
+      $offices_obj = $builder->get();
+
+      if ($offices_obj->getNumRows() > 0) {
+        $offices = $offices_obj->getResultArray();
+      }
+
+      $lookupValues['office'] = $offices;
     }
 
 
-    
-    
+
+    return $lookupValues;
+  }
+
+  public function singleFormAddVisibleColumns():array{
+
+    return ['office_name', 'custom_financial_year_reset_date','custom_financial_year_start_month'];
+
+   
+  }
+
+
 }

@@ -1093,3 +1093,12 @@ if(!function_exists('transfer_types')){
         return [1 => $income_transfer, 2 =>  $expense_transfer];
     }
 }
+
+
+if(!function_exists('mark_note_as_read')){
+    function mark_note_as_read($reader_user_id, $message_detail_id){
+        $messageLib=new \App\Libraries\Core\MessageLibrary();
+
+        $messageLib->markNoteAsRead($reader_user_id, $message_detail_id);
+    }
+}

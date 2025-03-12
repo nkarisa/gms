@@ -44,10 +44,14 @@ class BudgetLimitLibrary extends GrantsLibrary implements \App\Interfaces\Librar
     public function budgetLimitRemainingAmount(int $budget_id, int $income_account_id):float
     {
         $budget_limit_amount = $this->budgetLimitAmount($budget_id, $income_account_id);
+
+        //log_message('error',json_encode($budget_limit_amount ));
         
         $budgetLib=new \App\Libraries\Grants\BudgetLibrary();
 
         $sum_year_budgeted_amount = $budgetLib->budgetToDateAmountByIncomeAccount($budget_id, $income_account_id);
+
+        //log_message('error',json_encode( $sum_year_budgeted_amount ));
 
         return (float)$budget_limit_amount - (float)$sum_year_budgeted_amount;
     }

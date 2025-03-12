@@ -53,11 +53,14 @@ class CustomFinancialYear extends WebController
         $month_names = array_column($months, 'month_name');
     
         $months = array_combine($month_numbers, $month_names);
+
+        //log_message('error', json_encode($custom_financial_years));
     
         $result = [];
     
         $cnt = 0;
         foreach($custom_financial_years as $year){
+          log_message('error',json_encode($year));
           $year_id = array_shift($year);
           $year_track_number = $year['track_number'];
           $year['track_number'] = '<a href="'.base_url().$this->controller.'/view/'.hash_id($year_id).'">'.$year_track_number.'</a>';

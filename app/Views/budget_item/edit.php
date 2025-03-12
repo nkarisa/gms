@@ -418,6 +418,7 @@ function save(go_back = true){
         data:data,
         type:"POST",
         success:function(response){
+
             alert(response);
             if(go_back) {
                 location.href = document.referrer;

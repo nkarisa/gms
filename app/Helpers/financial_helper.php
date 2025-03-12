@@ -173,13 +173,16 @@ if (!function_exists('get_fy')) {
                 // $month_mumbers = array_column($months, 'month_number');
 
                 $db = \Config\Database::connect();
+                
                 $builder = $db->table('budget_review_count');
         
                 $month_numbers = array_column(month_order($office_id),'month_number');
-        
+
                 $builder->where(array('fk_account_system_id' => service('session')->get('user_account_system_id')));
-                $count_of_reviews_in_year = $builder->get('budget_review_count')->getRow()->budget_review_count_number;
+                $count_of_reviews_in_year = $builder->get()->getRow()->budget_review_count_number;
                 $count_of_months_in_period = count($month_numbers) / $count_of_reviews_in_year;
+
+                //log_message('error', json_encode(   $count_of_months_in_period));
                 /**
                  * 1 - 12 
                  * 2 - 6  

@@ -42,23 +42,29 @@ class BudgetLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
     $this->monthLib = new \App\Libraries\Core\MonthLibrary();
   }
 
-  public function budgetToDateAmountByIncomeAccount($budget_id, $income_account_id)
+  public function budgetToDateAmountByIncomeAccount($budget_id, $expense_account_id)
   {
 
 
+    //budget_to_date_amount_by_income_account
 
+    //Get account_income_id
+    $builder_reader=$this->read_db->table('expense_account');
+    $builder_reader->select(['fk_income_account_id']);
+    $builder_reader->where('expense_account_id', $expense_account_id);
+    $income_account_id=$builder_reader->get()->getRow()->fk_income_account_id;
+    
+    //Get the total amount
     $budget_item_detail_amount = 0.0;
     $builder = $this->read_db->table('budget_item_detail');
     $builder->selectSum('budget_item_detail_amount');
     $builder->join('budget_item', 'budget_item.budget_item_id = budget_item_detail.fk_budget_item_id');
-    $builder->join('expense_account', 'expense_account.expense_account_id = budget_item.fk_expense_account_id');
+   // $builder->join('expense_account', 'expense_account.expense_account_id = budget_item.fk_expense_account_id');
     $builder->where([
       'fk_budget_id' => $budget_id,
-      'fk_income_account_id' => $income_account_id
+      //'fk_income_account_id' => $income_account_id
     ]);
     $budget_item_detail_amount_obj = $builder->get();
-
-    //log_message('error', json_encode($budget_item_detail_amount_obj));
 
 
     if (!empty($budget_item_detail_amount_obj)) {
@@ -619,6 +625,8 @@ class BudgetLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
     $office = $this->getOffice($office_id);
 
     $default_custom_financial_year = $this->getCustomFinancialYear($office_id, true);
+
+    //log_message('error',json_encode($default_custom_financial_year));
 
     $year_budget_records = [];
 

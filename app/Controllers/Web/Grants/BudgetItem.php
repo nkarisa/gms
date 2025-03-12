@@ -675,7 +675,7 @@ class BudgetItem extends WebController
         $builder_update = $this->write_db->table('budget_item');
         $builder_update->where(array('budget_item_id' => $budget_item_id));
         $update_data['budget_item_revisions'] = json_encode($revision_data);
-        $builder_update->update('budget_item', $update_data);
+        $builder_update->update($update_data);
     }
 
     function prepareRevisionData($original_data, $new_data)
