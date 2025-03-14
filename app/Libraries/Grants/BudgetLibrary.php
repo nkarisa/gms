@@ -1283,6 +1283,12 @@ class BudgetLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
 
   function getBudgetIdBasedOnMonth($office_id, $reporting_month)
   {
+    if((intval($office_id)) == 0){
+      $financial_report_id = hash_id($office_id, 'decode');
+      $builder = $this->read_db->table('financial_report');
+      $builder->select('fk_office_id');
+      $office_id = $builder->where('financial_report_id', $financial_report_id)->get()->getRow()->fk_office_id;
+    }
 
     $custom_financial_year = $this->customFinancialYearLibrary->getDefaultCustomFinancialYearIdByOffice($office_id, true);
     $budget_tag_id = $this->budgetTagLibrary->getBudgetTagIdBasedOnReportingMonth($office_id, $reporting_month, $custom_financial_year)['budget_tag_id'];

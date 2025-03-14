@@ -59,7 +59,7 @@ class AwsAttachmentLibrary {
    
         $this->s3Client->putObject([
           'Key' => $key, // Where the file will be placed in S3
-          'Bucket' => service("settings")->get("GrantsConfig.s3_bucket_name"),
+           'Bucket' => $this->config->s3_bucket_name,
           'SourceFile' => $SourceFile, // Where the file originate in the local machine
         ]);
    
@@ -76,7 +76,7 @@ class AwsAttachmentLibrary {
     function s3PreassignedUrl($object_key)
     {
       $cmd = $this->s3Client->getCommand('GetObject', [
-        'Bucket' => service("settings")->get("GrantsConfig.s3_bucket_name"),
+        'Bucket' => $this->config->s3_bucket_name,
         'Key' => $object_key,
    
       ]);
@@ -91,7 +91,7 @@ class AwsAttachmentLibrary {
     {   
       $file = $file_parts[0] . '_' . $country_id . '.' . $file_parts[1];
    
-      $bucket = service("settings")->get("GrantsConfig.s3_bucket_name"); //'participants-csv-upload';
+      $bucket = $this->config->s3_bucket_name; //'participants-csv-upload';
    
       $keyname = 'reimbursement_participants/' . $file; // Replace with your desired file path and name in S3
    

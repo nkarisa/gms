@@ -1019,9 +1019,9 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
             $office_bank_ids = array_column($builder->get()->getResultArray(), 'office_bank_id');
          }
  
-         if (!empty($office_bank_ids)) {
-             $builder->whereIn('office_bank_id', $office_bank_ids);
-         }
+        //  if (!empty($office_bank_ids)) {
+        //      $builder->whereIn('office_bank_id', $office_bank_ids);
+        //  }
  
  
          $list_cleared_effects = [];
@@ -1246,7 +1246,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
         ));
 
         $builder2->groupBy('month_number,expense_account.expense_account_id');
-        $builder2->where('budget.fk_office_id', $office_ids);
+        $builder2->whereIn('budget.fk_office_id', $office_ids);
 
         // $this->read_db->where(array('month_order<=' => $month_order));
         $builder2->whereIn('month_id',  $listed_months);
@@ -1265,11 +1265,11 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
         }
 
         if (!empty($office_bank_ids)) {
-            $builder2->where('budget_item.fk_project_allocation_id', $get_office_bank_project_allocation);
+            $builder2->whereIn('budget_item.fk_project_allocation_id', $get_office_bank_project_allocation);
         }
 
 
-        $builder2->where('budget_item.fk_status_id', $max_approval_status_ids);
+        $builder2->whereIn('budget_item.fk_status_id', $max_approval_status_ids);
 
         $result = $builder2->get();
 
