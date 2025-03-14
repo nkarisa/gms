@@ -42,7 +42,7 @@ class GrantsConfig extends BaseConfig
     public $attachment_table_name = "attachment";
     public $attachment_key_column = "attachment_url";
     public $s3_region = 'eu-west-1';
-    public $s3_bucket_name = "fms-bucket";
+    public $s3_bucket_name = "safina-version-2-fcp-fms-testing-environment";
     public $max_count_of_favorites_menu_items = 10;
     public $maintenance_mode = false;
     public $allow_skipping_of_cheque_leaves = true;

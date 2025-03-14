@@ -19,7 +19,6 @@ class FinancialReport extends WebController
     private $customFinancialYearLibrary;
     private $budgetTagLibrary;
     private $voucherLibrary;
-    private $awsAttachmentLibrary;
     private $attachmentLibrary;
     private $checkbookLibrary;
     private $journalLibrary;
@@ -40,7 +39,6 @@ class FinancialReport extends WebController
         $this->customFinancialYearLibrary = new \App\Libraries\Grants\CustomFinancialYearLibrary();
         $this->budgetTagLibrary = new \App\Libraries\Grants\BudgetTagLibrary();
         $this->voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
-        $this->awsAttachmentLibrary = new \App\Libraries\System\AwsAttachmentLibrary();
         $this->attachmentLibrary = new \App\Libraries\Core\AttachmentLibrary();
         $this->checkbookLibrary = new \App\Libraries\Grants\ChequeBookLibrary();
         $this->journalLibrary = new \App\Libraries\Grants\JournalLibrary();
@@ -359,7 +357,16 @@ class FinancialReport extends WebController
         $office_id = $post['office_id'];
         $reporting_month = $post['reporting_month'];
         $report_id = $post['report_id'];
-  
+
+        // log_message('error', json_encode($office_id));
+        // log_message('error', intval($office_id));
+        //get the office id
+        if((intval($office_id)) == 0){
+          $decoded_financial_id = hash_id($office_id, 'decode');
+          $office_id = $this->getOfficeId2($decoded_financial_id);
+        }
+        
+        
         $budget_id = $this->budgetLibrary->getBudgetIdBasedOnMonth($office_id, $reporting_month);
         $comment =  $this->varianceCommentLibrary->getExpenseAccountComment($expense_account_id, $budget_id, $report_id);
       }
@@ -1306,9 +1313,9 @@ function showList():ResponseInterface
 
 function resultArray($report_id, $office_ids, $reporting_month, $project_ids = [], $office_bank_ids = [])
 {
-  // log_message('error', json_encode($office_bank_ids));
   extract($this->financialReportInformation($report_id));
 
+  
   $month_expenses = $this->expenseReport($office_ids, $reporting_month, $project_ids, $office_bank_ids);
   $fund_balances = $this->fundBalanceReport($office_ids, $reporting_month, $project_ids, $office_bank_ids);
 
@@ -1317,7 +1324,7 @@ function resultArray($report_id, $office_ids, $reporting_month, $project_ids = [
     //'test'=>[$office_ids,$reporting_month,'expense','bank_contra','bank',$project_ids,$office_bank_ids],
     'financial_ratios'=>$this->toDateFinancialRatios($office_ids[0],$reporting_month , $month_expenses, $fund_balances),
     'month_active_projects' => $this->getMonthActiveProjects($office_ids, $reporting_month),
-    'allow_mfr_reconciliation' => ($multiple_offices_report || $multiple_projects_report || count($this->getOfficeBanks($office_ids, $reporting_month, $project_ids, $office_bank_ids)) > 1) ? false : true,
+    'allow_mfr_reconciliation' => ($multiple_offices_report || $multiple_projects_report || count($this->getOfficeBanks($office_ids, $reporting_month, $project_ids, $office_bank_ids)) > 1) ? true : false,
     'office_banks' => $this->getOfficeBanks($office_ids, $reporting_month, $project_ids, $office_bank_ids),
     'multiple_offices_report' => $multiple_offices_report,
     'multiple_projects_report' => $multiple_projects_report,
@@ -1370,7 +1377,7 @@ function filterFinancialReport()
   $result['report_id'] = $report_id;
 
   //echo json_encode($result);
-
+  
   // $view_page =  $this->load->view('financial_report/ajax_view', $result, true);
   $view_page =  view('financial_report/ajax_view', $result);
 
@@ -1397,14 +1404,9 @@ function bankStatementsUploads($office_ids, $reporting_month, $project_ids = [],
   $reconciliation_builder->where(array('financial_report_month' => date('Y-m-01', strtotime($reporting_month))));
   $reconciliation_builder->join('financial_report', 'financial_report.financial_report_id=reconciliation.fk_financial_report_id');
 
-  // $this->read_db->select(array('reconciliation_id'));
-  // $this->read_db->where_in('fk_office_id', $office_ids);
-  // $this->read_db->where(array('financial_report_month' => date('Y-m-01', strtotime($reporting_month))));
-  // $this->read_db->join('financial_report', 'financial_report.financial_report_id=reconciliation.fk_financial_report_id');
 
   if (!empty($office_bank_ids)) {
     $reconciliation_builder->whereIn('reconciliation.fk_office_bank_id', $office_bank_ids);
-    // $this->read_db->where_in('reconciliation.fk_office_bank_id', $office_bank_ids);
   }
 
   if (!empty($project_ids)) {
@@ -1412,11 +1414,6 @@ function bankStatementsUploads($office_ids, $reporting_month, $project_ids = [],
     $reconciliation_builder->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_office_bank_id=office_bank.office_bank_id');
     $reconciliation_builder->join('project_allocation', 'project_allocation.project_allocation_id=office_bank_project_allocation.fk_project_allocation_id');
     $reconciliation_builder->whereIn('project_allocation.fk_project_id', $project_ids);
-
-    // $this->read_db->join('office_bank', 'office_bank.office_bank_id=reconciliation.office_bank_id');
-    // $this->read_db->join('office_bank_project_allocation', 'office_bank_project_allocation.fk_office_bank_id=office_bank.office_bank_id');
-    // $this->read_db->join('project_allocation', 'project_allocation.project_allocation_id=office_bank_project_allocation.fk_project_allocation_id');
-    // $this->read_db->where_in('project_allocation.fk_project_id', $project_ids);
   }
 
   $reconciliation_ids_obj = $reconciliation_builder->get();
@@ -1435,19 +1432,18 @@ function bankStatementsUploads($office_ids, $reporting_month, $project_ids = [],
 
   $approve_item_id = $approve_item_builder_id->getRow()->approve_item_id;
 
-  // $approve_item_id = $this->read_db->get_where(
-  //   'approve_item',
-  //   array('approve_item_name' => $approve_item_name)
-  // )->row()->approve_item_id;
-
-  //print_r(array_column($reconciliation_ids,'reconciliation_id'));exit;
-
   $attachment_where_condition_array['fk_approve_item_id'] = $approve_item_id;
   $attachment_where_condition_array['attachment_primary_id'] = array_column($reconciliation_ids, 'reconciliation_id');
 
   // return $this->Aws_attachment_library->retrieve_file_uploads_info('reconciliation',array_column($reconciliation_ids,'reconciliation_id'));
 
-  return $this->awsAttachmentLibrary->retrieveFileUploadsInfo($attachment_where_condition_array);
+  //fetch URL and file name from attachment table 
+  $attachment_builder = $this->read_db->table('attachment');
+  $attachment_builder->select(['attachment_name', 'attachment_url']);
+  $attachment_builder->whereIn('attachment_primary_id', $attachment_where_condition_array['attachment_primary_id']);
+  $attachment_results = $attachment_builder->get()->getResultArray();
+
+  return $this->awsAttachmentLibrary->retrieveFileUploadsInfo($attachment_results);
 }
 
 function projectsBalanceReport($office_ids, $reporting_month, $project_ids = [], $office_bank_ids = [])
@@ -1977,26 +1973,23 @@ function uploadStatements()
 
 
   // Check if a reconciliation record exists, if not create it
-  $this->read_db->join('financial_report', 'financial_report.financial_report_id=reconciliation.fk_financial_report_id');
-  $this->read_db->where(array('reconciliation.fk_office_bank_id' => $office_banks[0]));
-  $reconciliation_obj = $this->read_db->get_where(
-    'reconciliation',
-    array(
-      'financial_report.fk_office_id' => $post['office_id'],
-      'financial_report_month' => $post['reporting_month']
-    )
-  );
+  $reconciliation_builder = $this->read_db->table('reconciliation');
+  $reconciliation_builder->select('reconciliation_id');
+  $reconciliation_builder->join('financial_report', 'financial_report.financial_report_id=reconciliation.fk_financial_report_id');
+  $reconciliation_builder->where(array(
+    'reconciliation.fk_office_bank_id' => $office_banks[0],
+    'financial_report.fk_office_id' => $post['office_id'],
+    'financial_report.financial_report_month' => $post['reporting_month']
+  ));
+  $reconciliation_obj = $reconciliation_builder->get();
+  
 
-  // echo json_encode($reconciliation_obj->num_rows()); 
-
-  if ($reconciliation_obj->num_rows() == 0) {
+  if ($reconciliation_obj->getNumRows() == 0) {
     // Create a reconciliation record
-    //$financial_report_id,$office_bank_id,$statement_balance = 0, $suspense_amount = 0
-
-    $financial_report_id = $this->read_db->get_where(
-      'financial_report',
-      array('fk_office_id' => $post['office_id'], 'financial_report_month' => $post['reporting_month'])
-    )->row()->financial_report_id;
+    $financial_report_builder = $this->read_db->table('financial_report');
+    $financial_report_builder->select('financial_report_id');
+    $financial_report_builder->where(array('fk_office_id' => $post['office_id'], 'financial_report_month' => $post['reporting_month']));
+    $financial_report_id = $financial_report_builder->get()->getRow()->financial_report_id;
 
     $this->insertReconciliation($financial_report_id, $office_banks[0]);
   }
@@ -2004,16 +1997,15 @@ function uploadStatements()
   $result = [];
 
   if (count($office_banks) == 1) {
-    $this->read_db->join('financial_report', 'financial_report.financial_report_id=reconciliation.fk_financial_report_id');
-    $this->read_db->where(array('reconciliation.fk_office_bank_id' => $office_banks[0]));
-    $reconciliation_id = $this->read_db->get_where(
-      'reconciliation',
-      array(
-        'fk_office_id' => $post['office_id'],
-        'financial_report_month' => $post['reporting_month']
-      )
-    )->row()->reconciliation_id;
-
+    $builder = $this->read_db->table('reconciliation');
+    $builder->select('reconciliation_id');
+    $builder->join('financial_report', 'financial_report.financial_report_id=reconciliation.fk_financial_report_id');
+    $builder->where(array(
+      'reconciliation.fk_office_bank_id' => $office_banks[0],
+      'fk_office_id' => $post['office_id'],
+      'financial_report_month' => $post['reporting_month']
+    ));
+    $reconciliation_id =$builder->get()->getRow()->reconciliation_id;
 
     $storeFolder = upload_url('reconciliation', $reconciliation_id, [$office_banks[0]]);
 
@@ -2033,7 +2025,6 @@ function deleteStatement()
   $path = $this->request->getPost('path');
 
   $msg = "File deletion failed";
-
   if (file_exists($path)) {
     if (unlink($path)) {
       $msg = "File deleted successful";
@@ -2087,7 +2078,7 @@ function submitFinancialReport()
     $message = "You have missing requirements and report is not submitted. Check the following items:\n";
     $items = "";
 
-    log_message('error', $is_proof_of_cash_correct );
+    // log_message('error', $is_proof_of_cash_correct );
     if (!$is_proof_of_cash_correct) $items .= "-> Proof of Cash is correct\n";
     if (!$report_reconciled) $items .= "-> Report is reconciled\n";
     if (!$vouchers_approved) $items .= "-> All vouchers in the month are approved or journal is not empty\n";
@@ -2238,10 +2229,12 @@ function submitFinancialReport()
 
     // Post financial reatio historical data 
     $financial_ratios = $this->toDateFinancialRatios($post['office_id'],$post['reporting_month'] , $expense_report_balance, $fund_balance_report);
+    $db = $this->write_db;
+    $db->transStart();
 
-    $this->write_db->trans_start();
     // Update financial report table
-    $this->write_db->where(array('fk_office_id' => $post['office_id'], 'financial_report_month' => $post['reporting_month']));
+    $builder = $this->write_db->table('financial_report');
+    $builder->where(array('fk_office_id' => $post['office_id'], 'financial_report_month' => $post['reporting_month']));
 
     $current_budget = $this->budgetLibrary->getBudgetByOfficeCurrentTransactionDate($post['office_id']);
     
@@ -2264,7 +2257,7 @@ function submitFinancialReport()
     $update_data['fk_status_id'] = $next_status_id;
     // log_message('error', json_encode($update_data));
 
-    $this->write_db->update('financial_report', $update_data);
+    $builder->update($update_data);
 
 
     // Deactivate non default cheque book
@@ -2281,9 +2274,9 @@ function submitFinancialReport()
       ]);
     }
 
-    $this->write_db->trans_complete();
+    $db->transComplete();
 
-    if ($this->write_db->trans_status() === FALSE)
+    if ($db->transStatus() === FALSE)
     {
       
     }
@@ -2589,13 +2582,19 @@ function submitFinancialReport()
        // This piece f code will never run since the statement balance field is not present in the view when the above is met
        echo "Cannot update balances when multiple offices, banks or projects are selected";
      } else {
-      //  $financial_report_builder1 = $this->read_db->table('financial_report');
-      //  $financial_report_builder1->select('financial_report_id');
-      //  $financial_report_builder1->where(array('financial_report_month' => $post['reporting_month'], 'fk_office_id' => hash_id($post['office_ids'][0], 'decode')));
-      //  $financial_report_result = $financial_report_builder1->get();
-      //  $financial_report_id = $financial_report_result->getResultArray();
-      //  log_message('error', json_encode(array('financial_report_month' => $post['reporting_month'], 'offices' => hash_id($post['office_ids'][0], 'decode'), 'financial_report_id' => $financial_report_id, 'id'=>$this->id, 'id2'=>hash_id('ZY6pAN7LOq', 'decode'))));
-      $financial_report_id = hash_id($post['office_ids'][0], 'decode');
+      // log_message('error', json_encode(array('financial_report_month' => $post['reporting_month'], 'offices' => $post['office_ids'][0],'id'=>$this->id)));
+      if(intval($post['office_ids'][0]) == 0){
+        $financial_report_id = hash_id($post['office_ids'][0], 'decode');
+      }else{
+        $financial_report_builder1 = $this->read_db->table('financial_report');
+        $financial_report_builder1->select('financial_report_id');
+        $financial_report_builder1->where(array('financial_report_month' => $post['reporting_month'], 'fk_office_id' => $post['office_ids'][0]));
+        $financial_report_result = $financial_report_builder1->get();
+        $financial_report_id = $financial_report_result->getRow()->financial_report_id;
+      }
+       
+      
+      // $financial_report_id = hash_id($post['office_ids'][0], 'decode');
       // $financial_report_id = $this->read_db->get_where(
       //    'financial_report',
       //    array('financial_report_month' => $post['reporting_month'], 'fk_office_id' => $post['office_ids'][0])
@@ -2710,7 +2709,9 @@ function submitFinancialReport()
      $data['fk_approval_id'] = $this->grantsLibrary->insertApprovalRecord('reconciliation');
      $data['fk_status_id'] = 0; //$this->grants_model->initial_item_status('reconciliation');
  
-     $this->write_db->insert('reconciliation', $data);
+     $builder = $this->write_db->table('reconciliation');
+     $builder->insert($data);
+    //  $this->write_db->insert('reconciliation', $data);
  
      //return json_encode($data);
    }
@@ -2758,5 +2759,11 @@ function submitFinancialReport()
     return $proof_of_cash;
    }
 
+  //  //method used to get the office id using the financial report id
+   public function getOfficeId2($financial_report_id){
+    $builder = $this->read_db->table('financial_report');
+    $result = $builder->where('financial_report_id', $financial_report_id)->get()->getRow()->fk_office_id;
+    return $result;
+  }
 
 }

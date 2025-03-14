@@ -24,7 +24,12 @@
                       if(!isset($bank_statements_upload['attachment_url'])) continue;
                     ?>
                     <tr>
-                <td><?php if(count($office_banks) == 1){?><a href="#" class="fa fa-trash-o delete_statement" id="<?=$bank_statements_upload['attachment_url'];?>"></a><?php }?></td>
+                        <td>
+                            <?php 
+                                if(count($office_banks) == 1){?>
+                                    <a href="#" class="fa fa-trash-o delete_statement" id="<?=$bank_statements_upload['attachment_url'];?>"></a>
+                            <?php }?>
+                        </td>
             
                         <?php
                             $objectKey = $bank_statements_upload['attachment_url'].'/'.$bank_statements_upload['attachment_name'];

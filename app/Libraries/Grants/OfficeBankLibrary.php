@@ -434,7 +434,7 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
     $builder= $this->read_db->table('office_bank');
     $builder->select(array('office_bank_id'));
     $builder->where(array('fk_office_id' => $office_id, 'office_bank_is_default' => 0, 'office_bank_is_active' => 1));
-    $office_bank_obj = $builder->get('office_bank');
+    $office_bank_obj = $builder->get();
 
     if($office_bank_obj->getNumRows() > 0){
       $office_bank_ids = array_column($office_bank_obj->getResultArray(),'office_bank_id');

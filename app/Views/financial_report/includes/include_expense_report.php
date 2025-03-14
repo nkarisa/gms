@@ -165,7 +165,7 @@
 $(document).on('change','.active_note_area > textarea',function(){
     var expense_account_id = $(".is_clicked").first().data('account_id');
     var comment = $(this).val();
-    var url = "<?=base_url();?>Financial_report/post_expense_account_comment";
+    var url = "<?=base_url();?>ajax/financial_report/postExpenseAccountComment";
     var office_id = $("#office_ids").val();
     var reporting_month = '<?=$reporting_month;?>';
     var report_id = '<?=$report_id;?>';
@@ -237,7 +237,7 @@ function update_notes_area(row){
     var report_id = '<?=$report_id;?>';
     var data = {'expense_account_id':expense_account_id,'office_id':office_id,'report_id':report_id,'reporting_month':reporting_month};
     
-    var url = "<?=base_url();?>Financial_report/get_expense_account_comment";
+    var url = "<?=base_url();?>ajax/financial_report/getExpenseAccountComment";
 
     $.post(url,data,function(comment){
         var pane_count = row.children().length;

@@ -2,7 +2,6 @@
 ?>
 
 <script>
-console.log('test');
 // $(document).ready(function(){
 
     $('#btn_manage_columns').on('click', function () {

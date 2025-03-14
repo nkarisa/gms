@@ -126,7 +126,7 @@ extract($result);
                     || (count($month_active_projects) > 0 && !$this->config->allow_a_bank_to_be_linked_to_many_projects))
                 { ?>
         
-                <form id='frm_selected_offices' action='<?= base_url(); ?>financial_report/filter_financial_report' method='POST'>
+                <form id='frm_selected_offices' action='<?= base_url(); ?>ajax/financial_report/filterFinancialReport' method='POST'>
                     <div class='form-group'>
                         <label class='col-xs-2 control-label'><?= get_phrase('report_filter'); ?></label>
 

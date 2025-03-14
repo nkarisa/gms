@@ -102,7 +102,7 @@ class AttachmentLibrary extends GrantsLibrary implements \App\Interfaces\Library
      }
      
      $builder->join('approve_item', 'approve_item.approve_item_id=attachment_type.fk_approve_item_id');
-     $attachment_type_id = $builder->get('attachment_type')->getRow()->attachment_type_id;
+     $attachment_type_id = $builder->get()->getRow()->attachment_type_id;
  
      return $attachment_type_id;
    }
