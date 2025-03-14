@@ -1096,9 +1096,11 @@ class Voucher extends WebController
    {
 
     $post = $this->request->getPost();
+
+    //log_message('error', json_encode($post));
     $officeBankLibrary = new \App\Libraries\Grants\OfficeBankLibrary();
  
-     $office_bank_id = $post['fk_office_bank_id'] == null ? 0 : $post['fk_office_bank_id'];
+     $office_bank_id = !isset($post['fk_office_bank_id']) ? 0 : $post['fk_office_bank_id'];
  
      if ($office_bank_id == 0) {
        // Get id of active office bank
@@ -1345,5 +1347,34 @@ class Voucher extends WebController
     }
     
     return $this->response->setJSON($attachments);
+  }
+
+  function getExpenceAccountIncome(int $account_id, int $voucher_type)
+  {
+
+
+    //Get the voucher type effect
+    $builder_reader=$this->read_db->table('voucher_type');
+    $builder_reader->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+    $builder_reader->where(['voucher_type_id' => $voucher_type]);
+    $voucher_type_effect_code=$builder_reader->get()->getRow()->voucher_type_effect_code;
+
+
+    //Get income for an expense
+
+    $builder_reader_expense=$this->read_db->table('expense_account');
+
+    if ($voucher_type_effect_code == 'expense') {
+
+      $builder_reader_expense->select(['fk_income_account_id']);
+
+      $builder_reader_expense->where(['expense_account_id' => $account_id]);
+
+      $income_account = $builder_reader_expense->get()->getRow()->fk_income_account_id;
+    } else {
+      $income_account = $account_id;
+    }
+
+    echo   $income_account;
   }
 }

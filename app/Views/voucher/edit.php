@@ -843,7 +843,7 @@ $voucher_missing_details = $voucherLibrary->isVoucherMissingVoucherDetails($vouc
                     $('#cash_account').append(cash_account);
 
                     //Append the other office cash
-                    let active_office_cash_url = '<?= base_url() ?>voucher/getActiveOfficeCash';
+                    let active_office_cash_url = '<?= base_url() ?>ajax/voucher/getActiveOfficeCash';
 
                     populate_dropdowns(active_office_cash_url, '#cash_account', 'cash');
 
@@ -2003,7 +2003,7 @@ $voucher_missing_details = $voucherLibrary->isVoucherMissingVoucherDetails($vouc
 
         let voucher_type_id = $('#voucher_type').val();
 
-        let url = "<?= base_url() ?>voucher/get_expence_account_income/" + expense_or_income_id.val() + '/' + voucher_type_id;
+        let url = "<?= base_url() ?>ajax/voucher/getExpenceAccountIncome/" + expense_or_income_id.val() + '/' + voucher_type_id;
 
 
         $.get(url, function(response) {
