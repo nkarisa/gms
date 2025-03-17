@@ -1620,18 +1620,25 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return $vouchers_ids;
     }
 
-    function getAttachments($approve_item_id, $record_id){
+    public function getAttachments($approve_item_id, $record_id){
+
+
         $awsAttachmentLibrary = new \App\Libraries\System\AwsAttachmentLibrary();
         $attachment_where_condition_array['fk_approve_item_id'] = $approve_item_id;
         $attachment_where_condition_array['attachment_primary_id'] = $record_id;
+      
         $attachments = $awsAttachmentLibrary->retrieveFileUploadsInfo($attachment_where_condition_array);
+
+        
         $attachmentLibrary = new \App\Libraries\Core\AttachmentLibrary();
+
 
         for($i = 0; $i < sizeof($attachments); $i++){
           $objectKey = $attachments[$i]['attachment_url'].'/'.$attachments[$i]['attachment_name'];
           $attachments[$i]['attachment_url'] = $this->config->upload_files_to_s3 ? $awsAttachmentLibrary->s3PreassignedUrl($objectKey) : $attachmentLibrary->getLocalFilesystemAttachmentUrl($objectKey);
         }
     
+       
         return $attachments;
       }
 
@@ -1643,7 +1650,10 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
         if(count($vouchers)){
             $month_cancelled_vouchers = $this->monthCancelledVouchers($vouchers[0]['voucher_date']);
-            $account_system_settings = $accountSystemSettingLibrary->getAccountSystemSettings($vouchers[0]['fk_account_system_id']);
+            //$account_system_settings = $accountSystemSettingLibrary->getAccountSystemSettings($vouchers[0]['fk_account_system_id']);
+
+            $account_system_settings = $accountSystemSettingLibrary->getAccountSystemSettings($this->session->get('user_account_system_id'));
+            
             
             if (
                 array_key_exists('voucher_attachments_required', $account_system_settings)
@@ -1651,6 +1661,8 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             ) {
                 $voucher_attachments_required = true;
             }
+
+            //log_message('error', json_encode( $voucher_attachments_required));
         }
 
         $approve_item_id = $this->read_db->table('approve_item')->where(['approve_item_name' => 'voucher'])
@@ -1687,7 +1699,9 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         }
 
         $voucher_attachments = $this->getAttachments($approve_item_id, $rowData['voucher_id']);
+
         $count_of_attachments = count($voucher_attachments);
+
         $btn_color = $count_of_attachments == 0 ? 'btn-danger' : 'btn-success';
         $btn_label = $count_of_attachments == 0 ? get_phrase('attach_documents','Attach Support Documents') : get_phrase('show_documents','Show Support Documents');
         // $disable_approval_button = $count_of_attachments == 0 && $voucher_attachments_required ? true : false;
@@ -1702,9 +1716,16 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         
         $can_delete_attachment = ($rowData['fk_status_id'] == $item_initial_item_status_id || $status_approval_direction == '-1') && $user_has_voucher_update_permission ? true : false;
 
+        //log_message('error',json_encode($rowData));
+
+        //log_message('error', json_encode($rowData['fk_status_id']));
+
         if (is_array($month_cancelled_vouchers) && !in_array($rowData['voucher_id'], $month_cancelled_vouchers)) {
             if($voucher_attachments_required){
-                $columnsValues .= '<div data-attachments="'.json_encode($voucher_attachments).'" data-can_delete_attachment="'.$can_delete_attachment.'" data-voucher_id="'.$rowData['voucher_id'].'" class = "btn '.$btn_color.' dt-control" id = "dt-control-'.$rowData['voucher_id'].'">' . $btn_label . '</div> ';
+
+                // $columnsValues .= '<div data-attachments = "'.$voucher_attachments.'"  data-can_delete_attachment='.$can_delete_attachment.' data-voucher_id='.$rowData['voucher_id'].' class = "btn '.$btn_color.' dt-control" id = "dt-control-'.$rowData['voucher_id'].'">' . $btn_label . '</div> ';
+
+                $columnsValues .= '<div id="dt-control-'.$rowData['voucher_id'].'"  data-can_delete_attachment="'.$can_delete_attachment.'" data-voucher_id="'.$rowData['voucher_id'].'" class = "btn '.$btn_color.' dt-control" >' . $btn_label . '</div> ';
             }
             $columnsValues .= approval_action_button($this->controller, $item_status, $rowData['voucher_id'], $rowData['status_id'], $item_initial_item_status_id, $item_max_approval_status_ids, false, true,'', $is_voided_chq);
         }

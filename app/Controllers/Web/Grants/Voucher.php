@@ -1320,6 +1320,7 @@ class Voucher extends WebController
     $additional_attachment_table_insert_data['fk_status_id'] = $statusLibrary->initialItemStatus('attachment');
     $additional_attachment_table_insert_data['fk_attachment_type_id'] = $attachmentLibrary->getAttachmentTypeId('voucher_receipts');
 
+    //log_message('error',json_encode($additional_attachment_table_insert_data));
     $attachment_where_condition_array = [];
 
     $attachment_where_condition_array = array(
@@ -1327,6 +1328,7 @@ class Voucher extends WebController
       'attachment_primary_id' => $voucher_id
     );
 
+    
     $preassigned_urls = $awsAttachmentLibrary->uploadFiles($storeFolder, $additional_attachment_table_insert_data, $attachment_where_condition_array);
     
     return $this->response->setJSON($preassigned_urls);
@@ -1345,6 +1347,18 @@ class Voucher extends WebController
     if($attachmentLibrary->deleteUploadedDocument($attachment_id)){
       $attachments = $voucherLibrary->getAttachments($approve_item_id, $voucher_id);
     }
+    
+    return $this->response->setJSON($attachments);
+  }
+
+  function getAttachmentDocuments($voucher_id){
+
+    $approve_item_id = $this->read_db->table('approve_item')->where(['approve_item_name' => 'voucher'])->get()->getRow()->approve_item_id;
+
+    $attachments = [];
+    $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+
+    $attachments = $voucherLibrary->getAttachments($approve_item_id, $voucher_id);
     
     return $this->response->setJSON($attachments);
   }
