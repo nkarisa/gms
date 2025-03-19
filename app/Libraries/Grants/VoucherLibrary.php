@@ -1704,7 +1704,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
         $btn_color = $count_of_attachments == 0 ? 'btn-danger' : 'btn-success';
         $btn_label = $count_of_attachments == 0 ? get_phrase('attach_documents','Attach Support Documents') : get_phrase('show_documents','Show Support Documents');
-        // $disable_approval_button = $count_of_attachments == 0 && $voucher_attachments_required ? true : false;
+        $disable_approval_button = $count_of_attachments == 0 && $voucher_attachments_required ? true : false;
                 
         $officeLibrary = new \App\Libraries\Core\OfficeLibrary();
         $office_account_system_id = $officeLibrary->getOfficeAccountSystem($rowData['office_id'])['account_system_id'];
@@ -1727,7 +1727,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
                 $columnsValues .= '<div id="dt-control-'.$rowData['voucher_id'].'"  data-can_delete_attachment="'.$can_delete_attachment.'" data-voucher_id="'.$rowData['voucher_id'].'" class = "btn '.$btn_color.' dt-control" >' . $btn_label . '</div> ';
             }
-            $columnsValues .= approval_action_button($this->controller, $item_status, $rowData['voucher_id'], $rowData['status_id'], $item_initial_item_status_id, $item_max_approval_status_ids, false, true,'', $is_voided_chq);
+            $columnsValues .= approval_action_button($this->controller, $item_status, $rowData['voucher_id'], $rowData['status_id'], $item_initial_item_status_id, $item_max_approval_status_ids, $disable_approval_button, true,'', $is_voided_chq);
         }
     }
 
