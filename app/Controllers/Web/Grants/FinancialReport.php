@@ -1397,6 +1397,7 @@ function checkIfFinancialReportIsSubmitted($office_ids, $reporting_month)
 function bankStatementsUploads($office_ids, $reporting_month, $project_ids = [], $office_bank_ids = [])
 {
 
+  $attachment_results = [];
   $reconciliation_ids = [];
   $reconciliation_builder = $this->read_db->table('reconciliation');
   $reconciliation_builder->select('reconciliation_id');
@@ -1438,12 +1439,16 @@ function bankStatementsUploads($office_ids, $reporting_month, $project_ids = [],
   // return $this->Aws_attachment_library->retrieve_file_uploads_info('reconciliation',array_column($reconciliation_ids,'reconciliation_id'));
 
   //fetch URL and file name from attachment table 
-  $attachment_builder = $this->read_db->table('attachment');
-  $attachment_builder->select(['attachment_name', 'attachment_url']);
-  $attachment_builder->whereIn('attachment_primary_id', $attachment_where_condition_array['attachment_primary_id']);
-  $attachment_results = $attachment_builder->get()->getResultArray();
+  if(!empty($attachment_where_condition_array['attachment_primary_id'])){
+    $attachment_builder = $this->read_db->table('attachment');
+    $attachment_builder->select(['attachment_id','attachment_name', 'attachment_url', 'attachment_size', 'attachment_last_modified_date']);
+    $attachment_builder->whereIn('attachment_primary_id', $attachment_where_condition_array['attachment_primary_id']);
+    $attachment_results = $attachment_builder->get()->getResultArray();
+    return $attachment_results;
+  }else{
+    return $attachment_results;
+  }
 
-  return $this->awsAttachmentLibrary->retrieveFileUploadsInfo($attachment_results);
 }
 
 function projectsBalanceReport($office_ids, $reporting_month, $project_ids = [], $office_bank_ids = [])
@@ -2008,13 +2013,13 @@ function uploadStatements()
     $reconciliation_id =$builder->get()->getRow()->reconciliation_id;
 
     $storeFolder = upload_url('reconciliation', $reconciliation_id, [$office_banks[0]]);
-
-    if (
-      is_array($this->attachmentLibrary->uploadFiles($storeFolder)) &&
-      count($this->attachmentLibrary->uploadFiles($storeFolder)) > 0
-    ) {
-      $result = $this->attachmentLibrary->uploadFiles($storeFolder);
-    }
+    $result = $this->attachmentLibrary->uploadFiles($storeFolder);
+    // if (
+    //   is_array($this->attachmentLibrary->uploadFiles($storeFolder)) &&
+    //   count($this->attachmentLibrary->uploadFiles($storeFolder)) > 0
+    // ) {
+    //   $result = $this->attachmentLibrary->uploadFiles($storeFolder);
+    // }
   }
 
   echo json_encode($result);
@@ -2022,16 +2027,36 @@ function uploadStatements()
 
 function deleteStatement()
 {
-  $path = $this->request->getPost('path');
+  // $path = $this->request->getPost('path');
 
-  $msg = "File deletion failed";
-  if (file_exists($path)) {
-    if (unlink($path)) {
-      $msg = "File deleted successful";
-    }
+  // $msg = "File deletion failed";
+  // if (file_exists($path)) {
+  //   if (unlink($path)) {
+  //     $msg = "File deleted successful";
+  //   }
+  // }
+
+  // echo $msg;
+  $msg=get_phrase('delete_s3_object_failed', 'Bank statement not deleted.');
+
+  //Get the values from the form 
+  $path = $this->request->getPost('file_path');
+
+  $file_name=$this->request->getPost('file_name');
+
+  $attachment_id=(int)$this->request->getPost('id');
+
+  $file_path=$path.'/'.$file_name;
+
+  //Delete Object in S3 and the record in attachement Table.
+  $deleted_flag=$this->attachmentLibrary->deleteUploadedDocument($attachment_id,$file_path);
+
+  if($deleted_flag==1){
+    $msg=get_phrase('delete_s3_object_success', 'Bank statement deleted successfully.');
   }
-
   echo $msg;
+
+
 }
 
 function reverseMfrSubmission($report_id)

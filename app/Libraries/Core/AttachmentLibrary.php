@@ -127,5 +127,34 @@ class AttachmentLibrary extends GrantsLibrary implements \App\Interfaces\Library
   public function getLocalFilesystemAttachmentUrl($objectKey){
     return base_url().$objectKey;
   }
+
+  public function deleteUploadedDocument(int $uploaded_image_id, string $file_path='')
+  {
+
+    //Delete Bank statements
+    if($file_path!=''){
+
+      $this->awsAttachmentLibrary->deleteBankStatementInS3($file_path);
+
+    }
+
+    //Delete From attachment table
+    
+    $this->write_db->transStart();
+    $builder =  $this->write_db->table('attachment');
+    $builder->where(['attachment_id' => $uploaded_image_id]);
+    $builder->delete();
+    $this->write_db->transComplete();
+
+    // $this->write_db->where(['attachment_id' => $uploaded_image_id]);
+    // $this->write_db->delete('attachment');
+    // $this->write_db->trans_complete();
+
+    if ($this->write_db->transStatus() == FALSE) {
+      return 0;
+    } else {
+      return 1;
+    }
+  }
    
 }

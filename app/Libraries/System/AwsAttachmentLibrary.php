@@ -120,24 +120,37 @@ class AwsAttachmentLibrary {
     {
        
         $builder = $this->db->table($this->attachment_table_name);
-        $attachmentObj = $builder->where($attachmentWhereConditions)->get()->getRow();
-
+        $attachmentObj = $builder->where($attachmentWhereConditions)->get()->getResultArray();
+        $result = [];
         if (!$attachmentObj) {
-            return [];
+            return $result;
         }
+        for ($i=0; $i < sizeof($attachmentObj); $i++) { 
+            $objectKey = $attachmentObj[$i]['attachment_url'] . '/' . $attachmentObj[$i]['attachment_name'];
+            $s3PreassignedUrl = $this->s3PreassignedUrl($objectKey);
+            array_push($result, [
+                'attachment_name' => $attachmentObj[$i]['attachment_name'],
+                'attachment_size' => formatBytes($attachmentObj[$i]['attachment_size']),
+                'attachment_last_modified_date' => $attachmentObj[$i]['attachment_last_modified_date'],
+                'attachment_file_type' => $attachmentObj[$i]['attachment_file_type'],
+                'attachment_primary_id' => $attachmentObj[$i]['attachment_primary_id'],
+                'attachment_id' => $attachmentObj[$i]['attachment_id'],
+                's3_preassigned_url' => $s3PreassignedUrl
+            ]);
+        }
+        return $result;
+        // $objectKey = $attachmentObj->attachment_url . '/' . $attachmentObj->attachment_name;
+        // $s3PreassignedUrl = $this->s3PreassignedUrl($objectKey);
 
-        $objectKey = $attachmentObj->attachment_url . '/' . $attachmentObj->attachment_name;
-        $s3PreassignedUrl = $this->s3PreassignedUrl($objectKey);
-
-        return [
-            'attachment_name' => $attachmentObj->attachment_name,
-            'attachment_size' => formatBytes($attachmentObj->attachment_size),
-            'attachment_last_modified_date' => $attachmentObj->attachment_last_modified_date,
-            'attachment_file_type' => $attachmentObj->attachment_file_type,
-            'attachment_primary_id' => $attachmentObj->attachment_primary_id,
-            'attachment_id' => $attachmentObj->attachment_id,
-            's3_preassigned_url' => $s3PreassignedUrl
-        ];
+        // return [
+        //     'attachment_name' => $attachmentObj->attachment_name,
+        //     'attachment_size' => formatBytes($attachmentObj->attachment_size),
+        //     'attachment_last_modified_date' => $attachmentObj->attachment_last_modified_date,
+        //     'attachment_file_type' => $attachmentObj->attachment_file_type,
+        //     'attachment_primary_id' => $attachmentObj->attachment_primary_id,
+        //     'attachment_id' => $attachmentObj->attachment_id,
+        //     's3_preassigned_url' => $s3PreassignedUrl
+        // ];
     }
 
     public function uploadSingleFileFromDirectory(
@@ -282,4 +295,25 @@ class AwsAttachmentLibrary {
     function getLocalFilesystemAttachmentUrl($objectKey){
         return base_url().$objectKey;
       }
+
+    public function deleteBankStatementInS3(string $file_name){
+
+        try {
+      
+            $this->s3Client->deleteObject([
+                'Key' => $file_name,
+                'Bucket' => $this->config->s3_bucket_name,
+            ]);
+      
+            //Remove the temp files after gabbage collection for the S3 guzzlehttp to release resources
+      
+            gc_collect_cycles();
+      
+      
+        } catch (S3Exception $s3Ex) {
+      
+            die("An exception occured. {$s3Ex}");
+        }
+      
+       }
 }
