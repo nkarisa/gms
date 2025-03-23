@@ -316,7 +316,7 @@ class StatusLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
 
         // If the approveable item has a dependant table, insert status records for it
         if ($has_dependant_table) {
-            $dependant_table = $this->DependantTable($approve_item_name);
+            $dependant_table = $this->dependantTable($approve_item_name);
             $this->mandatoryFields($dependant_table);
             $this->insertStatusForApproveableItem($dependant_table);
         }

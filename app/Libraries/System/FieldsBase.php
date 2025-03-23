@@ -173,7 +173,7 @@ class FieldsBase
 
     $name_max_length = array_combine($array_of_columns, $array_of_max_length);
 
-    return $name_max_length[$this->column];
+    return isset($name_max_length[$this->column]) ? $name_max_length[$this->column] : 0;
   }
 
   function number_field($value = 0)
@@ -265,11 +265,10 @@ class FieldsBase
 
     $id = "";
 
-    $column_placeholder = $this->column;
-
-    if (substr($this->column, 0, 3) == 'fk_') {
-      $column_placeholder = substr($this->column, 3, -3);
-    }
+    // $column_placeholder = $this->column;
+    // if (substr($this->column, 0, 3) == 'fk_') {
+    //   $column_placeholder = substr($this->column, 3, -3);
+    // }
 
     $name = 'detail[' . $this->column . '][]';
     $master_class = "detail";
@@ -282,7 +281,8 @@ class FieldsBase
       $name = 'header[' . $this->column . ']';
       $master_class = 'master';
 
-      if ($multi_select_field != "" && 'fk_' . $multi_select_field . '_id' == $this->column) {
+      // if ($multi_select_field != "" && 'fk_' . $multi_select_field . '_id' == $this->column) {
+      if ($multi_select_field != "") {
         $multiple = "multiple='multiple'";
         $hide_select_label = "hidden";
         $name = 'header[' . $this->column . '][]';

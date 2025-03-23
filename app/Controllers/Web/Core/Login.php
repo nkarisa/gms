@@ -71,7 +71,7 @@ class Login extends WebController
      *
      * @return void It does not return anything, but it sends a JSON response to the client.
      */
-    public function ajax_login(): ResponseInterface
+    public function ajax_login(): ResponseInterface|null
     {
         // Initialize an empty response array
         $response = array();
@@ -93,10 +93,10 @@ class Login extends WebController
         // If the login status is 'success', add an empty redirect URL to the response array
         if ($login_status == 'success') {
             $response['redirect_url'] = '';
+            // Send the JSON response to the client
+            return $this->response->setJSON($response);
         } 
-
-        // Send the JSON response to the client
-        return $this->response->setJSON($response);
+        return null;
     }
 
     function validate_login(string $email, string $password = '', bool $is_user_switch = false): string

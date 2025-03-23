@@ -19,7 +19,7 @@ trait CallbackTrait
         return $postArray;
    }
 
-   protected function actionAfterEdit(): bool {
+   protected function actionAfterEdit(array $postData, int $approveId, int $itemId): bool {
         return true;
    }
 }

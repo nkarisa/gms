@@ -61,4 +61,5 @@ class GrantsConfig extends BaseConfig
     public $submit_mfr_without_controls=false;
     public $funding_balance_report_aggregate_method = "receipt";
     public $allow_a_bank_to_be_linked_to_many_projects = true;
+    public $dropTransactingOffices = true;
 }

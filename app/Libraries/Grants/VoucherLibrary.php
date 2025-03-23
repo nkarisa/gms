@@ -1666,52 +1666,63 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return compact('initial_record_status_id','month_cancelled_vouchers', 'voucher_attachments_required','approve_item_id','user_has_voucher_update_permission');
     }
 
-  function formatColumnsValues(string $columnsName, mixed $columnsValues, array $rowData, array $dependancyData = []): mixed {
+    function formatColumnsValues(string $columnsName, mixed $columnsValues, array $rowData, array $dependancyData = []): mixed {
 
-    $is_voided_chq = false;
-    $accountSystemSettingLibrary = new \App\Libraries\Core\AccountSystemSettingLibrary();
-    
-    extract($dependancyData);
-
-    if($columnsName == 'action'){
-        $officeLibrary = new \App\Libraries\Core\OfficeLibrary();
-        $office_account_system_id = $officeLibrary->getOfficeAccountSystem($rowData['office_id'])['account_system_id'];
-
-        $account_system_settings = $accountSystemSettingLibrary->getAccountSystemSettings($office_account_system_id);
-        $voucher_attachments_required = false;
-
-        if(
-            array_key_exists('voucher_attachments_required',$account_system_settings) && 
-            $account_system_settings['voucher_attachments_required'] == 1        ){
-            $voucher_attachments_required = true;
-        }
-
-        $voucher_attachments = $this->getAttachments($approve_item_id, $rowData['voucher_id']);
-        $count_of_attachments = count($voucher_attachments);
-        $btn_color = $count_of_attachments == 0 ? 'btn-danger' : 'btn-success';
-        $btn_label = $count_of_attachments == 0 ? get_phrase('attach_documents','Attach Support Documents') : get_phrase('show_documents','Show Support Documents');
-        // $disable_approval_button = $count_of_attachments == 0 && $voucher_attachments_required ? true : false;
-                
-        $officeLibrary = new \App\Libraries\Core\OfficeLibrary();
-        $office_account_system_id = $officeLibrary->getOfficeAccountSystem($rowData['office_id'])['account_system_id'];
-        $status_data = $this->actionButtonData($this->controller, $office_account_system_id);
-        $status_info = $status_data['item_status'];
-        extract($status_data);
-        $voucher_status = $rowData['fk_status_id'];
-        $status_approval_direction = isset($status_info[$voucher_status]['status_approval_direction']) ? $status_info[$voucher_status]['status_approval_direction'] : $status_info[$initial_record_status_id]['status_approval_direction'];
+        $is_voided_chq = false;
+        $accountSystemSettingLibrary = new \App\Libraries\Core\AccountSystemSettingLibrary();
         
-        $can_delete_attachment = ($rowData['fk_status_id'] == $item_initial_item_status_id || $status_approval_direction == '-1') && $user_has_voucher_update_permission ? true : false;
-
-        if (is_array($month_cancelled_vouchers) && !in_array($rowData['voucher_id'], $month_cancelled_vouchers)) {
-            if($voucher_attachments_required){
-                $columnsValues .= '<div data-attachments="'.json_encode($voucher_attachments).'" data-can_delete_attachment="'.$can_delete_attachment.'" data-voucher_id="'.$rowData['voucher_id'].'" class = "btn '.$btn_color.' dt-control" id = "dt-control-'.$rowData['voucher_id'].'">' . $btn_label . '</div> ';
+        $initial_record_status_id = $dependancyData['initial_record_status_id'];
+        $month_cancelled_vouchers = $dependancyData['month_cancelled_vouchers'];
+        $voucher_attachments_required = $dependancyData['voucher_attachments_required'];
+        $approve_item_id = $dependancyData['approve_item_id'];
+        $user_has_voucher_update_permission = $dependancyData['user_has_voucher_update_permission'];
+        // extract($dependancyData);
+    
+        if($columnsName == 'action'){
+            $officeLibrary = new \App\Libraries\Core\OfficeLibrary();
+            $office_account_system_id = $officeLibrary->getOfficeAccountSystem($rowData['office_id'])['account_system_id'];
+    
+            $account_system_settings = $accountSystemSettingLibrary->getAccountSystemSettings($office_account_system_id);
+            $voucher_attachments_required = false;
+    
+            if(
+                array_key_exists('voucher_attachments_required',$account_system_settings) && 
+                $account_system_settings['voucher_attachments_required'] == 1        ){
+                $voucher_attachments_required = true;
             }
-            $columnsValues .= approval_action_button($this->controller, $item_status, $rowData['voucher_id'], $rowData['status_id'], $item_initial_item_status_id, $item_max_approval_status_ids, false, true,'', $is_voided_chq);
+    
+            $voucher_attachments = $this->getAttachments($approve_item_id, $rowData['voucher_id']);
+            $count_of_attachments = count($voucher_attachments);
+            $btn_color = $count_of_attachments == 0 ? 'btn-danger' : 'btn-success';
+            $btn_label = $count_of_attachments == 0 ? get_phrase('attach_documents','Attach Support Documents') : get_phrase('show_documents','Show Support Documents');
+            // $disable_approval_button = $count_of_attachments == 0 && $voucher_attachments_required ? true : false;
+                    
+            $officeLibrary = new \App\Libraries\Core\OfficeLibrary();
+            $office_account_system_id = $officeLibrary->getOfficeAccountSystem($rowData['office_id'])['account_system_id'];
+            $status_data = $this->actionButtonData($this->controller, $office_account_system_id);
+            $status_info = $status_data['item_status'];
+            extract($status_data);
+            $voucher_status = $rowData['fk_status_id'];
+            $status_approval_direction = function() use($status_info, $voucher_status, $initial_record_status_id) {
+                if(isset($status_info[$voucher_status])){
+                    return isset($status_info[$voucher_status]['status_approval_direction']) ? $status_info[$voucher_status]['status_approval_direction'] : $status_info[$initial_record_status_id]['status_approval_direction'];
+                }else{
+                    return 0;
+                }
+            };
+            
+            $can_delete_attachment = ($rowData['fk_status_id'] == $item_initial_item_status_id || $status_approval_direction == '-1') && $user_has_voucher_update_permission ? true : false;
+    
+            if (is_array($month_cancelled_vouchers) && !in_array($rowData['voucher_id'], $month_cancelled_vouchers)) {
+                if($voucher_attachments_required){
+                    $columnsValues .= '<div data-attachments="'.json_encode($voucher_attachments).'" data-can_delete_attachment="'.$can_delete_attachment.'" data-voucher_id="'.$rowData['voucher_id'].'" class = "btn '.$btn_color.' dt-control" id = "dt-control-'.$rowData['voucher_id'].'">' . $btn_label . '</div> ';
+                }
+                $columnsValues .= approval_action_button($this->controller, $item_status, $rowData['voucher_id'], $rowData['status_id'], $item_initial_item_status_id, $item_max_approval_status_ids, false, true,'', $is_voided_chq);
+            }
         }
+    
+        return $columnsValues;
     }
-
-    return $columnsValues;
-  }
 
   public function monthFundsTransferVouchers($office_ids, $reporting_month)
   {

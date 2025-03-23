@@ -44,7 +44,7 @@ class BankLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
         return ['bank_track_number', 'bank_name', 'bank_swift_code', 'bank_is_active','account_system_name','bank_last_modified_by'];
     }
 
-    function formatColumnsValues(string $columnName, mixed $columnValue, array $rowArray): mixed {
+    function formatColumnsValues(string $columnName, mixed $columnValue, array $rowArray, array $dependancyData = []): mixed {
         switch($columnName){
             case "bank_last_modified_by":
                 $columnValue = $rowArray['user_firstname'] . ' ' . $rowArray['user_lastname'];

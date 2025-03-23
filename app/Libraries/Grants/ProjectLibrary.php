@@ -19,6 +19,9 @@ class ProjectLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $this->table = 'project';
     }
 
+    public function detailTables(): array{
+      return ['project_allocation','project_income_account'];
+    }
 
     function detailListTableVisibleColumns(): array{
       return ['project_track_number','project_name','project_code','project_start_date','project_end_date','funder_name'];

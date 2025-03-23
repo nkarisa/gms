@@ -164,11 +164,10 @@ trait FieldsTrait {
    * @return string
    */
 
-   function headerRowField(string $column, string $field_value = null, bool $show_only_selected_value = false, $detail_table = ''): string
+   function headerRowField(string $column, ?string $field_value = null, bool $show_only_selected_value = false, $detail_table = ''): string
    {
  
      $f = new FieldsBase($column, $this->controller, true);
-     //log_message('error',json_encode($this->controller));
  
      if ($detail_table != '') {
        $f = new FieldsBase($column, $detail_table, false, true);
@@ -179,11 +178,15 @@ trait FieldsTrait {
      $field = $field_type . "_field";
  
      if (array_key_exists($column, $this->set_field_type)) {
- 
+      // log_message('error', json_encode($this->set_field_type[$column]));
        $field_type = $this->set_field_type[$column]['field_type'];
+       $select2 = isset($this->set_field_type[$column]['select2']) && $this->set_field_type[$column]['select2'] ? $this->set_field_type[$column]['select2'] : false;
        $field = $field_type . "_field";
  
        if ($field_type == 'select' && count($this->set_field_type[$column]['options']) > 0) {
+          if($select2){
+            return $f->select_field($this->set_field_type[$column]['options'], $field_value, false, '', $column);
+          }
          return $f->select_field($this->set_field_type[$column]['options'], $field_value, false, '', $this->checkMultiSelectField($detail_table));
        } else {
          return $f->$field($field_value);

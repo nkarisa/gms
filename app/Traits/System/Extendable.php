@@ -95,6 +95,28 @@ trait Extendable
     return [];
   }
 
+  function getUnusedLookupValues($lookUpTableBuilder, &$lookup_values, $lookup_table, $association_table, $not_exist_string_condition = '')
+  {
+
+    $lookUpTableBuilder->where('NOT EXISTS (SELECT * FROM ' . $association_table . ' WHERE ' . $association_table . '.fk_' . $lookup_table . '_id=' . $lookup_table . '.' . $lookup_table . '_id ' . $not_exist_string_condition . ')', '', FALSE);
+
+    if ($this->config->dropTransactingOffices) {
+      $lookUpTableBuilder->where(array('office_is_readonly' => 0));
+    }
+
+    if ($lookup_table == 'office' && !$this->session->system_admin) {
+      $hierarchy_offices = array_column($this->session->hierarchy_offices, 'office_id');
+      $lookUpTableBuilder->whereIn('office_id', $hierarchy_offices);
+    }
+
+    $lookUpTableBuilder->select(array($lookup_table . '_id', $lookup_table . '_name'));
+    $lookUpTableBuilder->join($lookup_table,$lookup_table.'.'.$lookup_table.'_id='.$association_table.'.fk_'.$lookup_table.'_id');
+    $lookup_values[$lookup_table] = $lookUpTableBuilder->get()->getResultArray();
+
+    return $lookup_values;
+  }
+
+
   /**
    * This method is use to format values in a list view.
    * 

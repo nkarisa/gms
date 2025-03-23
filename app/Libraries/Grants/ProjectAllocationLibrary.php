@@ -8,18 +8,42 @@ class ProjectAllocationLibrary extends GrantsLibrary implements \App\Interfaces\
 {
 
     protected $table;
-    protected $grantsModel;
+    protected $projectAllocationModel;
 
     function __construct()
     {
         parent::__construct();
 
-        $this->grantsModel = new ProjectAllocationModel();
+        $this->projectAllocationModel = new ProjectAllocationModel();
 
         $this->table = 'project_allocation';
     }
 
-    function deactivateDefaultAllocation($office_id, $suspension_status){
+  public function detachDetailTable(): bool{
+    return true;
+  }
+
+  public function lookupValues(): array {
+    $lookup_values = parent::lookupValues();
+    $projectReadBuilder = $this->read_db->table('project');
+    $projectAllocationReadBuilder = $this->read_db->table('project_allocation');
+
+    if(!$this->session->system_admin){
+      $projectReadBuilder->where(array('fk_account_system_id'=>$this->session->user_account_system_id));
+      $projectReadBuilder->join('funder','funder.funder_id=project.fk_funder_id');
+      $lookup_values['project'] = $projectReadBuilder->get()->getResultArray();
+    }else{
+      $lookup_values['project'] = $projectReadBuilder->get()->getResultArray();
+
+    }
+
+    $not_exist_string_condition = "AND fk_project_id = ".hash_id($this->id,'decode');
+    $this->getUnusedLookupValues($projectAllocationReadBuilder , $lookup_values,'office','project_allocation',$not_exist_string_condition);
+
+    return $lookup_values;
+   }
+
+  public function deactivateDefaultAllocation($office_id, $suspension_status): void{
         $builder = $this->read_db->table('project');
         $builder->select(array('project_allocation_id'));
         $builder->where(array('fk_office_id' => $office_id, 'project_is_default' => 1));
@@ -40,5 +64,26 @@ class ProjectAllocationLibrary extends GrantsLibrary implements \App\Interfaces\
         }
   
      }
-   
+     
+     function detailListTableVisibleColumns(): array{
+      return [
+        'project_allocation_track_number',
+        'office_name',
+        'project_name',
+        'project_allocation_extended_end_date',
+        'project_allocation_created_date',
+        'project_allocation_last_modified_date'
+      ];
+     }
+
+    public function singleFormAddVisibleColumns(): array {
+      return [
+        'project_name',
+        'office_name'
+      ];
+     }
+
+     public function transactionValidateDuplicatesColumns(): array{
+      return ['fk_project_id','fk_office_id'];
+    }
 }

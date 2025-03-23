@@ -642,7 +642,7 @@ class Budget extends WebController
     }
 
     // Insert the budget
-    $statusLib=new \App\Libraries\Core\StatusLibrary();
+    $statusLib=new StatusLibrary();
     $tracking = $this->generateItemTrackNumberAndName('budget');
 
     $budgetInsertData = [

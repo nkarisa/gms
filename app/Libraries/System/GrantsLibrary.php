@@ -94,39 +94,6 @@ class GrantsLibrary
 
   }
 
-  // private function callbackTransactionValidateDuplicatesColumns($table_name)
-  // {
-
-  //   $featureLibrary = $this->loadLibrary($table_name);
-
-  //   $columns = array();
-
-  //   if (method_exists($featureLibrary, 'transactionValidateDuplicatesColumns')) {
-  //     $columns = $featureLibrary->transactionValidateDuplicatesColumns();
-  //   }
-
-  //   return $columns;
-  // }
-
-  // private function callbackMultiSelectField($table_name): string
-  // {
-  //   $library = $this->loadLibrary($table_name);
-
-  //   $multi_select_field = '';
-
-  //   if (
-  //     method_exists($library, 'multiSelectField') &&
-  //     strlen($library->multiSelectField()) > 0 &&
-  //     $this->action !== 'edit'
-  //   ) {
-
-  //     $multi_select_field = $library->multiSelectField();
-  //   }
-
-  //   return $multi_select_field;
-  // }
-
-
   /**
    * Retrieves the context definition of a user based on their user ID.
    *
@@ -485,14 +452,16 @@ class GrantsLibrary
     $dependantTable = $this->dependantTable($table);
     $has_detail_table = false;
 
+    
     if (
       is_array($all_detail_tables)
       && !empty(is_array($all_detail_tables))
       && $dependantTable != ""
-    ) {
-      $has_detail_table = true;
-    }
-
+      ) {
+        $has_detail_table = true;
+      }
+      
+    // log_message('error', json_encode(compact('table','all_detail_tables','dependantTable','has_detail_table')));
     return $has_detail_table;
   }
 

@@ -8,15 +8,15 @@ class FunderLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
 {
 
     protected $table;
-    protected $grantsModel;
+    protected $funderModel;
 
     function __construct()
     {
         parent::__construct();
 
-        $this->grantsModel = new FunderModel();
+        $this->funderModel = new FunderModel();
 
-        $this->table = 'grants';
+        $this->table = 'funder';
     }
 
     function detailTables(): array{

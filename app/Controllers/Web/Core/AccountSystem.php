@@ -15,4 +15,21 @@ class AccountSystem extends WebController
         parent::initController($request, $response, $logger);
 
     }
+
+    public function getValidReportingAccountSystems(): ResponseInterface {
+        $post = $this->request->getPost();
+        $account_system_level = (int)$post['account_system_level'];
+        $accountSystemReadBuilder = $this->read_db->table('account_system');
+
+        $accountSystemReadBuilder->select(['account_system_id','account_system_name']);
+        $accountSystemReadBuilder->where(['account_system_level' => $account_system_level + 1, 'account_system_is_active' => 1]);
+        $activeAccountSystemObj = $accountSystemReadBuilder->get();
+
+        $activeReportingAccountSystems = [];
+        if($activeAccountSystemObj->getNumRows() > 0){
+            $activeReportingAccountSystems = $activeAccountSystemObj->getResultArray();
+        }
+
+        return $this->response->setJSON($activeReportingAccountSystems);
+    }
 }

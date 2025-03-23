@@ -146,18 +146,24 @@ trait ManipulationTrait {
   
       // Prepare the header columns for insertion
       $headerColumns = [];
+      $additionalHeaderColumns = [];
       $headerRandom = record_prefix($this->controller) . '-' . rand(1000, 90000);
       $headerColumns[strtolower($this->controller) . '_track_number'] = $headerRandom;
       $headerColumns[strtolower($this->controller) . '_name'] = $this->request->getPost($this->controller . '_name') != ""
         ? $this->request->getPost($this->controller . '_name')
         : ucfirst($this->controller) . ' # ' . $headerRandom;
   
+      $allFieldName = array_column($this->tableFieldsMetadata($this->controller),'name');  
       foreach ($header as $key => $value) {
+        // Unset columns that are not part of the table columns
+        if (!in_array($key, $allFieldName)) {
+          $additionalHeaderColumns[$key] = $value;
+          continue;
+        } 
         $headerColumns[$key] = $value;
       }
   
       if (session()->has('masterTable')) {
-        log_message('error', session()->get('masterTable'));
         $headerColumns['fk_' . strtolower(session()->get('masterTable')) . '_id'] = hash_id($this->id, 'decode');
       }
   
@@ -213,6 +219,11 @@ trait ManipulationTrait {
       $transactionValidateDuplicates = $this->transactionValidateDuplicates($this->controller, $header, $transactionValidateDuplicatesColumns);
       $transactionValidateByComputation = $this->transactionValidateByComputation($this->controller, $header);
   
+      // Merge the $additionalHeaderColumns and $headerColumns
+      if(count($additionalHeaderColumns) > 0){
+        $headerColumns = array_merge($headerColumns, $additionalHeaderColumns);
+      }
+      
       return $this->transactionValidate([$transactionValidateDuplicates, $transactionValidateByComputation], $headerColumns, $headerId, $approvalId);
     }
   
