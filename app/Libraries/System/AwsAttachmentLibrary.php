@@ -119,6 +119,7 @@ class AwsAttachmentLibrary {
     public function attachmentRecordWithS3PreassignedUrl(array $attachmentWhereConditions = [])
     {
        
+        
         $builder = $this->db->table($this->attachment_table_name);
         $attachmentObj = $builder->where($attachmentWhereConditions)->get()->getRow();
 
@@ -210,6 +211,8 @@ class AwsAttachmentLibrary {
         $preassignedUrls = [];
         $files = service('request')->getFiles();
 
+        log_message('error', json_encode($files));
+
         if (!empty($files) && isset($files['file'])) {
             $uploadedFiles = $files['file'];
 
@@ -236,6 +239,7 @@ class AwsAttachmentLibrary {
                     }
 
                     // Insert data into the database
+                    
                     $this->db->table($this->attachment_table_name)->insert($attachmentData);
                     $lastId = $this->db->insertID();
 
@@ -257,9 +261,10 @@ class AwsAttachmentLibrary {
 
     public function retrieveFileUploadsInfo(array $attachmentWhereConditionArray): array
     {
+
         $filesArray = [];
 
-        if (!empty($attachmentWhereConditionArray[$this->attachment_key_column])) {
+        if (!empty($attachmentWhereConditionArray['attachment_primary_id'])) {
             $builder = $this->db->table($this->attachment_table_name);
 
             foreach ($attachmentWhereConditionArray as $key => $value) {

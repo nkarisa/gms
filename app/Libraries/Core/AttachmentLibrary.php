@@ -84,13 +84,15 @@ class AttachmentLibrary extends GrantsLibrary implements \App\Interfaces\Library
        'attachment_primary_id' => $item_id
      );
  
-     $preassigned_urls =  $this->awsAttachmentLibrary->uploadFiles($storeFolder, $additional_attachment_table_insert_data, $attachment_where_condition_array);
+     $preassigned_urls =  $this->awsAttachmentLibrary->uploadFiles($storeFolder, $additional_attachment_table_insert_data, $attachment_where_condition_array,['ii']);
  
      return $preassigned_urls;
    }
 
    function getAttachmentTypeId($attachment_type_name = "")
    {
+
+
     $builder = $this->read_db->table('attachment_type');
      $builder->select(array('attachment_type_id'));
  
@@ -102,7 +104,15 @@ class AttachmentLibrary extends GrantsLibrary implements \App\Interfaces\Library
      }
      
      $builder->join('approve_item', 'approve_item.approve_item_id=attachment_type.fk_approve_item_id');
-     $attachment_type_id = $builder->get()->getRow()->attachment_type_id;
+     $attachment_type_id = $builder->get();
+
+     if($attachment_type_id->getNumRows()>0){
+      $attachment_type_id=$attachment_type_id->getRow()->attachment_type_id;
+     
+      
+     }
+
+     //log_message('error', json_encode($attachment_type_id));
  
      return $attachment_type_id;
    }

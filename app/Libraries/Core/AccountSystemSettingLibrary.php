@@ -47,6 +47,7 @@ class AccountSystemSettingLibrary extends GrantsLibrary implements \App\Interfac
         }
     }
 
+   
     function getAccountSystemSettings($account_system_id){
         $accountSystemSettingReadBuilder = $this->read_db->table('account_system_setting');
         $accountSystemSettingReadBuilder->select(array('account_system_setting_name as setting_name','account_system_setting_value as setting_value','account_system_setting_accounts'));
@@ -57,7 +58,7 @@ class AccountSystemSettingLibrary extends GrantsLibrary implements \App\Interfac
         if($account_system_setting_obj->getNumRows() > 0){
           $account_system_setting_array = $account_system_setting_obj->getResultArray();
     
-          $cnt = 0;
+          
           foreach($account_system_setting_array as $settings){
             $account_systems = [];
             if($settings['account_system_setting_accounts'] != null){
@@ -65,7 +66,8 @@ class AccountSystemSettingLibrary extends GrantsLibrary implements \App\Interfac
 
               if(is_array($account_systems) && in_array($account_system_id, $account_systems)){
                 $account_system_setting[$settings['setting_name']] = $settings['setting_value'];
-                $cnt++;
+               
+                break;
               }
 
             }
@@ -74,5 +76,38 @@ class AccountSystemSettingLibrary extends GrantsLibrary implements \App\Interfac
         // log_message('error', json_encode($account_system_setting));
         return $account_system_setting;
       }
+
+
+    // function getAccountSystemSettings($account_system_id){
+    //   $accountSystemSettingReadBuilder = $this->read_db->table('account_system_setting');
+    //   $accountSystemSettingReadBuilder->select(array('account_system_setting_name','account_system_setting_accounts'));
+    //   //$accountSystemSettingReadBuilder->where(['account_system_setting_name'=>'Voucher_attachement']);
+    //   $account_system_setting_obj = $accountSystemSettingReadBuilder->get();
+
+
+    //   $account_system_setting = [];
+  
+    //   if($account_system_setting_obj->getNumRows() > 0){
+    //     $account_system_setting_array = $account_system_setting_obj->getResultArray();
+
+    //     $account_systems = [];
+
+    //     foreach($account_system_setting_array as $settings){
+
+    //       if($settings['account_system_setting_accounts']!="null"){
+            
+    //         $account_systems = json_decode($settings['account_system_setting_accounts']);
+
+    //         if(is_array($account_systems) && in_array($account_system_id, $account_systems)){
+    //           $account_system_setting[$settings['account_system_setting_name']] = $account_system_id;
+    //         }
+
+    //       }
+          
+    //     }
+    //   }
+    //   // log_message('error', json_encode($account_system_setting));
+    //   return $account_system_setting;
+    // }
    
 }

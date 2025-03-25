@@ -203,7 +203,9 @@ class WebController extends BaseController
     if ($this->action == "list") {
       // List page data will only be loaded via ajax request and will be a datatable serverside loaded
       if ($this->request->isAJAX()) {
+        
         $output = $this->libs::call($this->controller . '.' . $this->action . 'Output', [$id, $parentTable]);
+
       }
     } else {
       if ($this->id == null) {
@@ -495,6 +497,9 @@ class WebController extends BaseController
     // $statusLibrary = new \App\Libraries\Core\StatusLibrary();
     
     $data = $results['table_body'];
+
+    //log_message('error',json_encode($results));
+
     $formatColumnValuesdependancyData = $this->library->formatColumnsValuesDependancyData($data);
     $showListEditActionDependancyData = $this->library->showListEditActionDependancyData($data);
     $total_records = $results['total_records'];
