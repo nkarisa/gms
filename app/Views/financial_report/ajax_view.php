@@ -101,7 +101,6 @@ $userLibrary = new \App\Libraries\Core\UserLibrary();
 
 <hr />
 <?php //if(!$multiple_offices_report && $multiple_projects_report && !$financial_report_submitted) 
-log_message('error', json_encode($userLibrary->checkRoleHasPermissions('financial_report','update')));
 if (!$financial_report_submitted && $userLibrary->checkRoleHasPermissions('financial_report','update')) {
 ?>
     <div class="row">
@@ -617,38 +616,82 @@ if (!$financial_report_submitted && $userLibrary->checkRoleHasPermissions('finan
     });
 
     myDropzone.on("success", function(file, response) {
-        console.log(response);
+        // console.log(response);
         if (response == 0) {
             alert('Error in uploading files');
             return false;
         }
         var table_tbody = $("#tbl_list_statements tbody");
         var obj = JSON.parse(response);
-        console.log(obj);
+        // console.log(obj);
+
+        //clear the table
+        table_tbody.empty();
+
         $.each(obj, function(i, elem) {
-            table_tbody.append('<tr><td><a href="#" class="fa fa-trash-o delete_statement" id="' + elem.attachment_id + '"></a></td><td><a target="__blank" href="' + elem.s3_preassigned_url + '">' + elem.attachment_name + '</a></td><td>' + elem.attachment_size + '</td><td>' + elem.attachment_last_modified_date + '</td></tr>');
+            // console.log(elem);
+            for (let index = 0; index < elem.length; index++) {
+                table_tbody.append('<tr><td><a href="#" class="fa fa-trash-o delete_statement" id="' + elem[index].attachment_id + '" data-file_name="' + elem[index].attachment_name + '" data-file_path="' + elem[index].s3_preassigned_url + '"></a></td><td><a target="__blank" href="' + elem[index].s3_preassigned_url + '">' + elem[index].attachment_name + '</a></td><td>' + elem[index].attachment_size + '</td><td>' + elem[index].attachment_last_modified_date + '</td></tr>');
+                
+            }
+            
         });
+        
 
     });
 
 
     $(document).on('click', '.delete_statement', function() {
+        event.preventDefault();
+        //Prepare Data
+        let attachment_primary_id = $(this).attr('id');
 
-        var file_path = $(this).attr('id');
-        var url = "<?= base_url(); ?>ajax/financial_report/deleteStatement";
-        var data = {
-            'path': file_path
+        let file_path = $(this).data('file_path');
+
+        let file_name = $(this).data('file_name');
+
+        let url = "<?= base_url(); ?>ajax/financial_report/deleteStatement";
+        let data = {
+            'id':attachment_primary_id,
+            'file_name':file_name,
+            'file_path': file_path,
+
         };
 
+        //Remove the row
+
+        $(this).closest('tr').remove();
+
+        //Execute the ajax
         $.ajax({
             url: url,
             data: data,
             type: "POST",
             success: function(response) {
+                console.log(response);
                 alert(response);
-                $(".delete_statement").closest('tr').remove();
+                // $("#deletion_info_id").removeClass('hidden');
+
+                // $("#deletion_info_id").html(response);
+
             }
-        });
+
+         });
+        // var file_path = $(this).attr('id');
+        // var url = "<?= base_url(); ?>ajax/financial_report/deleteStatement";
+        // var data = {
+        //     'path': file_path
+        // };
+
+        // $.ajax({
+        //     url: url,
+        //     data: data,
+        //     type: "POST",
+        //     success: function(response) {
+        //         alert(response);
+        //         $(".delete_statement").closest('tr').remove();
+        //     }
+        // });
 
     });
 </script>
