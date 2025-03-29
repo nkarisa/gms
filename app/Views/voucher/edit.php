@@ -2419,6 +2419,7 @@ $voucher_missing_details = $voucherLibrary->isVoucherMissingVoucherDetails($vouc
 
         let voucherType = '<?= $voucher_header_info["voucher_type_name"]; ?>';
 
+    
         if (voucherType.trim() == 'Voided Cheque') {
             //alert(voucherType);
 
