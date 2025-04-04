@@ -40,7 +40,7 @@ class Kint
     |--------------------------------------------------------------------------
     */
     public string $richTheme = 'aante-light.css';
-    public bool $richFolder  = false;
+    public bool $richFolder  = false;//
     public int $richSort     = AbstractRenderer::SORT_FULL;
 
     /**
