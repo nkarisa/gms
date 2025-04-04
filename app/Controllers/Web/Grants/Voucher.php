@@ -36,7 +36,10 @@ class Voucher extends WebController
     } elseif ($this->action == 'multiFormAdd') {
       $result['office_has_request'] = $requestLibrary->getOfficeRequestCount() == 0 ? false : true;
     } elseif ($this->action == 'edit') {
-      $result = [];
+      //$result = [];
+      
+     //$this->id=$this->request->getUri()->getSegment(3);
+
       $result['voucher_header_info'] = $this->library->getVoucherHeaderToEdit(hash_id($this->id, 'decode'));
     }
 

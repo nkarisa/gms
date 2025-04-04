@@ -26,4 +26,5 @@ class Feature extends BaseConfig
      * If false, `limit(0)` returns no records. (the behavior of 3.1.9 or later in version 3.x.)
      */
     public bool $limitZeroAsAll = true;
+    public bool $strictLocaleNegotiation = false;
 }

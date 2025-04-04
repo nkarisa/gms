@@ -54,7 +54,7 @@
 
             voucherDropzone.on('error', function(file, response) {
                 // $(file.previewElement).find('.dz-error-message').text(response);
-                console.log(response);
+                //console.log(response);
             });
 
             voucherDropzone.on("success", function(file, response) {

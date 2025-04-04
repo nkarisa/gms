@@ -195,23 +195,27 @@ class WebController extends BaseController
  * @return array The data fetched for the specified action and id.
  */
 
-  protected function result($id = '', $parentTable = null)
+  protected function result($id = null, $parentTable = null)
   {
 
     $output = [];
+
+
+    //log_message('error', json_encode($this->id));
 
     if ($this->action == "list") {
       // List page data will only be loaded via ajax request and will be a datatable serverside loaded
       if ($this->request->isAJAX()) {
         
-        $output = $this->libs::call($this->controller . '.' . $this->action . 'Output', [$id, $parentTable]);
+        $output = $this->libs::call($this->controller . '.' . $this->action . 'Output', [$this->id, $parentTable]);
 
       }
     } else {
       if ($this->id == null) {
         $output = $this->libs::call($this->controller . '.' . $this->action . 'Output');
       } else {
-        $output = $this->libs::call($this->controller . '.' . $this->action . 'Output', [$this->id]);
+         //log_message('error', json_encode(['test'=>$this->controller . '.' . $this->action . 'Output', 'test2'=> $this->id]));
+         $output = $this->libs::call($this->controller . '.' . $this->action . 'Output', [$this->id]);
       }
     }
 
@@ -322,7 +326,7 @@ class WebController extends BaseController
    * @param mixed $parentTable
    * @return string|\CodeIgniter\HTTP\Response
    */
-  private function crud_views(string $id = null, $parentTable = null): string|\CodeIgniter\HTTP\Response
+  private function crud_views($id = null, $parentTable = null): string|\CodeIgniter\HTTP\Response
   {
     $result = $this->result($id);
 
@@ -527,7 +531,7 @@ class WebController extends BaseController
               $this->libs->loadLibrary('user')->checkRoleHasPermissions(strtolower($this->controller), 'update')
             )
           ) {
-            $track_number .= '<a href="' . base_url() . strtolower($this->controller) . '/edit/' . hash_id($primary_key, 'encode') . '"><i class = "fa fa-pencil"></i></a>';
+            $track_number .= '<a href="' . base_url() . strtolower($this->controller) . '/edit/' . hash_id($primary_key) . '"><i class = "fa fa-pencil"></i></a>';
           }
 
           $track_number .= ' <a href="' . base_url() . $this->controller . '/view/' . hash_id($primary_key) . '">' . $row[$column] . '</a>';
