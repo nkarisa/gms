@@ -709,10 +709,9 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
     public function createFinancialReport($financial_report_date, $office_id)
     {
         // Check if MFR exists
-        $statusLibrary = new StatusLibrary();
         $budgetLibrary = new BudgetLibrary();
 
-        $initial_status = $statusLibrary->initialItemStatus('financial_report');
+        $initial_status = $this->statusLibrary->initialItemStatus('financial_report');
 
         $financial_report_date = date('Y-m-01', strtotime($financial_report_date));
 
@@ -1590,6 +1589,106 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
     }
 
     return $report;
+  }
+
+  
+  function postApprovalActionEvent($event_payload):void{
+    
+    //log_message('error', json_encode($event_payload));
+    // Check if the status is a decline step
+    $status_approval_direction = 0; // Zero mean the status is a reinstating status
+
+    $builder = $this->read_db->table('status');
+    $builder->select(array('status_approval_direction'));
+    $builder->join('approval_flow','approval_flow.approval_flow_id=status.fk_approval_flow_id');
+    $builder->join('approve_item','approve_item.approve_item_id=approval_flow.fk_approve_item_id');
+    $builder->where(array('approve_item_name' => $event_payload['item'], 'status_id' => $event_payload['post']['next_status'] ));
+    $status_obj = $builder->get();
+    if($status_obj->getNumRows() > 0){
+        $status_approval_direction = $status_obj->getRow()->status_approval_direction;
+    }
+
+    if($status_approval_direction == -1){ // -1 mean that it is a decline status
+        //Unsubmit the current financial report
+        $data['financial_report_is_submitted'] = 0;
+        $builder2 = $this->write_db->table('financial_report');
+        $builder2->where(['financial_report_id' => $event_payload['post']['item_id']]);
+        $builder2->update($data);
+
+
+        // Decline subsequent submitted financial reports
+        $this->declineSubsequentFinancialReports($event_payload['post']['item_id'], $event_payload['post']['next_status']);
+    }
+
+    // $this->read_db->select(array('status_approval_direction'));
+    // $this->read_db->join('approval_flow','approval_flow.approval_flow_id=status.fk_approval_flow_id');
+    // $this->read_db->join('approve_item','approve_item.approve_item_id=approval_flow.fk_approve_item_id');
+    // $this->read_db->where(array('approve_item_name' => $event_payload['item'], 'status_id' => $event_payload['post']['next_status'] ));
+    // $status_obj = $this->read_db->get('status');
+
+    // if($status_obj->num_rows() > 0){
+    //   $status_approval_direction = $status_obj->row()->status_approval_direction;
+    // }
+    
+    // Perform actions here if the record is being declined
+    // if($status_approval_direction == -1){ // -1 mean that it is a decline status
+    //     //Unsubmit the current financial report
+    //     $data['financial_report_is_submitted'] = 0;
+    //     $this->write_db->where(['financial_report_id' => $event_payload['post']['item_id']]);
+    //     $this->write_db->update('financial_report', $data);
+        
+    //     // Decline subsequent submitted financial reports
+    //     $this->decline_subsequent_financial_reports($event_payload['post']['item_id'], $event_payload['post']['next_status']);
+    // }
+    
+  }
+
+  function declineSubsequentFinancialReports($financial_report_id, $decline_status){
+    // $this->read_db->reset_query(); 
+    // log_message('error', json_encode([$financial_report_id,$decline_status]));
+    
+    $builder = $this->read_db->table('financial_report');
+    $builder->select(array('financial_report_month','fk_office_id'));
+    $builder->Where(array('financial_report_id' => $financial_report_id));
+    $financial_report_obj = $builder->get();
+
+    // log_message('error', json_encode([$financial_report_obj->getResultObject()]));
+
+    // $this->read_db->select(array('financial_report_month','fk_office_id'));
+    // $this->read_db->where(array('financial_report_id' => $financial_report_id));
+    // $financial_report_obj = $this->read_db->get('financial_report');
+
+    //log_message('error', json_encode([$financial_report_id,$decline_status, $financial_report_obj->row_array()]));
+
+    //return false;
+    
+    if($financial_report_obj->getNumRows() > 0){
+
+        $financial_report = $financial_report_obj->getRowArray(); 
+        // log_message('error', json_encode([$financial_report]));
+        // log_message('error', json_encode(['fk_office_id' => $financial_report['fk_office_id'], 
+        // 'financial_report_month > ' => $financial_report['financial_report_month']]));
+
+        // Check if we have subsequent submit reports and unsubmit them and reset their approval status to step 1
+        // $initial_item_status=$this->grants_model->initial_item_status('financial_report');
+        $initial_item_status = $this->statusLibrary->initialItemStatus('financial_report');
+
+        $subsequent_mfr_data = [
+            'fk_status_id' => $initial_item_status,//$decline_status, // Immediate Decline status
+            'financial_report_is_submitted' => 0,
+        ];
+        $builder2 = $this->write_db->table('financial_report');
+        $builder2->where([
+            'fk_office_id' => $financial_report['fk_office_id'], 
+            'financial_report_month > ' => $financial_report['financial_report_month']
+        ]);
+        $builder2->whereNotIn('fk_status_id', [$initial_item_status, $decline_status]);
+        // log_message('error', json_encode($builder2->getCompiledUpdate()));
+        $builder2->update($subsequent_mfr_data);
+
+        
+        
+    }
   }
 
 }

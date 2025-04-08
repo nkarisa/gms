@@ -3,6 +3,7 @@
 namespace App\Controllers\Web\Grants;
 
 use App\Controllers\Web\WebController;
+use App\Libraries\System\SearchBuilderLibrary;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
@@ -24,6 +25,7 @@ class FinancialReport extends WebController
     private $journalLibrary;
     private $grantsLibrary;
     protected $statusLibrary;
+    private $searchBuilderLibrary;
     // private $config;
 
     
@@ -44,6 +46,7 @@ class FinancialReport extends WebController
         $this->journalLibrary = new \App\Libraries\Grants\JournalLibrary();
         $this->statusLibrary = new \App\Libraries\Core\StatusLibrary();
         $this->grantsLibrary = new \App\Libraries\System\GrantsLibrary();
+        $this->searchBuilderLibrary = new SearchBuilderLibrary();
         // $this->config = config('GrantsConfig');
         
         
@@ -1227,7 +1230,7 @@ function getFinancialReports()
     $financial_report_builder->orderBy($columns[$col], $dir);
   }
 
-  // $this->searchbuilder->searchbuilder_query_group($this->columns());
+  $this->searchBuilderLibrary->searchbuilder_query_group($this->columns(), $financial_report_builder);
 
   $financial_report_builder->select($columns);
   $financial_report_builder->join('status', 'status.status_id=financial_report.fk_status_id');
@@ -1253,8 +1256,8 @@ function countFinancialReports()
 
   $columns = $this->columns();
   $search_columns = $columns;
-
-  // $this->searchbuilder->searchbuilder_query_group($this->columns());
+  $financial_report_builder = $this->read_db->table('financial_report');
+  $this->searchBuilderLibrary->searchbuilder_query_group($this->columns(), $financial_report_builder);
   $builder = $this->read_db->table('financial_report');
   if (!$this->session->system_admin) {
     $builder->whereIn('financial_report.fk_office_id', array_column($this->session->hierarchy_offices, 'office_id'));
@@ -1310,6 +1313,48 @@ function showList():ResponseInterface
   // echo json_encode($response);
   return $this->response->setJSON($response);
 }
+
+// function show_list()
+// {
+
+//   $draw = intval($this->input->post('draw'));
+//   $financial_reports = $this->get_financial_reports();
+//   $count_financial_reports = $this->count_financial_reports();
+
+//   $result = [];
+
+//   $cnt = 0;
+//   foreach ($financial_reports as $financial_report) {
+
+//     $status_data = $this->general_model->action_button_data($this->controller, $financial_report['fk_account_system_id']);
+//     extract($status_data);
+
+//     $financial_report_id = array_shift($financial_report);
+//     $financial_status = array_pop($financial_report);
+
+//     $financial_report_track_number = $financial_report['financial_report_track_number'];
+//     $financial_report['financial_report_track_number'] = '<a target="__blank" href="' . base_url() . $this->controller . '/view/' . hash_id($financial_report_id) . '">' . $financial_report_track_number . '</a>';
+//     $financial_report['financial_report_is_submitted'] = $financial_report['financial_report_is_submitted'] == 1 ? get_phrase('yes') :  get_phrase('no');
+//     $row = array_values($financial_report);
+
+//     $action = ''; //approval_action_button($this->controller, $item_status, $financial_report_id, $financial_status, $item_initial_item_status_id, $item_max_approval_status_ids);
+
+//     array_unshift($row, $action);
+
+//     $result[$cnt] = $row;
+
+//     $cnt++;
+//   }
+
+//   $response = [
+//     'draw' => $draw,
+//     'recordsTotal' => $count_financial_reports,
+//     'recordsFiltered' => $count_financial_reports,
+//     'data' => $result
+//   ];
+
+//   echo json_encode($response);
+// }
 
 function resultArray($report_id, $office_ids, $reporting_month, $project_ids = [], $office_bank_ids = [])
 {
@@ -2288,7 +2333,7 @@ function submitFinancialReport()
     // Deactivate non default cheque book
     $this->officeBankLibrary->deactivateNonDefaultOfficeBankByOfficeId($office_id, $post['reporting_month']);
 
-    if (method_exists($this->financialReportLibrary, 'post_approval_action_event')) {
+    if (method_exists($this->financialReportLibrary, 'postApprovalActionEvent')) {
       $this->financialReportLibrary->postApprovalActionEvent([
         'item' => 'financial_report',
         'post' => [
