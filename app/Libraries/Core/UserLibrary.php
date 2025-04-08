@@ -650,8 +650,11 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
 
         // Check if column is controlled and apply permission logic
         if ($isColumnControlled->getNumRows() > 0) {
+            log_message('error', '0');
             $hasPermission = $this->checkRoleHasPermissions($activeController, $permissionLabel, 2);
+            log_message('error', ($hasPermission));
         } else {
+            log_message('error', '1');
             $hasPermission = true;
         }
 

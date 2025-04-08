@@ -1102,3 +1102,28 @@ if(!function_exists('mark_note_as_read')){
         $messageLib->markNoteAsRead($reader_user_id, $message_detail_id);
     }
 }
+
+if(!function_exists('keyed_alias_columns')){
+    function keyed_alias_columns($columns, $special_separator = 'as') {
+        $alias_columns = alias_columns($columns, $special_separator);
+
+        $list_columns = array_column($alias_columns, 'list_columns');
+        $query_columns = array_column($alias_columns, 'query_columns');
+
+        $rst = array_combine($list_columns, $query_columns);
+
+        return $rst;
+    }
+}
+
+if(!function_exists('get_query_column_for_list_column')){
+    function get_query_column_for_list_column($columns, $list_column, $special_separator = 'as') {
+        $keyed_alias_columns = keyed_alias_columns($columns, $special_separator);   
+        
+        // log_message('error', json_encode($keyed_alias_columns));
+
+        $query_column = $keyed_alias_columns[$list_column];
+
+        return $query_column;
+    }
+}
