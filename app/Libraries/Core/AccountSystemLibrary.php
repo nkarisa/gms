@@ -204,7 +204,7 @@ private function updateAccountSystemSettings(array $account_system_settings, int
     }
   }
 
-private function createAccountSystemLanguage(StatusLibrary $statusLib, int $account_system_id, int $language_id): void
+private function createAccountSystemLanguage(StatusLibrary $statusLib, int $account_system_id, int $language_id, $account_system_code): void
   {
     $accountSystemLanguageWriteBuilder = $this->write_db->table("account_system_language");
 
@@ -221,7 +221,54 @@ private function createAccountSystemLanguage(StatusLibrary $statusLib, int $acco
     $accountSystemLanguageInsert['fk_approval_id'] = NULL;
 
     $accountSystemLanguageWriteBuilder->insert($accountSystemLanguageInsert);
+
+    // Create language package file
+
+    $this->createLanguageDirectoryStructure($language_id, $account_system_code);
   }
+
+private function createLanguageDirectoryStructure($language_id, $account_system_code){
+      $languageReadBuilder = $this->read_db->table("language");
+
+      // 1. Get the language code
+      $language_code = $languageReadBuilder->where(['language_id' => $language_id])->get()->getRowArray()['language_code'];
+
+      // 2. Check if the language directory exists. Create the directory if not existing
+      $language_dir = APPPATH.'Language'.DS.$language_code;
+      if(!file_exists($language_dir)){
+        mkdir($language_dir);
+      }
+  
+      // 3. Check if the account system language directory exists in en
+      $english_language_account_system_dir = APPPATH.'Language'.DS.'en'.DS.$account_system_code;
+      if(!file_exists($english_language_account_system_dir)){
+        mkdir($english_language_account_system_dir);
+      }
+  
+      // 4. Check if the account system language directory exists in account system default language
+      $default_language_account_system_dir = $language_dir.DS.$account_system_code;
+      if(!file_exists($default_language_account_system_dir)){
+        mkdir($default_language_account_system_dir);
+      }
+  
+      $default_language_global_dir = $language_dir.DS.'Global';
+      if(!file_exists($default_language_global_dir)){
+        mkdir($default_language_global_dir);
+      }
+  
+      // 5. Copy english language file from global to account system langage
+      $engFromFile = APPPATH.'Language'.DS.'en'.DS.'Global'.DS.'App.php';
+      $engToFile = APPPATH.'Language'.DS.'en'.DS.$account_system_code.DS.'App.php';
+      copy($engFromFile, $engToFile);
+  
+      // 6. Copy english language file from global to english to default language of the new account system
+      $defaultFromFile = APPPATH.'Language'.DS.'en'.DS.'Global'.DS.'App.php';
+      $defaultToFile = APPPATH.'Language'.DS.$language_code.DS.$account_system_code.DS.'App.php';
+      copy($defaultFromFile, $defaultToFile);
+  
+      $toFile = APPPATH.'Language'.DS.$language_code.DS.'Global'.DS.'App.php';
+      copy($defaultFromFile, $toFile);
+}
 
 private function getRoleGroupNameById(int $roleGroupId): mixed
   {
@@ -572,6 +619,201 @@ function getAccountSystemRoleGroups(int $accountSystemId): array{
     return $roleGroups;
 }
 
+private function createVoucherTypes($statusLib, $account_system_id, $account_system_code, $template_account_system){
+  $voucherTypeReadBuilder = $this->read_db->table('voucher_type');
+  $voucherTypeWriteBuilder = $this->write_db->table('voucher_type');
+  
+  // 1. Get the voucher type records from the template accounting system
+  $voucherTypeReadBuilder->where(['fk_account_system_id' => $template_account_system]);
+  $resultObj = $voucherTypeReadBuilder->get();
+
+  if($resultObj->getNumRows() > 0){
+    $voucherTypesToCopy = $resultObj->getResultArray();
+
+    $voucherTypesData = [];
+
+    for($i =0; $i < count($voucherTypesToCopy); $i++){
+      $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('voucher_type');
+      $data['voucher_type_track_number'] = $itemTrackNumberAndName['voucher_type_track_number'];
+      $data['voucher_type_name'] = strtoupper($account_system_code). '-' .$voucherTypesToCopy[$i]['voucher_type_name'];
+      $data['voucher_type_abbrev'] = strtoupper($account_system_code).$voucherTypesToCopy[$i]['voucher_type_abbrev'];
+      $data['fk_account_system_id'] = $account_system_id;
+      $data['voucher_type_created_by'] = $this->session->user_id;
+      $data['voucher_type_created_date'] = date('Y-m-d');
+      $data['voucher_type_last_modified_by'] = $this->session->user_id;
+      $data['voucher_type_last_modified_date'] = date('Y-m-d');
+      $data['fk_approval_id'] = 0;
+      $data['fk_status_id'] = $statusLib->initialItemStatus('voucher_type');
+
+      unset($voucherTypesToCopy[$i]['voucher_type_id']);
+      $voucherTypesData[$i] = array_replace($voucherTypesToCopy[$i], $data);
+    }
+
+    if(count($voucherTypesData) > 0){
+      $voucherTypeWriteBuilder->insertBatch($voucherTypesData);
+    }
+
+  }
+
+}
+
+private function createOfficeCash($statusLib, $account_system_id, $account_system_code, $template_account_system){
+  $officeCashReadBuilder = $this->read_db->table('office_cash');
+  $officeWriteBuilder = $this->write_db->table('office_cash');
+  
+  // 1. Get the office cash records from the template accounting system
+  $officeCashReadBuilder->where(['fk_account_system_id' => $template_account_system]);
+  $resultObj = $officeCashReadBuilder->get();
+
+  if($resultObj->getNumRows() > 0){
+    $officeCashToCopy = $resultObj->getResultArray();
+
+    // log_message('error', json_encode($officeCashToCopy));
+
+    $officeCashData = [];
+
+    for($i =0; $i < count($officeCashToCopy); $i++){
+      $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('office_cash');
+      $data['office_cash_track_number'] = $itemTrackNumberAndName['office_cash_track_number'];
+      $data['office_cash_name'] = strtoupper($account_system_code). '-' .$officeCashToCopy[$i]['office_cash_name'];
+      $data['fk_account_system_id'] = $account_system_id;
+      $data['office_cash_created_by'] = $this->session->user_id;
+      $data['office_cash_created_date'] = date('Y-m-d');
+      $data['office_cash_last_modified_by'] = $this->session->user_id;
+      $data['office_cash_last_modified_date'] = date('Y-m-d');
+      $data['fk_approval_id'] = 0;
+      $data['fk_status_id'] = $statusLib->initialItemStatus('office_cash');
+
+      unset($officeCashToCopy[$i]['office_cash_id']);
+      $officeCashData[$i] = array_replace($officeCashToCopy[$i], $data);
+    }
+
+    if(count($officeCashData) > 0){
+      $officeWriteBuilder->insertBatch($officeCashData);
+    }
+
+  }
+}
+
+private function createAccountSystemRoles($statusLib, $account_system_id, $account_system_code, $template_account_system, $rolesGroups, $account_system_level){
+  $roleReadBuilder = $this->read_db->table('role');
+  $roleWriteBuilder = $this->write_db->table('role');
+  $rolePermissionReadBuilder = $this->write_db->table('role_permission');
+
+  // 1. Get the office cash records from the template accounting system
+  $roleReadBuilder->where(['fk_account_system_id' => $template_account_system]);
+  if($account_system_level == 4){
+    $roleReadBuilder->where(['fk_context_definition_id <=' => $account_system_level]);
+  }
+  $resultObj = $roleReadBuilder->get();
+
+  if($resultObj->getNumRows() > 0){
+    $roleToCopy = $resultObj->getResultArray();
+
+    // Get role permissions
+    $oldlRoleIds = array_column($roleToCopy,'role_id');
+    $rolePermissionReadBuilder->select(['fk_role_id','fk_permission_id'])->whereIn('fk_role_id',$oldlRoleIds);
+    $rolePermissionsObj = $rolePermissionReadBuilder->get();
+    
+    $rolePermissions = [];
+    
+    if($rolePermissionsObj->getNumRows() > 0){
+      $rolePermissionsArray = $rolePermissionsObj->getResultArray();
+      
+      foreach($rolePermissionsArray as $rolePermission){
+        $rolePermissions[$rolePermission['fk_role_id']][] = $rolePermission['fk_permission_id'];
+      }
+    }
+
+    for($i =0; $i < count($roleToCopy); $i++){
+      $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('role');
+      $data['role_track_number'] = $itemTrackNumberAndName['role_track_number'];
+      $data['role_name'] = strtoupper($account_system_code). '-' .$roleToCopy[$i]['role_name'];
+      $data['fk_account_system_id'] = $account_system_id;
+      $data['fk_context_definition_id'] = $roleToCopy[$i]['fk_context_definition_id'];
+      $data['role_created_by'] = $this->session->user_id;
+      $data['role_created_date'] = date('Y-m-d');
+      $data['role_last_modified_by'] = $this->session->user_id;
+      $data['role_last_modified_date'] = date('Y-m-d');
+      $data['fk_approval_id'] = 0;
+      $data['fk_status_id'] = $statusLib->initialItemStatus('role');
+
+      $_oldRoleId = $roleToCopy[$i]['role_id']; 
+      unset($roleToCopy[$i]['role_id']);
+
+      $roleWriteBuilder->insert($data);
+      $newRoleId = $this->write_db->insertID();
+
+      $permissionIdsToAttach = isset($rolePermissions[$_oldRoleId]) ? $rolePermissions[$_oldRoleId] : 0;
+      
+      if(count($permissionIdsToAttach) > 0){
+        $this->insertPermissionsToRole($statusLib, $newRoleId, $permissionIdsToAttach);
+      }
+
+      // Check if old role has a role group association and attach
+      $roleGroupAssociationReadBuilder = $this->read_db->table('role_group_association');
+      $roleGroupAssociationWriteBuilder = $this->write_db->table('role_group_association');
+
+      $roleGroupAssociationReadBuilder->where(['fk_role_id' => $_oldRoleId]);
+      $roleGroupAssocObj = $roleGroupAssociationReadBuilder->get();
+
+      if($roleGroupAssocObj->getNumRows() > 0){
+        $roleGroupAssoc = $roleGroupAssocObj->getResultArray();
+
+        foreach($roleGroupAssoc as $row){
+          $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('role_group_association');       
+          $assocData['role_group_association_name'] = $itemTrackNumberAndName['role_group_association_name'];
+          $assocData['role_group_association_track_number'] = $itemTrackNumberAndName['role_group_association_track_number'];
+          $assocData['fk_role_group_id'] = $row['fk_role_group_id'];
+          $assocData['fk_role_id'] = $newRoleId ;
+          $assocData['role_group_association_is_active'] = $row['role_group_association_is_active'];
+          $assocData['role_group_association_created_date'] = date('Y-m-d');
+          $assocData['role_group_association_created_by'] = $this->session->user_id;
+          $assocData['role_group_association_last_modified_date'] = date('Y-m-d');
+          $assocData['role_group_association_last_modified_by'] = $this->session->user_id;
+          $assocData['fk_status_id'] = $statusLib->initialItemStatus('role_group_association');
+          $assocData['fk_approval_id'] = 0;
+
+          $roleGroupAssociationWriteBuilder->insert($assocData);
+        }
+      }
+
+    }
+
+  }else{
+        $this->createRoleGroupAssociations($statusLib, $account_system_id, $rolesGroups, $account_system_code, $template_account_system);
+  }
+}
+
+private function insertPermissionsToRole($statusLib, $roleId, $permissionIds){
+  $rolePermissionWriteBuilder = $this->write_db->table('role_permission');
+  $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('role_permission');
+
+  $data  = [];
+
+  for($i = 0; $i < count($permissionIds); $i++){
+    $data[$i]['role_permission_track_number'] = $itemTrackNumberAndName['role_permission_track_number'];
+    $data[$i]['role_permission_name'] = $itemTrackNumberAndName['role_permission_name'];
+    $data[$i]['role_permission_is_active'] = 1;
+    $data[$i]['fk_role_id'] = $roleId;
+    $data[$i]['fk_permission_id'] = $permissionIds[$i];
+    $data[$i]['fk_approval_id'] = 0;
+    $data[$i]['fk_status_id'] = $statusLib->initialItemStatus('role');
+    $data[$i]['role_permission_created_date'] = date('Y-m-d');
+    $data[$i]['role_permission_created_by'] = $this->session->user_id;
+    $data[$i]['role_permission_last_modified_date'] = date('Y-m-d');
+    $data[$i]['role_permission_last_modified_by'] = $this->session->user_id;
+  }
+  
+
+  $rolePermissionWriteBuilder->insertBatch($data);
+
+}
+
+private function createApprovalFlow($statusLib, $account_system_id, $account_system_code, $template_account_system){
+
+}
+
 public function actionAfterInsert($post_array, $approval_id, $header_id): bool
   {
     $state = true;
@@ -584,8 +826,7 @@ public function actionAfterInsert($post_array, $approval_id, $header_id): bool
     $account_system_level = $post_array['account_system_level'];
     $statusLib = new \App\Libraries\Core\StatusLibrary();
     
-    $rolesGroups = $this->getAccountSystemRoleGroups($template_account_system);//$post_array['roles'];
-    // log_message('error', json_encode($rolesGroups));
+    $rolesGroups = $this->getAccountSystemRoleGroups($template_account_system);
     
     // Insert a record in the country currency table
     $countryCurrenyId = $this->createCountryCurrency($statusLib, $header_id, $account_system_code);
@@ -597,11 +838,12 @@ public function actionAfterInsert($post_array, $approval_id, $header_id): bool
     }
 
     // Insert account_system_language record
-    $this->createAccountSystemLanguage($statusLib, $header_id, $language_id);
+    $this->createAccountSystemLanguage($statusLib, $header_id, $language_id, $account_system_code);
 
     // Add Account System Roles 
-    $this->createRoleGroupAssociations($statusLib, $header_id, $rolesGroups, $account_system_code, $template_account_system);
-
+    $this->createAccountSystemRoles($statusLib, $header_id, $account_system_code, $template_account_system, $rolesGroups, $account_system_level);
+    // $this->createRoleGroupAssociations($statusLib, $header_id, $rolesGroups, $account_system_code, $template_account_system);
+    
     // Copy Global Income and Expense Accounts to the New Account System
     $this->copyGlobalAccountsToNewAccountSystem($statusLib, $header_id, $account_system_code, $template_account_system);
 
@@ -613,6 +855,14 @@ public function actionAfterInsert($post_array, $approval_id, $header_id): bool
      // Create the National Office and Context
     $this->createOfficeAndContext($statusLib, $header_id, $account_system_code, $countryCurrenyId, $template_account_system, $default_project_start_date, $account_system_level);
   
+    // Create voucher types
+    $this->createVoucherTypes($statusLib, $header_id, $account_system_code, $template_account_system);
+
+    // Create cash boxes
+    $this->createOfficeCash($statusLib, $header_id, $account_system_code, $template_account_system);
+
+    // Create approval workflow
+    $this->createApprovalFlow($statusLib, $header_id, $account_system_code, $template_account_system);
 
     return $state;
   }
@@ -628,14 +878,12 @@ public function singleFormAddVisibleColumns(): array
       'account_system_settings',
       'language_name',
       'country_currency_name',
-      // 'roles',
       'default_project_start_date'
     ];
   }
 
 public function actionAfterEdit(array $postData, int $approveId, int $itemId): bool
   {
-    // log_message('error', json_encode(compact('postDate','approveId','itemId')));
     return true;
   }
 }

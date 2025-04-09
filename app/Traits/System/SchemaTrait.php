@@ -351,7 +351,7 @@ trait SchemaTrait
      * @param string $table The name of the table to retrieve fields for.
      * @return array An array containing the names of all fields in the specified table.
      */
-    private function listFields($table)
+    protected function listFields($table)
     {
         $fields = [];
         $get_schema = $this->getSchema();

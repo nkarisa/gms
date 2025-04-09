@@ -74,7 +74,6 @@ class GrantsLibrary
       session()->set('masterTable', $segments[3]);
     }
 
-    // if($this->request->isAJAX()){
     if ($this->controller == "ajax" || $this->controller == "ajaxRequest") {
       $this->controller = isset($segments[1]) ? $segments[1] : 'dashboard';
     }
@@ -82,16 +81,12 @@ class GrantsLibrary
     if ($this->action == "showList") {
       $this->action = 'list';
     }
-    // }
 
     // Session 
     $this->session = service('session');
 
     // Response 
-    $this->response = service('response'); // Services::response()
-
-    // $this->statusLibrary = new StatusLibrary(); 
-
+    $this->response = service('response'); 
   }
 
   /**

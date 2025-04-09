@@ -42,4 +42,22 @@ class RoleLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
        function detailTables(): array {
         return ['role_permission','role_group_association'];
        }
+
+
+    function singleFormAddVisibleColumns(): array {
+      $fields = [
+        'role_name',
+        'role_shortname',
+        'role_description',
+        'role_is_active',
+        'context_definition_name',
+        'account_system_name'
+      ];
+
+      if($this->session->system_admin){
+        $fields = [...$fields, 'role_is_new_status_default','role_is_department_strict'];
+      }
+
+      return $fields;
+    }
 }

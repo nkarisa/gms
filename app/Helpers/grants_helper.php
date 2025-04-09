@@ -1127,3 +1127,22 @@ if(!function_exists('get_query_column_for_list_column')){
         return $query_column;
     }
 }
+
+if (!function_exists('list_lookup_tables')) {
+    function list_lookup_tables($table_name)
+    {
+
+        $grantsLibrary = new \App\Libraries\System\GrantsLibrary();
+        $table_fields = $grantsLibrary->getAllTableFields($table_name);
+
+        $list_lookup_tables = [];
+
+        foreach ($table_fields as $table_field) {
+            if (substr($table_field, 0, 3) == 'fk_') {
+                $list_lookup_tables[] = substr($table_field, 3, -3);
+            }
+        }
+
+        return $list_lookup_tables;
+    }
+}

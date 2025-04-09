@@ -60,4 +60,15 @@ class ApprovalFlowLibrary extends GrantsLibrary implements \App\Interfaces\Libra
        $builder->where('approve_item_is_active', 1);
     }
 
+    function listTableVisibleColumns(): array {
+        return [
+            'approval_flow_track_number',
+            // 'approval_flow_name',
+            'approve_item_name',
+            'approval_flow_is_active',
+            'account_system_name',
+            'approval_flow_created_date'
+        ];
+    }
+
 }

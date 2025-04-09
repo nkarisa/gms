@@ -22,6 +22,51 @@ class StatusLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
         $this->checkDeclineReinstateStatus();
     }
 
+    function getStatus($id){
+
+      $statusBuilder = $this->read_db->table('status');
+      $statusBuilder->select(array('status_approval_direction','approve_item_name','status_approval_sequence','status_is_requiring_approver_action'));
+      $statusBuilder->where(array('status_id'=>$id));
+      $statusBuilder->join('approval_flow','approval_flow.approval_flow_id=status.fk_approval_flow_id');
+      $statusBuilder->join('approve_item','approve_item.approve_item_id=approval_flow.fk_approve_item_id');
+      $status = $statusBuilder->get()->getRow();
+  
+      return $status;
+    }
+
+    public function detailTables(): array 
+    {
+      $id = hash_id($this->id,'decode');
+      $status = $this->getStatus($id );
+  
+      $direction = $status->status_approval_direction;
+      $is_first_level = $status->status_approval_sequence == 1 ? true : false;
+      $is_final_level = $status->status_is_requiring_approver_action == 0 ? true : false;
+      $table = $status->approve_item_name;
+  
+      $lookup_tables = list_lookup_tables($table);
+      $fields = $this->listFields($table);
+  
+      foreach($lookup_tables as $lookup_table){
+        if($lookup_table == 'status' || $lookup_table == 'approval') continue;
+        $lookup_table_fields = $this->listFields($lookup_table);
+        $fields = array_merge($fields , $lookup_table_fields);
+      }
+  
+      $cols = ['status_role'];
+  
+      if(in_array('fk_office_id', $fields) && !$is_first_level && !$is_final_level){
+        $cols = ['status_role','approval_exemption'];
+      }
+    
+      if($direction == 1){
+        return $cols;
+      }else{
+        return [];
+      }
+     
+    }
+
     function checkDeclineReinstateStatus(){
 
         $id = hash_id($this->id,'decode');
@@ -945,10 +990,6 @@ class StatusLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
     $status = $builder->get()->getResultArray();
 
     return $status;
-  }
-
-  function detailTables(): array {
-    return ['status_role'];
   }
 
   function createChangeHistoryOnStatusChange($new_data, $old_data, $table)

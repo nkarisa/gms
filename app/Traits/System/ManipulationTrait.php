@@ -16,7 +16,6 @@ trait ManipulationTrait {
   
       // Asign the post input to $post_array
       $post_array = $this->request->getPost();
-  
       // Check if there is a before insert method set in the feature model wrapped via grants model
       $post_array = $this->actionBeforeInsert($post_array);
   
@@ -63,13 +62,15 @@ trait ManipulationTrait {
   
         $success = 0;
         $failed = 0;
+
         foreach ($multi_select_field_values as $multi_select_field_value) {
   
           $header[$multi_select_field_name] = $multi_select_field_value;
   
           if (!empty($onfly_created_multi_selects)) {
             foreach ($onfly_created_multi_selects as $_column_name => $_column_values) {
-              $header[$_column_name] = $_column_values[$multi_select_field_value];
+              // Need to understand this implementation - After which this code will be uncommented
+              // $header[$_column_name] = $_column_values[$multi_select_field_value];
             }
           }
   
@@ -483,7 +484,7 @@ trait ManipulationTrait {
             $this->write_db->transRollback();
             $flagMessage = get_phrase('update_not_successful');
           } else {
-            if ($library->actionAfterEdit($data, $approvalId, $id)) {
+            if ($library->actionAfterEdit($data, $approvalId, hash_id($id, 'decode'))) {
               $this->write_db->transCommit();
               $flag = true;
               $flagMessage = get_phrase('update_completed');

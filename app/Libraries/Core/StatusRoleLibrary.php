@@ -24,19 +24,21 @@ class StatusRoleLibrary extends GrantsLibrary implements \App\Interfaces\Library
         $this->table = 'core';
     }
 
+    function actionBeforeInsert($post_array): array
+    {
 
-    // function detailListQuery()
-    // {
-    //     $this->read_db->join('role', 'role.role_id=status_role.fk_role_id');
-       
-    //     $this->read_db->join('status', 'status.status_id=status_role.status_role_status_id');
-    //     $this->read_db->where(array('status_role_status_id' => hash_id($this->id, 'decode')));
-    //     $result = $this->read_db->get('status_role')->result_array();
+        $post_array['header']['status_role_status_id'] = hash_id($this->id, 'decode');
 
-    //     return $result;
-    // }
+        $status_name = $this->read_db->table('status')
+        ->where(array('status_id' => hash_id($this->id, 'decode')))
+        ->get()->getRow()->status_name;
 
-    function list($builder, array $listSelectColumns, string $parentId = null, string $parentTable = null): array
+        $post_array['header']['status_role_name'] = $status_name;
+
+        return $post_array;
+    }
+
+    function list($builder, array $listSelectColumns, ?string $parentId = null, ?string $parentTable = null): array
     {
         $this->dataTableBuilder($builder, $this->controller, $listSelectColumns);
         $builder->select($listSelectColumns);
@@ -48,21 +50,10 @@ class StatusRoleLibrary extends GrantsLibrary implements \App\Interfaces\Library
         return ['results' => $results];
     }
 
-    // function detailListTableVisibleColumns(): array{
-    //     return [
-    //         'status_role_track_number',
-    //         'status_role_name',
-    //         'status_role_is_active',
-    //         'role_name',
-    //         'status_role_created_date'
-    //     ];
-    // }
-
     function singleFormAddVisibleColumns(): array
     {
         return ['role_name'];
     }
-
 
     public function lookupValues(): array
     {
@@ -110,4 +101,12 @@ class StatusRoleLibrary extends GrantsLibrary implements \App\Interfaces\Library
         return $lookup_values;
     }
    
+    function detailListTableVisibleColumns(): array {
+        return [
+            'status_role_track_number',
+            'role_name',
+            'status_role_is_active',
+            'status_role_created_date'
+        ];
+    }
 }
