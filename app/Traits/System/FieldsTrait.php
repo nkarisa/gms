@@ -178,7 +178,6 @@ trait FieldsTrait {
      $field = $field_type . "_field";
  
      if (array_key_exists($column, $this->set_field_type)) {
-      // log_message('error', json_encode($this->set_field_type[$column]));
        $field_type = $this->set_field_type[$column]['field_type'];
        $select2 = isset($this->set_field_type[$column]['select2']) && $this->set_field_type[$column]['select2'] ? $this->set_field_type[$column]['select2'] : false;
        $field = $field_type . "_field";

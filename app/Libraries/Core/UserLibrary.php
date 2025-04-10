@@ -650,11 +650,8 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
 
         // Check if column is controlled and apply permission logic
         if ($isColumnControlled->getNumRows() > 0) {
-            log_message('error', '0');
             $hasPermission = $this->checkRoleHasPermissions($activeController, $permissionLabel, 2);
-            log_message('error', ($hasPermission));
         } else {
-            log_message('error', '1');
             $hasPermission = true;
         }
 
@@ -1606,7 +1603,6 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
             'approval_direction' => $next_approval_direction == 1 ? $current_approval_direction : $next_approval_direction,
             'reinstatement_status_id' => $reinstatement_status_id
         ];
-        // log_message('error', $approvers);
         if ($existing_approvers == "" || $existing_approvers == "[]" || $existing_approvers == NULL) {
             $approvers = [$new_approver];
         } else {

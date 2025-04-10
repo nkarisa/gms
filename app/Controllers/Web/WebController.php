@@ -166,8 +166,6 @@ class WebController extends BaseController
       $this->id = hash_id(isset($this->segments[2]) ? $this->segments[2] : null, 'decode'); // Not sure what's this line does
     } elseif ($this->action == 'singleFormAdd' && count($this->uri->getSegments()) == 4) {
       $this->session->set('masterTable', $this->uri->getSegment(4));
-      // log_message('error', $this->session->masterTable);
-      // $this->id = $this->uri->getSegment(3);
       $this->id = isset($this->segments[2]) ? $this->segments[2] : null; // Used for example when adding a newr permission to a role
     } elseif ($this->action == 'list') {
       $this->session->set('masterTable', null);
@@ -200,21 +198,17 @@ class WebController extends BaseController
 
     $output = [];
 
-
-    //log_message('error', json_encode($this->id));
-
     if ($this->action == "list") {
       // List page data will only be loaded via ajax request and will be a datatable serverside loaded
       if ($this->request->isAJAX()) {
         
-        $output = $this->libs::call($this->controller . '.' . $this->action . 'Output', [$this->id, $parentTable]);
+        $output = $this->libs::call($this->controller . '.' . $this->action . 'Output', [$this->id == null ? $id : $this->id, $parentTable]);
 
       }
     } else {
       if ($this->id == null) {
         $output = $this->libs::call($this->controller . '.' . $this->action . 'Output');
       } else {
-         //log_message('error', json_encode(['test'=>$this->controller . '.' . $this->action . 'Output', 'test2'=> $this->id]));
          $output = $this->libs::call($this->controller . '.' . $this->action . 'Output', [$this->id]);
       }
     }
@@ -487,6 +481,7 @@ class WebController extends BaseController
 
     $parentId = null;
     $parentTable = null;
+    $post = $this->request->getPost();
 
     if ($this->request->getPost('parentId')) {
       $parentId = $this->request->getPost('parentId');
@@ -498,11 +493,8 @@ class WebController extends BaseController
 
     $results = $this->result($parentId, $parentTable);
     $draw = intval($this->request->getPost('draw'));
-    // $statusLibrary = new \App\Libraries\Core\StatusLibrary();
     
     $data = $results['table_body'];
-
-    //log_message('error',json_encode($results));
 
     $formatColumnValuesdependancyData = $this->library->formatColumnsValuesDependancyData($data);
     $showListEditActionDependancyData = $this->library->showListEditActionDependancyData($data);
@@ -512,7 +504,6 @@ class WebController extends BaseController
     $columns = $results['keys'];
 
     $cnt = 0;
-    // log_message('error', json_encode($data));
     foreach ($data as $row) {
       $cols = 0;
       $primary_key = 0;
@@ -561,8 +552,7 @@ class WebController extends BaseController
       'recordsFiltered' => intval($total_records),
       'data' => $records
     ];
-
-
+    
     return $this->response->setJSON($response);
   }
 
@@ -715,12 +705,8 @@ class WebController extends BaseController
     if ($attachement_id == '') {
 
       $get_current_url =  $this->request->getServer('HTTP_REFERER');;
-      // log_message('error', json_encode($get_current_url));
       $get_current_url_arr = explode('/', $get_current_url);
-
-     
-      //log_message('error',json_encode($get_current_url_arr));
-
+      
       $get_items_id = isset($get_current_url_arr[6]) ? $get_current_url_arr[6] : 0;
 
       $approve_item_name = isset($get_current_url_arr[4]) ? $get_current_url_arr[4] : ucwords($this->controller);

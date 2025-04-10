@@ -16,7 +16,7 @@ class ListOutput extends OutputTemplate
   private function listInternalQueryResults(array $lookup_tables): array
   {
     $table = $this->controller;
-
+    
     $filter_where_array = hash_id($this->id, 'decode') > 0 && !in_array($table, decode_setting("GrantsConfig","tableThatDontRequireHistoryFields")) ? [$table . '.fk_status_id' => hash_id($this->id, 'decode')] : [];
     $toggle_list_select_columns = $this->libs->toggleListSelectColumns($this->parentTable);
 
@@ -59,6 +59,7 @@ class ListOutput extends OutputTemplate
       if(array_key_exists($this->parentTable,$foreignKeyMappings)){
         $foreignKeyField = $foreignKeyMappings[$this->parentTable];
       }
+      
       $builder->where($foreignKeyField, hash_id($this->parentId, 'decode'));
     }
 
@@ -284,7 +285,7 @@ class ListOutput extends OutputTemplate
 
     $total_records = $toggleListQueryResults['total_records'];
     $controller = $this->controller;
-  
+
     return compact('table_body', 'total_records', 'keys', 'fields_meta_data', 'controller');
   }
 }

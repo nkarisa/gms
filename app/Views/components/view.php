@@ -166,12 +166,8 @@ $columns = array_chunk($keys,service("settings")->get("GrantsConfig.master_table
     <?php
 
     if( isset($result['detail']) && count($result['detail']) > 0){
-      // echo json_encode($result['detail']['project']['keys']);
       foreach ($result['detail'] as $detail_table_name => $details) {
-        //print_r(array_keys($details));
         extract($details);
-        //echo $detail_table_name;
-        // $primary_key_column = array_shift($keys);
         ?>
 
         <hr/>

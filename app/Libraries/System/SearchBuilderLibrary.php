@@ -44,7 +44,6 @@ class SearchBuilderLibrary {
 
             $outer_criteria = $searchBuilder['criteria'];
             $outer_logic = $searchBuilder['logic'];
-            // log_message('error', json_encode($searchBuilder));
             if(isset($outer_criteria)){
               $builder->groupStart();
               $column_key = 0;
@@ -75,7 +74,6 @@ class SearchBuilderLibrary {
     }
 
     function search_builder_condition($conditions,$outer_logic, $columns, $column_key, $builder){
-        // log_message('error', json_encode(['conditions' => $conditions,'outer_logic' => $outer_logic, 'column_key' => $column_key]));
         $list_column = str_replace(' ','_',strtolower(trim($conditions['data'])));
         $column = get_query_column_for_list_column($columns, $list_column, '@');
         $value = isset($conditions['value'][0]) ? $conditions['value'][0] : '';
@@ -87,8 +85,6 @@ class SearchBuilderLibrary {
         }elseif($value == 'no' || $value == 'No' || $value == 'NO'){
           $value = 0;
         }
-
-        // log_message('error', json_encode($type));
         
         $condition_key_word_prefix = ''; 
     

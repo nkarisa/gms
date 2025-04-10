@@ -579,7 +579,6 @@ private function createOfficeAndContext($statusLib, $header_id, $account_system_
     if($reportingContextObj->getNumRows() > 0){
       $row = $reportingContextObj->getRow();
       $reportingContextId = $hierarchy_level == 4 ? $row->context_region_id : $row->context_global_id;
-      // log_message('error', json_encode(compact('hierarchy_level','reportingContextId','template_account_system')));
       // Create Context Office
       $contextTable = $hierarchy_level == 4 ? 'context_country' : 'context_region';
       $itemTrackNumberAndName = $this->generateItemTrackNumberAndName($hierarchy_level == 4 ? 'context_country' : 'context_region');
@@ -668,8 +667,6 @@ private function createOfficeCash($statusLib, $account_system_id, $account_syste
   if($resultObj->getNumRows() > 0){
     $officeCashToCopy = $resultObj->getResultArray();
 
-    // log_message('error', json_encode($officeCashToCopy));
-
     $officeCashData = [];
 
     for($i =0; $i < count($officeCashToCopy); $i++){
@@ -736,6 +733,7 @@ private function createAccountSystemRoles($statusLib, $account_system_id, $accou
       $data['role_last_modified_by'] = $this->session->user_id;
       $data['role_last_modified_date'] = date('Y-m-d');
       $data['fk_approval_id'] = 0;
+      $data['role_template_id'] = $roleToCopy[$i]['role_id'];
       $data['fk_status_id'] = $statusLib->initialItemStatus('role');
 
       $_oldRoleId = $roleToCopy[$i]['role_id']; 
@@ -811,7 +809,142 @@ private function insertPermissionsToRole($statusLib, $roleId, $permissionIds){
 }
 
 private function createApprovalFlow($statusLib, $account_system_id, $account_system_code, $template_account_system){
+  
+  // Query builders
+  $approvalFlowReadBuilder = $this->read_db->table('approval_flow');
+  $statusWriteBuilder = $this->write_db->table('status');
+  $accountSystemWriteBuilder = $this->write_db->table('account_system'); // Must be in write_db
+  $statusRoleWriteBuilder = $this->write_db->table('status_role');
 
+  // Approval flow library object
+  $approvalFlowLibrary = new \App\Libraries\Core\ApprovalFlowLibrary();
+
+  // Creating user Id
+  $user_id = $this->session->user_id;
+
+  // The newly created accounting system  
+  $account_system = $accountSystemWriteBuilder->where(['account_system_id' => $account_system_id])
+  ->get()->getRowArray();
+
+  // Selected columns
+  $selectedColumns = [
+    'fk_approve_item_id',
+    'approve_item_name',
+    'status_id',
+    'status_name',
+    'status_button_label',
+    'status_decline_button_label',
+    'status_signatory_label',
+    'fk_approval_flow_id',
+    'status_approval_sequence',
+    'status_backflow_sequence',
+    'status_approval_direction',
+    'status_is_requiring_approver_action',
+    'fk_role_id'
+  ];
+
+  // Get templating account system approval flow and status
+  $approvalFlowReadBuilder->where(['fk_account_system_id' => $template_account_system]);
+  $approvalFlowReadBuilder->select($selectedColumns);
+  $approvalFlowReadBuilder->join('status','status.fk_approval_flow_id=approval_flow.approval_flow_id');
+  $approvalFlowReadBuilder->join('approve_item','approve_item.approve_item_id=approval_flow.fk_approve_item_id');
+  $approvalFlowReadBuilder->join('status_role','status.status_id=status_role.status_role_status_id','LEFT');
+  $templateApprovalFlowStatus = $approvalFlowReadBuilder->get();
+
+
+  // Check if the template approval flow and status is present
+  if($templateApprovalFlowStatus->getNumRows() > 0){
+     // Array to store the template accounting system approval flow
+    $template = [];
+    $approve_item = [];
+    $templateApprovalStatus = $templateApprovalFlowStatus->getResultArray();
+
+    foreach($templateApprovalStatus as $templateStatus){
+      $approve_item_id = $templateStatus['fk_approve_item_id'];
+      $approve_item_name = $templateStatus['approve_item_name'];
+      $status_id = $templateStatus['status_id'];
+      $approve_item[$approve_item_id] = $approve_item_name;
+      
+      unset($templateStatus['fk_approve_item_id']);
+      unset($templateStatus['approve_item_name']);
+      unset($templateStatus['status_id']);
+
+      $template[$approve_item_id]['status'][$status_id] = $templateStatus;
+
+      if(isset($templateStatus['fk_role_id']) && $templateStatus['fk_role_id'] > 0){
+        $template[$approve_item_id]['status_role'][$status_id][] = $templateStatus['fk_role_id'];
+      }
+       
+    }
+
+    foreach($template as $approveItemId => $statuses){
+        
+      $approvalFlowId = $approvalFlowLibrary->insertApprovalFlow($account_system, $approveItemId, $approve_item[$approveItemId], $user_id);
+
+      $statusData = [];
+      foreach($statuses['status'] as $oldStatusId => $status){
+        // Create statuses
+        $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('status');
+        $statusData['status_name'] = $status['status_name'];
+        $statusData['status_track_number'] =  $itemTrackNumberAndName['status_track_number'];
+        $statusData['status_button_label'] = $status['status_button_label'];
+        $statusData['status_decline_button_label'] = $status['status_decline_button_label'];
+        $statusData['status_signatory_label'] = $status['status_signatory_label'];
+        $statusData['fk_approval_flow_id'] = $approvalFlowId;
+        $statusData['status_approval_sequence'] = $status['status_approval_sequence'];
+        $statusData['status_backflow_sequence'] = $status['status_backflow_sequence'];
+        $statusData['status_approval_direction'] = $status['status_approval_direction'];
+        $statusData['status_is_requiring_approver_action'] = $status['status_is_requiring_approver_action'];
+        $statusData['status_created_date'] = date('Y-m-d');
+        $statusData['status_created_by'] = $user_id;
+        $statusData['status_last_modified_date'] = date('Y-m-d');
+        $statusData['status_last_modified_by'] = $user_id;
+
+        $statusWriteBuilder->insert($statusData);
+        $statusId = $this->write_db->insertID();
+
+        if(isset($template[$approveItemId]['status_role']) && isset($template[$approveItemId]['status_role'][$oldStatusId])) {
+          $statusRoles = $template[$approveItemId]['status_role'][$oldStatusId];
+
+          if(!empty($statusRoles)){
+            $statusRole = [];
+            
+            for($i = 0; $i < count($statusRoles); $i++){
+                $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('status_role');
+                $statusRole[$i]['status_role_track_number'] = $itemTrackNumberAndName['status_role_track_number'];
+                $statusRole[$i]['status_role_name'] =  $status['status_name'];
+                $statusRole[$i]['fk_role_id'] = $this->findRelatedAccountingSystemRole($statusRoles[$i], $account_system_id);// $statusRoles[$i];
+                $statusRole[$i]['fk_status_id'] = $statusLib->initialItemStatus('status_role');
+                $statusRole[$i]['status_role_status_id'] = $statusId;
+                $statusRole[$i]['status_role_is_active'] = 1;
+                $statusRole[$i]['status_role_created_by'] = $user_id;
+                $statusRole[$i]['status_role_created_date'] = date('Y-m-d');
+                $statusRole[$i]['status_role_last_modified_by'] = $user_id;
+                $statusRole[$i]['status_role_last_modified_date'] = date('Y-m-d');
+                $statusRole[$i]['fk_approval_id'] = 0;
+            }
+            $statusRoleWriteBuilder->insertBatch($statusRole);
+          }
+        }
+      }
+    }
+  }
+}
+
+private function findRelatedAccountingSystemRole($oldRoleId, $account_system_id): int{
+  // $roleReadBuilder = $this->read_db->table('role');
+  $roleWriteBuilder = $this->write_db->table('role');
+
+  $roleWriteBuilder->where(['role_template_id' => $oldRoleId, 'fk_account_system_id' => $account_system_id]);
+  $newRoleObj = $roleWriteBuilder->get();
+
+  $newRoleId = 0;
+
+  if($newRoleObj->getNumRows() > 0){
+    $newRoleId = $newRoleObj->getRowArray()['role_id'];
+  }
+
+  return $newRoleId;
 }
 
 public function actionAfterInsert($post_array, $approval_id, $header_id): bool
@@ -882,8 +1015,52 @@ public function singleFormAddVisibleColumns(): array
     ];
   }
 
-public function actionAfterEdit(array $postData, int $approveId, int $itemId): bool
+
+private function disableEnableFeature($tableName, $isBeingDeactivated, $accountSystemId, $fieldsToupdate = []){
+  $writeBuilder = $this->write_db->table($tableName);
+
+  $data = [];
+  
+  if(!empty($fieldsToupdate)){
+    foreach($fieldsToupdate as $fieldName => $updateData){
+      $data[$fieldName] = $isBeingDeactivated ? $updateData['onDeactivate'] : $updateData['onActivate'];
+    }
+  }
+
+  if(!empty($data)){
+    $writeBuilder->where(['fk_account_system_id' => $accountSystemId]);
+    $writeBuilder->update($data);
+  }
+}
+
+private function featuresDeactivationOrAction($postData, $accountSystemId){
+    $isBeingDeactivated = $postData['account_system_is_active'] == 0 ? true : false;
+    $activationField = ['onDeactivate' => 0, 'onActivate' => 1];
+
+    $itemsToBeDeactivatedOrActivated = [
+      'office' => ['office_end_date' => ['onDeactivate' => date('Y-m-d'), 'onActivate' => NULL],'office_is_active' => $activationField],
+      'income_account' => ['income_account_is_active' => $activationField],
+      'role' => ['role_is_active' => $activationField],
+      'voucher_type' => ['voucher_type_is_active' => $activationField],
+      'office_cash' => ['office_cash_type_is_active' => $activationField],
+      'user' => ['user_is_active' => $activationField]
+    ];
+
+    foreach ($itemsToBeDeactivatedOrActivated as $tableName => $fieldsToUpdate) {
+      $this->disableEnableFeature($tableName, $isBeingDeactivated, $accountSystemId, $fieldsToUpdate);
+    }
+}
+  public function actionAfterEdit(array $postData, int $approveId, int $itemId): bool
   {
+    $this->featuresDeactivationOrAction($postData, $itemId);
     return true;
+  }
+
+  function editVisibleColumns(): array {
+    return [
+      'account_system_name',
+      'account_system_is_allocation_linked_to_account',
+      'account_system_is_active'
+    ];
   }
 }

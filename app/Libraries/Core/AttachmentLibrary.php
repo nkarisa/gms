@@ -111,8 +111,6 @@ class AttachmentLibrary extends GrantsLibrary implements \App\Interfaces\Library
      
       
      }
-
-     //log_message('error', json_encode($attachment_type_id));
  
      return $attachment_type_id;
    }

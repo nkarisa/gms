@@ -377,7 +377,6 @@ trait ManipulationTrait {
     public function createChangeHistory(array $newData, bool $excludeUsingNewDataColumns = false, array $criticalColumnsToUnset = [], string $table = "", $itemId = 0)
     {
       // Determine the table name
-      //log_message('error', json_encode(0));
 
       $table = empty($table) ? $this->controller : $table;
   
@@ -422,23 +421,8 @@ trait ManipulationTrait {
       $update_data['history_created_date'] = date('Y-m-d');
       $update_data['history_created_by'] = $this->session->user_id;
       $update_data['history_last_modified_by'] = $this->session->user_id;
-
-      //log_message('error',json_encode($update_data));
-      
-      //log_message('error',json_encode($update_data));
-      // $updateData = [
-      //   'fk_approve_item_id' => $approve_item_id,
-      //   'fk_user_id' => $this->session->get('user_id'),
-      //   'history_action' => 1, // 1 = Update, 2 = Delete
-      //   'history_current_body' => json_encode($oldData),
-      //   'history_updated_body' => json_encode($newData),
-      //   'history_created_date' => date('Y-m-d'),
-      //   'history_created_by' => $this->session->get('user_id'),
-      //   'history_last_modified_by' => $this->session->get('user_id'),
-      // ];
   
       // Insert update history into 'history' table
-      log_message('error', json_encode($update_data));
       $builder_arr = $this->write_db->table('history');
       $builder_arr->insert($update_data);
     }

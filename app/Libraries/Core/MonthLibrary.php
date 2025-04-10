@@ -48,9 +48,7 @@ class MonthLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInter
         for($i = 1; $i < $budget_tag_level; $i++){
             $past_months_in_fy = array_merge($past_months_in_fy, $year_periods[$i - 1]);
         }
-
-        // log_message('error', json_encode($month_list_order));
-        
+                
         return $past_months_in_fy;
     }
 }

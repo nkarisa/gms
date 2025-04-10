@@ -416,6 +416,14 @@ class GrantsLibrary
     $featureLibrary = $this->loadLibrary($table_name);
     $uri = service('uri');
 
+    $is_detail_table = $this->controller == $table_name ? false: true;
+
+    // Terminate with an empty array if the table passed is a detail table
+    if($is_detail_table){
+      return [];
+    }
+
+
     if ($this->controller == 'approval' && $this->action == 'view') {
       // This is specific to approval view, only to list the detail listing of the selected approveable items
       // This prevents the approval from listing the details tables instead of a specific approveable item
@@ -456,7 +464,6 @@ class GrantsLibrary
         $has_detail_table = true;
       }
       
-    // log_message('error', json_encode(compact('table','all_detail_tables','dependantTable','has_detail_table')));
     return $has_detail_table;
   }
 
