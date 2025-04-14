@@ -1,6 +1,13 @@
+<?php
+$uri = service('uri');
+$segments = $uri->getSegments();
+$action = isset($segments[1]) ? $segments[1] : 'list';
+?>
 <script>
+
   $(document).ready(function () {
-    if ('<?= $action; ?>' == 'list') {
+    const action = '<?= isset($action) ? $action : 'list'; ?>'
+    if (action == 'list') {
       document.getElementById("defaultOpen").click();
     }
 
@@ -37,15 +44,23 @@
 
     elmnt.style.backgroundColor = color;
 
+    let setContextDefinitionId = localStorage.getItem("context_definition_id");
+
     if (context_definition_id == 1) {
       $("#select_cluster_to_move").removeClass('hidden');
     } else {
       $("#select_cluster_to_move").addClass('hidden');
     }
 
-    reload_datatable({ context_definition_id })
+    if(setContextDefinitionId != context_definition_id){
+      load_datatable({ context_definition_id })
+    }
+
   }
 
+    function initializeListCustomData() {
+    return { context_definition_id: 1 }
+  }
 
   $('#cluster').on('change', function () {
     var move_fcps_btn = $('#click_move_fcps');
@@ -57,18 +72,19 @@
   });
 
   $('#click_move_fcps').on('click', function () {
-    let message = '<?= get_phrase('Are_sure_you_want_to_change_the_cluster_of_the_selected_FCPs') ?>';
+    let message = '<?= get_phrase('confirm_change_of_office_cluster') ?>';
     let office_ids = get_office_ids();
 
     //Check if checkbox is empty
     if (office_ids.length == 0) {
-      alert('<?= get_phrase('You_have_to_select_atleast_an_FCP_and_cluster') ?>');
+      alert('<?= get_phrase('select_atleast_one_office_alert') ?>');
       return false;
     }
 
     //Update fcp to clusters
     if (confirm(message) == true) {
       let url = '<?= base_url(); ?>ajax/office/massUpdateForFcps';
+      const context_definition_id = 1
       data = {
         'cluster_office_id': $('#cluster').val(),
         'office_ids': get_office_ids(),
@@ -76,7 +92,7 @@
 
       $.post(url, data, function (res) {
         if (res.message) {
-          load_datatable(1)
+          load_datatable({context_definition_id })
         }
       });
 
@@ -233,4 +249,5 @@
   function onchange_fk_account_system_id(elem) {
 
   }
+
 </script>

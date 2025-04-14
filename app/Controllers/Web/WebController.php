@@ -109,6 +109,8 @@ class WebController extends BaseController
     $this->id = isset($this->segments[2]) ? $this->segments[2] : 0;
     $this->subAction = isset($this->segments[4]) ? $this->segments[4] : null;
 
+    // log_message('error', json_encode($this->segments));
+
     if($this->request->isAJAX()){
       if($this->controller == "ajax" || $this->controller == "ajaxRequest"){
         $this->controller = isset($this->segments[1]) ? $this->segments[1] : 'dashboard';
@@ -328,7 +330,7 @@ class WebController extends BaseController
     $page_data['page_name'] = $this->page_name();
     $page_data['page_title'] = $this->page_title();
     $page_data['views_dir'] = $this->views_dir();
-    $page_data['action'] = $this->page_name();
+    $page_data['action'] = $this->action;//$this->page_name();
     $page_data['result'] = $result;
     $page_data['text_align'] = 'left-to-right';  // Set in the settings config
     $page_data['skin_colour'] = 'green'; // Set in the settings config
@@ -481,7 +483,8 @@ class WebController extends BaseController
 
     $parentId = null;
     $parentTable = null;
-    $post = $this->request->getPost();
+
+    // log_message('error', json_encode($this->request->getPost()));
 
     if ($this->request->getPost('parentId')) {
       $parentId = $this->request->getPost('parentId');
@@ -550,7 +553,8 @@ class WebController extends BaseController
       'draw' => intval($draw),
       'recordsTotal' => intval($total_records),
       'recordsFiltered' => intval($total_records),
-      'data' => $records
+      'data' => $records,
+      'customData' => $this->request->getPost('customData') ? $this->request->getPost('customData') : []
     ];
     
     return $this->response->setJSON($response);

@@ -157,39 +157,68 @@
         $("#fav_menu_items").html(elements);
     }
 
-   
-    function reload_datatable(customFields) {
-        const url = "<?= base_url("$controller/showList"); ?>"
-        if (typeof customFields === 'object') {
-            $(".datatable").dataTable().fnDestroy();
-            const datatable = $("#datatable").DataTable({
-                dom: 'lBfrtip',
-                "bDestroy": true,
-                buttons: [
-                    'copyHtml5',
-                    'excelHtml5',
-                    'csvHtml5',
-                    'pdfHtml5',
-                ],
-                pagingType: "full_numbers",
-                stateSave: true,
-                pageLength: 10,
-                order: [],
-                serverSide: true,
-                processing: true,
-                language: { processing: 'Loading ...' },
-                ajax: {
-                    url: url,
-                    type: "POST",
-                    "data": function (d) {
-                        d.customData = customFields
-                    }
-                }
-            });
-        }else{
-            console.log('Argument supplied must be an object');
-        }
 
+    function load_datatable(customFields) {
+    let datatable;
+    const url = "<?= base_url(); ?><?= $controller; ?>/showList";
+    if (typeof customFields === 'object') {
+      $(".datatable").dataTable().fnDestroy();
+      datatable = $("#datatable").DataTable({
+        dom: 'lBfrtip',
+        "bDestroy": true,
+        buttons: [
+          'copyHtml5',
+          'excelHtml5',
+          'csvHtml5',
+          'pdfHtml5',
+        ],
+        pagingType: "full_numbers",
+        stateSave: true,
+        pageLength: 10,
+        order: [],
+        serverSide: true,
+        processing: true,
+        language: { processing: 'Loading ...' },
+        ajax: {
+          url: url,
+          type: "POST",
+          data: function (d) {
+            d.customData = customFields
+          },
+          complete: function (resp) {
+            if (resp.readyState == 4) {
+              const customData = resp.responseJSON.customData
+              if (typeof customData == 'object') {
+                const len = Object.keys(customData).length
+                if (len) {
+                  for (const [key, value] of Object.entries(customData)) {
+                    localStorage.setItem(key, value);
+                  }
+                }
+              }
+            }
+          }
+        }
+      });
+    } else {
+      console.log('Argument supplied must be an object');
     }
 
+    return datatable
+  }
+
+  let customData = typeof initializeListCustomData === "function" ? initializeListCustomData() : {}
+  let url = "<?= base_url(); ?><?= $controller; ?>/showList";
+  let datatable = load_datatable(customData)
+
+  $("#datatable_filter").html(search_box());
+
+
+  function search_box() {
+    return '<?= get_phrase('search'); ?>: <input type="form-control" onchange="search(this)" id="search_box" aria-controls="datatable" />';
+  }
+
+  function search(el) {
+    datatable.search($(el).val()).draw();
+  }
 </script>

@@ -67,8 +67,9 @@ trait DataTable {
         return $builder;
     }
 
+    // Decaprecated by the listTableWhere method
     protected function dataTableCondition(\CodeIgniter\Database\BaseBuilder $builder, array $dataFields){
-        //$builder->where($dataFields);
+        // $builder->where($dataFields);
     }
 
     function dataTableBuilder(\CodeIgniter\Database\BaseBuilder &$builder, string $tableName, array $selectColumns){

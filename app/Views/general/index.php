@@ -71,7 +71,7 @@
     <?php 
         include 'includes_bottom.php'; 
 
-        include 'modal.php';
+        // include 'modal.php';
 			if(file_exists(VIEWPATH.$controller.DS.session()->get('user_account_system').DS.'js_script.php')){
 				include VIEWPATH.$controller.DS.session()->get('user_account_system').DS.'js_script.php';
 			}elseif(file_exists(VIEWPATH.$controller.DS.'js_script.php')){
@@ -83,6 +83,7 @@
 			if(file_exists(VIEWPATH.'components'.DS.$action.'Script.php')){
 				include VIEWPATH.'components'.DS.$action.'Script.php';
 			}
+        include 'modal.php';
     ?>
 
 </body>
