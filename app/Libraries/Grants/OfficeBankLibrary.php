@@ -16,9 +16,246 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
 
     $this->grantsModel = new OfficeBankModel();
 
-    $this->table = 'grants';
+    $this->table = 'office_bank';
   }
 
+  function actionBeforeInsert($post_array): array{
+
+    // Always make a new office bank active and default
+    $post_array['header']['office_bank_is_default'] = 1;
+    $post_array['header']['office_bank_is_active'] = 1;
+    $office_id = $post_array['header']['fk_office_id'];
+
+    // Disallow having 2 default banks per office
+    $this->makeExisitingOfficeDefaultAccountsNotDefault($office_id);
+ 
+    return $post_array;
+  }
+
+
+  function makeExisitingOfficeDefaultAccountsNotDefault($office_id){
+    $officeBankWriteBuilder = $this->write_db->table('office_bank');
+    $data['office_bank_is_default'] = 0;
+    $officeBankWriteBuilder->where(array('fk_office_id' => $office_id, 'office_bank_is_default' => 1));
+    $officeBankWriteBuilder->update($data);
+  }
+
+  // function action_after_edit($post_array, $approval_id, $header_id){
+  //   return $this->create_office_bank_project_association($post_array, $approval_id, $header_id);
+  // }
+
+  function actionAfterInsert($post_array, $approval_id, $header_id): bool {
+    return $this->createOfficeBankProjectAssociation($post_array, $approval_id, $header_id);
+  }
+
+  function createOfficeBankProjectAssociation($post_array, $approval_id, $header_id): bool {
+    
+    $voucherTypeEffectReadBuilder = $this->read_db->table('voucher_type_effect');
+    $officeWriteBuilder = $this->write_db->table('office');
+    $voucherTypeAccountReadBuilder = $this->read_db->table('voucher_type_account');
+    $contraAccountReadBuilder = $this->read_db->table('contra_account');
+    $contraAccountWriteBuilder = $this->write_db->table('contra_account');
+
+    // Create contra accounts for the newly added bank account
+
+    $bank_to_bank_contra_effects = $voucherTypeEffectReadBuilder->get()->getResultArray();
+
+    $officeWriteBuilder->select(array('office_name','fk_account_system_id'));
+    $officeWriteBuilder->join('office_bank','office_bank.fk_office_id=office.office_id');
+    $officeWriteBuilder->where(array('office_bank_id'=>$header_id));
+    $office_info = $officeWriteBuilder->get()->getRow();
+
+    $this->write_db->transStart();
+
+    foreach($bank_to_bank_contra_effects as $bank_to_bank_contra_effect){
+
+      if(
+          $bank_to_bank_contra_effect['voucher_type_effect_code'] == 'bank_contra' ||
+          $bank_to_bank_contra_effect['voucher_type_effect_code'] == 'cash_contra' ||
+          $bank_to_bank_contra_effect['voucher_type_effect_code'] == 'bank_to_bank_contra' || 
+          $bank_to_bank_contra_effect['voucher_type_effect_code'] == 'cash_to_cash_contra' 
+        ){  
+
+            $contra_account_name = '';
+            $contra_account_code = '';
+            $voucher_type_account_id = 0;
+            //$voucher_type_effect_id = 0;
+
+            if($bank_to_bank_contra_effect['voucher_type_effect_code'] == 'bank_contra'){
+              $contra_account_name = $office_info->office_name." Bank to Cash";
+              $contra_account_code = "B2C"; 
+              $voucher_type_account_id = $voucherTypeAccountReadBuilder->where(array('voucher_type_account_code'=>'bank'))
+              ->get()->getRow()->voucher_type_account_id;
+
+            }elseif($bank_to_bank_contra_effect['voucher_type_effect_code'] == 'cash_contra'){
+              $contra_account_name = $office_info->office_name." Cash to Bank";
+              $contra_account_code = "C2B";
+              $voucher_type_account_id = $voucherTypeAccountReadBuilder->where(array('voucher_type_account_code'=>'cash'))
+              ->get()->getRow()->voucher_type_account_id;
+
+            }elseif($bank_to_bank_contra_effect['voucher_type_effect_code'] == 'bank_to_bank_contra'){
+              $contra_account_name = $office_info->office_name." Bank to Bank";
+              $contra_account_code = "B2B";
+              $voucher_type_account_id = $voucherTypeAccountReadBuilder->where(array('voucher_type_account_code'=>'bank'))
+              ->get()->getRow()->voucher_type_account_id;
+
+            }elseif($bank_to_bank_contra_effect['voucher_type_effect_code'] == 'cash_to_cash_contra'){
+              $contra_account_name = $office_info->office_name." Cash to Cash";
+              $contra_account_code = "C2C";
+              $voucher_type_account_id = $voucherTypeAccountReadBuilder->where(array('voucher_type_account_code'=>'cash'))
+              ->get()->getRow()->voucher_type_account_id;
+
+            }
+
+
+            $contra_account_record['contra_account_track_number'] = $this->generateItemTrackNumberAndName('contra_account')['contra_account_track_number'];
+            $contra_account_record['contra_account_name'] = $contra_account_name;
+            $contra_account_record['contra_account_code'] = $contra_account_code;
+            $contra_account_record['contra_account_description'] = $contra_account_name;;
+            $contra_account_record['fk_voucher_type_account_id'] = $voucher_type_account_id;//$voucher_type_account['voucher_type_account_id'];
+            $contra_account_record['fk_voucher_type_effect_id'] = $bank_to_bank_contra_effect['voucher_type_effect_id'];
+            $contra_account_record['fk_office_bank_id'] = $header_id;
+            $contra_account_record['fk_account_system_id'] = $office_info->fk_account_system_id;
+
+            $contra_account_data_to_insert = $this->mergeWithHistoryFields('contra_account',$contra_account_record,false);
+
+            $contra_account_count = $contraAccountReadBuilder->where(array('fk_office_bank_id' => $header_id, 'contra_account_code' => $contra_account_code))
+            ->get()->getNumRows();
+
+            if($contra_account_count == 0){
+              $contraAccountWriteBuilder->insert($contra_account_data_to_insert);
+            }
+      }
+    }
+
+    $this->createDefaultProjectAllocationAndLinkToAccount($post_array, $approval_id, $header_id);
+    $this->deactivateActiveChequeBooksForDeactivatedOfficeBank($header_id, $post_array);
+
+    $this->write_db->transComplete();
+
+    if ($this->write_db->transStatus() === FALSE)
+      {
+        return false;
+      }else{
+        return true;
+      }
+  }
+
+  /**
+     * deactivate_active_cheque_books_for_deactivated_office_bank
+     * 
+     * @author Nicodemus Karisa Mwambire
+     * @reviewer None
+     * @reviewed_date None
+     * @bug - DE2376
+     * @access private
+     * 
+     * @param int $office_bank_id - Id of the office bank being edited
+     * @param array $post_array - Edit data
+     * 
+     * Deactive active cheque book and toggle the office bank to non default when deactivating an office bank
+     * 
+     * @return void
+     */
+
+     private function deactivateActiveChequeBooksForDeactivatedOfficeBank(int $office_bank_id, array $post_array) : void
+     {
+
+      $chequeBookWriteBuilder = $this->write_db->table('cheque_book');
+      $officeBankWriteBuilder = $this->write_db->table('office_bank');
+ 
+       if(isset($post_array['office_bank_is_active']) && $post_array['office_bank_is_active'] == 0){
+ 
+         $cheque_book_data['cheque_book_is_active'] = 0;
+         $chequeBookWriteBuilder->where(array('fk_office_bank_id' => $office_bank_id));
+         $chequeBookWriteBuilder->update( $cheque_book_data);
+ 
+         $office_bank_data['office_bank_is_default'] = 0;
+         $officeBankWriteBuilder->where(array('office_bank_id' => $office_bank_id));
+         $officeBankWriteBuilder->update( $office_bank_data);
+ 
+       }
+     }
+
+  function createDefaultProjectAllocationAndLinkToAccount($post_array, $approval_id, $header_id){
+    $officeBankProjectAllocationReadBuilder = $this->read_db->table('office_bank_project_allocation');
+    $projectAllocationReadBuilder = $this->read_db->table('project_allocation');
+    $officeBankProjectAllocationWriteBuilder = $this->write_db->table('office_bank_project_allocation');
+    $officeReadBuilder = $this->read_db->table('office');
+    $projectReadBuilder = $this->read_db->table('project');
+    $projectAllocationWriteBuilder = $this->write_db->table('project_allocation');
+
+
+    // Check if the bank account is default
+    $office_bank_is_default = $post_array['office_bank_is_default'];
+    $office_id = $post_array['fk_office_id'];
+
+    if($office_bank_is_default){
+
+      $officeBankProjectAllocationReadBuilder->where(array('fk_office_bank_id' => $header_id));
+      $office_bank_allocations = $officeBankProjectAllocationReadBuilder->get()->getNumRows();
+
+      if($office_bank_allocations == 0){
+
+         // Get all allocations for a give office
+        $projectAllocationReadBuilder->join('project','project.project_id=project_allocation.fk_project_id');
+        $projectAllocationReadBuilder->where(array('fk_office_id'=>$office_id));
+        $office_project_allocation_object = $projectAllocationReadBuilder->get();
+
+          if($office_project_allocation_object->getNumRows() > 0){
+            // Link all the allocations for the default project to the bank account
+            foreach($office_project_allocation_object->getResultArray() as $project_allocation){
+              $itemTracking = $this->generateItemTrackNumberAndName('office_bank_project_allocation');
+              $office_bank_project_allocation['office_bank_project_allocation_name'] = $itemTracking['office_bank_project_allocation_name'];
+              $office_bank_project_allocation['office_bank_project_allocation_track_number'] = $itemTracking['office_bank_project_allocation_track_number'];
+              $office_bank_project_allocation['fk_office_bank_id'] = $header_id;
+              $office_bank_project_allocation['fk_project_allocation_id'] = $project_allocation['project_allocation_id'];
+              
+              $office_bank_project_allocation_data_to_insert = $this->mergeWithHistoryFields('office_bank_project_allocation',$office_bank_project_allocation,false);
+              $officeBankProjectAllocationWriteBuilder->insert($office_bank_project_allocation_data_to_insert);
+  
+            }
+          }else{
+            // If allocation are missing, create them and link
+            $account_system_id = $officeReadBuilder->where(array('office_id'=>$office_id))
+            ->get()->getRow()->fk_account_system_id;
+  
+            $projectReadBuilder->join('funder','funder.funder_id=project.fk_funder_id');
+            $projectReadBuilder->where(array('fk_account_system_id'=>$account_system_id,'project_is_default'=>1));
+            $default_project_obj = $projectReadBuilder->get();
+    
+            if($default_project_obj->getNumRows() > 0){
+              foreach($default_project_obj->getResultArray() as $project){
+                $itemTracking = $this->generateItemTrackNumberAndName('project_allocation');
+                $project_allocation['project_allocation_track_number'] = $itemTracking['project_allocation_track_number'];
+                $project_allocation['project_allocation_name'] = $itemTracking['project_allocation_name'];
+                $project_allocation['fk_project_id'] = $project['project_id'];
+                $project_allocation['project_allocation_amount'] = 0;
+                $project_allocation['project_allocation_is_active'] = 1;
+                $project_allocation['fk_office_id'] = $office_id;
+  
+                $project_allocation_data_to_insert = $this->mergeWithHistoryFields('project_allocation',$project_allocation,false);
+                $projectAllocationWriteBuilder->insert($project_allocation_data_to_insert);
+  
+                $project_allocation_id = $this->write_db->insertID();
+                
+                $trackingId = $this->generateItemTrackNumberAndName('office_bank_project_allocation');
+                $office_bank_project_allocation_inner['office_bank_project_allocation_name'] = $trackingId['office_bank_project_allocation_name'];
+                $office_bank_project_allocation_inner['office_bank_project_allocation_track_number'] = $trackingId['office_bank_project_allocation_track_number'];
+                $office_bank_project_allocation_inner['fk_office_bank_id'] = $header_id;
+                $office_bank_project_allocation_inner['fk_project_allocation_id'] = $project_allocation_id;
+
+                $office_bank_project_allocation_inner_data_to_insert = $this->mergeWithHistoryFields('office_bank_project_allocation',$office_bank_project_allocation_inner,false);
+                $officeBankProjectAllocationWriteBuilder->insert($office_bank_project_allocation_inner_data_to_insert);
+  
+              }
+            }
+  
+          }
+  
+        }
+      }
+  }
 
   public function detailListTableVisibleColumns(): array
   {

@@ -20,7 +20,6 @@ class OfficeLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
     $this->table = 'office';
   }
 
-
   function getRecordOfficeId($table, $primary_key)
   {
 
@@ -606,5 +605,37 @@ class OfficeLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
   {
     $context_definition_id = $dataFields['context_definition_id'];
     $builder->where('office.fk_context_definition_id', $context_definition_id);
+  }
+
+  function lookupValues(): array {
+    
+    $lookup_values = [];
+    $officeReadBuilder = $this->read_db->table('office');
+    $contextDefinitionReadBuilder = $this->read_db->table('context_definition');
+
+    // Use this when filling in context tables
+    if(substr($this->controller,0,8) == 'context_'){
+      $context_definition_name = str_replace('context_','',$this->controller);
+      $officeReadBuilder->join('context_definition','context_definition.context_definition_id=office.fk_context_definition_id');
+      $lookup_values = $officeReadBuilder->where('office',array('context_definition_name'=>$context_definition_name))
+      ->get()->getResultArray();
+    }
+    else{
+       $office_ids=array_column($this->session->hierarchy_offices,'office_id');
+       $officeReadBuilder->whereIn('office_id',$office_ids);
+      $lookup_values = $officeReadBuilder->get()->getResultArray();
+    }
+
+    // Show context definitions below the user's
+    if(!$this->session->system_admin){
+      $user_context_definition_id = $this->session->context_definition['context_definition_id'];
+      $contextDefinitionReadBuilder->select(array('context_definition_id', 'context_definition_name'));
+      $contextDefinitionReadBuilder->where(array('context_definition_id < ' => $user_context_definition_id));
+      $context_definitions = $contextDefinitionReadBuilder->get()->getResultArray();
+  
+      $lookup_values['context_definition'] = $context_definitions;  
+    }
+    
+    return $lookup_values;
   }
 }

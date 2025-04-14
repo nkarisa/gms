@@ -24,7 +24,7 @@ class ProjectLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
     }
 
     function detailListTableVisibleColumns(): array{
-      return ['project_track_number','project_name','project_code','project_start_date','project_end_date','funder_name'];
+      return ['project_track_number','project_name','project_is_default','project_code','project_start_date','project_end_date','funder_name'];
     }
 
     function defaultFieldValue(): array{
