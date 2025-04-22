@@ -1145,4 +1145,23 @@ if (!function_exists('list_lookup_tables')) {
 
         return $list_lookup_tables;
     }
+
+    /**
+ * Characters that Need to Be Escaped in JSON:
+* " (Double Quote)
+* \ (Backslash)
+* / (Forward Slash, optionally)
+* \n (Newline)
+* \r (Carriage Return)
+* \t (Tab)
+* \b (Backspace)
+* \f (Form feed)
+*/
+
+if(!function_exists('cleanStringForJson')){
+    function cleanStringForJson($string) {
+		$string = str_replace("\x00", '', $string);
+		return preg_replace("/[\x01-\x1F\x7F']/u", '', $string);
+    }
+}
 }

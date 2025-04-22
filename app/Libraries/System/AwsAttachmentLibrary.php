@@ -43,7 +43,7 @@ class AwsAttachmentLibrary {
 
         // Check if running on localhost
         if (!is_cli() && parse_url(base_url())['host'] === 'localhost') {
-            $s3ClientCredentials['profile'] = 'default';
+            $s3ClientCredentials['profile'] = 'okta-full-admin-role';
         }
 
         // Instantiate the S3 client
