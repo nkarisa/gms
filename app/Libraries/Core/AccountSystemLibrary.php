@@ -7,47 +7,56 @@ use App\Models\Core\AccountSystemModel;
 class AccountSystemLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
-  protected $table;
+  protected $table = 'account_system';
   protected $model;
-
+  protected $accountSystemReadBuilder;
   function __construct()
   {
     parent::__construct();
-
     $this->model = new AccountSystemModel();
 
-    $this->table = 'account_system';
+    $this->accountSystemReadBuilder = $this->read_db->table($this->table);
   }
 
+  /**
+   * Summary of getAccountSystems
+   * 
+   * Get all Accounting Systems in Safina
+   * 
+   * @return array
+   */
   public function getAccountSystems(): array
   {
-    $builder = $this->read_db->table($this->table);
-    $builder->select(array('account_system_id', 'account_system_code', 'account_system_name'));
-    $account_systems = $builder->get()->getResultObject();
+    $this->accountSystemReadBuilder->select(['account_system_id', 'account_system_code', 'account_system_name']);
+    $account_systems = $this->accountSystemReadBuilder->get()->getResultObject();
     return $account_systems;
   }
 
+  /**
+   * Summary of getAccountSystemIdByCode
+   * 
+   * Get a single accounting system Id by account system code
+   * 
+   * @param string $account_system_code
+   * @return int
+   */
   public function getAccountSystemIdByCode(string $account_system_code): int
   {
-    $builder = $this->read_db->table('account_system');
-    $builder->where('account_system_code', $account_system_code);
-    $account_system_id = $builder->get()->getRow()->account_system_id;
+    $this->accountSystemReadBuilder->where('account_system_code', $account_system_code);
+    $account_system_id = $this->accountSystemReadBuilder->get()->getRow()->account_system_id;
     return $account_system_id;
   }
 
   /**
-   * get_countries(): return an array of account systems/countries
-   * @author Onduso 
-   * @access public 
+   * Summary of getCountries
+   * Get active account systems arranged with key as account system id and value as the account system code
    * @return array
    */
   public function getCountries(): array
   {
-
-    $builder = $this->read_db->table($this->table);
-    $builder->select(['account_system_id', 'account_system_code']);
-    $builder->where(['account_system_is_active' => 1]);
-    $countries = $builder->get()->getResultArray();
+    $this->accountSystemReadBuilder->select(['account_system_id', 'account_system_code']);
+    $this->accountSystemReadBuilder->where(['account_system_is_active' => 1]);
+    $countries = $this->accountSystemReadBuilder->get()->getResultArray();
 
     $country_ids = array_column($countries, 'account_system_id');
     $country_code = array_column($countries, 'account_system_code');
@@ -58,11 +67,12 @@ class AccountSystemLibrary extends GrantsLibrary implements \App\Interfaces\Libr
   }
 
   /**
-   * get_country_language(): returns language id
-   * @author Onduso 
-   * @access public 
-   * @return int
+   * Summary of getCountryLanguage
+   * 
+   * Get the default language id for a given accounting system selected by account system id
+   * 
    * @param int $account_system_id
+   * @return array
    */
   public function getCountryLanguage(int $account_system_id): array
   {
@@ -82,6 +92,13 @@ class AccountSystemLibrary extends GrantsLibrary implements \App\Interfaces\Libr
     return compact('language_id');
   }
 
+  /**
+   * Summary of changeFieldType
+   * 
+   * Part of framework function that alters the types of the fields in the view pages from the default forms
+   * 
+   * @return array<array>
+   */
   public function changeFieldType(): array
   {
     $fields = [];
@@ -115,7 +132,7 @@ class AccountSystemLibrary extends GrantsLibrary implements \App\Interfaces\Libr
     $fields['default_project_start_date']['field_type'] = 'date';
 
     foreach ($currency_data as $currency) {
-      $fields['country_currency_name']['options'][$currency['code'].'--'.$currency['name']] = $currency['name'] . " (" . $currency['code'] . ")";
+      $fields['country_currency_name']['options'][$currency['code'] . '--' . $currency['name']] = $currency['name'] . " (" . $currency['code'] . ")";
     }
 
     // Get Account System Settings
@@ -128,21 +145,21 @@ class AccountSystemLibrary extends GrantsLibrary implements \App\Interfaces\Libr
     $fields['account_system_level']['field_type'] = 'select';
     $levels = ['4' => get_phrase('country'), '5' => get_phrase('region')];
 
-    foreach($levels as $key => $level){
+    foreach ($levels as $key => $level) {
       $fields['account_system_level']['options'][$key] = $level;
     }
 
     $fields['template_account_system']['field_type'] = 'select';
     // Get all country, region, global
     $accountSystemReadBuilder = $this->read_db->table('account_system');
-    $accountSystemReadBuilder->select(['account_system_id','account_system_name']);
+    $accountSystemReadBuilder->select(['account_system_id', 'account_system_name']);
     $accountSystemReadBuilder->where(['account_system_is_active' => 1, 'account_system_level>' => 4]);
-    $activeAccountSystemObj =$accountSystemReadBuilder->get();
+    $activeAccountSystemObj = $accountSystemReadBuilder->get();
 
-    if($activeAccountSystemObj->getNumRows() > 0){
+    if ($activeAccountSystemObj->getNumRows() > 0) {
       $activeAccountSystems = $activeAccountSystemObj->getResultArray();
 
-      foreach($activeAccountSystems as $activeAccountSystem){
+      foreach ($activeAccountSystems as $activeAccountSystem) {
         $fields['template_account_system']['options'][$activeAccountSystem['account_system_id']] = $activeAccountSystem['account_system_name'];
       }
     }
@@ -150,11 +167,19 @@ class AccountSystemLibrary extends GrantsLibrary implements \App\Interfaces\Libr
     return $fields;
   }
 
-private function createCountryCurrency(StatusLibrary $statusLib, int $account_system_id, string $currency_code_and_name): int|null
+  /**
+   * Summary of createCountryCurrency
+   * 
+   * Creates a country default currency
+   * 
+   * @param \App\Libraries\Core\StatusLibrary $statusLib
+   * @param int $account_system_id
+   * @param string $currency_code_and_name
+   * @return int|null
+   */
+  private function createCountryCurrency(StatusLibrary $statusLib, int $account_system_id, string $currency_code_and_name): int|null
   {
-    $currency_code_and_name_array = explode("--",$currency_code_and_name);
-    $currency_code = $currency_code_and_name_array[0];
-    $currency_name = $currency_code_and_name_array[1];
+    [$currency_code, $currency_name] = explode("--", $currency_code_and_name);
 
     $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('country_currency');
 
@@ -180,7 +205,17 @@ private function createCountryCurrency(StatusLibrary $statusLib, int $account_sy
     return null;
   }
 
-private function updateAccountSystemSettings(array $account_system_settings, int $account_system_id): void
+  /**
+   * Summary of updateAccountSystemSettings
+   * 
+   * Update the account_system_setting_accounts json object. This means that a given accounting system has been included to use
+   * a certain settings
+   * 
+   * @param array $account_system_settings
+   * @param int $account_system_id
+   * @return void
+   */
+  private function updateAccountSystemSettings(array $account_system_settings, int $account_system_id): void
   {
     $accountSystemSettingsReadBuilder = $this->read_db->table('account_system_setting');
     $accountSystemSettingsWriteBuilder = $this->write_db->table('account_system_setting');
@@ -206,7 +241,18 @@ private function updateAccountSystemSettings(array $account_system_settings, int
     }
   }
 
-private function createAccountSystemLanguage(StatusLibrary $statusLib, int $account_system_id, int $language_id, $account_system_code): void
+  /**
+   * Summary of createAccountSystemLanguage
+   * 
+   * Create the default language of a give accounting system
+   * 
+   * @param \App\Libraries\Core\StatusLibrary $statusLib
+   * @param int $account_system_id
+   * @param int $language_id
+   * @param mixed $account_system_code
+   * @return void
+   */
+  private function createAccountSystemLanguage(StatusLibrary $statusLib, int $account_system_id, int $language_id, $account_system_code): void
   {
     $accountSystemLanguageWriteBuilder = $this->write_db->table("account_system_language");
 
@@ -228,51 +274,68 @@ private function createAccountSystemLanguage(StatusLibrary $statusLib, int $acco
 
     $this->createLanguageDirectoryStructure($language_id, $account_system_code);
   }
+  /**
+   * Summary of createLanguageDirectoryStructure
+   * 
+   * Set up an accounting system language folder structure
+   * 
+   * @param int $language_id
+   * @param string $account_system_code
+   * @return void
+   */
+  private function createLanguageDirectoryStructure(int $language_id, string $account_system_code): void
+  {
+    $languageReadBuilder = $this->read_db->table("language");
 
-private function createLanguageDirectoryStructure(int $language_id, string $account_system_code){
-      $languageReadBuilder = $this->read_db->table("language");
+    // 1. Get the language code
+    $language_code = $languageReadBuilder->where(['language_id' => $language_id])->get()->getRowArray()['language_code'];
 
-      // 1. Get the language code
-      $language_code = $languageReadBuilder->where(['language_id' => $language_id])->get()->getRowArray()['language_code'];
+    // 2. Check if the language directory exists. Create the directory if not existing
+    $language_dir = APPPATH . 'Language' . DS . $language_code;
+    if (!file_exists($language_dir)) {
+      mkdir($language_dir);
+    }
 
-      // 2. Check if the language directory exists. Create the directory if not existing
-      $language_dir = APPPATH.'Language'.DS.$language_code;
-      if(!file_exists($language_dir)){
-        mkdir($language_dir);
-      }
-  
-      // 3. Check if the account system language directory exists in en
-      $english_language_account_system_dir = APPPATH.'Language'.DS.'en'.DS.$account_system_code;
-      if(!file_exists($english_language_account_system_dir)){
-        mkdir($english_language_account_system_dir);
-      }
-  
-      // 4. Check if the account system language directory exists in account system default language
-      $default_language_account_system_dir = $language_dir.DS.$account_system_code;
-      if(!file_exists($default_language_account_system_dir)){
-        mkdir($default_language_account_system_dir);
-      }
-  
-      $default_language_global_dir = $language_dir.DS.'Global';
-      if(!file_exists($default_language_global_dir)){
-        mkdir($default_language_global_dir);
-      }
-  
-      // 5. Copy english language file from global to account system langage
-      $engFromFile = APPPATH.'Language'.DS.'en'.DS.'Global'.DS.'App.php';
-      $engToFile = APPPATH.'Language'.DS.'en'.DS.$account_system_code.DS.'App.php';
-      copy($engFromFile, $engToFile);
-  
-      // 6. Copy english language file from global to english to default language of the new account system
-      $defaultFromFile = APPPATH.'Language'.DS.'en'.DS.'Global'.DS.'App.php';
-      $defaultToFile = APPPATH.'Language'.DS.$language_code.DS.$account_system_code.DS.'App.php';
-      copy($defaultFromFile, $defaultToFile);
-  
-      $toFile = APPPATH.'Language'.DS.$language_code.DS.'Global'.DS.'App.php';
-      copy($defaultFromFile, $toFile);
-}
+    // 3. Check if the account system language directory exists in en
+    $english_language_account_system_dir = APPPATH . 'Language' . DS . 'en' . DS . $account_system_code;
+    if (!file_exists($english_language_account_system_dir)) {
+      mkdir($english_language_account_system_dir);
+    }
 
-private function getRoleGroupNameById(int $roleGroupId): string | null
+    // 4. Check if the account system language directory exists in account system default language
+    $default_language_account_system_dir = $language_dir . DS . $account_system_code;
+    if (!file_exists($default_language_account_system_dir)) {
+      mkdir($default_language_account_system_dir);
+    }
+
+    $default_language_global_dir = $language_dir . DS . 'Global';
+    if (!file_exists($default_language_global_dir)) {
+      mkdir($default_language_global_dir);
+    }
+
+    // 5. Copy english language file from global to account system langage
+    $engFromFile = APPPATH . 'Language' . DS . 'en' . DS . 'Global' . DS . 'App.php';
+    $engToFile = APPPATH . 'Language' . DS . 'en' . DS . $account_system_code . DS . 'App.php';
+    copy($engFromFile, $engToFile);
+
+    // 6. Copy english language file from global to english to default language of the new account system
+    $defaultFromFile = APPPATH . 'Language' . DS . 'en' . DS . 'Global' . DS . 'App.php';
+    $defaultToFile = APPPATH . 'Language' . DS . $language_code . DS . $account_system_code . DS . 'App.php';
+    copy($defaultFromFile, $defaultToFile);
+
+    $toFile = APPPATH . 'Language' . DS . $language_code . DS . 'Global' . DS . 'App.php';
+    copy($defaultFromFile, $toFile);
+  }
+
+  /**
+   * Summary of getRoleGroupNameById
+   * 
+   * Get a role group name give its Id
+   * 
+   * @param int $roleGroupId
+   * @return string|null
+   */
+  private function getRoleGroupNameById(int $roleGroupId): string|null
   {
     $builder = $this->read_db->table('role_group');
     $builder->select(['role_group_name']);
@@ -283,8 +346,19 @@ private function getRoleGroupNameById(int $roleGroupId): string | null
     }
     return null;
   }
-
-private function createRoleGroupAssociations(StatusLibrary $statusLib, int $account_system_id, array $rolesGroups, string $account_system_code, int $template_account_system): void
+  /**
+   * Summary of createRoleGroupAssociations
+   * 
+   * Associate a role to a role group
+   * 
+   * @param \App\Libraries\Core\StatusLibrary $statusLib
+   * @param int $account_system_id
+   * @param array $rolesGroups
+   * @param string $account_system_code
+   * @param int $template_account_system
+   * @return void
+   */
+  private function createRoleGroupAssociations(StatusLibrary $statusLib, int $account_system_id, array $rolesGroups, string $account_system_code, int $template_account_system): void
   {
     foreach ($rolesGroups as $rolesGroup) {
 
@@ -315,11 +389,11 @@ private function createRoleGroupAssociations(StatusLibrary $statusLib, int $acco
       $rolesGroupAssociationInsert['role_group_association_track_number'] = $roleItemTrackNumberAndName['role_group_association_track_number'];
       $rolesGroupAssociationInsert['fk_role_group_id'] = $roleGroupId;
       $rolesGroupAssociationInsert['fk_role_id'] = $roleId;
-      $rolesGroupAssociationInsert['role_group_association_is_active'] = '';
-      $rolesGroupAssociationInsert['role_group_association_created_date'] = '';
-      $rolesGroupAssociationInsert['role_group_association_created_by'] = '';
-      $rolesGroupAssociationInsert['role_group_association_last_modified_date'] = '';
-      $rolesGroupAssociationInsert['role_group_association_last_modified_by'] = '';
+      $rolesGroupAssociationInsert['role_group_association_is_active'] = 1;
+      $rolesGroupAssociationInsert['role_group_association_created_date'] = date('Y-m-d');
+      $rolesGroupAssociationInsert['role_group_association_created_by'] = $this->session->user_id;
+      $rolesGroupAssociationInsert['role_group_association_last_modified_date'] = date('Y-m-d');
+      $rolesGroupAssociationInsert['role_group_association_last_modified_by'] = $this->session->user_id;
       $rolesGroupAssociationInsert['fk_status_id'] = $statusLib->initialItemStatus('role_group_association');
       $rolesGroupAssociationInsert['fk_approval_id'] = 0;
 
@@ -328,8 +402,18 @@ private function createRoleGroupAssociations(StatusLibrary $statusLib, int $acco
 
     }
   }
-
-private function createIncomeAccount(StatusLibrary $statusLib, array $globalIncomeAccount, int $account_system_id, string $account_system_code): int
+  /**
+   * Summary of createIncomeAccount
+   * 
+   * Create Income account for a given accounting system
+   * 
+   * @param \App\Libraries\Core\StatusLibrary $statusLib
+   * @param array $globalIncomeAccount
+   * @param int $account_system_id
+   * @param string $account_system_code
+   * @return int|string
+   */
+  private function createIncomeAccount(StatusLibrary $statusLib, array $globalIncomeAccount, int $account_system_id, string $account_system_code): int
   {
     $incomeAccountWriteBuilder = $this->write_db->table('income_account');
     $incomeAccountTrackNumberAndName = $this->generateItemTrackNumberAndName('income_account');
@@ -353,8 +437,18 @@ private function createIncomeAccount(StatusLibrary $statusLib, array $globalInco
     $incomeAccountWriteBuilder->insert($incomeAccountInsert);
     return $this->write_db->insertID();
   }
-
-private function createExpenseAccount(StatusLibrary $statusLib, array $globalExpenseAccount, int $incomeAccountId, string $account_system_code): void
+  /**
+   * Summary of createExpenseAccount
+   * 
+   * Create an income expense account
+   * 
+   * @param \App\Libraries\Core\StatusLibrary $statusLib
+   * @param array $globalExpenseAccount
+   * @param int $incomeAccountId
+   * @param string $account_system_code
+   * @return void
+   */
+  private function createExpenseAccount(StatusLibrary $statusLib, array $globalExpenseAccount, int $incomeAccountId, string $account_system_code): void
   {
 
     $expenseAccountWriteBuilder = $this->write_db->table('expense_account');
@@ -379,8 +473,17 @@ private function createExpenseAccount(StatusLibrary $statusLib, array $globalExp
 
     $expenseAccountWriteBuilder->insert($expenseAccountInsert);
   }
-
-private function createFunder(StatusLibrary $statusLib, int $account_system_id, string $account_system_code): int
+  /**
+   * Summary of createFunder
+   * 
+   * Create a funder record for a give accounting system
+   * 
+   * @param \App\Libraries\Core\StatusLibrary $statusLib
+   * @param int $account_system_id
+   * @param string $account_system_code
+   * @return int|string
+   */
+  private function createFunder(StatusLibrary $statusLib, int $account_system_id, string $account_system_code): int
   {
     $funderWriteBuilder = $this->write_db->table('funder');
     $funderTrackNumberAndName = $this->generateItemTrackNumberAndName('funder');
@@ -399,8 +502,20 @@ private function createFunder(StatusLibrary $statusLib, int $account_system_id, 
 
     return $this->write_db->insertID();
   }
-
-private function createProject(StatusLibrary $statusLib, string $account_system_code, array $accountSystemIncomeAccount, int $funderId, int $fundingStatusId, string $default_project_start_date): void
+  /**
+   * Summary of createProject
+   * 
+   * Create default projects for a given accounting system and associate them with their Income Accounts
+   * 
+   * @param \App\Libraries\Core\StatusLibrary $statusLib
+   * @param string $account_system_code
+   * @param array $accountSystemIncomeAccount
+   * @param int $funderId
+   * @param int $fundingStatusId
+   * @param string $default_project_start_date
+   * @return void
+   */
+  private function createProject(StatusLibrary $statusLib, string $account_system_code, array $accountSystemIncomeAccount, int $funderId, int $fundingStatusId, string $default_project_start_date): void
   {
 
     $projectWriteBuilder = $this->write_db->table('project');
@@ -429,14 +544,23 @@ private function createProject(StatusLibrary $statusLib, string $account_system_
     $projectInsert['fk_approval_id'] = 0;
 
     $projectWriteBuilder->insert($projectInsert);
-    
+
     $projectId = $this->write_db->insertID();
 
     $this->createProjectIncomeAccount($statusLib, $projectId, $accountSystemIncomeAccount['income_account_id']);
 
   }
-
-private function createProjectIncomeAccount(StatusLibrary $statusLib, int $projectId, int $incomeAccountId): void
+  /**
+   * Summary of createProjectIncomeAccount
+   * 
+   * Associate an income account to given project
+   * 
+   * @param \App\Libraries\Core\StatusLibrary $statusLib
+   * @param int $projectId
+   * @param int $incomeAccountId
+   * @return void
+   */
+  private function createProjectIncomeAccount(StatusLibrary $statusLib, int $projectId, int $incomeAccountId): void
   {
     $projectIncomeAccountWriteBuilder = $this->write_db->table('project_income_account'); //
     $projectIncomeAccountTrackNumberAndName = $this->generateItemTrackNumberAndName('project_income_account');
@@ -455,7 +579,18 @@ private function createProjectIncomeAccount(StatusLibrary $statusLib, int $proje
     $projectIncomeAccountWriteBuilder->insert($projectIncomeAccountInsert);
   }
 
-private function copyGlobalAccountsToNewAccountSystem(StatusLibrary $statusLib, int $account_system_id, string $account_system_code, $template_account_system_id): void
+  /**
+   * Summary of copyGlobalAccountsToNewAccountSystem
+   * 
+   * Copy Income Accounts from a Template Accounting system to a new child accounting system
+   * 
+   * @param \App\Libraries\Core\StatusLibrary $statusLib
+   * @param int $account_system_id
+   * @param string $account_system_code
+   * @param mixed $template_account_system_id
+   * @return void
+   */
+  private function copyGlobalAccountsToNewAccountSystem(StatusLibrary $statusLib, int $account_system_id, string $account_system_code, $template_account_system_id): void
   {
     $incomeAccountReadBuilder = $this->read_db->table('income_account');
     $expenseAccountReadBuilder = $this->read_db->table('expense_account');
@@ -481,8 +616,15 @@ private function copyGlobalAccountsToNewAccountSystem(StatusLibrary $statusLib, 
       }
     }
   }
-
-private function createProjectAndIncomeAccountAssociation(StatusLibrary $statusLib, int $account_system_id, string $account_system_code, string $default_project_start_date): void
+  /**
+   * Summary of createProjectAndIncomeAccountAssociation
+   * @param \App\Libraries\Core\StatusLibrary $statusLib
+   * @param int $account_system_id
+   * @param string $account_system_code
+   * @param string $default_project_start_date
+   * @return void
+   */
+  private function createProjectAndIncomeAccountAssociation(StatusLibrary $statusLib, int $account_system_id, string $account_system_code, string $default_project_start_date): void
   {
     $incomeAccountWriteBuilder = $this->write_db->table('income_account'); // Only works if a write builder
 
@@ -498,12 +640,18 @@ private function createProjectAndIncomeAccountAssociation(StatusLibrary $statusL
 
     if ($accountSystemIncomeAccounts->getNumRows() > 0) {
       foreach ($accountSystemIncomeAccounts->getResultArray() as $accountSystemIncomeAccount) {
-        $this->createProject($statusLib,$account_system_code, $accountSystemIncomeAccount, $funderId, $fundingStatusId, $default_project_start_date);
+        $this->createProject($statusLib, $account_system_code, $accountSystemIncomeAccount, $funderId, $fundingStatusId, $default_project_start_date);
       }
     }
   }
 
-private function createFundingStatus(StatusLibrary $statusLib, int $account_system_id): int
+  /**
+   * Summary of createFundingStatus
+   * @param \App\Libraries\Core\StatusLibrary $statusLib
+   * @param int $account_system_id
+   * @return int|string
+   */
+  private function createFundingStatus(StatusLibrary $statusLib, int $account_system_id): int
   {
     $fundingStatusWriterBuilder = $this->write_db->table('funding_status');
     $fundingStatusTrackNumberAndName = $this->generateItemTrackNumberAndName('funding_status');
@@ -522,24 +670,34 @@ private function createFundingStatus(StatusLibrary $statusLib, int $account_syst
     $fundingStatusWriterBuilder->insert($fundingStatusInsert);
 
     return $this->write_db->insertID();
-}
-
-private function createOfficeAndContext(
-    StatusLibrary $statusLib, 
-    int $header_id, 
-    string $account_system_code, 
-    int $country_currency_id, 
-    int $template_account_system, 
-    string $account_system_start_date, 
-    int $hierarchy_level): void
-  {
+  }
+  /**
+   * Summary of createOfficeAndContext
+   * @param \App\Libraries\Core\StatusLibrary $statusLib
+   * @param int $header_id
+   * @param string $account_system_code
+   * @param int $country_currency_id
+   * @param int $template_account_system
+   * @param string $account_system_start_date
+   * @param int $hierarchy_level
+   * @return void
+   */
+  private function createOfficeAndContext(
+    StatusLibrary $statusLib,
+    int $header_id,
+    string $account_system_code,
+    int $country_currency_id,
+    int $template_account_system,
+    string $account_system_start_date,
+    int $hierarchy_level
+  ): void {
     $officeWriterBuilder = $this->write_db->table('office');
     $contextOfficeWriterBuilder = $this->write_db->table($hierarchy_level == 4 ? 'context_country' : 'context_region');
     $contextReportingOfficeReaderBuilder = $this->write_db->table($hierarchy_level == 4 ? 'context_region' : 'context_global');
 
 
     // Create National Office
-    $officeName = $hierarchy_level == 4 ? $account_system_code.'-'.get_phrase('national_office') : $account_system_code.'-'.get_phrase('regiona_office');
+    $officeName = $hierarchy_level == 4 ? $account_system_code . '-' . get_phrase('national_office') : $account_system_code . '-' . get_phrase('regiona_office');
 
     $officeTrackNumberAndName = $this->generateItemTrackNumberAndName('office');
     $officeInsert['office_track_number'] = $officeTrackNumberAndName['office_track_number'];
@@ -567,39 +725,42 @@ private function createOfficeAndContext(
     $reportingContextId = null;
     // Get Context Region
 
-    $joinTable = $hierarchy_level == 4 ? 'context_region': 'context_global';
+    $joinTable = $hierarchy_level == 4 ? 'context_region' : 'context_global';
     $contextReportingOfficeReaderBuilder->select([$hierarchy_level == 4 ? 'context_region_id' : 'context_global_id']);
     $contextReportingOfficeReaderBuilder->where(['office.fk_account_system_id' => $template_account_system, 'office.fk_context_definition_id' => $hierarchy_level + 1]);
-    $contextReportingOfficeReaderBuilder->join('office','office.office_id='.$joinTable.'.fk_office_id'); // context_region
+    $contextReportingOfficeReaderBuilder->join('office', 'office.office_id=' . $joinTable . '.fk_office_id'); // context_region
     $reportingContextObj = $contextReportingOfficeReaderBuilder->get();
 
-    if($reportingContextObj->getNumRows() > 0){
+    if ($reportingContextObj->getNumRows() > 0) {
       $row = $reportingContextObj->getRow();
       $reportingContextId = $hierarchy_level == 4 ? $row->context_region_id : $row->context_global_id;
       // Create Context Office
       $contextTable = $hierarchy_level == 4 ? 'context_country' : 'context_region';
       $itemTrackNumberAndName = $this->generateItemTrackNumberAndName($hierarchy_level == 4 ? 'context_country' : 'context_region');
-      $contextOfficeInsert[$contextTable.'_track_number'] = $itemTrackNumberAndName[$contextTable.'_track_number'];
-      $contextOfficeInsert[$contextTable.'_name'] = get_phrase('context_for_office').' '.$officeName;
-      $contextOfficeInsert[$contextTable.'_description'] = get_phrase('context_for_office').' '.$officeName;
+      $contextOfficeInsert[$contextTable . '_track_number'] = $itemTrackNumberAndName[$contextTable . '_track_number'];
+      $contextOfficeInsert[$contextTable . '_name'] = get_phrase('context_for_office') . ' ' . $officeName;
+      $contextOfficeInsert[$contextTable . '_description'] = get_phrase('context_for_office') . ' ' . $officeName;
       $contextOfficeInsert['fk_office_id	'] = $officeId;
       $contextOfficeInsert['fk_context_definition_id	'] = $hierarchy_level;
       $contextOfficeInsert[$hierarchy_level == 4 ? 'fk_context_region_id' : 'fk_context_global_id'] = $reportingContextId;
-      $contextOfficeInsert[$contextTable.'_created_date'] = date('Y-m-d');
-      $contextOfficeInsert[$contextTable.'_created_by'] = $this->session->user_id;
-      $contextOfficeInsert[$contextTable.'_last_modified_date	'] = date('Y-m-d');
-      $contextOfficeInsert[$contextTable.'_last_modified_by	'] = $this->session->user_id;
+      $contextOfficeInsert[$contextTable . '_created_date'] = date('Y-m-d');
+      $contextOfficeInsert[$contextTable . '_created_by'] = $this->session->user_id;
+      $contextOfficeInsert[$contextTable . '_last_modified_date	'] = date('Y-m-d');
+      $contextOfficeInsert[$contextTable . '_last_modified_by	'] = $this->session->user_id;
       $contextOfficeInsert['fk_status_id	'] = $statusLib->initialItemStatus($contextTable);
       $contextOfficeInsert['fk_approval_id	'] = 0;
-  
+
       $contextOfficeWriterBuilder->insert($contextOfficeInsert);
 
     }
-    
-
-}
-
-private function getAccountSystemRoleGroups(int $accountSystemId): array{
+  }
+  /**
+   * Summary of getAccountSystemRoleGroups
+   * @param int $accountSystemId
+   * @return array
+   */
+  private function getAccountSystemRoleGroups(int $accountSystemId): array
+  {
     // Get Role Groups
     $roleGroupBuilder = $this->read_db->table('role_group');
     $roleGroupBuilder->select(['role_group_id', 'role_group_name', 'fk_context_definition_id']);
@@ -608,318 +769,354 @@ private function getAccountSystemRoleGroups(int $accountSystemId): array{
 
     $roleGroups = [];
 
-    if($roleGroupsObj->getNumRows() > 0){
+    if ($roleGroupsObj->getNumRows() > 0) {
       $roleGroups = $roleGroupsObj->getResultArray();
     }
 
     return $roleGroups;
-}
+  }
+  /**
+   * Summary of createVoucherTypes
+   * @param \App\Libraries\Core\StatusLibrary $statusLib
+   * @param int $account_system_id
+   * @param string $account_system_code
+   * @param int $template_account_system
+   * @return void
+   */
+  private function createVoucherTypes(
+    StatusLibrary $statusLib,
+    int $account_system_id,
+    string $account_system_code,
+    int $template_account_system
+  ): void {
 
-private function createVoucherTypes(
-    StatusLibrary $statusLib, 
-    int $account_system_id, 
-    string $account_system_code, 
-    int $template_account_system): void
+    $voucherTypeReadBuilder = $this->read_db->table('voucher_type');
+    $voucherTypeWriteBuilder = $this->write_db->table('voucher_type');
+    $voucherTypeLibrary = new \App\Libraries\Grants\VoucherTypeLibrary();
+
+    // 1. Get the voucher type records from the template accounting system
+    $voucherTypeReadBuilder->where(['fk_account_system_id' => $template_account_system]);
+    $resultObj = $voucherTypeReadBuilder->get();
+
+    if ($resultObj->getNumRows() > 0) {
+      $voucherTypesToCopy = $resultObj->getResultArray();
+
+      $voucherTypesData = [];
+
+      for ($i = 0; $i < count($voucherTypesToCopy); $i++) {
+        $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('voucher_type');
+        $data['voucher_type_track_number'] = $itemTrackNumberAndName['voucher_type_track_number'];
+        $data['voucher_type_name'] = strtoupper($account_system_code) . '-' . $voucherTypesToCopy[$i]['voucher_type_name'];
+        $data['voucher_type_abbrev'] = strtoupper($account_system_code) . $voucherTypesToCopy[$i]['voucher_type_abbrev'];
+        $data['fk_account_system_id'] = $account_system_id;
+        $data['voucher_type_created_by'] = $this->session->user_id;
+        $data['voucher_type_created_date'] = date('Y-m-d');
+        $data['voucher_type_last_modified_by'] = $this->session->user_id;
+        $data['voucher_type_last_modified_date'] = date('Y-m-d');
+        $data['fk_approval_id'] = 0;
+        $data['fk_status_id'] = $statusLib->initialItemStatus('voucher_type');
+
+        unset($voucherTypesToCopy[$i]['voucher_type_id']);
+        $voucherTypesData[$i] = array_replace($voucherTypesToCopy[$i], $data);
+      }
+
+      if (count($voucherTypesData) > 0) {
+        $voucherTypeWriteBuilder->insertBatch($voucherTypesData);
+      }
+
+      // Create hidden voucher types for Funds Transfera dn Voided Cheques
+      $voucherTypeLibrary->createHiddenVoucherTypes($account_system_id, $account_system_code);
+
+    }
+
+  }
+  /**
+   * Summary of createOfficeCash
+   * @param \App\Libraries\Core\StatusLibrary $statusLib
+   * @param int $account_system_id
+   * @param string $account_system_code
+   * @param int $template_account_system
+   * @return void
+   */
+  private function createOfficeCash(StatusLibrary $statusLib, int $account_system_id, string $account_system_code, int $template_account_system): void
   {
-  
-  $voucherTypeReadBuilder = $this->read_db->table('voucher_type');
-  $voucherTypeWriteBuilder = $this->write_db->table('voucher_type');
-  $voucherTypeLibrary = new \App\Libraries\Grants\VoucherTypeLibrary();
-  
-  // 1. Get the voucher type records from the template accounting system
-  $voucherTypeReadBuilder->where(['fk_account_system_id' => $template_account_system]);
-  $resultObj = $voucherTypeReadBuilder->get();
+    $officeCashReadBuilder = $this->read_db->table('office_cash');
+    $officeWriteBuilder = $this->write_db->table('office_cash');
 
-  if($resultObj->getNumRows() > 0){
-    $voucherTypesToCopy = $resultObj->getResultArray();
+    // 1. Get the office cash records from the template accounting system
+    $officeCashReadBuilder->where(['fk_account_system_id' => $template_account_system]);
+    $resultObj = $officeCashReadBuilder->get();
 
-    $voucherTypesData = [];
+    if ($resultObj->getNumRows() > 0) {
+      $officeCashToCopy = $resultObj->getResultArray();
 
-    for($i =0; $i < count($voucherTypesToCopy); $i++){
-      $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('voucher_type');
-      $data['voucher_type_track_number'] = $itemTrackNumberAndName['voucher_type_track_number'];
-      $data['voucher_type_name'] = strtoupper($account_system_code). '-' .$voucherTypesToCopy[$i]['voucher_type_name'];
-      $data['voucher_type_abbrev'] = strtoupper($account_system_code).$voucherTypesToCopy[$i]['voucher_type_abbrev'];
-      $data['fk_account_system_id'] = $account_system_id;
-      $data['voucher_type_created_by'] = $this->session->user_id;
-      $data['voucher_type_created_date'] = date('Y-m-d');
-      $data['voucher_type_last_modified_by'] = $this->session->user_id;
-      $data['voucher_type_last_modified_date'] = date('Y-m-d');
-      $data['fk_approval_id'] = 0;
-      $data['fk_status_id'] = $statusLib->initialItemStatus('voucher_type');
+      $officeCashData = [];
 
-      unset($voucherTypesToCopy[$i]['voucher_type_id']);
-      $voucherTypesData[$i] = array_replace($voucherTypesToCopy[$i], $data);
-    }
+      for ($i = 0; $i < count($officeCashToCopy); $i++) {
+        $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('office_cash');
+        $data['office_cash_track_number'] = $itemTrackNumberAndName['office_cash_track_number'];
+        $data['office_cash_name'] = strtoupper($account_system_code) . '-' . $officeCashToCopy[$i]['office_cash_name'];
+        $data['fk_account_system_id'] = $account_system_id;
+        $data['office_cash_created_by'] = $this->session->user_id;
+        $data['office_cash_created_date'] = date('Y-m-d');
+        $data['office_cash_last_modified_by'] = $this->session->user_id;
+        $data['office_cash_last_modified_date'] = date('Y-m-d');
+        $data['fk_approval_id'] = 0;
+        $data['fk_status_id'] = $statusLib->initialItemStatus('office_cash');
 
-    if(count($voucherTypesData) > 0){
-      $voucherTypeWriteBuilder->insertBatch($voucherTypesData);
-    }
-
-    // Create hidden voucher types for Funds Transfera dn Voided Cheques
-    $voucherTypeLibrary->createHiddenVoucherTypes($account_system_id, $account_system_code);
-
-  }
-
-}
-
-private function createOfficeCash(StatusLibrary $statusLib, int $account_system_id, string $account_system_code, int $template_account_system): void{
-  $officeCashReadBuilder = $this->read_db->table('office_cash');
-  $officeWriteBuilder = $this->write_db->table('office_cash');
-  
-  // 1. Get the office cash records from the template accounting system
-  $officeCashReadBuilder->where(['fk_account_system_id' => $template_account_system]);
-  $resultObj = $officeCashReadBuilder->get();
-
-  if($resultObj->getNumRows() > 0){
-    $officeCashToCopy = $resultObj->getResultArray();
-
-    $officeCashData = [];
-
-    for($i =0; $i < count($officeCashToCopy); $i++){
-      $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('office_cash');
-      $data['office_cash_track_number'] = $itemTrackNumberAndName['office_cash_track_number'];
-      $data['office_cash_name'] = strtoupper($account_system_code). '-' .$officeCashToCopy[$i]['office_cash_name'];
-      $data['fk_account_system_id'] = $account_system_id;
-      $data['office_cash_created_by'] = $this->session->user_id;
-      $data['office_cash_created_date'] = date('Y-m-d');
-      $data['office_cash_last_modified_by'] = $this->session->user_id;
-      $data['office_cash_last_modified_date'] = date('Y-m-d');
-      $data['fk_approval_id'] = 0;
-      $data['fk_status_id'] = $statusLib->initialItemStatus('office_cash');
-
-      unset($officeCashToCopy[$i]['office_cash_id']);
-      $officeCashData[$i] = array_replace($officeCashToCopy[$i], $data);
-    }
-
-    if(count($officeCashData) > 0){
-      $officeWriteBuilder->insertBatch($officeCashData);
-    }
-
-  }
-}
-
-private function createAccountSystemRoles(StatusLibrary $statusLib, int $account_system_id, string $account_system_code, int $template_account_system, array $rolesGroups, int $account_system_level): void{
-  $roleReadBuilder = $this->read_db->table('role');
-  $roleWriteBuilder = $this->write_db->table('role');
-  $rolePermissionReadBuilder = $this->write_db->table('role_permission');
-
-  // 1. Get the office cash records from the template accounting system
-  $roleReadBuilder->where(['fk_account_system_id' => $template_account_system]);
-  if($account_system_level == 4){
-    $roleReadBuilder->where(['fk_context_definition_id <=' => $account_system_level]);
-  }
-  $resultObj = $roleReadBuilder->get();
-
-  if($resultObj->getNumRows() > 0){
-    $roleToCopy = $resultObj->getResultArray();
-
-    // Get role permissions
-    $oldlRoleIds = array_column($roleToCopy,'role_id');
-    $rolePermissionReadBuilder->select(['fk_role_id','fk_permission_id'])->whereIn('fk_role_id',$oldlRoleIds);
-    $rolePermissionsObj = $rolePermissionReadBuilder->get();
-    
-    $rolePermissions = [];
-    
-    if($rolePermissionsObj->getNumRows() > 0){
-      $rolePermissionsArray = $rolePermissionsObj->getResultArray();
-      
-      foreach($rolePermissionsArray as $rolePermission){
-        $rolePermissions[$rolePermission['fk_role_id']][] = $rolePermission['fk_permission_id'];
-      }
-    }
-
-    for($i =0; $i < count($roleToCopy); $i++){
-      $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('role');
-      $data['role_track_number'] = $itemTrackNumberAndName['role_track_number'];
-      $data['role_name'] = strtoupper($account_system_code). '-' .$roleToCopy[$i]['role_name'];
-      $data['fk_account_system_id'] = $account_system_id;
-      $data['fk_context_definition_id'] = $roleToCopy[$i]['fk_context_definition_id'];
-      $data['role_created_by'] = $this->session->user_id;
-      $data['role_created_date'] = date('Y-m-d');
-      $data['role_last_modified_by'] = $this->session->user_id;
-      $data['role_last_modified_date'] = date('Y-m-d');
-      $data['fk_approval_id'] = 0;
-      $data['role_template_id'] = $roleToCopy[$i]['role_id'];
-      $data['fk_status_id'] = $statusLib->initialItemStatus('role');
-
-      $_oldRoleId = $roleToCopy[$i]['role_id']; 
-      unset($roleToCopy[$i]['role_id']);
-
-      $roleWriteBuilder->insert($data);
-      $newRoleId = $this->write_db->insertID();
-
-      $permissionIdsToAttach = isset($rolePermissions[$_oldRoleId]) ? $rolePermissions[$_oldRoleId] : [];
-      
-      if(count($permissionIdsToAttach) > 0){
-        $this->insertPermissionsToRole($statusLib, $newRoleId, $permissionIdsToAttach);
+        unset($officeCashToCopy[$i]['office_cash_id']);
+        $officeCashData[$i] = array_replace($officeCashToCopy[$i], $data);
       }
 
-      // Check if old role has a role group association and attach
-      $roleGroupAssociationReadBuilder = $this->read_db->table('role_group_association');
-      $roleGroupAssociationWriteBuilder = $this->write_db->table('role_group_association');
+      if (count($officeCashData) > 0) {
+        $officeWriteBuilder->insertBatch($officeCashData);
+      }
 
-      $roleGroupAssociationReadBuilder->where(['fk_role_id' => $_oldRoleId]);
-      $roleGroupAssocObj = $roleGroupAssociationReadBuilder->get();
+    }
+  }
+  /**
+   * Summary of createAccountSystemRoles
+   * @param \App\Libraries\Core\StatusLibrary $statusLib
+   * @param int $account_system_id
+   * @param string $account_system_code
+   * @param int $template_account_system
+   * @param array $rolesGroups
+   * @param int $account_system_level
+   * @return void
+   */
+  private function createAccountSystemRoles(StatusLibrary $statusLib, int $account_system_id, string $account_system_code, int $template_account_system, array $rolesGroups, int $account_system_level): void
+  {
+    $roleReadBuilder = $this->read_db->table('role');
+    $roleWriteBuilder = $this->write_db->table('role');
+    $rolePermissionReadBuilder = $this->write_db->table('role_permission');
 
-      if($roleGroupAssocObj->getNumRows() > 0){
-        $roleGroupAssoc = $roleGroupAssocObj->getResultArray();
+    // 1. Get the office cash records from the template accounting system
+    $roleReadBuilder->where(['fk_account_system_id' => $template_account_system]);
+    if ($account_system_level == 4) {
+      $roleReadBuilder->where(['fk_context_definition_id <=' => $account_system_level]);
+    }
+    $resultObj = $roleReadBuilder->get();
 
-        foreach($roleGroupAssoc as $row){
-          $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('role_group_association');       
-          $assocData['role_group_association_name'] = $itemTrackNumberAndName['role_group_association_name'];
-          $assocData['role_group_association_track_number'] = $itemTrackNumberAndName['role_group_association_track_number'];
-          $assocData['fk_role_group_id'] = $row['fk_role_group_id'];
-          $assocData['fk_role_id'] = $newRoleId ;
-          $assocData['role_group_association_is_active'] = $row['role_group_association_is_active'];
-          $assocData['role_group_association_created_date'] = date('Y-m-d');
-          $assocData['role_group_association_created_by'] = $this->session->user_id;
-          $assocData['role_group_association_last_modified_date'] = date('Y-m-d');
-          $assocData['role_group_association_last_modified_by'] = $this->session->user_id;
-          $assocData['fk_status_id'] = $statusLib->initialItemStatus('role_group_association');
-          $assocData['fk_approval_id'] = 0;
+    if ($resultObj->getNumRows() > 0) {
+      $roleToCopy = $resultObj->getResultArray();
 
-          $roleGroupAssociationWriteBuilder->insert($assocData);
+      // Get role permissions
+      $oldlRoleIds = array_column($roleToCopy, 'role_id');
+      $rolePermissionReadBuilder->select(['fk_role_id', 'fk_permission_id'])->whereIn('fk_role_id', $oldlRoleIds);
+      $rolePermissionsObj = $rolePermissionReadBuilder->get();
+
+      $rolePermissions = [];
+
+      if ($rolePermissionsObj->getNumRows() > 0) {
+        $rolePermissionsArray = $rolePermissionsObj->getResultArray();
+
+        foreach ($rolePermissionsArray as $rolePermission) {
+          $rolePermissions[$rolePermission['fk_role_id']][] = $rolePermission['fk_permission_id'];
         }
       }
 
-    }
+      for ($i = 0; $i < count($roleToCopy); $i++) {
+        $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('role');
+        $data['role_track_number'] = $itemTrackNumberAndName['role_track_number'];
+        $data['role_name'] = strtoupper($account_system_code) . '-' . $roleToCopy[$i]['role_name'];
+        $data['fk_account_system_id'] = $account_system_id;
+        $data['fk_context_definition_id'] = $roleToCopy[$i]['fk_context_definition_id'];
+        $data['role_created_by'] = $this->session->user_id;
+        $data['role_created_date'] = date('Y-m-d');
+        $data['role_last_modified_by'] = $this->session->user_id;
+        $data['role_last_modified_date'] = date('Y-m-d');
+        $data['fk_approval_id'] = 0;
+        $data['role_template_id'] = $roleToCopy[$i]['role_id'];
+        $data['fk_status_id'] = $statusLib->initialItemStatus('role');
 
-  }else{
-        $this->createRoleGroupAssociations($statusLib, $account_system_id, $rolesGroups, $account_system_code, $template_account_system);
-  }
-}
+        $_oldRoleId = $roleToCopy[$i]['role_id'];
+        unset($roleToCopy[$i]['role_id']);
 
-private function insertPermissionsToRole(StatusLibrary $statusLib, int $roleId, array $permissionIds): void{
-  $rolePermissionWriteBuilder = $this->write_db->table('role_permission');
-  $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('role_permission');
+        $roleWriteBuilder->insert($data);
+        $newRoleId = $this->write_db->insertID();
 
-  $data  = [];
+        $permissionIdsToAttach = isset($rolePermissions[$_oldRoleId]) ? $rolePermissions[$_oldRoleId] : [];
 
-  for($i = 0; $i < count($permissionIds); $i++){
-    $data[$i]['role_permission_track_number'] = $itemTrackNumberAndName['role_permission_track_number'];
-    $data[$i]['role_permission_name'] = $itemTrackNumberAndName['role_permission_name'];
-    $data[$i]['role_permission_is_active'] = 1;
-    $data[$i]['fk_role_id'] = $roleId;
-    $data[$i]['fk_permission_id'] = $permissionIds[$i];
-    $data[$i]['fk_approval_id'] = 0;
-    $data[$i]['fk_status_id'] = $statusLib->initialItemStatus('role');
-    $data[$i]['role_permission_created_date'] = date('Y-m-d');
-    $data[$i]['role_permission_created_by'] = $this->session->user_id;
-    $data[$i]['role_permission_last_modified_date'] = date('Y-m-d');
-    $data[$i]['role_permission_last_modified_by'] = $this->session->user_id;
-  }
-  
+        if (count($permissionIdsToAttach) > 0) {
+          $this->insertPermissionsToRole($statusLib, $newRoleId, $permissionIdsToAttach);
+        }
 
-  $rolePermissionWriteBuilder->insertBatch($data);
+        // Check if old role has a role group association and attach
+        $roleGroupAssociationReadBuilder = $this->read_db->table('role_group_association');
+        $roleGroupAssociationWriteBuilder = $this->write_db->table('role_group_association');
 
-}
+        $roleGroupAssociationReadBuilder->where(['fk_role_id' => $_oldRoleId]);
+        $roleGroupAssocObj = $roleGroupAssociationReadBuilder->get();
 
-private function createApprovalFlow(StatusLibrary $statusLib, int $account_system_id, int $template_account_system): void{
-  
-  // Query builders
-  $approvalFlowReadBuilder = $this->read_db->table('approval_flow');
-  $statusWriteBuilder = $this->write_db->table('status');
-  $accountSystemWriteBuilder = $this->write_db->table('account_system'); // Must be in write_db
-  $statusRoleWriteBuilder = $this->write_db->table('status_role');
+        if ($roleGroupAssocObj->getNumRows() > 0) {
+          $roleGroupAssoc = $roleGroupAssocObj->getResultArray();
 
-  // Approval flow library object
-  $approvalFlowLibrary = new \App\Libraries\Core\ApprovalFlowLibrary();
+          foreach ($roleGroupAssoc as $row) {
+            $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('role_group_association');
+            $assocData['role_group_association_name'] = $itemTrackNumberAndName['role_group_association_name'];
+            $assocData['role_group_association_track_number'] = $itemTrackNumberAndName['role_group_association_track_number'];
+            $assocData['fk_role_group_id'] = $row['fk_role_group_id'];
+            $assocData['fk_role_id'] = $newRoleId;
+            $assocData['role_group_association_is_active'] = $row['role_group_association_is_active'];
+            $assocData['role_group_association_created_date'] = date('Y-m-d');
+            $assocData['role_group_association_created_by'] = $this->session->user_id;
+            $assocData['role_group_association_last_modified_date'] = date('Y-m-d');
+            $assocData['role_group_association_last_modified_by'] = $this->session->user_id;
+            $assocData['fk_status_id'] = $statusLib->initialItemStatus('role_group_association');
+            $assocData['fk_approval_id'] = 0;
 
-  // Creating user Id
-  $user_id = $this->session->user_id;
+            $roleGroupAssociationWriteBuilder->insert($assocData);
+          }
+        }
 
-  // The newly created accounting system  
-  $account_system = $accountSystemWriteBuilder->where(['account_system_id' => $account_system_id])
-  ->get()->getRowArray();
-
-  // Selected columns
-  $selectedColumns = [
-    'fk_approve_item_id',
-    'approve_item_name',
-    'status_id',
-    'status_name',
-    'status_button_label',
-    'status_decline_button_label',
-    'status_signatory_label',
-    'fk_approval_flow_id',
-    'status_approval_sequence',
-    'status_backflow_sequence',
-    'status_approval_direction',
-    'status_is_requiring_approver_action',
-    'fk_role_id'
-  ];
-
-  // Get templating account system approval flow and status
-  $approvalFlowReadBuilder->where(['fk_account_system_id' => $template_account_system]);
-  $approvalFlowReadBuilder->select($selectedColumns);
-  $approvalFlowReadBuilder->join('status','status.fk_approval_flow_id=approval_flow.approval_flow_id');
-  $approvalFlowReadBuilder->join('approve_item','approve_item.approve_item_id=approval_flow.fk_approve_item_id');
-  $approvalFlowReadBuilder->join('status_role','status.status_id=status_role.status_role_status_id','LEFT');
-  $templateApprovalFlowStatus = $approvalFlowReadBuilder->get();
-
-
-  // Check if the template approval flow and status is present
-  if($templateApprovalFlowStatus->getNumRows() > 0){
-     // Array to store the template accounting system approval flow
-    $template = [];
-    $approve_item = [];
-    $templateApprovalStatus = $templateApprovalFlowStatus->getResultArray();
-
-    foreach($templateApprovalStatus as $templateStatus){
-      $approve_item_id = $templateStatus['fk_approve_item_id'];
-      $approve_item_name = $templateStatus['approve_item_name'];
-      $status_id = $templateStatus['status_id'];
-      $approve_item[$approve_item_id] = $approve_item_name;
-      
-      unset($templateStatus['fk_approve_item_id']);
-      unset($templateStatus['approve_item_name']);
-      unset($templateStatus['status_id']);
-
-      $template[$approve_item_id]['status'][$status_id] = $templateStatus;
-
-      if(isset($templateStatus['fk_role_id']) && $templateStatus['fk_role_id'] > 0){
-        $template[$approve_item_id]['status_role'][$status_id][] = $templateStatus['fk_role_id'];
       }
-       
+
+    } else {
+      $this->createRoleGroupAssociations($statusLib, $account_system_id, $rolesGroups, $account_system_code, $template_account_system);
     }
+  }
+  /**
+   * Summary of insertPermissionsToRole
+   * @param \App\Libraries\Core\StatusLibrary $statusLib
+   * @param int $roleId
+   * @param array $permissionIds
+   * @return void
+   */
+  private function insertPermissionsToRole(StatusLibrary $statusLib, int $roleId, array $permissionIds): void
+  {
+    $rolePermissionWriteBuilder = $this->write_db->table('role_permission');
+    $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('role_permission');
 
-    foreach($template as $approveItemId => $statuses){
-        
-      $approvalFlowId = $approvalFlowLibrary->insertApprovalFlow($account_system, $approveItemId, $approve_item[$approveItemId], $user_id);
+    $data = [];
 
-      $statusData = [];
-      foreach($statuses['status'] as $oldStatusId => $status){
-        // Create statuses
-        $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('status');
-        $statusData['status_name'] = $status['status_name'];
-        $statusData['status_track_number'] =  $itemTrackNumberAndName['status_track_number'];
-        $statusData['status_button_label'] = $status['status_button_label'];
-        $statusData['status_decline_button_label'] = $status['status_decline_button_label'];
-        $statusData['status_signatory_label'] = $status['status_signatory_label'];
-        $statusData['fk_approval_flow_id'] = $approvalFlowId;
-        $statusData['status_approval_sequence'] = $status['status_approval_sequence'];
-        $statusData['status_backflow_sequence'] = $status['status_backflow_sequence'];
-        $statusData['status_approval_direction'] = $status['status_approval_direction'];
-        $statusData['status_is_requiring_approver_action'] = $status['status_is_requiring_approver_action'];
-        $statusData['status_created_date'] = date('Y-m-d');
-        $statusData['status_created_by'] = $user_id;
-        $statusData['status_last_modified_date'] = date('Y-m-d');
-        $statusData['status_last_modified_by'] = $user_id;
+    for ($i = 0; $i < count($permissionIds); $i++) {
+      $data[$i]['role_permission_track_number'] = $itemTrackNumberAndName['role_permission_track_number'];
+      $data[$i]['role_permission_name'] = $itemTrackNumberAndName['role_permission_name'];
+      $data[$i]['role_permission_is_active'] = 1;
+      $data[$i]['fk_role_id'] = $roleId;
+      $data[$i]['fk_permission_id'] = $permissionIds[$i];
+      $data[$i]['fk_approval_id'] = 0;
+      $data[$i]['fk_status_id'] = $statusLib->initialItemStatus('role');
+      $data[$i]['role_permission_created_date'] = date('Y-m-d');
+      $data[$i]['role_permission_created_by'] = $this->session->user_id;
+      $data[$i]['role_permission_last_modified_date'] = date('Y-m-d');
+      $data[$i]['role_permission_last_modified_by'] = $this->session->user_id;
+    }
+    $rolePermissionWriteBuilder->insertBatch($data);
+  }
+  /**
+   * Summary of createApprovalFlow
+   * @param \App\Libraries\Core\StatusLibrary $statusLib
+   * @param int $account_system_id
+   * @param int $template_account_system
+   * @return void
+   */
+  private function createApprovalFlow(StatusLibrary $statusLib, int $account_system_id, int $template_account_system): void
+  {
 
-        $statusWriteBuilder->insert($statusData);
-        $statusId = $this->write_db->insertID();
+    // Query builders
+    $approvalFlowReadBuilder = $this->read_db->table('approval_flow');
+    $statusWriteBuilder = $this->write_db->table('status');
+    $accountSystemWriteBuilder = $this->write_db->table('account_system'); // Must be in write_db
+    $statusRoleWriteBuilder = $this->write_db->table('status_role');
 
-        if(isset($template[$approveItemId]['status_role']) && isset($template[$approveItemId]['status_role'][$oldStatusId])) {
-          $statusRoles = $template[$approveItemId]['status_role'][$oldStatusId];
+    // Approval flow library object
+    $approvalFlowLibrary = new \App\Libraries\Core\ApprovalFlowLibrary();
 
-          if(!empty($statusRoles)){
-            $statusRole = [];
-            
-            for($i = 0; $i < count($statusRoles); $i++){
+    // Creating user Id
+    $user_id = $this->session->user_id;
+
+    // The newly created accounting system  
+    $account_system = $accountSystemWriteBuilder->where(['account_system_id' => $account_system_id])
+      ->get()->getRowArray();
+
+    // Selected columns
+    $selectedColumns = [
+      'fk_approve_item_id',
+      'approve_item_name',
+      'status_id',
+      'status_name',
+      'status_button_label',
+      'status_decline_button_label',
+      'status_signatory_label',
+      'fk_approval_flow_id',
+      'status_approval_sequence',
+      'status_backflow_sequence',
+      'status_approval_direction',
+      'status_is_requiring_approver_action',
+      'fk_role_id'
+    ];
+
+    // Get templating account system approval flow and status
+    $approvalFlowReadBuilder->where(['fk_account_system_id' => $template_account_system]);
+    $approvalFlowReadBuilder->select($selectedColumns);
+    $approvalFlowReadBuilder->join('status', 'status.fk_approval_flow_id=approval_flow.approval_flow_id');
+    $approvalFlowReadBuilder->join('approve_item', 'approve_item.approve_item_id=approval_flow.fk_approve_item_id');
+    $approvalFlowReadBuilder->join('status_role', 'status.status_id=status_role.status_role_status_id', 'LEFT');
+    $templateApprovalFlowStatus = $approvalFlowReadBuilder->get();
+
+
+    // Check if the template approval flow and status is present
+    if ($templateApprovalFlowStatus->getNumRows() > 0) {
+      // Array to store the template accounting system approval flow
+      $template = [];
+      $approve_item = [];
+      $templateApprovalStatus = $templateApprovalFlowStatus->getResultArray();
+
+      foreach ($templateApprovalStatus as $templateStatus) {
+        $approve_item_id = $templateStatus['fk_approve_item_id'];
+        $approve_item_name = $templateStatus['approve_item_name'];
+        $status_id = $templateStatus['status_id'];
+        $approve_item[$approve_item_id] = $approve_item_name;
+
+        unset($templateStatus['fk_approve_item_id']);
+        unset($templateStatus['approve_item_name']);
+        unset($templateStatus['status_id']);
+
+        $template[$approve_item_id]['status'][$status_id] = $templateStatus;
+
+        if (isset($templateStatus['fk_role_id']) && $templateStatus['fk_role_id'] > 0) {
+          $template[$approve_item_id]['status_role'][$status_id][] = $templateStatus['fk_role_id'];
+        }
+
+      }
+
+      foreach ($template as $approveItemId => $statuses) {
+
+        $approvalFlowId = $approvalFlowLibrary->insertApprovalFlow($account_system, $approveItemId, $approve_item[$approveItemId], $user_id);
+
+        $statusData = [];
+        foreach ($statuses['status'] as $oldStatusId => $status) {
+          // Create statuses
+          $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('status');
+          $statusData['status_name'] = $status['status_name'];
+          $statusData['status_track_number'] = $itemTrackNumberAndName['status_track_number'];
+          $statusData['status_button_label'] = $status['status_button_label'];
+          $statusData['status_decline_button_label'] = $status['status_decline_button_label'];
+          $statusData['status_signatory_label'] = $status['status_signatory_label'];
+          $statusData['fk_approval_flow_id'] = $approvalFlowId;
+          $statusData['status_approval_sequence'] = $status['status_approval_sequence'];
+          $statusData['status_backflow_sequence'] = $status['status_backflow_sequence'];
+          $statusData['status_approval_direction'] = $status['status_approval_direction'];
+          $statusData['status_is_requiring_approver_action'] = $status['status_is_requiring_approver_action'];
+          $statusData['status_created_date'] = date('Y-m-d');
+          $statusData['status_created_by'] = $user_id;
+          $statusData['status_last_modified_date'] = date('Y-m-d');
+          $statusData['status_last_modified_by'] = $user_id;
+
+          $statusWriteBuilder->insert($statusData);
+          $statusId = $this->write_db->insertID();
+
+          if (isset($template[$approveItemId]['status_role']) && isset($template[$approveItemId]['status_role'][$oldStatusId])) {
+            $statusRoles = $template[$approveItemId]['status_role'][$oldStatusId];
+
+            if (!empty($statusRoles)) {
+              $statusRole = [];
+
+              for ($i = 0; $i < count($statusRoles); $i++) {
                 $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('status_role');
                 $statusRole[$i]['status_role_track_number'] = $itemTrackNumberAndName['status_role_track_number'];
-                $statusRole[$i]['status_role_name'] =  $status['status_name'];
+                $statusRole[$i]['status_role_name'] = $status['status_name'];
                 $statusRole[$i]['fk_role_id'] = $this->findRelatedAccountingSystemRole($statusRoles[$i], $account_system_id);// $statusRoles[$i];
                 $statusRole[$i]['fk_status_id'] = $statusLib->initialItemStatus('status_role');
                 $statusRole[$i]['status_role_status_id'] = $statusId;
@@ -929,36 +1126,50 @@ private function createApprovalFlow(StatusLibrary $statusLib, int $account_syste
                 $statusRole[$i]['status_role_last_modified_by'] = $user_id;
                 $statusRole[$i]['status_role_last_modified_date'] = date('Y-m-d');
                 $statusRole[$i]['fk_approval_id'] = 0;
+              }
+              $statusRoleWriteBuilder->insertBatch($statusRole);
             }
-            $statusRoleWriteBuilder->insertBatch($statusRole);
           }
         }
       }
     }
   }
-}
 
-private function findRelatedAccountingSystemRole(int $oldRoleId, int $account_system_id): int{
-  // $roleReadBuilder = $this->read_db->table('role');
-  $roleWriteBuilder = $this->write_db->table('role');
+  /**
+   * Summary of findRelatedAccountingSystemRole
+   * @param int $oldRoleId
+   * @param int $account_system_id
+   * @return int
+   */
+  private function findRelatedAccountingSystemRole(int $oldRoleId, int $account_system_id): int
+  {
+    // $roleReadBuilder = $this->read_db->table('role');
+    $roleWriteBuilder = $this->write_db->table('role');
 
-  $roleWriteBuilder->where(['role_template_id' => $oldRoleId, 'fk_account_system_id' => $account_system_id]);
-  $newRoleObj = $roleWriteBuilder->get();
+    $roleWriteBuilder->where(['role_template_id' => $oldRoleId, 'fk_account_system_id' => $account_system_id]);
+    $newRoleObj = $roleWriteBuilder->get();
 
-  $newRoleId = 0;
+    $newRoleId = 0;
 
-  if($newRoleObj->getNumRows() > 0){
-    $newRoleId = $newRoleObj->getRowArray()['role_id'];
+    if ($newRoleObj->getNumRows() > 0) {
+      $newRoleId = $newRoleObj->getRowArray()['role_id'];
+    }
+
+    return $newRoleId;
   }
 
-  return $newRoleId;
-}
-
-public function actionAfterInsert($post_array, $approval_id, $header_id): bool
+  /**
+   * Summary of actionAfterInsert
+   * @param mixed $post_array
+   * @param mixed $approval_id
+   * @param mixed $header_id
+   * @return bool
+   */
+  public function actionAfterInsert($post_array, $approval_id, $header_id): bool
   {
     $state = true;
 
-    $account_system_settings = isset($post_array['account_system_settings']) ?  $post_array['account_system_settings'] : [];
+    $account_system_settings = isset($post_array['account_system_settings']) ? $post_array['account_system_settings'] : [];
     $language_id = $post_array['fk_language_id'];
     $default_project_start_date = isset($post_array['default_project_start_date']) ? $post_array['default_project_start_date'] : null;
     $template_account_system = $post_array['template_account_system'];
@@ -966,15 +1177,15 @@ public function actionAfterInsert($post_array, $approval_id, $header_id): bool
     $account_system_level = $post_array['account_system_level'];
     $currency_code_and_name = $post_array['fk_country_currency_id'];
     $statusLib = new StatusLibrary();
-    
+
     $rolesGroups = $this->getAccountSystemRoleGroups($template_account_system);
-    
+
     // Insert a record in the country currency table
     $countryCurrenyId = $this->createCountryCurrency($statusLib, $header_id, $currency_code_and_name);
 
     // Update the account system settings account_system_setting_accounts json with $header_id with set 
     // Only valid for country based accounting systems
-    if($account_system_level == 4){
+    if ($account_system_level == 4) {
       $this->updateAccountSystemSettings($account_system_settings, $header_id);
     }
 
@@ -984,18 +1195,18 @@ public function actionAfterInsert($post_array, $approval_id, $header_id): bool
     // Add Account System Roles 
     $this->createAccountSystemRoles($statusLib, $header_id, $account_system_code, $template_account_system, $rolesGroups, $account_system_level);
     // $this->createRoleGroupAssociations($statusLib, $header_id, $rolesGroups, $account_system_code, $template_account_system);
-    
+
     // Copy Global Income and Expense Accounts to the New Account System
     $this->copyGlobalAccountsToNewAccountSystem($statusLib, $header_id, $account_system_code, $template_account_system);
 
     //Create Project and Project Income Account Association
     // Only applicable to country based accounting systems
-    if($account_system_level == 4){
+    if ($account_system_level == 4) {
       $this->createProjectAndIncomeAccountAssociation($statusLib, $header_id, $account_system_code, $default_project_start_date);
     }
-     // Create the National Office and Context
+    // Create the National Office and Context
     $this->createOfficeAndContext($statusLib, $header_id, $account_system_code, $countryCurrenyId, $template_account_system, $default_project_start_date, $account_system_level);
-  
+
     // Create voucher types
     $this->createVoucherTypes($statusLib, $header_id, $account_system_code, $template_account_system);
 
@@ -1008,7 +1219,11 @@ public function actionAfterInsert($post_array, $approval_id, $header_id): bool
     return $state;
   }
 
-public function singleFormAddVisibleColumns(): array
+  /**
+   * Summary of singleFormAddVisibleColumns
+   * @return string[]
+   */
+  public function singleFormAddVisibleColumns(): array
   {
     return [
       'account_system_name',
@@ -1023,30 +1238,44 @@ public function singleFormAddVisibleColumns(): array
     ];
   }
 
+  /**
+   * Summary of disableEnableFeature
+   * @param string $tableName
+   * @param bool $isBeingDeactivated
+   * @param int $accountSystemId
+   * @param array $fieldsToupdate
+   * @return void
+   */
+  private function disableEnableFeature(string $tableName, bool $isBeingDeactivated, int $accountSystemId, array $fieldsToupdate = []): void
+  {
+    $writeBuilder = $this->write_db->table($tableName);
 
-private function disableEnableFeature(string $tableName, bool $isBeingDeactivated, int $accountSystemId, array $fieldsToupdate = []): void{
-  $writeBuilder = $this->write_db->table($tableName);
+    $data = [];
 
-  $data = [];
-  
-  if(!empty($fieldsToupdate)){
-    foreach($fieldsToupdate as $fieldName => $updateData){
-      $data[$fieldName] = $isBeingDeactivated ? $updateData['onDeactivate'] : $updateData['onActivate'];
+    if (!empty($fieldsToupdate)) {
+      foreach ($fieldsToupdate as $fieldName => $updateData) {
+        $data[$fieldName] = $isBeingDeactivated ? $updateData['onDeactivate'] : $updateData['onActivate'];
+      }
+    }
+
+    if (!empty($data)) {
+      $writeBuilder->where(['fk_account_system_id' => $accountSystemId]);
+      $writeBuilder->update($data);
     }
   }
-
-  if(!empty($data)){
-    $writeBuilder->where(['fk_account_system_id' => $accountSystemId]);
-    $writeBuilder->update($data);
-  }
-}
-
-private function featuresDeactivationOrAction(array $postData, int $accountSystemId){
+  /**
+   * Summary of featuresDeactivationOrAction
+   * @param array $postData
+   * @param int $accountSystemId
+   * @return void
+   */
+  private function featuresDeactivationOrAction(array $postData, int $accountSystemId)
+  {
     $isBeingDeactivated = $postData['account_system_is_active'] == 0 ? true : false;
     $activationField = ['onDeactivate' => 0, 'onActivate' => 1];
 
     $itemsToBeDeactivatedOrActivated = [
-      'office' => ['office_end_date' => ['onDeactivate' => date('Y-m-d'), 'onActivate' => NULL],'office_is_active' => $activationField],
+      'office' => ['office_end_date' => ['onDeactivate' => date('Y-m-d'), 'onActivate' => NULL], 'office_is_active' => $activationField],
       'income_account' => ['income_account_is_active' => $activationField],
       'role' => ['role_is_active' => $activationField],
       'voucher_type' => ['voucher_type_is_active' => $activationField],
@@ -1059,14 +1288,25 @@ private function featuresDeactivationOrAction(array $postData, int $accountSyste
     foreach ($itemsToBeDeactivatedOrActivated as $tableName => $fieldsToUpdate) {
       $this->disableEnableFeature($tableName, $isBeingDeactivated, $accountSystemId, $fieldsToUpdate);
     }
-}
+  }
+  /**
+   * Summary of actionAfterEdit
+   * @param array $postData
+   * @param int $approveId
+   * @param int $itemId
+   * @return bool
+   */
   public function actionAfterEdit(array $postData, int $approveId, int $itemId): bool
   {
     $this->featuresDeactivationOrAction($postData, $itemId);
     return true;
   }
-
-  function editVisibleColumns(): array {
+  /**
+   * Summary of editVisibleColumns
+   * @return string[]
+   */
+  function editVisibleColumns(): array
+  {
     return [
       'account_system_name',
       'account_system_is_allocation_linked_to_account',
