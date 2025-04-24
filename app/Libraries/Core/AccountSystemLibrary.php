@@ -1051,8 +1051,10 @@ private function featuresDeactivationOrAction($postData, $accountSystemId){
       'income_account' => ['income_account_is_active' => $activationField],
       'role' => ['role_is_active' => $activationField],
       'voucher_type' => ['voucher_type_is_active' => $activationField],
-      'office_cash' => ['office_cash_type_is_active' => $activationField],
-      'user' => ['user_is_active' => $activationField]
+      'office_cash' => ['office_cash_is_active' => $activationField],
+      'user' => ['user_is_active' => $activationField],
+      'approval_flow' => ['approval_flow_is_active' => $activationField],
+      'bank' => ['bank_is_active' => $activationField],
     ];
 
     foreach ($itemsToBeDeactivatedOrActivated as $tableName => $fieldsToUpdate) {
@@ -1071,5 +1073,10 @@ private function featuresDeactivationOrAction($postData, $accountSystemId){
       'account_system_is_allocation_linked_to_account',
       'account_system_is_active'
     ];
+  }
+
+  function transactionValidateDuplicatesColumns(): array
+  {
+      return ['account_system_code'];
   }
 }

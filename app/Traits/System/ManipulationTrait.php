@@ -366,7 +366,7 @@ trait ManipulationTrait {
           $numRows = $builder->countAllResults(); // Equivalent to num_rows() in CI3
   
           // If the count of rows is greater than 0, mark as duplicate
-          if ($numRows > 0) {
+          if (($this->action == 'singleFormAdd' && $numRows > 0) || ($this->action == 'edit' && $numRows > 1)) {
             $hasDuplicateRecord = true;
           }
         }
