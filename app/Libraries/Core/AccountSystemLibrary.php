@@ -91,7 +91,7 @@ class AccountSystemLibrary extends GrantsLibrary implements \App\Interfaces\Libr
     $builder->select(['language_id', 'language_name']);
     $languages = $builder->get()->getResultArray();
 
-    $fields['country_currency_name']['field_type'] = 'text';
+    // $fields['country_currency_name']['field_type'] = 'text';
 
     $fields['language_name']['field_type'] = 'select';
     foreach ($languages as $language) {
@@ -117,7 +117,7 @@ class AccountSystemLibrary extends GrantsLibrary implements \App\Interfaces\Libr
     $fields['default_project_start_date']['field_type'] = 'date';
 
     foreach ($currency_data as $currency) {
-      $fields['country_currency_name']['options'][$currency['code']] = $currency['name'] . " (" . $currency['code'] . ")";
+      $fields['country_currency_name']['options'][$currency['code'].'--'.$currency['name']] = $currency['name'] . " (" . $currency['code'] . ")";
     }
 
     // Get Account System Settings
@@ -152,13 +152,17 @@ class AccountSystemLibrary extends GrantsLibrary implements \App\Interfaces\Libr
     return $fields;
   }
 
-private function createCountryCurrency(StatusLibrary $statusLib, int $account_system_id, string $country_currency_code): int|null
+private function createCountryCurrency(StatusLibrary $statusLib, int $account_system_id, string $currency_code_and_name): int|null
   {
+    $currency_code_and_name_array = explode("--",$currency_code_and_name);
+    $currency_code = $currency_code_and_name_array[0];
+    $currency_name = $currency_code_and_name_array[1];
+
     $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('country_currency');
 
-    $countryCurrentInsert['country_currency_name'] = $itemTrackNumberAndName['country_currency_name'];
+    $countryCurrentInsert['country_currency_name'] = $currency_name;
     $countryCurrentInsert['country_currency_track_number'] = $itemTrackNumberAndName['country_currency_track_number'];
-    $countryCurrentInsert['country_currency_code'] = $country_currency_code;
+    $countryCurrentInsert['country_currency_code'] = $currency_code;
     $countryCurrentInsert['fk_account_system_id'] = $account_system_id;
     $countryCurrentInsert['country_currency_created_by'] = $this->session->user_id;
     $countryCurrentInsert['country_currency_created_date'] = date('Y-m-d');
@@ -621,6 +625,7 @@ function getAccountSystemRoleGroups(int $accountSystemId): array{
 private function createVoucherTypes($statusLib, $account_system_id, $account_system_code, $template_account_system){
   $voucherTypeReadBuilder = $this->read_db->table('voucher_type');
   $voucherTypeWriteBuilder = $this->write_db->table('voucher_type');
+  $voucherTypeLibrary = new \App\Libraries\Grants\VoucherTypeLibrary();
   
   // 1. Get the voucher type records from the template accounting system
   $voucherTypeReadBuilder->where(['fk_account_system_id' => $template_account_system]);
@@ -651,6 +656,9 @@ private function createVoucherTypes($statusLib, $account_system_id, $account_sys
     if(count($voucherTypesData) > 0){
       $voucherTypeWriteBuilder->insertBatch($voucherTypesData);
     }
+
+    // Create hidden voucher types for Funds Transfera dn Voided Cheques
+    $voucherTypeLibrary->createHiddenVoucherTypes($account_system_id, $account_system_code);
 
   }
 
@@ -957,12 +965,13 @@ public function actionAfterInsert($post_array, $approval_id, $header_id): bool
     $template_account_system = $post_array['template_account_system'];
     $account_system_code = $post_array['account_system_code'];
     $account_system_level = $post_array['account_system_level'];
+    $currency_code_and_name = $post_array['fk_country_currency_id'];
     $statusLib = new \App\Libraries\Core\StatusLibrary();
     
     $rolesGroups = $this->getAccountSystemRoleGroups($template_account_system);
     
     // Insert a record in the country currency table
-    $countryCurrenyId = $this->createCountryCurrency($statusLib, $header_id, $account_system_code);
+    $countryCurrenyId = $this->createCountryCurrency($statusLib, $header_id, $currency_code_and_name);
 
     // Update the account system settings account_system_setting_accounts json with $header_id with set 
     // Only valid for country based accounting systems

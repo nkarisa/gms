@@ -173,7 +173,7 @@
           'pdfHtml5',
         ],
         pagingType: "full_numbers",
-        stateSave: true,
+        // stateSave: true,
         pageLength: 10,
         order: [],
         serverSide: true,
