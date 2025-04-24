@@ -8,18 +8,18 @@ class AccountSystemLibrary extends GrantsLibrary implements \App\Interfaces\Libr
 {
 
   protected $table;
-  protected $coreModel;
+  protected $model;
 
   function __construct()
   {
     parent::__construct();
 
-    $this->coreModel = new AccountSystemModel();
+    $this->model = new AccountSystemModel();
 
     $this->table = 'account_system';
   }
 
-  function getAccountSystems()
+  public function getAccountSystems(): array
   {
     $builder = $this->read_db->table($this->table);
     $builder->select(array('account_system_id', 'account_system_code', 'account_system_name'));
@@ -27,7 +27,7 @@ class AccountSystemLibrary extends GrantsLibrary implements \App\Interfaces\Libr
     return $account_systems;
   }
 
-  function getAccountSystemIdByCode($account_system_code)
+  public function getAccountSystemIdByCode(string $account_system_code): int
   {
     $builder = $this->read_db->table('account_system');
     $builder->where('account_system_code', $account_system_code);
@@ -90,8 +90,6 @@ class AccountSystemLibrary extends GrantsLibrary implements \App\Interfaces\Libr
     $builder = $this->read_db->table('language');
     $builder->select(['language_id', 'language_name']);
     $languages = $builder->get()->getResultArray();
-
-    // $fields['country_currency_name']['field_type'] = 'text';
 
     $fields['language_name']['field_type'] = 'select';
     foreach ($languages as $language) {
@@ -231,7 +229,7 @@ private function createAccountSystemLanguage(StatusLibrary $statusLib, int $acco
     $this->createLanguageDirectoryStructure($language_id, $account_system_code);
   }
 
-private function createLanguageDirectoryStructure($language_id, $account_system_code){
+private function createLanguageDirectoryStructure(int $language_id, string $account_system_code){
       $languageReadBuilder = $this->read_db->table("language");
 
       // 1. Get the language code
@@ -274,7 +272,7 @@ private function createLanguageDirectoryStructure($language_id, $account_system_
       copy($defaultFromFile, $toFile);
 }
 
-private function getRoleGroupNameById(int $roleGroupId): mixed
+private function getRoleGroupNameById(int $roleGroupId): string | null
   {
     $builder = $this->read_db->table('role_group');
     $builder->select(['role_group_name']);
@@ -286,23 +284,10 @@ private function getRoleGroupNameById(int $roleGroupId): mixed
     return null;
   }
 
-// private function getAccountSystemCode(int $account_system_id): mixed
-//   {
-//     $builder = $this->read_db->table('account_system');
-//     $builder->select(['account_system_code']);
-//     $builder->where(['account_system_id' => $account_system_id]);
-//     $accountSystemObj = $builder->get();
-//     if ($accountSystemObj->getNumRows() > 0) {
-//       return $accountSystemObj->getRow()->account_system_code;
-//     }
-//     return null;
-//   }
-
 private function createRoleGroupAssociations(StatusLibrary $statusLib, int $account_system_id, array $rolesGroups, string $account_system_code, int $template_account_system): void
   {
     foreach ($rolesGroups as $rolesGroup) {
 
-      // $rolesGroupArray = explode('_', $rolesGroup);
       $roleGroupId = $rolesGroup['role_group_id']; //$rolesGroupArray[0];
       $contextDefinitionId = $rolesGroup['fk_context_definition_id']; // $rolesGroupArray[1];
 
@@ -518,7 +503,7 @@ private function createProjectAndIncomeAccountAssociation(StatusLibrary $statusL
     }
   }
 
-private function createFundingStatus($statusLib, $account_system_id): int
+private function createFundingStatus(StatusLibrary $statusLib, int $account_system_id): int
   {
     $fundingStatusWriterBuilder = $this->write_db->table('funding_status');
     $fundingStatusTrackNumberAndName = $this->generateItemTrackNumberAndName('funding_status');
@@ -539,7 +524,15 @@ private function createFundingStatus($statusLib, $account_system_id): int
     return $this->write_db->insertID();
 }
 
-private function createOfficeAndContext($statusLib, $header_id, $account_system_code, $country_currency_id, $template_account_system, $account_system_start_date, $hierarchy_level){
+private function createOfficeAndContext(
+    StatusLibrary $statusLib, 
+    int $header_id, 
+    string $account_system_code, 
+    int $country_currency_id, 
+    int $template_account_system, 
+    string $account_system_start_date, 
+    int $hierarchy_level): void
+  {
     $officeWriterBuilder = $this->write_db->table('office');
     $contextOfficeWriterBuilder = $this->write_db->table($hierarchy_level == 4 ? 'context_country' : 'context_region');
     $contextReportingOfficeReaderBuilder = $this->write_db->table($hierarchy_level == 4 ? 'context_region' : 'context_global');
@@ -606,7 +599,7 @@ private function createOfficeAndContext($statusLib, $header_id, $account_system_
 
 }
 
-function getAccountSystemRoleGroups(int $accountSystemId): array{
+private function getAccountSystemRoleGroups(int $accountSystemId): array{
     // Get Role Groups
     $roleGroupBuilder = $this->read_db->table('role_group');
     $roleGroupBuilder->select(['role_group_id', 'role_group_name', 'fk_context_definition_id']);
@@ -622,7 +615,13 @@ function getAccountSystemRoleGroups(int $accountSystemId): array{
     return $roleGroups;
 }
 
-private function createVoucherTypes($statusLib, $account_system_id, $account_system_code, $template_account_system){
+private function createVoucherTypes(
+    StatusLibrary $statusLib, 
+    int $account_system_id, 
+    string $account_system_code, 
+    int $template_account_system): void
+  {
+  
   $voucherTypeReadBuilder = $this->read_db->table('voucher_type');
   $voucherTypeWriteBuilder = $this->write_db->table('voucher_type');
   $voucherTypeLibrary = new \App\Libraries\Grants\VoucherTypeLibrary();
@@ -664,7 +663,7 @@ private function createVoucherTypes($statusLib, $account_system_id, $account_sys
 
 }
 
-private function createOfficeCash($statusLib, $account_system_id, $account_system_code, $template_account_system){
+private function createOfficeCash(StatusLibrary $statusLib, int $account_system_id, string $account_system_code, int $template_account_system): void{
   $officeCashReadBuilder = $this->read_db->table('office_cash');
   $officeWriteBuilder = $this->write_db->table('office_cash');
   
@@ -700,7 +699,7 @@ private function createOfficeCash($statusLib, $account_system_id, $account_syste
   }
 }
 
-private function createAccountSystemRoles($statusLib, $account_system_id, $account_system_code, $template_account_system, $rolesGroups, $account_system_level){
+private function createAccountSystemRoles(StatusLibrary $statusLib, int $account_system_id, string $account_system_code, int $template_account_system, array $rolesGroups, int $account_system_level): void{
   $roleReadBuilder = $this->read_db->table('role');
   $roleWriteBuilder = $this->write_db->table('role');
   $rolePermissionReadBuilder = $this->write_db->table('role_permission');
@@ -750,7 +749,7 @@ private function createAccountSystemRoles($statusLib, $account_system_id, $accou
       $roleWriteBuilder->insert($data);
       $newRoleId = $this->write_db->insertID();
 
-      $permissionIdsToAttach = isset($rolePermissions[$_oldRoleId]) ? $rolePermissions[$_oldRoleId] : 0;
+      $permissionIdsToAttach = isset($rolePermissions[$_oldRoleId]) ? $rolePermissions[$_oldRoleId] : [];
       
       if(count($permissionIdsToAttach) > 0){
         $this->insertPermissionsToRole($statusLib, $newRoleId, $permissionIdsToAttach);
@@ -791,7 +790,7 @@ private function createAccountSystemRoles($statusLib, $account_system_id, $accou
   }
 }
 
-private function insertPermissionsToRole($statusLib, $roleId, $permissionIds){
+private function insertPermissionsToRole(StatusLibrary $statusLib, int $roleId, array $permissionIds): void{
   $rolePermissionWriteBuilder = $this->write_db->table('role_permission');
   $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('role_permission');
 
@@ -816,7 +815,7 @@ private function insertPermissionsToRole($statusLib, $roleId, $permissionIds){
 
 }
 
-private function createApprovalFlow($statusLib, $account_system_id, $account_system_code, $template_account_system){
+private function createApprovalFlow(StatusLibrary $statusLib, int $account_system_id, int $template_account_system): void{
   
   // Query builders
   $approvalFlowReadBuilder = $this->read_db->table('approval_flow');
@@ -939,7 +938,7 @@ private function createApprovalFlow($statusLib, $account_system_id, $account_sys
   }
 }
 
-private function findRelatedAccountingSystemRole($oldRoleId, $account_system_id): int{
+private function findRelatedAccountingSystemRole(int $oldRoleId, int $account_system_id): int{
   // $roleReadBuilder = $this->read_db->table('role');
   $roleWriteBuilder = $this->write_db->table('role');
 
@@ -966,7 +965,7 @@ public function actionAfterInsert($post_array, $approval_id, $header_id): bool
     $account_system_code = $post_array['account_system_code'];
     $account_system_level = $post_array['account_system_level'];
     $currency_code_and_name = $post_array['fk_country_currency_id'];
-    $statusLib = new \App\Libraries\Core\StatusLibrary();
+    $statusLib = new StatusLibrary();
     
     $rolesGroups = $this->getAccountSystemRoleGroups($template_account_system);
     
@@ -1004,7 +1003,7 @@ public function actionAfterInsert($post_array, $approval_id, $header_id): bool
     $this->createOfficeCash($statusLib, $header_id, $account_system_code, $template_account_system);
 
     // Create approval workflow
-    $this->createApprovalFlow($statusLib, $header_id, $account_system_code, $template_account_system);
+    $this->createApprovalFlow($statusLib, $header_id, $template_account_system);
 
     return $state;
   }
@@ -1025,7 +1024,7 @@ public function singleFormAddVisibleColumns(): array
   }
 
 
-private function disableEnableFeature($tableName, $isBeingDeactivated, $accountSystemId, $fieldsToupdate = []){
+private function disableEnableFeature(string $tableName, bool $isBeingDeactivated, int $accountSystemId, array $fieldsToupdate = []): void{
   $writeBuilder = $this->write_db->table($tableName);
 
   $data = [];
@@ -1042,7 +1041,7 @@ private function disableEnableFeature($tableName, $isBeingDeactivated, $accountS
   }
 }
 
-private function featuresDeactivationOrAction($postData, $accountSystemId){
+private function featuresDeactivationOrAction(array $postData, int $accountSystemId){
     $isBeingDeactivated = $postData['account_system_is_active'] == 0 ? true : false;
     $activationField = ['onDeactivate' => 0, 'onActivate' => 1];
 
@@ -1075,8 +1074,8 @@ private function featuresDeactivationOrAction($postData, $accountSystemId){
     ];
   }
 
-  function transactionValidateDuplicatesColumns(): array
-  {
-      return ['account_system_code'];
-  }
+  // function transactionValidateDuplicatesColumns(): array
+  // {
+  //     return ['account_system_code'];
+  // }
 }
