@@ -56,5 +56,22 @@ class ProjectLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
       
       return $lookUpValues;
     }
+
+    public function getProjectByProjectAllocationId($projectAllocationId){
+      $projectReadBuilder = $this->read_db->table('project');
+      
+      $projectReadBuilder->select(['project_id','project_name','project_start_date','project_end_date','project_is_default']);
+      $projectReadBuilder->where(['project_allocation_id' => $projectAllocationId]);
+      $projectReadBuilder->join('project_allocation','project_allocation.fk_project_id=project.project_id');
+      $projectObj = $projectReadBuilder->get();
+
+      $project = [];
+
+      if($projectObj->getNumRows() > 0){
+        $project = $projectObj->getRowArray();
+      }
+
+      return $project;
+    }
    
 }

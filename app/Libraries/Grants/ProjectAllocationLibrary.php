@@ -64,17 +64,6 @@ class ProjectAllocationLibrary extends GrantsLibrary implements \App\Interfaces\
         }
   
      }
-     
-    //  function detailListTableVisibleColumns(): array{
-    //   return [
-    //     'project_allocation_track_number',
-    //     'office_name',
-    //     'project_name',
-    //     'project_allocation_extended_end_date',
-    //     'project_allocation_created_date',
-    //     'project_allocation_last_modified_date'
-    //   ];
-    //  }
 
     public function singleFormAddVisibleColumns(): array {
       return [
@@ -107,7 +96,7 @@ class ProjectAllocationLibrary extends GrantsLibrary implements \App\Interfaces\
       return ['fk_project_id','fk_office_id'];
     }
 
-    function multiSelectField(): string {
+    public function multiSelectField(): string {
       return "office";
     }
 }

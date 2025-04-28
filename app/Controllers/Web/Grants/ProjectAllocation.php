@@ -15,4 +15,17 @@ class ProjectAllocation extends WebController
         parent::initController($request, $response, $logger);
 
     }
+
+    protected function result($id = null, $parentTable = null)
+    {
+        $result = parent::result($id, $parentTable);
+        $projectLibrary = new \App\Libraries\Grants\ProjectLibrary();
+
+        if($this->action == 'edit'){
+            $project = $projectLibrary->getProjectByProjectAllocationId(hash_id($this->id, 'decode'));
+            $result['project_end_date'] = isset($project['project_end_date']) ? date('Y-m-d', strtotime('+1 days', strtotime($project['project_end_date']))) : date('Y-m-d');
+        }
+
+        return $result;
+    }   
 }
