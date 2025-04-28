@@ -1313,10 +1313,10 @@ class AccountSystemLibrary extends GrantsLibrary implements \App\Interfaces\Libr
       'account_system_is_active'
     ];
   }
-
-  // function transactionValidateDuplicatesColumns(): array
-  // {
-  //     return ['account_system_code'];
-  // }
+  
+  function transactionValidateDuplicatesColumns(): array
+  {
+      return ['account_system_code'];
+  }
   
 }

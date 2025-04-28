@@ -228,7 +228,7 @@ trait ManipulationTrait {
       return $this->transactionValidate([$transactionValidateDuplicates, $transactionValidateByComputation], $headerColumns, $headerId, $approvalId);
     }
   
-    public function transactionValidateDuplicates(string $table_name, array $insert_array, array $validation_fields = [], int $allowable_records = 0): array
+    public function transactionValidateDuplicates(string $table_name, array $insert_array, array $validation_fields = [], int $allowable_records = 1): array
     {
   
       $validation_successful = true;
@@ -257,8 +257,8 @@ trait ManipulationTrait {
   
         $result = $this->write_db->table($table_name)
           ->where($insert_array)->get()->getNumRows();
-  
-        if ($result > $allowable_records) {
+
+          if ($result > $allowable_records) {
           $validation_successful = false; // Validation error flag
   
           $failure_message = get_phrase('duplicate_entries_not_allowed');
