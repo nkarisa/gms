@@ -50,9 +50,34 @@ class RoleGroupLibrary extends GrantsLibrary implements \App\Interfaces\LibraryI
                     return $contextDefinition;
                 }
             });
+
+            $accountSystemLibrary = new \App\Libraries\Core\AccountSystemLibrary();
+            $getAccountSystems = $accountSystemLibrary->getAccountSystems();
+            
+            $lookup_values['account_system'] = array_filter($getAccountSystems, function($accountSystem){
+                $user_account_system_id = $this->session->user_account_system_id;
+                if($accountSystem->account_system_id == $user_account_system_id){
+                    return $accountSystem;
+                }
+            });
         }
 
         return $lookup_values;
+    }
+
+    function actionAfterEdit(array $postData, int $approveId, int $itemId): bool {
+        $permissionTemplateWriteBuilder = $this->read_db->table('permission_template');
+        if(!$postData['role_group_is_active']){
+            // Deactivate all permission templates
+            $permissionTemplateWriteBuilder->where(['fk_role_group_id' => $itemId]);
+            $permissionTemplateWriteBuilder->update(['permission_template_is_active' => 0]);
+        }else{
+            // Enable all permission templates
+            $permissionTemplateWriteBuilder->where(['fk_role_group_id' => $itemId]);
+            $permissionTemplateWriteBuilder->update(['permission_template_is_active' => 1]);
+        }
+
+        return true;
     }
    
 }

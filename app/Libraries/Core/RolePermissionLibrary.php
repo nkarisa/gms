@@ -31,5 +31,13 @@ class RolePermissionLibrary extends GrantsLibrary implements \App\Interfaces\Lib
     function multiSelectField(): string {
         return 'permission';
     }
+
+    function editVisibleColumns(): array {
+        return [
+            'permission_name',
+            'role_name',
+            'role_permission_is_active'
+        ];
+    }
    
 }

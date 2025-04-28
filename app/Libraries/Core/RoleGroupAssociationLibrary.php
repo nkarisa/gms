@@ -44,6 +44,8 @@ class RoleGroupAssociationLibrary extends GrantsLibrary implements \App\Interfac
             $readBuilder = $this->read_db->table('role_group');
             $readBuilder->select(array('role_group_id','role_group_name'));
             $readBuilder->whereIn('fk_account_system_id',[1,$this->session->user_account_system_id]);
+            $readBuilder->where('role_group_is_active', 1);
+            $readBuilder->join('permission_template','permission_template.fk_role_group_id=role_group.role_group_id');
             $lookup_values['role_group'] = $readBuilder->get()->getResultArray();
         }
 

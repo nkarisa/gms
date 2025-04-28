@@ -485,8 +485,6 @@ class WebController extends BaseController
     $parentId = null;
     $parentTable = null;
 
-    // log_message('error', json_encode($this->request->getPost()));
-
     if ($this->request->getPost('parentId')) {
       $parentId = $this->request->getPost('parentId');
     }

@@ -675,11 +675,16 @@ class GrantsLibrary
     // Get the name of the record creator
     $createdByField = $this->historyTrackingField($table, 'created_by');
     if (isset($data[$createdByField]) && $data[$createdByField] >= 1) {
-      $createdBy = $this->read_db->table('user')
+      $createdByObj = $this->read_db->table('user')
         ->select('CONCAT(user_firstname, " ", user_lastname) as user_name')
         ->where('user_id', $data[$createdByField])
-        ->get()
-        ->getRow()->user_name;
+        ->get();
+
+        $createdBy = '';
+        if($createdByObj->getNumRows() > 0){
+          $createdBy = $createdByObj->getRow()->user_name;
+        }
+        
     } else {
       $createdBy = get_phrase('creator_user_not_set');
     }
@@ -688,11 +693,15 @@ class GrantsLibrary
     // Get the name of the last record modifier
     $lastModifiedByField = $this->historyTrackingField($table, 'last_modified_by');
     if (isset($data[$lastModifiedByField]) && $data[$lastModifiedByField] >= 1) {
-      $lastModifiedBy = $this->read_db->table('user')
+      $lastModifiedByObj = $this->read_db->table('user')
         ->select('CONCAT(user_firstname, " ", user_lastname) as user_name')
         ->where('user_id', $data[$lastModifiedByField])
-        ->get()
-        ->getRow()->user_name;
+        ->get();
+
+        $lastModifiedBy = '';
+        if($lastModifiedByObj->getNumRows() > 0){
+          $lastModifiedBy = $lastModifiedByObj->getRow()->user_name;
+        }
     } else {
       $lastModifiedBy = get_phrase('modifier_user_not_set');
     }
