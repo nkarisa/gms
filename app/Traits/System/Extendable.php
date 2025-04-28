@@ -95,18 +95,36 @@ trait Extendable
     $lookupValues = [];
     $lookupTables = $this->lookupTables();
 
-    if(in_array('account_system', $lookupTables)){
-      if(!$this->session->system_admin){
+    if (!$this->session->system_admin) {
+      if (in_array('account_system', $lookupTables)) {
         $accountSystemLibrary = new \App\Libraries\Core\AccountSystemLibrary();
         $getAccountSystems = $accountSystemLibrary->getAccountSystems();
-        
-        $lookupValues['account_system'] = array_filter($getAccountSystems, function($accountSystem){
-            $user_account_system_id = $this->session->user_account_system_id;
-            if($accountSystem->account_system_id == $user_account_system_id){
-                return $accountSystem;
-            }
+
+        $lookupValues['account_system'] = array_filter($getAccountSystems, function ($accountSystem) {
+          $user_account_system_id = $this->session->user_account_system_id;
+          if ($accountSystem->account_system_id == $user_account_system_id) {
+            return $accountSystem;
+          }
         });
-    }
+      }
+
+      if (in_array('office', $lookupTables)) {
+        $officeReadBuilder = $this->read_db->table('office');
+        $officeReadBuilder->where([
+          'office_is_active' => 1,
+          'fk_account_system_id' => $this->session->user_account_system_id,
+          'fk_context_definition_id' => 1
+        ]);
+
+        $officeObj = $officeReadBuilder->get();
+        $offices = [];
+
+        if ($officeObj->getNumRows() > 0) {
+          $offices = $officeObj->getResultArray();
+        }
+
+        $lookupValues['office'] = $offices;
+      }
     }
 
     return $lookupValues;

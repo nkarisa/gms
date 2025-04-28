@@ -42,7 +42,7 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $chequeBookLibrary = new \App\Libraries\Grants\ChequeBookLibrary();
         $statusLibrary = new \App\Libraries\Core\StatusLibrary();
 
-        $active_office_banks_by_reporting_month = $officeBankLibrary->get_active_office_banks_by_reporting_month([$office_id], $transacting_month);
+        $active_office_banks_by_reporting_month = $officeBankLibrary->getActiveOfficeBanksByReportingMonth([$office_id], $transacting_month);
 
         $result = [
             'active_office_banks' => $active_office_banks_by_reporting_month,

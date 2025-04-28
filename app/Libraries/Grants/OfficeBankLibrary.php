@@ -299,27 +299,7 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
     ];
   }
 
-  function lookupValues(): array
-  {
-    $lookupValues = parent::lookupValues();
-    $offices = [];
-
-    $builder = $this->read_db->table('office');
-    $builder->select(['office_id', 'office_name']);
-    $builder->where(['fk_context_definition_id' => 1, 'office_is_active' => 1]);
-    $builder->orWhere('office_is_readonly', 0);
-    $offices_obj = $builder->get();
-
-    if($offices_obj->getNumRows() > 0){
-      $offices = $offices_obj->getResultArray();
-    }
-
-    $lookupValues['office'] = $offices;
-
-    return $lookupValues;
-  }
-
-  function get_active_office_banks_by_reporting_month($office_ids, $reporting_month, $project_ids = [], $office_bank_ids = [])
+  function getActiveOfficeBanksByReportingMonth($office_ids, $reporting_month, $project_ids = [], $office_bank_ids = [])
   {
     $office_banks = $this->getOfficeBanks($office_ids, $project_ids, $office_bank_ids);
     $office_banks_array = [];
