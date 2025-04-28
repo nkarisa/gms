@@ -35,13 +35,17 @@ class ContextDefinitionLibrary extends GrantsLibrary implements \App\Interfaces\
         foreach ($context_definition as $definition) {
             $context_definition_name = $definition['context_definition_name'];
             $context_definition_level = $definition['context_definition_level'];
+            $context_definition_id = $definition['context_definition_id'];
 
             $context_table = "context_" . $context_definition_name;
             $context_user_table = $context_table . '_user';
             $fk = 'fk_' . $context_table . '_id';
             $context_level = $context_definition_level;
+            
 
             $order_array[$context_definition_name] = [
+                'context_definition_name' => $context_definition_name,
+                'context_definition_id' => $context_definition_id,
                 'context_table' => $context_table,
                 'context_user_table' => $context_user_table,
                 'fk' => $fk,
