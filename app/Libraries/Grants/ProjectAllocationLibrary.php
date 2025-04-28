@@ -86,4 +86,8 @@ class ProjectAllocationLibrary extends GrantsLibrary implements \App\Interfaces\
      public function transactionValidateDuplicatesColumns(): array{
       return ['fk_project_id','fk_office_id'];
     }
+
+    function multiSelectField(): string {
+      return "office";
+    }
 }
