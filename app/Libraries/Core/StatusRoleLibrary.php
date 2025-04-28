@@ -55,10 +55,17 @@ class StatusRoleLibrary extends GrantsLibrary implements \App\Interfaces\Library
         return ['role_name'];
     }
 
-    public function lookupValues(): array
+    function editVisibleColumns(): array {
+        return  [
+            'status_role_name',
+            'status_role_is_active',
+        ];
+    }
+
+    public function lookUpValues(): array
     {
         // Call the parent lookup_values method
-        $lookup_values = parent::lookupValues();
+        $lookup_values = parent::lookUpValues();
         // Decode the status_id from the hashed ID
         $status_id = hash_id($this->id, 'decode');
         // Handle the 'edit' action case
