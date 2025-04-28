@@ -50,16 +50,6 @@ class RoleGroupLibrary extends GrantsLibrary implements \App\Interfaces\LibraryI
                     return $contextDefinition;
                 }
             });
-
-            $accountSystemLibrary = new \App\Libraries\Core\AccountSystemLibrary();
-            $getAccountSystems = $accountSystemLibrary->getAccountSystems();
-            
-            $lookup_values['account_system'] = array_filter($getAccountSystems, function($accountSystem){
-                $user_account_system_id = $this->session->user_account_system_id;
-                if($accountSystem->account_system_id == $user_account_system_id){
-                    return $accountSystem;
-                }
-            });
         }
 
         return $lookup_values;

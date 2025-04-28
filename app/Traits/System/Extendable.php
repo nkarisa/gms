@@ -92,9 +92,24 @@ trait Extendable
    */
   function lookupValues(): array
   {
-    
+    $lookupValues = [];
+    $lookupTables = $this->lookupTables();
 
-    return [];
+    if(in_array('account_system', $lookupTables)){
+      if(!$this->session->system_admin){
+        $accountSystemLibrary = new \App\Libraries\Core\AccountSystemLibrary();
+        $getAccountSystems = $accountSystemLibrary->getAccountSystems();
+        
+        $lookupValues['account_system'] = array_filter($getAccountSystems, function($accountSystem){
+            $user_account_system_id = $this->session->user_account_system_id;
+            if($accountSystem->account_system_id == $user_account_system_id){
+                return $accountSystem;
+            }
+        });
+    }
+    }
+
+    return $lookupValues;
   }
 
   function getUnusedLookupValues($lookUpTableBuilder, &$lookup_values, $lookup_table, $association_table, $not_exist_string_condition = '')
