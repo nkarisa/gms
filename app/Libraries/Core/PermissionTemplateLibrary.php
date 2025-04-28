@@ -58,7 +58,7 @@ class PermissionTemplateLibrary extends GrantsLibrary implements \App\Interfaces
         if(!$this->session->system_admin){
             $readBuilder = $this->read_db->table('permission');
             $readBuilder->select(array('permission_id','permission_name'));
-            $readBuilder->where(array('permission_is_global'=>0));
+            $readBuilder->where(array('permission_is_global' => 0));
             $readBuilder->where('NOT EXISTS (SELECT * FROM permission_template WHERE permission_template.fk_permission_id=permission.permission_id AND fk_role_group_id = '.hash_id($this->id,'decode').')','',FALSE);
             $lookup_values['permission'] = $readBuilder->get()->getResultArray();
         }

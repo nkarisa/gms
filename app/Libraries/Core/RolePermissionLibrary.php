@@ -39,5 +39,20 @@ class RolePermissionLibrary extends GrantsLibrary implements \App\Interfaces\Lib
             'role_permission_is_active'
         ];
     }
+
+    function lookUpValues():array 
+  {
+      $lookup_values = parent::lookUpValues();
+      $permissionReadBuilder = $this->read_db->table('permission');
+
+      if(!$this->session->system_admin){
+          $permissionReadBuilder->select(array('permission_id','permission_name'));
+          $permissionReadBuilder->where(array('permission_is_global' => 0));
+          $permissionReadBuilder->where('NOT EXISTS (SELECT * FROM role_permission WHERE role_permission.fk_permission_id=permission.permission_id AND fk_role_id = '.hash_id($this->id,'decode').')','',FALSE);
+          $lookup_values['permission'] = $permissionReadBuilder->get()->getResultArray();
+      }
+
+      return $lookup_values;
+  }
    
 }
