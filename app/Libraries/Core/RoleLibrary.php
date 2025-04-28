@@ -112,33 +112,18 @@ class RoleLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
         return $lookup_values;
     }
 
-  
-  // function showListEditActionDependancyData(array $roles): array{
-  //     $userReadBuilder = $this->read_db->table('user');
-  //     $role_ids = array_column($roles, 'role_id');
+  function actionAfterEdit(array $postData, int $approveId, int $itemId): bool {
+    $rolePermissionWriteBuilder = $this->write_db->table('role_permission');
 
-  //     $userReadBuilder->select(['fk_role_id as role_id','COUNT(*) as user_count']);
-  //     $userReadBuilder->whereIn('fk_role_id', $role_ids);
-  //     $userReadBuilder->groupBy('fk_role_id');
-  //     $rolesUserCountObj = $userReadBuilder->get();
-
-  //     $rolesUserCount = [];
-  //     if($rolesUserCountObj->getNumRows() > 0){
-  //       $rolesUserCount = $rolesUserCountObj->getResultArray();
-  //     }
-
-  //     $roleIdsUsed = array_column($rolesUserCount, 'role_id');
-
-  //     return compact('roleIdsUsed');
-  // } 
-
-  //   function showListEditAction(array $row, array $dependancyData = []): bool{
-
-  //     $roleIdsUsed = $dependancyData['roleIdsUsed'];
-  //     if(in_array($row['role_id'], $roleIdsUsed)){
-  //       return false;
-  //     }
-
-  //     return true;
-  //   }
+    if($postData['role_is_active'] == 0){
+      // Disable all role permissions
+      $rolePermissionWriteBuilder->where('fk_role_id', $itemId);
+      $rolePermissionWriteBuilder->update(['role_permission_is_active' => 0]);
+    }else{
+      // Enable all role permissions
+      $rolePermissionWriteBuilder->where('fk_role_id', $itemId);
+      $rolePermissionWriteBuilder->update(['role_permission_is_active' => 1]);
+    }
+    return true;
+  }
 }
