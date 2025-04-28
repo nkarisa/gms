@@ -65,21 +65,41 @@ class ProjectAllocationLibrary extends GrantsLibrary implements \App\Interfaces\
   
      }
      
-     function detailListTableVisibleColumns(): array{
-      return [
-        'project_allocation_track_number',
-        'office_name',
-        'project_name',
-        'project_allocation_extended_end_date',
-        'project_allocation_created_date',
-        'project_allocation_last_modified_date'
-      ];
-     }
+    //  function detailListTableVisibleColumns(): array{
+    //   return [
+    //     'project_allocation_track_number',
+    //     'office_name',
+    //     'project_name',
+    //     'project_allocation_extended_end_date',
+    //     'project_allocation_created_date',
+    //     'project_allocation_last_modified_date'
+    //   ];
+    //  }
 
     public function singleFormAddVisibleColumns(): array {
       return [
         'project_name',
         'office_name'
+      ];
+     }
+
+     public function detailListTableVisibleColumns(): array{
+        return [
+          'project_allocation_track_number',
+          'project_name',
+          'office_name',
+          'project_allocation_is_active',
+          'project_allocation_extended_end_date',
+          'project_allocation_created_date'
+        ];
+     }
+
+     public function editVisibleColumns(): array {
+      return [
+        'project_name',
+        'project_allocation_is_active',
+        'office_name',
+        'project_allocation_extended_end_date'
       ];
      }
 
