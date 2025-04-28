@@ -92,6 +92,8 @@ trait Extendable
    */
   function lookupValues(): array
   {
+    
+
     return [];
   }
 
@@ -110,7 +112,7 @@ trait Extendable
     }
 
     $lookUpTableBuilder->select(array($lookup_table . '_id', $lookup_table . '_name'));
-    $lookUpTableBuilder->join($lookup_table,$lookup_table.'.'.$lookup_table.'_id='.$association_table.'.fk_'.$lookup_table.'_id');
+    $lookUpTableBuilder->join($lookup_table, $lookup_table . '.' . $lookup_table . '_id=' . $association_table . '.fk_' . $lookup_table . '_id');
     $lookup_values[$lookup_table] = $lookUpTableBuilder->get()->getResultArray();
 
     return $lookup_values;
@@ -290,27 +292,29 @@ trait Extendable
 
   public function transactionValidateDuplicatesColumns(): array
   {
-      return [];
+    return [];
   }
 
   protected function transactionValidateByComputationFlag(array $arrayToCheck)
   {
-      return VALIDATION_SUCCESS; // OR VALIDATION_ERROR
+    return VALIDATION_SUCCESS; // OR VALIDATION_ERROR
   }
 
   public function orderListPage(): string
   {
-      return ''; // Example - 'status_approval_sequence ASC';
+    return ''; // Example - 'status_approval_sequence ASC';
   }
 
-  function customTableJoin(\CodeIgniter\Database\BaseBuilder $builder):void {
+  function customTableJoin(\CodeIgniter\Database\BaseBuilder $builder): void
+  {
 
   }
 
   /**
    * @return array<string, mixed> // Enforces an associative array
    */
-  function formatColumnsValuesDependancyData(array $data): array{
+  function formatColumnsValuesDependancyData(array $data): array
+  {
     return [];
   }
 

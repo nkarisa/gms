@@ -225,5 +225,69 @@ class VoucherTypeLibrary extends GrantsLibrary implements \App\Interfaces\Librar
 
     return $is_voucher_type_affects_bank;
   }
+
+  function singleFormAddVisibleColumns(): array {
+    return [
+      'voucher_type_name',
+      'voucher_type_abbrev',
+      'voucher_type_is_active',
+      'voucher_type_account_name',
+      'voucher_type_effect_name',
+      'voucher_type_is_cheque_referenced',
+      'account_system_name'
+    ];
+  }
+
+  function editVisibleColumns(): array {
+    $fields = [...$this->singleFormAddVisibleColumns()];
+
+    // Check if voucher type has been used 
+    $voucherTypeIsUsed = $this->voucherTypeIsUsed(hash_id($this->id, 'decode'));
+
+    if($voucherTypeIsUsed == true){
+      unset($fields[array_search('voucher_type_account_name', $fields)]);
+      unset($fields[array_search('voucher_type_effect_name', $fields)]);
+      unset($fields[array_search('voucher_type_is_cheque_referenced', $fields)]);
+    }
+
+    return $fields;
+  }
+
+  function voucherTypeIsUsed($voucherTypeId){
+    $voucherReadBuilder = $this->read_db->table('voucher');
+
+    $voucherReadBuilder->where('fk_voucher_type_id', $voucherTypeId);
+    $voucherReadBuilder->limit(1);
+    $count = $voucherReadBuilder->countAllResults();
+    
+    return $count > 0 ? true : false;
+  }
+
+  function listTableVisibleColumns(): array {
+    return ['voucher_type_track_number',...$this->singleFormAddVisibleColumns()];
+  }
+
+  function lookupValues(): array
+  {
+      $lookup_values = parent::lookupValues();
+
+      if(!$this->session->system_admin){
+          $accountSystemLibrary = new \App\Libraries\Core\AccountSystemLibrary();
+          $getAccountSystems = $accountSystemLibrary->getAccountSystems();
+          
+          $lookup_values['account_system'] = array_filter($getAccountSystems, function($accountSystem){
+              $user_account_system_id = $this->session->user_account_system_id;
+              if($accountSystem->account_system_id == $user_account_system_id){
+                  return $accountSystem;
+              }
+          });
+      }
+
+      return $lookup_values;
+  }
+
+  function listTableWhere(\CodeIgniter\Database\BaseBuilder $queryBuilder): void {
+    $queryBuilder->where('voucher_type_is_hidden', 0);
+  }
    
 }
