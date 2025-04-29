@@ -44,8 +44,6 @@ class GrantsLibrary
   private $uri;
   public array $lookUpTablesForeignKeyMappings = [];
 
-  // protected $statusLibrary;
-
   function __construct()
   {
 

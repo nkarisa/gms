@@ -848,11 +848,35 @@ if (!function_exists('combine_name_with_ids')) {
     }
 }
 
+// if (!function_exists('db_error')) {
+//     function db_error($error_code)
+//     {
+//         $mysql_error_codes = [
+//             1452 => "Duplicate records not allowed"
+//         ];
+
+//         return isset($mysql_error_codes[$error_code]) ? $mysql_error_codes[$error_code] : "Database error occurred";
+//     }
+// }
+
 if (!function_exists('alert_error_message')) {
-    function alert_error_message($error_messages)
+    function alert_error_message(&$error_messages)
     {
         $messages = array_column($error_messages, 'message');
         array_walk($messages, 'create_error_message');
+    }
+}
+
+if (!function_exists('create_error_message')) {
+
+    function create_error_message($message, $key)
+    {
+
+        $explode_msq = explode(':', $message)[0];
+
+        if ($explode_msq != '') {
+            echo '=>' . $explode_msq . "\n";
+        }
     }
 }
 

@@ -515,12 +515,13 @@ class OfficeLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
 
     $this->write_db->table('system_opening_balance')->insert($system_opening_balance_to_insert);
 
-    $error_messages['system_openning'] = $this->write_db->error();
-
     if ($this->write_db->transStatus() == false) {
+      $message = $this->write_db->error()['message'];
+      if($this->write_db->error()['code'] == '1452'){
+        $message = get_phrase('duplicate_office_code',"Cannot create office with the same office code");
+      }
+      $flag = false;
       $this->write_db->transRollback();
-      alert_error_message($error_messages);
-
     } else {
       $this->write_db->transCommit();
       // Append office to user session after creating an office to allow user see the office immediately the create it without the need to log out
@@ -532,11 +533,21 @@ class OfficeLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
       );
       $flag = true;
       $message = "Office inserted successfully ";
-
     }
 
     return $this->response->setJSON(compact('message', 'flag'));
   }
+
+  function create_error_message($message, $key){
+
+    $explode_msq=explode(':',$message)[0];
+
+    if($explode_msq!=''){
+      echo '=>'.$explode_msq."\n";
+    }
+    
+  }
+
 
   function getReportingOfficeContext($context_definition)
   {

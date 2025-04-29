@@ -164,7 +164,7 @@ $action = isset($segments[1]) ? $segments[1] : 'list';
       success: function (response) {
         alert(response.message);
         if (btn.hasClass('btn-save')) {
-          location.href = document.referrer
+          response.flag ? location.href = document.referrer : '';
         } else {
           reset_form();
         }

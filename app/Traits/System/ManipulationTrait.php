@@ -133,9 +133,6 @@ trait ManipulationTrait {
       // Create the approval ticket if required by the header record
       $approvalId = $this->insertApprovalRecord(strtolower($this->controller));
   
-      // $approval = [];
-      // $details = [];
-  
       if ($this->id) {
         $decodedHashId = hash_id($this->id, 'decode');
   
@@ -298,8 +295,13 @@ trait ManipulationTrait {
   
       // Check if the transaction status is valid
       if ($this->write_db->transStatus() === false) {
-        $this->write_db->transRollback();
         $messageAndFlag['message'] = get_phrase('insert_failed');
+
+        if($this->write_db->error()){
+          $messageAndFlag['message'] = $this->write_db->error()['message'];
+        }
+
+        $this->write_db->transRollback();
       } else {
         // If any validation flag is false, rollback
         if (in_array(false, $validationFlags)) {
