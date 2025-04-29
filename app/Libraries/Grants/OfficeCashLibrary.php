@@ -48,5 +48,15 @@ class OfficeCashLibrary extends GrantsLibrary implements \App\Interfaces\Library
         return $cash_accounts;
   
       }
+
+      public function listTableVisibleColumns(): array {
+        return [
+          'office_cash_track_number',
+          'office_cash_name',
+          'office_cash_is_active',
+          'account_system_name',
+          'office_cash_created_date'
+        ];
+      }
    
 }
