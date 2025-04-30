@@ -517,6 +517,7 @@ class ViewOutput extends OutputTemplate
 
         // Check if the add button is allowed to be shown
         $show_add_button = $this->libs->showAddButton($table);
+        $show_edit_button = $this->libs->showEditButton($table);
 
         // Checks if the detail table has a detail table to it
         $has_details_listing = $this->libs->checkIfTableHasDetailListing($table);
@@ -528,7 +529,8 @@ class ViewOutput extends OutputTemplate
             'has_details_table' => $has_details,
             'has_details_listing' => $has_details_listing,
             'is_approveable_item' => $is_approveable_item,
-            'show_add_button' => $show_add_button
+            'show_add_button' => $show_add_button,
+            'show_edit_button' => $show_edit_button
         );
     }
 

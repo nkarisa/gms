@@ -618,6 +618,23 @@ class GrantsLibrary
     $this->defaultUnsetColumns($keys, $unset_fields);
   }
 
+  function checkShowEditButton(string $table): bool
+  {
+    $library = $this->loadLibrary($table);
+
+    $show_edit_button = true;
+
+    if (
+      method_exists($library, 'showEditButton')
+      && $library->showEditButton() != null
+    ) {
+      $show_edit_button = $library->showEditButton();
+    }
+
+
+    return $show_edit_button;
+  }
+
   function checkShowAddButton(string $table): bool
   {
     $library = $this->loadLibrary($table);
@@ -634,8 +651,6 @@ class GrantsLibrary
 
     return $show_add_button;
   }
-
-
 
 
   function runMasterViewQuery($table, $selectedColumns, $lookupTables)

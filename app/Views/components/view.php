@@ -55,7 +55,10 @@ $columns = array_chunk($keys,service("settings")->get("GrantsConfig.master_table
               <?php
               
                 if( $userLibrary->isStatusActionableByUser($table_body['status_id'], $controller) ){
-                  if($userLibrary->checkRoleHasPermissions(ucfirst($controller),'update'))
+                  if(
+                    $userLibrary->checkRoleHasPermissions(ucfirst($controller),'update') &&
+                    $show_edit_button
+                    )
                   {
                       echo WidgetBase::load('button',get_phrase('edit'),$controller.'/edit/'.$id);
                   }

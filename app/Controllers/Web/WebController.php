@@ -356,6 +356,11 @@ class WebController extends BaseController
       $page_data['show_add_button'] = $show_add_button;
     }
 
+    if($this->action == 'view'){
+      $show_edit_button = $this->libs::call($this->controller . '.checkShowEditButton', [$this->controller]);
+      $page_data['show_edit_button'] = $show_edit_button;
+    }
+
     // Can be overrode in a specific controller
     return view('general/index', $page_data);
   }

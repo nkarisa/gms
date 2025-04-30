@@ -219,7 +219,45 @@ class OfficeLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
 
   function listTableVisibleColumns(): array
   {
-    return ['office_track_number', 'office_name', 'office_is_active', 'office_is_suspended', 'office_start_date', 'office_end_date', 'context_definition_name', 'account_system_name'];
+    return [
+      'office_track_number', 
+      'office_name', 
+      'office_is_active', 
+      'office_is_suspended', 
+      'office_start_date', 
+      'office_end_date', 
+      'context_definition_name', 
+      'account_system_name'];
+  }
+
+  function editVisibleColumns(): array {
+    $fields =  [
+      'office_name',
+      'office_description',
+      'office_code',
+      'office_start_date',
+      'office_end_date',
+      'office_is_active'
+    ];
+
+    // If office has a financial report remove office_start_date field
+    $hasFirstFinancialReport = $this->checkOfficeHasFinancialReport(hash_id($this->id, 'decode'));
+
+    if($hasFirstFinancialReport == true){
+      unset($fields[array_search('office_start_date',$fields)]);
+    }
+
+    return $fields;
+  }
+
+  function checkOfficeHasFinancialReport($officeId){
+    $officeReportBuilder = $this->read_db->table('office');
+
+    $officeReportBuilder->where(['office_id' => $officeId]);
+    $officeReportBuilder->join('financial_report','financial_report.fk_office_id=office.office_id');
+    $count = $officeReportBuilder->countAllResults();
+
+    return $count ? true : false;
   }
 
   function formatColumnsValues(string $columnName, mixed $columnValue, array $rowArray, array $dependancyData = []): mixed

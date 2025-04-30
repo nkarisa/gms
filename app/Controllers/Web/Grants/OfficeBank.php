@@ -17,21 +17,29 @@ class OfficeBank extends WebController
     }
 
     public function validateOfficeBankAccount($office_bank_id){
+
+        $has_account_balance = false;
+        $has_active_cheque_book = false;
+
         $builder = $this->read_db->table('office_bank');
         $builder->where(['office_bank_id' => $office_bank_id]);
-        $office_id = $builder->get()->getRow()->fk_office_id;
-    
-        $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
-        $officeBankLibrary = new \App\Libraries\Grants\OfficeBankLibrary();
+        $officeIdObj = $builder->get();
 
-        $reporting_month = date('Y-m-01',strtotime($voucherLibrary->getVoucherDate($office_id)));
-        $account_balance = $officeBankLibrary->officeBankAccountBalance($office_bank_id, $reporting_month);
+        if($officeIdObj->getNumRows() > 0){
+          $office_id = $officeIdObj->getRow()->fk_office_id;
+          $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+          $officeBankLibrary = new \App\Libraries\Grants\OfficeBankLibrary();
+  
+          $reporting_month = date('Y-m-01',strtotime($voucherLibrary->getVoucherDate($office_id)));
+          $account_balance = $officeBankLibrary->officeBankAccountBalance($office_bank_id, $reporting_month);
+      
+          $chequeBookLibrary = new \App\Libraries\Grants\ChequeBookLibrary();
+          $leaves = $chequeBookLibrary->getRemainingUnusedChequeLeaves($office_bank_id);
+          
+          $has_account_balance = $account_balance != 0 ? true : false;
+          $has_active_cheque_book = count($leaves) > 0 ? true : false;
+        }
     
-        $chequeBookLibrary = new \App\Libraries\Grants\ChequeBookLibrary();
-        $leaves = $chequeBookLibrary->getRemainingUnusedChequeLeaves($office_bank_id);
-        
-        $has_account_balance = $account_balance != 0 ? true : false;
-        $has_active_cheque_book = count($leaves) > 0 ? true : false;
     
         $result = compact('has_account_balance','has_active_cheque_book');
     

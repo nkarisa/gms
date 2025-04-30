@@ -17,6 +17,11 @@ trait Extendable
     return true;
   }
 
+  public function showEditButton(): bool
+  {
+    return true;
+  }
+
   /**
    * Changes the type of a field in an add and edit from
    * 
