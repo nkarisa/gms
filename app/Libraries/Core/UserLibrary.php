@@ -1018,10 +1018,62 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
         return $columns;
     }
 
+    function additionalListColumns(): array
+    {
+      $columns = [
+        'user_offices' => 'user_email',
+      ];
+  
+      return $columns;
+    }
+
+    function formatColumnsValuesDependancyData($users): array{
+        $ids = array_column($users, 'user_id');
+        $userContextDefinitions = array_column($users, 'context_definition_name');
+        $userIdsAndContexts = array_combine($ids, $userContextDefinitions);
+        
+        $userOffices = [];
+
+        $center = array_filter($userIdsAndContexts, fn($user) => $user == 'center');
+        $cluster = array_filter($userIdsAndContexts, fn($user) => $user == 'cluster');
+        $cohort = array_filter($userIdsAndContexts, fn($user) => $user == 'cohort');
+        $country = array_filter($userIdsAndContexts, fn($user) => $user == 'country');
+
+        $groupedUsers = compact('center','cluster','cohort','country');
+
+        foreach ($groupedUsers as $hierarchyLevel => $groupUsers) {
+            if (sizeof($groupedUsers)) {
+                $contextCenterUser = $this->read_db->table('context_' . $hierarchyLevel . '_user');
+                $contextCenterUser->whereIn('fk_user_id', $ids);
+                $contextCenterUser->join('context_' . $hierarchyLevel, 'context_' . $hierarchyLevel . '.context_' . $hierarchyLevel . '_id=context_' . $hierarchyLevel . '_user.fk_context_' . $hierarchyLevel . '_id');
+
+                $contextCenterUser->join('office', 'office.office_id=context_'.$hierarchyLevel.'.fk_office_id');
+                $officesObj = $contextCenterUser->get();
+
+                if ($officesObj->getNumRows() > 0) {
+                    $users = $officesObj->getResultArray();
+                    foreach ($users as $user) {
+                        if (in_array($user['fk_user_id'], $ids)) {
+                            $userOffices[$user['fk_user_id']][] = $user['office_code'];
+                        }
+                    }
+                }
+            }
+        }
+        
+        return compact('userOffices');
+    }
+
     function formatColumnsValues(string $column, mixed $columnValue, array $rowArray, array $dependancyData = []): mixed
     {
+        $userOffices = $dependancyData['userOffices'];
+
         if ($column == 'user_first_time_login') {
             $columnValue = $columnValue == 1 ? get_phrase('yes') : get_phrase('no');
+        }
+
+        if($column == 'user_offices'){
+            $columnValue = array_key_exists($rowArray['user_id'], $userOffices) ? implode(', ',$userOffices[$rowArray['user_id']]) : '';
         }
 
         return $columnValue;
