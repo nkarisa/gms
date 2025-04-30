@@ -1,11 +1,12 @@
-<?php 
+<?php
 
 namespace App\Libraries\Grants;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\BankModel;
 
-class BankLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface {
+class BankLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
+{
     protected $table;
     protected $bankModel;
 
@@ -25,30 +26,47 @@ class BankLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
         $this->table = 'bank';
     }
 
-    // function pagePosition(){
-    //     $widget['position_1']['view'][] =  "Hello World";
-    //     return $widget;
-    // }
-
     function detailTables(): array
     {
         return ['office_bank'];
     }
 
-    // function columnAliases(): array{
-    //     return ['bank_name' => 'My Banking'];
-    // }
-
-
-    function listTableVisibleColumns(): array {
-        return ['bank_track_number', 'bank_name', 'bank_swift_code', 'bank_is_active','account_system_name'];
+    function listTableVisibleColumns(): array
+    {
+        return ['bank_track_number', 'bank_name', 'bank_swift_code', 'bank_is_active', 'account_system_name'];
     }
 
+    function setDatatableSearching(\CodeIgniter\Database\BaseBuilder $builder, array $selectColumns, array $extraColumns = [])
+    {
+        $extraColumns = ['user_firstname', 'user_lastname'];
+        return parent::setDatatableSearching($builder, $selectColumns, $extraColumns);
+    }
 
+    function editVisibleColumns(): array {
+        $fields = [
+            'bank_name',
+            'bank_swift_code',
+            'bank_is_active',
+            'account_system_name'
+        ];
 
-function  setDatatableSearching(\CodeIgniter\Database\BaseBuilder $builder, array $selectColumns, array $extraColumns = []){
-    $extraColumns = ['user_firstname','user_lastname'];
-    return parent::setDatatableSearching($builder, $selectColumns, $extraColumns);
-}
+        // If a bank has office active office banks remove bank is active field
+        $bankHasActiveOfficeBanks = $this->bankHasActiveOfficeBanks(hash_id($this->id, 'decode'));
 
+        if($bankHasActiveOfficeBanks){
+            unset($fields[array_search('bank_is_active', $fields)]);
+        }
+
+        return $fields;
+    }
+
+    private function bankHasActiveOfficeBanks($bankId){
+        $bankReadBuilder = $this->read_db->table('bank');
+
+        $bankReadBuilder->where(['bank_id' => $bankId, 'office_bank_is_active' => 1]);
+        $bankReadBuilder->join('office_bank','office_bank.fk_bank_id=bank.bank_id');
+        $count = $bankReadBuilder->countAllResults();
+
+        return $count ? true : false;
+    }
 }
