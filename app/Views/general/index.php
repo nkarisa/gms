@@ -61,7 +61,7 @@
 
             <hr />
             <div class="page-content">
-                <?= view($views_dir."/".$action, $result);?>
+                <?= view($views_dir."/".$page_name, $result);?>
             </div>
             <?= view('general/footer') ?>
 
