@@ -42,24 +42,36 @@ class BankLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
         return parent::setDatatableSearching($builder, $selectColumns, $extraColumns);
     }
 
-    function editVisibleColumns(): array {
-        $fields = [
-            'bank_name',
-            'bank_swift_code',
-            'bank_is_active',
-            'account_system_name'
-        ];
+    // function editVisibleColumns(): array {
+    //     $fields = [
+    //         'bank_name',
+    //         'bank_swift_code',
+    //         'bank_is_active',
+    //         'account_system_name'
+    //     ];
 
-        // If a bank has office active office banks remove bank is active field
+    //     // If a bank has office active office banks remove bank is active field
+    //     $bankHasActiveOfficeBanks = $this->bankHasActiveOfficeBanks(hash_id($this->id, 'decode'));
+
+    //     if($bankHasActiveOfficeBanks){
+    //         unset($fields[array_search('bank_is_active', $fields)]);
+    //     }
+
+    //     return $fields;
+    // }
+
+    function actionBeforeEdit(array $postArray): array {
         $bankHasActiveOfficeBanks = $this->bankHasActiveOfficeBanks(hash_id($this->id, 'decode'));
 
-        if($bankHasActiveOfficeBanks){
-            unset($fields[array_search('bank_is_active', $fields)]);
+        if($bankHasActiveOfficeBanks && $postArray['header']['bank_is_active'] == 0){
+              return [
+                'flag' => false,
+                'message' => get_phrase('bank_has_active_account_edit_failure', 'Bank edit failed. Bank has active bank accounts')
+              ];  
         }
 
-        return $fields;
+        return $postArray;
     }
-
     private function bankHasActiveOfficeBanks($bankId){
         $bankReadBuilder = $this->read_db->table('bank');
 

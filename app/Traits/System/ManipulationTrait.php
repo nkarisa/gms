@@ -435,9 +435,16 @@ trait ManipulationTrait {
   
       $library = $this->loadLibrary($this->controller);
       $postArray = $this->request->getPost(); // Equivalent to $this->input->post() in CI3
-  
+
       // Call action_before_edit from grants service
-      $postArray = $library->actionBeforeEdit($postArray);
+      $postArray = $library->actionBeforeEdit($postArray);  
+      
+      if (!array_key_exists('header', $postArray)) {
+        $message = get_phrase('edit_operation_failed');
+        return $this->response->setJSON(['flag' => false, 'message' => isset($postArray['message']) ? $postArray['message'] : $message]);
+      }
+  
+      
   
       $flag = false;
       $flagMessage = "";
