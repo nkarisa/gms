@@ -28,10 +28,30 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
 
     // Disallow having 2 default banks per office
     $this->makeExisitingOfficeDefaultAccountsNotDefault($office_id);
- 
+
     return $post_array;
   }
 
+  public function lookupValues(): array {
+    $lookUpValues = parent::lookupValues();
+
+    $officeReadBuilder = $this->read_db->table('office');
+
+    $officeReadBuilder->select(['office_name','office_id']);
+    $officeReadBuilder->where(['fk_context_definition_id' => 1, 'office_is_active' => 1]);
+
+    if(!$this->session->system_admin){
+      $officeReadBuilder->where(['fk_account_system_id' => $this->session->user_account_system_id]);
+    }
+
+    $officeObj = $officeReadBuilder->get();
+
+    if($officeObj->getNumRows() > 0){
+      $lookUpValues['office'] = $officeObj->getResultArray();
+    }
+
+    return $lookUpValues;
+  }
 
   function makeExisitingOfficeDefaultAccountsNotDefault($office_id){
     $officeBankWriteBuilder = $this->write_db->table('office_bank');

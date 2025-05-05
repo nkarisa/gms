@@ -65,18 +65,6 @@
                 $('.save, .save_new').addClass('disabled');
             }
         });
-
-
-        //Check if the office_bank_chequebook_size is empty;
-        $('.save, .save_new').on('click', function () {
-            const chqbk_size_elem = $('#office_bank_chequebook_size');
-            if (chqbk_size_elem.val() == '') {
-                alert('<?= get_phrase('chqbooksize', 'Please Select Standard Bank Chequebook Number Of Leaves'); ?>');
-                $(chqbk_size_elem).css("border", "1px solid red").select2();
-                return false;
-            }
-        });
     })
-
 
 </script>

@@ -130,6 +130,22 @@ trait Extendable
 
         $lookupValues['office'] = $offices;
       }
+
+      // checkIfTableHasAccountSystem
+      foreach($lookupTables as $lookupTable){
+        if($this->checkIfTableHasAccountSystem($lookupTable)){
+          $lookUpTableReadBuilder = $this->read_db->table($lookupTable);
+          
+          $lookUpTableReadBuilder->where('fk_account_system_id', $this->session->user_account_system_id);
+          $lookUpTableObj = $lookUpTableReadBuilder->get();
+
+          if($lookUpTableObj->getNumRows() > 0){
+            $lookupValues[$lookupTable] = $lookUpTableObj->getResultArray();
+          }
+
+        }
+      }
+
     }
 
     return $lookupValues;

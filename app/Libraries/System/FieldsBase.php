@@ -21,8 +21,6 @@ class FieldsBase
 
   private $is_detail_header = false;
 
-//   private $lib;
-
   private $config;
 
   function __construct($column, $table, $is_header = false, $is_detail_header = false)
@@ -51,14 +49,9 @@ class FieldsBase
     $this->config = config(GrantsConfig::class);
   }
 
-  function index()
-  {
-  }
 
-  function is_field_required()
+function is_field_required()
   {
-
-    //$is_field_required = 1;
     $library = new GrantsLibrary();
     $all_fields = $library->tableFieldsMetadata($this->table);
 
@@ -67,11 +60,12 @@ class FieldsBase
 
     $name_default = array_combine($array_of_columns, $array_of_default);
 
-    foreach ($name_default as $field => $default_value) {
-      if ($this->column == $field && $default_value != null && (strlen($default_value) > 0 )) {
-        $this->is_field_required = false;
-        break;
-      }
+    $notRequiredFields = array_filter($name_default, function($default_value){
+      return $default_value != null;
+    });
+
+    if(sizeof($notRequiredFields) && in_array($this->column, array_keys($notRequiredFields))){
+      $this->is_field_required = false;
     }
 
     return $this->is_field_required;

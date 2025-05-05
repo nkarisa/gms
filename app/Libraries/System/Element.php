@@ -80,10 +80,6 @@ class Element{
         $label_size = 0;
       }
 
-      // $fld = new Fields_base(str_replace(' ','_',$label_name),get_instance()->controller);
-
-      // $mask = $fld->is_field_required() ? "<span class='text-danger'>*</span>" : '';
-      
       $form_group = "<div class='form-group'>";
       
       if($label_size > 0){
