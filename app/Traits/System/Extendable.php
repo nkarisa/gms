@@ -313,11 +313,6 @@ trait Extendable
 
   }
 
-  public function ListTableWhere(): void
-  {
-
-  }
-
   public function detailListQuery(): void
   {
 

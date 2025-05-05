@@ -19,6 +19,14 @@ class RoleGroupAssociationLibrary extends GrantsLibrary implements \App\Interfac
         $this->table = 'core';
     }
 
+    public function listTableWhere(\CodeIgniter\Database\BaseBuilder $queryBuilder): void{
+        $queryBuilder->where('role_group.fk_account_system_id <> ', NULL);
+    }
+
+    function transactionValidateDuplicatesColumns(): array
+    {
+        return ['fk_role_group_id', 'fk_role_id'];
+    }
 
     function detailListTableVisibleColumns(): array{
         return ['role_group_association_track_number','role_group_name','role_name','role_group_association_is_active','role_group_association_created_date'];
@@ -32,9 +40,9 @@ class RoleGroupAssociationLibrary extends GrantsLibrary implements \App\Interfac
         ];
     }
 
-    function multiSelectField(): string{
-        return 'role';
-    }
+    // function multiSelectField(): string{
+    //     return 'role_group';
+    // }
 
     public function lookupValues(): array
     {

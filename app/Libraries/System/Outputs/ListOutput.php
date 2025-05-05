@@ -63,8 +63,9 @@ class ListOutput extends OutputTemplate
       $builder->where($foreignKeyField, hash_id($this->parentId, 'decode'));
     }
 
-    $this->libs->listTableWhere($builder);
+    $featureLibrary->listTableWhere($builder);
 
+    // This is to be a redundant code and needs to be removed in the future
     if (method_exists($featureLibrary, $where_method)) {
       $featureLibrary->$where_method($builder);
     }
@@ -147,7 +148,7 @@ class ListOutput extends OutputTemplate
     );
 
     $this->libs->dataTableBuilder($builder, $table, $selected_columns);
-
+    
     return $builder->get()->getResultArray();
   }
 
