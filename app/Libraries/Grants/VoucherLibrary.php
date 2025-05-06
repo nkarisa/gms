@@ -4,6 +4,7 @@ namespace App\Libraries\Grants;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\VoucherModel;
+use App\Enums\AccountSystemSettingEnum;
 
 class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
@@ -985,8 +986,8 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $builder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
         $builder->join('voucher_type_account', 'voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
         if(
-            !array_key_exists('use_accrual_based_accounting',$account_system_settings)  ||
-            $account_system_settings['use_accrual_based_accounting'] == 0){
+            !array_key_exists(AccountSystemSettingEnum::ACCRUAL_SETTING_NAME->value,$account_system_settings)  ||
+            $account_system_settings[AccountSystemSettingEnum::ACCRUAL_SETTING_NAME->value] == 0){
               $builder->whereIn('voucher_type_account_code', ['bank', 'cash']);
         }
         $voucher_types = $builder->getWhere(array('voucher_type_is_active' => 1, 'voucher_type_is_hidden' => 0, 'fk_account_system_id' => $account_system_id))

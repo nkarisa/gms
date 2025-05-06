@@ -3,6 +3,7 @@
 namespace App\Database\Seeds;
 
 use CodeIgniter\Database\Seeder;
+use App\Enums\VoucherTypeEffectEnum;
 
 class AccrualVoucherTypeEffectSeeder extends Seeder
 {
@@ -11,12 +12,12 @@ class AccrualVoucherTypeEffectSeeder extends Seeder
         $grantsLibrary = new \App\Libraries\System\GrantsLibrary();
         $data = [];
         $effects = [
-            'receivables' => 'Receivables',
-            'payables' => 'Payables',
-            'prepayments' => 'Prepayments',
-            'payments' => 'Receivable Payments',
-            'disbursements' => 'Payable Disbursements',
-            'settlements' => 'Prepayment Settlements'
+            VoucherTypeEffectEnum::RECEIVABLES->value => ucfirst(VoucherTypeEffectEnum::RECEIVABLES->value),
+            VoucherTypeEffectEnum::PAYABLES->value => ucfirst(VoucherTypeEffectEnum::PAYABLES->value),
+            VoucherTypeEffectEnum::PREPAYMENTS->value => ucfirst(VoucherTypeEffectEnum::PREPAYMENTS->value),
+            VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->value => get_phrase('receivable').' '.VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->value,
+            VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->value => get_phrase('payable').' '.VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->value,
+            VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->value => get_phrase('prepayment').' '.VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->value
         ];
 
         $cnt = 0;

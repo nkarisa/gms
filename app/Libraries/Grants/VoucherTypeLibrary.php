@@ -2,6 +2,7 @@
 
 namespace App\Libraries\Grants;
 
+use App\Enums\AccountSystemSettingEnum;
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\VoucherTypeModel;
 class VoucherTypeLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
@@ -286,8 +287,8 @@ class VoucherTypeLibrary extends GrantsLibrary implements \App\Interfaces\Librar
          $account_system_settings = $accountSystemSettingLibrary->getAccountSystemSettings($this->session->user_account_system_id);
 
          if(
-            !array_key_exists('use_accrual_based_accounting',$account_system_settings)  ||
-            $account_system_settings['use_accrual_based_accounting'] == 0){
+            !array_key_exists(AccountSystemSettingEnum::ACCRUAL_SETTING_NAME->value,$account_system_settings)  ||
+            $account_system_settings[AccountSystemSettingEnum::ACCRUAL_SETTING_NAME->value] == 0){
               $voucherTypeAccountReadBuilder->whereIn('voucher_type_account_code', ['bank', 'cash']);
           }
           $voucherTypeAccountObj = $voucherTypeAccountReadBuilder->get();

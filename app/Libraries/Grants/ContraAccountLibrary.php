@@ -4,6 +4,7 @@ namespace App\Libraries\Grants;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\ContraAccountModel;
+use App\Enums\{AccountSystemSettingEnum, VoucherTypeEffectEnum};
 class ContraAccountLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
@@ -38,7 +39,7 @@ class ContraAccountLibrary extends GrantsLibrary implements \App\Interfaces\Libr
           $office_info = $office_info_obj->getRow();
 
           $account_system_settings = $accountSystemSettingLibrary->getAccountSystemSettings($office_info->fk_account_system_id);
-          $use_accrual_based_accounting = array_key_exists('use_accrual_based_accounting',$account_system_settings);
+          $use_accrual_based_accounting = array_key_exists(AccountSystemSettingEnum::ACCRUAL_SETTING_NAME->value,$account_system_settings);
 
           foreach($bank_to_bank_contra_effects as $bank_to_bank_contra_effect){
   
@@ -48,9 +49,9 @@ class ContraAccountLibrary extends GrantsLibrary implements \App\Interfaces\Libr
                 $bank_to_bank_contra_effect['voucher_type_effect_code'] == 'bank_to_bank_contra' || 
                 $bank_to_bank_contra_effect['voucher_type_effect_code'] == 'cash_to_cash_contra' ||
                 $use_accrual_based_accounting && (
-                  $bank_to_bank_contra_effect['voucher_type_effect_code'] == 'receivables' ||
-                  $bank_to_bank_contra_effect['voucher_type_effect_code'] == 'payables' ||
-                  $bank_to_bank_contra_effect['voucher_type_effect_code'] == 'prepayments'
+                  $bank_to_bank_contra_effect['voucher_type_effect_code'] == VoucherTypeEffectEnum::RECEIVABLES->value ||
+                  $bank_to_bank_contra_effect['voucher_type_effect_code'] == VoucherTypeEffectEnum::PAYABLES->value ||
+                  $bank_to_bank_contra_effect['voucher_type_effect_code'] == VoucherTypeEffectEnum::PREPAYMENTS->value
                 )
               ){  
     

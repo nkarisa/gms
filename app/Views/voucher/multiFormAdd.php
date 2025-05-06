@@ -1,9 +1,5 @@
 <?php 
 use \App\Libraries\System\Widgets\WidgetBase;
-
-// $db = \Config\Database::connect();
-// $field_data = $db->getFieldData('cancel_cheque');
-// echo json_encode($field_data);
 ?>
 
 <style>

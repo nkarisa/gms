@@ -7,6 +7,7 @@ use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use App\Libraries\{Core, Grants};
+use App\Enums\VoucherTypeEffectEnum;
 
 class Voucher extends WebController
 {
@@ -482,7 +483,12 @@ class Voucher extends WebController
     
     $office_accounting_system = $this->library->officeAccountSystem($this->request->getPost('office_id'));
 
-    if ($voucher_type_effect == 'expense' || $voucher_type_effect == 'bank_refund' || $voucher_type_effect == 'payables' || $voucher_type_effect == 'settlements') {
+    if (
+        $voucher_type_effect == 'expense' || 
+        $voucher_type_effect == 'bank_refund' || 
+        $voucher_type_effect ==  VoucherTypeEffectEnum::PAYABLES->value || 
+        $voucher_type_effect == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->value
+        ) {
 
       if($voucher_type_effect == 'payables'){
         $contraAccountLibrary->addContraAccount($office_bank_id);
@@ -511,9 +517,13 @@ class Voucher extends WebController
       }
       $expenseAccountReadBuilder->select(array('expense_account_id as account_id', 'expense_account_name as account_name'));
       $accounts_obj = $expenseAccountReadBuilder->get();
-    } elseif ($voucher_type_effect == 'income' || $voucher_type_effect == 'bank_to_bank_contra' || $voucher_type_effect == 'receivables') {
+    } elseif (
+      $voucher_type_effect == 'income' || 
+      $voucher_type_effect == 'bank_to_bank_contra' || 
+      $voucher_type_effect == VoucherTypeEffectEnum::RECEIVABLES->value
+      ) {
 
-      if($voucher_type_effect == 'receivables'){
+      if($voucher_type_effect == VoucherTypeEffectEnum::RECEIVABLES->value){
         $contraAccountLibrary->addContraAccount($office_bank_id);
       }
 
@@ -571,7 +581,7 @@ class Voucher extends WebController
           'office_bank_id' => $office_bank_id
         )
       )->get();
-    }elseif ($voucher_type_effect == 'prepayments'){
+    }elseif ($voucher_type_effect == VoucherTypeEffectEnum::PREPAYMENTS->value){
       $contraAccountLibrary->addContraAccount($office_bank_id);
 
       $contraAccountReadBuilder->select(array('contra_account_id as account_id', 'contra_account_name as account_name', 'contra_account_code as account_code'));
@@ -579,12 +589,12 @@ class Voucher extends WebController
       $contraAccountReadBuilder->join('office_bank', 'office_bank.office_bank_id=contra_account.fk_office_bank_id');
       $contraAccountReadBuilder->where(array('fk_account_system_id' => $office_accounting_system->account_system_id));
       $contraAccountReadBuilder->where(array(
-        'voucher_type_effect_code' => 'prepayments',
+        'voucher_type_effect_code' => VoucherTypeEffectEnum::PREPAYMENTS->value,
         'office_bank_is_active' => 1,
         'office_bank_id' => $office_bank_id
       ));
       $accounts_obj = $contraAccountReadBuilder->get();
-    }elseif ($voucher_type_effect == 'payments'){
+    }elseif ($voucher_type_effect == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->value){
       $contraAccountLibrary->addContraAccount($office_bank_id);
 
       $contraAccountReadBuilder->select(array('contra_account_id as account_id', 'contra_account_name as account_name', 'contra_account_code as account_code'));
@@ -592,12 +602,12 @@ class Voucher extends WebController
       $contraAccountReadBuilder->join('office_bank', 'office_bank.office_bank_id=contra_account.fk_office_bank_id');
       $contraAccountReadBuilder->where(array('fk_account_system_id' => $office_accounting_system->account_system_id));
       $contraAccountReadBuilder->where(array(
-        'voucher_type_effect_code' => 'receivables',
+        'voucher_type_effect_code' => VoucherTypeEffectEnum::RECEIVABLES->value,
         'office_bank_is_active' => 1,
         'office_bank_id' => $office_bank_id
       ));
       $accounts_obj = $contraAccountReadBuilder->get();
-    }elseif ($voucher_type_effect == 'disbursements'){
+    }elseif ($voucher_type_effect == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->value){
       $contraAccountLibrary->addContraAccount($office_bank_id);
 
       $contraAccountReadBuilder->select(array('contra_account_id as account_id', 'contra_account_name as account_name', 'contra_account_code as account_code'));
@@ -605,7 +615,7 @@ class Voucher extends WebController
       $contraAccountReadBuilder->join('office_bank', 'office_bank.office_bank_id=contra_account.fk_office_bank_id');
       $contraAccountReadBuilder->where(array('fk_account_system_id' => $office_accounting_system->account_system_id));
       $contraAccountReadBuilder->where(array(
-        'voucher_type_effect_code' => 'payables',
+        'voucher_type_effect_code' => VoucherTypeEffectEnum::PAYABLES->value,
         'office_bank_is_active' => 1,
         'office_bank_id' => $office_bank_id
       ));

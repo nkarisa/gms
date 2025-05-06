@@ -3,6 +3,7 @@
 namespace App\Database\Seeds;
 
 use CodeIgniter\Database\Seeder;
+use App\Enums\AccountSystemSettingEnum;
 
 class AccrualAccountSystemSettingSeeder extends Seeder
 {
@@ -13,7 +14,7 @@ class AccrualAccountSystemSettingSeeder extends Seeder
 
         $data = [
             [
-                'account_system_setting_name' => 'use_accrual_based_accounting',
+                'account_system_setting_name' => AccountSystemSettingEnum::ACCRUAL_SETTING_NAME->value,
                 'account_system_setting_track_number' => $itemTrackNumberAndName['account_system_setting_track_number'],
                 'account_system_setting_value' => 1,
                 'account_system_setting_description' => 'When set to 1 means country requires accrual based accounting',
