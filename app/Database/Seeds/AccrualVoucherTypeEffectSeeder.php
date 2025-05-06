@@ -12,12 +12,12 @@ class AccrualVoucherTypeEffectSeeder extends Seeder
         $grantsLibrary = new \App\Libraries\System\GrantsLibrary();
         $data = [];
         $effects = [
-            VoucherTypeEffectEnum::RECEIVABLES->value => ucfirst(VoucherTypeEffectEnum::RECEIVABLES->value),
-            VoucherTypeEffectEnum::PAYABLES->value => ucfirst(VoucherTypeEffectEnum::PAYABLES->value),
-            VoucherTypeEffectEnum::PREPAYMENTS->value => ucfirst(VoucherTypeEffectEnum::PREPAYMENTS->value),
-            VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->value => get_phrase('receivable').' '.VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->value,
-            VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->value => get_phrase('payable').' '.VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->value,
-            VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->value => get_phrase('prepayment').' '.VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->value
+            VoucherTypeEffectEnum::RECEIVABLES->getCode() => VoucherTypeEffectEnum::RECEIVABLES->getName(),
+            VoucherTypeEffectEnum::PAYABLES->getCode() => VoucherTypeEffectEnum::PAYABLES->getName(),
+            VoucherTypeEffectEnum::PREPAYMENTS->getCode() => VoucherTypeEffectEnum::PREPAYMENTS->getName(),
+            VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() => VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getName(),
+            VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() => VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getName(),
+            VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode() => VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getName()
         ];
 
         $cnt = 0;

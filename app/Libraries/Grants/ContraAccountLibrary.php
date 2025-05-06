@@ -49,9 +49,9 @@ class ContraAccountLibrary extends GrantsLibrary implements \App\Interfaces\Libr
                 $bank_to_bank_contra_effect['voucher_type_effect_code'] == 'bank_to_bank_contra' || 
                 $bank_to_bank_contra_effect['voucher_type_effect_code'] == 'cash_to_cash_contra' ||
                 $use_accrual_based_accounting && (
-                  $bank_to_bank_contra_effect['voucher_type_effect_code'] == VoucherTypeEffectEnum::RECEIVABLES->value ||
-                  $bank_to_bank_contra_effect['voucher_type_effect_code'] == VoucherTypeEffectEnum::PAYABLES->value ||
-                  $bank_to_bank_contra_effect['voucher_type_effect_code'] == VoucherTypeEffectEnum::PREPAYMENTS->value
+                  $bank_to_bank_contra_effect['voucher_type_effect_code'] == VoucherTypeEffectEnum::RECEIVABLES->getCode() ||
+                  $bank_to_bank_contra_effect['voucher_type_effect_code'] == VoucherTypeEffectEnum::PAYABLES->getCode() ||
+                  $bank_to_bank_contra_effect['voucher_type_effect_code'] == VoucherTypeEffectEnum::PREPAYMENTS->getCode()
                 )
               ){  
     
