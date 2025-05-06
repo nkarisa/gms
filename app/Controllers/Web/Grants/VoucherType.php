@@ -30,6 +30,8 @@ class VoucherType extends WebController
            $voucher_type_effect_codes = ['income','expense','bank_contra','bank_to_bank_contra','bank_refund'];
         }elseif($voucher_type_account_code == 'cash'){
            $voucher_type_effect_codes = ['income','expense','cash_contra','cash_to_cash_contra'];
+        }elseif($voucher_type_account_code == 'accrual'){
+         $voucher_type_effect_codes = ['payables','receivables','prepayments','payments','settlements','disbursements'];
         }
    
         if(!empty($voucher_type_effect_codes)){

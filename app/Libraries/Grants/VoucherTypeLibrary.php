@@ -269,6 +269,35 @@ class VoucherTypeLibrary extends GrantsLibrary implements \App\Interfaces\Librar
 
   function listTableWhere(\CodeIgniter\Database\BaseBuilder $queryBuilder): void {
     $queryBuilder->where('voucher_type_is_hidden', 0);
+
+    if(!$this->session->system_admin){
+      $queryBuilder->where(['fk_account_system_id' => $this->session->user_account_system_id]);
+   }
+
   }
+
    
+  public function lookupValues(): array {
+    $lookUpValues = parent::lookupValues();
+
+    if(!$this->session->system_admin){
+        $voucherTypeAccountReadBuilder = $this->read_db->table('voucher_type_account');
+         $accountSystemSettingLibrary = new \App\Libraries\Core\AccountSystemSettingLibrary();
+         $account_system_settings = $accountSystemSettingLibrary->getAccountSystemSettings($this->session->user_account_system_id);
+
+         if(
+            !array_key_exists('use_accrual_based_accounting',$account_system_settings)  ||
+            $account_system_settings['use_accrual_based_accounting'] == 0){
+              $voucherTypeAccountReadBuilder->whereIn('voucher_type_account_code', ['bank', 'cash']);
+          }
+          $voucherTypeAccountObj = $voucherTypeAccountReadBuilder->get();
+
+          if($voucherTypeAccountObj->getNumRows() > 0){
+            $lookUpValues['voucher_type_account'] = $voucherTypeAccountObj->getResultArray();
+          }
+          
+      }
+
+    return $lookUpValues;
+  }
 }

@@ -21,7 +21,9 @@ $("#fk_voucher_type_effect_id").on('change',function(){
         if((
             response.voucher_type_effect_code == 'expense' && voucher_type_account == 1) || 
             response.voucher_type_effect_code == 'bank_contra' || 
-            response.voucher_type_effect_code == 'bank_to_bank_contra'){
+            response.voucher_type_effect_code == 'bank_to_bank_contra' || 
+            response.voucher_type_effect_code == 'prepayments' || 
+            response.voucher_type_effect_code == 'disbursements'  ){
             $("#voucher_type_is_cheque_referenced").closest('.form-group').show();
         }else{
             $("#voucher_type_is_cheque_referenced").closest('.form-group').hide();

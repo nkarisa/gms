@@ -16,7 +16,7 @@ class AccountSystemSettingLibrary extends GrantsLibrary implements \App\Interfac
 
         $this->coreModel = new AccountSystemSettingModel();
 
-        $this->table = 'core';
+        $this->table = 'account_system_setting';
     }
 
     public function insertNewAccountSystemLanguage(int $languageId)
@@ -57,7 +57,6 @@ class AccountSystemSettingLibrary extends GrantsLibrary implements \App\Interfac
     
         if($account_system_setting_obj->getNumRows() > 0){
           $account_system_setting_array = $account_system_setting_obj->getResultArray();
-    
           
           foreach($account_system_setting_array as $settings){
             $account_systems = [];
@@ -67,13 +66,17 @@ class AccountSystemSettingLibrary extends GrantsLibrary implements \App\Interfac
               if(is_array($account_systems) && in_array($account_system_id, $account_systems)){
                 $account_system_setting[$settings['setting_name']] = $settings['setting_value'];
                
-                break;
+                // break;
               }
 
             }
           }
         }
         return $account_system_setting;
+      }
+
+      public function listTableWhere(\CodeIgniter\Database\BaseBuilder $queryBuilder): void {
+
       }
    
 }

@@ -954,6 +954,10 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
         $officeBankLibrary = new OfficeBankLibrary();
         $chequeBookLibrary = new ChequeBookLibrary();
+        
+        $accountSystemSettingLibrary = new \App\Libraries\Core\AccountSystemSettingLibrary();
+        $account_system_settings = $accountSystemSettingLibrary->getAccountSystemSettings($this->session->user_account_system_id);
+
 
         $office_banks_for_office = $officeBankLibrary->getOfficeBanksForOffice($office_id);
         // Do not show bank_to_bank_contra voucher effect types if the office has only 1 bank
@@ -980,6 +984,11 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $builder->join('account_system', 'account_system.account_system_id=voucher_type.fk_account_system_id');
         $builder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
         $builder->join('voucher_type_account', 'voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
+        if(
+            !array_key_exists('use_accrual_based_accounting',$account_system_settings)  ||
+            $account_system_settings['use_accrual_based_accounting'] == 0){
+              $builder->whereIn('voucher_type_account_code', ['bank', 'cash']);
+        }
         $voucher_types = $builder->getWhere(array('voucher_type_is_active' => 1, 'voucher_type_is_hidden' => 0, 'fk_account_system_id' => $account_system_id))
             ->getResultObject();
 

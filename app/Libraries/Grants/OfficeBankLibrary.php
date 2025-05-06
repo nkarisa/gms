@@ -707,4 +707,19 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
     return $recipient_bank;
 
   }
+
+  public function getDefaultOfficeBank($officeId){
+    $officeBankReadBuilder = $this->read_db->table('office_bank');
+
+    $officeBankReadBuilder->where(['fk_office_id' => $officeId,'office_bank_is_active' => 1, 'office_bank_is_default' => 1]);
+    $officeBankObj = $officeBankReadBuilder->get();
+
+    $officeBank = [];
+
+    if($officeBankObj->getNumRows() > 0){
+      $officeBank = $officeBankObj->getRowArray();
+    }
+
+    return $officeBank;
+  }
 }
