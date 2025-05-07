@@ -166,7 +166,7 @@ trait FieldsTrait {
 
    function headerRowField(string $column, ?string $field_value = null, bool $show_only_selected_value = false, $detail_table = ''): string
    {
- 
+    
      $f = new FieldsBase($column, $this->controller, true);
  
      if ($detail_table != '') {
@@ -176,7 +176,7 @@ trait FieldsTrait {
      $this->setChangeFieldType();
      $field_type = $f->field_type();
      $field = $field_type . "_field";
- 
+
      if (array_key_exists($column, $this->set_field_type)) {
        $field_type = $this->set_field_type[$column]['field_type'];
        $select2 = isset($this->set_field_type[$column]['select2']) && $this->set_field_type[$column]['select2'] ? $this->set_field_type[$column]['select2'] : false;

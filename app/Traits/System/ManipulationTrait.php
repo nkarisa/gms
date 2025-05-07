@@ -158,7 +158,10 @@ trait ManipulationTrait {
           $additionalHeaderColumns[$key] = $value;
           continue;
         } 
-        $headerColumns[$key] = $value;
+
+        $headerColumns[$key] = !is_array($value) ? $value : json_encode($value = array_map(function($item){
+          return (int) $item;
+        }, $value));
       }
   
       if (session()->has('masterTable')) {
@@ -189,7 +192,12 @@ trait ManipulationTrait {
             if (strpos($column, '_name') === true && $column !== $this->dependantTable($this->controller) . '_name') {
               $column = 'fk_' . substr($column, 0, -5) . '_id';
             }
-            $detailColumns[$i][$column] = $values[$i];
+            
+            $value = $values[$i];
+
+            $detailColumns[$i][$column] = !is_array($value) ? $value : json_encode($value = array_map(function($item){
+              return (int) $item;
+            }, $value));
   
             $detailRandom = record_prefix($this->dependantTable($this->controller)) . '-' . rand(1000, 90000);
             $detailColumns[$i][$this->dependantTable($this->controller) . '_track_number'] = $detailRandom;
@@ -452,7 +460,12 @@ trait ManipulationTrait {
       if (is_array($postArray) && !empty($postArray) && !array_key_exists('error', $postArray)) {
         extract($postArray);
         // $id = hash_id($id, 'decode');
-        $data = $header;
+        $data = array_map(function($elem){
+          return is_array($elem) ? json_encode($elem = array_map(function($item){
+            return (int) $item;
+          }, $elem)) : $elem;
+        }, $header);
+
         $approvalId = 0; // To be evaluated later
   
         $transactionValidateDuplicatesColumns = is_array($library->transactionValidateDuplicatesColumns())

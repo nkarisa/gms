@@ -253,16 +253,12 @@ function is_field_required()
 
   function select_field($options, $selected_option = 0, $show_only_selected_value = false, $onchange_function_name = '', $multi_select_field = '')
   {
+
     if ($onchange_function_name == '') {
       $onchange_function_name =  'onchange_' . $this->column;
     }
 
     $id = "";
-
-    // $column_placeholder = $this->column;
-    // if (substr($this->column, 0, 3) == 'fk_') {
-    //   $column_placeholder = substr($this->column, 3, -3);
-    // }
 
     $name = 'detail[' . $this->column . '][]';
     $master_class = "detail";
@@ -275,7 +271,6 @@ function is_field_required()
       $name = 'header[' . $this->column . ']';
       $master_class = 'master';
 
-      // if ($multi_select_field != "" && 'fk_' . $multi_select_field . '_id' == $this->column) {
       if ($multi_select_field != "") {
         $multiple = "multiple='multiple'";
         $hide_select_label = "hidden";
@@ -301,7 +296,6 @@ function is_field_required()
     $required = $this->is_field_required ? "required='required'" : '';
     $mask_asterisk_color = $this->is_field_required ? "red" : "green";
     $mask = '<span class="input-group-addon"><i style="color:' . $mask_asterisk_color . '" class="fa fa-asterisk"></i></span>';
-    //" . get_phrase('select_' . $column_placeholder) . "
     $select =  '<div class="input-group">' . $mask . "<select onchange='" . $onchange_function_name . "(this)' id='" . $id . "' name='" . $name . "' class='form-control " . $master_class . " input_" . $this->table . " " . $this->column . " " . $select2 . "' $required " . $multiple . ">
             <option class='" . $hide_select_label . "' value=''>".get_phrase('select_records')."</option>";
     
@@ -313,7 +307,12 @@ function is_field_required()
           continue;
         }
 
-        if ($option_value == $selected_option) {
+        if($selected_option != null && isValidJSONArray($selected_option)){
+            $selectedOptionsArray  = json_decode($selected_option);
+            if(in_array($option_value, $selectedOptionsArray)){
+              $selected = "selected='selected'";
+            }
+        }elseif ($option_value == $selected_option) {
           $selected = "selected='selected'";
         }
         $select .= "<option value='" . $option_value . "' " . $selected . ">" . ucwords(str_replace("_", " ", $option_html)) . "</option>";

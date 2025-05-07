@@ -78,5 +78,64 @@ class AccountSystemSettingLibrary extends GrantsLibrary implements \App\Interfac
       public function listTableWhere(\CodeIgniter\Database\BaseBuilder $queryBuilder): void {
 
       }
+
+      public function changeFieldType(): array {
+        $fields = [];
+
+        $fields['account_system_setting_value']['field_type'] = 'select';
+        $fields['account_system_setting_value']['options'] = [1 => get_phrase('on'), 0 => get_phrase('off')];
+
+        $getAccountSystemLibrary = new \App\Libraries\Core\AccountSystemLibrary();
+        $accountSystems = $getAccountSystemLibrary->getAccountSystems();
+        $ids = array_column($accountSystems, 'account_system_id');
+        $codes = array_column($accountSystems, 'account_system_code');
+        $fields['account_system_setting_accounts']['field_type'] = 'select';
+        $fields['account_system_setting_accounts']['options'] = array_combine($ids, $codes);
+        $fields['account_system_setting_accounts']['select2'] = true;
+
+        return $fields;
+      }
    
+    public function formatColumnsValuesDependancyData(array $data): array {
+      $accountSystems = [];
+      $accountSystemLibrary = new \App\Libraries\Core\AccountSystemLibrary();
+
+      $accountSystems = $accountSystemLibrary->getAccountSystems();
+
+      return compact('accountSystems');
+    }
+
+    public function formatColumnsValues(string $columnName, mixed $columnValue, array $rowArray, array $dependancyData = []): mixed {
+
+      if($columnName == 'account_system_setting_accounts'){
+        $accountSystems = $dependancyData['accountSystems'];
+
+        if($columnValue != null && isValidJSONArray($columnValue)){
+          
+          $selectedAccountSystemIds = json_decode($columnValue);
+          $selectedAccountSystemCode = [];
+
+          foreach($accountSystems as $accountSystem){
+            if(in_array($accountSystem->account_system_id, $selectedAccountSystemIds)){
+              $selectedAccountSystemCode[] = strtoupper($accountSystem->account_system_code);
+            }
+          }
+
+          $columnValue = implode(', ', $selectedAccountSystemCode);
+        }
+      }
+
+      return $columnValue;
+    }
+
+    public function listTableVisibleColumns(): array {
+      return [
+        'account_system_setting_track_number',
+        'account_system_setting_name',
+        'account_system_setting_value',
+        'account_system_setting_accounts',
+        'account_system_setting_created_date',
+        'account_system_setting_last_modified_date'
+      ];
+    }
 }

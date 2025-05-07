@@ -180,7 +180,6 @@ class ListOutput extends OutputTemplate
     }
   }
 
-
   private function toggleListQueryResults()
   {
 
@@ -193,6 +192,8 @@ class ListOutput extends OutputTemplate
     $builder = $this->read_db->table($this->controller);
     $filter_where_array = hash_id($this->id, 'decode') > 0 && !in_array($this->controller, decode_setting("GrantsConfig","tableThatDontRequireHistoryFields")) ? [$this->controller . '.fk_status_id' => hash_id($this->id, 'decode')] : [];
     $listTableWhere = 'listTableWhere';
+
+    // Make the track_number and name field be the first and second columns respectively
 
     if ($this->parentTable != null) {
       $listTableWhere = 'detailListTableWhere';
