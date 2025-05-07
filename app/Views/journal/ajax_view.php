@@ -642,7 +642,7 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
             btn.closest('td').find('.btn_reverse').addClass('disabled');
             //btn.remove();
 
-            var url_check = "<?= base_url(); ?>Journal/check_if_voucher_is_reversed_or_cancelled/" + voucher_id
+            var url_check = "<?= base_url(); ?>ajax/journal/checkIfVoucherIsReversedOrCancelled/" + voucher_id
 
             $.get(url_check, function (response_voucher_cancelled) {
 
@@ -664,10 +664,12 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
                     }
                     var url = "<?= base_url(); ?>ajax/journal/reverseVoucher/" + voucher_id + "/" + is_reuse_cheque_transaction + "/" + reusing_eft_or_chq_number + "/" + journal_month;
 
+
+                    console.log(url);
                     $.get(url, function (response) {
 
                         const obj = JSON.parse(response);
-                        // console.log(obj);
+                        console.log(obj);
                         // console.log(obj.message_code);
                         if (obj.message_code == 'success') {
                             window.location.reload();

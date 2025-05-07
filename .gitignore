@@ -127,3 +127,11 @@ nb-configuration.xml
 .history
 docker-compose.yaml
 .scannerwork
+
+##
+# Config Files
+#
+app/Config/Feature.php
+app/Config/Kint.php
+
+composer.lock

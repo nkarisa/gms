@@ -3,6 +3,7 @@
 namespace App\Controllers\Web\Grants;
 
 use App\Controllers\Web\WebController;
+use App\Libraries\Grants\JournalLibrary;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
@@ -87,7 +88,7 @@ class Journal extends WebController
             $message = get_phrase('exceed_reuse_limit', "You have exceeded the reuse limit of 3 for this bank reference. Kindly contact PF");
         }
 
-        return $this->response->setJSON(['message_code' => $message_code, 'message' => $message, 'next_voucher_number' => $insert_voucher['next_voucher_number']]);
+        echo json_encode(['message_code' => $message_code, 'message' => $message, 'next_voucher_number' => $insert_voucher['next_voucher_number']]);
     }
 
     function updateCashRecipientAccount($new_voucher_id,$voucher){
@@ -127,5 +128,13 @@ class Journal extends WebController
           $this->write_db->insert('cash_recipient_account',$cash_recipient_account_data);
         }
     
+      }
+
+      function checkIfVoucherIsReversedOrCancelled($voucher_id){
+       
+        $voucherToReverse=$this->library->checkIfVoucherIsReversedOrCancelled($voucher_id);
+
+        //log_message('error', json_encode($voucherToReverse));
+        echo $voucherToReverse;
       }
 }

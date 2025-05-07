@@ -35,8 +35,9 @@ $("#fk_voucher_type_effect_id").on('change',function(){
 
 $("#fk_voucher_type_account_id").on('change',function(){
  
-    var voucher_type_account_id = $(this).val();
-    var url = "<?=base_url();?>ajax/voucher_type/getVoucherTypeEffects/"+voucher_type_account_id;
+    let voucher_type_account_id = $(this).val();
+
+    let url = "<?=base_url();?>ajax/voucher_type/getVoucherTypeEffects/"+voucher_type_account_id;
 
     $("#fk_voucher_type_effect_id").closest('.form-group').show();
     $("#fk_voucher_type_effect_id").children().remove();

@@ -48,7 +48,12 @@ class VoucherType extends WebController
         $voucherTypeEffectReadBuilder = $this->read_db->table('voucher_type_effect');
 
         $voucher_type_effect_code = $voucherTypeEffectReadBuilder->where(array('voucher_type_effect_id'=>$voucher_type_effect_id))
-        ->get()->getRow()->voucher_type_effect_code;
+        ->get();
+
+        if($voucher_type_effect_code->getNumRows()>0){
+         $voucher_type_effect_code->getRow()->voucher_type_effect_code;
+        }
+
    
         return $this->response->setJSON(compact('voucher_type_effect_code'));
      }

@@ -1,0 +1,15 @@
+name: "safina-app-ci4"
+
+services:
+  web-server:
+    image: webdevops/php-nginx-dev:8.3
+    container_name: "${COMPOSE_PROJECT_NAME}"
+    volumes:
+      - ./:/var/www/html
+      - /Users/dorismwamburi/.aws/credentials:/.aws/credentials
+    ports:
+      - "8000:80"
+    environment:
+      WEB_DOCUMENT_ROOT: /var/www/html/public
+      SSL_MODE: "off"
+      PHP_DISPLAY_ERRORS: 1
