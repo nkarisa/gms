@@ -1574,7 +1574,7 @@ function projectsMonthExpenseToDate($office_ids, $reporting_month, $project_ids 
   $end_of_reporting_month = date('Y-m-t', strtotime($reporting_month));
 
   $this->read_db->select_sum('voucher_detail_total_cost');
-  $this->read_db->where(array('voucher_type_effect_code' => 'expense'));
+  $this->read_db->whereIn('voucher_type_effect_code', ['expense','bank_refund']);
   $this->read_db->where(array('voucher_date<=' => $end_of_reporting_month));
   $this->read_db->where_in('voucher.fk_office_id', $office_ids);
 
@@ -1767,7 +1767,7 @@ function projectsPreviousMonthsExpenseToDate($office_ids, $reporting_month, $pro
 
   $builder = $this->read_db->table('voucher_detail');
   $builder->selectSum('voucher_detail_total_cost');
-  $builder->where('voucher_type_effect_code' , 'expense');
+  $builder->whereIn('voucher_type_effect_code' , ['expense', 'bank_refund']);
   $builder->where('voucher_date<' , $start_of_reporting_month);
   $builder->whereIn('voucher.fk_office_id', $office_ids);
 
