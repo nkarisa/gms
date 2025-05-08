@@ -127,7 +127,7 @@
             serverSide: true,
             pagingType: "full_numbers",
             ajax: {
-                url: '/ajax/reimbursement_claim/claims',
+                url: '<?=base_url('ajax/reimbursement_claim/claims')?>',
                 type: "POST",
                 data: function (d) {
                     d.fk_status_ids = $('#status_id').val();
