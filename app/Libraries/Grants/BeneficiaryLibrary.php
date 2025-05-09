@@ -4,6 +4,7 @@ namespace App\Libraries\Grants;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\BeneficiaryModel;
+
 class BeneficiaryLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
@@ -16,9 +17,22 @@ class BeneficiaryLibrary extends GrantsLibrary implements \App\Interfaces\Librar
 
         $this->grantsModel = new BeneficiaryModel();
 
-        $this->table = 'grants';
+        $this->table = 'beneficiaries';
+    }
+
+    function listTableVisibleColumns(): array
+    {
+        $columns = [
+            'beneficiary_id',
+            'beneficiary_name',
+            'beneficiary_number',
+            'beneficiary_gender',
+            'beneficiary_dob',
+            'account_system_name',
+        ];
+
+        return $columns;
     }
 
 
-   
 }
