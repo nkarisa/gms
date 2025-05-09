@@ -212,7 +212,7 @@ $action = isset($segments[1]) ? $segments[1] : 'list';
     const suspension_status = btn.data('suspension_status');
     const office_id = btn.data('office_id')
     const data = { office_id, suspension_status }
-    const url = '<?= base_url(); ?>ajax/office/suspend_office'
+    const url = '<?= base_url(); ?>ajax/office/suspendOffice'
 
     const cnf = confirm('<?= get_phrase('confirm_suspension', 'Are you sure you want to perform this action?'); ?>');
 

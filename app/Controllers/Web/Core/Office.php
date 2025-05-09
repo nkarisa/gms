@@ -122,7 +122,7 @@ class Office extends WebController
     return $this->response->setJSON(array('office_context' => $office_context));
   }
 
-  function suspend_office(){
+  function suspendOffice(){
     $post = $this->request->getPost();
     $office_id = $post['office_id'];
     $suspension_status = $post['suspension_status'];

@@ -1,6 +1,8 @@
-<?php 
-//print_r($this->session->role_permissions);
-?>
+<style>
+  .chosen-single {
+    min-height: 30px;
+}
+</style>
 <div class="row">
     <div class="col-xs-12">
         <div class="panel panel-default" data-collapsed="0">
@@ -11,13 +13,13 @@
                     </div>
                 </div>
             
-                <div class="panel-body"  style="max-width:50; overflow: auto;">	
+                <div class="panel-body"  style="max-width:50;height:auto;">	
                     <?php echo form_open(base_url()."login/switch_user" , array('id'=>'frm_switch_user','class' => 'form-horizontal form-groups-bordered validate', 'enctype' => 'multipart/form-data'));?>
                         <div class="form-group">
                             <label class="control-label col-xs-2"><?=get_phrase('choose_user_to_switch_to');?></label>
 
                             <div class="col-xs-8">
-                                <select name="user_id" id="user_id" class="form-control select2">
+                                <select name="user_id" id="user_id" class="form-control chosen">
                                     <option value=""><?=get_phrase("choose_a_user");?></option>
                                     <?php 
                                         if($session->has('primary_user_data')){
@@ -44,6 +46,12 @@
 </div>
 
 <script>
+    $("#user_id").chosen({
+        disable_search_threshold: 10,
+        no_results_text: "Oops, nothing found!",
+        width: "95%"
+    });
+
     $('#switch').on('click', function(){
 
         let user_id = $('#user_id').val();

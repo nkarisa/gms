@@ -184,7 +184,6 @@
                             </div>
                             <div id='weak_password_div'
                                 style="color:red; size:20px; font-family:Georgia, 'Times New Roman', Times, serif;">
-                                <!-- Populated by ajax -->
                             </div>
                         </div>
                         <!-- Confirm Password -->
@@ -201,12 +200,12 @@
                     </div>
                 </div>
 
-                <div class="form-group col-xs-12" style = "text-align:center;">
+                <div class="form-group col-xs-12" style="text-align:center;">
                     <button id='post_account_created' type="submit" class="btn btn-primary" style="border-radius:10px">
-                        <?=get_phrase('create_account','Create Account');?>
+                        <?= get_phrase('create_account', 'Create Account'); ?>
                     </button>
-                    <a href="<?=base_url()?>" class="btn btn-primary" style="border-radius:10px">
-                        <?=get_phrase('back_to_login','Back to Login');?>
+                    <a href="<?= base_url() ?>" class="btn btn-primary" style="border-radius:10px">
+                        <?= get_phrase('back_to_login', 'Back to Login'); ?>
                     </a>
                 </div>
 
@@ -312,7 +311,7 @@
         let data = {
             email: $(this).val(),
         };
-        let url = '<?= base_url() ?>login/verifyValidEmail';
+        let url = '<?= base_url() ?>ajax/login/verifyValidEmail';
         $('#overlay').removeClass('hidden');
         $.post(url, data, function (res) {
             if (parseInt(res) == 0) {
@@ -332,7 +331,7 @@
 
     //Email exists
     function emailExists(data) {
-        let url = '<?= base_url() ?>login/emailExists';
+        let url = '<?= base_url() ?>ajax/login/emailExists';
         $('#overlay').removeClass('hidden');
         $.post(url, data, function (response) {
             if (parseInt(response) == 1) {
@@ -352,30 +351,32 @@
         let data = {
             password: $(this).val(),
         }
-        let url = '<?= base_url() ?>login/verifyPasswordComplexity';
+        let url = '<?= base_url() ?>ajax/login/verifyPasswordComplexity';
         $('#overlay').removeClass('hidden');
         $.post(url, data, function (validPasswordArr) {
-            let arrayLength = validPasswordArr.length;
-            if (arrayLength > 0) {
-                //Hide Create Button
-                $('#post_account_created').hide();
-                //Unhide Labels
-                let buildWrongPasswardDivString = '';
-                for (let index = 0; index < arrayLength; index++) {
-                    buildWrongPasswardDivString += validPasswordArr[index] + '<br>';
+            if (typeof validPasswordArr == 'object') {
+                let arrayLength = validPasswordArr.length;
+                if (arrayLength > 0) {
+                    //Hide Create Button
+                    $('#post_account_created').hide();
+                    //Unhide Labels
+                    let buildWrongPasswardDivString = '';
+                    for (let index = 0; index < arrayLength; index++) {
+                        buildWrongPasswardDivString += validPasswordArr[index] + '<br>';
+                    }
+                    $('#weak_password_div').html(buildWrongPasswardDivString);
+                    //Disabled confirm_password
+                    $('#confirm_password').prop('disabled', true);
+                    $('#overlay').addClass('hidden');
+                } else {
+                    //Unhide Create Button
+                    $('#post_account_created').show();
+                    //Hide Labels
+                    $('#weak_password_div').html('');
+                    //Enable confirm_password field
+                    $('#confirm_password').prop('disabled', false);
+                    $('#overlay').addClass('hidden');
                 }
-                $('#weak_password_div').html(buildWrongPasswardDivString);
-                //Disabled confirm_password
-                $('#confirm_password').prop('disabled', true);
-                $('#overlay').addClass('hidden');
-            } else {
-                //Unhide Create Button
-                $('#post_account_created').show();
-                //Hide Labels
-                $('#weak_password_div').html('');
-                //Enable confirm_password field
-                $('#confirm_password').prop('disabled', false);
-                $('#overlay').addClass('hidden');
             }
         });
     });
@@ -435,7 +436,7 @@
         let data = {
             email: $('#email').val(),
         };
-        let url = '<?= base_url() ?>login/verifyValidEmail';
+        let url = '<?= base_url() ?>ajax/login/verifyValidEmail';
         $.post(url, data, function (responseValidEmail) {
             //If email is invalid don't proceed
             if (parseInt(responseValidEmail) == 0) {
@@ -443,7 +444,7 @@
                 return false;
             } else {
                 //Check if email exists. 
-                let url = '<?= base_url() ?>login/emailExists';
+                let url = '<?= base_url() ?>ajax/login/emailExists';
                 $.post(url, data, function (responseEmailExists) {
                     //If email exists return false otherwise save data to table
                     if (parseInt(responseEmailExists) == 1) {
@@ -471,7 +472,7 @@
                             user_office: $('#user_office').val(),
                         };
 
-                        let url = "<?= base_url() ?>login/saveCreateAccountData"
+                        let url = "<?= base_url() ?>ajax/login/saveCreateAccountData"
 
                         $.post(url, data, function (response) {
                             alert(response.message);
@@ -521,32 +522,28 @@
         //Designations 
         get_user_departments_roles_and_designations(userType, 'designation', 'user_designation', 0);
     });
+
     //Populate offices
     function get_user_offices(context_definition_id, account_system_id) {
-        let compassion_country_id = $('#user_country').val();
-        //Get me offices that belong to country of $(this) context
-        let url = '<?= base_url() ?>login/getOffices/' + compassion_country_id + '/' + context_definition_id;
-        $.ajax({
-            url: url,
-            //data: data,
-            type: "GET",
-            beforeSend: function () {
-                $('#overlay').removeClass('hidden');
-            },
-            success: function (response) {
-                $('#overlay').removeClass('hidden');
-                selectElement = $('#user_office');
-                populate_offices_departments_roles(selectElement, response);
-                $('#overlay').addClass('hidden');
-            },
-            error: function () {
-            }
-        });
+        const compassion_country_id = $('#user_country').val();
+        // Get offices that belong to country of $(this) context
+        const url = '<?= base_url() ?>ajax/office/getOfficeData';
+        const data = {
+                compassion_country_id: compassion_country_id,
+                context_definition_id: context_definition_id
+        }
+                
+        $.post(url, data, function(response){
+            $('#overlay').removeClass('hidden');
+            selectElement = $('#user_office');
+            populate_offices_departments_roles(selectElement, response);
+            $('#overlay').addClass('hidden');
+        })
     }
 
     //Populate departments
     function get_user_departments_roles_and_designations(userTypeId, tableName, elementId, countryId) {
-        var url = '<?= base_url() ?>login/getUserDepartmentsRolesAndDesignations/' + userTypeId + '/' + tableName + '/' + countryId;
+        var url = '<?= base_url() ?>ajax/login/getUserDepartmentsRolesAndDesignations/' + userTypeId + '/' + tableName + '/' + countryId;
         $.get(url, function (objResponse) {
             // let objResponse = JSON.parse(response);
             // console.log(objResponse);
@@ -557,7 +554,7 @@
 
     //Populate activator ids
     function populate_user_activator_ids(userType, officeID, countryID) {
-        let url = '<?= base_url() ?>login/getUserActivatorIds/' + userType + '/' + officeID + '/' + countryID;
+        let url = '<?= base_url() ?>ajax/login/getUserActivatorIds/' + userType + '/' + officeID + '/' + countryID;
         $.get(url, function (activatorUserIds) {
             $('#overlay').removeClass('hidden');
             //Populate the fk_user_ids
@@ -584,7 +581,7 @@
 
     //Populate language
     function populate_country_language(account_system_id) {
-        let url = '<?= base_url() ?>login/getCountryLanguage/' + account_system_id;
+        let url = '<?= base_url() ?>ajax/login/getCountryLanguage/' + account_system_id;
         $.get(url, function (language) {
             //Check if the value is zero
             // alert(language.language_id)
@@ -600,7 +597,7 @@
 
     //Populate currency
     function populate_country_currency(account_system_id) {
-        let url = '<?= base_url() ?>login/getCountryCurrency/' + account_system_id;
+        let url = '<?= base_url() ?>ajax/login/getCountryCurrency/' + account_system_id;
         $.get(url, function (country_currency) {
             //Check if the value is zero
             if (parseInt(country_currency.country_currency_id) == 0) {
@@ -615,6 +612,7 @@
 
     //Populate departments, roles, offices
     function populate_offices_departments_roles(selectElement, results) {
+        console.log(results)
         $('#overlay').removeClass('hidden');
         //Detach the 1st option
         let firstOption = selectElement.find('option:first-child').detach();

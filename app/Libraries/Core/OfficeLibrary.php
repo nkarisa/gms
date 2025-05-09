@@ -94,6 +94,24 @@ class OfficeLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
   }
 
 
+  public function getOfficesIdsAndNames(int $account_system_id, int $context_definition_id): array
+  {
+
+    $officeReadBuilder = $this->read_db->table('office');
+
+    $officeReadBuilder->select(['office_id', 'office_name']);
+    $officeReadBuilder->where(['office_is_active' => 1, 'fk_account_system_id' => $account_system_id, 'fk_context_definition_id' => $context_definition_id]);
+    $offices = $officeReadBuilder->get()->getResultArray();
+
+    $office_ids = array_column($offices, 'office_id');
+    $office_names = array_column($offices, 'office_name');
+
+    $office_ids_and_names = array_combine($office_ids, $office_names);
+
+    return $office_ids_and_names;
+  }
+
+
   function getOffices($context_definition_id, $add_user_form)
   {
 

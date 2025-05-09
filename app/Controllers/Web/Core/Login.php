@@ -344,4 +344,17 @@ class Login extends WebController
 
         return $this->response->setJSON($un_allowed_password);
     }
+
+    public function getOfficeData(): ResponseInterface{
+        $post = $this->request->getPost();
+        // log_message('error', json_encode($post));
+        $compassionCountryId = $post['compassion_country_id'];
+        $contextDefinitionId = $post['context_definition_id'];
+
+        $officeLibrary = new \App\Libraries\Core\OfficeLibrary();
+
+        $officeIdsAndNames = $officeLibrary->getOfficesIdsAndNames($compassionCountryId, $contextDefinitionId);
+        // log_message('error', json_encode($officeIdsAndNames));
+        return $this->response->setJSON($officeIdsAndNames);
+    }
 }

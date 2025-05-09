@@ -1849,4 +1849,5 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
   
       return $user->user_firstname . ' ' . $user->user_lastname;
     }
+    
 }

@@ -40,6 +40,8 @@
 
 <link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/grants.css">
 
+<!-- <link rel="stylesheet" href="<?php echo base_url(); ?>assets/chosen/chosen.min.css"> -->
+
 <?php
 if ($skin_colour != ''): ?>
 	<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/skins/<?php echo $skin_colour; ?>.css">
@@ -66,4 +68,7 @@ if ($skin_colour != ''): ?>
 <link rel="stylesheet" href="<?php echo base_url(); ?>assets/js/dropzone/dist/min/dropzone.min.css">
 
 <script src="<?php echo base_url(); ?>assets/js/dropzone/dist/min/dropzone.min.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chosen-js@1.8.7/chosen.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chosen-js@1.8.7/chosen.jquery.min.js"></script>
 
