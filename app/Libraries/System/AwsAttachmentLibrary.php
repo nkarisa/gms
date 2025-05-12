@@ -301,6 +301,14 @@ class AwsAttachmentLibrary {
         return base_url().$objectKey;
       }
 
+  /**
+   * delete_bank_statement_in_s3(): This method deletes s3 objects.
+   * @author Livingstone Onduso
+   * @access public
+   * @return void
+   * @param: string $file_name
+   * Created Date:  20/03/2025
+   */
     public function deleteBankStatementInS3(string $file_name){
 
         try {

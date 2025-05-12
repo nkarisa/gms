@@ -5,7 +5,7 @@
 //print_r($this->financial_report_model->get_office_bank_project_allocation(1));
 // $status_data = $this->general_model->action_button_data('financial_report');
 // echo json_encode($status_data);
-$userLibrary = new \App\Libraries\Core\UserLibrary(); 
+$userLibrary = new \App\Libraries\Core\UserLibrary();
 
 
 
@@ -13,7 +13,7 @@ $userLibrary = new \App\Libraries\Core\UserLibrary();
 <div id="voucher_print">
     <div class="row">
         <div class='col-xs-12 header'><?= get_phrase('fund_balance_report'); ?></div>
-        <div class="col-xs-12" id = "fund_balance_report">
+        <div class="col-xs-12" id="fund_balance_report">
             <?php include "includes/include_fund_balance_report.php"; ?>
         </div>
     </div>
@@ -33,22 +33,22 @@ $userLibrary = new \App\Libraries\Core\UserLibrary();
     </div>
 
 
-    <?php if(!empty($funds_transfers)){?>
-    <div class='row'>  
+    <?php if (!empty($funds_transfers)) { ?>
+        <div class='row'>
             <div class="col-xs-12">
                 <div class="col-xs-12 header"><?= get_phrase('funds_transfers'); ?></div>
                 <?php include "includes/include_funds_transfers.php"; ?>
             </div>
-    </div>
-    <?php }?>
+        </div>
+    <?php } ?>
 
     <div class="row">
         <div class="col-xs-12 header"><?= get_phrase('proof_of_cash'); ?></div>
-        <div class="col-xs-6" id = "proof_of_cash">
+        <div class="col-xs-6" id="proof_of_cash">
             <?php include "includes/include_proof_of_cash.php"; ?>
         </div>
 
-        
+
     </div>
 
     <div class="row">
@@ -101,7 +101,7 @@ $userLibrary = new \App\Libraries\Core\UserLibrary();
 
 <hr />
 <?php //if(!$multiple_offices_report && $multiple_projects_report && !$financial_report_submitted) 
-if (!$financial_report_submitted && $userLibrary->checkRoleHasPermissions('financial_report','update')) {
+if (!$financial_report_submitted && $userLibrary->checkRoleHasPermissions('financial_report', 'update')) {
 ?>
     <div class="row">
         <div class="col-xs-12" style="text-align:center;">
@@ -111,23 +111,22 @@ if (!$financial_report_submitted && $userLibrary->checkRoleHasPermissions('finan
 <?php } ?>
 
 <script>
+    $(document).on('click', "#submit_report", function(ev) {
 
-    $(document).on('click', "#submit_report",function(ev) {
-        
         var url = "<?= base_url(); ?>ajax/financial_report/submitFinancialReport";
-        
+
         var data = {
             'office_id': <?= $office_ids[0]; ?>,
             'reporting_month': '<?= $reporting_month; ?>',
-            'financial_report_id': '<?=$report_id;?>'
+            'financial_report_id': '<?= $report_id; ?>'
         };
 
-        postRequest(url, data, function (response) {
+        postRequest(url, data, function(response) {
             if (response) {
                 if (response != 1) {
                     alert(response);
                 } else {
-                    alert('<?=get_phrase('financial_report_submission_success','MFR Submitted Successful');?>');
+                    alert('<?= get_phrase('financial_report_submission_success', 'MFR Submitted Successful'); ?>');
                     location.href = document.referrer;
                 }
             } else {
@@ -146,7 +145,7 @@ if (!$financial_report_submitted && $userLibrary->checkRoleHasPermissions('finan
         //         if (response != 1) {
         //             alert(response);
         //         } else {
-        //             alert('<?=get_phrase('financial_report_submission_success','MFR Submitted Successful');?>');
+        //             alert('<?= get_phrase('financial_report_submission_success', 'MFR Submitted Successful'); ?>');
         //             location.href = document.referrer;
         //         }
         //     } else {
@@ -164,9 +163,9 @@ if (!$financial_report_submitted && $userLibrary->checkRoleHasPermissions('finan
         //         if (response != 1) {
         //             alert(response);
         //         } else {
-        //             alert('<?=get_phrase('financial_report_submission_success','MFR Submitted Successful');?>');
+        //             alert('<?= get_phrase('financial_report_submission_success', 'MFR Submitted Successful'); ?>');
         //             location.href = document.referrer;
-                    
+
         //         }
 
         //     } else {
@@ -194,7 +193,7 @@ if (!$financial_report_submitted && $userLibrary->checkRoleHasPermissions('finan
 
     });
 
-    function compute_fund_balance_totals(){
+    function compute_fund_balance_totals() {
         $('#fund_balance_table tbody tr').each(function(i, el) {
             let opening_balance = parseFloat($(el).find('.fund_month_opening_balance').html().split(',').join(""));
             let month_income = parseFloat($(el).find('.fund_month_income').html().split(',').join(""));
@@ -211,7 +210,7 @@ if (!$financial_report_submitted && $userLibrary->checkRoleHasPermissions('finan
         let total_fund = accounting.formatNumber((sum_opening_balance + sum_month_income - sum_month_expense), 2);
 
         $("#total_fund_month_closing_balance").html(total_fund);
-        
+
         // alert(total_fund)
 
         $(".row_total, .row_header").css('font-weight', 'bold');
@@ -254,13 +253,12 @@ if (!$financial_report_submitted && $userLibrary->checkRoleHasPermissions('finan
         var td_drop_table_total = $("#" + drop_table_id).find('td.td_effects_total');
         var drop_table_total = td_drop_table_total.html().split(',').join("");
 
-         //Check if destination table is a number then compute the amount
-         if(Number(drop_table_total)|| parseFloat(drop_table_total)==0.00){
-            drop_table_total=drop_table_total+parseFloat(row_amount);
-         }
-         else{
-            drop_table_total=0.00; 
-         }
+        //Check if destination table is a number then compute the amount
+        if (Number(drop_table_total) || parseFloat(drop_table_total) == 0.00) {
+            drop_table_total = drop_table_total + parseFloat(row_amount);
+        } else {
+            drop_table_total = 0.00;
+        }
 
         var origin_table_balance = parseFloat(effects_total) - parseFloat(row_amount);
         var drop_table_balance = parseFloat(drop_table_total) + parseFloat(row_amount);
@@ -284,7 +282,7 @@ if (!$financial_report_submitted && $userLibrary->checkRoleHasPermissions('finan
 
         var td_bank_reconciliation_balance = $("#td_bank_reconciliation_balance");
         var bank_reconciliation_balance = 0;
-        
+
         if (td_bank_reconciliation_balance.find('input').length > 0) {
             bank_reconciliation_balance = td_bank_reconciliation_balance.find('input').val().split(',').join("");
         } else {
@@ -292,7 +290,7 @@ if (!$financial_report_submitted && $userLibrary->checkRoleHasPermissions('finan
         }
 
         var reconciled_bank_balance = parseFloat(bank_reconciliation_balance) + parseFloat(td_deposit_in_transit.html().split(',').join("")) - parseFloat(td_oustanding_cheques.html().split(',').join(""));
-      
+
         $("#reconciled_bank_balance").html(accounting.formatNumber(reconciled_bank_balance, 2));
 
         var td_book_closing_balance = $("#td_book_closing_balance");
@@ -300,15 +298,14 @@ if (!$financial_report_submitted && $userLibrary->checkRoleHasPermissions('finan
         var book_closing_balance = td_book_closing_balance.html().split(',').join("");
 
         //If cancelling increase the closing balance otherwise subtract it
-        if(clear_btn.hasClass('cancel_btn') && clear_btn.hasClass('active_effect') ){
-            book_closing_balance=parseFloat(book_closing_balance)+parseFloat(row_amount);
-        }
-        else if(clear_btn.hasClass('cancel_btn') && clear_btn.hasClass('cleared_effect') ){
-            book_closing_balance=parseFloat(book_closing_balance)-parseFloat(row_amount);
+        if (clear_btn.hasClass('cancel_btn') && clear_btn.hasClass('active_effect')) {
+            book_closing_balance = parseFloat(book_closing_balance) + parseFloat(row_amount);
+        } else if (clear_btn.hasClass('cancel_btn') && clear_btn.hasClass('cleared_effect')) {
+            book_closing_balance = parseFloat(book_closing_balance) - parseFloat(row_amount);
         }
 
         $("#td_book_closing_balance").html(accounting.formatNumber(book_closing_balance, 2));
-     
+
         if (parseFloat(book_closing_balance).toFixed(2) === parseFloat(reconciled_bank_balance).toFixed(2)) {
             if ($("#reconciliation_flag").hasClass('label-danger')) {
                 $("#reconciliation_flag").removeClass('label-danger');
@@ -345,17 +342,16 @@ if (!$financial_report_submitted && $userLibrary->checkRoleHasPermissions('finan
             to_color = 'danger';
 
             //Append _bounce when number or when not a number, split to get the number then append
-            if(Number(opening_outstanding_bouched_chq_id)){
+            if (Number(opening_outstanding_bouched_chq_id)) {
 
                 rebuild_data_attribute = opening_outstanding_bouched_chq_id + '_bounce';
-            }
-            else{
+            } else {
 
-                let get_chq_id_number=opening_outstanding_bouched_chq_id.split('_')[0];
+                let get_chq_id_number = opening_outstanding_bouched_chq_id.split('_')[0];
 
                 rebuild_data_attribute = get_chq_id_number + '_bounce';
             }
-            
+
             btn.attr('data-opening_outstanding_cheque_id', rebuild_data_attribute);
 
             to_label = "<?= get_phrase('cancel'); ?>";
@@ -422,15 +418,14 @@ if (!$financial_report_submitted && $userLibrary->checkRoleHasPermissions('finan
             });
             //Recompute the reconciliation
             compute_reconciliation(btn);
-        }
-        else{
-            
+        } else {
+
             return false;
         }
     }
 
-    function reload_fund_balance_report(){
-        let url = "<?=base_url();?>financial_report/fund_balance_report";
+    function reload_fund_balance_report() {
+        let url = "<?= base_url(); ?>financial_report/fund_balance_report";
         let data = {
             office_id: $('#office_ids').val(),
             reporting_month: '<?= $reporting_month; ?>',
@@ -438,16 +433,16 @@ if (!$financial_report_submitted && $userLibrary->checkRoleHasPermissions('finan
             office_bank_ids: $("#office_bank_ids").val() ? $("#office_bank_ids").val() : ''
         }
 
-        $.post(url, data, function (response) {
+        $.post(url, data, function(response) {
             //alert(response)
-            $("#fund_balance_report").html(response) 
+            $("#fund_balance_report").html(response)
 
             compute_fund_balance_totals()
         })
     }
 
     function reload_proof_of_cash() {
-        let url = "<?=base_url();?>financial_report/proof_of_cash";
+        let url = "<?= base_url(); ?>financial_report/proof_of_cash";
         let data = {
             office_id: $('#office_ids').val(),
             reporting_month: '<?= $reporting_month; ?>',
@@ -455,12 +450,12 @@ if (!$financial_report_submitted && $userLibrary->checkRoleHasPermissions('finan
             office_bank_ids: $("#office_bank_ids").val() ? $("#office_bank_ids").val() : ''
         }
 
-        $.post(url, data, function (response) {
+        $.post(url, data, function(response) {
             //alert(response)
             // compute_fund_balance_totals()
-            $("#proof_of_cash").html(response) 
+            $("#proof_of_cash").html(response)
             compute_proof_of_cash()
-            
+
         })
     }
 
@@ -509,10 +504,10 @@ if (!$financial_report_submitted && $userLibrary->checkRoleHasPermissions('finan
                     var action_div = cloned_tr.find(':first-child').find('div');
 
 
-                    if (to_class == 'cleared_effect' && id==0) {
+                    if (to_class == 'cleared_effect' && id == 0) {
                         action_div.remove('div.cancel_btn');
 
-                    } else if (to_class == 'active_effect' && id==0) {
+                    } else if (to_class == 'active_effect' && id == 0) {
 
                         let return_clear_div_with_clear_btn = '<div data-data-opening_deposit_transit_id="0" data-opening_outstanding_cheque_id="' + opening_outstanding_cheque_id + '_bounce" id="0" class="btn btn-danger  cancel_btn to_clear outstanding_cheque active_effect state_0">Cancel</div>'
 
@@ -561,7 +556,7 @@ if (!$financial_report_submitted && $userLibrary->checkRoleHasPermissions('finan
         compute_proof_of_cash()
     });
 
-    function compute_proof_of_cash(){
+    function compute_proof_of_cash() {
         let total_cash = $("#total_cash").html().replace(/,/g, ''); // You can use replaceAll(',','') instead but The replaceAll method is not supported in Internet Explorer versions 6-11 
         let total_fund_month_closing_balance = $("#total_fund_month_closing_balance").html().replace(/,/g, '');
 
@@ -632,13 +627,53 @@ if (!$financial_report_submitted && $userLibrary->checkRoleHasPermissions('finan
             // console.log(elem);
             for (let index = 0; index < elem.length; index++) {
                 table_tbody.append('<tr><td><a href="#" class="fa fa-trash-o delete_statement" id="' + elem[index].attachment_id + '" data-file_name="' + elem[index].attachment_name + '" data-file_path="' + elem[index].s3_preassigned_url + '"></a></td><td><a target="__blank" href="' + elem[index].s3_preassigned_url + '">' + elem[index].attachment_name + '</a></td><td>' + elem[index].attachment_size + '</td><td>' + elem[index].attachment_last_modified_date + '</td></tr>');
-                
+
             }
-            
+
         });
-        
+
 
     });
+
+    // $(document).on('click', '.delete_statement', function(event) {
+
+    //     event.preventDefault();
+
+    //     //Prepare Data 
+    //     let attachment_primary_id = $(this).attr('id');
+
+    //     let file_path = $(this).data('file_path');
+
+    //     let file_name = $(this).data('file_name');
+
+    //     let url = "<?= base_url(); ?>financial_report/delete_statement";
+    //     let data = {
+    //         'id': attachment_primary_id,
+    //         'file_name': file_name,
+    //         'file_path': file_path,
+
+    //     };
+
+    //     //Remove the row 
+
+    //     $(this).closest('tr').remove();
+
+    //     //Execute the ajax
+    //     $.ajax({
+    //         url: url,
+    //         data: data,
+    //         type: "POST",
+    //         success: function(response) {
+
+    //             $("#deletion_info_id").removeClass('hidden');
+
+    //             $("#deletion_info_id").html(response);
+
+    //         }
+
+    //     });
+
+    // });
 
 
     $(document).on('click', '.delete_statement', function() {
@@ -668,30 +703,20 @@ if (!$financial_report_submitted && $userLibrary->checkRoleHasPermissions('finan
             data: data,
             type: "POST",
             success: function(response) {
-                console.log(response);
-                alert(response);
+                //console.log(response);
+                //alert(response);
                 // $("#deletion_info_id").removeClass('hidden');
 
                 // $("#deletion_info_id").html(response);
 
+                $("#deletion_info_id").removeClass('hidden');
+
+                $("#deletion_info_id").html(response);
+
             }
 
          });
-        // var file_path = $(this).attr('id');
-        // var url = "<?= base_url(); ?>ajax/financial_report/deleteStatement";
-        // var data = {
-        //     'path': file_path
-        // };
 
-        // $.ajax({
-        //     url: url,
-        //     data: data,
-        //     type: "POST",
-        //     success: function(response) {
-        //         alert(response);
-        //         $(".delete_statement").closest('tr').remove();
-        //     }
-        // });
 
     });
 </script>
