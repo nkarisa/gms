@@ -1189,11 +1189,6 @@ class GrantsLibrary
 
     if($item_id != null){
 
-        // $this->read_db->where(array($table.'_id'=>$item_id));
-        // $this->read_db->join($table,$table.'.fk_status_id=status.status_id');
-        // $status_approval_direction = $this->read_db->get('status')->row()->status_approval_direction;
-        // $item_has_declined_state = $status_approval_direction == -1 ? true : false;
-
         $query = $this->read_db->table('status')
             ->where(array($table.'_id'=>$item_id))
             ->join($table,$table.'.fk_status_id=status.status_id');

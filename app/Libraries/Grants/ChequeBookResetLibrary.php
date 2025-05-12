@@ -20,5 +20,13 @@ class ChequeBookResetLibrary extends GrantsLibrary implements \App\Interfaces\Li
     }
 
 
+    function deactivateChequeBookReset($office_bank_id)
+    {
+        $chequeBookResetWriteBuilder = $this->write_db->table('cheque_book_reset');
+
+        $chequeBookResetWriteBuilder->where(array('fk_office_bank_id' => $office_bank_id));
+        $data['cheque_book_reset_is_active'] = 0;
+        $chequeBookResetWriteBuilder->update($data);
+    }
    
 }

@@ -722,4 +722,21 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
 
     return $officeBank;
   }
+
+  function getChequeBookSize($office_bank_id){
+
+    $officeBankReadBuilder = $this->read_db->table('office_bank');
+
+    $officeBankReadBuilder->select(array('office_bank_chequebook_size'));
+    $officeBankReadBuilder->where(array('office_bank_id' => $office_bank_id));
+    $office_bank_chequebook_size_obj = $officeBankReadBuilder->get();
+
+    $office_bank_chequebook_size = 100;
+
+    if($office_bank_chequebook_size_obj->getNumRows() > 0){
+      $office_bank_chequebook_size = $office_bank_chequebook_size_obj->getRow()->office_bank_chequebook_size;
+    }
+
+    return $office_bank_chequebook_size;
+  }
 }
