@@ -755,8 +755,8 @@ class WebController extends BaseController
     }
 
     echo json_encode($reconstruct_attachments_array);
-
-    
   }
+
+
 
 }

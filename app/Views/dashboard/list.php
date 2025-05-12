@@ -1,6 +1,5 @@
 <?php 
-// $languageLibrary = new \App\Libraries\Core\LanguageLibrary();
-// echo json_encode($languageLibrary->getLanguages());
+echo lang('Global.App.funds_transfer')
 ?>
 <div class = 'row'>
     <div class="col-sm-12">

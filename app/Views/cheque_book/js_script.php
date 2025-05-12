@@ -22,7 +22,7 @@
             
             //Cheque if the active cheques exists if so don't create another one otherwise create a new one
             if (active_chqs > 0) {
-                alert('<?= get_phrase("you_still_have_an_active_chequebook_for_this_bank_account_and_can_not_add_another_one");?>');
+                alert('<?= get_phrase("active_cheque_book_error",'You Still Have An Active Chequebook For This Bank Account And Can Not Add Another One');?>');
                 $('#fk_office_bank_id').val($('#fk_office_bank_id option:eq(0)').val()).trigger('change');
                 // window.location.href = '<?= base_url() ?>cheque_book/list'
             } else {
@@ -114,7 +114,7 @@
                     $('#cheque_book_last_serial_number_id').attr('value', last_leaf);
 
                 } else {
-                    alert('<?= get_phrase("start_serial_and_count_of_leaves_must_be_greater_than_zero"); ?>');
+                    alert('<?= get_phrase("error_in_cheque_book_start_serial",'Start Serial And Count Of Leaves Must Be Greater Than Zero'); ?>');
 
                     return false;
                 }
