@@ -1,5 +1,5 @@
 <?php 
-echo lang('Global.App.funds_transfer')
+// echo lang('Global.App.funds_transfer')
 ?>
 <div class = 'row'>
     <div class="col-sm-12">
