@@ -496,14 +496,16 @@
                 //resign it to 4 (country_defination_context)
                 userType = 4;
             }
+            
             let compassion_country_id = $('#user_country').val();
             $('#overlay').removeClass('hidden');
             //Offices
             get_user_offices(userType, compassion_country_id);
+            
             //Language for country
-            populate_country_language(compassion_country_id);
+            //populate_country_language(compassion_country_id);
             //Currency for country
-            populate_country_currency(compassion_country_id);
+            //populate_country_currency(compassion_country_id);
             $('#overlay').addClass('hidden');
         }
     });
@@ -525,17 +527,24 @@
 
     //Populate offices
     function get_user_offices(context_definition_id, account_system_id) {
+        
         const compassion_country_id = $('#user_country').val();
         // Get offices that belong to country of $(this) context
         const url = '<?= base_url() ?>ajax/office/getOfficeData';
+
+        
+
         const data = {
                 compassion_country_id: compassion_country_id,
                 context_definition_id: context_definition_id
         }
+
+        
                 
         $.post(url, data, function(response){
             $('#overlay').removeClass('hidden');
             selectElement = $('#user_office');
+            console.log(response);
             populate_offices_departments_roles(selectElement, response);
             $('#overlay').addClass('hidden');
         })
