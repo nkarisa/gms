@@ -1551,9 +1551,9 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
         return $this->response->setJSON(['flag' => $flag, 'message' => $flagMessage]);
     }
 
-    function list($builder, array $columns, string $parentId = null, string $parentTable = null): array
+    function list($builder, array $columns, ?string $parentId = null, ?string $parentTable = null): array
     {
-        $users = [];
+        $results = [];
 
         $this->dataTableBuilder($builder, $this->controller, $columns);
 
@@ -1577,10 +1577,31 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
         $obj = $builder->get();
 
         if ($obj->getNumRows() > 0) {
-            $users = $obj->getResultArray();
+            $results = $obj->getResultArray();
         }
 
-        return ['results' => $users];
+
+        $builder->join('context_definition', 'context_definition.context_definition_id=user.fk_context_definition_id');
+        $builder->join('language', 'language.language_id=user.fk_language_id');
+        $builder->join('role', 'role.role_id=user.fk_role_id');
+        $builder->join('account_system', 'account_system.account_system_id=user.fk_account_system_id');
+        $builder->join('status', 'status.status_id=user.fk_status_id');
+        $builder->where(array('user_id <> ' => $this->session->user_id));
+        if (!$this->session->system_admin) {
+            $user_context = $this->session->context_definition['context_definition_name'];
+            if ($user_context == 'cluster') {
+                $builder->join('context_center_user', 'context_center_user.fk_user_id=user.user_id');
+                $builder->join('context_center', 'context_center.context_center_id=context_center_user.fk_context_center_id');
+                $builder->whereIn('context_center.fk_office_id', array_column($this->session->hierarchy_offices, 'office_id'));
+            }
+            $builder->where(array('user.fk_account_system_id' => $this->session->user_account_system_id));
+        }
+
+        $total_records = $builder->countAllResults();
+
+        $final = true;
+
+        return compact('results','total_records', 'final');
     }
 
     function updateApproversList($user_id, $table_name, $item_id, $current_status, $next_status)

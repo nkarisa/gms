@@ -198,13 +198,90 @@ class CancelChequeLibrary extends GrantsLibrary implements \App\Interfaces\Libra
     }
 
     public function singleFormAddVisibleColumns(): array {
-        // Please do not remove this method though useless, it prevents a Kint error issue
         return [
             'cancel_cheque_number'
         ];
     }
-
     function showListEditAction(array $record, array $dependancyData = []): bool {
         return false;
+    }
+
+    function additionalListColumns(): array {
+        $additionalListColumns = [
+          'office_code' => 'cancel_cheque_track_number'
+        ];
+        return $additionalListColumns;
+    }
+
+    public function formatColumnsValuesDependancyData(array $data): array {
+        $canceChequeIds = array_column($data, 'cancel_cheque_id');
+        $officeReadBuilder = $this->read_db->table('office');
+        $chequeBookIdWithOfficeCode = [];
+
+        if(!empty($canceChequeIds)){
+            $officeReadBuilder->select(['office_id','office_code','cheque_book_id','cancel_cheque_id']);
+            $officeReadBuilder->join('office_bank','office_bank.fk_office_id=office.office_id');
+            $officeReadBuilder->join('cheque_book','cheque_book.fk_office_bank_id=office_bank.office_bank_id');
+            $officeReadBuilder->join('cancel_cheque','cancel_cheque.fk_cheque_book_id=cheque_book.cheque_book_id');
+            $officeReadBuilder->whereIn('cancel_cheque_id', $canceChequeIds);
+            $chequeBookIdWithOfficeCodeObj = $officeReadBuilder->get();
+    
+            if($chequeBookIdWithOfficeCodeObj->getNumRows() > 0){
+                $officesAndIdsRaw = $chequeBookIdWithOfficeCodeObj->getResultArray();
+                $cancelChequeIds = array_column($officesAndIdsRaw, 'cancel_cheque_id');
+                $officeCodes = array_column($officesAndIdsRaw, 'office_code');
+                $chequeBookIdWithOfficeCode = array_combine($cancelChequeIds, $officeCodes);
+            }
+        }
+
+        return compact('chequeBookIdWithOfficeCode');
+    }
+
+    public function formatColumnsValues(string $columnName, mixed $columnValue, array $rowArray, array $dependancyData = []): mixed{
+    
+        if($columnName == 'office_code'){
+            $chequeBookIdWithOfficeCode = $dependancyData['chequeBookIdWithOfficeCode'];
+            $columnValue = $chequeBookIdWithOfficeCode[$rowArray['cancel_cheque_id']];
+        }
+
+        return $columnValue;
+    }
+
+    public function list(\CodeIgniter\Database\BaseBuilder $datatableBuilder, array $listSelectColumns, string|null $parentId = null, string|null $parentTable = null): array {
+
+        $cancelChequeReadBuilder = $this->read_db->table('cancel_cheque');
+        $officeIds = array_column($this->session->hierarchy_offices, 'office_id');
+
+        $this->dataTableBuilder($datatableBuilder, $this->controller, $listSelectColumns);
+        $datatableBuilder->select($listSelectColumns);
+        $datatableBuilder->join('voucher','voucher.voucher_id=cancel_cheque.fk_voucher_id');
+        $datatableBuilder->join('cheque_book','cheque_book.cheque_book_id=cancel_cheque.fk_cheque_book_id');
+        $datatableBuilder->join('office_bank','office_bank.office_bank_id=cheque_book.fk_office_bank_id');
+        $datatableBuilder->join('office','office.office_id=office_bank.fk_office_id');
+        $datatableBuilder->join('item_reason','item_reason.item_reason_id=cancel_cheque.fk_item_reason_id');
+        $datatableBuilder->whereIn('office_id', $officeIds);
+        $resultsObj = $datatableBuilder->get();
+        
+        $results = [];
+
+        if($resultsObj->getNumRows() > 0){
+            $results = $resultsObj->getResultArray();
+        }
+
+
+        $cancelChequeReadBuilder->join('voucher','voucher.voucher_id=cancel_cheque.fk_voucher_id');
+        $cancelChequeReadBuilder->join('cheque_book','cheque_book.cheque_book_id=cancel_cheque.fk_cheque_book_id');
+        $cancelChequeReadBuilder->join('office_bank','office_bank.office_bank_id=cheque_book.fk_office_bank_id');
+        $cancelChequeReadBuilder->join('office','office.office_id=office_bank.fk_office_id');
+        $datatableBuilder->whereIn('office_id', $officeIds);
+        $total_records = $cancelChequeReadBuilder->countAllResults();
+
+        if($total_records == 0) {
+            $total_records = 10;
+        }
+
+        $final = true;
+
+        return compact('results','total_records', 'final');
     }
 }

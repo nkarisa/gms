@@ -62,23 +62,6 @@ class IncomeAccountLibrary extends GrantsLibrary implements \App\Interfaces\Libr
     return $income_accounts_with_allocation;
   }
 
-  public function list($builder, array $selectColumns, $parentId = null, $parentTable = null): array
-  {
-    $this->lookupJoins($builder);
-
-    $selectColumns = array_values($selectColumns);
-    $this->dataTableBuilder($builder, $this->controller, $selectColumns);
-    $builder->select($selectColumns);
-    $result_obj = $builder->get();
-
-    $results = [];
-
-    if ($result_obj->getNumRows() > 0) {
-      $results = $result_obj->getResultArray();
-    }
-
-    return compact('results');
-  }
 
  /**
    *incomeAccountByOfficeId():This method returns array of income accounts.

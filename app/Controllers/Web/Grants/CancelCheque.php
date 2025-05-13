@@ -90,6 +90,7 @@ class CancelCheque extends WebController
         $canceChequeWriteBuilder = $this->write_db->table('cancel_cheque');
         $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
         $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+        $chequeInjectionLibrary = new \App\Libraries\Grants\ChequeInjectionLibrary();
 
         $this->write_db->transStart();
 
@@ -127,11 +128,14 @@ class CancelCheque extends WebController
 
             //Create voucher record with zero amount
             $last_voucher_id = $voucherLibrary->insertZeroAmountVoucher($cheque_number, $cheque_book_id, $office_bank_id, $cnt);
-
             //Insert Data :cheque number records
             $data['fk_voucher_id'] = $last_voucher_id;
-
             $canceChequeWriteBuilder->insert( $data);
+
+            if($last_voucher_id > 0){
+                // Check if cheque number is an active injection and disable it
+                $chequeInjectionLibrary->disableChequeActiveChequeInjection($office_bank_id, $cheque_number);
+            }
 
             $cnt++;
         }

@@ -75,7 +75,7 @@ class ChequeBookResetLibrary extends GrantsLibrary implements \App\Interfaces\Li
     public function listTableWhere(\CodeIgniter\Database\BaseBuilder $queryBuilder): void {
         if(!$this->session->system_admin){
             $queryBuilder->join('bank','bank.bank_id=office_bank.fk_bank_id');
-            $queryBuilder->where(['fk_account_system_id' => $this->session->user_account_system_id]);
+            $queryBuilder->where(['bank.fk_account_system_id' => $this->session->user_account_system_id]);
         }
     }
 

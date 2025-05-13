@@ -278,7 +278,7 @@ trait Extendable
   public function list(\CodeIgniter\Database\BaseBuilder $datatableBuilder, array $listSelectColumns, string $parentId = null, string $parentTable = null): array
   {
 
-    return ['results' => []];
+    return ['results' => [], 'total_records' => 10, 'final' => false];
   }
 
   /**

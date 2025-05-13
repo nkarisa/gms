@@ -28,10 +28,27 @@ class ChequeBookLibrary extends GrantsLibrary implements \App\Interfaces\Library
         return $is_skipping_of_cheque_leaves_allowed;
     }
 
+    function officeBankActiveChequeInjections($office_bank_id){
+        $chequeInjectionReadBuilder = $this->read_db->table('cheque_injection');
+
+        $chequeInjectionReadBuilder->select(['cheque_injection_id','cheque_injection_number']);
+        $chequeInjectionReadBuilder->where(['fk_office_bank_id' => $office_bank_id, 'cheque_injection_is_active' => 1]);
+        $chequeInjectionObj = $chequeInjectionReadBuilder->get();
+
+        $chequeInjections = [];
+
+        if($chequeInjectionObj->getNumRows() > 0){
+            $chequeInjections = $chequeInjectionObj->getResultArray();
+        }
+
+        return $chequeInjections;
+
+    }
+
     function getRemainingUnusedChequeLeaves($office_bank_id, $cheque_numbers_only = true)
     {
         $all_cheque_leaves = $this->getAllApprovedActiveChequeBooksLeaves($office_bank_id, $cheque_numbers_only);
-
+        $activeInjectedLeaves = array_column($this->officeBankActiveChequeInjections($office_bank_id), 'cheque_injection_number');
         $leaves = [];
 
         if (!empty($all_cheque_leaves)) {
@@ -51,6 +68,10 @@ class ChequeBookLibrary extends GrantsLibrary implements \App\Interfaces\Library
                 if (in_array($cheque_number, $used_cheque_leaves)) {
                     unset($all_cheque_leaves[array_search($cheque_number, $all_cheque_leaves)]);
                 }
+            }
+
+            foreach($activeInjectedLeaves as $activeInjectedLeave){
+                array_unshift($all_cheque_leaves, $activeInjectedLeave);
             }
 
             $keyed_cheque_leaves = [];
@@ -87,7 +108,7 @@ class ChequeBookLibrary extends GrantsLibrary implements \App\Interfaces\Library
         $builder->select(array('cheque_book_start_serial_number', 'cheque_book_count_of_leaves'));
         // 'cheque_book_is_active' => 1 was removed when resolving bug DE4583 where reverted leaves of cheques that are closed were missing 
         // in the voucher and cancel cheque leaves pool 
-        $builder->where(array('fk_office_bank_id' => $office_bank_id));
+        $builder->where(array('fk_office_bank_id' => $office_bank_id, 'cheque_book_is_active' => 1));
         $all_chqbooks_inactive_and_active = $builder->get()->getResult();
        
         $builder = $this->read_db->table('cheque_book');
@@ -355,26 +376,6 @@ class ChequeBookLibrary extends GrantsLibrary implements \App\Interfaces\Library
         return array('office_bank');
     }
 
-    public function action_before_edit($post_array)
-    {
-
-        // Disallow edit when the first leaf of a cheque book has already been used
-
-        $office_bank_id = $post_array['header']['fk_office_bank_id'];
-        $cheque_book_start_serial_number = $post_array['header']['cheque_book_start_serial_number'];
-
-        $query_builder = $this->read_db->table('voucher')
-            ->where(array('fk_office_bank_id' => $office_bank_id, 'voucher_cheque_number >=' => $cheque_book_start_serial_number));
-
-        $count_initial_voucher_for_cheque_book = $query_builder->get()->getNumRows();
-
-        if ($count_initial_voucher_for_cheque_book > 0) {
-            return ['error' => get_phrase('edit_used_cheque_book_not_allowed', 'You can\'t edit a chequebook that has atleast one of it\'s leaf used in a transaction')];
-        }
-
-        return $post_array;
-    }
-
     public function actionBeforeInsert($post_array): array
     {
 
@@ -417,57 +418,6 @@ class ChequeBookLibrary extends GrantsLibrary implements \App\Interfaces\Library
 
         return $post_array;
     }
-
-    /**
-     * Gets the cheque book id of a given cheque number for cheque books in a given office bank
-     * @author Nicodemus Karisa Mwambire
-     * @date 18th March 2024
-     * @param int cheque_number - Provide cheque number
-     * @param int office_bank_id - Given office bank
-     * @return int Cheque Book Id
-     * @source master-record-cheque-id
-     * @version v24.3.0.1
-     */
-    public function get_cheque_book_id_for_cheque_number(int $cheque_number, int $office_bank_id): int
-    {
-
-        $cheque_book_id = 0;
-        $chequeInjectionLibrary = new ChequeInjectionLibrary();
-        $is_injected_cheque_number = $chequeInjectionLibrary->isInjectedChequeNumber($office_bank_id, $cheque_number);
-
-        $query_builder = $this->read_db->table('cheque_book')
-            ->select(['cheque_book_id', 'cheque_book_start_serial_number', 'cheque_book_count_of_leaves'])
-            ->where(array('fk_office_bank_id' => $office_bank_id));
-
-        $office_bank_cheque_books_obj = $query_builder->get();
-
-        if ($office_bank_cheque_books_obj->getNumRows() > 0) {
-            $cheque_books = $office_bank_cheque_books_obj->getResultArray();
-
-            foreach ($cheque_books as $cheque_book) {
-                $cheque_book_pages = range($cheque_book['cheque_book_start_serial_number'], $cheque_book['cheque_book_start_serial_number'] + ($cheque_book['cheque_book_count_of_leaves'] - 1));
-                // log_message('error', json_encode($cheque_book_pages));
-                if (in_array($cheque_number, $cheque_book_pages)) {
-                    $cheque_book_id = $cheque_book['cheque_book_id'];
-                    break;
-                }
-            }
-        }
-
-        // We only get to this independent if clause if the leaf is injected and missing in all the books e.g. Bank Slips
-        if ($cheque_book_id == 0 && $is_injected_cheque_number == true) {
-            $query = $this->read_db->table('cheque_book');
-            $query->where(array('fk_office_bank_id' => $office_bank_id));
-            $query->limit(1);
-            $query->orderBy('cheque_book_id desc');
-            $cheque_book_id = $query->get()->getRow()->cheque_book_id;
-
-        }
-
-        return $cheque_book_id;
-    }
-
-    
 
     /**
      * deactivateChequebookExemptionExpiryDate
@@ -554,13 +504,30 @@ class ChequeBookLibrary extends GrantsLibrary implements \App\Interfaces\Library
         return $max_id['cheque_book_id'];
     }
 
-    public function getOfficeChequeBooks($office_bank_id)
+    public function getOfficeChequeBooksCount($office_bank_id)
     {
 
         $query = $this->read_db->table('cheque_book');
         $query->select(array('cheque_book_id'));
         $query->where(array('fk_office_bank_id' => $office_bank_id));
         return $query->get()->getNumRows();
+    }
+
+    public function getOfficeChequeBooks($office_bank_id, $activeStatus = 1)
+    {
+
+        $query = $this->read_db->table('cheque_book');
+        $query->select(array('cheque_book_id','fk_office_bank_id','cheque_book_is_used','cheque_book_start_serial_number','cheque_book_count_of_leaves','cheque_book_use_start_date'));
+        $query->where(array('fk_office_bank_id' => $office_bank_id, 'cheque_book_is_active' => $activeStatus));
+        $chequeBookObj = $query->get();
+
+        $chequeBooks = [];
+
+        if($chequeBookObj->getNumRows() > 0){
+            $chequeBooks = $chequeBookObj->getResultArray();
+        }
+
+        return $chequeBooks;
     }
 
     public function get_max_status_office_cheque_book($office_bank_id)
@@ -653,14 +620,6 @@ class ChequeBookLibrary extends GrantsLibrary implements \App\Interfaces\Library
         return $min_serial_number;
     }
 
-    public function single_form_add_visible_columns()
-    {
-        return [
-            'office_bank_name', 'cheque_book_start_serial_number', 'cheque_book_count_of_leaves',
-            'cheque_book_use_start_date',
-        ];
-    }
-
     /**
      * This method counts the number of reused of cancelled cheque transactions.
      * The name needs to be update since its misleading
@@ -675,20 +634,12 @@ class ChequeBookLibrary extends GrantsLibrary implements \App\Interfaces\Library
         $count = 0;
 
         if ($cheque_number != 0) {
-            //$this->read_db->select('voucher_cheque_number');
-            //Added by Onduso on 26th May 2023
-            //$this->read_db->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
-
             $builder = $this->read_db->table('voucher');
             $builder->select('voucher_cheque_number');
             $builder->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
 
             if ($reusing_and_cancel_eft_or_chq == 'cheque') {
-
-                //$this->read_db->where(array('voucher_type_is_cheque_referenced' => 1)); //get Only chq numbers and NOT Eft numbers
-
                 $builder->where(array('voucher_type_is_cheque_referenced' => 1));
-
             } else if ($reusing_and_cancel_eft_or_chq == 'eft') {
                 $builder->where(array('voucher_type_is_cheque_referenced' => 0));
             }
@@ -773,6 +724,16 @@ class ChequeBookLibrary extends GrantsLibrary implements \App\Interfaces\Library
         return $count_cancelled_chqs >= 3 ? true : false;
     }
 
+    function isUnusedChequeInjection($office_bank_id, $cheque_injection_number){
+        $chequeInjectionReadBuilder = $this->read_db->table('cheque_injection');
+
+        $chequeInjectionReadBuilder->where(['cheque_injection_is_active' => 1,'fk_office_bank_id' => $office_bank_id, 
+        'cheque_injection_number' => $cheque_injection_number]);
+        $count = $chequeInjectionReadBuilder->countAllResults();
+
+        return $count > 0 ? true : false;
+    }
+
     public function chequeToBeInjectedExistsInRange(int $office_bank_id, int $cheque_number_to_inject)
     {
         $message = "You can\'t inject the cheque number " . $cheque_number_to_inject . " due to the following reasons: \n";
@@ -784,10 +745,8 @@ class ChequeBookLibrary extends GrantsLibrary implements \App\Interfaces\Library
         $all_reused_cheques = $this->getReusedCheques($office_bank_id);
         // Cancelled beyond threshold
         $count_of_chqs_greater_than_threshold = $this->isLeafCancelledChqsMoreThanThreshold($office_bank_id, $cheque_number_to_inject);
-
-        //$this->load->model('cancel_cheque_model');
-        //$unused_cheque_leaves = array_column($this->cancel_cheque_model->get_valid_cheques($office_bank_id), 'cheque_number');
-
+        // Unused Injection
+        $active_injection_found = $this->isUnusedChequeInjection($office_bank_id, $cheque_number_to_inject);
         $cancelChequeLibrary = new CancelChequeLibrary();
         $unused_cheque_leaves = array_column($cancelChequeLibrary->getValidCheques($office_bank_id), 'cheque_number');
 
@@ -816,6 +775,11 @@ class ChequeBookLibrary extends GrantsLibrary implements \App\Interfaces\Library
 
         if ($count_of_chqs_greater_than_threshold) {
             $message .= " -> The cheque number has been cancelled above the required threshold \n";
+            $is_injectable = false;
+        }
+
+        if($active_injection_found){
+            $message .= " -> The cheque number has been injected and not yet used \n";
             $is_injectable = false;
         }
 
@@ -876,19 +840,6 @@ class ChequeBookLibrary extends GrantsLibrary implements \App\Interfaces\Library
         return $isPreviousBookApproved;
     }
 
-    public function allow_skipping_of_cheque_leaves()
-    {
-
-        $is_skipping_of_cheque_leaves_allowed = true;
-
-        if ($this->config->item("allow_skipping_of_cheque_leaves") == false
-        ) {
-            $is_skipping_of_cheque_leaves_allowed = false;
-        }
-
-        return $is_skipping_of_cheque_leaves_allowed;
-    }
-
     public function listTableWhere(\CodeIgniter\Database\BaseBuilder $queryBuilder): void
     {
         // Use the Office hierarchy for the logged user if not system admin
@@ -931,29 +882,6 @@ class ChequeBookLibrary extends GrantsLibrary implements \App\Interfaces\Library
 
     }
 
-    public function deactivate_non_default_office_bank_cheque_books($office_id)
-    {
-
-        $cheque_book_ids = [];
-
-        $read_query = $this->read_db->table('cheque_book');
-        $read_query->select(array('cheque_book_id'));
-        $read_query->where(array('office_bank_is_default' => 0, 'cheque_book_is_active' => 1, 'fk_office_id' => $office_id));
-        $read_query->join('office_bank', 'office_bank.office_bank_id=cheque_book.fk_office_bank_id');
-        $cheque_book_obj = $read_query->get();
-
-        if ($cheque_book_obj->getNumRows() > 0) {
-            $cheque_book_ids = array_column($cheque_book_obj->getResultArray(), 'cheque_book_id');
-        }
-
-        $write_query = $this->write_db->table('cheque_book');
-        $write_query->whereIn('cheque_book_id', $cheque_book_ids);
-        $data['cheque_book_is_active'] = 0;
-        $write_query->update($data);
-    }
-
-    
-
     public function getActiveChequeBookReset($office_bank_id)
     {
 
@@ -968,26 +896,6 @@ class ChequeBookLibrary extends GrantsLibrary implements \App\Interfaces\Library
         }
 
         return $get_active_cheque_book_reset;
-    }
-
-
-    public function opening_outstanding_cheques_used_cheque_leaves($office_bank_id)
-    {
-        $post = $this->input->post();
-
-        $opening_outstanding_cheques_array = [];
-
-        $this->read_db->select(array('opening_outstanding_cheque_number'));
-        $this->read_db->where(array('opening_outstanding_cheque.fk_office_bank_id' => $office_bank_id));
-        $opening_outstanding_cheques_obj = $this->read_db->get('opening_outstanding_cheque');
-
-        if ($opening_outstanding_cheques_obj->num_rows() > 0) {
-            $opening_outstanding_cheques = $opening_outstanding_cheques_obj->result_array();
-
-            $opening_outstanding_cheques_array = array_column($opening_outstanding_cheques, 'opening_outstanding_cheque_number');
-        }
-
-        return $opening_outstanding_cheques_array;
     }
 
 

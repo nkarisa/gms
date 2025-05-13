@@ -214,11 +214,15 @@ class ListOutput extends OutputTemplate
       method_exists($featureLibrary, 'list')
       && is_array($featureLibrary->list($builder, $listSelectColumns, $this->parentId, $this->parentTable))
       && array_key_exists('results', $featureLibrary->list($builder, $listSelectColumns, $this->parentId, $this->parentTable))
-      && !empty($featureLibrary->list($builder, $listSelectColumns, $this->parentId, $this->parentTable)['results'])
+      && array_key_exists('total_records', $featureLibrary->list($builder, $listSelectColumns, $this->parentId, $this->parentTable))
+      && array_key_exists('final', $featureLibrary->list($builder, $listSelectColumns, $this->parentId, $this->parentTable))
+      && $featureLibrary->list($builder, $listSelectColumns, $this->parentId, $this->parentTable)['final']
     ) {
-      $feature_model_list_result = $featureLibrary->list($builder, $listSelectColumns, $this->parentId, $this->parentTable)['results'];
+      $feature_model_list_result = $featureLibrary->list($builder, $listSelectColumns, $this->parentId, $this->parentTable);
       // Allows empty result set
-      $query_result = $feature_model_list_result; // A full user defined query result
+      // $query_result = $feature_model_list_result; // A full user defined query result
+      $query_result = isset($feature_model_list_result['results']) ? $feature_model_list_result['results'] : [] ; // A full user defined query result
+      $total_records = isset($feature_model_list_result['total_records']) ?  $feature_model_list_result['total_records']: 0;
     } else {
       // Get result from grants model if feature model list returns empty
       $query_result = $this->listInternalQueryResults($lookup_tables);

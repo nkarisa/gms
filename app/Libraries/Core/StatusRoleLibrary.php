@@ -47,7 +47,16 @@ class StatusRoleLibrary extends GrantsLibrary implements \App\Interfaces\Library
         $builder->where('status_role_status_id', hash_id($parentId, 'decode'));
         $results = $builder->get()->getResultArray();
 
-        return ['results' => $results];
+        $builder->join('role', 'role.role_id=status_role.fk_role_id');
+        $builder->join('status', 'status.status_id=status_role.status_role_status_id');
+        $builder->where('status_role_status_id', hash_id($parentId, 'decode'));
+        $total_records = $builder->countAllResults();
+
+        $total_records == 0 ? 10 : $total_records;
+
+        $final = true;
+
+        return compact('results','total_records', 'final');
     }
 
     function singleFormAddVisibleColumns(): array

@@ -2707,7 +2707,12 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
         $voucherWriteBuilder = $this->write_db->table('voucher');
 
+
         $this->write_db->transStart();
+
+        // Create cheque injection if the cheque is for a closed cheque book
+        $this->createChequeInjectionForOfficeBank($voucherWriteBuilder, $voucher_id);
+
         //Get vouchers to re-number after delete
         $vouchers = $this->getVoucherNumbersForRenumbering($voucher_id);
         $voucher_number = $vouchers[0]['voucher_number'];
@@ -2738,11 +2743,13 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             $start_serial++;
         }
 
-        /*Delete the voucher in voucher and voucher details tables with the voided cheque
-      Due to the Cascade the cancel_cheque record is also removed.*/
+
+        // Delete the voucher in voucher and voucher details tables with the voided cheque
+        // Due to the Cascade the cancel_cheque record is also removed.
+        
         $voucherWriteBuilder->where(['voucher_id' => $voucher_id]);
         $voucherWriteBuilder->delete();
-
+        
         $status = 1;
         $this->write_db->transComplete();
 
@@ -2751,5 +2758,33 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         }
 
         return $status;
+    }
+
+    private function createChequeInjectionForOfficeBank($voucherWriteBuilder, $voucher_id){
+        $chequeBookLibrary = new \App\Libraries\Grants\ChequeBookLibrary();
+        $chequeInjectionLibrary = new \App\Libraries\Grants\ChequeInjectionLibrary();
+
+        $voucherWriteBuilder->where(['voucher_id' => $voucher_id]);
+        $voucherObj = $voucherWriteBuilder->get();
+        $voucherToDelete = [];
+
+        if($voucherObj->getNumRows() > 0){
+            $voucherToDelete = $voucherObj->getRowArray(); 
+
+            $officeBankId = $voucherToDelete['fk_office_bank_id'];
+            $chequeNumber = $voucherToDelete['voucher_cheque_number'];
+
+            $getValidChequesNumbers = $chequeBookLibrary->getAllApprovedActiveChequeBooksLeaves($officeBankId);//array_column($cancelChequeLibrary->getValidCheques($officeBankId),'cheque_number');
+            $getValidChequesNumbers = array_map(function($chequeNumber){
+                return (int) $chequeNumber;
+            }, $getValidChequesNumbers);
+
+            // log_message('error', json_encode(compact('voucherToDelete','getValidChequesNumbers')));
+
+            if(!in_array($chequeNumber, $getValidChequesNumbers)){
+                $chequeInjectionLibrary->createChequeInjectionForOfficeBank($officeBankId, $chequeNumber);
+            }
+        }
+
     }
 }

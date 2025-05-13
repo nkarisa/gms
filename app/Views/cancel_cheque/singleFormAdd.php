@@ -87,21 +87,14 @@
         <script>
             //Unhide or Hide Other Reason field and make required
             $(document).on('change', '#fk_item_reason_id', function () {
-
                 let others = $(this).find('option:selected').text();
-
                 if (others.trim() == 'Others') {
-
                     $('#other_reason_label_id').removeClass('hidden');
-
                     $('#other_reason').removeClass('hidden');
-
                     $('#other_reason').addClass('required');
                 } else {
                     $('#other_reason_label_id').addClass('hidden');
-
                     $('#other_reason').addClass('hidden');
-
                     $('#other_reason').removeClass('required');
                 }
             });
@@ -159,36 +152,23 @@
 
             //Save the cancelled Cheques
             $(document).on('click', '.btn-save', function (event) {
-
                 //Validate the form and return false if an issue with validation other proceed and save data
                 if (form_validation() == true) {
-
                     return false;
                 }
 
                 //Get the data from the and save form passed validation.
-
                 let information_msg = '<?= get_phrase("information_msg", "Are you sure you want to void this cheque??"); ?>';
-
                 if (confirm(information_msg) == true) {
-
                     let office_bank_id = $('#fk_office_bank_id').val();
-
                     let cheque_number_id = $('#cheque_number_id').val();
-
                     let chequebook_id = $('#chequebook_id').val();
-
                     let reason_id = $('#fk_item_reason_id').val();
-
-                    //If others selected
                     let others = $('#fk_item_reason_id').find('option:selected').text();
-
                     let other_reason = '';
-
                     if (others.trim() == 'Others') {
                         other_reason = $('#other_reason').val();
                     }
-
                     //get the data  values
                     let data = {
                         'cancel_cheque_number': cheque_number_id,
@@ -197,17 +177,11 @@
                         'fk_item_reason_id': reason_id,
                         'other_reason': other_reason
                     }
-
-                    // console.log(data);
-
                     let url = '<?= base_url(); ?>ajax/cancel_cheque/saveCancelledCheques';
 
                     $.post(url, data, function (response) {
-
                         if (parseInt(response.insert_status) == 0) {
-
                             $('#message_info').html('<?= get_phrase('db_insert_failed', 'Cancelling Cheques Failed'); ?>')
-
                             $('#message_info').css({
                                 "color": "red",
                                 'font-size': "medium",
@@ -220,14 +194,12 @@
                         } else {
 
                             $('#message_info').html('<?= get_phrase('db_insert_success', 'Cheques cancellation Saved'); ?>');
-
                             $('#message_info').css({
                                 "color": "green",
                                 'font-size': "medium",
                                 "margin": "auto",
                                 "padding-left": "500px"
                             });
-
                             //alert('Test');
                             window.location.replace('<?= base_url(); ?>voucher/list/');
                         }
@@ -241,52 +213,37 @@
 
             //Refresh the page
             $(document).on('click', '.btn-reset', function () {
-
                 window.location.href = '<?= base_url() ?>cancel_cheque/single_form_add';
-
             });
 
 
             function form_validation() {
-
                 let form_field_missing_info = false;
 
                 /*Get all required fieds and loop to color them with border line of 
                  red if values not supplied otherwise remove red borders if values <> '' or 0 or null*/
                 let required = $('.required');
-
                 for (var index = 0; index < required.length; index++) {
-
                     let value = $(required[index]).val();
-
                     if (value == '' || value == 0 || value == null) {
-
                         /*ignore ids with 's2' e.g. s2id_fk_office_bank_id which are autocreated when it elem=select2 dropdown
                           and highlight the ones without s2 elements like fk_office_bank_id and turn form_field_missing_info=true */
                         $(required[index]).css('border-color', 'red');
-
                         let element_id_attr = $(required[index]).attr('id');
-
                         if (element_id_attr.includes("s2id") == false) {
-
                             form_field_missing_info = true;
                         }
                     } else {
                         //Remmove the red border on higlighted elements if all have values
                         if (($(required[index]).hasClass('select2'))) {
-
                             $(required[index]).css('border', '');
-
                             //reload select2
                             $(required[index]).select2();
-
                         } else {
                             $(required[index]).css('border', '');
                         }
                     }
                 }
-
                 return form_field_missing_info;
-
             }
 </script>

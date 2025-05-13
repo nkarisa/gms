@@ -105,7 +105,7 @@ class ChequeBook extends WebController
 
     function getOfficeChequeBooks($office_bank_id){
         $chequeBookLibrary = new ChequeBookLibrary();
-        $count_cheque_books = $chequeBookLibrary->getOfficeChequeBooks($office_bank_id);
+        $count_cheque_books = $chequeBookLibrary->getOfficeChequeBooksCount($office_bank_id);
         return $this->response->setJSON(compact('count_cheque_books'));
     }
 

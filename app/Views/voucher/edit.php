@@ -106,7 +106,7 @@ $voucher_missing_details = $voucherLibrary->isVoucherMissingVoucherDetails($vouc
 
                     if (trim($voucher_header_info["voucher_type_name"]) == "Voided Cheque") { ?>
 
-                        <button class='btn btn-primary' id='revert_cheque' name=''><?= get_phrase('revert_chq', "Revert Cheque"); ?></button>
+                        <button class='btn btn-primary' id='revert_cheque' name=''><?= get_phrase('revert_cheque', "Revert Cheque"); ?></button>
                         <span id="message_id"></span>
 
                     <?php } ?>
@@ -2435,26 +2435,13 @@ $voucher_missing_details = $voucherLibrary->isVoucherMissingVoucherDetails($vouc
             $('.btn-insert').hide();
             $('.btn-save').hide();
 
-            // //Details section
-            // $('.action').prop('disabled', 'disabled');
-
-            // let action= $('.action');
-
-            // console.log(action);
-            // for(let index; index>=action.length; index++){
-            //     console.log('Yesy');
-            // }
-
         }
     });
 
     //Return the Voided check to the pool.
     $(document).on('click', '#revert_cheque', function(event) {
-
         let message = "<?= get_phrase('confirm_void_msg_info', 'Are you sure you want to revert cheque??'); ?>";
-
         if (confirm(message) == true) {
-
             let voucher_id = '<?= hash_id($id, 'decode') ?>';
             //Delete voucher record of the voided chq in voucher and voucher_details and cancel_cheque tables
             let url = '<?= base_url(); ?>ajax/voucher/revertCancelledChequeAndRelatedVoucher';

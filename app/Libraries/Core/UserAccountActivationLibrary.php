@@ -83,6 +83,9 @@ class UserAccountActivationLibrary extends GrantsLibrary implements \App\Interfa
     $builder->where(['deleted_at'=> NULL]);
     $builder->join('user','user.user_id=user_account_activation.fk_user_id');
     $builder->join('role','role.role_id=user.fk_role_id');
+    if(!$this->session->system_admin){
+      $builder->where(['user.fk_account_system_id'=> $this->session->user_account_system_id]);
+    }
     $result_obj = $builder->get();
 
     $results = [];
@@ -91,7 +94,22 @@ class UserAccountActivationLibrary extends GrantsLibrary implements \App\Interfa
       $results = $result_obj->getResultArray();
     }
 
-    return compact('results');
+    $builder->where(['deleted_at'=> NULL]);
+    if(!$this->session->system_admin){
+      $builder->where(['user.fk_account_system_id'=> $this->session->user_account_system_id]);
+    }
+    $builder->join('user','user.user_id=user_account_activation.fk_user_id');
+    $builder->join('role','role.role_id=user.fk_role_id');
+    if(!$this->session->system_admin){
+      $builder->where(['user.fk_account_system_id'=> $this->session->user_account_system_id]);
+    }
+    $total_records = $builder->countAllResults();
+
+    $total_records == 0 ? 10 : $total_records;
+
+    $final = true;
+
+    return compact('results', 'total_records', 'final');
   }
 
       /**
