@@ -733,4 +733,22 @@ class OfficeLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
 
     return  $office;
   }
+
+  function checkIfTableHasRelationshipWithOffice($table_name){
+    $table_has_relationship_with_office = false;
+    $fields = $this->listFields($table_name);
+    $lookup_tables = list_lookup_tables($table_name);
+
+    foreach($lookup_tables as $lookup_table){
+      if($lookup_table == 'status' || $lookup_table == 'approval') continue;
+      $lookup_table_fields = $this->listFields($lookup_table);
+      $fields = array_merge($fields , $lookup_table_fields);
+    }
+    
+    if(in_array('fk_office_id', $fields)){ 
+      $table_has_relationship_with_office = true;
+    }
+
+    return $table_has_relationship_with_office;
+  }
 }
