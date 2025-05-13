@@ -85,7 +85,9 @@ class ChequeBookLibrary extends GrantsLibrary implements \App\Interfaces\Library
         $builder = $this->read_db->table('cheque_book');
         $builder->whereIn('cheque_book.fk_status_id', $max_status_ids);
         $builder->select(array('cheque_book_start_serial_number', 'cheque_book_count_of_leaves'));
-        $builder->where(array('fk_office_bank_id' => $office_bank_id, 'cheque_book_is_active' => 1));
+        // 'cheque_book_is_active' => 1 was removed when resolving bug DE4583 where reverted leaves of cheques that are closed were missing 
+        // in the voucher and cancel cheque leaves pool 
+        $builder->where(array('fk_office_bank_id' => $office_bank_id));
         $all_chqbooks_inactive_and_active = $builder->get()->getResult();
        
         $builder = $this->read_db->table('cheque_book');
