@@ -191,8 +191,8 @@ class CancelChequeLibrary extends GrantsLibrary implements \App\Interfaces\Libra
         return [
             'cancel_cheque_track_number',
             'cancel_cheque_number',
-            // 'cheque_book_start_serial_number',
             'voucher_number',
+            'item_reason_name',
             'cancel_cheque_created_date'
         ];
     }
@@ -202,5 +202,9 @@ class CancelChequeLibrary extends GrantsLibrary implements \App\Interfaces\Libra
         return [
             'cancel_cheque_number'
         ];
+    }
+
+    function showListEditAction(array $record, array $dependancyData = []): bool {
+        return false;
     }
 }
