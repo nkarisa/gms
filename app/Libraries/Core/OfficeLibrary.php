@@ -705,4 +705,32 @@ class OfficeLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
     
     return $lookup_values;
   }
+
+    /**
+   * get_office_id
+   * Get the office id
+   * @param Int $office_bank_id
+   * @author Livingstone Onduso
+   * @updated Nicodemus Karisa - Move the method from voucher model
+   * @date 2024-04-22
+   * @access private
+   * @return Int
+   */
+  public function getOfficeByOfficeBankId(int $office_bank_id): array
+  {
+    $officeBankReadBuilder = $this->read_db->table('office_bank');
+
+    $officeBankReadBuilder->select(['office_id as office_id', 'office_code', 'fk_account_system_id as account_system_id']);
+    $officeBankReadBuilder->where(['office_bank_id' => $office_bank_id]);
+    $officeBankReadBuilder->join('office','office.office_id=office_bank.fk_office_id');
+    $officeObj = $officeBankReadBuilder->get();
+
+    $office = [];
+
+    if($officeObj->getNumRows() > 0){
+      $office = $officeObj->getRowArray();
+    }
+
+    return  $office;
+  }
 }

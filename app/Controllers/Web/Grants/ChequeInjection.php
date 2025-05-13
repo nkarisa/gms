@@ -30,10 +30,11 @@ class ChequeInjection extends WebController
      * @return void - echo already_injected string
      * @param int $office_bank_id, $cheque_number
      */
-    function already_injected(int $office_bank_id, int $cheque_number): void
+    function alreadyInjected(int $office_bank_id, int $cheque_number): void
     {
 
-        $injected_chqs = $this->cheque_book_model->injected_cheque_exists($office_bank_id, $cheque_number);
+        $chequeBookLibrary = new \App\Libraries\Grants\ChequeBookLibrary();
+        $injected_chqs = $chequeBookLibrary->injectedChequeExists($office_bank_id, $cheque_number);
 
         $injected = '';
 

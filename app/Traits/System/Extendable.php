@@ -186,6 +186,12 @@ trait Extendable
     return $columnValue;
   }
 
+  function addTrackNumberStyle(array $rowArray, array $dependancyData = []): string{
+    $newStyleOrClass = '';
+
+    return $newStyleOrClass;
+  }
+
   /**
    * Lists the tables that are to be details table in a view page.
    * Note that these tables must have foreign key of the master table

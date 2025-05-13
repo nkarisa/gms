@@ -1460,4 +1460,12 @@ class Voucher extends WebController
 
     echo   $income_account;
   }
+
+  public function revertCancelledChequeAndRelatedVoucher(){
+    $voucher_id = $this->request->getPost('voucher_id');
+    $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+    $save_status = $voucherLibrary->revertCancelledChequeAndRelatedVoucher($voucher_id);
+
+    return $this->response->setJSON(compact('save_status'));
+  }
 }

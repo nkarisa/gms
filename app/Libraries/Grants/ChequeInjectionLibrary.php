@@ -13,10 +13,8 @@ class ChequeInjectionLibrary extends GrantsLibrary implements \App\Interfaces\Li
     function __construct()
     {
         parent::__construct();
-
-        $this->grantsModel = new ChequeInjectionModel();
-
-        $this->table = 'grants';
+        $this->model = new ChequeInjectionModel();
+        $this->table = 'cheque_injection';
     }
 
 
@@ -74,5 +72,23 @@ class ChequeInjectionLibrary extends GrantsLibrary implements \App\Interfaces\Li
         }
 
         return $is_injected_cheque_number;
+    }
+
+    public function singleFormAddVisibleColumns(): array {
+        return [
+            'office_bank_name',
+            'cheque_injection_number',
+            'item_reason_name'
+        ];
+    }
+
+    public function listTableVisibleColumns(): array {
+        return [
+            'cheque_injection_track_number',
+            'office_bank_name',
+            'cheque_injection_number',
+            'cheque_injection_is_active',
+            'cheque_injection_created_date'
+        ];
     }
 }

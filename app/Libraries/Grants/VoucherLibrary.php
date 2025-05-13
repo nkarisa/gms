@@ -1236,7 +1236,6 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $chequeInjectionLibrary->updateInjectedChequeStatus($office_bank_id, $voucher_cheque_number);
         $chequeBookLibary = new ChequeBookLibrary();
         $header['fk_cheque_book_id'] = $this->isVoucherTypeChequeReferenced($header['fk_voucher_type_id']) ? $chequeBookLibary->getChequeBookIdForChequeNumber($header['voucher_cheque_number'], $header['fk_office_bank_id']) : NULL;
-        // $header['fk_cheque_book_id'] = $this->verify_cheque_book_id_by_voucher_type_id($header['fk_voucher_type_id'], $header['voucher_cheque_number'], $header['fk_office_bank_id']);
         $header['voucher_vendor'] = $post['voucher_vendor'];
         $header['voucher_vendor_address'] = $post['voucher_vendor_address'];
         $header['voucher_description'] = $post['voucher_description'];
@@ -1689,85 +1688,76 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
     }
 
     function formatColumnsValues(string $columnsName, mixed $columnsValues, array $rowData, array $dependancyData = []): mixed {
+    
+        if($columnsName == 'action'){
+            $this->attachmentColumnValue($columnsValues, $rowData, $dependancyData);
+        }
+    
+        return $columnsValues;
+    }
 
+    function addTrackNumberStyle(array $rowData, array $dependancyData = []): string{
+        $style = "";
+        
+        if(trim($rowData['voucher_type_name']) == 'Voided Cheque'){
+            $style = "style='color:orange;'";
+        }
+
+        return $style;
+    }
+
+    private function attachmentColumnValue(&$columnsValues, $rowData, $dependancyData)
+    {
         $is_voided_chq = false;
         $accountSystemSettingLibrary = new \App\Libraries\Core\AccountSystemSettingLibrary();
-        
         $initial_record_status_id = $dependancyData['initial_record_status_id'];
         $month_cancelled_vouchers = $dependancyData['month_cancelled_vouchers'];
         $voucher_attachments_required = $dependancyData['voucher_attachments_required'];
         $approve_item_id = $dependancyData['approve_item_id'];
         $user_has_voucher_update_permission = $dependancyData['user_has_voucher_update_permission'];
-        // extract($dependancyData);
-    
-        if($columnsName == 'action'){
-            $officeLibrary = new \App\Libraries\Core\OfficeLibrary();
-            $office_account_system_id = $officeLibrary->getOfficeAccountSystem($rowData['office_id'])['account_system_id'];
-    
-            $account_system_settings = $accountSystemSettingLibrary->getAccountSystemSettings($office_account_system_id);
-            $voucher_attachments_required = false;
-    
-            if(
-                array_key_exists('voucher_attachments_required',$account_system_settings) && 
-                $account_system_settings['voucher_attachments_required'] == 1        ){
-                $voucher_attachments_required = true;
-            }
-    
-            $voucher_attachments = $this->getAttachments($approve_item_id, $rowData['voucher_id']);
-    
-            $count_of_attachments = count($voucher_attachments);
-    
-            $btn_color = $count_of_attachments == 0 ? 'btn-danger' : 'btn-success';
-            $btn_label = $count_of_attachments == 0 ? get_phrase('attach_documents','Attach Support Documents') : get_phrase('show_documents','Show Support Documents');
-            $disable_approval_button = $count_of_attachments == 0 && $voucher_attachments_required ? true : false;
-                    
-            $officeLibrary = new \App\Libraries\Core\OfficeLibrary();
-            $office_account_system_id = $officeLibrary->getOfficeAccountSystem($rowData['office_id'])['account_system_id'];
-            $status_data = $this->actionButtonData($this->controller, $office_account_system_id);
-            $status_info = $status_data['item_status'];
-            extract($status_data);
-            $voucher_status = $rowData['fk_status_id'];
-            $status_approval_direction = function() use($status_info, $voucher_status, $initial_record_status_id) {
-                if(isset($status_info[$voucher_status])){
-                    return isset($status_info[$voucher_status]['status_approval_direction']) ? $status_info[$voucher_status]['status_approval_direction'] : $status_info[$initial_record_status_id]['status_approval_direction'];
-                }else{
-                    return 0;
-                }
-            };
-            
-            $can_delete_attachment = ($rowData['fk_status_id'] == $item_initial_item_status_id || $status_approval_direction == '-1') && $user_has_voucher_update_permission ? true : false;
-    
-        //log_message('error',json_encode($rowData));
+        $officeLibrary = new \App\Libraries\Core\OfficeLibrary();
+        $office_account_system_id = $officeLibrary->getOfficeAccountSystem($rowData['office_id'])['account_system_id'];
+        $account_system_settings = $accountSystemSettingLibrary->getAccountSystemSettings($office_account_system_id);
+        $voucher_attachments_required = false;
 
-        //log_message('error', json_encode($rowData['fk_status_id']));
-
-            if (is_array($month_cancelled_vouchers) && !in_array($rowData['voucher_id'], $month_cancelled_vouchers)) {
-                if($voucher_attachments_required){
-    
-                // $columnsValues .= '<div data-attachments = "'.$voucher_attachments.'"  data-can_delete_attachment='.$can_delete_attachment.' data-voucher_id='.$rowData['voucher_id'].' class = "btn '.$btn_color.' dt-control" id = "dt-control-'.$rowData['voucher_id'].'">' . $btn_label . '</div> ';
-    
-                $columnsValues .= '<div id="dt-control-'.$rowData['voucher_id'].'"  data-can_delete_attachment="'.$can_delete_attachment.'" data-voucher_id="'.$rowData['voucher_id'].'" class = "btn '.$btn_color.' dt-control" >' . $btn_label . '</div> ';
-            }
-                $columnsValues .= approval_action_button($this->controller, $item_status, $rowData['voucher_id'], $rowData['status_id'], $item_initial_item_status_id, $item_max_approval_status_ids, $disable_approval_button, true,'', $is_voided_chq);
-            }
-
-            // $can_delete_attachment = ($rowData['fk_status_id'] == $item_initial_item_status_id || $status_approval_direction == '-1') && $user_has_voucher_update_permission ? true : false;
-    
-            // if (is_array($month_cancelled_vouchers) && !in_array($rowData['voucher_id'], $month_cancelled_vouchers)) {
-            //     if($voucher_attachments_required){
-            //         $columnsValues .= '<div data-attachments="'.json_encode($voucher_attachments).'" data-can_delete_attachment="'.$can_delete_attachment.'" data-voucher_id="'.$rowData['voucher_id'].'" class = "btn '.$btn_color.' dt-control" id = "dt-control-'.$rowData['voucher_id'].'">' . $btn_label . '</div> ';
-            //     }
-            //     $columnsValues .= approval_action_button($this->controller, $item_status, $rowData['voucher_id'], $rowData['status_id'], $item_initial_item_status_id, $item_max_approval_status_ids, false, true,'', $is_voided_chq);
-            // }
+        if (
+            array_key_exists('voucher_attachments_required', $account_system_settings) &&
+            $account_system_settings['voucher_attachments_required'] == 1
+        ) {
+            $voucher_attachments_required = true;
         }
 
+        $voucher_attachments = $this->getAttachments($approve_item_id, $rowData['voucher_id']);
+        $count_of_attachments = count($voucher_attachments);
+        $btn_color = $count_of_attachments == 0 ? 'btn-danger' : 'btn-success';
+        $btn_label = $count_of_attachments == 0 ? get_phrase('attach_documents', 'Attach Support Documents') : get_phrase('show_documents', 'Show Support Documents');
+        $disable_approval_button = $count_of_attachments == 0 && $voucher_attachments_required ? true : false;
 
-       
-    
-        return $columnsValues;
+        $officeLibrary = new \App\Libraries\Core\OfficeLibrary();
+        $office_account_system_id = $officeLibrary->getOfficeAccountSystem($rowData['office_id'])['account_system_id'];
+        $status_data = $this->actionButtonData($this->controller, $office_account_system_id);
+        $status_info = $status_data['item_status'];
+        extract($status_data);
+        $voucher_status = $rowData['fk_status_id'];
+        $status_approval_direction = function () use ($status_info, $voucher_status, $initial_record_status_id) {
+            if (isset($status_info[$voucher_status])) {
+                return isset($status_info[$voucher_status]['status_approval_direction']) ? $status_info[$voucher_status]['status_approval_direction'] : $status_info[$initial_record_status_id]['status_approval_direction'];
+            } else {
+                return 0;
+            }
+        };
+
+        $can_delete_attachment = ($rowData['fk_status_id'] == $item_initial_item_status_id || $status_approval_direction == '-1') && $user_has_voucher_update_permission ? true : false;
+
+        if (is_array($month_cancelled_vouchers) && !in_array($rowData['voucher_id'], $month_cancelled_vouchers)) {
+            if ($voucher_attachments_required) {
+                $columnsValues .= '<div id="dt-control-' . $rowData['voucher_id'] . '"  data-can_delete_attachment="' . $can_delete_attachment . '" data-voucher_id="' . $rowData['voucher_id'] . '" class = "btn ' . $btn_color . ' dt-control" >' . $btn_label . '</div> ';
+            }
+            $columnsValues .= approval_action_button($this->controller, $item_status, $rowData['voucher_id'], $rowData['status_id'], $item_initial_item_status_id, $item_max_approval_status_ids, $disable_approval_button, true, '', $is_voided_chq);
+        }
     }
 
-  public function monthFundsTransferVouchers($office_ids, $reporting_month)
+    public function monthFundsTransferVouchers($office_ids, $reporting_month)
   {
 
       $voucher_type_ids = $this->voucherTypeLibrary->officeHiddenBankVoucherTypes($office_ids[0]);
@@ -2534,4 +2524,232 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
     
         return $unrefunded_amount;
       }
+
+      /**
+     * get_income_and_expense_for_account_system
+     * Gets the income acc and expense account for a given account system as a row
+     * @param int int $office_id
+     * @author Livingstone Onduso.
+     * @date 2024-04-30
+     * @access private
+     * @return  array
+     */
+    private function getIncomeAndExpenseForAccountSystem(int $account_system_id): array
+    {
+
+        $accounts = [];
+        $incomeAccountReadBuilder = $this->read_db->table('income_account');
+
+        $incomeAccountReadBuilder->select(['income_account_id', 'expense_account_id']);
+        $incomeAccountReadBuilder->join('expense_account', 'expense_account.fk_income_account_id=income_account.income_account_id');
+        $incomeAccountReadBuilder->where(['fk_account_system_id' => $account_system_id]);
+        $income_and_expense_acc = $incomeAccountReadBuilder->get();
+
+        if ($income_and_expense_acc->getNumRows() > 0) {
+            $row = $income_and_expense_acc->getRow();
+            $accounts['income_acc'] = $row->income_account_id;
+            $accounts['expense_acc'] = $row->expense_account_id;
+        }
+
+        return  $accounts;
+    }
+
+       /**
+     * insert_zero_amount_voucher
+     * To insert a voucher with zero amount for voided chq
+     * @param int $cheque_number, int $cheque_id, int $office_bank_id
+     * @author Livingstone Onduso.
+     * @date 2024-04-22
+     * @access public
+     * @return 
+     */
+    public function insertZeroAmountVoucher(int $cheque_number, int $cheque_id, int $office_bank_id, $cnt)
+    {
+
+        $officeLibrary = new \App\Libraries\Core\OfficeLibrary();
+        $voucherTypeLibrary = new \App\Libraries\Grants\VoucherTypeLibrary();
+        $approvalLibrary = new \App\Libraries\Core\ApprovalLibrary();
+        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+        $voucherWriteBuilder = $this->write_db->table('voucher');
+        $voucherDetailWriteBuilder = $this->write_db->table('voucher_detail');
+
+        $office = $officeLibrary->getOfficeByOfficeBankId($office_bank_id);
+
+        $office_id = $office['office_id'];
+        $last_voucher_number_and_date = $this->getOfficeLastVoucher($office_id);
+        $voided_chq_voucher_type = $voucherTypeLibrary->getHiddenVoucherType('VChq', $office['account_system_id']); // $this->voucher_type_model->get_hidden_voucher_type('bank', 'expense', 2, 1)->voucher_type_id;
+        $accounts = $this->getIncomeAndExpenseForAccountSystem($office['account_system_id']);
+
+        $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('voucher');
+
+        $header['voucher_track_number'] = $itemTrackNumberAndName['voucher_track_number'];
+        $header['voucher_name'] = $itemTrackNumberAndName['voucher_name'];
+        $header['fk_office_id'] = $office['office_id'];
+        $header['voucher_date'] = $last_voucher_number_and_date['voucher_date'];
+        $header['voucher_number'] =  $last_voucher_number_and_date['voucher_number'] + $cnt;
+        $header['fk_voucher_type_id'] = $voided_chq_voucher_type->voucher_type_id;
+        $header['fk_office_bank_id'] = $office_bank_id;
+        $header['fk_office_cash_id'] = 0;
+        $header['voucher_cheque_number'] = $cheque_number;
+        $header['fk_cheque_book_id'] = $cheque_id;
+        $header['voucher_vendor'] = get_phrase('not_applicable_header_voucher_vendor', "Not Applicable");
+        $header['voucher_vendor_address'] = get_phrase('not_applicable_header_voucher_address', "Not Applicable");
+        $header['voucher_description'] = get_phrase('not_applicable_header_voucher_description', "Not Applicable");
+        $header['voucher_created_by'] = $this->session->user_id;
+        $header['voucher_created_date'] = date('Y-m-d');
+        $header['voucher_last_modified_by'] = $this->session->user_id;
+        $header['fk_approval_id'] = $approvalLibrary->insertApprovalRecord('voucher');
+        $header['fk_status_id'] = $statusLibrary->initialItemStatus('voucher');
+        $header['voucher_cleared'] = 1;
+        $header['voucher_cleared_month'] = date('Y-m-t', strtotime($last_voucher_number_and_date['voucher_date']));
+
+        $voucherWriteBuilder->insert( $header);
+
+        $insert_id = $this->write_db->insertID();
+
+        $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('voucher_detail');
+        $detail['fk_voucher_id'] = $insert_id;
+        $detail['voucher_detail_track_number'] = $itemTrackNumberAndName ['voucher_detail_track_number'];
+        $detail['voucher_detail_name'] = $itemTrackNumberAndName['voucher_detail_name'];
+        $detail['voucher_detail_quantity'] = 0;
+        $detail['voucher_detail_description'] = get_phrase('detail_desc', "Not Applicable");
+        $detail['voucher_detail_unit_cost'] = 0.00;
+        $detail['voucher_detail_total_cost'] = 0.00;
+        $detail['fk_expense_account_id'] = $accounts['expense_acc'];
+        $detail['fk_income_account_id'] = $accounts['income_acc'];
+        $detail['fk_contra_account_id'] = 0;
+        $detail['fk_project_allocation_id'] = $this->getAtleastOneFcpProjectAllocation($office_id);
+        $detail['fk_request_detail_id'] =  0;
+        $detail['fk_approval_id'] = 0; 
+        $detail['fk_status_id'] = $statusLibrary->initialItemStatus('voucher_detail');
+
+        $voucherDetailWriteBuilder->insert($detail);
+
+        $voucher_date = $last_voucher_number_and_date['voucher_date'];
+
+        //Create month cash journal  and mfr if is first voucher of the month on cancellation of chq.
+        $this->createReportAndJournal($office_id, $voucher_date);
+        
+        return $insert_id;
+    }
+
+    /**
+     * get_atleast_fcp_project_allocation
+     * Gets the first project as a row
+     * @param int int $office_id
+     * @author Livingstone Onduso.
+     * @date 2024-04-22
+     * @access private
+     * @return  int
+     */
+    private function getAtleastOneFcpProjectAllocation(int $office_id): int
+    {
+
+        $projectAllocationReadBuilder = $this->read_db->table('project_allocation');
+
+        $projectAllocationReadBuilder->select(['project_allocation_id']);
+        $projectAllocationReadBuilder->where(['fk_office_id' => $office_id]);
+        $project_allocation_id = $projectAllocationReadBuilder->get();
+
+        if ($project_allocation_id->getNumRows() > 0) {
+            return $project_allocation_id->getRow()->project_allocation_id;
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * re_number_voucher_numbering 
+     * Gets all vouchers of the mother
+     * @param int $voucher_id
+     * @author Livingstone Onduso.
+     * @date 2024-04-26
+     * @access public
+     * @return array
+     */
+    private function getVoucherNumbersForRenumbering(int $voucher_id): array
+    {
+
+        //Get the office and transaction_date
+        /*
+    FOR LAG OF WRITE AND READ REPLICATION in READ NODE WE HAVE TO USE 'write_db' and NOT 'read_db' 
+    WHEN READING THE LIST FOR VOUCHERS FOR RENUMBERING
+   */
+        $voucherWriteBuilder = $this->write_db->table('voucher');
+
+        $voucherWriteBuilder->select(['voucher_date', 'fk_office_id']);
+        $voucherWriteBuilder->where(['voucher_id' => $voucher_id]);
+        $voucher_date_and_office = $voucherWriteBuilder->get()->getRow();
+
+        //Get all vouchers of the months
+        $voucherWriteBuilder->select(['voucher_id', 'voucher_number']);
+        $voucherWriteBuilder->where(
+            [   
+                    'fk_office_id' => $voucher_date_and_office->fk_office_id, 
+                    'voucher_date >=' => date('Y-m-01', strtotime($voucher_date_and_office->voucher_date)), 
+                    'voucher_date <=' => date('Y-m-t', strtotime($voucher_date_and_office->voucher_date))
+                ]
+            );
+        return $voucherWriteBuilder->get()->getResultArray();
+    }    
+
+    /**
+     * revert_cancelled_cheque_and_related_voucher 
+     * reverts the chq number
+     * @param int  $voucher_id
+     * @author Livingstone Onduso.
+     * @date 2024-04-22
+     * @access public
+     * @return int
+     */
+    public function revertCancelledChequeAndRelatedVoucher(int $voucher_id): int
+    {
+
+        $voucherWriteBuilder = $this->write_db->table('voucher');
+
+        $this->write_db->transStart();
+        //Get vouchers to re-number after delete
+        $vouchers = $this->getVoucherNumbersForRenumbering($voucher_id);
+        $voucher_number = $vouchers[0]['voucher_number'];
+        $voucher_number_splitted = str_split($voucher_number, 4);
+        $year_month_part = $voucher_number_splitted[0];
+        $new_voucher_number = '';
+
+        //Renumber the voucher after delete
+        $start_serial = 1;
+        foreach ($vouchers as $voucher) {
+            //Build the serial number
+            if (strlen($start_serial) < 2) {
+                $new_voucher_number = $year_month_part . '0' . $start_serial;
+            } elseif (strlen($start_serial) >= 2) {
+                $new_voucher_number = $year_month_part . $start_serial;
+            }
+
+            //If the voucher selected to delete is equal to the one selected for delete just continue with loop
+            if ($voucher['voucher_id'] == $voucher_id) {
+                continue;
+            }
+
+            //Update the records in voucher
+            $update_data['voucher_number'] = $new_voucher_number;
+            $voucherWriteBuilder->where(['voucher_id' => $voucher['voucher_id']]);
+            $voucherWriteBuilder->update( $update_data);
+
+            $start_serial++;
+        }
+
+        /*Delete the voucher in voucher and voucher details tables with the voided cheque
+      Due to the Cascade the cancel_cheque record is also removed.*/
+        $voucherWriteBuilder->where(['voucher_id' => $voucher_id]);
+        $voucherWriteBuilder->delete();
+
+        $status = 1;
+        $this->write_db->transComplete();
+
+        if ($this->write_db->transStatus() == false) {
+            $status = 0;
+        }
+
+        return $status;
+    }
 }

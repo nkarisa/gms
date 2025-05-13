@@ -521,7 +521,14 @@ class WebController extends BaseController
           continue;
         }
         if (strpos($column, 'track_number') == true) {
-          $track_number = '';
+          $track_number_style = '';
+
+          if (method_exists($this->library, 'addTrackNumberStyle')) {
+            $track_number_style = $this->library->addTrackNumberStyle($row, $formatColumnValuesdependancyData);
+          }
+
+          $track_number = ' <a '.$track_number_style.' href="' . base_url() . $this->controller . '/view/' . hash_id($primary_key) . '">' . $row[$column] . '</a> ';
+
           if (
             $this->session->system_admin ||
             (
@@ -529,10 +536,10 @@ class WebController extends BaseController
               $this->libs->loadLibrary('user')->checkRoleHasPermissions(strtolower($this->controller), 'update')
             )
           ) {
-            $track_number .= '<a href="' . base_url() . strtolower($this->controller) . '/edit/' . hash_id($primary_key) . '"><i class = "fa fa-pencil"></i></a>';
+            $track_number .= '<a '.$track_number_style.' href="' . base_url() . strtolower($this->controller) . '/edit/' . hash_id($primary_key) . '"><i class = "fa fa-pencil"></i></a>';
           }
 
-          $track_number .= ' <a href="' . base_url() . $this->controller . '/view/' . hash_id($primary_key) . '">' . $row[$column] . '</a>';
+          
           $row[$column] = $track_number;
 
         } elseif (strpos($column, '_is_') == true) {

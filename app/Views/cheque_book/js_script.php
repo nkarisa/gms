@@ -82,12 +82,7 @@
                     let last_leaf = parseInt(start_serial) + (parseInt(leave_count) - 1);
                     $('#cheque_book_last_serial_number_id').attr('value', last_leaf);
                 } else {
-<<<<<<< HEAD
                     alert('<?= get_phrase("error_in_cheque_book_start_serial",'Start Serial And Count Of Leaves Must Be Greater Than Zero'); ?>');
-
-=======
-                    alert('<?= get_phrase("start_serial_and_count_of_leaves_must_be_greater_than_zero"); ?>');
->>>>>>> smoke-testing
                     return false;
                 }
             } else {

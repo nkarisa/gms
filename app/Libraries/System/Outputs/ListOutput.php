@@ -63,12 +63,12 @@ class ListOutput extends OutputTemplate
       $builder->where($foreignKeyField, hash_id($this->parentId, 'decode'));
     }
 
-    $featureLibrary->listTableWhere($builder);
+    // $featureLibrary->listTableWhere($builder);
 
-    // This is to be a redundant code and needs to be removed in the future
-    if (method_exists($featureLibrary, $where_method)) {
-      $featureLibrary->$where_method($builder);
-    }
+    // // This is to be a redundant code and needs to be removed in the future
+    // if (method_exists($featureLibrary, $where_method)) {
+    //   $featureLibrary->$where_method($builder);
+    // }
 
     $this->libs->joinTablesWithOffice($builder, $table);
 
@@ -110,6 +110,7 @@ class ListOutput extends OutputTemplate
       $featureLibrary->customTableJoin($builder);
     }
     
+    
     // Apply ordering
     if (method_exists($featureLibrary, 'orderListPage')) {
       $builder->orderBy($featureLibrary->orderListPage());
@@ -120,6 +121,14 @@ class ListOutput extends OutputTemplate
     // Apply filter conditions
     if (is_array($filter_where_array) && count($filter_where_array) > 0) {
       $builder->where($filter_where_array);
+    }
+
+
+    // $featureLibrary->listTableWhere($builder);
+
+    // This is to be a redundant code and needs to be removed in the future
+    if (method_exists($featureLibrary, $where_method)) {
+      $featureLibrary->$where_method($builder);
     }
   }
 
@@ -148,7 +157,7 @@ class ListOutput extends OutputTemplate
     );
 
     $this->libs->dataTableBuilder($builder, $table, $selected_columns);
-    
+
     return $builder->get()->getResultArray();
   }
 

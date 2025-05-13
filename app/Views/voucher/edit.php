@@ -2456,14 +2456,14 @@ $voucher_missing_details = $voucherLibrary->isVoucherMissingVoucherDetails($vouc
         if (confirm(message) == true) {
 
             let voucher_id = '<?= hash_id($id, 'decode') ?>';
-
             //Delete voucher record of the voided chq in voucher and voucher_details and cancel_cheque tables
+            let url = '<?= base_url(); ?>ajax/voucher/revertCancelledChequeAndRelatedVoucher';
+            let data = {
+                voucher_id
+            }
 
-            let url = '<?= base_url(); ?>voucher/revert_cancelled_cheque_and_related_voucher/' + voucher_id;
-
-            $.get(url, function(res) {
-
-                let status = parseInt(res);
+            $.post(url, data, function(res) {
+                let status = parseInt(res.save_status);
 
                 message = "<?= get_phrase('revert_chq_msg_info', 'Cheque number reverted'); ?>";
 

@@ -301,4 +301,56 @@ class VoucherTypeLibrary extends GrantsLibrary implements \App\Interfaces\Librar
 
     return $lookUpValues;
   }
+
+  public function createMissingVoidHiddenVoucherTypes($account_system_id){
+
+    $voucherTypeEffectReadBuilder = $this->read_db->table('voucher_type_effect');
+    $voucherTypeAccountReadBuilder = $this->read_db->table('voucher_type_account');
+    $voucherTypeWriteBuilder = $this->write_db->table('voucher_type');
+    $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+
+    $voucherTypeEffectReadBuilder->select(array('voucher_type_effect_id','voucher_type_effect_code'));
+    $voucherTypeEffectReadBuilder->whereIn('voucher_type_effect_code', ['income','expense']);
+    $voucher_type_effects = $voucherTypeEffectReadBuilder->get()->getResultArray();
+
+    $voucher_type_effect_ids = array_column($voucher_type_effects,'voucher_type_effect_id');
+    $voucher_type_effect_codes = array_column($voucher_type_effects,'voucher_type_effect_code');
+
+    $ordered_voucher_type_effect =  array_combine($voucher_type_effect_codes, $voucher_type_effect_ids);
+
+    $voucherTypeAccountReadBuilder->where(array('voucher_type_account_code' => 'bank'));
+    $bank_voucher_type_account_id = $voucherTypeAccountReadBuilder->get()->getRow()->voucher_type_account_id;
+
+    $data['voucher_type_track_number'] = $this->generateItemTrackNumberAndName('voucher_type')['voucher_type_track_number'];
+    $data['voucher_type_name'] = 'Voided Cheque';
+    $data['voucher_type_is_active'] = 1;
+    $data['voucher_type_is_hidden'] = 1;
+    $data['voucher_type_abbrev'] = 'VChq';
+    $data['fk_voucher_type_account_id'] = $bank_voucher_type_account_id;
+    $data['fk_voucher_type_effect_id'] = $ordered_voucher_type_effect['expense'];
+    $data['voucher_type_is_cheque_referenced'] = 1;
+    $data['fk_account_system_id'] = $account_system_id;
+    $data['voucher_type_created_by'] = $this->session->user_id;
+    $data['voucher_type_created_date'] = date('Y-m-d');
+    $data['voucher_type_last_modified_by'] = $this->session->user_id;
+    $data['voucher_type_last_modified_date'] = date('Y-m-d h:i:s');
+    $data['fk_status_id'] = $statusLibrary->getMaxApprovalStatusId('voucher_type', [], $account_system_id)[0];
+
+    if($this->checkMissingHiddenVoidingVoucherType($account_system_id)){
+      // log_message('error', json_encode($data));
+      $voucherTypeWriteBuilder->insert($data);
+    }
+  }
+
+  private function checkMissingHiddenVoidingVoucherType($account_system_id){
+    $voucherTypeReadBuilder = $this->read_db->table('voucher_type');
+    $voucherTypeReadBuilder->where(['fk_account_system_id' => $account_system_id, 'voucher_type_abbrev' => 'VChq']);
+    $voucher_type_obj = $voucherTypeReadBuilder->get();
+
+    if($voucher_type_obj->getNumRows() == 0){
+      return true;
+    }
+
+    return false;
+  }
 }
