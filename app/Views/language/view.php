@@ -124,7 +124,7 @@ $columns = array_chunk($keys,service("settings")->get("GrantsConfig.master_table
                         echo number_format($column_value,2);
                         //echo $column_value;
                     }else{
-                        echo ucwords(str_replace('_',' ',$column_value));
+                        echo $column_value;
                     }
                   ?>
                 </td>

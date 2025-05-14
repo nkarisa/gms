@@ -70,14 +70,13 @@ class Language extends WebController
 
     function result($id = 0, $parentTable = null)
     {
-
         $result = parent::result($id);
-
+        
         $accountSystemLibrary = new \App\Libraries\Core\AccountSystemLibrary();
-
+        
         if ($this->action == 'view') {
             $result['master']['account_system_code'] = $this->session->user_account_system_code;
-            $result['master']['language_code'] = $this->library->getLanguageById(hash_id($this->id, 'decode'))->language_code;
+            $result['master']['language_code'] =$this->library->getLanguageById(hash_id($this->id, 'decode'))->language_code;
             $result['master']['account_systems'] = $accountSystemLibrary->getAccountSystems();
         }
 

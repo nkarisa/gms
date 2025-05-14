@@ -2329,7 +2329,6 @@ function submitFinancialReport()
 
     $builder->update($update_data);
 
-
     // Deactivate non default cheque book
     $this->officeBankLibrary->deactivateNonDefaultOfficeBankByOfficeId($office_id, $post['reporting_month']);
 
@@ -2356,24 +2355,6 @@ function submitFinancialReport()
 
   echo $message;
 }
-
-// function massUpdateFinancialReviewDataByAccountSystem($account_system_id, $reporting_month)
-// {
-//   // Get FCPs for an accounting system that have submitted MFR for the period given
-//   $this->read_db->select(array('office_id'));
-//   $this->read_db->where(array('office.fk_account_system_id' => $account_system_id, 
-//   'financial_report_month' => date('Y-m-01', strtotime($reporting_month))));
-//   $this->read_db->join('financial_report','financial_report.fk_office_id=office.office_id');
-//   $offices_obj = $this->read_db->get('office');
-
-//   if($offices_obj->num_rows() > 0){
-//     $office_ids = array_column($offices_obj->result_array(),'office_id');
-
-//     foreach($office_ids as $office_id){
-//       $this->fundBalanceSummaryReport($office_id, $reporting_month);
-//     }
-//   }
-// }
 
  /**
    * removeZeroBalances
@@ -2418,18 +2399,11 @@ function submitFinancialReport()
  
      $total_cash = array_sum($this->_proofOfCash([$office_id], $reporting_month, $project_ids, $office_bank_ids));
  
-     $total_closing_fund_balance = $this->truncate($total_closing_fund_balance, 0);
+     $total_closing_fund_balance = floor($total_closing_fund_balance);
  
-     $total_cash = $this->truncate($total_cash, 0);
- 
-     //log_message('error', json_encode(['fund' => $total_closing_fund_balance, 'cash' => $total_cash]));
-     //log_message('error', json_encode($total_cash - $total_closing_fund_balance));
- 
+     $total_cash = floor($total_cash);
+
      $is_proof_of_cash_correct =(float)$total_cash == (float)$total_closing_fund_balance ? true : false;
- 
-     //log_message('error', $is_proof_of_cash_correct);
- 
-     //return true; //$is_proof_of_cash_correct;
  
      return $is_proof_of_cash_correct;
    }
@@ -2442,12 +2416,14 @@ function submitFinancialReport()
 
    function truncate($number, $decimals = "0")
    {
-     $power = pow(10, $decimals);
-     if ($number > 0) {
-       return floor($number * $power) / $power;
-     } else {
-       return ceil($number * $power) / $power;
-     }
+    //  $power = pow(10, $decimals);
+    //  if ($number > 0) {
+    //    return floor($number * $power) / $power;
+    //  } else {
+    //    return ceil($number * $power) / $power;
+    //  }
+
+    return round($number, $decimals, PHP_ROUND_HALF_UP);
    }   
 
    function checkIfBudgetIsActive($office_id, $reporting_month)

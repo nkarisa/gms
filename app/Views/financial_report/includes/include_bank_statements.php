@@ -50,7 +50,7 @@
             </tbody>
         </table>
 
-
+        <div id='deletion_info_id'class="hidden" style="color:green; font-weight:bold;">Message</div>
 <script>
 
 </script>

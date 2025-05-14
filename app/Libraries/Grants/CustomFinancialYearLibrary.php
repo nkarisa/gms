@@ -217,4 +217,97 @@ class CustomFinancialYearLibrary extends GrantsLibrary implements \App\Interface
   }
 
 
+   // Update any default custom_financial_year record to 0
+   function actionBeforeInsert($post_array):array{
+    $office_id = $post_array['header']['fk_office_id'];
+    $new_reset_date = $post_array['header']['custom_financial_year_reset_date'];
+
+    // Check if there is an existing default custom fy with 3 years and below based on the custom_financial_year_reset_date
+    $checkExistingCustomFYWith3YearsAndBelow = $this->checkExistingCustomFYWith3YearsAndBelow($office_id, $new_reset_date);
+    // log_message('error', json_encode($checkExistingCustomFYWith3YearsAndBelow));
+    if($checkExistingCustomFYWith3YearsAndBelow){
+        return ['message' => get_phrase('existing_custom_fy_with_3_years_and_below','There is an existing default custom financial year with 3 years and below based on the custom financial year reset date')];
+    }
+
+    // Check if there is an existing default custom financial year. Turn it to non default it exists
+    $checkExistingDefaultCustomFY = $this->checkExistingDefaultCustomFY($office_id);
+
+    if($checkExistingDefaultCustomFY){
+        $this->setCustomFyAsNonDefault($office_id);
+    }
+
+    // Update the default custom_financial_year record
+    $writeBuilder=$this->write_db->table('custom_financial_year');
+
+    $data['custom_financial_year_is_active']=1;
+    $data['custom_financial_year_is_default']=1;
+
+    $writeBuilder->where(array('custom_financial_year_is_default' => 1,'fk_office_id' => $office_id));
+    $writeBuilder->update($data);
+
+    return $post_array;
+}
+
+// checkExistingCustomFYWith3YearsAndBelow has the custom_financial_year_reset_date 3 years and below
+function checkExistingCustomFYWith3YearsAndBelow($office_id, $current_reset_data){
+  $checkExistingCustomFYWith3YearsAndBelow = false;
+  
+  $readBuilder=$this->read_db->table('custom_financial_year');
+  $readBuilder->where(array('custom_financial_year_is_default' => 1,'fk_office_id' => $office_id));
+  $custom_financial_year_obj = $readBuilder->get();
+
+ //  log_message('error', json_encode($custom_financial_year_obj->result_array()));
+  
+  if($custom_financial_year_obj->getNumRows() > 0){
+      $previous_reset_date = $custom_financial_year_obj->getRow()->custom_financial_year_reset_date;
+      
+      $date1 = new \DateTime($previous_reset_date);
+      $date2 = new \DateTime($current_reset_data);
+    
+      
+     //  log_message('error', json_encode(compact('office_id', 'current_reset_data','previous_reset_date')));
+
+     // Calculate the difference
+     $diff = $date1->diff($date2);
+
+     // Convert the difference to total months
+     $totalMonths = ($diff->y * 12) + $diff->m;
+
+     if ($totalMonths < 36) {
+         $checkExistingCustomFYWith3YearsAndBelow = true;
+     }
+ }
+
+ return $checkExistingCustomFYWith3YearsAndBelow;
+}
+
+private function setCustomFyAsNonDefault($office_id){
+
+  $data['custom_financial_year_is_active']=0;
+
+  $data['custom_financial_year_is_default']=0;
+
+  $writeBuilder=$this->write_db->table("custom_financial_year");
+
+  $writeBuilder->where(array('custom_financial_year_is_default' => 1,'fk_office_id' => $office_id));
+  
+  $writeBuilder->update($data);
+}
+
+private function checkExistingDefaultCustomFY($office_id){
+  $checkExistingDefaultCustomFY = false;
+
+  $readerBuilder=$this->read_db->table("custom_financial_year");
+
+  $readerBuilder->where(array('custom_financial_year_is_default' => 1,'fk_office_id' => $office_id));
+  $count = $readerBuilder->get()->getNumRows();
+
+  if($count > 0){
+      $checkExistingDefaultCustomFY = true;
+  }
+
+  return $checkExistingDefaultCustomFY;
+}
+
+
 }
