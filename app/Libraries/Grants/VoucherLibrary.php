@@ -1820,8 +1820,9 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         // log_message('error',json_encode($income_accounts));
         // log_message('error',json_encode($expense_accounts));
 
+        $builder = $this->read_db->table('expense_account');
         if (!empty($income_accounts)) {
-            $builder = $this->read_db->table('expense_account');
+            //$builder = $this->read_db->table('expense_account');
             $builder->select(array('income_account_id', 'income_account_name'));
             $builder->whereIn('income_account_id', $income_accounts);
             $income_accounts = $builder->get('income_account')->getResultArray();
@@ -1835,7 +1836,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         if (!empty($expense_accounts)) {
             $builder->select(array('expense_account_id', 'expense_account_name'));
             $builder->whereIn('expense_account_id', $expense_accounts);
-            $expense_accounts = $builder->get('expense_account')->getResultArray();
+            $expense_accounts = $builder->get()->getResultArray();
 
             $expense_account_ids = array_column($expense_accounts, 'expense_account_id');
             $expense_account_names = array_column($expense_accounts, 'expense_account_name');

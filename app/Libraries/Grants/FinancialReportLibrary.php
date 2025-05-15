@@ -1691,4 +1691,9 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
     }
   }
 
+  function lookupTables(): array
+  {
+    return ['office', 'status'];
+  }
+
 }
