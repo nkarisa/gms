@@ -1124,6 +1124,8 @@ function result($id = '', $parentId = null)
     $month_expenses = $this->expenseReport($office_ids, $reporting_month);
     $fund_balances = $this->fundBalanceReport($office_ids, $reporting_month);
     $action_label = $this->libs->actionLabels('financial_report', hash_id($this->id, 'decode'));
+
+
     return array_merge([
       'test' => [],
       "financial_ratios" => $this->toDateFinancialRatios($office_ids[0],$reporting_month , $month_expenses, $fund_balances),
@@ -1155,6 +1157,7 @@ function result($id = '', $parentId = null)
       'table' => 'financial_report',
       'primary_key' => hash_id($this->id, 'decode'),
       'financial_report_status' => $status_id,
+      
       'funds_transfers' => $this->voucherLibrary->monthFundsTransferVouchers($office_ids, $reporting_month),
       'is_status_id_max' => $this->statusLibrary->isStatusIdMax('financial_report', hash_id($this->id, 'decode')),
       'office_id' =>$this->getOfficeId(),
