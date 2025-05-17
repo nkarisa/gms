@@ -1,3 +1,7 @@
+<?php 
+$awsAttachmentLibrary = new \App\Libraries\System\AwsAttachmentLibrary();
+$attachmentLibrary = new \App\Libraries\Core\AttachmentLibrary();
+?>
 <table class="table table-striped" id="tbl_list_statements">
                     <thead>
                         <tr>
@@ -16,7 +20,7 @@
                     
                                 <?php 
                                     $objectKey = $bank_statements_upload['attachment_url'].'/'.$bank_statements_upload['attachment_name'];
-                                    $url = $this->config->item('upload_files_to_s3')?$this->grants_s3_lib->s3_preassigned_url($objectKey):$this->attachment_library->get_local_filesystem_attachment_url($objectKey);
+                                    $url = $config->upload_files_to_s3 ? $awsAttachmentLibrary->s3PreassignedUrl($objectKey):$attachmentLibrary->getLocalFilesystemAttachmentUrl($objectKey);
                                 ?>
                                 <td><a target='__blank' href='<?=$url;?>'><?=$bank_statements_upload['attachment_name'];?></a></td>
                                 <td><?=formatBytes($bank_statements_upload['attachment_size']);?></td>
