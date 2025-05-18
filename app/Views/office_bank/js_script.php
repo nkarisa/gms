@@ -14,6 +14,7 @@
                 }
                 if (has_active_cheque_book) {
                     $('#office_bank_book_exemption_expiry_date').closest('.form-group').addClass('hidden');
+                    $('#office_bank_chequebook_size').closest('.form-group').addClass('hidden');
                 }
             })
         }

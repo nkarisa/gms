@@ -315,7 +315,6 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
       'office_bank_is_active',
       'office_bank_chequebook_size',
       'office_bank_book_exemption_expiry_date'
-
     ];
   }
 
@@ -493,7 +492,7 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
     $office_bank_id = hash_id($hash_office_bank_id,'decode');
     $leaves = $chequeBookLibrary->getRemainingUnusedChequeLeaves($office_bank_id);
     if(!empty($leaves)){
-      $message = "<br/>".get_phrase("cheque_book_use_expiry_edit_warning","Editing the cheque book use expiry date is not permitted for office banks with active cheque book.");
+      $message = "<br/>".get_phrase("cheque_book_use_expiry_edit_warning","Editing the cheque book use expiry date and cheque book size is not permitted for office banks with active cheque book.");
     }
     return $message;
   }
