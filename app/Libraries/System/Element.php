@@ -123,7 +123,7 @@ class Element{
   
       }
   
-      $add_form .= $this->form_group([$this->reset_button(),$this->save_button($form_id),$this->save_new_button($form_id)]);
+      $add_form .= $this->form_group([$form_id == 'add_form' ? $this->reset_button() : '',$this->save_button($form_id),$this->save_new_button($form_id)]);
       
       $add_form .= "</form>";
   
@@ -131,7 +131,7 @@ class Element{
     }
   
     function reset_button(){
-      return "<div class='btn btn-default'>".get_phrase('reset')."</div>";
+      return "<div class='btn btn-default reset'>".get_phrase('reset')."</div>";
     }
   
     function save_button($form_id){

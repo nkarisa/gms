@@ -22,11 +22,13 @@
 
         $('#fk_office_id').on('change', function () {
             const office_id = $('#fk_office_id').val();
-            const url = '<?= base_url(); ?>ajax/office_bank/incomeAccountRequiringAllocation/' + office_id;
-            const count_active_office_banks_url = '<?= base_url(); ?>ajax/office_bank/countActiveOfficeBanks/' + office_id
+            const url = '<?= base_url(); ?>ajax/office_bank/incomeAccountRequiringAllocation';
+            const count_active_office_banks_url = '<?= base_url(); ?>ajax/office_bank/countActiveOfficeBanks'
+            const data = {
+                office_id
+            }
 
-
-            $.get(url, function (response_obj) {
+            $.post(url, data, function (response_obj) {
                 if (response_obj.unallocated_income_account.length > 0) {
                     $message_string = 'The following income accounts are not associated to project for this office.';
                     $message_string += 'You will not be able to save this new office bank until this issue is fixed.\n\n';
@@ -42,8 +44,7 @@
                 } else {
                     $(".save, .save_new").removeClass('disabled');
 
-                    $.get(count_active_office_banks_url, function (count_active_office_banks) {
-                        // alert(count_active_office_banks)
+                    $.post(count_active_office_banks_url, data, function (count_active_office_banks) {
                         if (count_active_office_banks.count > 0) {
                             $('#office_bank_conditions').removeClass('hidden');
                             $('.save, .save_new').addClass('disabled')

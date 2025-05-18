@@ -79,4 +79,8 @@
   });
 
 
+  $('.reset').on('click', function(){
+     document.getElementById('add_form').reset();
+  })
+
 </script>

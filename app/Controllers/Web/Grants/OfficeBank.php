@@ -46,9 +46,11 @@ class OfficeBank extends WebController
         return $this->response->setJSON($result);
       }
 
-      function incomeAccountRequiringAllocation($office_id){
+      function incomeAccountRequiringAllocation(){
         $office_bank_ids = [];
         $office_banks = [];
+        $post = $this->request->getPost();
+        $office_id = $post['office_id'];
     
         $builder = $this->read_db->table('office_bank');
         $builder->select(array('office_bank_id','office_bank_name'));
@@ -62,25 +64,34 @@ class OfficeBank extends WebController
           $office_banks = $office_bank_ids_raw;
         }
     
-        $incomeAccountLibrary = new \App\Libraries\Grants\IncomeAccountLibrary();
-        $income_accounts = $incomeAccountLibrary->incomeAccountMissingProjectAllocation($office_id, $office_bank_ids);
-    
         $accounts = [];
-    
-        if(count($income_accounts) > 0){
-          $builder = $this->read_db->table("income_account");
-          $builder->select(array('income_account_id','income_account_name'));
-          $builder->whereIn('income_account_id', $income_accounts);
-          $accounts = $builder->get()->getResultArray();
+        
+        if($office_id > 0){
+          $incomeAccountLibrary = new \App\Libraries\Grants\IncomeAccountLibrary();
+          $income_accounts = $incomeAccountLibrary->incomeAccountMissingProjectAllocation($office_id, $office_bank_ids);
+      
+      
+          if(count($income_accounts) > 0){
+            $builder = $this->read_db->table("income_account");
+            $builder->select(array('income_account_id','income_account_name'));
+            $builder->whereIn('income_account_id', $income_accounts);
+            $accounts = $builder->get()->getResultArray();
+          }
         }
         
     
         return $this->response->setJSON(['unallocated_income_account' => $accounts, 'existing_office_banks' => $office_banks]);
       }
 
-      function countActiveOfficeBanks($office_id){
-        $officeBankLibrary = new \App\Libraries\Grants\OfficeBankLibrary();
-        $count  = $officeBankLibrary->getActiveOfficeBank($office_id);
+      function countActiveOfficeBanks(){
+        $post = $this->request->getPost();
+        $office_id = $post['office_id'];
+        $count = 0;
+        
+        if($office_id > 0){
+          $officeBankLibrary = new \App\Libraries\Grants\OfficeBankLibrary();
+          $count  = $officeBankLibrary->getActiveOfficeBank($office_id);
+        }
         return $this->response->setJSON(compact('count'));
       }
 }

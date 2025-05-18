@@ -63,4 +63,7 @@
         ev.preventDefault();
     });
 
+    $('.reset').on('click', function(){
+        document.getElementById('edit_form').reset();
+    })
 </script>
