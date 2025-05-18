@@ -63,15 +63,7 @@ class ListOutput extends OutputTemplate
       $builder->where($foreignKeyField, hash_id($this->parentId, 'decode'));
     }
 
-    // $featureLibrary->listTableWhere($builder);
-
-    // // This is to be a redundant code and needs to be removed in the future
-    // if (method_exists($featureLibrary, $where_method)) {
-    //   $featureLibrary->$where_method($builder);
-    // }
-
     $this->libs->joinTablesWithOffice($builder, $table);
-
 
     // Handle lookup tables and joins
     if (is_array($lookup_tables) && count($lookup_tables) > 0) {
@@ -183,7 +175,7 @@ class ListOutput extends OutputTemplate
         $filter_where_array
       );
 
-      $this->libs->dataTableBuilder($builder, $table, $selected_columns);
+      // $this->libs->dataTableBuilder($builder, $table, $selected_columns);
       
       return $builder->countAllResults();
     }
@@ -220,7 +212,6 @@ class ListOutput extends OutputTemplate
     ) {
       $feature_model_list_result = $featureLibrary->list($builder, $listSelectColumns, $this->parentId, $this->parentTable);
       // Allows empty result set
-      // $query_result = $feature_model_list_result; // A full user defined query result
       $query_result = isset($feature_model_list_result['results']) ? $feature_model_list_result['results'] : [] ; // A full user defined query result
       $total_records = isset($feature_model_list_result['total_records']) ?  $feature_model_list_result['total_records']: 0;
     } else {

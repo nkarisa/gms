@@ -1113,14 +1113,9 @@ function result($id = '', $parentId = null)
     $budget_tag_name = '';
 
     if($budget_id == 0){
-      // $this->load->model('budget_tag_model');
-      // $this->load->model('custom_financial_year_model');
-
       $custom_financial_year = $this->customFinancialYearLibrary->getDefaultCustomFinancialYearIdByOffice($office_ids[0], true);
       $budget_tag_name = $this->budgetTagLibrary->getBudgetTagIdBasedOnReportingMonth($office_ids[0],$reporting_month, $custom_financial_year)['budget_tag_name'];
     }
-    // log_message('error', json_encode($budget_id));
-
     $month_expenses = $this->expenseReport($office_ids, $reporting_month);
     $fund_balances = $this->fundBalanceReport($office_ids, $reporting_month);
     $action_label = $this->libs->actionLabels('financial_report', hash_id($this->id, 'decode'));
@@ -1163,37 +1158,9 @@ function result($id = '', $parentId = null)
       'office_id' =>$this->getOfficeId(),
       'action_lable'=>$action_label['status_name'],
     ], $this->grantsLibrary->actionButtonData($this->controller, $account_system_id));
-  } elseif ($this->action == 'list') {
-    $columns = $this->columns();
-    unset($columns[array_search('fk_account_system_id', $columns)]);
-    array_shift($columns);
-    $result['columns'] = $columns;
-    $result['has_details_table'] = false;
-    $result['has_details_listing'] = false;
-    $result['is_multi_row'] = false;
-    $result['show_add_button'] = false;
-
-    return $result;
-  } else {
-    return parent::result($id);
-  }
-}
-
-function columns()
-{
-  $columns = [
-    'financial_report_id',
-    'financial_report_track_number',
-    'office_name',
-    'financial_report_is_submitted',
-    'financial_report_month',
-    'financial_report_submitted_date',
-    //'financial_report_created_date',
-    'status_name',
-    'fk_account_system_id',
-  ];
-
-  return $columns;
+  } 
+  
+  return $result;
 }
 
 function getOfficeId(){
@@ -1203,161 +1170,7 @@ function getOfficeId(){
   $id = $builder->get()->getRow()->fk_office_id;
   return $id;
 }
-function getFinancialReports()
-{
 
-  $columns = $this->columns();
-  array_push($columns, 'status_id');
-  $search_columns = $columns;
-
-  // Limiting records
-  $start = intval($this->request->getPost('start'));
-  $length = intval($this->request->getPost('length'));
-  $financial_report_builder = $this->read_db->table('financial_report');
-  $financial_report_builder->limit($length, $start);
-
-  // Ordering records
-
-  $order = $this->request->getPost('order');
-  $col = '';
-  $dir = 'desc';
-
-  if (!empty($order)) {
-    $col = $order[0]['column'];
-    $dir = $order[0]['dir'];
-  }
-
-  if ($col == '') {
-    $financial_report_builder->orderBy('financial_report_id DESC');
-  } else {
-    $financial_report_builder->orderBy($columns[$col], $dir);
-  }
-
-  $this->searchBuilderLibrary->searchbuilder_query_group($this->columns(), $financial_report_builder);
-
-  $financial_report_builder->select($columns);
-  $financial_report_builder->join('status', 'status.status_id=financial_report.fk_status_id');
-  $financial_report_builder->join('office', 'office.office_id=financial_report.fk_office_id');
-
-  if (!$this->session->system_admin) {
-    $financial_report_builder->whereIn('financial_report.fk_office_id', array_column($this->session->hierarchy_offices, 'office_id'));
-  }
-
-  $result_obj = $financial_report_builder->get();
-
-  $results = [];
-
-  if ($result_obj->getNumRows() > 0) {
-    $results = $result_obj->getResultArray();
-  }
-
-  return $results;
-}
-
-function countFinancialReports()
-{
-
-  $columns = $this->columns();
-  $search_columns = $columns;
-  $financial_report_builder = $this->read_db->table('financial_report');
-  $this->searchBuilderLibrary->searchbuilder_query_group($this->columns(), $financial_report_builder);
-  $builder = $this->read_db->table('financial_report');
-  if (!$this->session->system_admin) {
-    $builder->whereIn('financial_report.fk_office_id', array_column($this->session->hierarchy_offices, 'office_id'));
-  }
-
-  $builder->join('status', 'status.status_id=financial_report.fk_status_id');
-  $builder->join('office', 'office.office_id=financial_report.fk_office_id');
-  $builder->get();
-  $count_all_results = $builder->countAllResults();
-
-  return $count_all_results;
-}
-
-function showList():ResponseInterface
-{
-
-  $draw = intval($this->request->getPost('draw'));
-  $financial_reports = $this->getFinancialReports();
-  $count_financial_reports = $this->countFinancialReports();
-
-  $result = [];
-
-  $cnt = 0;
-  foreach ($financial_reports as $financial_report) {
-
-    $status_data = $this->grantsLibrary->actionButtonData($this->controller, $financial_report['fk_account_system_id']);
-    extract($status_data);
-
-    $financial_report_id = array_shift($financial_report);
-    $financial_status = array_pop($financial_report);
-
-    $financial_report_track_number = $financial_report['financial_report_track_number'];
-    $financial_report['financial_report_track_number'] = '<a target="_blank" href="' . base_url() . $this->controller . '/view/' . hash_id($financial_report_id) . '">' . $financial_report_track_number . '</a>';
-    $financial_report['financial_report_is_submitted'] = $financial_report['financial_report_is_submitted'] == 1 ? get_phrase('yes') :  get_phrase('no');
-    $row = array_values($financial_report);
-
-    $action = ''; //approval_action_button($this->controller, $item_status, $financial_report_id, $financial_status, $item_initial_item_status_id, $item_max_approval_status_ids);
-
-    array_unshift($row, $action);
-
-    $result[$cnt] = $row;
-
-    $cnt++;
-  }
-
-  $response = [
-    'draw' => $draw,
-    'recordsTotal' => $count_financial_reports,
-    'recordsFiltered' => $count_financial_reports,
-    'data' => $result
-  ];
-
-  // echo json_encode($response);
-  return $this->response->setJSON($response);
-}
-
-// function show_list()
-// {
-
-//   $draw = intval($this->input->post('draw'));
-//   $financial_reports = $this->get_financial_reports();
-//   $count_financial_reports = $this->count_financial_reports();
-
-//   $result = [];
-
-//   $cnt = 0;
-//   foreach ($financial_reports as $financial_report) {
-
-//     $status_data = $this->general_model->action_button_data($this->controller, $financial_report['fk_account_system_id']);
-//     extract($status_data);
-
-//     $financial_report_id = array_shift($financial_report);
-//     $financial_status = array_pop($financial_report);
-
-//     $financial_report_track_number = $financial_report['financial_report_track_number'];
-//     $financial_report['financial_report_track_number'] = '<a target="__blank" href="' . base_url() . $this->controller . '/view/' . hash_id($financial_report_id) . '">' . $financial_report_track_number . '</a>';
-//     $financial_report['financial_report_is_submitted'] = $financial_report['financial_report_is_submitted'] == 1 ? get_phrase('yes') :  get_phrase('no');
-//     $row = array_values($financial_report);
-
-//     $action = ''; //approval_action_button($this->controller, $item_status, $financial_report_id, $financial_status, $item_initial_item_status_id, $item_max_approval_status_ids);
-
-//     array_unshift($row, $action);
-
-//     $result[$cnt] = $row;
-
-//     $cnt++;
-//   }
-
-//   $response = [
-//     'draw' => $draw,
-//     'recordsTotal' => $count_financial_reports,
-//     'recordsFiltered' => $count_financial_reports,
-//     'data' => $result
-//   ];
-
-//   echo json_encode($response);
-// }
 
 function resultArray($report_id, $office_ids, $reporting_month, $project_ids = [], $office_bank_ids = [])
 {

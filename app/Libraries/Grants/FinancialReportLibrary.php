@@ -1421,7 +1421,13 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
 
     public function listTableVisibleColumns(): array
     {
-      return ['financial_report_track_number', 'office_name', 'financial_report_is_submitted', 'financial_report_month', 'financial_report_submitted_date', 'status_name'];
+      return [
+                'financial_report_track_number', 
+                'office_name', 'financial_report_is_submitted', 
+                'financial_report_month', 
+                'financial_report_submitted_date', 
+                'status_name'
+            ];
     }
 
     function pagePosition(){
