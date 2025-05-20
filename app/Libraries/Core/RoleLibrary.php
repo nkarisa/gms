@@ -39,12 +39,12 @@ class RoleLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
         return $roles_ids_and_names;
        }
    
-       function detailTables(): array {
-        return ['role_permission','role_group_association'];
-       }
+      //  function detailTables(): array {
+      //   return ['role_permission','role_group_association'];
+      //  }
 
 
-    function singleFormAddVisibleColumns(): array {
+    function singleFormEditVisibleColumns(): array {
       $fields = [
         'role_name',
         'role_shortname',
@@ -71,14 +71,14 @@ class RoleLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
     }
 
     function editVisibleColumns(): array {
-      $fields = [...$this->singleFormAddVisibleColumns()];
+      $fields = [...$this->singleFormEditVisibleColumns()];
 
       // Check if role has user associated to it
-      $roleHasUsers = $this->checkRoleHasUsers(hash_id($this->id, 'decode'));
+      //$roleHasUsers = $this->checkRoleHasUsers(hash_id($this->id, 'decode'));
       
-      if($roleHasUsers == true){
-        unset($fields[array_search('role_is_active', $fields)]);
-      }
+      //if($roleHasUsers == true){
+        //unset($fields[array_search('role_is_active', $fields)]);
+      //}
       
       return $fields;
     }
@@ -104,17 +104,58 @@ class RoleLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
     }
 
   function actionAfterEdit(array $postData, int $approveId, int $itemId): bool {
+  
+    // if($postData['role_is_active'] == 0){
+    //   // Disable all role permissions
+    //   $rolePermissionWriteBuilder->where('fk_role_id', $itemId);
+    //   $rolePermissionWriteBuilder->update(['role_permission_is_active' => 0]);
+    // }else{
+    //   // Enable all role permissions
+    //   $rolePermissionWriteBuilder->where('fk_role_id', $itemId);
+    //   $rolePermissionWriteBuilder->update(['role_permission_is_active' => 1]);
+    // }
+
+
     $rolePermissionWriteBuilder = $this->write_db->table('role_permission');
 
-    if($postData['role_is_active'] == 0){
+    //Check if role has user associated to it
+    $roleHasUsers =$this->checkRoleHasUsers(hash_id($this->id, 'decode'));
+
+    if(!$roleHasUsers){
       // Disable all role permissions
       $rolePermissionWriteBuilder->where('fk_role_id', $itemId);
       $rolePermissionWriteBuilder->update(['role_permission_is_active' => 0]);
+
     }else{
       // Enable all role permissions
       $rolePermissionWriteBuilder->where('fk_role_id', $itemId);
       $rolePermissionWriteBuilder->update(['role_permission_is_active' => 1]);
     }
     return true;
+  }
+
+  function changeFieldType():array{
+    
+    $fields = []; 
+
+    $readerBuilder=$this->read_db->table('context_definition');
+    $readerBuilder->select(array('context_definition_id','context_definition_name'));
+    $context_definition_names=$readerBuilder->get()->getResultArray();
+
+    $names=array_column($context_definition_names,'context_definition_name');
+
+    $ids=array_column($context_definition_names,'context_definition_id');
+
+    $combine_ids_and_names=array_combine($ids,$names);
+
+    $fields['context_definition_name']['field_type'] = 'select';
+
+    foreach($combine_ids_and_names as $id=>$name){
+      $fields['context_definition_name']['options'][$id] = $name;
+    }
+
+    
+
+    return $fields;
   }
 }
