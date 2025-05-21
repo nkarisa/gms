@@ -138,4 +138,14 @@ class AccountSystemSettingLibrary extends GrantsLibrary implements \App\Interfac
         'account_system_setting_last_modified_date'
       ];
     }
+
+    function singleFormAddVisibleColumns(): array
+    {
+      return [
+        'account_system_setting_name',
+        'account_system_setting_description',
+        'account_system_setting_accounts',
+        'account_system_setting_value'
+      ];
+    }
 }

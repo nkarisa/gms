@@ -487,7 +487,8 @@ class Voucher extends WebController
         $voucher_type_effect == 'expense' || 
         $voucher_type_effect == 'bank_refund' || 
         $voucher_type_effect ==  VoucherTypeEffectEnum::PAYABLES->getCode() || 
-        $voucher_type_effect == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode()
+        $voucher_type_effect == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode() || 
+        $voucher_type_effect == VoucherTypeEffectEnum::PREPAYMENTS->getCode()
         ) {
 
       if($voucher_type_effect == 'payables'){
@@ -581,19 +582,19 @@ class Voucher extends WebController
           'office_bank_id' => $office_bank_id
         )
       )->get();
-    }elseif ($voucher_type_effect == VoucherTypeEffectEnum::PREPAYMENTS->getCode()){
-      $contraAccountLibrary->addContraAccount($office_bank_id);
+    // }elseif ($voucher_type_effect == VoucherTypeEffectEnum::PREPAYMENTS->getCode()){
+    //   $contraAccountLibrary->addContraAccount($office_bank_id);
 
-      $contraAccountReadBuilder->select(array('contra_account_id as account_id', 'contra_account_name as account_name', 'contra_account_code as account_code'));
-      $contraAccountReadBuilder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=contra_account.fk_voucher_type_effect_id');
-      $contraAccountReadBuilder->join('office_bank', 'office_bank.office_bank_id=contra_account.fk_office_bank_id');
-      $contraAccountReadBuilder->where(array('fk_account_system_id' => $office_accounting_system->account_system_id));
-      $contraAccountReadBuilder->where(array(
-        'voucher_type_effect_code' => VoucherTypeEffectEnum::PREPAYMENTS->getCode(),
-        'office_bank_is_active' => 1,
-        'office_bank_id' => $office_bank_id
-      ));
-      $accounts_obj = $contraAccountReadBuilder->get();
+    //   $contraAccountReadBuilder->select(array('contra_account_id as account_id', 'contra_account_name as account_name', 'contra_account_code as account_code'));
+    //   $contraAccountReadBuilder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=contra_account.fk_voucher_type_effect_id');
+    //   $contraAccountReadBuilder->join('office_bank', 'office_bank.office_bank_id=contra_account.fk_office_bank_id');
+    //   $contraAccountReadBuilder->where(array('fk_account_system_id' => $office_accounting_system->account_system_id));
+    //   $contraAccountReadBuilder->where(array(
+    //     'voucher_type_effect_code' => VoucherTypeEffectEnum::PREPAYMENTS->getCode(),
+    //     'office_bank_is_active' => 1,
+    //     'office_bank_id' => $office_bank_id
+    //   ));
+    //   $accounts_obj = $contraAccountReadBuilder->get();
     }elseif ($voucher_type_effect == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode()){
       $contraAccountLibrary->addContraAccount($office_bank_id);
 
