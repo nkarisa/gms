@@ -16,9 +16,16 @@ class AssetDepreciationLibrary extends GrantsLibrary implements \App\Interfaces\
 
         $this->assetdepreciationModel = new AssetDepreciationModel();
 
-        $this->table = 'assetdepreciation';
+        $this->table = 'asset_depreciation';
     }
 
-
+    function singleFormAddVisibleColumns(): array
+    {
+        return [
+            'capital_asset_name',
+            'asset_depreciation_cost',
+            'asset_depreciation_month'
+        ];
+    }
    
 }
