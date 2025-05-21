@@ -135,13 +135,13 @@ $columns = array_chunk($keys,service("settings")->get("GrantsConfig.master_table
                     if(strpos($column,'is_')){
                       echo $column_value == 1?get_phrase('yes'):get_phrase('no');
 
-                    }elseif(in_array($column,$lookup_name_fields) ){
+                    }elseif(in_array($column,$lookup_name_fields)){
                         $primary_table_name = substr($column,0,-5);
                         $lookup_table_id = $table_body[strtolower($primary_table_name).'_id'];
-                        echo '<a href="'.base_url().$primary_table_name.'/view/'.hash_id($lookup_table_id).'">'.ucwords(str_replace('_',' ',$column_value)).'</a>';
-                    //}elseif(in_array($column,$this->{$this->controller.'_model'}->currency_fields())){
-                      //  echo number_format($column_value,2);
-                        //echo $column_value;
+                        // $lookup_table_id = $table_body[strtolower($primary_table_name).'_id'];
+                        if($lookup_table_id > 0){
+                          echo '<a href="'.base_url().$primary_table_name.'/view/'.hash_id($lookup_table_id).'">'.ucwords(str_replace('_',' ',$column_value)).'</a>';
+                        }
                     }else{
                         echo $column_value != null ? ucwords(str_replace('_',' ',$column_value)): '';
                     }

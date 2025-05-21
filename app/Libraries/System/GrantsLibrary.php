@@ -660,12 +660,22 @@ class GrantsLibrary
     $builder = $this->read_db->table($table); // Start query builder for the table
     $builder->select($selectedColumns);
 
+
+
     // Check if lookup tables exist and join them
     if (is_array($lookupTables) && count($lookupTables) > 0) {
+        $featureLibrary = $this->loadLibrary($table );
+      // Create table joins
+        $lookup_tables_with_null_values = [];
+        if(!empty(property_exists($featureLibrary, 'lookup_tables_with_null_values'))){
+          $lookup_tables_with_null_values = $featureLibrary->lookup_tables_with_null_values;
+        }
+
       foreach ($lookupTables as $lookupTable) {
-        // Create table joins
+        
+        $joinType = in_array($lookupTable, $lookup_tables_with_null_values) ? 'LEFT': '';
         $lookupTableId = $this->primaryKeyField($lookupTable);
-        $builder->join($lookupTable, "$lookupTable.$lookupTableId = $table.fk_$lookupTableId");
+        $builder->join($lookupTable, "$lookupTable.$lookupTableId = $table.fk_$lookupTableId", $joinType);
       }
     }
 
@@ -683,9 +693,8 @@ class GrantsLibrary
     // Get the data row based on the primary key and hashed ID
     $primaryKeyField = $this->primaryKeyField($table);
     $decodedId = hash_id($this->uri->getSegment(3), 'decode');
-    $data = (array) $builder->getWhere([$primaryKeyField => $decodedId])->getRow();
-
-    log_message('error', json_encode($data));
+    $builder->where([$primaryKeyField => $decodedId]);
+    $data = (array) $builder->get()->getRow();
 
     // Get the name of the record creator
     $createdByField = $this->historyTrackingField($table, 'created_by');
