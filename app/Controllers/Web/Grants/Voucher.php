@@ -1420,7 +1420,18 @@ class Voucher extends WebController
     if($from_voucher_obj->getNumRows() > 0){
       $from_voucher_id = $from_voucher_obj->getRowArray()['voucher_id'];
       // Compute unrefunded amount
-      $voucher_cost = $voucherLibrary->unrefundedAmountByFromVoucherId($from_voucher_id);
+      $settlementType = 'bank_refund';
+      
+      if(
+        $voucherTypeInfo['voucher_type_effect_code'] == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() ||
+        $voucherTypeInfo['voucher_type_effect_code'] == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() || 
+        $voucherTypeInfo['voucher_type_effect_code'] == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode()
+      ){
+        $settlementType = 'accrual'; 
+      }
+
+      $voucher_cost = $voucherLibrary->unrefundedAmountByFromVoucherId($from_voucher_id, $settlementType);
+      
     }
   
 

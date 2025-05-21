@@ -3,9 +3,9 @@
 // $db = \Config\Database::connect('read');
 // echo json_encode($db->getFieldData('capital_asset'));
 
-$voucherLibary = new  \App\Libraries\Grants\VoucherLibrary();
-$recievableBalance = $voucherLibary->accountsRecievables(1328, '2024-11-01');
-echo json_encode($recievableBalance);
+// $voucherLibary = new  \App\Libraries\Grants\VoucherLibrary();
+// $recievableBalance = $voucherLibary->accountsRecievables(1328, '2024-11-01');
+// echo json_encode($recievableBalance);
 
 // $voucherTypeLibrary = new \App\Libraries\Grants\VoucherTypeLibrary();
 // $voucherType = $voucherTypeLibrary->getVoucherTypeById(227);

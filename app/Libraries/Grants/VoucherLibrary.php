@@ -951,45 +951,45 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return $next_serial;
     }
 
-    function accountsRecievables($officeId, $transactionDate){
-        $voucherDetailReaderBuilder = $this->read_db->table('voucher_detail');
-        $transactionDate = date('Y-m-t', strtotime($transactionDate));
+    // function accountsRecievables($officeId, $transactionDate){
+    //     $voucherDetailReaderBuilder = $this->read_db->table('voucher_detail');
+    //     $transactionDate = date('Y-m-t', strtotime($transactionDate));
 
-        $voucherDetailReaderBuilder->selectSum('voucher_detail_total_cost');
-        $voucherDetailReaderBuilder->select('voucher_type_effect_code,fk_income_account_id,voucher_id');
-        $voucherDetailReaderBuilder->join('voucher','voucher.voucher_id=voucher_detail.fk_voucher_id');
-        $voucherDetailReaderBuilder->join('voucher_type','voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
-        $voucherDetailReaderBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
-        $voucherDetailReaderBuilder->where(['fk_office_id' => $officeId]);
-        $voucherDetailReaderBuilder->whereIn('voucher_type_effect_code', [VoucherTypeEffectEnum::RECEIVABLES->getCode(), VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode()]);
-        $voucherDetailReaderBuilder->groupStart();
-            $voucherDetailReaderBuilder->where('voucher_transaction_cleared_date', NULL);
-            $voucherDetailReaderBuilder->orWhere('voucher_transaction_cleared_date <=', $transactionDate);
-        $voucherDetailReaderBuilder->groupEnd();
-        $voucherDetailReaderBuilder->groupBy('voucher_type_effect_code,fk_income_account_id,voucher_id');
-        $queryResultObj = $voucherDetailReaderBuilder->get();
+    //     $voucherDetailReaderBuilder->selectSum('voucher_detail_total_cost');
+    //     $voucherDetailReaderBuilder->select('voucher_type_effect_code,fk_income_account_id,voucher_id');
+    //     $voucherDetailReaderBuilder->join('voucher','voucher.voucher_id=voucher_detail.fk_voucher_id');
+    //     $voucherDetailReaderBuilder->join('voucher_type','voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+    //     $voucherDetailReaderBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+    //     $voucherDetailReaderBuilder->where(['fk_office_id' => $officeId]);
+    //     $voucherDetailReaderBuilder->whereIn('voucher_type_effect_code', [VoucherTypeEffectEnum::RECEIVABLES->getCode(), VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode()]);
+    //     $voucherDetailReaderBuilder->groupStart();
+    //         $voucherDetailReaderBuilder->where('voucher_transaction_cleared_date', NULL);
+    //         $voucherDetailReaderBuilder->orWhere('voucher_transaction_cleared_date <=', $transactionDate);
+    //     $voucherDetailReaderBuilder->groupEnd();
+    //     $voucherDetailReaderBuilder->groupBy('voucher_type_effect_code,fk_income_account_id,voucher_id');
+    //     $queryResultObj = $voucherDetailReaderBuilder->get();
 
-        $queryResult = [];
+    //     $queryResult = [];
 
-        if($queryResultObj->getNumRows() > 0){
-            $queryResult = $queryResultObj->getResultArray();
-        }
+    //     if($queryResultObj->getNumRows() > 0){
+    //         $queryResult = $queryResultObj->getResultArray();
+    //     }
 
-        return $queryResult;
-    }
+    //     return $queryResult;
+    // }
 
 
-    function accountsRecievableBalance($officeId, $transactionDate){
-        $this->accountsRecievables($officeId, $transactionDate);
-    }
+    // function accountsRecievableBalance($officeId, $transactionDate){
+    //     $this->accountsRecievables($officeId, $transactionDate);
+    // }
 
-    function accountPayablesBalance($officeId){
-        $voucherDetailReaderBuilder = $this->read_db->table('voucher_detail');
-    }
+    // function accountPayablesBalance($officeId){
+    //     $voucherDetailReaderBuilder = $this->read_db->table('voucher_detail');
+    // }
 
-    function prepaymentsBalance($officeId){
-        $voucherDetailReaderBuilder = $this->read_db->table('voucher_detail');
-    }
+    // function prepaymentsBalance($officeId){
+    //     $voucherDetailReaderBuilder = $this->read_db->table('voucher_detail');
+    // }
 
     function getActiveVoucherTypes($account_system_id, $office_id, $transaction_date)
     {
@@ -1315,7 +1315,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
                     VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode() => VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getName(),
                 };
                 $header['voucher_cleared_from'] = $reverse_from_voucher_id;
-                $header['voucher_description'] = get_phrase('voucher_number').$reverse_from_voucher['voucher_number']. ' ' .$title;
+                $header['voucher_description'] = $post['voucher_description'].' ['.get_phrase('voucher_number').' '.$reverse_from_voucher['voucher_number']. ' ' .$title.']';
             }
         }else{
             $header['voucher_description'] = $post['voucher_description'];
@@ -1410,8 +1410,14 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         }
 
         if($voucher_type_effect_code == 'bank_refund') {
-            $this->updateReversalFromVoucher($reverse_from_voucher_id, $header_id, $reverse_from_voucher_number, $header['voucher_description'], $total_voucher_cost);
-          }
+            $this->updateReversalFromVoucher($reverse_from_voucher_id, $header_id, $reverse_from_voucher_number, $header['voucher_description'], $total_voucher_cost, 'bank_refund');
+        }elseif(
+            $voucher_type_effect_code == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() ||
+            $voucher_type_effect_code == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() ||
+            $voucher_type_effect_code == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode()
+        ){
+            $this->updateReversalFromVoucher($reverse_from_voucher_id, $header_id, $reverse_from_voucher_number, $header['voucher_description'], $total_voucher_cost,'accrual');
+        }
       
           $voucher_posting_condition = $this->voucherPostingCondition($post);
 
@@ -1450,9 +1456,9 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return $checkResult;
       }
 
-    function updateReversalFromVoucher($from_id, $to_id, $voucher_number_from, $new_voucher_description, $total_voucher_cost){
+    function updateReversalFromVoucher($from_id, $to_id, $voucher_number_from, $new_voucher_description, $total_voucher_cost, $settlementType = 'bank_refund'){
 
-        $unrefunded_amount = $this->unrefundedAmountByFromVoucherId($from_id);
+        $unrefunded_amount = $this->unrefundedAmountByFromVoucherId($from_id, $settlementType);
         
         // Get existing voucher_refunding_to ids
         $voucher_refunding_to_json = $this->read_db->table('voucher')->where( ['voucher_id' => $from_id])
@@ -1471,18 +1477,24 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $voucherWriteBuilder = $this->write_db->table('voucher');
 
         if(($total_voucher_cost - $unrefunded_amount) == 0){
-          $desc['voucher_description'] = "$new_voucher_description [Refunded to $voucher_number_from]";
-          
-          $voucherWriteBuilder->where('voucher_id', $to_id);
-          $voucherWriteBuilder->update($desc);
+            if($settlementType == 'bank_refund') {
+                $desc['voucher_description'] = "$new_voucher_description [Refunded to $voucher_number_from]";
       
-          $data['voucher_reversal_to'] = $to_id;
-          $data['voucher_is_reversed'] = 1;
+                $data['voucher_reversal_to'] = $to_id;
+                $data['voucher_is_reversed'] = 1;
+            }else{
+                $desc['voucher_description'] = "$new_voucher_description";
+                $data['voucher_cleared_to'] = $to_id;
+                $data['voucher_transaction_cleared_date'] = date('Y-m-01');
+            }
+
+            $voucherWriteBuilder->where('voucher_id', $to_id);
+            $voucherWriteBuilder->update($desc);
+          
         }
         
         $voucherWriteBuilder->where(['voucher_id' => $from_id]);
         $voucherWriteBuilder->update( $data);
-        
         
       }
 
@@ -2567,11 +2579,11 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return $cheque_numbers;
     }
 
-    public function unrefundedAmountByFromVoucherId($from_voucher_id){
+    public function unrefundedAmountByFromVoucherId($from_voucher_id, $settlementType = 'bank_refund'){
 
         $voucherReadBuilder = $this->read_db->table('voucher');
 
-        $voucherReadBuilder->select("voucher_detail_total_cost");
+        $voucherReadBuilder->selectSum("voucher_detail_total_cost");
         $voucherReadBuilder->where(array('voucher_id' => $from_voucher_id));
         $voucherReadBuilder->join('voucher_detail', 'voucher_detail.fk_voucher_id = voucher.voucher_id');
         $voucher_amount_obj = $voucherReadBuilder->get();
@@ -2582,8 +2594,8 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
           $voucher_amount = abs(array_sum(array_column($voucher_details, 'voucher_detail_total_cost')));
         }
 
-        $voucherReadBuilder->select("voucher_detail_total_cost");
-        $voucherReadBuilder->where(array('voucher_reversal_from' => $from_voucher_id));
+        $voucherReadBuilder->selectSum("voucher_detail_total_cost");
+        $voucherReadBuilder->where(array($settlementType == 'bank_refund' ? 'voucher_reversal_from' : 'voucher_cleared_from' => $from_voucher_id));
         $voucherReadBuilder->join('voucher_detail', 'voucher_detail.fk_voucher_id = voucher.voucher_id');
         $total_refund_amount_obj = $voucherReadBuilder->get();
     

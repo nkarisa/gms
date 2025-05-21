@@ -16,6 +16,13 @@ class AddVoucherClearedFromToVoucherTable extends Migration
                 'default'    => 0,
                 'after'      => 'voucher_reversal_from', // This places it after the specified column
             ],
+            'voucher_cleared_to' => [
+                'type'       => 'INT',
+                'constraint' => 11, // Or whatever integer constraint you prefer
+                'null'       => false,
+                'default'    => 0,
+                'after'      => 'voucher_cleared_from', // This places it after the specified column
+            ],
         ];
         $this->forge->addColumn('voucher', $fields);
     }
@@ -25,5 +32,6 @@ class AddVoucherClearedFromToVoucherTable extends Migration
         // This is the reverse operation.
         // It's good practice to provide a way to revert the migration.
         $this->forge->dropColumn('voucher', 'voucher_cleared_from');
+        $this->forge->dropColumn('voucher', 'voucher_cleared_to');
     }
 }
