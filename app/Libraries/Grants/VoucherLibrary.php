@@ -1290,19 +1290,35 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $reverse_from_voucher_id = 0;
         $reverse_from_voucher_number = '';
         
-        if($voucher_type_effect_code == 'bank_refund') {
-        
-        $reverse_from_voucher = $this->getRefundFromVoucher($office_id, $post['bank_refund']);
-        $reverse_from_voucher_number = $reverse_from_voucher['voucher_number'];
-        $reverse_from_voucher_id = $reverse_from_voucher['voucher_id'];
+        if(
+            $voucher_type_effect_code == 'bank_refund' ||
+            $voucher_type_effect_code == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() ||
+            $voucher_type_effect_code == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() ||
+            $voucher_type_effect_code == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode()
+        ){
+            $reverse_from_voucher = $this->getRefundFromVoucher($office_id, $post['bank_refund']);
+            $reverse_from_voucher_number = $reverse_from_voucher['voucher_number'];
+            $reverse_from_voucher_id = $reverse_from_voucher['voucher_id'];
 
-        $header['voucher_reversal_from'] = $reverse_from_voucher_id;
-        $header['voucher_description'] = '<strike>'.$post['voucher_description'].'</strike>';
-        $header['voucher_is_reversed'] = 1;
-        // $header['voucher_cleared'] = 1;
-        // $header['voucher_cleared_month'] = date('Y-m-t', strtotime($voucher_date));
+            if($voucher_type_effect_code == 'bank_refund') {
+                $header['voucher_reversal_from'] = $reverse_from_voucher_id;
+                $header['voucher_description'] = '<strike>'.$post['voucher_description'].'</strike>';
+                $header['voucher_is_reversed'] = 1;
+            }elseif(
+                $voucher_type_effect_code == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() ||
+                $voucher_type_effect_code == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() ||
+                $voucher_type_effect_code == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode()
+            ){
+                $title = match($voucher_type_effect_code){
+                    VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() => VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getName(),
+                    VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() => VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getName(),
+                    VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode() => VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getName(),
+                };
+                $header['voucher_cleared_from'] = $reverse_from_voucher_id;
+                $header['voucher_description'] = get_phrase('voucher_number').$reverse_from_voucher['voucher_number']. ' ' .$title;
+            }
         }else{
-        $header['voucher_description'] = $post['voucher_description'];
+            $header['voucher_description'] = $post['voucher_description'];
         }
 
         $header['fk_approval_id'] = $approvalLibrary->insertApprovalRecord('voucher');
