@@ -1910,14 +1910,16 @@ extract($result);
         let voucher_type_id = $("#voucher_type").val()
         let bank_refund_voucher = $('#bank_refund').val()
         let office_id = $('#office').val()
+
         let data = {
             bank_refund_voucher,
-            office_id
+            office_id,
+            voucher_type_id
         }
         let url = "<?=base_url();?>ajax/voucher/validateRefundFromVoucher/" + office_id
         
         if(bank_refund_voucher.length == 0){
-            alert('<?=get_phrase('bank_refund_voucher_error','You MUST provide an unrefunded bank expense voucher');?>');
+            alert('<?=get_phrase('bank_refund_voucher_error','You MUST Provide A Valid Voucher');?>');
             return false;
         }
 

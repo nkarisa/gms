@@ -978,6 +978,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return $queryResult;
     }
 
+
     function accountsRecievableBalance($officeId, $transactionDate){
         $this->accountsRecievables($officeId, $transactionDate);
     }

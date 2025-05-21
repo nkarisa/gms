@@ -8,6 +8,7 @@ use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use App\Libraries\{Core, Grants};
 use App\Enums\VoucherTypeEffectEnum;
+use PDO;
 
 class Voucher extends WebController
 {
@@ -1321,32 +1322,68 @@ class Voucher extends WebController
 
     $message = 'failed';
     $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+    
     $post = $this->request->getPost();
     $voucher_number = $post['bank_refund_voucher'];
     $office_id = $post['office_id'];
+    $voucher_type_id = $post['voucher_type_id'];
+    $voucherTypeLibrary = new \App\Libraries\Grants\VoucherTypeLibrary();
+
+    // Get voucher type effect code by voucher type id
+    $voucherTypeInfo = $voucherTypeLibrary->getVoucherTypeById($voucher_type_id);
+    
+    $invalid_reasons = '';
+    
+    if($voucherTypeInfo['voucher_type_effect_code'] == 'bank_refund'){
+      $invalid_reasons = "a) A bank refund should only be for bank expenses\n
+        b) Expense MUST be have been done within 6 months\n
+        c) A voucher can only be refunded once\n
+        d) A voucher MUST be cleared in the bank reconciliation";
+    }elseif(
+      $voucherTypeInfo['voucher_type_effect_code'] == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() ||
+      $voucherTypeInfo['voucher_type_effect_code'] == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() ||
+      $voucherTypeInfo['voucher_type_effect_code'] == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode()
+      ){
+        $referenceType = match($voucherTypeInfo['voucher_type_effect_code']){
+          VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() => VoucherTypeEffectEnum::RECEIVABLES->getName(),
+          VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() => VoucherTypeEffectEnum::PAYABLES->getName(),
+          VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode() => VoucherTypeEffectEnum::PREPAYMENTS->getName(),
+        };
+
+        $invalid_reasons = 'Choose an unsettled "'.$referenceType. '" voucher';
+    }
+
     $next_vouching_date = $voucherLibrary->getVoucherDate($office_id);
     $max_date_of_reversable_voucher = date('Y-m-01', strtotime('-6 months', strtotime($next_vouching_date)));
-
-    $invalid_reasons = "a) A bank refund should only be for bank expenses\n
-    b) Expense MUST be have been done within 6 months\n
-    c) A voucher can only be refunded once\n
-    d) A voucher MUST be cleared in the bank reconciliation";
+    
 
     $message = get_phrase('invalid_refund_voucher','Voucher number {{voucher_number}} is invalid for the following reasons {{invalid_reasons}}', ['voucher_number' => $voucher_number, 'invalid_reasons' => $invalid_reasons]);
 
     $voucherReadBuilder = $this->read_db->table('voucher');
     $voucherReadBuilder->selectSum('voucher_detail_total_cost');
     $voucherReadBuilder->where(['fk_office_id' => $office_id, 'voucher_date <= ' => $next_vouching_date, 'voucher_date >=' => $max_date_of_reversable_voucher]);
-    $voucherReadBuilder->where(['voucher_cleared' => 1]);
-    $voucherReadBuilder->where(['voucher_reversal_from' => 0, 'voucher_reversal_to' => 0, 'voucher_number' => $voucher_number, 'voucher_type_is_hidden' => 0]);
-    $voucherReadBuilder->where(['voucher_type_account_code' => 'bank', 'voucher_type_effect_code' => 'expense']);
+    
+    if($voucherTypeInfo['voucher_type_effect_code'] == 'bank_refund'){
+      $voucherReadBuilder->where(['voucher_cleared' => 1]);
+      $voucherReadBuilder->where(['voucher_reversal_from' => 0, 'voucher_reversal_to' => 0, 'voucher_number' => $voucher_number, 'voucher_type_is_hidden' => 0]);
+      $voucherReadBuilder->where(['voucher_type_account_code' => 'bank', 'voucher_type_effect_code' => 'expense']);
+    }elseif($voucherTypeInfo['voucher_type_effect_code'] == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode()){
+      $voucherReadBuilder->where(['voucher_transaction_cleared_date' => NULL]);  
+      $voucherReadBuilder->where(['voucher_type_account_code' => 'accrual', 'voucher_number' => $voucher_number, 'voucher_type_effect_code' => VoucherTypeEffectEnum::RECEIVABLES->getCode() ]);
+    }elseif($voucherTypeInfo['voucher_type_effect_code'] == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode()){
+      $voucherReadBuilder->where(['voucher_transaction_cleared_date' => NULL]);  
+      $voucherReadBuilder->where(['voucher_type_account_code' => 'accrual', 'voucher_number' => $voucher_number, 'voucher_type_effect_code' => VoucherTypeEffectEnum::PAYABLES->getCode() ]);
+    }elseif($voucherTypeInfo['voucher_type_effect_code'] == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode()){
+      $voucherReadBuilder->where(['voucher_transaction_cleared_date' => NULL]);  
+      $voucherReadBuilder->where(['voucher_type_account_code' => 'accrual', 'voucher_number' => $voucher_number, 'voucher_type_effect_code' => VoucherTypeEffectEnum::PREPAYMENTS->getCode() ]);
+    }
+  
+    
     $voucherReadBuilder->join('voucher_detail','voucher_detail.fk_voucher_id=voucher.voucher_id');
     $voucherReadBuilder->join('voucher_type','voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
     $voucherReadBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
     $voucherReadBuilder->join('voucher_type_account','voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
     $voucher_obj = $voucherReadBuilder->get();
-
-    // $voucher_cost = 0;
 
     if($voucher_obj->getNumRows() > 0){
       $voucher_cost_array = $voucher_obj->getRowArray();

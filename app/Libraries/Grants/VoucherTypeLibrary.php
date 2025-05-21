@@ -354,4 +354,21 @@ class VoucherTypeLibrary extends GrantsLibrary implements \App\Interfaces\Librar
     return false;
   }
 
+      function getVoucherTypeById($voucherTypeId): array|object{
+        $voucherTypeReadBuilder = $this->read_db->table('voucher_type');
+
+        $voucherTypeReadBuilder->select(['voucher_type_id','voucher_type_name','voucher_type_effect_code','voucher_type_account_code']);
+        $voucherTypeReadBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+        $voucherTypeReadBuilder->join('voucher_type_account','voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
+        $voucherTypeReadBuilder->where(['voucher_type_id' => $voucherTypeId]);
+        $voucherTypeObj = $voucherTypeReadBuilder->get();
+
+        $voucherType = [];
+
+        if($voucherTypeObj->getNumRows() > 0){
+            $voucherType = $voucherTypeObj->getRowArray();
+        }
+
+        return $voucherType;
+    }
 }
