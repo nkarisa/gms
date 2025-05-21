@@ -1844,7 +1844,10 @@ extract($result);
         const unitcost = unformat_number(raw_unitcost_elem.val()) ? parseFloat(unformat_number(raw_unitcost_elem.val())) : 0;
         const totalcost = parseFloat(qty * unitcost)
         const url = "<?=base_url();?>ajax/voucher/validateRefundLimit"
+        const voucherTypeId = $("#voucher_type").val()
+
         const data = {
+            voucherTypeId,
             totalcost,
             office_id: $('#office').val(),
             account_id: $(this).val(),

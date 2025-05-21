@@ -397,7 +397,6 @@ class Voucher extends WebController
     $response['project_allocation'] = [];
     $post = $this->request->getPost();
     $bank_refund_from = $post['bank_refund_from'];
-    // $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
 
     if (!validate_date($transaction_date)) {
       $transaction_date = date('Y-m-d');
@@ -414,7 +413,12 @@ class Voucher extends WebController
       service("settings")->get("GrantsConfig.toggle_accounts_by_allocation")
     ) {
 
-      if($voucher_type_effect_and_code->voucher_type_effect_code == 'bank_refund'){
+      if(
+        $voucher_type_effect_and_code->voucher_type_effect_code == 'bank_refund' || 
+        $voucher_type_effect_and_code->voucher_type_effect_code == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() || 
+        $voucher_type_effect_and_code->voucher_type_effect_code == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() || 
+        $voucher_type_effect_and_code->voucher_type_effect_code == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode()
+        ){
         $voucherDetailReadBuilder = $this->read_db->table('voucher_detail');
         $voucherDetailReadBuilder->select(['DISTINCT(project_allocation_id) as project_allocation_id','project_name as project_allocation_name']);
         $voucherDetailReadBuilder->where(['voucher_number' => $bank_refund_from, 'voucher.fk_office_id' => $office_id]);
@@ -1289,14 +1293,29 @@ class Voucher extends WebController
     $office_id = $post['office_id'];
     $refund_voucher_amount = $post['refund_voucher_amount'];
     $totalcost = $post['totalcost'];
+    $voucherTypeId = $post['voucherTypeId'];
     $is_refundable = 0;
     $detail_amount = 0;
 
+    $voucherTypeLibrary = new \App\Libraries\Grants\VoucherTypeLibrary();
+    $voucherTypeInfo = $voucherTypeLibrary->getVoucherTypeById($voucherTypeId);
+
     $voucherDetailReadBuilder = $this->read_db->table('voucher_detail');
     $voucherDetailReadBuilder->selectSum('voucher_detail_total_cost');
-    $voucherDetailReadBuilder->where(['fk_expense_account_id' => $account_id, 'voucher.fk_office_id' => $office_id, 'voucher_number' => $bank_refund_from, 'voucher_type_is_hidden' => 0]);
-    $voucherDetailReadBuilder->where(['voucher_cleared' => 1]);
-    $voucherDetailReadBuilder->where(['voucher_reversal_from' => 0, 'voucher_reversal_to' => 0, 'voucher_type_account_code' => 'bank', 'voucher_type_effect_code' => 'expense']);
+    $voucherDetailReadBuilder->where(['voucher.fk_office_id' => $office_id, 'voucher_number' => $bank_refund_from]);
+
+    if($voucherTypeInfo['voucher_type_effect_code'] == 'bank_refund'){
+      $voucherDetailReadBuilder->where(['fk_expense_account_id' => $account_id, 'voucher_type_is_hidden' => 0]);
+      $voucherDetailReadBuilder->where(['voucher_cleared' => 1]);
+      $voucherDetailReadBuilder->where(['voucher_reversal_from' => 0, 'voucher_reversal_to' => 0, 'voucher_type_account_code' => 'bank', 'voucher_type_effect_code' => 'expense']);
+    }elseif($voucherTypeInfo['voucher_type_effect_code'] == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode()){
+      $voucherDetailReadBuilder->where(['fk_income_account_id' => $account_id]);
+    }elseif($voucherTypeInfo['voucher_type_effect_code'] == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode()){
+      $voucherDetailReadBuilder->where(['fk_expense_account_id' => $account_id]);
+    }elseif($voucherTypeInfo['voucher_type_effect_code'] == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode()){
+      $voucherDetailReadBuilder->where(['fk_expense_account_id' => $account_id]);  
+    }
+    
     $voucherDetailReadBuilder->join('voucher','voucher.voucher_id=voucher_detail.fk_voucher_id');
     $voucherDetailReadBuilder->join('voucher_type','voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
     $voucherDetailReadBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
