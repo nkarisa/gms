@@ -39,6 +39,7 @@ class VoucherType extends WebController
             VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode(),
             VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode(),
             VoucherTypeEffectEnum::DEPRECIATION->getCode(),
+            VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode(),
          ];
         }
    

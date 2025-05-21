@@ -142,14 +142,19 @@ class Voucher extends WebController
         $voucher_type_account == 'bank' || 
         $voucher_type_effect == 'cash_contra' || 
         $voucher_type_effect == 'bank_to_bank_contra' ||
-        $voucher_type_effect == 'prepayments' ||
-        $voucher_type_effect == 'payments' ||
-        $voucher_type_effect == 'disbursements'
+        $voucher_type_effect == VoucherTypeEffectEnum::PREPAYMENTS->getCode() ||
+        $voucher_type_effect == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() ||
+        $voucher_type_effect == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() ||
+        $voucher_type_effect == VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode()
         ) {
       $response['office_banks'] = $this->library->getOfficeBanks($office_id);
     }
 
-    if ($voucher_type_effect == 'bank_to_bank_contra' || $voucher_type_effect == 'cash_to_cash_contra') {
+    if (
+        $voucher_type_effect == 'bank_to_bank_contra' || 
+        $voucher_type_effect == VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode() || 
+        $voucher_type_effect == 'cash_to_cash_contra'
+        ) {
       $response['is_transfer_contra'] = true;
     }
 
@@ -157,8 +162,9 @@ class Voucher extends WebController
         $voucher_type_effect == 'bank_to_bank_contra' || 
         $voucher_type_effect == 'bank_contra' || 
         ($voucher_type_account == 'bank' && $voucher_type_effect == 'expense') ||
-        $voucher_type_effect == 'prepayments' || 
-        $voucher_type_effect == 'disbursements'
+        $voucher_type_effect == VoucherTypeEffectEnum::PREPAYMENTS->getCode()  || 
+        $voucher_type_effect == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode()  || 
+        $voucher_type_effect == VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode()
         ) {
       $response['is_bank_payment'] = true;
     }
@@ -489,7 +495,9 @@ class Voucher extends WebController
         $voucher_type_effect ==  VoucherTypeEffectEnum::PAYABLES->getCode() || 
         $voucher_type_effect == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode() || 
         $voucher_type_effect == VoucherTypeEffectEnum::PREPAYMENTS->getCode() ||
-        $voucher_type_effect == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode()
+        $voucher_type_effect == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() ||
+        $voucher_type_effect == VoucherTypeEffectEnum::DEPRECIATION->getCode() ||
+        $voucher_type_effect == VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode()
         ) {
 
       // if($voucher_type_effect == 'payables'){
@@ -517,6 +525,15 @@ class Voucher extends WebController
         $expenseAccountReadBuilder->where(array('project_allocation_id' => $project_allocation_id, 'expense_account_is_active' => 1));
         $expenseAccountReadBuilder->where(array('fk_account_system_id' => $office_accounting_system->account_system_id));
       }
+
+      if($voucher_type_effect == VoucherTypeEffectEnum::DEPRECIATION->getCode()){
+        $expenseAccountReadBuilder->join('expense_vote_heads_category','expense_vote_heads_category.expense_vote_heads_category_id=expense_account.fk_expense_vote_heads_category_id');
+        $expenseAccountReadBuilder->where(['expense_vote_heads_category.expense_vote_heads_category_name' => VoucherTypeEffectEnum::DEPRECIATION->getName()]);
+      }elseif($voucher_type_effect == VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode()){
+        $expenseAccountReadBuilder->join('expense_vote_heads_category','expense_vote_heads_category.expense_vote_heads_category_id=expense_account.fk_expense_vote_heads_category_id');
+        $expenseAccountReadBuilder->where(['expense_vote_heads_category.expense_vote_heads_category_name' => VoucherTypeEffectEnum::PAYROLL_LIABILITY->getName()]);
+      }
+
       $expenseAccountReadBuilder->select(array('expense_account_id as account_id', 'expense_account_name as account_name'));
       $accounts_obj = $expenseAccountReadBuilder->get();
     } elseif (
