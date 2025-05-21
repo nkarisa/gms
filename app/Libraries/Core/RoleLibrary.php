@@ -39,9 +39,9 @@ class RoleLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
         return $roles_ids_and_names;
        }
    
-      //  function detailTables(): array {
-      //   return ['role_permission','role_group_association'];
-      //  }
+       function detailTables(): array {
+        return ['role_permission','role_group_association'];
+       }
 
 
     function singleFormEditVisibleColumns(): array {
