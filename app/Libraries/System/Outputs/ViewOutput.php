@@ -235,7 +235,7 @@ class ViewOutput extends OutputTemplate
         $lookup_tables = $this->libs->lookupTables($table);
         //runMasterViewQuery
         $master_view_query_result = $this->libs->runMasterViewQuery($table, $select_columns, $lookup_tables);
-
+        
         return $this->libs->updateQueryResultForFieldsChangedToSelectType($this->controller, $master_view_query_result);
 
     }
@@ -612,7 +612,6 @@ class ViewOutput extends OutputTemplate
 
    public  function getOutput($id): array
     {
-
         // Use the $id instead of the getSegment(3) in the future code to allow calling this method without routed request
 
         $table = $this->controller;
@@ -623,7 +622,7 @@ class ViewOutput extends OutputTemplate
         }
 
         $query_output = $this->toggleMasterViewQueryResult();
-        $keys = $this->toggleMasterViewSelectColumns();
+        $keys = $this->toggleMasterViewSelectColumns(); 
 
         if (is_array($master_additional_fields) && count($master_additional_fields) > 0) {
             $query_output = array_merge($query_output, $master_additional_fields);
@@ -664,6 +663,7 @@ class ViewOutput extends OutputTemplate
 
             $result['detail'] = $detail;
         }
+
 
         return $result;
     }

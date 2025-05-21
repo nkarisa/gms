@@ -34,7 +34,12 @@ class CapitalAssetLibrary extends GrantsLibrary implements \App\Interfaces\Libra
             'asset_category_name',
             'office_name',
             'capital_asset_purchase_date',
-            'capital_asset_cost'
+            'asset_status_name',
+            'capital_asset_end_term_date',
+            'capital_asset_cost',
+            'capital_asset_total_depreciation',
+            'capital_asset_location',
+            
         ];
     }
 
@@ -48,7 +53,7 @@ class CapitalAssetLibrary extends GrantsLibrary implements \App\Interfaces\Libra
             'capital_asset_purchase_date',
             'capital_asset_cost',
             'capital_asset_total_depreciation',
-            'capital_asset_created_date',
+            'asset_status_name'
         ];
     }
 }

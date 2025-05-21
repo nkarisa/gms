@@ -2,8 +2,6 @@
 
 use \App\Libraries\System\Widgets\WidgetBase;
 
-// echo json_encode($result['detail']);
-
 extract($result);
 extract($result['master']);
 
@@ -54,7 +52,7 @@ $columns = array_chunk($keys,service("settings")->get("GrantsConfig.master_table
           <th colspan="<?=service("settings")->get("GrantsConfig.master_table_columns");?>" style="text-align:center;">
               <?php
               
-                if( $userLibrary->isStatusActionableByUser($table_body['status_id'], $controller) ){
+                if($userLibrary->isStatusActionableByUser($table_body['status_id'], $controller) ){
                   if(
                     $userLibrary->checkRoleHasPermissions(ucfirst($controller),'update') &&
                     $show_edit_button

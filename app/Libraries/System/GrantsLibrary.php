@@ -685,6 +685,8 @@ class GrantsLibrary
     $decodedId = hash_id($this->uri->getSegment(3), 'decode');
     $data = (array) $builder->getWhere([$primaryKeyField => $decodedId])->getRow();
 
+    log_message('error', json_encode($data));
+
     // Get the name of the record creator
     $createdByField = $this->historyTrackingField($table, 'created_by');
     if (isset($data[$createdByField]) && $data[$createdByField] >= 1) {
