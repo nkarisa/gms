@@ -169,7 +169,12 @@ class Voucher extends WebController
       $response['is_bank_payment'] = true;
     }
 
-    if($voucher_type_effect == 'bank_refund'){
+    if(
+        $voucher_type_effect == 'bank_refund' || 
+        $voucher_type_effect == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() || 
+        $voucher_type_effect == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() || 
+        $voucher_type_effect == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode()
+      ){
       $response['is_bank_refund'] = true;
     }
 

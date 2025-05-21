@@ -5,6 +5,7 @@ namespace App\Libraries\Grants;
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\VoucherModel;
 use App\Enums\AccountSystemSettingEnum;
+use App\Enums\VoucherTypeEffectEnum;
 
 class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
@@ -950,6 +951,45 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return $next_serial;
     }
 
+    function accountsRecievables($officeId, $transactionDate){
+        $voucherDetailReaderBuilder = $this->read_db->table('voucher_detail');
+        $transactionDate = date('Y-m-t', strtotime($transactionDate));
+
+        $voucherDetailReaderBuilder->selectSum('voucher_detail_total_cost');
+        $voucherDetailReaderBuilder->select('voucher_type_effect_code,fk_income_account_id,voucher_id');
+        $voucherDetailReaderBuilder->join('voucher','voucher.voucher_id=voucher_detail.fk_voucher_id');
+        $voucherDetailReaderBuilder->join('voucher_type','voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+        $voucherDetailReaderBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+        $voucherDetailReaderBuilder->where(['fk_office_id' => $officeId]);
+        $voucherDetailReaderBuilder->whereIn('voucher_type_effect_code', [VoucherTypeEffectEnum::RECEIVABLES->getCode(), VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode()]);
+        $voucherDetailReaderBuilder->groupStart();
+            $voucherDetailReaderBuilder->where('voucher_transaction_cleared_date', NULL);
+            $voucherDetailReaderBuilder->orWhere('voucher_transaction_cleared_date <=', $transactionDate);
+        $voucherDetailReaderBuilder->groupEnd();
+        $voucherDetailReaderBuilder->groupBy('voucher_type_effect_code,fk_income_account_id,voucher_id');
+        $queryResultObj = $voucherDetailReaderBuilder->get();
+
+        $queryResult = [];
+
+        if($queryResultObj->getNumRows() > 0){
+            $queryResult = $queryResultObj->getResultArray();
+        }
+
+        return $queryResult;
+    }
+
+    function accountsRecievableBalance($officeId, $transactionDate){
+        $this->accountsRecievables($officeId, $transactionDate);
+    }
+
+    function accountPayablesBalance($officeId){
+        $voucherDetailReaderBuilder = $this->read_db->table('voucher_detail');
+    }
+
+    function prepaymentsBalance($officeId){
+        $voucherDetailReaderBuilder = $this->read_db->table('voucher_detail');
+    }
+
     function getActiveVoucherTypes($account_system_id, $office_id, $transaction_date)
     {
 
@@ -966,6 +1006,8 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         if (count($office_banks_for_office['is_active']) < 2) {
             $builder->whereNotIn('voucher_type_effect_code', ['bank_to_bank_contra']);
         }
+
+
 
         if (!empty($office_banks_for_office['chequebook_exemption_expiry_date'])) {
 
@@ -1296,12 +1338,26 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
                 $detail['voucher_detail_unit_cost'] = $voucher_detail_unit_cost;
                 $detail['voucher_detail_total_cost'] = $voucher_detail_total_cost;
                 // log_message('error', json_encode(['voucher_type_effect_code' => $voucher_type_effect_code, 'detail' => $detail]));
-                if ($voucher_type_effect_code == 'expense' || $voucher_type_effect_code == 'bank_refund') {
+                if (
+                    $voucher_type_effect_code == 'expense' || 
+                    $voucher_type_effect_code == 'bank_refund' || 
+                    $voucher_type_effect_code == VoucherTypeEffectEnum::PAYABLES->getCode() || 
+                    $voucher_type_effect_code == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() || 
+                    $voucher_type_effect_code == VoucherTypeEffectEnum::PREPAYMENTS->getCode() || 
+                    $voucher_type_effect_code == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode() || 
+                    $voucher_type_effect_code == VoucherTypeEffectEnum::DEPRECIATION->getCode() || 
+                    $voucher_type_effect_code == VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode()
+                    ) {
                     $expense_account_id = $this->request->getPost('voucher_detail_account')[$i];
                     $detail['fk_expense_account_id'] = $expense_account_id;
                     $detail['fk_income_account_id'] = $expenseAccountLibrary->getExpenseIncomeAccountId($expense_account_id);
                     $detail['fk_contra_account_id'] = 0;
-                } elseif ($voucher_type_effect_code == 'income' || $voucher_type_effect_code == 'bank_to_bank_contra') {
+                } elseif (
+                    $voucher_type_effect_code == 'income' || 
+                    $voucher_type_effect_code == 'bank_to_bank_contra' ||
+                    $voucher_type_effect_code == VoucherTypeEffectEnum::RECEIVABLES->getCode() || 
+                    $voucher_type_effect_code == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode()
+                    ) {
                     $detail['fk_expense_account_id'] = 0;
                     $detail['fk_income_account_id'] = $this->request->getPost('voucher_detail_account')[$i];
                     $detail['fk_contra_account_id'] = 0;

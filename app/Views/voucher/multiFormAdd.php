@@ -121,7 +121,7 @@ extract($result);
 
 
                     <span class='hidden'>
-                        <label class='control-label col-xs-1'><?= get_phrase('refund_from'); ?> </label>
+                        <label class='control-label col-xs-1'><?= get_phrase('reference_from'); ?> </label>
                         <div class='col-xs-2'>
                             <input style="clear:right;float:left;max-width:90%;" type='text' placeholder="<?=get_phrase('enter_bank_expense_voucher_number');?>" name='bank_refund' id='bank_refund' disabled='disabled' class='form-control required account_fields' />
                             <i style="cursor: pointer;float:right" id="bank_refund_search" class = 'fa fa-search'></i>
@@ -144,7 +144,7 @@ extract($result);
                     </span>
 
                     <span class='hidden'>
-                        <label class='control-label col-xs-1'><?= get_phrase('refund_voucher_amount'); ?></label>
+                        <label class='control-label col-xs-1'><?= get_phrase('reference_voucher_amount'); ?></label>
                         <div class='col-xs-2'><input onkeydown="return false" id='refund_voucher_amount' name='refund_voucher_amount' class='form-control' value='0' onkeydown="return false" /></div>
                     </span>
 
