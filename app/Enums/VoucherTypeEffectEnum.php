@@ -15,6 +15,7 @@ enum VoucherTypeEffectEnum {
     case RECEIVABLES_PAYMENTS;
     case PAYABLE_DISBURSEMENTS;
     case PREPAYMENT_SETTLEMENTS;
+    case DEPRECIATION;
 
     public function getCode(): string{
         return match($this) {
@@ -31,6 +32,7 @@ enum VoucherTypeEffectEnum {
             self::RECEIVABLES_PAYMENTS => 'payments',
             self::PAYABLE_DISBURSEMENTS => 'disbursements',
             self::PREPAYMENT_SETTLEMENTS => 'settlements',
+            self::DEPRECIATION => 'depreciation',
         };
     }
 
@@ -48,7 +50,8 @@ enum VoucherTypeEffectEnum {
             self::PREPAYMENTS => get_phrase('prepayments'),
             self::RECEIVABLES_PAYMENTS => get_phrase('receivable_payments'),
             self::PAYABLE_DISBURSEMENTS => get_phrase('payable_disbursements'),
-            self::PREPAYMENT_SETTLEMENTS => get_phrase('prepayment_settlements')
+            self::PREPAYMENT_SETTLEMENTS => get_phrase('prepayment_settlements'),
+            self::DEPRECIATION => get_phrase('depreciation'),
         };           
     }
 }

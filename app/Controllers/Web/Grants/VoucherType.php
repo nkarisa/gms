@@ -6,7 +6,7 @@ use App\Controllers\Web\WebController;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
-
+use App\Enums\VoucherTypeEffectEnum;
 class VoucherType extends WebController
 {
 
@@ -31,7 +31,15 @@ class VoucherType extends WebController
         }elseif($voucher_type_account_code == 'cash'){
            $voucher_type_effect_codes = ['income','expense','cash_contra','cash_to_cash_contra'];
         }elseif($voucher_type_account_code == 'accrual'){
-         $voucher_type_effect_codes = ['payables','receivables','prepayments','payments','settlements','disbursements'];
+         $voucher_type_effect_codes = [
+            VoucherTypeEffectEnum::PAYABLES->getCode(),
+            VoucherTypeEffectEnum::RECEIVABLES->getCode(),
+            VoucherTypeEffectEnum::PREPAYMENTS->getCode(),
+            VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode(),
+            VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode(),
+            VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode(),
+            VoucherTypeEffectEnum::DEPRECIATION->getCode(),
+         ];
         }
    
         if(!empty($voucher_type_effect_codes)){
