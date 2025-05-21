@@ -11,7 +11,7 @@ enum VoucherTypeEffectEnum {
     case BANK_REFUND;
     case RECEIVABLES;
     case PAYABLES;
-    case PREPAYMENTS;
+    case PREPAYMENTS; 
     case RECEIVABLES_PAYMENTS;
     case PAYABLE_DISBURSEMENTS;
     case PREPAYMENT_SETTLEMENTS;

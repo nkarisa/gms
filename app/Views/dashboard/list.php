@@ -1,5 +1,7 @@
 <?php 
 // echo lang('Global.App.funds_transfer')
+// $db = \Config\Database::connect('read');
+// echo json_encode($db->getFieldData('capital_asset'));
 ?>
 <div class = 'row'>
     <div class="col-sm-12">
