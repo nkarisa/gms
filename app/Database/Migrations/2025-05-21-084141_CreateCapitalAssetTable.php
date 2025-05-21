@@ -11,7 +11,7 @@ class CreateCapitalAssetTable extends Migration
         $this->forge->addField([
             'capital_asset_id' => [
                 'type'           => 'INT',
-                'constraint'     => 11,
+                'constraint'     => 100,
                 'unsigned'       => true,
                 'auto_increment' => true,
                 'null'           => false,
@@ -24,6 +24,16 @@ class CreateCapitalAssetTable extends Migration
             'capital_asset_name' => [
                 'type'       => 'VARCHAR',
                 'constraint' => '200',
+                'null'       => false,
+            ],
+            'capital_asset_serial' => [
+                'type'       => 'VARCHAR',
+                'constraint' => '200',
+                'null'       => false,
+            ],
+            'fk_asset_category_id' => [
+                'type'       => 'INT',
+                'constraint' => '100',
                 'null'       => false,
             ],
             'capital_asset_description' => [

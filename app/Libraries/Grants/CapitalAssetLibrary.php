@@ -9,6 +9,7 @@ class CapitalAssetLibrary extends GrantsLibrary implements \App\Interfaces\Libra
 
     protected $table;
     protected $capitalassetModel;
+    public $lookup_tables_with_null_values = ['voucher'];
 
     function __construct()
     {
@@ -29,9 +30,25 @@ class CapitalAssetLibrary extends GrantsLibrary implements \App\Interfaces\Libra
         return [
             'capital_asset_name',
             'capital_asset_description',
+            'capital_asset_serial',
+            'asset_category_name',
             'office_name',
             'capital_asset_purchase_date',
             'capital_asset_cost'
+        ];
+    }
+
+    function listTableVisibleColumns(): array {
+        return [
+            'capital_asset_track_number',
+            'capital_asset_name',
+            'capital_asset_serial',
+            'office_name',
+            'asset_category_name',
+            'capital_asset_purchase_date',
+            'capital_asset_cost',
+            'capital_asset_total_depreciation',
+            'capital_asset_created_date',
         ];
     }
 }
