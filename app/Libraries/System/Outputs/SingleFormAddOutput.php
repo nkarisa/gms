@@ -32,7 +32,7 @@ class SingleFormAddOutput extends OutputTemplate{
           $field_value = hash_id($this->id, 'decode');
           $show_only_selected_value = true;
         }
-
+        
         $fields[$column] = $this->libs->headerRowField($column, $field_value, $show_only_selected_value);
       } else {
 

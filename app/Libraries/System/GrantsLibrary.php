@@ -909,9 +909,9 @@ class GrantsLibrary
           }
         }
       }
-
       $single_form_add_visible_columns = $visible_columns;
     }
+
     return $single_form_add_visible_columns;
   }
 

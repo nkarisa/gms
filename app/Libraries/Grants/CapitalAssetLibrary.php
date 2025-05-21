@@ -16,9 +16,22 @@ class CapitalAssetLibrary extends GrantsLibrary implements \App\Interfaces\Libra
 
         $this->capitalassetModel = new CapitalAssetModel();
 
-        $this->table = 'capitalasset';
+        $this->table = 'capital_asset';
     }
 
+    function detailTables(): array {
+        return [
+            'asset_depreciation'
+        ];
+    }
 
-   
+    function singleFormAddVisibleColumns(): array {
+        return [
+            'capital_asset_name',
+            'capital_asset_description',
+            'office_name',
+            'capital_asset_purchase_date',
+            'capital_asset_cost'
+        ];
+    }
 }

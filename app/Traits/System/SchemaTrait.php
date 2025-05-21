@@ -126,7 +126,6 @@ trait SchemaTrait
     {
         // Retrieve the field data of the specified table
         $metadata = $this->tableFieldsMetadata($table_name);
-
         $primary_key_field = "";
 
         // Iterate through the field data to find the primary key field
