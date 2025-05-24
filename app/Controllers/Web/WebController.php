@@ -104,16 +104,16 @@ class WebController extends BaseController
     $this->uri = service('uri');
     $this->segments = $this->uri->getSegments();
 
-    $this->controller = isset($this->segments[0]) ? $this->segments[0] : 'dashboard';
-    $this->action = isset($this->segments[1]) ? $this->segments[1] : 'list';
-    $this->id = isset($this->segments[2]) ? $this->segments[2] : 0;
-    $this->subAction = isset($this->segments[4]) ? $this->segments[4] : null;
+    $this->controller = $this->segments[0] ?? 'dashboard';
+    $this->action = $this->segments[1] ?? 'list';
+    $this->id = $this->segments[2] ?? 0;
+    $this->subAction = $this->segments[4] ?? null;
 
     // log_message('error', json_encode($this->segments));
 
     if($this->request->isAJAX()){
       if($this->controller == "ajax" || $this->controller == "ajaxRequest"){
-        $this->controller = isset($this->segments[1]) ? $this->segments[1] : 'dashboard';
+        $this->controller = $this->segments[1] ?? 'dashboard';
       }
 
       if($this->action == "showList"){
@@ -165,16 +165,16 @@ class WebController extends BaseController
 
     if ($this->action == 'view' && $lib->checkIfTableHasDetailTable($this->controller)) {
       $this->session->set('masterTable', ucfirst($this->controller));
-      $this->id = hash_id(isset($this->segments[2]) ? $this->segments[2] : null, 'decode'); // Not sure what's this line does
+      $this->id = hash_id($this->segments[2] ?? null, 'decode'); // Not sure what's this line does
     } elseif ($this->action == 'singleFormAdd' && count($this->uri->getSegments()) == 4) {
       $this->session->set('masterTable', $this->uri->getSegment(4));
-      $this->id = isset($this->segments[2]) ? $this->segments[2] : null; // Used for example when adding a newr permission to a role
+      $this->id = $this->segments[2] ?? null; // Used for example when adding a newr permission to a role
     } elseif ($this->action == 'list') {
       $this->session->set('masterTable', null);
-      $this->id = hash_id(isset($this->segments[2]) ? $this->segments[2] : 0, 'decode');
+      $this->id = hash_id($this->segments[2] ?? 0, 'decode');
     }
 
-    $this->id = isset($this->segments[2]) ? $this->segments[2] : 0;
+    $this->id = $this->segments[2] ?? 0;
     $statusLibrary = new \App\Libraries\Core\StatusLibrary();
     $this->max_status_id = $statusLibrary->getMaxApprovalStatusId($this->controller);
 
@@ -722,9 +722,9 @@ class WebController extends BaseController
       $get_current_url =  $this->request->getServer('HTTP_REFERER');;
       $get_current_url_arr = explode('/', $get_current_url);
       
-      $get_items_id = isset($get_current_url_arr[6]) ? $get_current_url_arr[6] : 0;
+      $get_items_id = $get_current_url_arr[6] ?? 0;
 
-      $approve_item_name = isset($get_current_url_arr[4]) ? $get_current_url_arr[4] : ucwords($this->controller);
+      $approve_item_name = $get_current_url_arr[4] ?? ucwords($this->controller);
       
       $attachment_id_picked_from_url_id = hash_id($get_items_id, 'decode');
 

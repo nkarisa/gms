@@ -102,7 +102,7 @@ class UniqueIdentifierLibrary extends GrantsLibrary implements \App\Interfaces\L
 
         $attachment_type_name = 'user_unique_identifier_document';
         $account_system_unique_identifier = $this->getAccountSystemUniqueIdentifier($this->session->user_account_system_id);
-        $unique_identifier_id = isset($account_system_unique_identifier['unique_identifier_id']) ? $account_system_unique_identifier['unique_identifier_id'] : 0;
+        $unique_identifier_id = $account_system_unique_identifier['unique_identifier_id'] ?? 0;
         $attachment_url = "uploads/attachments/user/" . $user_id . "/user_identifier_document/" . $unique_identifier_id;
 
         $builder = $this->read_db->table('attachment');

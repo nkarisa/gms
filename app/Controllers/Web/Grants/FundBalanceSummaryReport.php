@@ -569,7 +569,7 @@ class FundBalanceSummaryReport extends WebController
 		}
 
 		$search = $this->request->getPost('search');
-		$search_value = isset($search['value']) ? $search['value'] : '';
+		$search_value = $search['value'] ?? '';
 
 		$search_column = $this->request->getPost('accounts');
 
@@ -603,7 +603,7 @@ class FundBalanceSummaryReport extends WebController
 					$amount = 0;
 					if(!empty($cash_at_hand_balances)){
 						if($search_column > 0){
-							$amount = isset($cash_at_hand_balances[$search_column][$cash_balance_header]) ? $cash_at_hand_balances[$search_column][$cash_balance_header] : 0;
+							$amount = $cash_at_hand_balances[$search_column][$cash_balance_header] ?? 0;
 						}else{
 							$amount = array_sum(array_column($cash_at_hand_balances,$cash_balance_header));
 						}
@@ -695,7 +695,7 @@ class FundBalanceSummaryReport extends WebController
 		}
 
 		$search = $this->request->getPost('search');
-		$search_value = isset($search['value']) ? $search['value'] : '';
+		$search_value = $search['value'] ?? '';
 
 		$search_column = $this->request->getPost('accounts');
 		//  log_message('error', json_encode($search_column));
@@ -794,7 +794,7 @@ class FundBalanceSummaryReport extends WebController
 		}
 
 		$search = $this->request->getPost('search');
-		$search_value = isset($search['value']) ? $search['value'] : '';
+		$search_value = $search['value'] ?? '';
 
 		$search_column = $this->request->getPost('accounts');
 		//  log_message('error', json_encode($search_column));
@@ -898,7 +898,7 @@ class FundBalanceSummaryReport extends WebController
 		}
 
 		$search = $this->request->getPost('search');
-		$search_value = isset($search['value']) ? $search['value'] : '';
+		$search_value = $search['value'] ?? '';
 
 		$search_column = $this->request->getPost('accounts');
 		//  log_message('error', json_encode($search_column));
@@ -1003,7 +1003,7 @@ class FundBalanceSummaryReport extends WebController
 		}
 
 		$search = $this->request->getPost('search');
-		$search_value = isset($search['value']) ? $search['value'] : '';
+		$search_value = $search['value'] ?? '';
 
 		$search_column = $this->request->getPost('accounts');
 		//  log_message('error', json_encode($search_column));
@@ -1449,7 +1449,7 @@ class FundBalanceSummaryReport extends WebController
 		}
 
 		$search = $this->request->getPost('search');
-		$search_value = isset($search['value']) ? $search['value'] : '';
+		$search_value = $search['value'] ?? '';
 
 		$search_column = $this->request->getPost('accounts');
 

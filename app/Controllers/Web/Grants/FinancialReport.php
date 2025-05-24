@@ -97,9 +97,9 @@ class FinancialReport extends WebController
   
       foreach ($income_accounts as $account) {
   
-        $month_opening_balance = isset($all_accounts_month_opening_balance[$account['income_account_id']]) ? $all_accounts_month_opening_balance[$account['income_account_id']] : 0;
-        $month_income = isset($all_accounts_month_income[$account['income_account_id']]) ? $all_accounts_month_income[$account['income_account_id']] : 0;
-        $month_expense = isset($all_accounts_month_expense[$account['income_account_id']]) ? $all_accounts_month_expense[$account['income_account_id']] : 0;
+        $month_opening_balance = $all_accounts_month_opening_balance[$account['income_account_id']] ?? 0;
+        $month_income = $all_accounts_month_income[$account['income_account_id']] ?? 0;
+        $month_expense = $all_accounts_month_expense[$account['income_account_id']] ?? 0;
   
         if ($month_opening_balance == 0 && $month_income == 0 && $month_expense == 0) {
           continue;
@@ -128,8 +128,8 @@ class FinancialReport extends WebController
   
         $sum_of_bounced_cheques = $this->financialReportLibrary->getTotalSumOfBouncedOpeningCheques($office_ids, $start_date_of_month);
   
-        $total_amount_bounced = isset($sum_of_bounced_cheques[0]['opening_outstanding_cheque_amount']) ? $sum_of_bounced_cheques[0]['opening_outstanding_cheque_amount'] : 0;
-        $bounced_date = isset($sum_of_bounced_cheques[0]['opening_outstanding_cheque_cleared_date']) ? $sum_of_bounced_cheques[0]['opening_outstanding_cheque_cleared_date'] : NULL;
+        $total_amount_bounced = $sum_of_bounced_cheques[0]['opening_outstanding_cheque_amount'] ?? 0;
+        $bounced_date = $sum_of_bounced_cheques[0]['opening_outstanding_cheque_cleared_date'] ??  NULL;
         $mfr_report_month = date('Y-m-t', strtotime($start_date_of_month));
   
         if ($total_amount_bounced > 0 &&  $bounced_date > $mfr_report_month && sizeof($report) > 0) {
@@ -306,8 +306,8 @@ class FinancialReport extends WebController
   
       $expense_account_comment = $this->expenseAccountComment($office_ids, $reporting_month);
   
-      $budget_to_date = isset($month_and_to_date_budget['to_date']) ? $month_and_to_date_budget['to_date'] : 0 ;
-      $month_budget = isset($month_and_to_date_budget['month']) ? $month_and_to_date_budget['month'] : 0;
+      $budget_to_date = $month_and_to_date_budget['to_date'] ?? 0 ;
+      $month_budget = $month_and_to_date_budget['month'] ?? 0;
       // $budget_variance = $this->_budget_variance_by_expense_account($office_ids,$reporting_month);
       // $budget_variance_percent = $this->_budget_variance_percent_by_expense_account($office_ids,$reporting_month);   
   
@@ -321,13 +321,13 @@ class FinancialReport extends WebController
   
           $expense_account_grid[$income_account_id]['income_account'] = $income_account['income_account'];
           $expense_account_grid[$income_account_id]['expense_accounts'][$expense_account['expense_account_id']]['expense_account'] = $expense_account;
-          $expense_account_grid[$income_account_id]['expense_accounts'][$expense_account['expense_account_id']]['month_expense'] = isset($month_expense[$income_account_id][$expense_account_id]) ? $month_expense[$income_account_id][$expense_account_id] : 0;
-          $expense_account_grid[$income_account_id]['expense_accounts'][$expense_account['expense_account_id']]['month_budget'] = isset($month_budget[$income_account_id][$expense_account_id]) ? $month_budget[$income_account_id][$expense_account_id] : 0;
-          $expense_account_grid[$income_account_id]['expense_accounts'][$expense_account['expense_account_id']]['month_expense_to_date'] = isset($month_expense_to_date[$income_account_id][$expense_account_id]) ? $month_expense_to_date[$income_account_id][$expense_account_id] : 0;
-          $expense_account_grid[$income_account_id]['expense_accounts'][$expense_account['expense_account_id']]['budget_to_date'] = isset($budget_to_date[$income_account_id][$expense_account_id]) ? $budget_to_date[$income_account_id][$expense_account_id] : 0;
+          $expense_account_grid[$income_account_id]['expense_accounts'][$expense_account['expense_account_id']]['month_expense'] = $month_expense[$income_account_id][$expense_account_id] ?? 0;
+          $expense_account_grid[$income_account_id]['expense_accounts'][$expense_account['expense_account_id']]['month_budget'] = $month_budget[$income_account_id][$expense_account_id] ?? 0;
+          $expense_account_grid[$income_account_id]['expense_accounts'][$expense_account['expense_account_id']]['month_expense_to_date'] = $month_expense_to_date[$income_account_id][$expense_account_id] ?? 0;
+          $expense_account_grid[$income_account_id]['expense_accounts'][$expense_account['expense_account_id']]['budget_to_date'] = $budget_to_date[$income_account_id][$expense_account_id] ?? 0;
           //$expense_account_grid[$income_account_id]['expense_accounts'][$expense_account['expense_account_id']]['budget_variance'] = $budget_variance;
           //$expense_account_grid[$income_account_id]['expense_accounts'][$expense_account['expense_account_id']]['budget_variance_percent'] = $budget_variance_percent;
-          $expense_account_grid[$income_account_id]['expense_accounts'][$expense_account['expense_account_id']]['expense_account_comment'] = isset($expense_account_comment[$income_account_id][$expense_account_id]) ? $expense_account_comment[$income_account_id][$expense_account_id] : ''; //$expense_account_comment;
+          $expense_account_grid[$income_account_id]['expense_accounts'][$expense_account['expense_account_id']]['expense_account_comment'] = $expense_account_comment[$income_account_id][$expense_account_id] ?? ''; //$expense_account_comment;
   
           $check_sum += $expense_account_grid[$income_account_id]['expense_accounts'][$expense_account['expense_account_id']]['month_expense_to_date'] +  $expense_account_grid[$income_account_id]['expense_accounts'][$expense_account['expense_account_id']]['budget_to_date'];
         }
@@ -1072,11 +1072,11 @@ private function toDateFinancialRatios(
   $income_account_ids_by_funding_streams = $this->incomeAccountIdsByFundingStreams($account_system_id);
 
   // Get support, gift, local, individual and ongoing income accounts ids 
-  $support_income_account_ids = isset($income_account_ids_by_funding_streams['support']) ? $income_account_ids_by_funding_streams['support'] : [];
-  $local_resource_income_account_ids = isset($income_account_ids_by_funding_streams['local']) ? $income_account_ids_by_funding_streams['local'] : [];
-  $gift_resource_income_account_ids = isset($income_account_ids_by_funding_streams['gift']) ? $income_account_ids_by_funding_streams['gift'] : [];
-  $individual_resource_income_account_ids = isset($income_account_ids_by_funding_streams['individual']) ? $income_account_ids_by_funding_streams['individual'] : [];
-  $ongoing_resource_income_account_ids = isset($income_account_ids_by_funding_streams['ongoing']) ? $income_account_ids_by_funding_streams['ongoing'] : [];
+  $support_income_account_ids = $income_account_ids_by_funding_streams['support'] ?? [];
+  $local_resource_income_account_ids = $income_account_ids_by_funding_streams['local'] ?? [];
+  $gift_resource_income_account_ids = $income_account_ids_by_funding_streams['gift'] ?? [];
+  $individual_resource_income_account_ids = $income_account_ids_by_funding_streams['individual'] ?? [];
+  $ongoing_resource_income_account_ids = $income_account_ids_by_funding_streams['ongoing'] ?? [];
   
   // Merge all CI income accounts
   $ci_income_income_accounts = array_merge($support_income_account_ids, $gift_resource_income_account_ids, $individual_resource_income_account_ids, $ongoing_resource_income_account_ids);
@@ -1794,7 +1794,7 @@ function clearTransactions()
     }
 
     $builder->where(array('opening_deposit_transit_id' => $post['opening_deposit_transit_id']));
-    $builder->update('opening_deposit_transit', $update_data);
+    $builder->update( $update_data);
   } elseif (isset($post['opening_outstanding_cheque_id']) && $post['opening_outstanding_cheque_id'] > 0) {
     $update_data['opening_outstanding_cheque_is_cleared'] = 1;
     $update_data['opening_outstanding_cheque_cleared_date'] = date('Y-m-t', strtotime($post['reporting_month'])); //date('Y-m-t');
@@ -2028,9 +2028,9 @@ function submitFinancialReport()
     if(!empty($outstanding_cheques)){
       $cnt = 0;
       foreach($outstanding_cheques as $outstanding_cheque){
-        $outstanding_cheques_balance[$cnt]['voucher_id'] = isset($outstanding_cheque['voucher_id']) ? $outstanding_cheque['voucher_id'] : NULL;
+        $outstanding_cheques_balance[$cnt]['voucher_id'] = $outstanding_cheque['voucher_id'] ?? NULL;
         $outstanding_cheques_balance[$cnt]['voucher_date'] = $outstanding_cheque['voucher_date'];
-        $outstanding_cheques_balance[$cnt]['voucher_number'] = isset($outstanding_cheque['voucher_number']) ? $outstanding_cheque['voucher_number'] : NULL;
+        $outstanding_cheques_balance[$cnt]['voucher_number'] = $outstanding_cheque['voucher_number'] ?? NULL;
         $outstanding_cheques_balance[$cnt]['cheque_number'] = $outstanding_cheque['voucher_cheque_number'];
         $outstanding_cheques_balance[$cnt]['description'] = $outstanding_cheque['voucher_description'];
         $outstanding_cheques_balance[$cnt]['office_bank_id'] = $outstanding_cheque['fk_office_bank_id'];
@@ -2062,9 +2062,9 @@ function submitFinancialReport()
     if(!empty($transit_deposits)){
       $cnt = 0;
       foreach($transit_deposits as $transit_deposit){
-        $transit_deposit_balance[$cnt]['voucher_id'] = isset($transit_deposit['voucher_id']) ? $transit_deposit['voucher_id'] : NULL;
+        $transit_deposit_balance[$cnt]['voucher_id'] = $transit_deposit['voucher_id'] ?? NULL;
         $transit_deposit_balance[$cnt]['voucher_date'] = $transit_deposit['voucher_date'];
-        $transit_deposit_balance[$cnt]['voucher_number'] = isset($transit_deposit['voucher_number']) ? $transit_deposit['voucher_number'] : NULL;
+        $transit_deposit_balance[$cnt]['voucher_number'] = $transit_deposit['voucher_number'] ?? NULL;
         $transit_deposit_balance[$cnt]['description'] = $transit_deposit['voucher_description'];
         $transit_deposit_balance[$cnt]['office_bank_id'] = $transit_deposit['fk_office_bank_id'];
         // $transit_deposit_balance[$cnt]['office_bank_name'] = $outstanding_cheque['office_bank_name'];

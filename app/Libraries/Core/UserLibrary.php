@@ -1206,13 +1206,13 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
         $user['user_lastname'] = $post['user_lastname'];
         $user['user_email'] = strtolower(trim($post['user_email']));
         $user['fk_context_definition_id'] = $post['fk_context_definition_id'];
-        $user['user_is_context_manager'] = isset($post['user_is_context_manager']) ? $post['user_is_context_manager'] : 0;
-        $user['user_is_system_admin'] = isset($post['user_is_system_admin']) ? $post['user_is_system_admin'] : 0;
+        $user['user_is_context_manager'] = $post['user_is_context_manager'] ?? 0;
+        $user['user_is_system_admin'] = $post['user_is_system_admin'] ?? 0;
         $user['fk_language_id'] = $post['fk_language_id'];
         $user['user_is_active'] = $this->assignUserActiveStatus($post['fk_context_definition_id'], isset($post['fk_account_system_id']) ? $post['fk_account_system_id'] : null); // A user has to be full approved to have the record active. Normal approval flow to be followed.
         $user['md5_migrate'] = 1; //For migrating fro use of php MD5 to complex sha256 with salt
         $user['fk_role_id'] = $post['fk_role_id'];
-        $user['user_is_switchable'] = isset($post['user_is_switchable']) ? $post['user_is_switchable'] : 1;
+        $user['user_is_switchable'] = $post['user_is_switchable'] ?? 1;
         if ($this->session->system_admin) {
             $user['fk_country_currency_id'] = $post['fk_country_currency_id'];
             $user['fk_account_system_id'] = $post['fk_account_system_id'];
@@ -1335,9 +1335,9 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
         $user['user_lastname'] = $post['user_lastname'];
         $user['user_email'] = $post['user_email'];
         $user['fk_context_definition_id'] = $post['fk_context_definition_id'];
-        $user['user_is_context_manager'] = isset($post['user_is_context_manager']) ? $post['user_is_context_manager'] : 0;
-        $user['user_is_system_admin'] = isset($post['user_is_system_admin']) ? $post['user_is_system_admin'] : 0;
-        $user['fk_language_id'] = isset($post['fk_language_id']) ? $post['fk_language_id'] : 1;
+        $user['user_is_context_manager'] = $post['user_is_context_manager'] ?? 0;
+        $user['user_is_system_admin'] = $post['user_is_system_admin'] ?? 0;
+        $user['fk_language_id'] = $post['fk_language_id'] ?? 1;
         $user['user_is_active'] = 1;
         $user['md5_migrate'] = 1; // For migrating fro use of php MD5 to complex sha256 with salt
         $user['fk_role_id'] = $post['primary_role_id'];

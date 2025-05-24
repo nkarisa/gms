@@ -43,8 +43,8 @@ class EmailTemplateLibrary extends GrantsLibrary implements \App\Interfaces\Libr
             $data['mail_log_recipients'] = json_encode($mail_recipients);
             $data['mail_log_message'] =  '{"subject":"'.$sub.'","body":"'.$msg.'"}';
             $data['mail_log_created_date'] = date('Y-m-d');
-            $data['mail_log_created_by'] = isset($this->session->user_id) ? $this->session->user_id: 1;
-            $data['mail_log_last_modified_by'] = isset($this->session->user_id) ? $this->session->user_id: 1;
+            $data['mail_log_created_by'] = $this->session->user_id ?? 1;
+            $data['mail_log_last_modified_by'] = $this->session->user_id ?? 1;
             $data['fk_status_id'] = $this->initialItemStatus('mail_log');;
            
             $this->write_db->table("mail_log")->insert($data);

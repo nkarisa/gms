@@ -599,11 +599,11 @@ class StatusLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
         // Assign roles based on approval direction
         foreach ($statusRecordsWithStatusIdKey as $statusId => &$statusRecord) {
             if ($statusRecord['status_approval_direction'] == -1) {
-                $statusRecord['status_role'] = isset($statusRoles[$itemInitialItemStatusId]) ? $statusRoles[$itemInitialItemStatusId] : [];
+                $statusRecord['status_role'] = $statusRoles[$itemInitialItemStatusId] ?? [];
             } elseif ($statusRecord['status_approval_direction'] == 0) {
-                $statusRecord['status_role'] = isset($levelRoles[$statusRecord['status_approval_sequence']]) ? $levelRoles[$statusRecord['status_approval_sequence']] : [];
+                $statusRecord['status_role'] = $levelRoles[$statusRecord['status_approval_sequence']] ?? [];
             } else {
-                $statusRecord['status_role'] = isset($statusRoles[$statusId]) ? $statusRoles[$statusId] : [];
+                $statusRecord['status_role'] = $statusRoles[$statusId] ?? [];
             }
         }
 

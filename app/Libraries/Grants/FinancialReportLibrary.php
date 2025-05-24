@@ -86,8 +86,8 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
 
         $cash_transactions_to_date = $this->cashTransactionsToDate($office_ids, $reporting_month, $project_ids, $office_bank_ids, 0, $retrieve_only_max_approved);
 
-        $bank_income_to_date = isset($cash_transactions_to_date['bank']['income']) ? $cash_transactions_to_date['bank']['income'] : 0;
-        $bank_expenses_to_date = isset($cash_transactions_to_date['bank']['expense']) ? $cash_transactions_to_date['bank']['expense'] : 0;
+        $bank_income_to_date = $cash_transactions_to_date['bank']['income'] ?? 0;
+        $bank_expenses_to_date = $cash_transactions_to_date['bank']['expense'] ?? 0;
 
         $computed_cash_at_bank = $opening_bank_balance + $bank_income_to_date - $bank_expenses_to_date;
 
@@ -165,8 +165,8 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
             $sum_of_bounced_cheques = $this->getTotalSumOfBouncedOpeningCheques($office_ids, $reporting_month, $project_ids, $office_bank_ids);
             $mfr_report_month = date('Y-m-t', strtotime($reporting_month));
 
-            $total_amount_bounced = isset($sum_of_bounced_cheques[0]['opening_outstanding_cheque_amount']) ? $sum_of_bounced_cheques[0]['opening_outstanding_cheque_amount'] : 0;
-            $bounced_date = isset($sum_of_bounced_cheques[0]['opening_outstanding_cheque_cleared_date']) ? $sum_of_bounced_cheques[0]['opening_outstanding_cheque_cleared_date'] : NULL;
+            $total_amount_bounced = $sum_of_bounced_cheques[0]['opening_outstanding_cheque_amount'] ?? 0;
+            $bounced_date = $sum_of_bounced_cheques[0]['opening_outstanding_cheque_cleared_date'] ?? NULL;
 
             if ($total_amount_bounced > 0 && $bounced_date > $mfr_report_month) {
                 $bank_balance_amount = $bank_balance_amount - $total_amount_bounced;
@@ -623,8 +623,8 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
         $bank_to_bank_contra_receipts = $this->bankToBankContraReceipts($office_bank_ids, $reporting_month);
         $bank_to_bank_contra_contributions = $this->bankToBankContraContributions($office_bank_ids, $reporting_month);
         $cash_transactions_to_date = $this->cashTransactionsToDate($office_ids, $reporting_month, $project_ids, $office_bank_ids, 0, $retrieve_only_max_approved);
-        $bank_income_to_date = isset($cash_transactions_to_date['bank']['income']) ? $cash_transactions_to_date['bank']['income'] : 0;
-        $bank_expenses_to_date = isset($cash_transactions_to_date['bank']['expense']) ? $cash_transactions_to_date['bank']['expense'] : 0;
+        $bank_income_to_date = $cash_transactions_to_date['bank']['income'] ?? 0;
+        $bank_expenses_to_date = $cash_transactions_to_date['bank']['expense'] ?? 0;
 
         $computed_cash_at_bank = $opening_bank_balance + $bank_income_to_date - $bank_expenses_to_date;
 
@@ -646,8 +646,8 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
     {
         $cash_transactions_to_date = $this->cashTransactionsToDate($office_ids, $reporting_month, $project_ids, $office_bank_ids, $office_cash_id, $retrieve_only_max_approved);
         $opening_cash_balance = $this->openingCashBalance($office_ids, $reporting_month, $project_ids, $office_bank_ids, $office_cash_id)['cash'];
-        $cash_income_to_date = isset($cash_transactions_to_date['cash']['income']) ? $cash_transactions_to_date['cash']['income'] : 0;
-        $cash_expenses_to_date = isset($cash_transactions_to_date['cash']['expense']) ? $cash_transactions_to_date['cash']['expense'] : 0;
+        $cash_income_to_date = $cash_transactions_to_date['cash']['income'] ?? 0;
+        $cash_expenses_to_date = $cash_transactions_to_date['cash']['expense'] ?? 0;
 
         return $opening_cash_balance + $cash_income_to_date - $cash_expenses_to_date;
     }
@@ -686,9 +686,9 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
 
         foreach ($income_accounts as $account) {
 
-            $month_opening_balance = isset($all_accounts_month_opening_balance[$account['income_account_id']]) ? $all_accounts_month_opening_balance[$account['income_account_id']] : 0;
-            $month_income = isset($all_accounts_month_income[$account['income_account_id']]) ? $all_accounts_month_income[$account['income_account_id']] : 0;
-            $month_expense = isset($all_accounts_month_expense[$account['income_account_id']]) ? $all_accounts_month_expense[$account['income_account_id']] : 0;
+            $month_opening_balance = $all_accounts_month_opening_balance[$account['income_account_id']] ?? 0;
+            $month_income = $all_accounts_month_income[$account['income_account_id']] ?? 0;
+            $month_expense = $all_accounts_month_expense[$account['income_account_id']] ?? 0;
 
             if ($month_opening_balance == 0 && $month_income == 0 && $month_expense == 0) {
                 continue;
@@ -788,9 +788,9 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
         $account_opening_balance = [];
 
         foreach ($income_account_ids as $income_account_id) {
-            $opening = isset($initial_account_opening_balance[$income_account_id]) ? $initial_account_opening_balance[$income_account_id] : 0;
-            $income = isset($account_last_month_income_to_date[$income_account_id]) ? $account_last_month_income_to_date[$income_account_id] : 0;
-            $expense = isset($account_last_month_expense_to_date[$income_account_id]) ? $account_last_month_expense_to_date[$income_account_id] : 0;
+            $opening = $initial_account_opening_balance[$income_account_id] ?? 0;
+            $income = $account_last_month_income_to_date[$income_account_id] ?? 0;
+            $expense = $account_last_month_expense_to_date[$income_account_id] ?? 0;
 
             $account_opening_balance[$income_account_id] = $opening  + ($income - $expense);
         }

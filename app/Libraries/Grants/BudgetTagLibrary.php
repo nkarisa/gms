@@ -26,7 +26,7 @@ class BudgetTagLibrary extends GrantsLibrary implements \App\Interfaces\LibraryI
         $budgetReviewCountLibrary = new BudgetReviewCountLibrary();
 
         $report_month = date('n',strtotime($reporting_month));
-        $custom_financial_year_id = isset($custom_financial_year['custom_financial_year_id']) ? $custom_financial_year['custom_financial_year_id'] : null ;
+        $custom_financial_year_id = $custom_financial_year['custom_financial_year_id'] ?? null ;
         
         if($custom_financial_year_id == null || (isset($custom_financial_year['custom_financial_year_is_active']) && $custom_financial_year['custom_financial_year_is_active'])){
             $office_custom_financial_years = $customFinancialYearLibrary->officeCustomFinancialYears($office_id);

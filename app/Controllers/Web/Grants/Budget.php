@@ -665,7 +665,7 @@ class Budget extends WebController
 
     // Insert budget limits
     $budgetLimitInsertData = [];
-    $incomeAccountIds = isset($actionBeforeInsert['details']['fk_income_account_id']) ? $actionBeforeInsert['details']['fk_income_account_id']: [];
+    $incomeAccountIds = $actionBeforeInsert['details']['fk_income_account_id'] ?? [];
 
     foreach ($incomeAccountIds as $index => $incomeAccountId) {
         $budgetLimitTracking = $this->generateItemTrackNumberAndName('budget_limit');
@@ -674,7 +674,7 @@ class Budget extends WebController
             'budget_limit_track_number' => $budgetLimitTracking['budget_limit_track_number'],
             'budget_limit_name' => $budgetLimitTracking['budget_limit_name'],
             'fk_income_account_id' => $incomeAccountId,
-            'budget_limit_amount' => isset($actionBeforeInsert['details']['budget_limit_amount'][$index])? $actionBeforeInsert['details']['budget_limit_amount'][$index]: 0,
+            'budget_limit_amount' => $actionBeforeInsert['details']['budget_limit_amount'][$index] ?? 0,
             'fk_budget_id' => $budgetId,
             'fk_status_id' => $statusLib->initialItemStatus('budget_limit'),
             'budget_limit_created_by' => $session->get('user_id'),

@@ -935,7 +935,7 @@ class AccountSystemLibrary extends GrantsLibrary implements \App\Interfaces\Libr
         $roleWriteBuilder->insert($data);
         $newRoleId = $this->write_db->insertID();
 
-        $permissionIdsToAttach = isset($rolePermissions[$_oldRoleId]) ? $rolePermissions[$_oldRoleId] : [];
+        $permissionIdsToAttach = $rolePermissions[$_oldRoleId] ?? [];
 
         if (count($permissionIdsToAttach) > 0) {
           $this->insertPermissionsToRole($statusLib, $newRoleId, $permissionIdsToAttach);
@@ -1169,9 +1169,9 @@ class AccountSystemLibrary extends GrantsLibrary implements \App\Interfaces\Libr
   {
     $state = true;
 
-    $account_system_settings = isset($post_array['account_system_settings']) ? $post_array['account_system_settings'] : [];
+    $account_system_settings = $post_array['account_system_settings'] ?? [];
     $language_id = $post_array['fk_language_id'];
-    $default_project_start_date = isset($post_array['default_project_start_date']) ? $post_array['default_project_start_date'] : null;
+    $default_project_start_date = $post_array['default_project_start_date'] ?? null;
     $template_account_system = $post_array['template_account_system'];
     $account_system_code = $post_array['account_system_code'];
     $account_system_level = $post_array['account_system_level'];

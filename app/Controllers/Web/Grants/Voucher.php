@@ -1127,8 +1127,8 @@ class Voucher extends WebController
            $detail['fk_expense_account_id'] = 0;
            $detail['fk_contra_account_id'] = $post['voucher_detail_account'][$i];
          }
-         $detail['fk_project_allocation_id'] = isset($post['fk_project_allocation_id'][$i]) ? $post['fk_project_allocation_id'][$i] : 0;
-         $detail['fk_request_detail_id'] =  isset($post['fk_request_detail_id'][$i]) ? $post['fk_request_detail_id'][$i] : 0;
+         $detail['fk_project_allocation_id'] = $post['fk_project_allocation_id'][$i] ?? 0;
+         $detail['fk_request_detail_id'] =  $post['fk_request_detail_id'][$i] ?? 0;
  
          if ($voucher_detail_id != '') {
            //update the voucher_detail table
@@ -1201,7 +1201,7 @@ class Voucher extends WebController
     //log_message('error', json_encode($post));
     $officeBankLibrary = new \App\Libraries\Grants\OfficeBankLibrary();
  
-     $office_bank_id = !isset($post['fk_office_bank_id']) ? 0 : $post['fk_office_bank_id'];
+     $office_bank_id = isset($post['fk_office_bank_id']) ?? 0;
  
      if ($office_bank_id == 0) {
        // Get id of active office bank
