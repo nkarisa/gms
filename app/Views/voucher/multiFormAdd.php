@@ -123,7 +123,7 @@ extract($result);
                     <span class='hidden'>
                         <label class='control-label col-xs-1'><?= get_phrase('reference_from'); ?> </label>
                         <div class='col-xs-2'>
-                            <select style="clear:right;float:left;max-width:90%;" type='text' name='bank_refund' id='bank_refund' disabled='disabled' class='form-control select2 required account_fields'>
+                            <select style="clear:right;float:left;max-width:90%;" type='text' name='bank_refund' id='bank_refund' disabled='disabled' class='form-control required account_fields'>
                                 <option value=""><?=get_phrase('select_voucher_number');?></option>
                             </select>
                             <!-- <i style="cursor: pointer;float:right" id="bank_refund_search" class = 'fa fa-search'></i> -->
@@ -1812,7 +1812,6 @@ extract($result);
                 !$(el).attr('readonly') &&
                 $(el).hasClass('required')
             ) {
-                //$(el).addClass('validate_error');
                 return_flag = false;
                 $(el).css('border', '1px red solid');
             }
