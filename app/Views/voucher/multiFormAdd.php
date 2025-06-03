@@ -126,7 +126,6 @@ extract($result);
                             <select style="clear:right;float:left;max-width:90%;" type='text' name='bank_refund' id='bank_refund' disabled='disabled' class='form-control required account_fields'>
                                 <option value=""><?=get_phrase('select_voucher_number');?></option>
                             </select>
-                            <!-- <i style="cursor: pointer;float:right" id="bank_refund_search" class = 'fa fa-search'></i> -->
                             <span id = "bank_refund_error" style = 'color:red;'></span>
                         </div>
                     </span>
@@ -1806,8 +1805,9 @@ extract($result);
         return_flag = true;
 
         $(".required").each(function(i, el) {
+            // console.log({id: $(el).attr('id'), val: $(el).val(), disabled: $(el).attr('disabled'), readonly: $(el).attr('readonly'), required: $(el).hasClass()})
             if (
-                $(el).val() == "" &&
+                $(el).val() == ""  &&
                 !$(el).attr('disabled') &&
                 !$(el).attr('readonly') &&
                 $(el).hasClass('required')

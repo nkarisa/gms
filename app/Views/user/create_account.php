@@ -530,7 +530,7 @@
         
         const compassion_country_id = $('#user_country').val();
         // Get offices that belong to country of $(this) context
-        const url = '<?= base_url() ?>ajax/office/getOfficeData';
+        const url = '<?= base_url() ?>ajax/login/getOfficeData';
 
         
 

@@ -2579,20 +2579,9 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return $cheque_numbers;
     }
 
-    public function unrefundedAmountByFromVoucherId($from_voucher_id, $settlementType = 'bank_refund'){
+    public function unrefundedAmountByFromVoucherId($from_voucher_id, $originalVoucherAmount, $settlementType = 'bank_refund'){
 
         $voucherReadBuilder = $this->read_db->table('voucher');
-
-        $voucherReadBuilder->selectSum("voucher_detail_total_cost");
-        $voucherReadBuilder->where(array('voucher_id' => $from_voucher_id));
-        $voucherReadBuilder->join('voucher_detail', 'voucher_detail.fk_voucher_id = voucher.voucher_id');
-        $voucher_amount_obj = $voucherReadBuilder->get();
-
-        $voucher_amount = 0;
-        if($voucher_amount_obj->getNumRows() > 0){
-          $voucher_details = $voucher_amount_obj->getResultArray();
-          $voucher_amount = abs(array_sum(array_column($voucher_details, 'voucher_detail_total_cost')));
-        }
 
         $voucherReadBuilder->selectSum("voucher_detail_total_cost");
         $voucherReadBuilder->where(array($settlementType == 'bank_refund' ? 'voucher_reversal_from' : 'voucher_cleared_from' => $from_voucher_id));
@@ -2606,7 +2595,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
           $total_refund_amount = abs(array_sum(array_column($refunded_to_vouchers, 'voucher_detail_total_cost')));
         }
 
-        $unrefunded_amount = $voucher_amount - $total_refund_amount;
+        $unrefunded_amount = $originalVoucherAmount - $total_refund_amount;
     
         return $unrefunded_amount;
       }
@@ -2893,7 +2882,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $voucherReadBuilder->select('voucher_number');
         $voucherReadBuilder->orderBy('voucher_date DESC');
         $voucherReadBuilder->where(['voucher.fk_office_id' => $officeId, 'voucher_type_account_code' => 'bank', 'voucher_type_effect_code' => VoucherTypeEffectEnum::EXPENSE->getCode()]);
-        $voucherReadBuilder->where(['voucher.voucher_date >=' => $voucherValidPeriod, 'voucher_cleared' => 0, 'voucher_reversal_to' => 0]);
+        $voucherReadBuilder->where(['voucher.voucher_date >=' => $voucherValidPeriod, 'voucher_cleared' => 1, 'voucher_reversal_to' => 0, 'voucher_reversal_from' => 0]);
         $voucherReadBuilder->join('voucher_type','voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
         $voucherReadBuilder->join('voucher_type_account','voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
         $voucherReadBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
