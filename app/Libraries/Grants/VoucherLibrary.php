@@ -2874,20 +2874,29 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
     }
 
-    public function getValidAccrualVouchers(string $voucher_type_effect, $officeId){
-        $voucherReadBuilder = $this->read_db->table('voucher');
-
+    public function getValidAccrualVouchers(string $voucher_type_effect, int $officeId, string $voucher_date){
         $voucherNumbers = match($voucher_type_effect){
-            'bank_refund' => $this->getBankRefundValidRefundVouchers(),
-            VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() => $this->getUnclearedReceivables(),
-            VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() => $this->getUnclearedPayables(),
-            VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode() => $this->getUnclearedPrepayments(),
+            VoucherTypeEffectEnum::BANK_REFUND->getCode() => $this->getBankRefundValidRefundVouchers($officeId, $voucher_date),
+            VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() => $this->getUnclearedReceivables($officeId, $voucher_date),
+            VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() => $this->getUnclearedPayables($officeId, $voucher_date),
+            VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode() => $this->getUnclearedPrepayments($officeId, $voucher_date),
         };
 
-        $voucherReadBuilder->select(['voucher_number']);
-        $voucherReadBuilder->where(['fk_office_id' => $officeId, 'voucher_type_effect_code' => $voucher_type_effect]);
-        $voucherReadBuilder->join('voucher_type','voucher.fk_voucher_type_id=voucher_type.voucher_type_id');
-        $voucherReadBuilder->join('voucher_type_effect','voucher_type.fk_voucher_type_effect_id=voucher_type_effect.voucher_type_effect_id');
+        return $voucherNumbers;
+    }
+
+    private function getBankRefundValidRefundVouchers(int $officeId, string $voucher_date){
+        $voucherReadBuilder = $this->read_db->table('voucher');
+        $refundClearanceValidPeriod = service('settings')->get('GrantsConfig.refundClearanceValidPeriodInMonths');
+        $voucherValidPeriod = date('Y-m-01', strtotime("-$refundClearanceValidPeriod months", strtotime($voucher_date)));
+
+        $voucherReadBuilder->select('voucher_number');
+        $voucherReadBuilder->orderBy('voucher_date DESC');
+        $voucherReadBuilder->where(['voucher.fk_office_id' => $officeId, 'voucher_type_account_code' => 'bank', 'voucher_type_effect_code' => VoucherTypeEffectEnum::EXPENSE->getCode()]);
+        $voucherReadBuilder->where(['voucher.voucher_date >=' => $voucherValidPeriod, 'voucher_cleared' => 0, 'voucher_reversal_to' => 0]);
+        $voucherReadBuilder->join('voucher_type','voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+        $voucherReadBuilder->join('voucher_type_account','voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
+        $voucherReadBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
         $resultObj = $voucherReadBuilder->get();
 
         $voucherNumbers = [];
@@ -2900,19 +2909,75 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return $voucherNumbers;
     }
 
-    private function getBankRefundValidRefundVouchers(){
-        return [];
+    private function getUnclearedReceivables(int $officeId, string $voucher_date){
+        $voucherReadBuilder = $this->read_db->table('voucher');
+        $accrualClearanceValidPeriod = service('settings')->get('GrantsConfig.accrualClearanceValidPeriodInMonths');
+        $voucherValidPeriod = date('Y-m-01', strtotime("-$accrualClearanceValidPeriod months", strtotime($voucher_date)));
+
+
+        $voucherReadBuilder->select('voucher_number');
+        $voucherReadBuilder->orderBy('voucher_date DESC');
+        $voucherReadBuilder->where(['voucher.fk_office_id' => $officeId, 'voucher_type_effect_code' => VoucherTypeEffectEnum::RECEIVABLES->getCode()]);
+        $voucherReadBuilder->where(['voucher.voucher_date >=' => $voucherValidPeriod, 'voucher_cleared' => 0, 'voucher_cleared_to' => 0]);
+        $voucherReadBuilder->join('voucher_type','voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+        $voucherReadBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+        $resultObj = $voucherReadBuilder->get();
+
+        $voucherNumbers = [];
+
+        if($resultObj->getNumRows() > 0){
+            $results = $resultObj->getResultArray();
+            $voucherNumbers = array_column($results, 'voucher_number');
+        }
+
+        return $voucherNumbers;
     }
 
-    private function getUnclearedReceivables(){
-        return [];
+    private function getUnclearedPayables(int $officeId, string $voucher_date){
+         $voucherReadBuilder = $this->read_db->table('voucher');
+        $accrualClearanceValidPeriod = service('settings')->get('GrantsConfig.accrualClearanceValidPeriodInMonths');
+        $voucherValidPeriod = date('Y-m-01', strtotime("-$accrualClearanceValidPeriod months", strtotime($voucher_date)));
+
+
+        $voucherReadBuilder->select('voucher_number');
+        $voucherReadBuilder->orderBy('voucher_date DESC');
+        $voucherReadBuilder->where(['voucher.fk_office_id' => $officeId, 'voucher_type_effect_code' => VoucherTypeEffectEnum::PAYABLES->getCode()]);
+        $voucherReadBuilder->where(['voucher.voucher_date >=' => $voucherValidPeriod, 'voucher_cleared' => 0, 'voucher_cleared_to' => 0]);
+        $voucherReadBuilder->join('voucher_type','voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+        $voucherReadBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+        $resultObj = $voucherReadBuilder->get();
+
+        $voucherNumbers = [];
+
+        if($resultObj->getNumRows() > 0){
+            $results = $resultObj->getResultArray();
+            $voucherNumbers = array_column($results, 'voucher_number');
+        }
+
+        return $voucherNumbers;
     }
 
-    private function getUnclearedPayables(){
-        return [];
-    }
+    private function getUnclearedPrepayments(int $officeId, string $voucher_date){
+         $voucherReadBuilder = $this->read_db->table('voucher');
+        $accrualClearanceValidPeriod = service('settings')->get('GrantsConfig.accrualClearanceValidPeriodInMonths');
+        $voucherValidPeriod = date('Y-m-01', strtotime("-$accrualClearanceValidPeriod months", strtotime($voucher_date)));
 
-    private function getUnclearedPrepayments(){
-        return [];
+
+        $voucherReadBuilder->select('voucher_number');
+        $voucherReadBuilder->orderBy('voucher_date DESC');
+        $voucherReadBuilder->where(['voucher.fk_office_id' => $officeId, 'voucher_type_effect_code' => VoucherTypeEffectEnum::PREPAYMENTS->getCode()]);
+        $voucherReadBuilder->where(['voucher.voucher_date >=' => $voucherValidPeriod, 'voucher_cleared' => 0, 'voucher_cleared_to' => 0]);
+        $voucherReadBuilder->join('voucher_type','voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+        $voucherReadBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+        $resultObj = $voucherReadBuilder->get();
+
+        $voucherNumbers = [];
+
+        if($resultObj->getNumRows() > 0){
+            $results = $resultObj->getResultArray();
+            $voucherNumbers = array_column($results, 'voucher_number');
+        }
+
+        return $voucherNumbers;
     }
 }

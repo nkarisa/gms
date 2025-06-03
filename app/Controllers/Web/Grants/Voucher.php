@@ -172,13 +172,14 @@ class Voucher extends WebController
     }
 
     if(
-        $voucher_type_effect == 'bank_refund' || 
+        $voucher_type_effect == VoucherTypeEffectEnum::BANK_REFUND->getCode() || 
         $voucher_type_effect == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() || 
         $voucher_type_effect == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() || 
         $voucher_type_effect == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode()
       ){
+      $next_vouching_date = $voucherLibrary->getVoucherDate($office_id);
       $response['is_bank_refund'] = true;
-      $response['valid_refund_vouchers'] = $voucherLibrary->getValidAccrualVouchers($voucher_type_effect, $office_id);
+      $response['valid_refund_vouchers'] = $voucherLibrary->getValidAccrualVouchers($voucher_type_effect, $office_id, $next_vouching_date);
     }
 
     return $this->response->setJSON($response);

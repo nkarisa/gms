@@ -64,4 +64,7 @@ class GrantsConfig extends BaseConfig
     public $dropTransactingOffices = true;
     public $dropOnlyCenter = true;
 
+    public $refundClearanceValidPeriodInMonths = 6; // period in months
+    public $accrualClearanceValidPeriodInMonths = 6;
+
 }
