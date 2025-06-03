@@ -2873,4 +2873,46 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         }
 
     }
+
+    public function getValidAccrualVouchers(string $voucher_type_effect, $officeId){
+        $voucherReadBuilder = $this->read_db->table('voucher');
+
+        $voucherNumbers = match($voucher_type_effect){
+            'bank_refund' => $this->getBankRefundValidRefundVouchers(),
+            VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() => $this->getUnclearedReceivables(),
+            VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() => $this->getUnclearedPayables(),
+            VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode() => $this->getUnclearedPrepayments(),
+        };
+
+        $voucherReadBuilder->select(['voucher_number']);
+        $voucherReadBuilder->where(['fk_office_id' => $officeId, 'voucher_type_effect_code' => $voucher_type_effect]);
+        $voucherReadBuilder->join('voucher_type','voucher.fk_voucher_type_id=voucher_type.voucher_type_id');
+        $voucherReadBuilder->join('voucher_type_effect','voucher_type.fk_voucher_type_effect_id=voucher_type_effect.voucher_type_effect_id');
+        $resultObj = $voucherReadBuilder->get();
+
+        $voucherNumbers = [];
+
+        if($resultObj->getNumRows() > 0){
+            $results = $resultObj->getResultArray();
+            $voucherNumbers = array_column($results, 'voucher_number');
+        }
+
+        return $voucherNumbers;
+    }
+
+    private function getBankRefundValidRefundVouchers(){
+        return [];
+    }
+
+    private function getUnclearedReceivables(){
+        return [];
+    }
+
+    private function getUnclearedPayables(){
+        return [];
+    }
+
+    private function getUnclearedPrepayments(){
+        return [];
+    }
 }

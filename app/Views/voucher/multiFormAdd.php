@@ -123,8 +123,10 @@ extract($result);
                     <span class='hidden'>
                         <label class='control-label col-xs-1'><?= get_phrase('reference_from'); ?> </label>
                         <div class='col-xs-2'>
-                            <input style="clear:right;float:left;max-width:90%;" type='text' placeholder="<?=get_phrase('enter_bank_expense_voucher_number');?>" name='bank_refund' id='bank_refund' disabled='disabled' class='form-control required account_fields' />
-                            <i style="cursor: pointer;float:right" id="bank_refund_search" class = 'fa fa-search'></i>
+                            <select style="clear:right;float:left;max-width:90%;" type='text' name='bank_refund' id='bank_refund' disabled='disabled' class='form-control select2 required account_fields'>
+                                <option value=""><?=get_phrase('select_voucher_number');?></option>
+                            </select>
+                            <!-- <i style="cursor: pointer;float:right" id="bank_refund_search" class = 'fa fa-search'></i> -->
                             <span id = "bank_refund_error" style = 'color:red;'></span>
                         </div>
                     </span>
@@ -378,7 +380,8 @@ extract($result);
 
             if(response_is_bank_refund){
                 $("#bank_refund, #refund_voucher_amount, #bank_balance").closest('span').removeClass('hidden');
-                // $("#refund_voucher_amount").closest('span').addClass('hidden');
+                // Populate refund voucher list
+                populateVoucherInRefundList(response_objects['valid_refund_vouchers']);
                 $("#refund_voucher_amount").val(0)
             }else{
                 $("#bank_refund").closest('span').addClass('hidden');
@@ -396,6 +399,16 @@ extract($result);
         }) : alert("Choose a valid date");
 
     });
+
+
+    function populateVoucherInRefundList(voucherList){
+        // console.log(voucherList);
+        const bankRefundElem = $("#bank_refund")
+        bankRefundElem.children().remove();
+        voucherList.forEach((voucherNumber) => {
+            bankRefundElem.append('<option value = "' + voucherNumber + '">' + voucherNumber + '</option>')
+        })
+    }
 
 
     $(".btn-retrieve-request").on('click', function() {

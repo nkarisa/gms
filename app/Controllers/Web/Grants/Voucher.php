@@ -117,6 +117,7 @@ class Voucher extends WebController
     $response['is_bank_refund'] = false;
 
     $officeBankLibrary = new Grants\OfficeBankLibrary();
+    $voucherLibrary = new Grants\VoucherLibrary();
 
     $response['voucher_type_requires_cheque_referencing'] = $this->library->voucherTypeRequiresChequeReferencing($voucher_type_id);
 
@@ -177,6 +178,7 @@ class Voucher extends WebController
         $voucher_type_effect == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode()
       ){
       $response['is_bank_refund'] = true;
+      $response['valid_refund_vouchers'] = $voucherLibrary->getValidAccrualVouchers($voucher_type_effect, $office_id);
     }
 
     return $this->response->setJSON($response);
