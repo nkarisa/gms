@@ -72,7 +72,7 @@ trait SetupTrait {
 
   function create_missing_controller($table, $assets_temp_path, $app_name)
   {
-    $controllers_path = APPPATH . 'controllers' . DIRECTORY_SEPARATOR . 'web' . DIRECTORY_SEPARATOR . $app_name . DIRECTORY_SEPARATOR;
+    $controllers_path = APPPATH . 'Controllers' . DIRECTORY_SEPARATOR . 'Web' . DIRECTORY_SEPARATOR . $app_name . DIRECTORY_SEPARATOR;
     // Copy contents of assets/temp_library to the created file after the tag above
     $replaceables = array("%cap_feature%" => $table, '%cap_module%' => $app_name);
     $this->write_file_contents($table, $controllers_path, $assets_temp_path, $replaceables, 'Controller');

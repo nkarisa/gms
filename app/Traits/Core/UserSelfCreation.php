@@ -14,7 +14,7 @@ trait UserSelfCreation {
         $data['system_title'] = $this->system_title;
         $data['countries'] = $countries;
 
-        log_message('error', json_encode( $data));
+        // log_message('error', json_encode( $data));
 
         return view('user/create_account', $data);
     }
