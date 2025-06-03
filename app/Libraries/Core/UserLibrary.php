@@ -1290,7 +1290,7 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
         try {
             $salt = $awsParameterLibrary->getParameterValue('sha256-password-salt');
         } catch (\Throwable $th) {
-            $salt = env('PASSWORD_SALT');
+            $salt = env('SHA256-PASSWORD-SALT');
         }
 
         $hashed = hash('sha256', $password . $salt);
