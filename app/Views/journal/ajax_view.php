@@ -124,7 +124,6 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
                         <th colspan='3' style='text-align:center;'><?= get_phrase($accrual_ledger); ?></th>
                     <?php }?>
 
-                    <!-- <th colspan='3' style='text-align:center;'>Cash</th> -->
                     <?php if ($sum_of_accounts > 0) { ?>
                         <th colspan='<?= $sum_of_accounts; ?>'></th><?php } ?>
                 </tr>
@@ -331,9 +330,6 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
                                     </div>
                                 <?php }
                             } ?>
-
-
-
                         </td>
                         <td><?= date('jS M Y', strtotime($date)); ?></td>
                         <td><input type='checkbox' name='selected_voucher[]' class='select_voucher'
