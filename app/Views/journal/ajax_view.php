@@ -54,6 +54,8 @@ extract($result['status_data']);
 $result['mfr_submited_status'] = 0; // A stop gap waiting a discussion with Development Team on this matter so that ticket INC0218239 can be resolved. 
 // Users should be able to reverse voucher even if the MFRs are submitted. This is important to allow handling stale cheques and invalid transactions
 
+$month_used_accrual_ledgers = ['receivables' => 0,'payables' => 0,'prepayments' => 0,'depreciation' => 0,'payroll_liabilities' => 0];
+$count_of_month_used_accrual_ledgers = count($month_used_accrual_ledgers);
 
 $sum_of_income_accounts = count($accounts['income']);
 $sum_of_expense_accounts = count($accounts['expense']);
@@ -91,7 +93,7 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
                                 title='Next Month'><i class='fa fa-plus-circle' style='font-size:20pt;'></i></a>
                         <?php } ?>
                     </th>
-                    <th colspan="<?= $sum_of_accounts + 5 + (count($month_opening_balance['bank']) * 3) + (count($month_opening_balance['cash']) * 3); ?>"
+                    <th colspan="<?= $sum_of_accounts + $count_of_month_used_accrual_ledgers * 3 + 5 + (count($month_opening_balance['bank']) * 3) + (count($month_opening_balance['cash']) * 3); ?>"
                         style='text-align:center;'>
                         <?= $office_name; ?></br>
                         <?= get_phrase('cash_journal'); ?> <br>
@@ -118,6 +120,10 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
                             (<?= $cash_account['account_name']; ?>)</th>
                     <?php } ?>
 
+                    <?php foreach($month_used_accrual_ledgers as $accrual_ledger => $ledger_opening_balance){?>
+                        <th colspan='3' style='text-align:center;'><?= get_phrase($accrual_ledger); ?></th>
+                    <?php }?>
+
                     <!-- <th colspan='3' style='text-align:center;'>Cash</th> -->
                     <?php if ($sum_of_accounts > 0) { ?>
                         <th colspan='<?= $sum_of_accounts; ?>'></th><?php } ?>
@@ -133,7 +139,9 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
                         <th colspan='3'><?= number_format($cash_account['amount'], 2); ?></th>
                     <?php } ?>
 
-                    <!-- <th colspan='3'><?= number_format(array_sum(array_column($month_opening_balance['cash'], 'amount')), 2); ?></th> -->
+                    <?php foreach($month_used_accrual_ledgers as $accrual_ledger => $ledger_opening_balance){?>
+                        <th colspan='3'><?= number_format($ledger_opening_balance, 2); ?></th>
+                    <?php }?>
 
                     <?php if ($sum_of_income_accounts > 0) { ?>
                         <th colspan='<?= count($accounts['income']); ?>'><?= get_phrase('income'); ?></th><?php } ?>
@@ -163,6 +171,11 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
                         <th><?= $cash_account['account_name'] . ' ' . get_phrase('balance'); ?></th>
                     <?php } ?>
 
+                    <?php foreach($month_used_accrual_ledgers as $accrual_ledger => $ledger_opening_balance){?>
+                        <th><?= get_phrase($accrual_ledger). ' ' . get_phrase('debit'); ?></th>
+                        <th><?= get_phrase($accrual_ledger) . ' ' . get_phrase('credit'); ?></th>
+                        <th><?= get_phrase($accrual_ledger) . ' ' . get_phrase('balance'); ?></th>
+                    <?php }?>
 
                     <?php foreach ($accounts['income'] as $income_account_code) { ?>
                         <th><?= $income_account_code; ?></th>
