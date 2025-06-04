@@ -1056,7 +1056,9 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $builder->select(array('voucher_type_account_code', 'voucher_type_effect_code'));
         $builder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
         $builder->join('voucher_type_account', 'voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
-        $voucher_type_effect_and_code = $builder->getWhere(array('voucher_type_id' => $voucher_type_id))->getRow();
+        $builder->where(array('voucher_type_id' => $voucher_type_id));
+        $voucher_type_effect_and_code = $builder->get()
+        ->getRow();
 
         return $voucher_type_effect_and_code;
     }
@@ -2863,7 +2865,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
     }
 
-    public function getValidAccrualVouchers(string $voucher_type_effect, int $officeId, string $voucher_date){
+    public function getValidAccrualVouchers(string $voucher_type_effect, int $officeId, string $voucher_date): array{
         $voucherNumbers = match($voucher_type_effect){
             VoucherTypeEffectEnum::BANK_REFUND->getCode() => $this->getBankRefundValidRefundVouchers($officeId, $voucher_date),
             VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() => $this->getUnclearedReceivables($officeId, $voucher_date),

@@ -380,7 +380,7 @@ extract($result);
             if(response_is_bank_refund){
                 $("#bank_refund, #refund_voucher_amount, #bank_balance").closest('span').removeClass('hidden');
                 // Populate refund voucher list
-                populateVoucherInRefundList(response_objects['valid_refund_vouchers']);
+                // populateVoucherInRefundList(response_objects['valid_refund_vouchers']);
                 $("#refund_voucher_amount").val(0)
             }else{
                 $("#bank_refund").closest('span').addClass('hidden');
@@ -990,6 +990,22 @@ extract($result);
         populate_select(response_office_cash, $("#cash_account"), 'Select a cash account');
     }
 
+    $("#bank").on('change', function(){
+        let office_id = $('#office').val();
+        let voucher_type_id = $("#voucher_type").val();
+        let url = "<?= base_url(); ?>ajax/voucher/getValidVoucherListForRefund/" + office_id + "/" + voucher_type_id;
+        
+        getRequest(url, function(response_objects){
+            let response_is_bank_refund = response_objects['is_bank_refund'];
+            if(response_is_bank_refund){
+                $("#bank_refund, #refund_voucher_amount, #bank_balance").closest('span').removeClass('hidden');
+                // Populate refund voucher list
+                populateVoucherInRefundList(response_objects['valid_refund_vouchers']);
+                // $("#refund_voucher_amount").val(0)
+            }
+        })
+    })
+
     function get_bank_cash_information(OfficeBankSelect) {
 
         let office_id = $("#office").val();
@@ -1014,68 +1030,19 @@ extract($result);
             if (response_is_voucher_type_requires_cheque_referencing) {
                 var url = "<?= base_url(); ?>ajax/voucher/checkActiveChequeBookForOfficeBankExist/" + office_id + "/" + office_bank_id + "/" + transaction_date;
                 getRequest(url, function(response_obj) {
-                    // alert(response);
-                    // var response_obj = JSON.parse(response);
                     //Check if response =false and then redirect to the cheque form
                     if (!response_obj['is_active_cheque_book_existing']) {
-
                         alert('No active cheque book & you will be directed to add cheque book form');
-
-                        var redirect_to_add_cheque_book_url = "<?= base_url(); ?>cheque_book/singleFormAdd";
-
+                        let redirect_to_add_cheque_book_url = "<?= base_url(); ?>cheque_book/singleFormAdd";
                         window.location.replace(redirect_to_add_cheque_book_url);
-                        //alert('Yes');
                     } else if (!response_obj['are_all_cheque_books_fully_approved']) {
-
                         alert('Your active cheque book is either unsubmitted, declined or reinstated and not approved. You will be redirect to the cheque book');
-
-                        var redirect_to_add_cheque_book_url = "<?= base_url(); ?>cheque_book/view/" + response_obj['current_cheque_book_id']; //QnG6NpbmWr
-
+                        let redirect_to_add_cheque_book_url = "<?= base_url(); ?>cheque_book/view/" + response_obj['current_cheque_book_id']; //QnG6NpbmWr
                         window.location.replace(redirect_to_add_cheque_book_url);
                     }
                 });
             }
-
-            // if (response_office_cash.length > 0) {
-            //     add_options_to_cash_select(response_office_cash);
-
-            //     if (response_office_bank.length > 0) add_options_to_bank_select(response_office_bank, true);
-
-            // } else if (response_office_bank.length > 0) {
-            //     add_options_to_bank_select(response_office_bank);
-
-            //     if (response_office_cash.length > 0) add_options_to_cash_select(response_office_cash, true);
-
-            // }
-
-            // if (response_is_transfer_contra) {
-            //     $("#cash_recipient_account").closest('span').removeClass('hidden');
-            //     $("#cash_recipient_account").removeAttr('disabled');
-            //     $("#cash_recipient_account").html('');
-            // } else {
-            //     $("#cash_recipient_account").closest('span').addClass('hidden');
-            // }
-
-            // if (response_is_bank_payment) {
-            //     $("#cheque_number").closest('span').removeClass('hidden');
-
-            //     change_voucher_number_field_to_eft_number(response_is_voucher_type_requires_cheque_referencing);
-
-            // } else {
-            //     $("#cheque_number").closest('span').addClass('hidden');
-            // }
-
-            // if (voucher_type_id) {
-            //     //update_request_details_count_on_badge();
-            //     $(".btn-insert").show();
-            //     $(".btn-retrieve-request").show();
-            // } else {
-            //     hide_buttons();
-            // }
-
         });
-
-
     }
 
     function change_voucher_number_field_to_eft_number(response_is_voucher_type_requires_cheque_referencing) {

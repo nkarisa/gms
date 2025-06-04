@@ -117,7 +117,7 @@ class Voucher extends WebController
     $response['is_bank_refund'] = false;
 
     $officeBankLibrary = new Grants\OfficeBankLibrary();
-    $voucherLibrary = new Grants\VoucherLibrary();
+    // $voucherLibrary = new Grants\VoucherLibrary();
 
     $response['voucher_type_requires_cheque_referencing'] = $this->library->voucherTypeRequiresChequeReferencing($voucher_type_id);
 
@@ -170,6 +170,24 @@ class Voucher extends WebController
         ) {
       $response['is_bank_payment'] = true;
     }
+
+    if(
+        $voucher_type_effect == VoucherTypeEffectEnum::BANK_REFUND->getCode() || 
+        $voucher_type_effect == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() || 
+        $voucher_type_effect == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() || 
+        $voucher_type_effect == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode()
+      ){
+      $response['is_bank_refund'] = true;
+    }
+
+    return $this->response->setJSON($response);
+  }
+
+  function getValidVoucherListForRefund($office_id, $voucher_type_id = 0): ResponseInterface{
+    $response = [];
+    $voucherLibrary = new Grants\VoucherLibrary();
+    $voucher_type_effect_and_code = $voucherLibrary->voucherTypeEffectAndCode($voucher_type_id);
+    $voucher_type_effect = $voucher_type_effect_and_code->voucher_type_effect_code;
 
     if(
         $voucher_type_effect == VoucherTypeEffectEnum::BANK_REFUND->getCode() || 
