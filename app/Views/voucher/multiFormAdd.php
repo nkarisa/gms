@@ -1001,7 +1001,7 @@ extract($result);
                 $("#bank_refund, #refund_voucher_amount, #bank_balance").closest('span').removeClass('hidden');
                 // Populate refund voucher list
                 populateVoucherInRefundList(response_objects['valid_refund_vouchers']);
-                // $("#refund_voucher_amount").val(0)
+                $("#refund_voucher_amount").val(0)
             }
         })
     })

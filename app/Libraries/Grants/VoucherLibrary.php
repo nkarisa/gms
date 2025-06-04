@@ -2868,6 +2868,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
     public function getValidAccrualVouchers(string $voucher_type_effect, int $officeId, string $voucher_date): array{
         $voucherNumbers = match($voucher_type_effect){
             VoucherTypeEffectEnum::BANK_REFUND->getCode() => $this->getBankRefundValidRefundVouchers($officeId, $voucher_date),
+            // VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode(),VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode(),VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode() => $this->getUnclearedAccruals($voucher_type_effect, $officeId, $voucher_date)
             VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() => $this->getUnclearedReceivables($officeId, $voucher_date),
             VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() => $this->getUnclearedPayables($officeId, $voucher_date),
             VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode() => $this->getUnclearedPrepayments($officeId, $voucher_date),
@@ -2875,6 +2876,31 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
         return $voucherNumbers;
     }
+
+    // private function getUnclearedAccruals($voucher_type_effect, $officeId, $voucher_date){
+    //     log_message('error', json_encode(compact('voucher_type_effect','officeId','voucher_date')));
+    //     $voucherReadBuilder = $this->read_db->table('voucher');
+    //     $accrualClearanceValidPeriod = service('settings')->get('GrantsConfig.accrualClearanceValidPeriodInMonths');
+    //     $voucherValidPeriod = date('Y-m-01', strtotime("-$accrualClearanceValidPeriod months", strtotime($voucher_date)));
+
+
+    //     $voucherReadBuilder->select('voucher_number');
+    //     $voucherReadBuilder->orderBy('voucher_date DESC');
+    //     $voucherReadBuilder->where(['voucher.fk_office_id' => $officeId, 'voucher_type_effect_code' => $voucher_type_effect]);
+    //     $voucherReadBuilder->where(['voucher.voucher_date >=' => $voucherValidPeriod, 'voucher_cleared' => 0, 'voucher_cleared_to' => 0]);
+    //     $voucherReadBuilder->join('voucher_type','voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+    //     $voucherReadBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+    //     $resultObj = $voucherReadBuilder->get();
+
+    //     $voucherNumbers = [];
+
+    //     if($resultObj->getNumRows() > 0){
+    //         $results = $resultObj->getResultArray();
+    //         $voucherNumbers = array_column($results, 'voucher_number');
+    //     }
+
+    //     return $voucherNumbers;
+    // }
 
     private function getBankRefundValidRefundVouchers(int $officeId, string $voucher_date){
         $voucherReadBuilder = $this->read_db->table('voucher');
