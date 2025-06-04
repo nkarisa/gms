@@ -56,7 +56,7 @@ extract($result['status_data']);
 $result['mfr_submited_status'] = 0; // A stop gap waiting a discussion with Development Team on this matter so that ticket INC0218239 can be resolved. 
 // Users should be able to reverse voucher even if the MFRs are submitted. This is important to allow handling stale cheques and invalid transactions
 
-$month_used_accrual_ledgers = ['receivables' => 100,'payables' => 200,'prepayments' => 300,'depreciation' => 400,'payroll_liabilities' => 500];
+$month_used_accrual_ledgers = ['receivables' => 100,'payables' => 200,'prepayments' => 300,'depreciation' => 400,'payroll_liability' => 500];
 $count_of_month_used_accrual_ledgers = count($month_used_accrual_ledgers);
 
 $sum_of_income_accounts = count($accounts['income']);
@@ -200,6 +200,21 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
                     return 0;
                 }, array_flip(array_keys($month_opening_balance['cash'])));
 
+                $sum_receivables_income = 0;
+                $sum_receivables_expense = 0;
+
+                $sum_payables_income = 0;
+                $sum_payables_expense = 0;
+
+                $sum_prepayments_income = 0;
+                $sum_prepayments_expense = 0;
+
+                $sum_depreciation_income = 0;
+                $sum_depreciation_expense = 0;
+
+                $sum_payroll_liability_income = 0;
+                $sum_payroll_liability_expense = 0;
+
                 // Imstantiate empty cash and bank balances
                 $running_bank_balance = $bank_accounts;
                 $sum_bank_income = $bank_accounts;
@@ -210,6 +225,21 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
                 $sum_petty_cash_expense = $cash_accounts;
                 
                 foreach ($vouchers as $voucher_id => $voucher) {
+                    $receivables_income = 0;
+                    $receivables_expense = 0;
+                    
+                    $payables_income = 0;
+                    $payables_expense = 0;
+
+                    $prepayments_income = 0;
+                    $prepayments_expense = 0;
+
+                    $depreciation_income = 0;
+                    $depreciation_expense = 0;
+
+                    $payroll_liability_income = 0;
+                    $payroll_liability_expense = 0;
+
                     extract($voucher);
                     // echo json_encode($voucher);
                     ?>
@@ -408,6 +438,46 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
                             $running_petty_cash_balance[$office_cash_id] = $month_opening_balance['cash'][$office_cash_id]['amount'] + ($sum_petty_cash_income[$office_cash_id] - $sum_petty_cash_expense[$office_cash_id]);
                         }
 
+                        if($voucher_type_transaction_effect == 'receivables' || $voucher_type_transaction_effect == 'payments'){
+                            $receivables_income = $voucher_type_transaction_effect == 'receivables' ? $voucher_amount : 0;
+                            $receivables_expense = $voucher_type_transaction_effect == 'payments' ? $voucher_amount : 0;
+
+                            $sum_receivables_income  = $sum_receivables_income + $receivables_income;
+                            $sum_receivables_expense  = $sum_receivables_expense + $receivables_expense;
+                        }
+
+                        if($voucher_type_transaction_effect == 'payables' || $voucher_type_transaction_effect == 'disbursements'){
+                            $payables_income = $voucher_type_transaction_effect == 'disbursements' ? $voucher_amount : 0;
+                            $payables_expense = $voucher_type_transaction_effect == 'payables' ? $voucher_amount : 0;
+
+                            $sum_payables_income  = $sum_payables_income + $payables_income;
+                            $sum_payables_expense  = $sum_payables_expense + $payables_expense;
+                        }
+
+                        if($voucher_type_transaction_effect == 'prepayments' || $voucher_type_transaction_effect == 'setlements'){
+                            $prepayments_income = $voucher_type_transaction_effect == 'prepayments' ? $voucher_amount : 0;
+                            $prepayments_expense = $voucher_type_transaction_effect == 'setlements' ? $voucher_amount : 0;
+
+                            $sum_prepayments_income  = $sum_prepayments_income + $prepayments_income;
+                            $sum_prepayments_expense  = $sum_prepayments_expense + $prepayments_expense;
+                        }
+
+                        if($voucher_type_transaction_effect == 'depreciation'){
+                            $depreciation_income = 0;
+                            $depreciation_expense = $voucher_type_transaction_effect == 'depreciation' ? $voucher_amount : 0;
+
+                            $sum_depreciation_income  = $sum_depreciation_income + $depreciation_income;
+                            $sum_depreciation_expense  = $sum_depreciation_expense + $depreciation_expense;
+                        }
+
+                        if($voucher_type_transaction_effect == 'payroll_liability'){
+                            $payroll_liability_income = 0;
+                            $payroll_liability_expense = $voucher_type_transaction_effect == 'payroll_liability' ? $voucher_amount : 0;
+
+                            $sum_payroll_liability_income  = $sum_payroll_liability_income + $payroll_liability_income;
+                            $sum_payroll_liability_expense  = $sum_payroll_liability_expense + $payroll_liability_expense;
+                        }
+
                         ?>
 
                         <?php foreach ($month_opening_balance['bank'] as $bank_id => $bank_account) { ?>
@@ -461,10 +531,39 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
                         <?php } ?>
 
                         <?php foreach($month_used_accrual_ledgers as $accrual_ledger => $ledger_opening_balance){?>
-                            <td class='align-right'><?= number_format($ledger_opening_balance, 2); ?></td>
-                            <td class='align-right'><?= number_format($ledger_opening_balance, 2); ?></td>
-                            <td class='align-right'><?= number_format($ledger_opening_balance, 2); ?></td>
+                            <?php if($accrual_ledger == 'receivables' || $accrual_ledger == 'payments'){?>
+                                <td class='align-right'><?= number_format($receivables_income, 2); ?></td>
+                                <td class='align-right'><?= number_format($receivables_expense, 2); ?></td>
+                                <td class='align-right'><?= number_format($ledger_opening_balance, 2); ?></td>
+                            <?php }?>
+
+                            <?php if($accrual_ledger == 'payables' || $accrual_ledger == 'disbursement'){?>
+                                <td class='align-right'><?= number_format($payables_income, 2); ?></td>
+                                <td class='align-right'><?= number_format($payables_expense, 2); ?></td>
+                                <td class='align-right'><?= number_format($ledger_opening_balance, 2); ?></td>
+                            <?php }?>
+
+                            <?php if($accrual_ledger == 'prepayments' || $accrual_ledger == 'settlements'){?>
+                                <td class='align-right'><?= number_format($prepayments_income, 2); ?></td>
+                                <td class='align-right'><?= number_format($prepayments_expense, 2); ?></td>
+                                <td class='align-right'><?= number_format($ledger_opening_balance, 2); ?></td>
+                            <?php }?>
+
+                            <?php if($accrual_ledger == 'depreciation'){?>
+                                <td class='align-right'><?= number_format($depreciation_income, 2); ?></td>
+                                <td class='align-right'><?= number_format($depreciation_expense, 2); ?></td>
+                                <td class='align-right'><?= number_format($ledger_opening_balance, 2); ?></td>
+                            <?php }?>
+
+                            <?php if($accrual_ledger == 'payroll_liability'){?>
+                                <td class='align-right'><?= number_format($payroll_liability_income, 2); ?></td>
+                                <td class='align-right'><?= number_format($payroll_liability_expense, 2); ?></td>
+                                <td class='align-right'><?= number_format($ledger_opening_balance, 2); ?></td>
+                            <?php }?>
+
                         <?php }?>
+
+                       
 
                         <?php
                         echo $journalLibrary->journalSpread($office_id, $spread, $transacting_month, $voucher_type_cash_account, $voucher_type_transaction_effect);
