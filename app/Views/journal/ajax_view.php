@@ -50,11 +50,13 @@
 $financialReportLibrary = new \App\Libraries\Grants\FinancialReportLibrary();
 $journalLibrary = new \App\Libraries\Grants\JournalLibrary();
 
+echo json_encode($result);
+
 extract($result['status_data']);
 $result['mfr_submited_status'] = 0; // A stop gap waiting a discussion with Development Team on this matter so that ticket INC0218239 can be resolved. 
 // Users should be able to reverse voucher even if the MFRs are submitted. This is important to allow handling stale cheques and invalid transactions
 
-$month_used_accrual_ledgers = ['receivables' => 0,'payables' => 0,'prepayments' => 0,'depreciation' => 0,'payroll_liabilities' => 0];
+$month_used_accrual_ledgers = ['receivables' => 100,'payables' => 200,'prepayments' => 300,'depreciation' => 400,'payroll_liabilities' => 500];
 $count_of_month_used_accrual_ledgers = count($month_used_accrual_ledgers);
 
 $sum_of_income_accounts = count($accounts['income']);
@@ -360,20 +362,14 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
 
                         <td class='align-right'>
                             <?php
-                            $eft_or_chq = '';
+                                $eft_or_chq = '';
+                                if (!is_numeric($cheque_number)) {
+                                    $eft_or_chq = $cheque_number . ' [' . $voucher_type_abbrev . ']';
+                                } else if (is_numeric($cheque_number)) {
 
-                            //echo $cheque_number !=''  ? $cheque_number .' ['.$voucher_type_abbrev.']' : '';
-                        
-                            if (!is_numeric($cheque_number)) {
-
-                                $eft_or_chq = $cheque_number . ' [' . $voucher_type_abbrev . ']';
-                            } else if (is_numeric($cheque_number)) {
-
-                                $eft_or_chq = $cheque_number != 0 ? $cheque_number . ' [' . $voucher_type_abbrev . ']' : '';
-                            }
-                            echo $eft_or_chq;
-
-                            //!$voucher_is_reversed?(!$cheque_number?'':$cheque_number):$cheque_number;
+                                    $eft_or_chq = $cheque_number != 0 ? $cheque_number . ' [' . $voucher_type_abbrev . ']' : '';
+                                }
+                                echo $eft_or_chq;
                             ?>
                         </td>
 
@@ -475,6 +471,12 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
                             <td class='align-right'><?= number_format($cash_exp, 2); ?></td>
                             <td class='align-right'><?= number_format($cash_bal, 2); ?></td>
                         <?php } ?>
+
+                        <?php foreach($month_used_accrual_ledgers as $accrual_ledger => $ledger_opening_balance){?>
+                            <td class='align-right'><?= number_format($ledger_opening_balance, 2); ?></td>
+                            <td class='align-right'><?= number_format($ledger_opening_balance, 2); ?></td>
+                            <td class='align-right'><?= number_format($ledger_opening_balance, 2); ?></td>
+                        <?php }?>
 
                         <?php
                         echo $journalLibrary->journalSpread($office_id, $spread, $transacting_month, $voucher_type_cash_account, $voucher_type_transaction_effect);

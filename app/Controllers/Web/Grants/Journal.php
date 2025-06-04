@@ -16,7 +16,7 @@ class Journal extends WebController
     {
         parent::initController($request, $response, $logger);
 
-        $this->library = new \App\Libraries\Grants\JournalLibrary();
+        $this->library = new JournalLibrary();
     }
 
     function result($id = "", $parentId = null){
