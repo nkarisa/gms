@@ -3,6 +3,7 @@ namespace App\Libraries\Grants;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\JournalModel;
+use \App\Enums\VoucherTypeEffectEnum;
 
 class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
@@ -70,11 +71,6 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
     public function reorder_office_month_vouchers($office_id, $transacting_month, $project_allocation_ids = [], $office_bank_id = 0)
     {
 
-        // $approveable_item = $this->read_db->get_where(
-        //   'approve_item',
-        //   array('approve_item_name' => 'voucher')
-        // )->row();
-
         $raw_array_of_vouchers = $this->getAllOfficeMonthVouchers($office_id, $transacting_month, $project_allocation_ids, $office_bank_id);
 
         $voucher_record = [];
@@ -120,7 +116,7 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         foreach ($all_voucher_details as $voucher_details) {
             extract($voucher_details);
             if ($current_voucher_id == $voucher_id) {
-                if ($voucher_type_effect_code == 'income') {
+                if ($voucher_type_effect_code == 'income' || VoucherTypeEffectEnum::RECEIVABLES->getCode() || VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode()) {
                     $spread[$count]['account_id'] = $fk_income_account_id;
                 } elseif ($voucher_type_effect_code == 'bank_contra' || $voucher_type_effect_code == 'cash_contra') {
                     $spread[$count]['account_id'] = $fk_contra_account_id;
@@ -492,7 +488,126 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return [
             'income'  => $this->monthOfficeUsedIncomeAccounts($office_id, $transacting_month),
             'expense' => $this->monthOfficeUsedExpenseAccounts($office_id, $transacting_month),
+            VoucherTypeEffectEnum::RECEIVABLES->getCode() => $this->monthOfficeUsedReceivableAccounts($office_id, $transacting_month),
+            VoucherTypeEffectEnum::PAYABLES->getCode() => $this->monthOfficeUsedPayableAccounts($office_id, $transacting_month),
+            VoucherTypeEffectEnum::PREPAYMENTS->getCode() => $this->monthOfficeUsedPrepaymentAccounts($office_id, $transacting_month),
+            VoucherTypeEffectEnum::DEPRECIATION->getCode() => $this->monthOfficeUsedDepreciationAccounts($office_id, $transacting_month),
+            VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode() => $this->monthOfficeUsedPayrollLiabilityAccounts($office_id, $transacting_month),
         ];
+    }
+
+    private function monthOfficeUsedReceivableAccounts(int $office_id, string $transacting_month){
+        $all_income_accounts = $this->incomeAccounts($office_id);
+
+        $start_date = date('Y-m-01', strtotime($transacting_month));
+        $end_date   = date('Y-m-t', strtotime($transacting_month));
+
+        $builder = $this->read_db->table("voucher_detail");
+        $builder->select(['fk_income_account_id income_account_id']);
+        $builder->where([
+            'voucher_date >='                        => $start_date,
+            'voucher_date <='                        => $end_date,
+            'voucher_detail.fk_income_account_id > ' => 0,
+            'fk_office_id'                           => $office_id
+        ]);
+        $builder->whereIn('voucher_type_effect_code',[VoucherTypeEffectEnum::RECEIVABLES->getCode(),VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode()]);
+        $builder->join('voucher', 'voucher.voucher_id=voucher_detail.fk_voucher_id');
+        $builder->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+        $builder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+        $month_used_income_accounts_obj = $builder->get();
+
+        $month_used_income_account_ids = [];
+
+        if ($month_used_income_accounts_obj->getNumRows() > 0) {
+            $month_used_income_accounts_array = $month_used_income_accounts_obj->getResultArray();
+            $month_used_income_account_ids    = array_column($month_used_income_accounts_array, 'income_account_id', 'income_account_id');
+        }
+
+        $array_of_common_ids = array_intersect_key($all_income_accounts, $month_used_income_account_ids);
+
+        return $array_of_common_ids;
+    }
+
+    private function monthOfficeUsedPayableAccounts(int $office_id, string $transacting_month){
+        $all_expense_accounts = $this->expenseAccounts($office_id);
+
+        $start_date = date('Y-m-01', strtotime($transacting_month));
+        $end_date   = date('Y-m-t', strtotime($transacting_month));
+
+        $builder = $this->read_db->table("voucher_detail");
+        $builder->select(['fk_expense_account_id expense_account_id']);
+        $builder->where([
+            'voucher_date >='                         => $start_date,
+            'voucher_date <='                         => $end_date,
+            'voucher_detail.fk_expense_account_id > ' => 0,
+            'fk_office_id'                            => $office_id,
+        ]);
+        $builder->whereIn('voucher_type_effect_code',[
+            VoucherTypeEffectEnum::PAYABLES->getCode(),
+            VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode(),
+            // VoucherTypeEffectEnum::PREPAYMENTS->getCode(),
+            // VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode(),
+            // VoucherTypeEffectEnum::DEPRECIATION->getCode(),
+            // VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode(),
+        ]);
+        $builder->join('voucher', 'voucher.voucher_id=voucher_detail.fk_voucher_id');
+        $builder->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+        $builder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+        $month_used_expense_accounts_obj = $builder->get();
+
+        $month_used_expense_account_ids = [];
+
+        if ($month_used_expense_accounts_obj->getNumRows() > 0) {
+            $month_used_expense_accounts_array = $month_used_expense_accounts_obj->getResultArray();
+            $month_used_expense_account_ids    = array_column($month_used_expense_accounts_array, 'expense_account_id', 'expense_account_id');
+        }
+
+        $array_of_common_ids = array_intersect_key($all_expense_accounts, $month_used_expense_account_ids);
+        return $array_of_common_ids;
+    }
+
+    private function monthOfficeUsedPrepaymentAccounts(int $office_id, string $transacting_month){
+        $all_expense_accounts = $this->expenseAccounts($office_id);
+
+        $start_date = date('Y-m-01', strtotime($transacting_month));
+        $end_date   = date('Y-m-t', strtotime($transacting_month));
+
+        $builder = $this->read_db->table("voucher_detail");
+        $builder->select(['fk_expense_account_id expense_account_id']);
+        $builder->where([
+            'voucher_date >='                         => $start_date,
+            'voucher_date <='                         => $end_date,
+            'voucher_detail.fk_expense_account_id > ' => 0,
+            'fk_office_id'                            => $office_id,
+        ]);
+        $builder->whereIn('voucher_type_effect_code',[
+            VoucherTypeEffectEnum::PREPAYMENTS->getCode(),
+            VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode(),
+            // VoucherTypeEffectEnum::DEPRECIATION->getCode(),
+            // VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode(),
+        ]);
+        $builder->join('voucher', 'voucher.voucher_id=voucher_detail.fk_voucher_id');
+        $builder->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+        $builder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+        $month_used_expense_accounts_obj = $builder->get();
+
+        $month_used_expense_account_ids = [];
+
+        if ($month_used_expense_accounts_obj->getNumRows() > 0) {
+            $month_used_expense_accounts_array = $month_used_expense_accounts_obj->getResultArray();
+            $month_used_expense_account_ids    = array_column($month_used_expense_accounts_array, 'expense_account_id', 'expense_account_id');
+        }
+
+        $array_of_common_ids = array_intersect_key($all_expense_accounts, $month_used_expense_account_ids);
+        return $array_of_common_ids;
+    }
+
+    private function monthOfficeUsedDepreciationAccounts(int $office_id, string $transacting_month){
+        return [];
+    }
+
+    private function monthOfficeUsedPayrollLiabilityAccounts(int $office_id, string $transacting_month){
+        return [];
     }
 
     public function monthOfficeUsedExpenseAccounts($office_id, $transacting_month)
@@ -598,7 +713,17 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
     public function journalSpread($office_id, $spread, $transacting_month, $account_type = 'bank', $transaction_effect = 'income')
     {
         $financial_accounts = $this->financialAccounts($office_id, $transacting_month);
-        $accounts           = $transaction_effect == 'income' ? $financial_accounts['income'] : $financial_accounts['expense'];
+
+        $accounts = match($transaction_effect){
+            'income' => $financial_accounts['income'],
+            'expense' => $financial_accounts['expense'],
+            VoucherTypeEffectEnum::RECEIVABLES->getCode() => $financial_accounts[VoucherTypeEffectEnum::RECEIVABLES->getCode()],
+            VoucherTypeEffectEnum::PAYABLES->getCode() => $financial_accounts[VoucherTypeEffectEnum::PAYABLES->getCode()],
+            VoucherTypeEffectEnum::PREPAYMENTS->getCode() => $financial_accounts[VoucherTypeEffectEnum::PREPAYMENTS->getCode()],
+            VoucherTypeEffectEnum::DEPRECIATION->getCode() => $financial_accounts[VoucherTypeEffectEnum::DEPRECIATION->getCode()],
+            VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode() => $financial_accounts[VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode()],
+        };
+
         $spread_cells       = "";
 
         if ($transaction_effect == 'expense') {
@@ -630,11 +755,42 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             }
             // Fill up empty cells in spread when the account type is an income type
             $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'expense');
+        
         } elseif ($transaction_effect == 'cash_contra' || $transaction_effect == 'bank_contra' || $transaction_effect == 'bank_to_bank_contra' || $transaction_effect == 'cash_to_cash_contra') {
 
             $spread_cells = "";
             $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'income');
             $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'expense');
+
+        } elseif ($transaction_effect == VoucherTypeEffectEnum::RECEIVABLES->getCode()) {
+            $spread_cells = "";
+            foreach ($accounts as $account_id => $account_code) {
+                $transacted_amount = 0;
+                foreach ($spread as $spread_transaction) {
+                    if (in_array($account_id, $spread_transaction) && $transaction_effect == VoucherTypeEffectEnum::RECEIVABLES->getCode()) {
+                        $transacted_amount += $spread_transaction['transacted_amount'];
+                    }
+                }
+
+                $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_" . $transaction_effect . "_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
+            }
+            // Fill up empty cells in spread when the account type is an income type
+            $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'expense');
+        
+        }elseif ($transaction_effect == VoucherTypeEffectEnum::PAYABLES->getCode()) {
+            $spread_cells = "";
+            // Fill up empty cells in spread when the account type is an expense type
+            $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'income');
+
+            foreach ($accounts as $account_id => $account_code) {
+                $transacted_amount = 0;
+                foreach ($spread as $spread_transaction) {
+                    if (in_array($account_id, $spread_transaction) && $transaction_effect == VoucherTypeEffectEnum::PAYABLES->getCode()) {
+                        $transacted_amount += $spread_transaction['transacted_amount'];
+                    }
+                }
+                $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_" . $transaction_effect . "_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
+            }
 
         }
 

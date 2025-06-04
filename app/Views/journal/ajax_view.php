@@ -50,7 +50,7 @@
 $financialReportLibrary = new \App\Libraries\Grants\FinancialReportLibrary();
 $journalLibrary = new \App\Libraries\Grants\JournalLibrary();
 
-echo json_encode($result);
+// echo json_encode($result);
 
 extract($result['status_data']);
 $result['mfr_submited_status'] = 0; // A stop gap waiting a discussion with Development Team on this matter so that ticket INC0218239 can be resolved. 
@@ -208,8 +208,6 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
                 $running_petty_cash_balance = $cash_accounts;
                 $sum_petty_cash_income = $cash_accounts;
                 $sum_petty_cash_expense = $cash_accounts;
-
-                //print_r($vouchers);
                 
                 foreach ($vouchers as $voucher_id => $voucher) {
                     extract($voucher);
@@ -233,11 +231,9 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
                                 <a class='btn btn-danger' target="__blank"
                                     href='<?= base_url() . 'voucher/view/' . $related_voucher_id; ?>'><?= $reverse_btn_label; ?>
                                     [<?= get_related_voucher($voucher_reversal_to > 0 ? $voucher_reversal_to : $voucher_reversal_from); ?>]</a>
-                            <?php } ?>
-
-                            <?php
-
-                            //$logged_role_id = $this->session->role_ids;
+                            <?php 
+                            
+                            } 
                         
                             $disable_flag = '';
 
@@ -258,11 +254,7 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
                                 echo approval_action_button('voucher', $item_status, $voucher_id, $status_id, $item_initial_item_status_id, $item_max_approval_status_ids);
                             } ?>
 
-
-
                             <?php if ($voucher_type_is_cheque_referenced == 0) {
-
-
                                 //$reuse_flag_when_eft_used= $cheque_number!=0?'re_use':"";
                                 $cancel_eft_class = $cheque_number != 0 && $cheque_number != '' ? 'cancel_eft' : '';
 
@@ -274,13 +266,9 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
                                 } else if (!is_numeric($cheque_number) && $cheque_number != '') {
                                     $reuse_flag_when_eft_used = 're_use_eft';
                                 }
-
-
-                                //echo $eft_or_chq;
                         
                                 ?>
                                 <?php
-
 
                                 if ($mfr_submited_status) { ?>
 
