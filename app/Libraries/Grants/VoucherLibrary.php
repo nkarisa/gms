@@ -2581,8 +2581,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return $cheque_numbers;
     }
 
-    public function unrefundedAmountByFromVoucherId($from_voucher_id, $originalVoucherAmount, $settlementType = 'bank_refund'){
-
+    public function unrefundedAmountByFromVoucherId($from_voucher_id, $settlementType = 'bank_refund', $originalVoucherAmount = 0){
         $voucherReadBuilder = $this->read_db->table('voucher');
 
         $voucherReadBuilder->selectSum("voucher_detail_total_cost");

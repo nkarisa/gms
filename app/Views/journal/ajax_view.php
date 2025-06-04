@@ -492,6 +492,10 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
                                 $bank_bal = $running_bank_balance[$office_bank_id];
                             }
 
+                            if($voucher_type_transaction_effect == 'payments'){
+                                $bank_inc = $voucher_amount;
+                            }
+
                             if ($bank_id == $receiving_office_bank_id) {
                                 $bank_inc = $bank_income[$receiving_office_bank_id];
                                 $bank_exp = $bank_expense[$receiving_office_bank_id];

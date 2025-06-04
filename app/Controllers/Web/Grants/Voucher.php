@@ -1443,7 +1443,8 @@ class Voucher extends WebController
       }
 
       $originalTotalAmount = $voucher['voucher_detail_total_cost'];
-      $voucher_cost = $voucherLibrary->unrefundedAmountByFromVoucherId($voucher_id, $originalTotalAmount, $settlementType);
+
+      $voucher_cost = $voucherLibrary->unrefundedAmountByFromVoucherId($voucher_id, $settlementType, $originalTotalAmount);
       
     }
   
