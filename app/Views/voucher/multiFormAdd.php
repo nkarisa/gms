@@ -403,7 +403,8 @@ extract($result);
     function populateVoucherInRefundList(voucherList){
         // console.log(voucherList);
         const bankRefundElem = $("#bank_refund")
-        bankRefundElem.children().remove();
+        $("#bank_refund option:gt(0)").remove();
+    
         voucherList.forEach((voucherNumber) => {
             bankRefundElem.append('<option value = "' + voucherNumber + '">' + voucherNumber + '</option>')
         })
