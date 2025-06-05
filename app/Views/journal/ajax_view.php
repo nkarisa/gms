@@ -87,46 +87,19 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
                     <th colspan="<?=titleColspan();?>" style='text-align:center;'><?=title();?></th>
                 </tr>
                 <tr>
-                    <th colspan='7'></th>
-
-                    <?php foreach ($month_opening_balance['bank'] as $office_bank_id => $bank_account) { ?>
-                        <th colspan='3' style='text-align:center;'><?= get_phrase('bank'); ?>
-                            (<?= $bank_account['account_name']; ?>)</th>
-                    <?php } ?>
-
-                    <?php foreach ($month_opening_balance['cash'] as $office_cash_id => $cash_account) { ?>
-                        <th colspan='3' style='text-align:center;'><?= get_phrase('cash'); ?>
-                            (<?= $cash_account['account_name']; ?>)</th>
-                    <?php } ?>
-
-                    <?php foreach($month_used_accrual_ledgers as $accrual_ledger => $ledger_opening_balance){?>
-                        <th colspan='3' style='text-align:center;'><?= get_phrase($accrual_ledger); ?></th>
-                    <?php }?>
-
-                    <?php if ($sum_of_accounts > 0) { ?>
-                        <th colspan='<?= $sum_of_accounts; ?>'></th><?php } ?>
+                    <th colspan='<?=journal()->journalDetailColumns;?>'></th>
+                    <?=bankLedgerColumnHeaders();?>
+                    <?=cashLedgerColumnHeaders();?>
+                    <?=accrualLedgerColumnHeaders();?>
+                    <?=accountSpreadEmpty();?>
                 </tr>
                 <tr>
                     <th colspan='7'><?= get_phrase('balance_b/f'); ?></th>
-
-                    <?php foreach ($month_opening_balance['bank'] as $office_bank_id => $bank_account) { ?>
-                        <th colspan='3'><?= number_format($bank_account['amount'], 2); ?></th>
-                    <?php } ?>
-
-                    <?php foreach ($month_opening_balance['cash'] as $office_cash_id => $cash_account) { ?>
-                        <th colspan='3'><?= number_format($cash_account['amount'], 2); ?></th>
-                    <?php } ?>
-
-                    <?php foreach($month_used_accrual_ledgers as $accrual_ledger => $ledger_opening_balance){?>
-                        <th colspan='3'><?= number_format($ledger_opening_balance, 2); ?></th>
-                    <?php }?>
-
-                    <?php if ($sum_of_income_accounts > 0) { ?>
-                        <th colspan='<?= count($accounts['income']); ?>'><?= get_phrase('income'); ?></th><?php } ?>
-                    <?php if ($sum_of_expense_accounts > 0) { ?>
-                        <th colspan='<?= count($accounts['expense']); ?>'><?= get_phrase('expense'); ?></th><?php } ?>
-
-                    <?php ?>
+                    <?=bankLedgerOpeningBalance();?>
+                    <?=cashLedgerOpeningBalance();?>
+                    <?=accrualLedgerOpeningBalance();?>
+                    <?=incomeAccountsHeaderTitle();?>
+                    <?=expenseAccountsHeaderTitle();?>
                 </tr>
                 <tr>
                     <th><?= get_phrase('journal_action', 'Action'); ?></th>
