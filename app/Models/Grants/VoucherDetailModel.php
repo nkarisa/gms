@@ -6,8 +6,8 @@ use CodeIgniter\Model;
 
 class VoucherDetailModel extends Model
 {
-    protected $table            = 'voucherdetails';
-    protected $primaryKey       = 'id';
+    protected $table            = 'voucher_detail';
+    protected $primaryKey       = 'voucher_detail_id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;

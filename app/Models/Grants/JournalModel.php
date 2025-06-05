@@ -3,13 +3,14 @@
 namespace App\Models\Grants;
 
 use CodeIgniter\Model;
+use \Tatter\Relations\Traits\ModelTrait;
 
 class JournalModel extends Model
 {
-    protected $table            = 'journals';
-    protected $primaryKey       = 'id';
+    protected $table            = 'journal';
+    protected $primaryKey       = 'journal_id';
     protected $useAutoIncrement = true;
-    protected $returnType       = 'array';
+    protected $returnType       = \App\Entities\Grants\Journal::class;
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [];
@@ -23,9 +24,9 @@ class JournalModel extends Model
     // Dates
     protected $useTimestamps = false;
     protected $dateFormat    = 'datetime';
-    protected $createdField  = 'created_at';
-    protected $updatedField  = 'updated_at';
-    protected $deletedField  = 'deleted_at';
+    protected $createdField  = 'journal_created_date';
+    protected $updatedField  = 'journal_last_modified_date';
+    protected $deletedField  = 'journal_deleted_date';
 
     // Validation
     protected $validationRules      = [];
@@ -43,4 +44,6 @@ class JournalModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
+
+    protected $with = ['voucher_detail'];
 }

@@ -1,15 +1,7 @@
 <?php 
-// echo lang('Global.App.funds_transfer')
-// $db = \Config\Database::connect('read');
-// echo json_encode($db->getFieldData('capital_asset'));
-
-// $voucherLibary = new  \App\Libraries\Grants\VoucherLibrary();
-// $recievableBalance = $voucherLibary->accountsRecievables(1328, '2024-11-01');
-// echo json_encode($recievableBalance);
-
-// $voucherTypeLibrary = new \App\Libraries\Grants\VoucherTypeLibrary();
-// $voucherType = $voucherTypeLibrary->getVoucherTypeById(227);
-// echo json_encode($voucherType);
+$journalData = json_decode(file_get_contents(APPPATH.'Data/journalData.json'), true);
+$journalBuilder = new \App\Libraries\Grants\Builders\Journal($journalData);
+echo json_encode($journalBuilder->getMonthBankOpeningBalance());
 ?>
 <div class = 'row'>
     <div class="col-sm-12">

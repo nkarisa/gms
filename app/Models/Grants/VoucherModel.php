@@ -6,10 +6,10 @@ use CodeIgniter\Model;
 
 class VoucherModel extends Model
 {
-    protected $table            = 'vouchers';
-    protected $primaryKey       = 'id';
+    protected $table            = 'voucher';
+    protected $primaryKey       = 'voucher_id';
     protected $useAutoIncrement = true;
-    protected $returnType       = 'array';
+    protected $returnType       = \App\Entities\Grants\Voucher::class;
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [];
@@ -23,9 +23,9 @@ class VoucherModel extends Model
     // Dates
     protected $useTimestamps = false;
     protected $dateFormat    = 'datetime';
-    protected $createdField  = 'created_at';
-    protected $updatedField  = 'updated_at';
-    protected $deletedField  = 'deleted_at';
+    protected $createdField  = 'voucher_created_date';
+    protected $updatedField  = 'voucher_last_modified_date';
+    protected $deletedField  = 'voucher_deleted_date';
 
     // Validation
     protected $validationRules      = [];

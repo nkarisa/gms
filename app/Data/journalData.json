@@ -1,0 +1,3590 @@
+{
+    "master": {
+        "keys": [
+            "journal_track_number",
+            "journal_name",
+            "journal_month",
+            "journal_created_date",
+            "journal_created_by",
+            "journal_last_modified_by",
+            "journal_last_modified_date",
+            "office_id",
+            "office_name"
+        ],
+        "table_body": {
+            "journal_track_number": "JOAL-19336",
+            "journal_name": "Journal for the month of 2023-09-01",
+            "journal_month": "2023-09-01",
+            "journal_created_date": "2023-09-06",
+            "journal_created_by": "4168",
+            "journal_last_modified_by": "4168",
+            "journal_last_modified_date": "0000-00-00 00:00:00",
+            "office_id": "1621",
+            "office_name": "KE0334-PEFA Church Mwele",
+            "status_id": "392",
+            "created_by": "Habel Chai",
+            "last_modified_by": "Habel Chai"
+        },
+        "table_name": "journal",
+        "has_details_table": false,
+        "is_approveable_item": false,
+        "lookup_name_fields": [
+            "office_name"
+        ],
+        "action_labels": {
+            "current_actor_role_id": [],
+            "next_actor_role_id": [
+                "1"
+            ],
+            "status_name": "Fully Approved",
+            "button_label": "Fully Approved",
+            "show_decline_button": false,
+            "next_approval_status": "392",
+            "next_decline_status": "1990",
+            "show_label_as_button": false,
+            "is_max_approval_status": false,
+            "decline_button_label": "Decline"
+        }
+    },
+    "detail": [],
+    "vouchers": {
+        "active_office_banks": [
+            {
+                "office_bank_id": "1424",
+                "office_bank_name": "KE0334-Mwele Pefa Church CDC\t"
+            }
+        ],
+        "office_bank_accounts": [
+            {
+                "office_bank_id": "1424",
+                "office_bank_account_number": "1290431078",
+                "bank_name": "Kenya Commercial Bank",
+                "office_bank_name": "KE0334-Mwele Pefa Church CDC\t"
+            }
+        ],
+        "office_has_multiple_bank_accounts": false,
+        "transacting_month": "2023-09-01",
+        "office_id": "1621",
+        "office_name": "KE0334-PEFA Church Mwele",
+        "navigation": {
+            "previous": "22078",
+            "next": "25750"
+        },
+        "accounts": {
+            "income": {
+                "1": "R100",
+                "2": "R200",
+                "4": "R330",
+                "5": "R351",
+                "6": "R410",
+                "7": "R415",
+                "9": "R510",
+                "12": "R320",
+                "15": "R360",
+                "51": "R310"
+            },
+            "expense": {
+                "1": "E10",
+                "2": "E20",
+                "3": "E15",
+                "4": "E25",
+                "5": "E30",
+                "6": "E35",
+                "7": "E40",
+                "8": "E45",
+                "9": "E50",
+                "10": "E55",
+                "12": "E65",
+                "13": "E70",
+                "15": "E75",
+                "16": "E200",
+                "17": "E320",
+                "18": "E330",
+                "20": "E360",
+                "22": "E410",
+                "23": "E415",
+                "25": "E510",
+                "86": "E310",
+                "253": "E80",
+                "254": "E81",
+                "255": "E82",
+                "256": "E83",
+                "257": "E84",
+                "258": "E85",
+                "259": "E89"
+            },
+            "receivables": [],
+            "payables": [],
+            "prepayments": [],
+            "settlements": [],
+            "depreciation": [],
+            "payroll_liability": []
+        },
+        "month_opening_balance": {
+            "bank": {
+                "1424": {
+                    "account_name": "KE0334-Mwele Pefa Church CDC\t",
+                    "amount": 476430.1000000001
+                }
+            },
+            "cash": {
+                "1": {
+                    "account_name": "Petty Cash Box",
+                    "amount": 6011.68
+                },
+                "2": {
+                    "account_name": "M-Pesa",
+                    "amount": 0
+                },
+                "3": {
+                    "account_name": "Airtel Money",
+                    "amount": 0
+                }
+            }
+        },
+        "vouchers": {
+            "1511908": {
+                "date": "2023-09-06",
+                "payee": "CKE",
+                "voucher_type_abbrev": "CR",
+                "voucher_type_name": "Cash Received",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "income",
+                "voucher_number": "230901",
+                "description": "Cash recived from CKE for August 2023 ICP Disbursment",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "0",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "0",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "723760.80"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "49150.92"
+                    },
+                    {
+                        "account_id": "2",
+                        "transacted_amount": "57552.77"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "60763.50"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "26041.50"
+                    },
+                    {
+                        "account_id": "4",
+                        "transacted_amount": "17732.04"
+                    },
+                    {
+                        "account_id": "12",
+                        "transacted_amount": "23443.00"
+                    },
+                    {
+                        "account_id": "51",
+                        "transacted_amount": "26000.00"
+                    },
+                    {
+                        "account_id": "51",
+                        "transacted_amount": "30000.00"
+                    }
+                ]
+            },
+            "1512017": {
+                "date": "2023-09-06",
+                "payee": "Kavu Gube Kadilo",
+                "voucher_type_abbrev": "CPCD",
+                "voucher_type_name": "Chequed Petty Cash Deposit",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "bank_contra",
+                "voucher_number": "230902",
+                "description": "Petty Cash Withdrawal",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1351",
+                "office_bank_id": "1424",
+                "office_cash_id": "1",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "9000.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "4000.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "12100.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "2500.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "2800.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "2300.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "7000.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "5300.00"
+                    }
+                ]
+            },
+            "1512117": {
+                "date": "2023-09-06",
+                "payee": "Landmark Genral Exibition",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230903",
+                "description": "Payment of overal and uniform for college students",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1386",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1800.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1400.00"
+                    }
+                ]
+            },
+            "1512143": {
+                "date": "2023-09-06",
+                "payee": "Kenya Coast National Polytechnic",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230904",
+                "description": "Payment of college fees for participant #221(Jessicar Mbodze)",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1387",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "10000.00"
+                    }
+                ]
+            },
+            "1512177": {
+                "date": "2023-09-06",
+                "payee": "Mabati Technical Training Institute",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230905",
+                "description": "Payment of college fees for participant #291(James Ndenge Mwatsuma)",
+                "cleared": false,
+                "cleared_month": "2023-10-31",
+                "cheque_number": "1388",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "51",
+                        "transacted_amount": "6800.00"
+                    }
+                ]
+            },
+            "1512207": {
+                "date": "2023-09-06",
+                "payee": "Vision Empowerment Training Institute",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230906",
+                "description": "Payment of college fees for participant #25",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1389",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "10000.00"
+                    }
+                ]
+            },
+            "1512352": {
+                "date": "2023-09-06",
+                "payee": "Mazeras youth polytechnic",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230907",
+                "description": "payment of polytechnic fees for participation 261",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1390",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "4200.00"
+                    }
+                ]
+            },
+            "1512414": {
+                "date": "2023-09-06",
+                "payee": "Kenya coast National polytechnic",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230908",
+                "description": "college fees for participant 48",
+                "cleared": false,
+                "cleared_month": "2023-10-31",
+                "cheque_number": "1391",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "10000.00"
+                    }
+                ]
+            },
+            "1512473": {
+                "date": "2023-09-06",
+                "payee": "Kasidi secondary school",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230909",
+                "description": "payment of day school fees for participant 3005",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1392",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "2760.00"
+                    }
+                ]
+            },
+            "1512521": {
+                "date": "2023-09-06",
+                "payee": "kenyaplex institute of Technology",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230910",
+                "description": "payment of college fees for participant 131",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1393",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "10000.00"
+                    }
+                ]
+            },
+            "1512610": {
+                "date": "2023-09-06",
+                "payee": "Mabati Technical Training institute",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230911",
+                "description": "payment of college fees for participant 40",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1394",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "10000.00"
+                    }
+                ]
+            },
+            "1529109": {
+                "date": "2023-09-11",
+                "payee": "Wim Lebanon Enterprise, Muungano group, Rickson Panga, Juliet Aswani",
+                "voucher_type_abbrev": "PC",
+                "voucher_type_name": "Payment by Cash",
+                "voucher_type_cash_account": "cash",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230912",
+                "description": "Payment of detergent,Transport",
+                "cleared": true,
+                "cleared_month": null,
+                "cheque_number": "0",
+                "office_bank_id": "1424",
+                "office_cash_id": "1",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "0",
+                "voucher_type_is_cheque_referenced": "0",
+                "spread": [
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "1350.00"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "1200.00"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "400.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "750.00"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "150.00"
+                    }
+                ]
+            },
+            "1529171": {
+                "date": "2023-09-11",
+                "payee": "Lugwe primary school,Isaac Nyondo primary school,Chang'ombe primary school,Kailo primary school,Kozini pre-school,Mwele primary school",
+                "voucher_type_abbrev": "PC",
+                "voucher_type_name": "Payment by Cash",
+                "voucher_type_cash_account": "cash",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230913",
+                "description": "Payment of school fees for primary and pre-primary school participants#s526,427,495,334,379,418,3003,356,502,517,392,558,562,558,386,470,504,503,463,449,477",
+                "cleared": true,
+                "cleared_month": null,
+                "cheque_number": "0",
+                "office_bank_id": "1424",
+                "office_cash_id": "1",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "0",
+                "voucher_type_is_cheque_referenced": "0",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "20920.00"
+                    }
+                ]
+            },
+            "1529393": {
+                "date": "2023-09-11",
+                "payee": "Abaa Nafuu Duka,Isaac Nyondo primary school,Mgalla primary school,Payless less store, Otech communications ltD,Mariakani hospital,Eddepa academy",
+                "voucher_type_abbrev": "PC",
+                "voucher_type_name": "Payment by Cash",
+                "voucher_type_cash_account": "cash",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230914",
+                "description": "Payment of locks repair, school fees, medication",
+                "cleared": true,
+                "cleared_month": null,
+                "cheque_number": "0",
+                "office_bank_id": "1424",
+                "office_cash_id": "1",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "0",
+                "voucher_type_is_cheque_referenced": "0",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "770.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "6000.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "350.00"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "580.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "2520.00"
+                    }
+                ]
+            },
+            "1529567": {
+                "date": "2023-09-11",
+                "payee": "Callif Cabs welfare,RGC Bamba CDC,Rev. Danson Saha,Asha Mbeyu,Irene Nazi,Rickson Panga,Sophie Katana,May Nyadzua,John Aunga,",
+                "voucher_type_abbrev": "PC",
+                "voucher_type_name": "Payment by Cash",
+                "voucher_type_cash_account": "cash",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230915",
+                "description": "Payment of transport expenses,Meals,Cooking services",
+                "cleared": true,
+                "cleared_month": null,
+                "cheque_number": "0",
+                "office_bank_id": "1424",
+                "office_cash_id": "1",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "0",
+                "voucher_type_is_cheque_referenced": "0",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "3200.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "4030.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "400.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "500.00"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "150.00"
+                    },
+                    {
+                        "account_id": "7",
+                        "transacted_amount": "350.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "400.00"
+                    },
+                    {
+                        "account_id": "9",
+                        "transacted_amount": "400.00"
+                    },
+                    {
+                        "account_id": "9",
+                        "transacted_amount": "4000.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "400.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "300.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "100.00"
+                    }
+                ]
+            },
+            "1529618": {
+                "date": "2023-09-11",
+                "payee": "Michael Mwaringa Lwambi",
+                "voucher_type_abbrev": "CPCD",
+                "voucher_type_name": "Chequed Petty Cash Deposit",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "bank_contra",
+                "voucher_number": "230916",
+                "description": "Petty Cash Withdrawal",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1374",
+                "office_bank_id": "1424",
+                "office_cash_id": "1",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "5200.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "2200.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "3000.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "2200.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "7400.00"
+                    }
+                ]
+            },
+            "1529631": {
+                "date": "2023-09-11",
+                "payee": "Mwamtsunga Youth Polytechnic",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230917",
+                "description": "Payment of polytechic fees for participant #257",
+                "cleared": false,
+                "cleared_month": "2023-10-31",
+                "cheque_number": "1396",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "2110.00"
+                    }
+                ]
+            },
+            "1529664": {
+                "date": "2023-09-11",
+                "payee": "Mwele Pefa Church CDC",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230918",
+                "description": "Payment of participants' gifts for the month of September,23",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1399",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "2",
+                        "transacted_amount": "59335.00"
+                    }
+                ]
+            },
+            "1529686": {
+                "date": "2023-09-11",
+                "payee": "Mazeras Youth Polytechnic",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230919",
+                "description": "Payment of college fees for participant #218",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1400",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "7600.00"
+                    }
+                ]
+            },
+            "1531975": {
+                "date": "2023-09-12",
+                "payee": "Barak Groceries",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230920",
+                "description": "Cancelled Cheque",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1397",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "0.00"
+                    }
+                ]
+            },
+            "1545839": {
+                "date": "2023-09-16",
+                "payee": "Barak Groceries",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230921",
+                "description": "Payment of foodstuffs for different activities",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1398",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "8370.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1675.00"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "3500.00"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "700.00"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "500.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "3250.00"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "1625.00"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "8925.00"
+                    }
+                ]
+            },
+            "1547063": {
+                "date": "2023-09-16",
+                "payee": "Mahaba Ali,Irene Ndune,Elizabeth Mtoro,Judith Chirindo,Rickson Panga,Juliet Aswani,A-ONE Supermarket",
+                "voucher_type_abbrev": "PC",
+                "voucher_type_name": "Payment by Cash",
+                "voucher_type_cash_account": "cash",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230922",
+                "description": "Payment of Transport expenses,office lunch,cooking services,Wages,",
+                "cleared": true,
+                "cleared_month": null,
+                "cheque_number": "0",
+                "office_bank_id": "1424",
+                "office_cash_id": "1",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "0",
+                "voucher_type_is_cheque_referenced": "0",
+                "spread": [
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "300.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "613.00"
+                    },
+                    {
+                        "account_id": "9",
+                        "transacted_amount": "600.00"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "50.00"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "1600.00"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "750.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "830.00"
+                    }
+                ]
+            },
+            "1547077": {
+                "date": "2023-09-16",
+                "payee": "A-One supermarket,Choice butchery,Emmanuel Kavu,Harrison Gonzi,Gladys Nyale,Reuben Jindwa,Tabu Magongo",
+                "voucher_type_abbrev": "PC",
+                "voucher_type_name": "Payment by Cash",
+                "voucher_type_cash_account": "cash",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230923",
+                "description": "Payment of meals,Transport expenses,Medication",
+                "cleared": true,
+                "cleared_month": null,
+                "cheque_number": "0",
+                "office_bank_id": "1424",
+                "office_cash_id": "1",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "0",
+                "voucher_type_is_cheque_referenced": "0",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1207.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1250.00"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "150.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "150.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "650.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "350.00"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "563.00"
+                    }
+                ]
+            },
+            "1547083": {
+                "date": "2023-09-16",
+                "payee": "Harrison Gonzi,Mariam Mwabari,Kavu Gube Kadilo,Irene Nazi,Simon Kimuya,Rickson Panga,Emmanuel Kavu,",
+                "voucher_type_abbrev": "PC",
+                "voucher_type_name": "Payment by Cash",
+                "voucher_type_cash_account": "cash",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230924",
+                "description": "Payment of purchase of goat,Transport expenses,office meals",
+                "cleared": true,
+                "cleared_month": null,
+                "cheque_number": "0",
+                "office_bank_id": "1424",
+                "office_cash_id": "1",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "0",
+                "voucher_type_is_cheque_referenced": "0",
+                "spread": [
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "4000.00"
+                    },
+                    {
+                        "account_id": "7",
+                        "transacted_amount": "350.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "400.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "470.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "500.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "200.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "300.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "200.00"
+                    }
+                ]
+            },
+            "1547090": {
+                "date": "2023-09-16",
+                "payee": "Habel Chai,KPLC",
+                "voucher_type_abbrev": "PC",
+                "voucher_type_name": "Payment by Cash",
+                "voucher_type_cash_account": "cash",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230925",
+                "description": "Payment of meals, transport and electricity bill",
+                "cleared": true,
+                "cleared_month": null,
+                "cheque_number": "0",
+                "office_bank_id": "1424",
+                "office_cash_id": "1",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "0",
+                "voucher_type_is_cheque_referenced": "0",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "360.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "720.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "3425.00"
+                    }
+                ]
+            },
+            "1547107": {
+                "date": "2023-09-16",
+                "payee": "Kavu Gube Kadilo",
+                "voucher_type_abbrev": "CPCD",
+                "voucher_type_name": "Chequed Petty Cash Deposit",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "bank_contra",
+                "voucher_number": "230926",
+                "description": "Petty Cash Withdrawal",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1395",
+                "office_bank_id": "1424",
+                "office_cash_id": "1",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "4800.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "1600.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "3000.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "3400.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "3324.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "3000.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "4000.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "20000.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "1876.00"
+                    }
+                ]
+            },
+            "1552665": {
+                "date": "2023-09-19",
+                "payee": "Safaricom LTD",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230927",
+                "description": "Payment of wifi monthly subscriptions for the month of August,2023",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1401",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "5557.00"
+                    }
+                ]
+            },
+            "1552689": {
+                "date": "2023-09-19",
+                "payee": "Holy Ghost Fathers' Technical Training Insitute",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230928",
+                "description": "Payment of college fees for participant #288(Eunice Mbaji)",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1402",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "10000.00"
+                    }
+                ]
+            },
+            "1552715": {
+                "date": "2023-09-19",
+                "payee": "Holy Ghost Fathers' Technical Training Insitute",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230929",
+                "description": "Payment of college fees for participant #219(Saumu Luvuno)",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1403",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "10000.00"
+                    }
+                ]
+            },
+            "1552732": {
+                "date": "2023-09-19",
+                "payee": "Kenya Coast National Polytechnic",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230930",
+                "description": "Payment of college fees for participant #177(Janet Tsui)",
+                "cleared": false,
+                "cleared_month": "2023-10-31",
+                "cheque_number": "1404",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "10000.00"
+                    }
+                ]
+            },
+            "1552750": {
+                "date": "2023-09-19",
+                "payee": "Rabai Secondary school",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230931",
+                "description": "Payment of day school fees for participant #282(Simon Nzimo)",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1405",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "2500.00"
+                    }
+                ]
+            },
+            "1552769": {
+                "date": "2023-09-19",
+                "payee": "Kenya Coast National Polytehcnic",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230932",
+                "description": "Payment of college fees for participant #213(Seif Ngale)",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1406",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "10000.00"
+                    }
+                ]
+            },
+            "1552791": {
+                "date": "2023-09-19",
+                "payee": "Saz Traders",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230933",
+                "description": "Payment of safety boots for participants #s 270,291 & 40",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1407",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "8850.00"
+                    }
+                ]
+            },
+            "1552804": {
+                "date": "2023-09-19",
+                "payee": "Technical University of Mombasa",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230934",
+                "description": "Payment of University fees for participant #43(Elly Mwakoyo)",
+                "cleared": false,
+                "cleared_month": null,
+                "cheque_number": "1408",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "0",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "15000.00"
+                    }
+                ]
+            },
+            "1552836": {
+                "date": "2023-09-19",
+                "payee": "Mwele Pefa Church CDC",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230935",
+                "description": "Payment of HVC Funds for participants for the month of September 2023.",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1409",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "4",
+                        "transacted_amount": "18566.00"
+                    }
+                ]
+            },
+            "1552847": {
+                "date": "2023-09-19",
+                "payee": "Bata Shoe Kenya PLC",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230936",
+                "description": "Payment of college shoes for participants #s 218 & 25",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1410",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "4398.00"
+                    }
+                ]
+            },
+            "1552871": {
+                "date": "2023-09-19",
+                "payee": "Moi University",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230937",
+                "description": "Payment of college fees for participant #158(Fatuma Nzaka)who is under scholarship",
+                "cleared": false,
+                "cleared_month": null,
+                "cheque_number": "1411",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "0",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "51",
+                        "transacted_amount": "20000.00"
+                    }
+                ]
+            },
+            "1552882": {
+                "date": "2023-09-19",
+                "payee": "Julius Katana Tsofa",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230938",
+                "description": "Payment of project participants health screening fees",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1412",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "64900.00"
+                    }
+                ]
+            },
+            "1552908": {
+                "date": "2023-09-19",
+                "payee": "A0NE Supermarket",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230939",
+                "description": "Payment of hygine items for the month of August,23",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1413",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "6109.00"
+                    }
+                ]
+            },
+            "1552944": {
+                "date": "2023-09-19",
+                "payee": "Rabai Seondary School",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230940",
+                "description": "Payment of seondary school fees for participant #273(Dume Ndara)",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1415",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "3166.00"
+                    }
+                ]
+            },
+            "1552957": {
+                "date": "2023-09-19",
+                "payee": "Kenya Coast National Polytechnic",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230941",
+                "description": "Payment of college fees for participant #282(Simon Kimuya)",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1416",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "20000.00"
+                    }
+                ]
+            },
+            "1554720": {
+                "date": "2023-09-19",
+                "payee": "Doctors worldwide,Lugwe primary school,Mghala pre-school,Ushindi Mwele ECDE,Jack's Link cyber cafe,Egonzi production,Rabai health centre,Bofu pre-school and others",
+                "voucher_type_abbrev": "PC",
+                "voucher_type_name": "Payment by Cash",
+                "voucher_type_cash_account": "cash",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230942",
+                "description": "Payment of medication,school fees,Meals,staff IDs,Transport expenses",
+                "cleared": true,
+                "cleared_month": null,
+                "cheque_number": "0",
+                "office_bank_id": "1424",
+                "office_cash_id": "1",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "0",
+                "voucher_type_is_cheque_referenced": "0",
+                "spread": [
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "200.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "550.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "800.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "850.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "8000.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "650.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "400.00"
+                    }
+                ]
+            },
+            "1554725": {
+                "date": "2023-09-19",
+                "payee": "Shikaadabu pre-school,Kailo primary school,Shinners academy,Chang'ombe primary school, Lugwe primary school and other schools",
+                "voucher_type_abbrev": "PC",
+                "voucher_type_name": "Payment by Cash",
+                "voucher_type_cash_account": "cash",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230943",
+                "description": "Payment of primary and pre-primary school fees for participants #s496,497,361,411,437,3026,366,521,452,471,391,3001,405,528,506,536,442,505,484",
+                "cleared": true,
+                "cleared_month": null,
+                "cheque_number": "0",
+                "office_bank_id": "1424",
+                "office_cash_id": "1",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "0",
+                "voucher_type_is_cheque_referenced": "0",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "19920.00"
+                    }
+                ]
+            },
+            "1554726": {
+                "date": "2023-09-19",
+                "payee": "Krapf Memorial Secondary Schoo",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230944",
+                "description": "Payment of secondary school fees for participant #294",
+                "cleared": false,
+                "cleared_month": "2023-10-31",
+                "cheque_number": "1417",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "3266.00"
+                    }
+                ]
+            },
+            "1554727": {
+                "date": "2023-09-19",
+                "payee": "Krapf Memorial Secondary school",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230945",
+                "description": "Payment of secondary school fees for participant #152(Bernard Chilodi)",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1418",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "10000.00"
+                    }
+                ]
+            },
+            "1554732": {
+                "date": "2023-09-19",
+                "payee": "Kenya Medical Training College",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230946",
+                "description": "Payment of college fees for participant #268 who is under scholarship",
+                "cleared": false,
+                "cleared_month": "2023-10-31",
+                "cheque_number": "1419",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "51",
+                        "transacted_amount": "14465.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "5535.00"
+                    }
+                ]
+            },
+            "1554733": {
+                "date": "2023-09-19",
+                "payee": "Perazim Healthcare LTD",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230947",
+                "description": "Payment of drugs for participants and CDW",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1420",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "4750.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1500.00"
+                    }
+                ]
+            },
+            "1554735": {
+                "date": "2023-09-19",
+                "payee": "Amani Couselling Centre and Training Institute",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230948",
+                "description": "Payment of college fees for participant #231",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1421",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "10000.00"
+                    }
+                ]
+            },
+            "1554736": {
+                "date": "2023-09-19",
+                "payee": "Simon Nzimo Kimuya",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230949",
+                "description": "Payment of gift for participant #282 who opened an account to deposit for future use.",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1422",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "2",
+                        "transacted_amount": "33128.00"
+                    }
+                ]
+            },
+            "1554737": {
+                "date": "2023-09-19",
+                "payee": "Kenya Coast National Polytechnic",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230950",
+                "description": "Payment of college fees as gift for participant #282(Simon Kimuya)",
+                "cleared": false,
+                "cleared_month": null,
+                "cheque_number": "1423",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "0",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "2",
+                        "transacted_amount": "18100.00"
+                    }
+                ]
+            },
+            "1568630": {
+                "date": "2023-09-23",
+                "payee": "KCB",
+                "voucher_type_abbrev": "CR",
+                "voucher_type_name": "Cash Received",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "income",
+                "voucher_number": "230951",
+                "description": "Amount received from parents contribution from receipts #s16709-16732",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "0",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "0",
+                "spread": [
+                    {
+                        "account_id": "9",
+                        "transacted_amount": "17200.00"
+                    }
+                ]
+            },
+            "1568760": {
+                "date": "2023-09-23",
+                "payee": "Joanto Books and general stores",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230952",
+                "description": "Payment of stationery and art class materials",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1425",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "2100.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1440.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "730.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1500.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "750.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "600.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "625.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "150.00"
+                    }
+                ]
+            },
+            "1568770": {
+                "date": "2023-09-23",
+                "payee": "Mazeras Youth Polytechnic",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230953",
+                "description": "Payment of polytechnic fees for participants #s243 and 270",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1426",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "17250.00"
+                    }
+                ]
+            },
+            "1592392": {
+                "date": "2023-09-29",
+                "payee": "Juliet Shisia Aswani",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230954",
+                "description": "Salety for CDW Juliet for the month of September,2023",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1427",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "33809.00"
+                    }
+                ]
+            },
+            "1592420": {
+                "date": "2023-09-29",
+                "payee": "Imarika Sacco",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230955",
+                "description": "Payment of September 23 salary for staff",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1428",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "41693.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "41075.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "48602.00"
+                    },
+                    {
+                        "account_id": "9",
+                        "transacted_amount": "9400.00"
+                    }
+                ]
+            },
+            "1592453": {
+                "date": "2023-09-29",
+                "payee": "NHIF",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230956",
+                "description": "Payment of NHIF deductions for the month of September,23",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1429",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1200.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1200.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1300.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1000.00"
+                    }
+                ]
+            },
+            "1592477": {
+                "date": "2023-09-29",
+                "payee": "NSSF",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230957",
+                "description": "Payment of NSSF deductions for the month of September 2023",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1430",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "2160.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "2160.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "2160.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "2160.00"
+                    },
+                    {
+                        "account_id": "9",
+                        "transacted_amount": "1200.00"
+                    }
+                ]
+            },
+            "1592494": {
+                "date": "2023-09-29",
+                "payee": "Madison Life Assurance Kenya LTD",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230958",
+                "description": "Payment of staff personal insuarnace deductions for the month of September,23",
+                "cleared": false,
+                "cleared_month": "2023-10-31",
+                "cheque_number": "1431",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "8000.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "3150.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "5000.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "5000.00"
+                    }
+                ]
+            },
+            "1592509": {
+                "date": "2023-09-29",
+                "payee": "Leahlevel Healthcare",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230959",
+                "description": "Payment of participant drugs for the month of September,23",
+                "cleared": false,
+                "cleared_month": "2023-10-31",
+                "cheque_number": "1432",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "4955.00"
+                    }
+                ]
+            },
+            "1592548": {
+                "date": "2023-09-29",
+                "payee": "Pahe Mwachinga Hardware LTD",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230960",
+                "description": "Payment of buiding materials for participant #399",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1433",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "48420.00"
+                    }
+                ]
+            },
+            "1592562": {
+                "date": "2023-09-29",
+                "payee": "Emali Kukucare",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230961",
+                "description": "Payment for purchase of incubator for hutching eggs for caregivers' kitchen rearing project",
+                "cleared": false,
+                "cleared_month": "2023-10-31",
+                "cheque_number": "1434",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "67500.00"
+                    }
+                ]
+            },
+            "1605683": {
+                "date": "2023-09-30",
+                "payee": "Bengo pre-school,Isaac Nyondo ECEC,Lugwe primary school,Isaac Nyondo Primary school,",
+                "voucher_type_abbrev": "PC",
+                "voucher_type_name": "Payment by Cash",
+                "voucher_type_cash_account": "cash",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230962",
+                "description": "Payment of pre-primary and primary school fees for participants #s454,511,362,486,529and 461",
+                "cleared": true,
+                "cleared_month": null,
+                "cheque_number": "0",
+                "office_bank_id": "1424",
+                "office_cash_id": "1",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "0",
+                "voucher_type_is_cheque_referenced": "0",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "6000.00"
+                    }
+                ]
+            },
+            "1605702": {
+                "date": "2023-09-30",
+                "payee": "Hotel Delito's,Mashallah shop,Catherine Kalama",
+                "voucher_type_abbrev": "PC",
+                "voucher_type_name": "Payment by Cash",
+                "voucher_type_cash_account": "cash",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230963",
+                "description": "Payment of meals and other expenses while taking participant #529 to Kenyatta National hospital for medication",
+                "cleared": true,
+                "cleared_month": null,
+                "cheque_number": "0",
+                "office_bank_id": "1424",
+                "office_cash_id": "1",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "0",
+                "voucher_type_is_cheque_referenced": "0",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "5450.00"
+                    }
+                ]
+            },
+            "1605735": {
+                "date": "2023-09-30",
+                "payee": "Kavu Gube Kadilo",
+                "voucher_type_abbrev": "CPCD",
+                "voucher_type_name": "Chequed Petty Cash Deposit",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "bank_contra",
+                "voucher_number": "230964",
+                "description": "Petty Cash Withdrawal",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1414",
+                "office_bank_id": "1424",
+                "office_cash_id": "1",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "1500.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "3000.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "1200.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "1000.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "5000.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "2500.00"
+                    },
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "27000.00"
+                    }
+                ]
+            },
+            "1605810": {
+                "date": "2023-09-30",
+                "payee": "Superbest Fashion,Choice butchery, Jenipher Mwakio,Rickson Panga,Franscinah Zawadi,Catherine Kalama",
+                "voucher_type_abbrev": "PC",
+                "voucher_type_name": "Payment by Cash",
+                "voucher_type_cash_account": "cash",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230965",
+                "description": "Payment of tailoring materials,Meals,Transport expenses,Chicken",
+                "cleared": true,
+                "cleared_month": null,
+                "cheque_number": "0",
+                "office_bank_id": "1424",
+                "office_cash_id": "1",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "0",
+                "voucher_type_is_cheque_referenced": "0",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "2700.00"
+                    },
+                    {
+                        "account_id": "15",
+                        "transacted_amount": "5000.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "3000.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "350.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "150.00"
+                    },
+                    {
+                        "account_id": "15",
+                        "transacted_amount": "3500.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "100.00"
+                    },
+                    {
+                        "account_id": "9",
+                        "transacted_amount": "400.00"
+                    }
+                ]
+            },
+            "1606021": {
+                "date": "2023-09-30",
+                "payee": "Mtawa service station,Choice butchery,Rabai Health centre,Rickson Panga,Grace Dzombo,Tabu Medza,Gladys Nyale,Rev. Danson Saha,David Mwabaya and others",
+                "voucher_type_abbrev": "PC",
+                "voucher_type_name": "Payment by Cash",
+                "voucher_type_cash_account": "cash",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230966",
+                "description": "Payment of gas refilling,meals,medication,Transport expenses,wages,facilitation fees",
+                "cleared": true,
+                "cleared_month": null,
+                "cheque_number": "0",
+                "office_bank_id": "1424",
+                "office_cash_id": "1",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "0",
+                "voucher_type_is_cheque_referenced": "0",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1300.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1005.00"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "400.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "745.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1000.00"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "200.00"
+                    },
+                    {
+                        "account_id": "6",
+                        "transacted_amount": "700.00"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "1000.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "400.00"
+                    },
+                    {
+                        "account_id": "9",
+                        "transacted_amount": "400.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1000.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "400.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "2000.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "2000.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "400.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "150.00"
+                    }
+                ]
+            },
+            "1606044": {
+                "date": "2023-09-30",
+                "payee": "Nickson Lewa Mchombo",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230967",
+                "description": "Payment of medical funds for participant #581",
+                "cleared": false,
+                "cleared_month": "2023-10-31",
+                "cheque_number": "1436",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "5020.00"
+                    },
+                    {
+                        "account_id": "12",
+                        "transacted_amount": "2880.00"
+                    }
+                ]
+            },
+            "1606089": {
+                "date": "2023-09-30",
+                "payee": "Peter Foods Enterprises",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230968",
+                "description": "Payment of food stuffs for diffener activities as listed.",
+                "cleared": false,
+                "cleared_month": "2023-10-31",
+                "cheque_number": "1437",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "23880.00"
+                    },
+                    {
+                        "account_id": "7",
+                        "transacted_amount": "2030.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "3750.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "790.00"
+                    },
+                    {
+                        "account_id": "12",
+                        "transacted_amount": "2620.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "5980.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1800.00"
+                    },
+                    {
+                        "account_id": "15",
+                        "transacted_amount": "5490.00"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "3340.00"
+                    },
+                    {
+                        "account_id": "15",
+                        "transacted_amount": "9550.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "6430.00"
+                    }
+                ]
+            },
+            "1606095": {
+                "date": "2023-09-30",
+                "payee": "Landmark General Exhibition",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230969",
+                "description": "Payment of college uniform and overall for participants #s218 and 298",
+                "cleared": false,
+                "cleared_month": "2023-10-31",
+                "cheque_number": "1438",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1400.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1900.00"
+                    }
+                ]
+            },
+            "1606110": {
+                "date": "2023-09-30",
+                "payee": "Priscillar Binti Chengo",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230970",
+                "description": "Payment of vegetables, fruits and some firewood for different activities",
+                "cleared": false,
+                "cleared_month": "2023-10-31",
+                "cheque_number": "1439",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1950.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "14845.00"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "1975.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "2155.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "2020.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "870.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "2235.00"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "1075.00"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "1690.00"
+                    }
+                ]
+            },
+            "1606116": {
+                "date": "2023-09-30",
+                "payee": "Irne Albert Kothe",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230971",
+                "description": "Payment of tailoring teacher's wages for home-based mothers",
+                "cleared": false,
+                "cleared_month": "2023-10-31",
+                "cheque_number": "1440",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "4000.00"
+                    }
+                ]
+            },
+            "1606121": {
+                "date": "2023-09-30",
+                "payee": "Daniel Mrenje ALi",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230972",
+                "description": "Payment of adult education teacher's wages",
+                "cleared": false,
+                "cleared_month": "2023-10-31",
+                "cheque_number": "1441",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "3000.00"
+                    }
+                ]
+            },
+            "1612023": {
+                "date": "2023-09-30",
+                "payee": "Pahe Mwachinga Hardware LTD",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230973",
+                "description": "Payment of building materials as house renovation for participant #371(Joyce Gaya)",
+                "cleared": false,
+                "cleared_month": "2023-10-31",
+                "cheque_number": "1448",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "41400.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1080.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "360.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1400.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "2240.00"
+                    }
+                ]
+            },
+            "1612119": {
+                "date": "2023-09-30",
+                "payee": "Mwele CDDC Bakery LTD",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230974",
+                "description": "Payment of bread and scones for different activities as listed",
+                "cleared": false,
+                "cleared_month": "2023-10-31",
+                "cheque_number": "1449",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "8400.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "240.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "200.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1500.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "100.00"
+                    }
+                ]
+            },
+            "1612208": {
+                "date": "2023-09-30",
+                "payee": "Peterson Ireri Njeru",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230975",
+                "description": "Payment of toto basins and laptop bag",
+                "cleared": false,
+                "cleared_month": "2023-10-31",
+                "cheque_number": "1450",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "2000.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "2000.00"
+                    }
+                ]
+            },
+            "1612299": {
+                "date": "2023-09-30",
+                "payee": "Commissioner of Domestic Taxes",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230976",
+                "description": "Payment of NITA Levy for three moths",
+                "cleared": false,
+                "cleared_month": "2023-10-31",
+                "cheque_number": "1451",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "600.00"
+                    }
+                ]
+            },
+            "1612350": {
+                "date": "2023-09-30",
+                "payee": "Commissioner of Domestic Taxes",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230977",
+                "description": "Payment of housing levy for the month of September,2023",
+                "cleared": false,
+                "cleared_month": "2023-10-31",
+                "cheque_number": "1452",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1552.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1886.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1578.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1244.00"
+                    }
+                ]
+            },
+            "1612395": {
+                "date": "2023-09-30",
+                "payee": "Commissioner of Domestic Taxes",
+                "voucher_type_abbrev": "CHQ",
+                "voucher_type_name": "Payment by Cheque",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230978",
+                "description": "Payment of staff PAYE for the month of September 2023",
+                "cleared": false,
+                "cleared_month": "2023-10-31",
+                "cheque_number": "1453",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "4420.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "2911.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "2840.00"
+                    }
+                ]
+            },
+            "1613010": {
+                "date": "2023-09-30",
+                "payee": "Mankind store,Choice butchery,Rev. Danson Saha,David Mwabaya,Irene Nazi,Rachael Mjeni,Kavu Gube Kadili,John Aunga and others",
+                "voucher_type_abbrev": "PC",
+                "voucher_type_name": "Payment by Cash",
+                "voucher_type_cash_account": "cash",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230979",
+                "description": "Payment of meals,Transport expenses,Facilitation fees,Cooking services,washroom services",
+                "cleared": true,
+                "cleared_month": null,
+                "cheque_number": "0",
+                "office_bank_id": "1424",
+                "office_cash_id": "1",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "0",
+                "voucher_type_is_cheque_referenced": "0",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "360.00"
+                    },
+                    {
+                        "account_id": "15",
+                        "transacted_amount": "1750.00"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "100.00"
+                    },
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "2000.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "350.00"
+                    },
+                    {
+                        "account_id": "9",
+                        "transacted_amount": "300.00"
+                    },
+                    {
+                        "account_id": "9",
+                        "transacted_amount": "1000.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "250.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "200.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "450.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "400.00"
+                    },
+                    {
+                        "account_id": "9",
+                        "transacted_amount": "500.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "200.00"
+                    },
+                    {
+                        "account_id": "7",
+                        "transacted_amount": "350.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "563.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1674.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "4500.00"
+                    }
+                ]
+            },
+            "1614197": {
+                "date": "2023-09-30",
+                "payee": "Ke0290 Marere CDC",
+                "voucher_type_abbrev": "CR",
+                "voucher_type_name": "Cash Received",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "income",
+                "voucher_number": "230980",
+                "description": "Amount received from ke290 as expenses during exchange programe for a friendly match",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "0",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "0",
+                "spread": [
+                    {
+                        "account_id": "15",
+                        "transacted_amount": "7755.00"
+                    },
+                    {
+                        "account_id": "12",
+                        "transacted_amount": "2650.00"
+                    }
+                ]
+            },
+            "1616261": {
+                "date": "2023-09-30",
+                "payee": "Hotel Delito's,Mashallah shop,Catherine Kalama",
+                "voucher_type_abbrev": "PC",
+                "voucher_type_name": "Payment by Cash",
+                "voucher_type_cash_account": "cash",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230981",
+                "description": "Correction of voucher #230963 with amount posted to the wrong account",
+                "cleared": true,
+                "cleared_month": null,
+                "cheque_number": "0",
+                "office_bank_id": "1424",
+                "office_cash_id": "1",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "0",
+                "voucher_type_is_cheque_referenced": "0",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "-5450.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "5450.00"
+                    }
+                ]
+            },
+            "1619186": {
+                "date": "2023-09-30",
+                "payee": "Kavu Gube Kadilo",
+                "voucher_type_abbrev": "CPCD",
+                "voucher_type_name": "Chequed Petty Cash Deposit",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "bank_contra",
+                "voucher_number": "230982",
+                "description": "Petty Cash withdrawal to take participant #529 to Kenyatta Hospital in Nairobi",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "1435",
+                "office_bank_id": "1424",
+                "office_cash_id": "1",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "1",
+                "spread": [
+                    {
+                        "account_id": "0",
+                        "transacted_amount": "15000.00"
+                    }
+                ]
+            },
+            "1619324": {
+                "date": "2023-09-30",
+                "payee": "Elizabeth Mtoro,Agnes Kobe,Jackson Mande,Leornard Nzaro,Omar Nzaro Chai",
+                "voucher_type_abbrev": "PC",
+                "voucher_type_name": "Payment by Cash",
+                "voucher_type_cash_account": "cash",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230983",
+                "description": "Payment of cooking services,transport expenses and house renovation expenses",
+                "cleared": true,
+                "cleared_month": null,
+                "cheque_number": "0",
+                "office_bank_id": "1424",
+                "office_cash_id": "1",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "0",
+                "voucher_type_is_cheque_referenced": "0",
+                "spread": [
+                    {
+                        "account_id": "9",
+                        "transacted_amount": "5600.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "600.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "600.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "380.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "2000.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "2500.00"
+                    }
+                ]
+            },
+            "1622526": {
+                "date": "2023-09-30",
+                "payee": "Wilma Kazungu, Emmanuel Kavu, Kelvin Mwatsuma",
+                "voucher_type_abbrev": "PC",
+                "voucher_type_name": "Payment by Cash",
+                "voucher_type_cash_account": "cash",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230984",
+                "description": "Burning CD for movies,facilitation fees, referee charges",
+                "cleared": true,
+                "cleared_month": null,
+                "cheque_number": "0",
+                "office_bank_id": "1424",
+                "office_cash_id": "1",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "0",
+                "voucher_type_is_cheque_referenced": "0",
+                "spread": [
+                    {
+                        "account_id": "5",
+                        "transacted_amount": "1000.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "1500.00"
+                    },
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "800.00"
+                    }
+                ]
+            },
+            "1622842": {
+                "date": "2023-09-30",
+                "payee": "KCB Bank",
+                "voucher_type_abbrev": "BCHG",
+                "voucher_type_name": "Bank Adjustment",
+                "voucher_type_cash_account": "bank",
+                "voucher_type_transaction_effect": "expense",
+                "voucher_number": "230985",
+                "description": "Payment of Bank Charges",
+                "cleared": true,
+                "cleared_month": "2023-09-30",
+                "cheque_number": "10",
+                "office_bank_id": "1424",
+                "office_cash_id": "0",
+                "status_id": "378",
+                "receiving_office_bank_id": null,
+                "receiving_office_cash_id": null,
+                "voucher_is_reversed": "0",
+                "voucher_reversal_from": "0",
+                "voucher_reversal_to": "0",
+                "voucher_is_cleared": "1",
+                "voucher_type_is_cheque_referenced": "0",
+                "spread": [
+                    {
+                        "account_id": "1",
+                        "transacted_amount": "4550.98"
+                    }
+                ]
+            }
+        },
+        "mfr_submited_status": true,
+        "allow_skipping_of_cheque_leaves": true,
+        "financial_report_max_status": "399"
+    },
+    "status_data": {
+        "item_max_approval_status_ids": [
+            "378"
+        ],
+        "item_status": {
+            "377": {
+                "status_id": "377",
+                "status_name": "Ready To Submit",
+                "status_button_label": "",
+                "status_decline_button_label": null,
+                "status_approval_sequence": "1",
+                "status_approval_direction": "1",
+                "status_backflow_sequence": "0",
+                "status_role": [
+                    "34",
+                    "43"
+                ]
+            },
+            "378": {
+                "status_id": "378",
+                "status_name": "Fully Approved",
+                "status_button_label": "",
+                "status_decline_button_label": "Return",
+                "status_approval_sequence": "6",
+                "status_approval_direction": "1",
+                "status_backflow_sequence": "0",
+                "status_role": [
+                    "37"
+                ]
+            },
+            "1352": {
+                "status_id": "1352",
+                "status_name": "Declined",
+                "status_button_label": "Reinstate",
+                "status_decline_button_label": null,
+                "status_approval_sequence": "6",
+                "status_approval_direction": "-1",
+                "status_backflow_sequence": "1",
+                "status_role": [
+                    "34",
+                    "43"
+                ]
+            },
+            "1353": {
+                "status_id": "1353",
+                "status_name": "Reinstated",
+                "status_button_label": "Approve After Reinstate",
+                "status_decline_button_label": null,
+                "status_approval_sequence": "6",
+                "status_approval_direction": "0",
+                "status_backflow_sequence": "0",
+                "status_role": [
+                    "37"
+                ]
+            },
+            "2617": {
+                "status_id": "2617",
+                "status_name": "Verify Voucher",
+                "status_button_label": "Verify",
+                "status_decline_button_label": "Return",
+                "status_approval_sequence": "2",
+                "status_approval_direction": "1",
+                "status_backflow_sequence": "0",
+                "status_role": [
+                    "37",
+                    "41"
+                ]
+            },
+            "2618": {
+                "status_id": "2618",
+                "status_name": "Reinstated for Verify Voucher",
+                "status_button_label": "Approve",
+                "status_decline_button_label": "Return",
+                "status_approval_sequence": "2",
+                "status_approval_direction": "0",
+                "status_backflow_sequence": "0",
+                "status_role": [
+                    "37",
+                    "41"
+                ]
+            },
+            "2619": {
+                "status_id": "2619",
+                "status_name": "Declined from Verify Voucher",
+                "status_button_label": "Reinstate",
+                "status_decline_button_label": "",
+                "status_approval_sequence": "2",
+                "status_approval_direction": "-1",
+                "status_backflow_sequence": "1",
+                "status_role": [
+                    "34",
+                    "43"
+                ]
+            },
+            "4247": {
+                "status_id": "4247",
+                "status_name": "First ASM Approval",
+                "status_button_label": "First ASM Approve",
+                "status_decline_button_label": "Decline",
+                "status_approval_sequence": "3",
+                "status_approval_direction": "1",
+                "status_backflow_sequence": "0",
+                "status_role": [
+                    "41"
+                ]
+            },
+            "4248": {
+                "status_id": "4248",
+                "status_name": "Reinstated for Committee Approval",
+                "status_button_label": "Approve",
+                "status_decline_button_label": "",
+                "status_approval_sequence": "3",
+                "status_approval_direction": "0",
+                "status_backflow_sequence": "0",
+                "status_role": [
+                    "41"
+                ]
+            },
+            "4249": {
+                "status_id": "4249",
+                "status_name": "Declined from Committee Approval",
+                "status_button_label": "Reinstate",
+                "status_decline_button_label": "",
+                "status_approval_sequence": "3",
+                "status_approval_direction": "-1",
+                "status_backflow_sequence": "1",
+                "status_role": [
+                    "34",
+                    "43"
+                ]
+            },
+            "4262": {
+                "status_id": "4262",
+                "status_name": "Second ASM Approval",
+                "status_button_label": "Second ASM Approve",
+                "status_decline_button_label": "Decline",
+                "status_approval_sequence": "4",
+                "status_approval_direction": "1",
+                "status_backflow_sequence": "0",
+                "status_role": [
+                    "41"
+                ]
+            },
+            "4263": {
+                "status_id": "4263",
+                "status_name": "Reinstated for Second ASM Approval",
+                "status_button_label": "Approve",
+                "status_decline_button_label": "Decline",
+                "status_approval_sequence": "4",
+                "status_approval_direction": "0",
+                "status_backflow_sequence": "0",
+                "status_role": [
+                    "41"
+                ]
+            },
+            "4264": {
+                "status_id": "4264",
+                "status_name": "Declined from Second ASM Approval",
+                "status_button_label": "Reinstate",
+                "status_decline_button_label": "",
+                "status_approval_sequence": "4",
+                "status_approval_direction": "-1",
+                "status_backflow_sequence": "1",
+                "status_role": [
+                    "34",
+                    "43"
+                ]
+            },
+            "4268": {
+                "status_id": "4268",
+                "status_name": "ASM Approval",
+                "status_button_label": "Approve",
+                "status_decline_button_label": "Decline",
+                "status_approval_sequence": "5",
+                "status_approval_direction": "1",
+                "status_backflow_sequence": "0",
+                "status_role": [
+                    "41"
+                ]
+            },
+            "4269": {
+                "status_id": "4269",
+                "status_name": "Reinstated for ASM Approval",
+                "status_button_label": "Approve",
+                "status_decline_button_label": "Decline",
+                "status_approval_sequence": "5",
+                "status_approval_direction": "0",
+                "status_backflow_sequence": "0",
+                "status_role": [
+                    "41"
+                ]
+            },
+            "4270": {
+                "status_id": "4270",
+                "status_name": "Declined from ASM Approval",
+                "status_button_label": "Reinstate",
+                "status_decline_button_label": "",
+                "status_approval_sequence": "5",
+                "status_approval_direction": "-1",
+                "status_backflow_sequence": "1",
+                "status_role": [
+                    "34",
+                    "43"
+                ]
+            }
+        },
+        "item_initial_item_status_id": 377,
+        "permissions": {
+            "update": false,
+            "delete": false
+        },
+        "active_approval_actor": []
+    },
+    "transacting_month": "2023-09-01"
+}

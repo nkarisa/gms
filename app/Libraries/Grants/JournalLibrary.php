@@ -490,7 +490,8 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             'expense' => $this->monthOfficeUsedExpenseAccounts($office_id, $transacting_month),
             VoucherTypeEffectEnum::RECEIVABLES->getCode() => $this->monthOfficeUsedReceivableAccounts($office_id, $transacting_month),
             VoucherTypeEffectEnum::PAYABLES->getCode() => $this->monthOfficeUsedPayableAccounts($office_id, $transacting_month),
-            VoucherTypeEffectEnum::PREPAYMENTS->getCode(), VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode() => $this->monthOfficeUsedPrepaymentAccounts($office_id, $transacting_month),
+            VoucherTypeEffectEnum::PREPAYMENTS->getCode() => $this->monthOfficeUsedPrepaymentAccounts($office_id, $transacting_month),
+            VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode() => $this->monthOfficeUsedPrepaymentAccounts($office_id, $transacting_month),
             VoucherTypeEffectEnum::DEPRECIATION->getCode() => $this->monthOfficeUsedDepreciationAccounts($office_id, $transacting_month),
             VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode() => $this->monthOfficeUsedPayrollLiabilityAccounts($office_id, $transacting_month),
         ];
@@ -725,6 +726,10 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             VoucherTypeEffectEnum::PREPAYMENTS->getCode(),
             VoucherTypeEffectEnum::DEPRECIATION->getCode(),
             VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode() => $financial_accounts['expense'],
+            'bank_contra' => $financial_accounts['bank_contra']??[],
+            'cash_contra' => $financial_accounts['cash_contra']??[],
+            'bank_to_bank_contra' => $financial_accounts['bank_to_bank_contra']??[],
+            'cash_to_cash_contra' => $financial_accounts['cash_to_cash_contra']??[]
             // VoucherTypeEffectEnum::RECEIVABLES->getCode() => $financial_accounts[VoucherTypeEffectEnum::RECEIVABLES->getCode()],
             // VoucherTypeEffectEnum::PAYABLES->getCode() => $financial_accounts[VoucherTypeEffectEnum::PAYABLES->getCode()],
             // VoucherTypeEffectEnum::PREPAYMENTS->getCode() => $financial_accounts[VoucherTypeEffectEnum::PREPAYMENTS->getCode()],

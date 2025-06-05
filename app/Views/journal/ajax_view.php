@@ -46,7 +46,7 @@
 </style>
 
 <?php
-
+helper('journal');
 $financialReportLibrary = new \App\Libraries\Grants\FinancialReportLibrary();
 $journalLibrary = new \App\Libraries\Grants\JournalLibrary();
 
@@ -83,31 +83,8 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
         <table class='table table-bordered' style='white-space:nowrap;' id="journal">
             <thead>
                 <tr>
-                    <th>
-                        <?php if ($navigation['previous']) { ?>
-                            <a class='pull-left'
-                                href="<?= base_url(); ?>journal/view/<?= hash_id($navigation['previous']); ?>"
-                                title='Previous Month'><i class='fa fa-minus-circle' style='font-size:20pt;'></i></a>
-                        <?php } ?>
-
-                        <?php if ($navigation['next']) { ?>
-                            <a class='pull-right' href="<?= base_url(); ?>vournal/view/<?= hash_id($navigation['next']); ?>"
-                                title='Next Month'><i class='fa fa-plus-circle' style='font-size:20pt;'></i></a>
-                        <?php } ?>
-                    </th>
-                    <th colspan="<?= $sum_of_accounts + $count_of_month_used_accrual_ledgers * 3 + 5 + (count($month_opening_balance['bank']) * 3) + (count($month_opening_balance['cash']) * 3); ?>"
-                        style='text-align:center;'>
-                        <?= $office_name; ?></br>
-                        <?= get_phrase('cash_journal'); ?> <br>
-                        <?= date('F Y', strtotime($transacting_month)); ?>
-
-                    </th>
-                    <th>
-                        <?php if ($navigation['next']) { ?>
-                            <a class='pull-right' href="<?= base_url(); ?>journal/view/<?= hash_id($navigation['next']); ?>"
-                                title='Next Month'><i class='fa fa-plus-circle' style='font-size:20pt;'></i></a>
-                        <?php } ?>
-                    </th>
+                    <th><?=navigation();?></th>
+                    <th colspan="<?=titleColspan();?>" style='text-align:center;'><?=title();?></th>
                 </tr>
                 <tr>
                     <th colspan='7'></th>
