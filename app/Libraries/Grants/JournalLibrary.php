@@ -490,7 +490,7 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             'expense' => $this->monthOfficeUsedExpenseAccounts($office_id, $transacting_month),
             VoucherTypeEffectEnum::RECEIVABLES->getCode() => $this->monthOfficeUsedReceivableAccounts($office_id, $transacting_month),
             VoucherTypeEffectEnum::PAYABLES->getCode() => $this->monthOfficeUsedPayableAccounts($office_id, $transacting_month),
-            VoucherTypeEffectEnum::PREPAYMENTS->getCode() => $this->monthOfficeUsedPrepaymentAccounts($office_id, $transacting_month),
+            VoucherTypeEffectEnum::PREPAYMENTS->getCode(), VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode() => $this->monthOfficeUsedPrepaymentAccounts($office_id, $transacting_month),
             VoucherTypeEffectEnum::DEPRECIATION->getCode() => $this->monthOfficeUsedDepreciationAccounts($office_id, $transacting_month),
             VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode() => $this->monthOfficeUsedPayrollLiabilityAccounts($office_id, $transacting_month),
         ];
@@ -719,6 +719,7 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             VoucherTypeEffectEnum::RECEIVABLES->getCode(),
             VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() => $financial_accounts['income'],
             'expense',
+            VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode(),
             VoucherTypeEffectEnum::PAYABLES->getCode(),
             VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode(),
             VoucherTypeEffectEnum::PREPAYMENTS->getCode(),
@@ -817,6 +818,20 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             $spread_cells = "";
             $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'income');
             $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'expense');
+
+        }elseif ($transaction_effect == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode()) {
+            $spread_cells = "";
+            // Fill up empty cells in spread when the account type is an expense type
+            $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'income');
+            foreach ($accounts as $account_id => $account_code) {
+                $transacted_amount = 0;
+                foreach ($spread as $spread_transaction) {
+                    if (in_array($account_id, $spread_transaction) && $transaction_effect == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode()) {
+                        $transacted_amount += $spread_transaction['transacted_amount'];
+                    }
+                }
+                $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_" . $transaction_effect . "_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
+            }
 
         }
 

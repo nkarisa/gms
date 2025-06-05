@@ -323,8 +323,7 @@ extract($result);
         $("#cash_account").val(0);
 
         checkIfDateIsSelected() ? getRequest(url, function(response_objects) {
-
-            // var response_objects = JSON.parse(response);
+            // console.log(response_objects)
             let response_office_cash = response_objects['office_cash'];
             let response_office_bank = response_objects['office_banks'];
             let response_is_transfer_contra = response_objects['is_transfer_contra'];
@@ -379,6 +378,8 @@ extract($result);
 
             if(response_is_bank_refund){
                 $("#bank_refund, #refund_voucher_amount, #bank_balance").closest('span').removeClass('hidden');
+                $("#bank_refund").removeAttr('disabled');
+                $("#bank_refund").removeAttr('readonly');
                 // Populate refund voucher list
                 // populateVoucherInRefundList(response_objects['valid_refund_vouchers']);
                 $("#refund_voucher_amount").val(0)
@@ -990,7 +991,23 @@ extract($result);
         populate_select(response_office_cash, $("#cash_account"), 'Select a cash account');
     }
 
-    $("#bank").on('change', function(){
+    // $("#bank").on('change', function(){
+    //     let office_id = $('#office').val();
+    //     let voucher_type_id = $("#voucher_type").val();
+    //     let url = "<?= base_url(); ?>ajax/voucher/getValidVoucherListForRefund/" + office_id + "/" + voucher_type_id;
+        
+    //     getRequest(url, function(response_objects){
+    //         let response_is_bank_refund = response_objects['is_bank_refund'];
+    //         if(response_is_bank_refund){
+    //             $("#bank_refund, #refund_voucher_amount, #bank_balance").closest('span').removeClass('hidden');
+    //             // Populate refund voucher list
+    //             populateVoucherInRefundList(response_objects['valid_refund_vouchers']);
+    //             $("#refund_voucher_amount").val(0)
+    //         }
+    //     })
+    // })
+
+    $("#voucher_type").on('change', function(){
         let office_id = $('#office').val();
         let voucher_type_id = $("#voucher_type").val();
         let url = "<?= base_url(); ?>ajax/voucher/getValidVoucherListForRefund/" + office_id + "/" + voucher_type_id;
