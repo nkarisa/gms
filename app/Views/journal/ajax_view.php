@@ -205,159 +205,115 @@
                             );?>
                         </td>
                         <td><?= date('jS M Y', strtotime($date)); ?></td>
-                        <td><input type='checkbox' name='selected_voucher[]' class='select_voucher'
-                                value='<?= $voucher_id; ?>' /> <span title="<?= $voucher_type_name; ?>"
-                                class="label <?= $cleared ? 'btn-success' : 'btn-warning'; ?>"><?= service("settings")->get("GrantsConfig.use_voucher_type_abbreviation") ? $voucher_type_abbrev : $voucher_type_name; ?><span>
+                        <td>
+                            <?=voucherSelection($voucher_id, $voucher_type_abbrev, $voucher_type_name, $cleared);?>
                         </td>
                         <td>
-                            <a href="<?= base_url(); ?>voucher/view/<?= hash_id($voucher_id); ?>" target="__blank">
-                                <div class='btn btn-default'><?= $voucher_number; ?></div>
-                            </a>
+                            <?=voucherNumberButton($voucher_id, $voucher_number);?>
                         </td>
 
-                        <td title='<?php if (strlen($payee) > 50)
-                            echo $description; ?>'>
-                            <i data-voucher_id='<?= $voucher_id; ?>' data-reference_column='voucher_vendor'
-                                class='fa fa-pencil edit_journal  <?= (!$role_has_journal_update_permission || $voucher_is_reversed || $check_if_financial_report_is_submitted) ? 'hidden' : ''; ?> '></i>
-                            <span
-                                class='cell_content'><?= strlen($payee) > 50 ? substr($payee, 0, 50) . '...' : $payee; ?></span>
+                        <td title='<?=(strlen($payee) > 50) ? $description : "";?>'>
+                            <?=payeeLabel($payee, $voucher_id, $role_has_journal_update_permission, $voucher_is_reversed, $check_if_financial_report_is_submitted);?>
                         </td>
 
-                        <td title='<?php if (strlen($description) > 50)
-                            echo $description; ?>'>
-                            <i data-voucher_id='<?= $voucher_id; ?>' data-reference_column='voucher_description'
-                                class='fa fa-pencil edit_journal  <?= (!$role_has_journal_update_permission || $voucher_is_reversed || $check_if_financial_report_is_submitted) ? 'hidden' : ''; ?> '></i>
-                            <span
-                                class='cell_content'><?= strlen($description) > 50 ? substr($description, 0, 50) . '...' : $description; ?></span>
+                        <td title='<?=(strlen($description) > 50) ? $description: "";?>'>
+                            <?=voucherDescription($voucher_id, $description, $role_has_journal_update_permission, $voucher_is_reversed, $check_if_financial_report_is_submitted);?>
                         </td>
 
                         <td class='align-right'>
-                            <?php
-                            $eft_or_chq = '';
-                            if (!is_numeric($cheque_number)) {
-                                $eft_or_chq = $cheque_number . ' [' . $voucher_type_abbrev . ']';
-                            } else if (is_numeric($cheque_number)) {
-
-                                $eft_or_chq = $cheque_number != 0 ? $cheque_number . ' [' . $voucher_type_abbrev . ']' : '';
-                            }
-                            echo $eft_or_chq;
-                            ?>
+                            <?=formatBankReference($cheque_number, $voucher_type_abbrev)?>
                         </td>
 
                         <?php
 
                         // Compute bank and cash running balances
                         $voucher_amount = array_sum(array_column($spread, 'transacted_amount'));
+                
+                        computeBankRunningBalances(
+                            $voucher, 
+                            $voucher_amount, 
+                            $sum_bank_income, 
+                            $sum_bank_expense, 
+                            $bank_income, 
+                            $bank_expense, 
+                            $running_bank_balance
+                        );
 
-                        if ($receiving_office_bank_id && is_int($receiving_office_bank_id) && isset($sum_bank_income[$receiving_office_bank_id])) {
+                        computeCashRunningBalances(
+                            $voucher, 
+                            $voucher_amount, 
+                            $sum_petty_cash_income, 
+                            $sum_petty_cash_expense, 
+                            $cash_income,
+                            $cash_expense,
+                            $running_petty_cash_balance
+                        );
 
-                            $bank_income[$receiving_office_bank_id] = ($voucher_type_cash_account == 'bank' && $voucher_type_transaction_effect == 'bank_to_bank_contra') ? $voucher_amount : 0;
-                            $bank_expense[$receiving_office_bank_id] = 0;
+                        computePayablesRunningBalances(
+                            $voucher, 
+                            $voucher_amount, 
+                            $sum_payables_income, 
+                            $sum_payables_expense, 
+                            $payables_income, 
+                            $payables_expense, 
+                            $running_payables_balance
+                        );
 
-                            $sum_bank_income[$receiving_office_bank_id] = $sum_bank_income[$receiving_office_bank_id] + $bank_income[$receiving_office_bank_id];
-                            $sum_bank_expense[$receiving_office_bank_id] = $sum_bank_expense[$receiving_office_bank_id] + $bank_expense[$receiving_office_bank_id];
+                        computeReceivablesRunningBalances(
+                            $voucher, 
+                            $voucher_amount, 
+                            $sum_receivables_income, 
+                            $sum_receivables_expense, 
+                            $receivables_income,
+                            $receivables_expense, 
+                            $running_receivables_balance
+                        );
 
-                            $running_bank_balance[$receiving_office_bank_id] = $month_opening_balance['bank'][$receiving_office_bank_id]['amount'] + ($sum_bank_income[$receiving_office_bank_id] - $sum_bank_expense[$receiving_office_bank_id]);
-                        }
+                        computePrepaymentsRunningBalances(
+                            $voucher, 
+                            $voucher_amount, 
+                            $sum_prepayments_income, 
+                            $sum_prepayments_expense, 
+                            $prepayments_income, 
+                            $prepayments_expense, 
+                            $running_prepayments_balance
+                        );
 
-                        if ($receiving_office_cash_id && is_int($receiving_office_cash_id) && isset($sum_petty_cash_income[$receiving_office_cash_id])) {
+                        computeDepreciationRunningBalances(
+                            $voucher, 
+                            $voucher_amount, 
+                            $sum_depreciation_income, 
+                            $sum_depreciation_expense, 
+                            $depreciation_income, 
+                            $depreciation_expense, 
+                            $running_depreciation_balance
+                        );
 
-                            $cash_income[$receiving_office_cash_id] = ($voucher_type_cash_account == 'cash' && $voucher_type_transaction_effect == 'cash_to_cash_contra') ? $voucher_amount : 0;
-                            $cash_expense[$receiving_office_cash_id] = 0;
-
-                            $sum_petty_cash_income[$receiving_office_cash_id] = $sum_petty_cash_income[$receiving_office_cash_id] + $cash_income[$receiving_office_cash_id];
-                            $sum_petty_cash_expense[$receiving_office_cash_id] = $sum_petty_cash_expense[$receiving_office_cash_id] + $cash_expense[$receiving_office_cash_id];
-
-                            $running_petty_cash_balance[$receiving_office_cash_id] = $month_opening_balance['cash'][$receiving_office_cash_id]['amount'] + ($sum_petty_cash_income[$receiving_office_cash_id] - $sum_petty_cash_expense[$receiving_office_cash_id]);
-                        }
-
-                        if ($office_bank_id && isset($sum_bank_income[$office_bank_id])) {
-                            $bank_income[$office_bank_id] = (($voucher_type_cash_account == 'bank' && $voucher_type_transaction_effect == 'income') || ($voucher_type_cash_account == 'cash' && $voucher_type_transaction_effect == 'cash_contra')) ? $voucher_amount : 0;
-                            $bank_expense[$office_bank_id] = (($voucher_type_cash_account == 'bank' && $voucher_type_transaction_effect == 'expense') || ($voucher_type_cash_account == 'bank' && ($voucher_type_transaction_effect == 'bank_contra' || $voucher_type_transaction_effect == 'bank_to_bank_contra'))) ? $voucher_amount : 0;
-
-                            $sum_bank_income[$office_bank_id] = $sum_bank_income[$office_bank_id] + $bank_income[$office_bank_id];
-                            $sum_bank_expense[$office_bank_id] = $sum_bank_expense[$office_bank_id] + $bank_expense[$office_bank_id];
-
-                            $running_bank_balance[$office_bank_id] = $month_opening_balance['bank'][$office_bank_id]['amount'] + ($sum_bank_income[$office_bank_id] - $sum_bank_expense[$office_bank_id]);
-                        }
-
-                        if ($office_cash_id && isset($sum_petty_cash_income[$office_cash_id])) {
-                            $cash_income[$office_cash_id] = (($voucher_type_cash_account == 'cash' && $voucher_type_transaction_effect == 'income') || ($voucher_type_cash_account == 'bank' && $voucher_type_transaction_effect == 'bank_contra')) ? $voucher_amount : 0;
-                            $cash_expense[$office_cash_id] = (($voucher_type_cash_account == 'cash' && $voucher_type_transaction_effect == 'expense') || ($voucher_type_cash_account == 'cash' && $voucher_type_transaction_effect == 'cash_contra' || $voucher_type_transaction_effect == 'cash_to_cash_contra')) ? $voucher_amount : 0;
-
-                            $sum_petty_cash_income[$office_cash_id] = $sum_petty_cash_income[$office_cash_id] + $cash_income[$office_cash_id];
-                            $sum_petty_cash_expense[$office_cash_id] = $sum_petty_cash_expense[$office_cash_id] + $cash_expense[$office_cash_id];
-
-                            $running_petty_cash_balance[$office_cash_id] = $month_opening_balance['cash'][$office_cash_id]['amount'] + ($sum_petty_cash_income[$office_cash_id] - $sum_petty_cash_expense[$office_cash_id]);
-                        }
-
-                        if ($voucher_type_transaction_effect == 'receivables' || $voucher_type_transaction_effect == 'payments') {
-                            $receivables_income = $voucher_type_transaction_effect == 'receivables' ? $voucher_amount : 0;
-                            $receivables_expense = $voucher_type_transaction_effect == 'payments' ? $voucher_amount : 0;
-
-                            $sum_receivables_income += $receivables_income;
-                            $sum_receivables_expense += $receivables_expense;
-                        }
-
-                        if ($voucher_type_transaction_effect == 'payables' || $voucher_type_transaction_effect == 'disbursements') {
-                            $payables_income = $voucher_type_transaction_effect == 'disbursements' ? $voucher_amount : 0;
-                            $payables_expense = $voucher_type_transaction_effect == 'payables' ? $voucher_amount : 0;
-
-                            $sum_payables_income += $payables_income;
-                            $sum_payables_expense += $payables_expense;
-                        }
-
-                        if ($voucher_type_transaction_effect == 'prepayments' || $voucher_type_transaction_effect == 'setlements') {
-                            $prepayments_income = $voucher_type_transaction_effect == 'prepayments' ? $voucher_amount : 0;
-                            $prepayments_expense = $voucher_type_transaction_effect == 'setlements' ? $voucher_amount : 0;
-
-                            $sum_prepayments_income += $prepayments_income;
-                            $sum_prepayments_expense += $prepayments_expense;
-                        }
-
-                        if ($voucher_type_transaction_effect == 'depreciation') {
-                            $depreciation_income = 0;
-                            $depreciation_expense = $voucher_type_transaction_effect == 'depreciation' ? $voucher_amount : 0;
-
-                            $sum_depreciation_income += $depreciation_income;
-                            $sum_depreciation_expense += $depreciation_expense;
-                        }
-
-                        if ($voucher_type_transaction_effect == 'payroll_liability') {
-                            $payroll_liability_income = 0;
-                            $payroll_liability_expense = $voucher_type_transaction_effect == 'payroll_liability' ? $voucher_amount : 0;
-
-                            $sum_payroll_liability_income += $payroll_liability_income;
-                            $sum_payroll_liability_expense += $payroll_liability_expense;
-                        }
+                        computePayrollLiabilityRunningBalances(
+                            $voucher, 
+                            $voucher_amount, 
+                            $sum_payroll_liability_income, 
+                            $sum_payroll_liability_expense, 
+                            $payroll_liability_income, 
+                            $payroll_liability_expense, 
+                            $running_payroll_liability_balance
+                        );
 
                         ?>
 
                         <?php foreach ($month_opening_balance['bank'] as $bank_id => $bank_account) { ?>
                             <?php
-                            $bank_inc = 0;
-                            $bank_exp = 0;
-                            $bank_bal = 0;
-
-                            if ($bank_id == $office_bank_id) {
-                                $bank_inc = $bank_income[$office_bank_id];
-                                $bank_exp = $bank_expense[$office_bank_id];
-                                $bank_bal = $running_bank_balance[$office_bank_id];
-                            }
-
-                            if ($voucher_type_transaction_effect == 'payments') {
-                                $bank_inc = $voucher_amount;
-                            }
-
-                            if ($voucher_type_transaction_effect == 'disbursements') {
-                                $bank_exp = $voucher_amount;
-                            }
-
-                            if ($bank_id == $receiving_office_bank_id) {
-                                $bank_inc = $bank_income[$receiving_office_bank_id];
-                                $bank_exp = $bank_expense[$receiving_office_bank_id];
-                                $bank_bal = $running_bank_balance[$receiving_office_bank_id];
-                            }
+                                [
+                                    'bank_inc' => $bank_inc,
+                                    'bank_exp' => $bank_exp,
+                                    'bank_bal' => $bank_bal
+                                ]= computeCurrentJournalRowBalance(
+                                    $voucher, 
+                                    $bank_id, 
+                                    $bank_income, 
+                                    $bank_expense, 
+                                    $running_bank_balance
+                                );
                             ?>
 
                             <td class='align-right'><?= number_format($bank_inc, 2); ?></td>
@@ -369,21 +325,17 @@
                         <?php foreach ($month_opening_balance['cash'] as $cash_id => $cash_account) { ?>
 
                             <?php
-                            $cash_inc = 0;
-                            $cash_exp = 0;
-                            $cash_bal = 0;
-
-                            if ($cash_id == $office_cash_id) {
-                                $cash_inc = $cash_income[$office_cash_id];
-                                $cash_exp = $cash_expense[$office_cash_id];
-                                $cash_bal = $running_petty_cash_balance[$office_cash_id];
-                            }
-
-                            if ($cash_id == $receiving_office_cash_id) {
-                                $cash_inc = $cash_income[$receiving_office_cash_id];
-                                $cash_exp = $cash_expense[$receiving_office_cash_id];
-                                $cash_bal = $running_petty_cash_balance[$receiving_office_cash_id];
-                            }
+                                [
+                                    'cash_inc' => $cash_inc,
+                                    'cash_exp' => $cash_exp,
+                                    'cash_bal' => $cash_bal
+                                ] = computeCurrentJournalRowBalance(
+                                    $voucher, 
+                                    $cash_id, 
+                                    $cash_income, 
+                                    $cash_expense, 
+                                    $running_petty_cash_balance
+                                );
                             ?>
 
                             <td class='align-right'><?= number_format($cash_inc, 2); ?></td>
