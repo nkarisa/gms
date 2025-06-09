@@ -121,3 +121,19 @@ if(!function_exists('accrualAccountsTitle')){
     );
     }
 }
+
+if(!function_exists('incomeCodesTitle')){
+    function incomeCodesTitle(){
+        return view('journal/components/incomeCodesTitle',
+        ['accounts' => journal()->getMonthAccounts()]
+    );
+    }
+}
+
+if(!function_exists('expenseCodesTitle')){
+    function expenseCodesTitle(){
+        return view('journal/components/expenseCodesTitle',
+        ['accounts' => journal()->getMonthAccounts()]
+    );
+    }
+}

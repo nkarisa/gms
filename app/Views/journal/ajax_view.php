@@ -46,35 +46,10 @@
 </style>
 
 <?php
-helper('journal');
-$financialReportLibrary = new \App\Libraries\Grants\FinancialReportLibrary();
-$journalLibrary = new \App\Libraries\Grants\JournalLibrary();
-
-// echo json_encode($result);
-
-extract($result['status_data']);
-$result['mfr_submited_status'] = 0; // A stop gap waiting a discussion with Development Team on this matter so that ticket INC0218239 can be resolved. 
-// Users should be able to reverse voucher even if the MFRs are submitted. This is important to allow handling stale cheques and invalid transactions
-
-$month_used_accrual_ledgers = ['receivables' => 100,'payables' => 200,'prepayments' => 300,'depreciation' => 400,'payroll_liability' => 500];
-$count_of_month_used_accrual_ledgers = count($month_used_accrual_ledgers);
-
-$sum_of_income_accounts = count($accounts['income']);
-$sum_of_expense_accounts = count($accounts['expense']);
-$sum_of_accounts = $sum_of_income_accounts + $sum_of_expense_accounts;
-
-$role_has_journal_update_permission = $userLibrary->checkRoleHasPermissions(ucfirst($controller), 'update');
-$check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinancialReportIsSubmitted([$office_id], $transacting_month);
-
+    helper('journal');
+    $journalLibrary = new \App\Libraries\Grants\JournalLibrary();
+    extract($result['status_data']);
 ?>
-<input type='text' id='transacting_month_id' class='hidden' value='<?= $result['transacting_month']; ?>'>
-<?php if (isset($office_bank_name)) { ?>
-    <div class='row'>
-        <div class='col-xs-12' style='font-weight:bold;text-align:center;'>
-            <?= get_phrase('office_bank_cash_journal'); ?> : <?= $office_bank_name; ?>
-        </div>
-    </div>
-<?php } ?>
 
 <hr />
 
@@ -83,10 +58,12 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
         <table class='table table-bordered' style='white-space:nowrap;' id="journal">
             <thead>
                 <tr>
+                    <!-- Navigation row -->
                     <th><?=navigation();?></th>
                     <th colspan="<?=titleColspan();?>" style='text-align:center;'><?=title();?></th>
                 </tr>
                 <tr>
+                    <!-- Ledger columns headers row -->
                     <th colspan='<?=journal()->journalDetailColumns;?>'></th>
                     <?=bankLedgerColumnHeaders();?>
                     <?=cashLedgerColumnHeaders();?>
@@ -94,6 +71,7 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
                     <?=accountSpreadEmpty();?>
                 </tr>
                 <tr>
+                    <!-- Ledger Opening Balances row -->
                     <th colspan='7'><?= get_phrase('balance_b/f'); ?></th>
                     <?=bankLedgerOpeningBalance();?>
                     <?=cashLedgerOpeningBalance();?>
@@ -102,6 +80,7 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
                     <?=expenseAccountsHeaderTitle();?>
                 </tr>
                 <tr>
+                    <!-- Accounts Code Title row -->
                     <th><?= get_phrase('journal_action', 'Action'); ?></th>
                     <th><?= get_phrase('transaction_journal_date', 'Date'); ?></th>
                     <th><?= get_phrase('voucher_type', 'Voucher Type'); ?></th>
@@ -113,14 +92,8 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
                     <?=bankAccountsTitle();?>
                     <?=cashAccountsTitle();?>
                     <?=accrualAccountsTitle();?>
-
-                    <?php foreach ($accounts['income'] as $income_account_code) { ?>
-                        <th><?= $income_account_code; ?></th>
-                    <?php } ?>
-
-                    <?php foreach ($accounts['expense'] as $expense_account_code) { ?>
-                        <th><?= $expense_account_code; ?></th>
-                    <?php } ?>
+                    <?=incomeCodesTitle();?>
+                    <?=expenseCodesTitle();?>
 
                 </tr>
             </thead>
@@ -613,7 +586,7 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
 
     $(".btn_reverse").on('click', function () {
 
-        journal_month = $('#transacting_month_id').val();
+        journal_month = '<?=$result['transacting_month'];?>' // $('#transacting_month_id').val();
 
 
         var btn = $(this);
