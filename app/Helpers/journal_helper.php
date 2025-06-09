@@ -94,3 +94,30 @@ if(!function_exists('expenseAccountsHeaderTitle')){
         return view('journal/components/expenseAccountsHeaderTitle');
     }
 }
+
+
+if(!function_exists('bankAccountsTitle')){
+    function bankAccountsTitle(){
+        return view('journal/components/bankAccountsTitle',
+        ['month_opening_balance' => journal()->getMonthCashOpeningBalance()]
+    );
+    }
+}
+
+
+if(!function_exists('cashAccountsTitle')){
+    function cashAccountsTitle(){
+        return view('journal/components/cashAccountsTitle',
+        ['month_opening_balance' => journal()->getMonthCashOpeningBalance()]
+    );
+    }
+}
+
+
+if(!function_exists('accrualAccountsTitle')){
+    function accrualAccountsTitle(){
+        return view('journal/components/accrualAccountsTitle',
+        ['month_opening_balance' => journal()->getMonthCashOpeningBalance()]
+    );
+    }
+}

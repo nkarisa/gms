@@ -110,23 +110,9 @@ $check_if_financial_report_is_submitted = $financialReportLibrary->checkIfFinanc
                     <th><?= get_phrase('journal_description', 'Description'); ?></th>
                     <th><?= get_phrase('cheque_no_or_eft_no', 'CHQ/EFT No.'); ?></th>
 
-                    <?php foreach ($month_opening_balance['bank'] as $office_bank_id => $bank_account) { ?>
-                        <th><?= get_phrase('bank_income') . ' (' . $bank_account['account_name'] . ')'; ?></th>
-                        <th><?= get_phrase('bank_expense') . ' (' . $bank_account['account_name'] . ')'; ?></th>
-                        <th><?= get_phrase('balance') . ' (' . $bank_account['account_name'] . ')'; ?></th>
-                    <?php } ?>
-
-                    <?php foreach ($month_opening_balance['cash'] as $office_cash_id => $cash_account) { ?>
-                        <th><?= $cash_account['account_name'] . ' ' . get_phrase('income'); ?></th>
-                        <th><?= $cash_account['account_name'] . ' ' . get_phrase('expense'); ?></th>
-                        <th><?= $cash_account['account_name'] . ' ' . get_phrase('balance'); ?></th>
-                    <?php } ?>
-
-                    <?php foreach($month_used_accrual_ledgers as $accrual_ledger => $ledger_opening_balance){?>
-                        <th><?= get_phrase($accrual_ledger). ' ' . get_phrase('debit'); ?></th>
-                        <th><?= get_phrase($accrual_ledger) . ' ' . get_phrase('credit'); ?></th>
-                        <th><?= get_phrase($accrual_ledger) . ' ' . get_phrase('balance'); ?></th>
-                    <?php }?>
+                    <?=bankAccountsTitle();?>
+                    <?=cashAccountsTitle();?>
+                    <?=accrualAccountsTitle();?>
 
                     <?php foreach ($accounts['income'] as $income_account_code) { ?>
                         <th><?= $income_account_code; ?></th>
