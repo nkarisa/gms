@@ -228,6 +228,7 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
         $system_opening_bank = $this->systemOpeningBankBalance($office_id, $office_bank_id);
         $system_opening_cash = $this->systemOpeningCashBalance($office_id, $office_bank_id);
+        // $system_opening_accrual = $this->systemOpeningAccrualBalance($office_id, $office_bank_id);
 
         $bank_to_date_income  = [];
         $bank_to_date_expense = [];
@@ -251,8 +252,24 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             $month_cash_opening[$office_cash_id]['amount']       = $office_cash_balance['amount'] + ($cash_to_date_income[$office_cash_id] - $cash_to_date_expense[$office_cash_id]);
         }
 
-        //echo json_encode( ['bank'=>$month_bank_opening,'cash'=>$month_cash_opening]);exit;
-        return ['bank' => $month_bank_opening, 'cash' => $month_cash_opening];
+        // $month_used_accrual_ledgers = ['receivables' => 100,'payables' => 200,'prepayments' => 300,'depreciation' => 400,'payroll_liability' => 500];
+        // foreach ($system_opening_accrual as $accrual_id => $accrual_balance) {
+        //     $accrual_to_date_debit[$accrual_id] = 0;
+        //     $accrual_to_date_credit[$accrual_id] = 0;
+        //     $month_accrual_opening[$accrual_id]['account_name'] = $accrual_balance['account_name'];
+        //     $month_accrual_opening[$accrual_id]['amount'] = $accrual_balance['amount'] + $accrual_to_date_debit[$accrual_id] - $accrual_to_date_credit[$accrual_id];
+        // }
+
+
+        return [
+            'bank' => $month_bank_opening, 
+            'cash' => $month_cash_opening, 
+            'receivables' => ['account_name' => 'receivables', 'amount' => 100], 
+            'payables' => ['account_name' => 'payables', 'amount' => 200],
+            'prepayments' => ['account_name' => 'prepayments', 'amount' => 300],
+            'depreciation' => ['account_name' => 'depreciation', 'amount' => 400],
+            'payroll_liability' => ['account_name' => 'depreciation', 'amount' => 500]
+        ];
     }
 
     public function getOfficeBankProjectAllocation($office_bank_id)

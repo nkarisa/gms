@@ -140,6 +140,26 @@
                     "account_name": "Airtel Money",
                     "amount": 0
                 }
+            },
+            "receivables": {
+                "account_name": "receivables",
+                "amount": 100
+            },
+            "payables": {
+                "account_name": "payables",
+                "amount": 200
+            },
+            "prepayments": {
+                "account_name": "prepayments",
+                "amount": 300
+            },
+            "depreciation": {
+                "account_name": "depreciation",
+                "amount": 400
+            },
+            "payroll_liability": {
+                "account_name": "depreciation",
+                "amount": 500
             }
         },
         "vouchers": {
@@ -3581,10 +3601,20 @@
         },
         "item_initial_item_status_id": 377,
         "permissions": {
-            "update": false,
+            "update": true,
             "delete": false
         },
         "active_approval_actor": []
     },
-    "transacting_month": "2023-09-01"
+    "transacting_month": "2023-09-01",
+    "role_has_journal_update_permission": false,
+    "check_if_financial_report_is_submitted": true,
+    "mfr_submited_status": 0,
+    "month_used_accrual_ledgers": {
+        "receivables": 100,
+        "payables": 200,
+        "prepayments": 300,
+        "depreciation": 400,
+        "payroll_liability": 500
+    }
 }

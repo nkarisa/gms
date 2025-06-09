@@ -63,4 +63,5 @@ class Journal {
         }
         return $sumAccounts;
     }
+
 }

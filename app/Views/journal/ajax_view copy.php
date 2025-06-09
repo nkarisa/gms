@@ -193,16 +193,110 @@
                     <!-- Action Column -->
                     <tr>
                         <td>
-                            <?=journalAction(
-                                $voucher, 
-                                $voucher_id,
-                                $mfr_submited_status, 
-                                $role_has_journal_update_permission, 
-                                $item_status, 
-                                $item_initial_item_status_id,
-                                $item_max_approval_status_ids,
-                                $check_if_financial_report_is_submitted
-                            );?>
+
+                            <?php
+                            if ($voucher_is_reversed && ($voucher_reversal_from || $voucher_reversal_to)) {
+
+                                $related_voucher_id = hash_id($voucher_reversal_from, 'encode');
+                                $reverse_btn_label = get_phrase('linked_source');
+
+                                if (!$voucher_reversal_from) {
+                                    $related_voucher_id = hash_id($voucher_reversal_to, 'encode');
+                                    $reverse_btn_label = get_phrase('linked_destination');
+                                }
+                                ?>
+                                <a class='btn btn-danger' target="__blank"
+                                    href='<?= base_url() . 'voucher/view/' . $related_voucher_id; ?>'><?= $reverse_btn_label; ?>
+                                    [<?= get_related_voucher($voucher_reversal_to > 0 ? $voucher_reversal_to : $voucher_reversal_from); ?>]</a>
+                            <?php
+
+                            }
+
+                            $disable_flag = '';
+
+                            if ($voucher_is_reversed != 1 && $mfr_submited_status != 1) {
+
+                                $disable_flag = !$role_has_journal_update_permission ? true : false;
+
+                                if ($disable_flag) { ?>
+
+                                    <div data-voucher_id='<?= $voucher_id; ?>'
+                                        class='btn btn-info   <?= !$role_has_journal_update_permission ? "disabled" : ''; ?>  <?= $voucher_is_cleared || $voucher_is_cleared ? "hidden" : ""; ?>'>
+                                        <i class='fa fa-arrow-left' style='cursor:pointer; font-size:18px;color:white'></i>
+                                        <?= get_phrase('return'); ?>
+                                    </div>
+
+                                <?php }
+
+                                echo approval_action_button('voucher', $item_status, $voucher_id, $status_id, $item_initial_item_status_id, $item_max_approval_status_ids);
+                            } ?>
+
+                            <?php if ($voucher_type_is_cheque_referenced == 0) {
+                                //$reuse_flag_when_eft_used= $cheque_number!=0?'re_use':"";
+                                $cancel_eft_class = $cheque_number != 0 && $cheque_number != '' ? 'cancel_eft' : '';
+
+                                $reuse_flag_when_eft_used = '';
+
+                                if (is_numeric($cheque_number)) {
+
+                                    $reuse_flag_when_eft_used = $cheque_number != 0 ? 're_use_eft' : '';
+                                } else if (!is_numeric($cheque_number) && $cheque_number != '') {
+                                    $reuse_flag_when_eft_used = 're_use_eft';
+                                }
+
+                                ?>
+                                <?php
+
+                                if ($mfr_submited_status) { ?>
+
+                                    <div data-voucher_id='<?= $voucher_id; ?>'
+                                        class='btn btn_reverse  <?= $cancel_eft_class; ?> <?= !$role_has_journal_update_permission ? "disabled" : ''; ?> <?= $voucher_is_reversed || $voucher_is_cleared ? "hidden" : ""; ?> <?= $voucher_is_cleared ? "hidden" : ""; ?>'>
+                                        <i class='fa fa-close' style='cursor:pointer; font-size:20px;color:red'></i>
+                                        <?= get_phrase('cancel'); ?>
+                                    </div>
+                                <?php } ?>
+
+                                <!-- Re-use -->
+                                <!-- Show reuse if previous month and hide it in current months -->
+
+                                <?php
+                                if ($reuse_flag_when_eft_used != "") { ?>
+
+                                    <div data-voucher_id='<?= $voucher_id; ?>'
+                                        class='btn btn_reverse  eft <?= $reuse_flag_when_eft_used; ?> <?= !$role_has_journal_update_permission || $result['mfr_submited_status'] == 1 ? "disabled" : ''; ?> <?= $voucher_is_reversed || $voucher_is_cleared ? "hidden" : ""; ?> <?= $voucher_is_cleared ? "hidden" : ""; ?>'>
+                                        <i class='fa fa-undo' style='cursor:pointer; font-size:20px;color:white'></i>
+
+                                        <?= get_phrase('use_eft', $reuse_flag_when_eft_used); ?>
+
+                                    </div>
+
+                                <?php } ?>
+
+
+                            <?php } else {
+                                $cancel_cheque_class = $cheque_number != 0 ? 'cancel_cheque' : '';
+
+                                if ($mfr_submited_status) { ?>
+
+                                    <div data-voucher_id='<?= $voucher_id; ?>'
+                                        class='btn btn_reverse <?= $cancel_cheque_class; ?> <?= !$role_has_journal_update_permission || $result['mfr_submited_status'] == 1 ? "disabled" : ''; ?> <?= $voucher_is_reversed || $voucher_is_cleared ? "hidden" : ""; ?> <?= $voucher_is_cleared && $result['mfr_submited_status'] == 0 && !$role_has_journal_update_permission ? "disabled" : ""; ?>'>
+                                        <i class='fa fa-close' style='cursor:pointer; font-size:18px;color:red'></i>
+                                        <?= get_phrase('cancel_transaction', 'Cancel'); ?>
+                                    </div>
+
+                                <?php }
+
+                                //Only display re-use button
+                                if ($check_if_financial_report_is_submitted == 1) { ?>
+
+                                    <div data-voucher_id='<?= $voucher_id; ?>'
+                                        class='btn btn_reverse re_use_cheque <?= !$role_has_journal_update_permission || $result['mfr_submited_status'] == 1 ? "disabled" : ''; ?> <?= $voucher_is_reversed || $voucher_is_cleared ? "hidden" : ""; ?> '>
+                                        <i class='fa fa-undo' style='cursor:pointer; font-size:20px;color:yellow'></i>
+                                        <?= get_phrase('re_use_cheque'); ?>
+
+                                    </div>
+                                <?php }
+                            } ?>
                         </td>
                         <td><?= date('jS M Y', strtotime($date)); ?></td>
                         <td><input type='checkbox' name='selected_voucher[]' class='select_voucher'
