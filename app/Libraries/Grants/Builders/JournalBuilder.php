@@ -567,6 +567,7 @@ trait JournalBuilder
     }
     public function journalSpread($spread, $transaction_effect = 'income')
     {
+        // log_message('error', json_encode($spread))
         // $journalLibrary = new JournalLibrary();
         $financial_accounts = $this->getMonthAccounts();
 
@@ -645,7 +646,6 @@ trait JournalBuilder
             $transacted_amount = 0;
             foreach ($spread as $spread_transaction) {
                 if (in_array($account_id, $spread_transaction) && ($transaction_effect == 'expense' || $transaction_effect == 'settlements' || $transaction_effect == 'payables')) {
-                    log_message('error', json_encode($transaction_effect));
                     $transacted_amount += $spread_transaction['transacted_amount'];
                 }
             }

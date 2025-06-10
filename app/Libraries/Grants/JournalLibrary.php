@@ -115,12 +115,18 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
         foreach ($all_voucher_details as $voucher_details) {
             extract($voucher_details);
+
             if ($current_voucher_id == $voucher_id) {
-                if ($voucher_type_effect_code == 'income' || VoucherTypeEffectEnum::RECEIVABLES->getCode() || VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode()) {
+                if (
+                    $voucher_type_effect_code == 'income' || 
+                    $voucher_type_effect_code == VoucherTypeEffectEnum::RECEIVABLES->getCode() || 
+                    $voucher_type_effect_code == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode()
+                ) {
                     $spread[$count]['account_id'] = $fk_income_account_id;
+                    log_message('error', json_encode(compact('voucher_id','voucher_type_effect_code','fk_income_account_id')));
                 } elseif ($voucher_type_effect_code == 'bank_contra' || $voucher_type_effect_code == 'cash_contra') {
                     $spread[$count]['account_id'] = $fk_contra_account_id;
-                } else {
+                } elseif($voucher_type_effect_code == 'expense' || $voucher_type_effect_code == 'settlements' || $voucher_type_effect_code == 'payables') {
                     $spread[$count]['account_id'] = $fk_expense_account_id;
                 }
 
