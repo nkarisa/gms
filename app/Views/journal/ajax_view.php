@@ -280,7 +280,7 @@ $sum_petty_cash_expense = $cash_accounts;
                             $prepayments_expense,
                             $running_prepayments_balance
                         );
-
+                        
                         $journal->computeDepreciationRunningBalances(
                             $voucher,
                             $voucher_amount,

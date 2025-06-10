@@ -336,8 +336,8 @@ trait JournalBuilder
         $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
 
         if ($voucher_type_transaction_effect == 'payables' || $voucher_type_transaction_effect == 'disbursements') {
-            $payables_income = $voucher_type_transaction_effect == 'payables' ? $voucher_amount : 0;
-            $payables_expense = $voucher_type_transaction_effect == 'disbursements' ? $voucher_amount : 0;
+            $payables_income = $voucher_type_transaction_effect == 'disbursements' ? $voucher_amount : 0;
+            $payables_expense = $voucher_type_transaction_effect == 'payables' ? $voucher_amount : 0;
 
             $sum_payables_income += $payables_income;
             $sum_payables_expense += $payables_expense;
@@ -366,9 +366,9 @@ trait JournalBuilder
     {
         $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
 
-        if ($voucher_type_transaction_effect == 'prepayments' || $voucher_type_transaction_effect == 'setlements') {
+        if ($voucher_type_transaction_effect == 'prepayments' || $voucher_type_transaction_effect == 'settlements') {
             $prepayments_income = $voucher_type_transaction_effect == 'prepayments' ? $voucher_amount : 0;
-            $prepayments_expense = $voucher_type_transaction_effect == 'setlements' ? $voucher_amount : 0;
+            $prepayments_expense = $voucher_type_transaction_effect == 'settlements' ? $voucher_amount : 0;
 
             $sum_prepayments_income += $prepayments_income;
             $sum_prepayments_expense += $prepayments_expense;
