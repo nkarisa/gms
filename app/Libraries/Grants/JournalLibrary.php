@@ -123,7 +123,6 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
                     $voucher_type_effect_code == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode()
                 ) {
                     $spread[$count]['account_id'] = $fk_income_account_id;
-                    log_message('error', json_encode(compact('voucher_id','voucher_type_effect_code','fk_income_account_id')));
                 } elseif ($voucher_type_effect_code == 'bank_contra' || $voucher_type_effect_code == 'cash_contra') {
                     $spread[$count]['account_id'] = $fk_contra_account_id;
                 } elseif($voucher_type_effect_code == 'expense' || $voucher_type_effect_code == 'settlements' || $voucher_type_effect_code == 'payables') {
@@ -519,6 +518,8 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode() => $this->monthOfficeUsedPayrollLiabilityAccounts($office_id, $transacting_month),
         ];
 
+        // log_message('error', json_encode($accounts));
+
         return $accounts;
     }
 
@@ -696,6 +697,10 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             'voucher_detail.fk_income_account_id > ' => 0,
             'fk_office_id'                           => $office_id,
         ]);
+        $builder->groupStart();
+            $builder->where(['voucher_detail.fk_expense_account_id' => 0]);
+            $builder->orWhere(['voucher_detail.fk_expense_account_id' => NULL]);
+        $builder->groupEnd();
         $builder->join('voucher', 'voucher.voucher_id=voucher_detail.fk_voucher_id');
         $month_used_income_accounts_obj = $builder->get();
 
