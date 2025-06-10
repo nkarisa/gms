@@ -428,7 +428,7 @@ trait JournalBuilder
             $office_bank_id = $voucher['receiving_office_bank_id'];
         }
 
-        if ($office_bank_id) {
+        if ($bank_id == $office_bank_id) {
             $bank_inc = $bank_income[$office_bank_id];
             $bank_exp = $bank_expense[$office_bank_id];
             $bank_bal = $running_bank_balance[$office_bank_id];
@@ -452,7 +452,7 @@ trait JournalBuilder
             $office_cash_id = $voucher['receiving_office_cash_id'];
         }
 
-        if ($office_cash_id) {
+        if ($cash_id == $office_cash_id) {
             $cash_inc = $cash_income[$office_cash_id];
             $cash_exp = $cash_expense[$office_cash_id];
             $cash_bal = $running_petty_cash_balance[$office_cash_id];
