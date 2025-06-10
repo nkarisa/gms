@@ -304,7 +304,7 @@ trait JournalBuilder
             $sum_bank_income[$office_bank_id] += $bank_income[$office_bank_id];
             $sum_bank_expense[$office_bank_id] += $bank_expense[$office_bank_id];
 
-            $running_bank_balance[$office_bank_id] = $running_bank_balance[$office_bank_id] + ($sum_bank_income[$office_bank_id] - $sum_bank_expense[$office_bank_id]);
+            $running_bank_balance[$office_bank_id] += ($sum_bank_income[$office_bank_id] - $sum_bank_expense[$office_bank_id]);
         }
     }
 
@@ -329,7 +329,7 @@ trait JournalBuilder
             $sum_petty_cash_income[$office_cash_id] += $cash_income[$office_cash_id];
             $sum_petty_cash_expense[$office_cash_id] += $cash_expense[$office_cash_id];
             
-            $running_petty_cash_balance[$office_cash_id] =  $running_petty_cash_balance[$office_cash_id] + ($sum_petty_cash_income[$office_cash_id] - $sum_petty_cash_expense[$office_cash_id]);
+            $running_petty_cash_balance[$office_cash_id] += ($sum_petty_cash_income[$office_cash_id] - $sum_petty_cash_expense[$office_cash_id]);
         }
 
     }
@@ -345,7 +345,7 @@ trait JournalBuilder
             $sum_payables_income += $payables_income;
             $sum_payables_expense += $payables_expense;
 
-            $running_payables_balance = $this->getAccrualOpeningBalances()['payables'] + ($sum_payables_income - $sum_payables_expense);
+            $running_payables_balance += ($sum_payables_income - $sum_payables_expense);
         }
     }
 
@@ -360,7 +360,7 @@ trait JournalBuilder
             $sum_receivables_income += $receivables_income;
             $sum_receivables_expense += $receivables_expense;
 
-            $running_receivables_balance = $this->getAccrualOpeningBalances()['receivables'] + ($sum_receivables_income - $sum_receivables_expense);
+            $running_receivables_balance += ($sum_receivables_income - $sum_receivables_expense);
         }
 
     }
@@ -376,7 +376,7 @@ trait JournalBuilder
             $sum_prepayments_income += $prepayments_income;
             $sum_prepayments_expense += $prepayments_expense;
 
-            $running_prepayments_balance = $this->getAccrualOpeningBalances()['prepayments'] + ($sum_prepayments_income - $sum_prepayments_expense);
+            $running_prepayments_balance += ($sum_prepayments_income - $sum_prepayments_expense);
         }
 
     }
@@ -392,7 +392,7 @@ trait JournalBuilder
             $sum_depreciation_income += $depreciation_income;
             $sum_depreciation_expense += $depreciation_expense;
 
-            $running_depreciation_balance = $this->getAccrualOpeningBalances()['depreciation'] + ($sum_depreciation_income - $sum_depreciation_expense);
+            $running_depreciation_balance += ($sum_depreciation_income - $sum_depreciation_expense);
         }
     }
 
@@ -407,7 +407,7 @@ trait JournalBuilder
             $sum_payroll_liability_income += $payroll_liability_income;
             $sum_payroll_liability_expense += $payroll_liability_expense;
 
-            $running_payroll_liability_balance = $this->getAccrualOpeningBalances()['payroll_liability'] + ($sum_payroll_liability_income - $sum_payroll_liability_expense);
+            $running_payroll_liability_balance += ($sum_payroll_liability_income - $sum_payroll_liability_expense);
         }
 
     }

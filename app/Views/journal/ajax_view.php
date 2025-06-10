@@ -101,7 +101,7 @@ $running_depreciation_balance = $journal->getAccrualOpeningBalances()['depreciat
 $sum_depreciation_income = 0;
 $sum_depreciation_expense = 0;
 
-$running_payroll_liability__balance = $journal->getAccrualOpeningBalances()['payroll_liability'];
+$running_payroll_liability_balance = $journal->getAccrualOpeningBalances()['payroll_liability'];
 $sum_payroll_liability_income = 0;
 $sum_payroll_liability_expense = 0;
 
