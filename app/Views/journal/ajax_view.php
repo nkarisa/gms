@@ -344,85 +344,61 @@ $sum_petty_cash_expense = $cash_accounts;
                         <?php 
                         }
 
-                        if ($voucher_type_transaction_effect == 'receivables' || $voucher_type_transaction_effect == 'payments') {
-                            [
-                                'receivables_inc' => $receivables_inc,
-                                'receivables_exp' => $receivables_exp,
-                                'receivables_bal' => $receivables_bal
-
-                            ] = computeCurrentJournalRowReceivablesBalance(
+                            ['receivables_inc' => $receivables_inc, 'receivables_exp' => $receivables_exp,'receivables_bal' => $receivables_bal] = computeCurrentJournalRowReceivablesBalance(
                                 $voucher,
                                 $receivables_income,
                                 $receivables_expense,
                                 $running_receivables_balance
                             );
-                            ?>
-
-                            <td class='align-right'><?= number_format($receivables_income, 2); ?></td>
-                            <td class='align-right'><?= number_format($receivables_expense, 2); ?></td>
-                            <td class='align-right'><?= number_format($ledger_opening_balance, 2); ?></td>
-
-                        <?php } elseif ($voucher_type_transaction_effect == 'payables' || $voucher_type_transaction_effect == 'disbursement') {
-                            [
-                                'payables_inc' => $payables_inc,
-                                'payables_exp' => $payables_exp,
-                                'payables_bal' => $payables_bal
-                            ] = computeCurrentJournalRowPayablesBalance(
+                            
+                            ['payables_inc' => $payables_inc, 'payables_exp' => $payables_exp, 'payables_bal' => $payables_bal] = computeCurrentJournalRowPayablesBalance(
                                 $voucher,
                                 $payables_income,
                                 $payables_expense,
                                 $running_payables_balance
                             );
-                            ?>
-                            <td class='align-right'><?= number_format($payables_inc, 2); ?></td>
-                            <td class='align-right'><?= number_format($payables_exp, 2); ?></td>
-                            <td class='align-right'><?= number_format($payables_bal, 2); ?></td>
-                        <?php } elseif ($voucher_type_transaction_effect == 'prepayments' || $voucher_type_transaction_effect == 'settlements') {
-                            [
-                                'prepayments_inc' => $prepayments_inc,
-                                'prepayments_exp' => $prepayments_exp,
-                                'prepayments_bal' => $prepayments_bal
-                            ] = computeCurrentJournalRowPrepaymentsBalance(
+                          
+                            ['prepayments_inc' => $prepayments_inc, 'prepayments_exp' => $prepayments_exp, 'prepayments_bal' => $prepayments_bal] = computeCurrentJournalRowPrepaymentsBalance(
                                 $voucher,
                                 $prepayments_income,
                                 $prepayments_expense,
                                 $running_prepayments_balance
                             );
-                            ?>
-                            <td class='align-right'><?= number_format($prepayments_inc, 2); ?></td>
-                            <td class='align-right'><?= number_format($prepayments_exp, 2); ?></td>
-                            <td class='align-right'><?= number_format($prepayments_bal, 2); ?></td>
-                        <?php } elseif ($voucher_type_transaction_effect == 'depreciation') { 
 
-                               [
-                                'depreciation_inc' => $depreciation_inc,
-                                'depreciation_exp' => $depreciation_exp,
-                                'depreciation_bal' => $depreciation_bal
-                               ] = computeCurrentJournalRowDepreciationBalance(
+                            ['depreciation_inc' => $depreciation_inc, 'depreciation_exp' => $depreciation_exp, 'depreciation_bal' => $depreciation_bal] = computeCurrentJournalRowDepreciationBalance(
                                     $voucher, 
                                     $depreciation_income, 
                                     $depreciation_expense, 
                                     $running_depreciation_balance
-                                    )
-                        ?>
-                            <td class='align-right'><?= number_format($depreciation_inc, 2); ?></td>
-                            <td class='align-right'><?= number_format($depreciation_exp, 2); ?></td>
-                            <td class='align-right'><?= number_format($depreciation_bal, 2); ?></td>
-                        <?php } elseif ($voucher_type_transaction_effect == 'payroll_liability') { 
-                            [
-                                'payroll_liability_inc' => $payroll_liability_inc,
-                                'payroll_liability_exp' => $payroll_liability_exp,
-                                'payroll_liability_bal' => $payroll_liability_bal
-                            ]= computeCurrentJournalRowPayrollLiabilityBalance(
+                            );
+                        
+                            ['payroll_liability_inc' => $payroll_liability_inc, 'payroll_liability_exp' => $payroll_liability_exp, 'payroll_liability_bal' => $payroll_liability_bal]= computeCurrentJournalRowPayrollLiabilityBalance(
                                 $voucher, 
                                 $payroll_liability_income, 
                                 $payroll_liability_expense, 
-                                $running_payroll_liability_balance);
+                                $running_payroll_liability_balance
+                            );
                         ?>
-                            <td class='align-right'><?= number_format($payroll_liability_inc, 2); ?></td>
-                            <td class='align-right'><?= number_format($payroll_liability_exp, 2); ?></td>
-                            <td class='align-right'><?= number_format($payroll_liability_bal, 2); ?></td>
-                        <?php } ?>
+                        
+                        <td class='align-right'><?= number_format($receivables_inc, 2); ?></td>
+                        <td class='align-right'><?= number_format($receivables_exp, 2); ?></td>
+                        <td class='align-right'><?= number_format($receivables_bal, 2); ?></td>
+
+                        <td class='align-right'><?= number_format($payables_inc, 2); ?></td>
+                        <td class='align-right'><?= number_format($payables_exp, 2); ?></td>
+                        <td class='align-right'><?= number_format($payables_bal, 2); ?></td>
+
+                        <td class='align-right'><?= number_format($prepayments_inc, 2); ?></td>
+                        <td class='align-right'><?= number_format($prepayments_exp, 2); ?></td>
+                        <td class='align-right'><?= number_format($prepayments_bal, 2); ?></td>
+
+                        <td class='align-right'><?= number_format($depreciation_inc, 2); ?></td>
+                        <td class='align-right'><?= number_format($depreciation_exp, 2); ?></td>
+                        <td class='align-right'><?= number_format($depreciation_bal, 2); ?></td>
+
+                        <td class='align-right'><?= number_format($payroll_liability_inc, 2); ?></td>
+                        <td class='align-right'><?= number_format($payroll_liability_exp, 2); ?></td>
+                        <td class='align-right'><?= number_format($payroll_liability_bal, 2); ?></td>
 
                         <?php
                         echo $journalLibrary->journalSpread($office_id, $spread, $transacting_month, $voucher_type_cash_account, $voucher_type_transaction_effect);

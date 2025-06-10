@@ -610,7 +610,7 @@ if(!function_exists('computeCurrentJournalRowReceivablesBalance')){
             $receivables_exp = $receivables_expense;
             $receivables_bal = $running_receivables_balance;
         }
-        return compact('receivables_inc', 'receivables_exp', 'receivables_exp');
+        return compact('receivables_inc', 'receivables_exp', 'receivables_bal');
     }
 }
 
