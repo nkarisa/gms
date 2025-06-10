@@ -502,7 +502,7 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
     public function financialAccounts($office_id, $transacting_month)
     {
-        return [
+        $accounts = [
             'income'  => $this->monthOfficeUsedIncomeAccounts($office_id, $transacting_month),
             'expense' => $this->monthOfficeUsedExpenseAccounts($office_id, $transacting_month),
             VoucherTypeEffectEnum::RECEIVABLES->getCode() => $this->monthOfficeUsedReceivableAccounts($office_id, $transacting_month),
@@ -512,6 +512,8 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             VoucherTypeEffectEnum::DEPRECIATION->getCode() => $this->monthOfficeUsedDepreciationAccounts($office_id, $transacting_month),
             VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode() => $this->monthOfficeUsedPayrollLiabilityAccounts($office_id, $transacting_month),
         ];
+
+        return $accounts;
     }
 
     private function monthOfficeUsedReceivableAccounts(int $office_id, string $transacting_month){
@@ -729,7 +731,27 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
     }
 
     public function journalSpread($office_id, $spread, $transacting_month, $account_type = 'bank', $transaction_effect = 'income'){
-        
+        $financial_accounts = $this->financialAccounts($office_id, $transacting_month);
+        $accounts = journal()->getMonthAccounts();
+        // log_message('error', json_encode($accounts));
+
+        $accounts = match($transaction_effect){
+            'income',
+            VoucherTypeEffectEnum::RECEIVABLES->getCode(),
+            VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() => $financial_accounts['income'],
+            'expense',
+            VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode(),
+            VoucherTypeEffectEnum::PAYABLES->getCode(),
+            VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode(),
+            VoucherTypeEffectEnum::PREPAYMENTS->getCode(),
+            VoucherTypeEffectEnum::DEPRECIATION->getCode(),
+            VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode() => $financial_accounts['expense'],
+            'bank_contra' => $financial_accounts['bank_contra']??[],
+            'cash_contra' => $financial_accounts['cash_contra']??[],
+            'bank_to_bank_contra' => $financial_accounts['bank_to_bank_contra']??[],
+            'cash_to_cash_contra' => $financial_accounts['cash_to_cash_contra']??[]
+        };
+
     }
 
     // public function journalSpread($office_id, $spread, $transacting_month, $account_type = 'bank', $transaction_effect = 'income')

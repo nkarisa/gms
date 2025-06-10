@@ -46,8 +46,12 @@
 </style>
 
 <?php
+// echo json_encode($result);
 helper('journal');
 $journalLibrary = new \App\Libraries\Grants\JournalLibrary();
+
+$journalData = new \App\Libraries\Grants\Builders\Journal($result);
+$journal = new \App\Libraries\Grants\Builders\JournalBuilder($journalData);
 
 // Unpacking/destructure controller view results
 

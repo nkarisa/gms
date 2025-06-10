@@ -3,7 +3,7 @@
 if (!function_exists('journal')) {
     function journal()
     {
-        $journalData = json_decode(file_get_contents(APPPATH . 'Data/journalData.json'), true);
+        // $journalData = json_decode(file_get_contents(APPPATH . 'Data/journalData.json'), true);
         return new \App\Libraries\Grants\Builders\Journal($journalData);
     }
 }
@@ -179,10 +179,13 @@ if (!function_exists('journalActionRelatedVouchers')) {
 }
 
 if (!function_exists('journalActionApprovalAndReturn')) {
-    function journalActionApprovalAndReturn($voucher_id, $status_id, $item_initial_item_status_id, $item_max_approval_status_ids, $role_has_journal_update_permission, $item_status)
+    function journalActionApprovalAndReturn($voucher, $voucher_id, $status_id, $item_initial_item_status_id, $item_max_approval_status_ids, $role_has_journal_update_permission, $item_status)
     {
+        $voucher_is_cleared = $voucher['voucher_is_cleared'];
+        $voucher_is_reversed = $voucher['voucher_is_reversed'];
         $return_string = '';
         $disable_flag = !$role_has_journal_update_permission ? true : false;
+
         if ($disable_flag) {
             $return_string .= view(
                 'journal/components/journalActionReturnVoucher',
@@ -251,7 +254,7 @@ if (!function_exists('journalAction')) {
         }
 
         if ($voucher_is_reversed != 1 && $check_if_financial_report_is_submitted != 1) {
-            $return_string .= journalActionApprovalAndReturn($voucher_id, $status_id, $item_initial_item_status_id, $item_max_approval_status_ids, $role_has_journal_update_permission, $item_status);
+            $return_string .= journalActionApprovalAndReturn($voucher, $voucher_id, $status_id, $item_initial_item_status_id, $item_max_approval_status_ids, $role_has_journal_update_permission, $item_status);
         }
 
         if ($voucher_type_is_cheque_referenced && $check_if_financial_report_is_submitted) {
@@ -335,67 +338,6 @@ if (!function_exists('voucherNumberButton')) {
     }
 }
 
-// if (!function_exists('computeBankToBankContraRunningBalances')) {
-//     function computeBankToBankContraRunningBalances($voucher, $voucher_amount, $sum_bank_income, $sum_bank_expense, &$bank_income, &$bank_expense, &$running_bank_balance, )
-//     {
-//         $receiving_office_bank_id = $voucher['receiving_office_bank_id'];
-//         $voucher_type_cash_account = $voucher['voucher_type_cash_account'];
-//         $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
-
-//         if ($receiving_office_bank_id && is_int($receiving_office_bank_id) && isset($sum_bank_income[$receiving_office_bank_id])) {
-
-//             $bank_income[$receiving_office_bank_id] = ($voucher_type_cash_account == 'bank' && $voucher_type_transaction_effect == 'bank_to_bank_contra') ? $voucher_amount : 0;
-//             $bank_expense[$receiving_office_bank_id] = 0;
-
-//             $sum_bank_income[$receiving_office_bank_id] += $bank_income[$receiving_office_bank_id];
-//             $sum_bank_expense[$receiving_office_bank_id] += $bank_expense[$receiving_office_bank_id];
-
-//             $running_bank_balance[$receiving_office_bank_id] = journal()->getMonthBankOpeningBalance()[$receiving_office_bank_id]['amount'] + ($sum_bank_income[$receiving_office_bank_id] - $sum_bank_expense[$receiving_office_bank_id]);
-//         }
-//     }
-// }
-
-// if (!function_exists('computeBankAccountRunningBalances')) {
-//     function computeBankAccountRunningBalances($voucher, $voucher_amount, $sum_bank_income, $sum_bank_expense, &$bank_income, &$bank_expense, &$running_bank_balance)
-//     {
-//         $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
-//         $voucher_type_cash_account = $voucher['voucher_type_cash_account'];
-//         $office_bank_id = $voucher['office_bank_id'];
-
-//         if ($office_bank_id && isset($sum_bank_income[$office_bank_id])) {
-//             $bank_income[$office_bank_id] = (($voucher_type_cash_account == 'bank' && $voucher_type_transaction_effect == 'income') || ($voucher_type_cash_account == 'cash' && $voucher_type_transaction_effect == 'cash_contra')) ? $voucher_amount : 0;
-//             $bank_expense[$office_bank_id] = (($voucher_type_cash_account == 'bank' && $voucher_type_transaction_effect == 'expense') || ($voucher_type_cash_account == 'bank' && ($voucher_type_transaction_effect == 'bank_contra' || $voucher_type_transaction_effect == 'bank_to_bank_contra'))) ? $voucher_amount : 0;
-
-//             $sum_bank_income[$office_bank_id] += $bank_income[$office_bank_id];
-//             $sum_bank_expense[$office_bank_id] += $bank_expense[$office_bank_id];
-
-//             $running_bank_balance[$office_bank_id] = journal()->getMonthBankOpeningBalance()[$office_bank_id]['amount'] + ($sum_bank_income[$office_bank_id] - $sum_bank_expense[$office_bank_id]);
-//         }
-//     }
-// }
-
-
-// if (!function_exists('computeCashToCashContraRunningBalances')) {
-//     function computeCashToCashContraRunningBalances($voucher, $voucher_amount, $sum_petty_cash_income, $sum_petty_cash_expense, &$cash_income, &$cash_expense, &$running_petty_cash_balance)
-//     {
-//         $receiving_office_cash_id = $voucher['receiving_office_cash_id'];
-//         $voucher_type_cash_account = $voucher['voucher_type_cash_account'];
-//         $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
-
-//         if ($receiving_office_cash_id && is_int($receiving_office_cash_id) && isset($sum_petty_cash_income[$receiving_office_cash_id])) {
-
-//             $cash_income[$receiving_office_cash_id] = ($voucher_type_cash_account == 'cash' && $voucher_type_transaction_effect == 'cash_to_cash_contra') ? $voucher_amount : 0;
-//             $cash_expense[$receiving_office_cash_id] = 0;
-
-//             $sum_petty_cash_income[$receiving_office_cash_id] += $cash_income[$receiving_office_cash_id];
-//             $sum_petty_cash_expense[$receiving_office_cash_id] += $cash_expense[$receiving_office_cash_id];
-
-//             $running_petty_cash_balance[$receiving_office_cash_id] = journal()->getMonthCashOpeningBalance()[$receiving_office_cash_id]['amount'] + ($sum_petty_cash_income[$receiving_office_cash_id] - $sum_petty_cash_expense[$receiving_office_cash_id]);
-//         }
-//     }
-// }
-
-
 if (!function_exists('computeBankRunningBalances')) {
     function computeBankRunningBalances($voucher, $voucher_amount, $sum_bank_income, $sum_bank_expense, &$bank_income, &$bank_expense, &$running_bank_balance)
     {
@@ -412,7 +354,7 @@ if (!function_exists('computeBankRunningBalances')) {
 
         if ($office_bank_id) {
             $bank_income[$office_bank_id] = (($voucher_type_cash_account == 'bank' && $voucher_type_transaction_effect == 'income') || $voucher_type_transaction_effect == 'payments' || ($voucher_type_cash_account == 'cash' && $voucher_type_transaction_effect == 'cash_contra')) ? $voucher_amount : 0;
-            $bank_expense[$office_bank_id] = (($voucher_type_cash_account == 'bank' && $voucher_type_transaction_effect == 'expense') || $voucher_type_transaction_effect == 'disbursements' || ($voucher_type_cash_account == 'bank' && ($voucher_type_transaction_effect == 'bank_contra' || $voucher_type_transaction_effect == 'bank_to_bank_contra'))) ? $voucher_amount : 0;
+            $bank_expense[$office_bank_id] = (($voucher_type_cash_account == 'bank' && $voucher_type_transaction_effect == 'expense') || $voucher_type_transaction_effect == 'prepayments' || $voucher_type_transaction_effect == 'disbursements' || ($voucher_type_cash_account == 'bank' && ($voucher_type_transaction_effect == 'bank_contra' || $voucher_type_transaction_effect == 'bank_to_bank_contra'))) ? $voucher_amount : 0;
 
             $sum_bank_income[$office_bank_id] += $bank_income[$office_bank_id];
             $sum_bank_expense[$office_bank_id] += $bank_expense[$office_bank_id];

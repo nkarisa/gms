@@ -39,8 +39,9 @@ class Journal extends WebController
             $result['role_has_journal_update_permission'] = $userLibrary->checkRoleHasPermissions(ucfirst($this->controller), 'update');
             $result['check_if_financial_report_is_submitted'] = $financialReportLibrary->checkIfFinancialReportIsSubmitted([$office_id], $transacting_month);
             // Users should be able to reverse voucher even if the MFRs are submitted. This is important to allow handling stale cheques and invalid transactions
-            $result['mfr_submited_status'] = 0; // A stop gap waiting a discussion with Development Team on this matter so that ticket INC0218239 can be resolved. 
+            $result['mfr_submited_status'] = $financialReportLibrary->checkIfFinancialReportIsSubmitted([$office_id], $transacting_month);; // A stop gap waiting a discussion with Development Team on this matter so that ticket INC0218239 can be resolved. 
             $result['month_used_accrual_ledgers'] = ['receivables' => 100,'payables' => 200,'prepayments' => 300,'depreciation' => 400,'payroll_liability' => 500];
+          
           }
 
         return $result;
@@ -50,7 +51,7 @@ class Journal extends WebController
     {
         $chequeBookLibrary = new \App\Libraries\Grants\ChequeBookLibrary();
         $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
-        $journalLibrary = new \App\Libraries\Grants\JournalLibrary();
+        $journalLibrary = new JournalLibrary();
         $financialReportLibrary = new \App\Libraries\Grants\FinancialReportLibrary();
 
         $message = get_phrase("transaction_failed");
