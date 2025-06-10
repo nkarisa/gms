@@ -429,6 +429,28 @@ $sum_petty_cash_expense = $cash_accounts;
                         </td>
                     <?php } ?>
 
+
+                    <td class='align-right'><?= number_format($sum_receivables_income, 2); ?></td>
+                    <td class='align-right'><?= number_format($sum_receivables_expense, 2); ?></td>
+                    <td class='align-right'><?= number_format($sum_receivables_expense == 0 ? $journal->getAccrualOpeningBalances()['receivables'] : $running_receivables_balance, 2); ?></td>
+
+                    <td class='align-right'><?= number_format($sum_payables_income, 2); ?></td>
+                    <td class='align-right'><?= number_format($sum_payables_expense, 2); ?></td>
+                    <td class='align-right'><?= number_format($sum_payables_expense == 0 ? $journal->getAccrualOpeningBalances()['payables'] : $running_payables_balance, 2); ?></td>
+
+                    <td class='align-right'><?= number_format($sum_prepayments_income, 2); ?></td>
+                    <td class='align-right'><?= number_format($sum_prepayments_expense, 2); ?></td>
+                    <td class='align-right'><?= number_format($sum_prepayments_expense == 0 ? $journal->getAccrualOpeningBalances()['prepayments'] : $running_prepayments_balance, 2); ?></td>
+
+                    <td class='align-right'><?= number_format($sum_depreciation_income, 2); ?></td>
+                    <td class='align-right'><?= number_format($sum_depreciation_expense, 2); ?></td>
+                    <td class='align-right'><?= number_format($sum_depreciation_expense == 0 ? $journal->getAccrualOpeningBalances()['depreciation'] : $running_depreciation_balance, 2); ?></td>
+
+
+                    <td class='align-right'><?= number_format($sum_payroll_liability_income, 2); ?></td>
+                    <td class='align-right'><?= number_format($sum_payroll_liability_expense, 2); ?></td>
+                    <td class='align-right'><?= number_format($sum_payroll_liability_expense == 0 ? $journal->getAccrualOpeningBalances()['payroll_liability'] : $running_payroll_liability_balance, 2); ?></td>
+
                     <!-- Spread totals -->
                     <?php foreach ($accounts['income'] as $income_account_id => $income_account_code) { ?>
                         <td class='total_income total_income_<?= $income_account_id; ?>'>0</td>
