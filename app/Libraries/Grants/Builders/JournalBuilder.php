@@ -565,7 +565,7 @@ trait JournalBuilder
         }
         return $spread_cells;
     }
-    public function journalSpread($office_id, $spread, $account_type = 'bank', $transaction_effect = 'income')
+    public function journalSpread($spread, $transaction_effect = 'income')
     {
         // $journalLibrary = new JournalLibrary();
         $financial_accounts = $this->getMonthAccounts();
@@ -641,11 +641,11 @@ trait JournalBuilder
     {
         // Fill up empty cells in spread when the account type is an expense type
         $spread_cells = $this->emptyJournalCells('income');
-
         foreach ($accounts as $account_id => $account_code) {
             $transacted_amount = 0;
             foreach ($spread as $spread_transaction) {
                 if (in_array($account_id, $spread_transaction) && ($transaction_effect == 'expense' || $transaction_effect == 'settlements' || $transaction_effect == 'payables')) {
+                    log_message('error', json_encode($transaction_effect));
                     $transacted_amount += $spread_transaction['transacted_amount'];
                 }
             }

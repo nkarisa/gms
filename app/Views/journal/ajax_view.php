@@ -403,7 +403,7 @@ $sum_petty_cash_expense = $cash_accounts;
                         <td class='align-right'><?= number_format($payroll_liability_bal, 2); ?></td>
 
                         <?php
-                        echo $journal->journalSpread($office_id, $spread, $voucher_type_cash_account, $voucher_type_transaction_effect);
+                        echo $journal->journalSpread($spread, $voucher_type_transaction_effect);
                         ?>
 
                     </tr>
