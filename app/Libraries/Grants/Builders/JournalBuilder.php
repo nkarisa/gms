@@ -296,13 +296,15 @@ trait JournalBuilder
         }
 
         if ($office_bank_id) {
-            $bank_income[$office_bank_id] = (($voucher_type_cash_account == 'bank' && $voucher_type_transaction_effect == 'income') || $voucher_type_transaction_effect == 'payments' || ($voucher_type_cash_account == 'cash' && $voucher_type_transaction_effect == 'cash_contra')) ? $voucher_amount : 0;
+            $bank_income[$office_bank_id] = (($voucher_type_cash_account == 'bank' && $voucher_type_transaction_effect == 'income') ||  ($voucher_type_cash_account == 'cash' && $voucher_type_transaction_effect == 'cash_contra')) ||
+            $voucher_type_transaction_effect == 'payments' ? $voucher_amount : 0;
+
             $bank_expense[$office_bank_id] = (($voucher_type_cash_account == 'bank' && $voucher_type_transaction_effect == 'expense') || $voucher_type_transaction_effect == 'prepayments' || $voucher_type_transaction_effect == 'disbursements' || ($voucher_type_cash_account == 'bank' && ($voucher_type_transaction_effect == 'bank_contra' || $voucher_type_transaction_effect == 'bank_to_bank_contra'))) ? $voucher_amount : 0;
 
             $sum_bank_income[$office_bank_id] += $bank_income[$office_bank_id];
             $sum_bank_expense[$office_bank_id] += $bank_expense[$office_bank_id];
 
-            $running_bank_balance[$office_bank_id] = $this->getMonthBankOpeningBalance()[$office_bank_id]['amount'] + ($sum_bank_income[$office_bank_id] - $sum_bank_expense[$office_bank_id]);
+            $running_bank_balance[$office_bank_id] = $running_bank_balance[$office_bank_id] + ($sum_bank_income[$office_bank_id] - $sum_bank_expense[$office_bank_id]);
         }
     }
 
@@ -321,12 +323,13 @@ trait JournalBuilder
 
         if ($office_cash_id) {
             $cash_income[$office_cash_id] = (($voucher_type_cash_account == 'cash' && $voucher_type_transaction_effect == 'income') || ($voucher_type_cash_account == 'bank' && $voucher_type_transaction_effect == 'bank_contra')) ? $voucher_amount : 0;
+
             $cash_expense[$office_cash_id] = (($voucher_type_cash_account == 'cash' && $voucher_type_transaction_effect == 'expense') || ($voucher_type_cash_account == 'cash' && $voucher_type_transaction_effect == 'cash_contra' || $voucher_type_transaction_effect == 'cash_to_cash_contra')) ? $voucher_amount : 0;
 
             $sum_petty_cash_income[$office_cash_id] += $cash_income[$office_cash_id];
             $sum_petty_cash_expense[$office_cash_id] += $cash_expense[$office_cash_id];
-
-            $running_petty_cash_balance[$office_cash_id] = $this->getMonthCashOpeningBalance()[$office_cash_id]['amount'] + ($sum_petty_cash_income[$office_cash_id] - $sum_petty_cash_expense[$office_cash_id]);
+            
+            $running_petty_cash_balance[$office_cash_id] =  $running_petty_cash_balance[$office_cash_id] + ($sum_petty_cash_income[$office_cash_id] - $sum_petty_cash_expense[$office_cash_id]);
         }
 
     }

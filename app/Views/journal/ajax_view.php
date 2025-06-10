@@ -72,7 +72,6 @@ $journal = new \App\Libraries\Grants\Builders\Journal($result);
 
 $vouchers = $result['vouchers']['vouchers'];
 
-
 // Create array of office_cash and office_bank ids keys with zero values
 $bank_accounts = array_map(function ($elem) {
     return 0;
@@ -113,6 +112,20 @@ $sum_bank_expense = $bank_accounts;
 $running_petty_cash_balance = $cash_accounts;
 $sum_petty_cash_income = $cash_accounts;
 $sum_petty_cash_expense = $cash_accounts;
+
+$running_bank_balance = [];
+$officeBanksIds = $journal->getOfficeBankAccountsIds();
+
+foreach($officeBanksIds as $officeBankId){
+    $running_bank_balance[$officeBankId] = $journal->getMonthBankOpeningBalance()[$officeBankId]['amount'];
+}
+
+$running_petty_cash_balance = [];
+$officeCashIds = $journal->getOfficeCashAccountsIds();
+foreach($officeCashIds as $officeCashId){
+    $running_petty_cash_balance[$officeCashId] = $journal->getMonthCashOpeningBalance()[$officeCashId]['amount'];
+}
+
 ?>
 
 <hr />

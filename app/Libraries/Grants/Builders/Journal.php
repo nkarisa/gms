@@ -32,6 +32,18 @@ class Journal {
     function getMonthBankOpeningBalance(): array {
         return $this->journalData['vouchers']['month_opening_balance']['bank'];
     }
+
+    function getOfficeBankAccountsIds(){
+        return array_column($this->journalData['vouchers']['office_bank_accounts'],'office_bank_id');
+    }
+
+    function getOfficeCashAccountsIds(){
+        return array_keys($this->journalData['vouchers']['month_opening_balance']['cash']);
+    }
+
+    function getMonthBankOpeningBalanceByOfficeBankId($officeBankId): array {
+        return $this->journalData['vouchers']['month_opening_balance']['bank'][$officeBankId]['amount'];
+    }
     function getMonthCashOpeningBalance(): array {
         return $this->journalData['vouchers']['month_opening_balance']['cash'];
     }
