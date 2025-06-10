@@ -3,6 +3,8 @@
 namespace App\Libraries\Grants\Builders;
 
 class Journal {
+
+    use JournalBuilder;
     public int $journalDetailColumns = 7;
     function __construct(private array $journalData){
         
@@ -14,6 +16,16 @@ class Journal {
     function getJournalOfficeName(): string {
         return $this->journalData['vouchers']['office_name'];  
     }
+
+    // This two methods below [transactingMonth and getJournalTransactionMonth] give the same result
+    function transactingMonth(){
+        return $this->journalData['transacting_month'];
+    }
+
+    function getOfficeId(){
+        return $this->journalData['master']['table_body']['office_id'];
+    }
+
     function getJournalTransactionMonth(): string {
         return $this->journalData['vouchers']['transacting_month'];
     }

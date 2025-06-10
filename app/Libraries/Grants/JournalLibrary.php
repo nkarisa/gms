@@ -720,39 +720,15 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return array_combine($ids, $code);
     }
 
-    private function emptyJournalCells($office_id, $transacting_month, $account_type = 'income')
-    {
-        $spread_cells       = '';
-        $financial_accounts = $this->financialAccounts($office_id, $transacting_month);
-        for ($i = 0; $i < count($financial_accounts[$account_type]); $i++) {
-            $spread_cells .= "<td class='align-right'>0.00</td>";
-        }
-        return $spread_cells;
-    }
-
-    public function journalSpread($office_id, $spread, $transacting_month, $account_type = 'bank', $transaction_effect = 'income'){
-        $financial_accounts = $this->financialAccounts($office_id, $transacting_month);
-        $accounts = journal()->getMonthAccounts();
-        // log_message('error', json_encode($accounts));
-
-        $accounts = match($transaction_effect){
-            'income',
-            VoucherTypeEffectEnum::RECEIVABLES->getCode(),
-            VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() => $financial_accounts['income'],
-            'expense',
-            VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode(),
-            VoucherTypeEffectEnum::PAYABLES->getCode(),
-            VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode(),
-            VoucherTypeEffectEnum::PREPAYMENTS->getCode(),
-            VoucherTypeEffectEnum::DEPRECIATION->getCode(),
-            VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode() => $financial_accounts['expense'],
-            'bank_contra' => $financial_accounts['bank_contra']??[],
-            'cash_contra' => $financial_accounts['cash_contra']??[],
-            'bank_to_bank_contra' => $financial_accounts['bank_to_bank_contra']??[],
-            'cash_to_cash_contra' => $financial_accounts['cash_to_cash_contra']??[]
-        };
-
-    }
+    // private function emptyJournalCells($office_id, $transacting_month, $account_type = 'income')
+    // {
+    //     $spread_cells       = '';
+    //     $financial_accounts = $this->financialAccounts($office_id, $transacting_month);
+    //     for ($i = 0; $i < count($financial_accounts[$account_type]); $i++) {
+    //         $spread_cells .= "<td class='align-right'>0.00</td>";
+    //     }
+    //     return $spread_cells;
+    // }
 
     // public function journalSpread($office_id, $spread, $transacting_month, $account_type = 'bank', $transaction_effect = 'income')
     // {

@@ -47,11 +47,9 @@
 
 <?php
 // echo json_encode($result);
-helper('journal');
+// helper('journal');
 $journalLibrary = new \App\Libraries\Grants\JournalLibrary();
-
-$journalData = new \App\Libraries\Grants\Builders\Journal($result);
-$journal = new \App\Libraries\Grants\Builders\JournalBuilder($journalData);
+$journal = new \App\Libraries\Grants\Builders\Journal($result);
 
 // Unpacking/destructure controller view results
 
@@ -84,7 +82,7 @@ $cash_accounts = array_map(function ($elem) {
 }, array_flip(array_keys($month_opening_balance['cash'])));
 $accrual_accounts = array_map(function ($elem) {
     return 0;
-}, journal()->getAccrualOpeningBalances());
+}, $journal->getAccrualOpeningBalances());
 
 
 $running_receivables_balance = $accrual_accounts['receivables'];
@@ -125,25 +123,25 @@ $sum_petty_cash_expense = $cash_accounts;
             <thead>
                 <tr>
                     <!-- Navigation row -->
-                    <th><?= navigation(); ?></th>
-                    <th colspan="<?= titleColspan(); ?>" style='text-align:center;'><?= title(); ?></th>
+                    <th><?=$journal->navigation(); ?></th>
+                    <th colspan="<?= $journal->titleColspan(); ?>" style='text-align:center;'><?= $journal->title(); ?></th>
                 </tr>
                 <tr>
                     <!-- Ledger columns headers row -->
-                    <th colspan='<?= journal()->journalDetailColumns; ?>'></th>
-                    <?= bankLedgerColumnHeaders(); ?>
-                    <?= cashLedgerColumnHeaders(); ?>
-                    <?= accrualLedgerColumnHeaders(); ?>
-                    <?= accountSpreadEmpty(); ?>
+                    <th colspan='<?= $journal->journalDetailColumns; ?>'></th>
+                    <?= $journal->bankLedgerColumnHeaders(); ?>
+                    <?= $journal->cashLedgerColumnHeaders(); ?>
+                    <?= $journal->accrualLedgerColumnHeaders(); ?>
+                    <?= $journal->accountSpreadEmpty(); ?>
                 </tr>
                 <tr>
                     <!-- Ledger Opening Balances row -->
                     <th colspan='7'><?= get_phrase('balance_b/f'); ?></th>
-                    <?= bankLedgerOpeningBalance(); ?>
-                    <?= cashLedgerOpeningBalance(); ?>
-                    <?= accrualLedgerOpeningBalance(); ?>
-                    <?= incomeAccountsHeaderTitle(); ?>
-                    <?= expenseAccountsHeaderTitle(); ?>
+                    <?= $journal->bankLedgerOpeningBalance(); ?>
+                    <?= $journal->cashLedgerOpeningBalance(); ?>
+                    <?= $journal->accrualLedgerOpeningBalance(); ?>
+                    <?= $journal->incomeAccountsHeaderTitle(); ?>
+                    <?= $journal->expenseAccountsHeaderTitle(); ?>
                 </tr>
                 <tr>
                     <!-- Accounts Code Title row -->
@@ -155,11 +153,11 @@ $sum_petty_cash_expense = $cash_accounts;
                     <th><?= get_phrase('journal_description', 'Description'); ?></th>
                     <th><?= get_phrase('cheque_no_or_eft_no', 'CHQ/EFT No.'); ?></th>
 
-                    <?= bankAccountsTitle(); ?>
-                    <?= cashAccountsTitle(); ?>
-                    <?= accrualAccountsTitle(); ?>
-                    <?= incomeCodesTitle(); ?>
-                    <?= expenseCodesTitle(); ?>
+                    <?= $journal->bankAccountsTitle(); ?>
+                    <?= $journal->cashAccountsTitle(); ?>
+                    <?= $journal->accrualAccountsTitle(); ?>
+                    <?= $journal->incomeCodesTitle(); ?>
+                    <?= $journal->expenseCodesTitle(); ?>
 
                 </tr>
             </thead>
@@ -197,7 +195,7 @@ $sum_petty_cash_expense = $cash_accounts;
                     <!-- Action Column -->
                     <tr>
                         <td>
-                            <?= journalAction(
+                            <?= $journal->journalAction(
                                 $voucher,
                                 $voucher_id,
                                 $mfr_submited_status,
@@ -210,22 +208,22 @@ $sum_petty_cash_expense = $cash_accounts;
                         </td>
                         <td><?= date('jS M Y', strtotime($date)); ?></td>
                         <td>
-                            <?= voucherSelection($voucher_id, $voucher_type_abbrev, $voucher_type_name, $cleared); ?>
+                            <?= $journal->voucherSelection($voucher_id, $voucher_type_abbrev, $voucher_type_name, $cleared); ?>
                         </td>
                         <td>
-                            <?= voucherNumberButton($voucher_id, $voucher_number); ?>
+                            <?= $journal->voucherNumberButton($voucher_id, $voucher_number); ?>
                         </td>
 
                         <td title='<?= (strlen($payee) > 50) ? $description : ""; ?>'>
-                            <?= payeeLabel($payee, $voucher_id, $role_has_journal_update_permission, $voucher_is_reversed, $check_if_financial_report_is_submitted); ?>
+                            <?= $journal->payeeLabel($payee, $voucher_id, $role_has_journal_update_permission, $voucher_is_reversed, $check_if_financial_report_is_submitted); ?>
                         </td>
 
                         <td title='<?= (strlen($description) > 50) ? $description : ""; ?>'>
-                            <?= voucherDescription($voucher_id, $description, $role_has_journal_update_permission, $voucher_is_reversed, $check_if_financial_report_is_submitted); ?>
+                            <?= $journal->voucherDescription($voucher_id, $description, $role_has_journal_update_permission, $voucher_is_reversed, $check_if_financial_report_is_submitted); ?>
                         </td>
 
                         <td class='align-right'>
-                            <?= formatBankReference($cheque_number, $voucher_type_abbrev) ?>
+                            <?= $journal->formatBankReference($cheque_number, $voucher_type_abbrev) ?>
                         </td>
 
                         <?php
@@ -233,7 +231,7 @@ $sum_petty_cash_expense = $cash_accounts;
                         // Compute bank and cash running balances
                         $voucher_amount = array_sum(array_column($spread, 'transacted_amount'));
 
-                        computeBankRunningBalances(
+                        $journal->computeBankRunningBalances(
                             $voucher,
                             $voucher_amount,
                             $sum_bank_income,
@@ -243,7 +241,7 @@ $sum_petty_cash_expense = $cash_accounts;
                             $running_bank_balance
                         );
 
-                        computeCashRunningBalances(
+                        $journal->computeCashRunningBalances(
                             $voucher,
                             $voucher_amount,
                             $sum_petty_cash_income,
@@ -253,7 +251,7 @@ $sum_petty_cash_expense = $cash_accounts;
                             $running_petty_cash_balance
                         );
 
-                        computePayablesRunningBalances(
+                        $journal->computePayablesRunningBalances(
                             $voucher,
                             $voucher_amount,
                             $sum_payables_income,
@@ -263,7 +261,7 @@ $sum_petty_cash_expense = $cash_accounts;
                             $running_payables_balance
                         );
 
-                        computeReceivablesRunningBalances(
+                        $journal->computeReceivablesRunningBalances(
                             $voucher,
                             $voucher_amount,
                             $sum_receivables_income,
@@ -273,7 +271,7 @@ $sum_petty_cash_expense = $cash_accounts;
                             $running_receivables_balance
                         );
 
-                        computePrepaymentsRunningBalances(
+                        $journal->computePrepaymentsRunningBalances(
                             $voucher,
                             $voucher_amount,
                             $sum_prepayments_income,
@@ -283,7 +281,7 @@ $sum_petty_cash_expense = $cash_accounts;
                             $running_prepayments_balance
                         );
 
-                        computeDepreciationRunningBalances(
+                        $journal->computeDepreciationRunningBalances(
                             $voucher,
                             $voucher_amount,
                             $sum_depreciation_income,
@@ -293,7 +291,7 @@ $sum_petty_cash_expense = $cash_accounts;
                             $running_depreciation_balance
                         );
 
-                        computePayrollLiabilityRunningBalances(
+                        $journal->computePayrollLiabilityRunningBalances(
                             $voucher,
                             $voucher_amount,
                             $sum_payroll_liability_income,
@@ -311,7 +309,7 @@ $sum_petty_cash_expense = $cash_accounts;
                                 'bank_inc' => $bank_inc,
                                 'bank_exp' => $bank_exp,
                                 'bank_bal' => $bank_bal
-                            ] = computeCurrentJournalRowBankBalance(
+                            ] = $journal->computeCurrentJournalRowBankBalance(
                                 $voucher,
                                 $bank_id,
                                 $bank_income,
@@ -333,7 +331,7 @@ $sum_petty_cash_expense = $cash_accounts;
                                 'cash_inc' => $cash_inc,
                                 'cash_exp' => $cash_exp,
                                 'cash_bal' => $cash_bal
-                            ] = computeCurrentJournalRowCashBalance(
+                            ] = $journal->computeCurrentJournalRowCashBalance(
                                 $voucher,
                                 $cash_id,
                                 $cash_income,
@@ -348,35 +346,35 @@ $sum_petty_cash_expense = $cash_accounts;
                         <?php 
                         }
 
-                            ['receivables_inc' => $receivables_inc, 'receivables_exp' => $receivables_exp,'receivables_bal' => $receivables_bal] = computeCurrentJournalRowReceivablesBalance(
+                            ['receivables_inc' => $receivables_inc, 'receivables_exp' => $receivables_exp,'receivables_bal' => $receivables_bal] = $journal->computeCurrentJournalRowReceivablesBalance(
                                 $voucher,
                                 $receivables_income,
                                 $receivables_expense,
                                 $running_receivables_balance
                             );
                             
-                            ['payables_inc' => $payables_inc, 'payables_exp' => $payables_exp, 'payables_bal' => $payables_bal] = computeCurrentJournalRowPayablesBalance(
+                            ['payables_inc' => $payables_inc, 'payables_exp' => $payables_exp, 'payables_bal' => $payables_bal] = $journal->computeCurrentJournalRowPayablesBalance(
                                 $voucher,
                                 $payables_income,
                                 $payables_expense,
                                 $running_payables_balance
                             );
                           
-                            ['prepayments_inc' => $prepayments_inc, 'prepayments_exp' => $prepayments_exp, 'prepayments_bal' => $prepayments_bal] = computeCurrentJournalRowPrepaymentsBalance(
+                            ['prepayments_inc' => $prepayments_inc, 'prepayments_exp' => $prepayments_exp, 'prepayments_bal' => $prepayments_bal] = $journal->computeCurrentJournalRowPrepaymentsBalance(
                                 $voucher,
                                 $prepayments_income,
                                 $prepayments_expense,
                                 $running_prepayments_balance
                             );
 
-                            ['depreciation_inc' => $depreciation_inc, 'depreciation_exp' => $depreciation_exp, 'depreciation_bal' => $depreciation_bal] = computeCurrentJournalRowDepreciationBalance(
+                            ['depreciation_inc' => $depreciation_inc, 'depreciation_exp' => $depreciation_exp, 'depreciation_bal' => $depreciation_bal] = $journal->computeCurrentJournalRowDepreciationBalance(
                                     $voucher, 
                                     $depreciation_income, 
                                     $depreciation_expense, 
                                     $running_depreciation_balance
                             );
                         
-                            ['payroll_liability_inc' => $payroll_liability_inc, 'payroll_liability_exp' => $payroll_liability_exp, 'payroll_liability_bal' => $payroll_liability_bal]= computeCurrentJournalRowPayrollLiabilityBalance(
+                            ['payroll_liability_inc' => $payroll_liability_inc, 'payroll_liability_exp' => $payroll_liability_exp, 'payroll_liability_bal' => $payroll_liability_bal]= $journal->computeCurrentJournalRowPayrollLiabilityBalance(
                                 $voucher, 
                                 $payroll_liability_income, 
                                 $payroll_liability_expense, 
@@ -405,7 +403,7 @@ $sum_petty_cash_expense = $cash_accounts;
                         <td class='align-right'><?= number_format($payroll_liability_bal, 2); ?></td>
 
                         <?php
-                        echo $journalLibrary->journalSpread($office_id, $spread, $transacting_month, $voucher_type_cash_account, $voucher_type_transaction_effect);
+                        echo $journal->journalSpread($office_id, $spread, $voucher_type_cash_account, $voucher_type_transaction_effect);
                         ?>
 
                     </tr>
