@@ -84,47 +84,34 @@ $accrual_accounts = array_map(function ($elem) {
 }, $journal->getAccrualOpeningBalances());
 
 
-$running_receivables_balance = $accrual_accounts['receivables'];
+// Instatiate ledger column variables
+$running_receivables_balance = $journal->getAccrualOpeningBalances()['receivables'];
 $sum_receivables_income = 0;
 $sum_receivables_expense = 0;
 
-$running_payables_balance = $accrual_accounts['payables'];
+$running_payables_balance = $journal->getAccrualOpeningBalances()['payables'];
 $sum_payables_income = 0;
 $sum_payables_expense = 0;
 
-$running_prepayments_balance = $accrual_accounts['prepayments'];
+$running_prepayments_balance = $journal->getAccrualOpeningBalances()['prepayments'];
 $sum_prepayments_income = 0;
 $sum_prepayments_expense = 0;
 
-$running_depreciation_balance = $accrual_accounts['depreciation'];
+$running_depreciation_balance = $journal->getAccrualOpeningBalances()['depreciation'];
 $sum_depreciation_income = 0;
 $sum_depreciation_expense = 0;
 
-$running_payroll_liability__balance = $accrual_accounts['payroll_liability'];
+$running_payroll_liability__balance = $journal->getAccrualOpeningBalances()['payroll_liability'];
 $sum_payroll_liability_income = 0;
 $sum_payroll_liability_expense = 0;
 
-// Imstantiate empty cash and bank balances
-$running_bank_balance = $bank_accounts;
+$running_bank_balance = $journal->getInitialBankRunningBalance();
 $sum_bank_income = $bank_accounts;
 $sum_bank_expense = $bank_accounts;
 
-$running_petty_cash_balance = $cash_accounts;
+$running_petty_cash_balance = $journal->getInitialCashRunningBalance();
 $sum_petty_cash_income = $cash_accounts;
 $sum_petty_cash_expense = $cash_accounts;
-
-$running_bank_balance = [];
-$officeBanksIds = $journal->getOfficeBankAccountsIds();
-
-foreach($officeBanksIds as $officeBankId){
-    $running_bank_balance[$officeBankId] = $journal->getMonthBankOpeningBalance()[$officeBankId]['amount'];
-}
-
-$running_petty_cash_balance = [];
-$officeCashIds = $journal->getOfficeCashAccountsIds();
-foreach($officeCashIds as $officeCashId){
-    $running_petty_cash_balance[$officeCashId] = $journal->getMonthCashOpeningBalance()[$officeCashId]['amount'];
-}
 
 ?>
 

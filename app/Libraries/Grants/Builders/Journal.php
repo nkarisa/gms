@@ -88,4 +88,25 @@ class Journal {
         return $sumAccounts;
     }
 
+    public function getInitialBankRunningBalance(){
+        $running_bank_balance = [];
+        $officeBanksIds = $this->getOfficeBankAccountsIds();
+
+        foreach($officeBanksIds as $officeBankId){
+            $running_bank_balance[$officeBankId] = $this->getMonthBankOpeningBalance()[$officeBankId]['amount'];
+        }
+
+        return $running_bank_balance;
+    }
+
+    public function getInitialCashRunningBalance(){
+        $running_petty_cash_balance = [];
+        $officeCashIds = $this->getOfficeCashAccountsIds();
+        foreach($officeCashIds as $officeCashId){
+            $running_petty_cash_balance[$officeCashId] = $this->getMonthCashOpeningBalance()[$officeCashId]['amount'];
+        }
+
+        return $running_petty_cash_balance;
+    }
+
 }
