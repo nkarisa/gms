@@ -569,81 +569,101 @@ trait JournalBuilder
             'cash_to_cash_contra' => $financial_accounts['cash_to_cash_contra'] ?? []
         };
 
-        if ($transaction_effect == 'expense' || $transaction_effect == 'settlements' ) {
+        // $spread_cells = match($transaction_effect){
+        //     'expense, settlements' => $this->expenseAccountsSpreading($accounts, $spread, $transaction_effect),
+        // };
+
+        if (
+            $transaction_effect == 'expense' || 
+            $transaction_effect == 'settlements' ||  
+            $transaction_effect == 'payables'
+        ) {
             $spread_cells = $this->expenseAccountsSpreading($accounts, $spread, $transaction_effect);
-        } elseif ($transaction_effect == 'income') {
+        } elseif (
+            $transaction_effect == 'income' || 
+            $transaction_effect == 'receivables'
+        ) {
             $spread_cells = $this->incomeAccountsSpreading($accounts, $spread, $transaction_effect);
-        } elseif ($transaction_effect == 'cash_contra' || $transaction_effect == 'bank_contra' || $transaction_effect == 'bank_to_bank_contra' || $transaction_effect == 'cash_to_cash_contra') {
+        } elseif (
+            $transaction_effect == 'cash_contra' || 
+            $transaction_effect == 'bank_contra' || 
+            $transaction_effect == 'bank_to_bank_contra' || 
+            $transaction_effect == 'cash_to_cash_contra' ||
+            $transaction_effect == 'prepayments' ||
+            $transaction_effect == 'payments' || 
+            $transaction_effect == 'disbursements'
+            ) {
             $spread_cells = $this->contraAccountsSpreading();
-        } elseif ($transaction_effect == VoucherTypeEffectEnum::RECEIVABLES->getCode()) {
-            $spread_cells = $this->receivablesAccountsSpreading($accounts, $spread, $transaction_effect);
-        } elseif ($transaction_effect == VoucherTypeEffectEnum::PAYABLES->getCode()) {
-            $spread_cells = $this->payablesAccountsSpreading($accounts, $spread, $transaction_effect);
-        } elseif ($transaction_effect == VoucherTypeEffectEnum::PREPAYMENTS->getCode()) {
-            $spread_cells = $this->prepaymentsAccountsSpreading($accounts, $spread, $transaction_effect);
-        } elseif ($transaction_effect == 'payments' || $transaction_effect == 'disbursements') {
-            $spread_cells = $this->paymentsAndDisbursementsAccountsSpreading();
         }
+        // } elseif ($transaction_effect == VoucherTypeEffectEnum::RECEIVABLES->getCode()) {
+        //     $spread_cells = $this->receivablesAccountsSpreading($accounts, $spread, $transaction_effect);
+        // } elseif ($transaction_effect == VoucherTypeEffectEnum::PAYABLES->getCode()) {
+        //     $spread_cells = $this->payablesAccountsSpreading($accounts, $spread, $transaction_effect);
+        // } elseif ($transaction_effect == VoucherTypeEffectEnum::PREPAYMENTS->getCode()) {
+        //     $spread_cells = $this->prepaymentsAccountsSpreading($accounts, $spread, $transaction_effect);
+        // } elseif ($transaction_effect == 'payments' || $transaction_effect == 'disbursements') {
+        //     $spread_cells = $this->paymentsAndDisbursementsAccountsSpreading();
+        // }
 
         return $spread_cells ?? '';
     }
 
-    private function paymentsAndDisbursementsAccountsSpreading(){
-        return $this->emptyJournalCells('income').$this->emptyJournalCells('expense');
-    }
+    // private function paymentsAndDisbursementsAccountsSpreading(){
+    //     return $this->emptyJournalCells('income').$this->emptyJournalCells('expense');
+    // }
 
-    private function prepaymentsAccountsSpreading($accounts, $spread, $transaction_effect)
-    {
-        // Fill up empty cells in spread when the account type is an expense type
-        $spread_cells = $this->emptyJournalCells('income');
-        foreach ($accounts as $account_id => $account_code) {
-            $transacted_amount = 0;
-            foreach ($spread as $spread_transaction) {
-                if (in_array($account_id, $spread_transaction) && $transaction_effect == VoucherTypeEffectEnum::PREPAYMENTS->getCode()) {
-                    $transacted_amount += $spread_transaction['transacted_amount'];
-                }
-            }
-            $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_" . $transaction_effect . "_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
-        }
+    // private function prepaymentsAccountsSpreading($accounts, $spread, $transaction_effect)
+    // {
+    //     // Fill up empty cells in spread when the account type is an expense type
+    //     $spread_cells = $this->emptyJournalCells('income');
+    //     foreach ($accounts as $account_id => $account_code) {
+    //         $transacted_amount = 0;
+    //         foreach ($spread as $spread_transaction) {
+    //             if (in_array($account_id, $spread_transaction) && $transaction_effect == VoucherTypeEffectEnum::PREPAYMENTS->getCode()) {
+    //                 $transacted_amount += $spread_transaction['transacted_amount'];
+    //             }
+    //         }
+    //         $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_" . $transaction_effect . "_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
+    //     }
 
-        return $spread_cells;
-    }
+    //     return $spread_cells;
+    // }
 
-    private function payablesAccountsSpreading($accounts, $spread, $transaction_effect)
-    {
-        // Fill up empty cells in spread when the account type is an expense type
-        $spread_cells = $this->emptyJournalCells('income');
-        foreach ($accounts as $account_id => $account_code) {
-            $transacted_amount = 0;
-            foreach ($spread as $spread_transaction) {
-                if (in_array($account_id, $spread_transaction) && $transaction_effect == VoucherTypeEffectEnum::PAYABLES->getCode()) {
-                    $transacted_amount += $spread_transaction['transacted_amount'];
-                }
-            }
-            $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_" . $transaction_effect . "_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
-        }
+    // private function payablesAccountsSpreading($accounts, $spread, $transaction_effect)
+    // {
+    //     // Fill up empty cells in spread when the account type is an expense type
+    //     $spread_cells = $this->emptyJournalCells('income');
+    //     foreach ($accounts as $account_id => $account_code) {
+    //         $transacted_amount = 0;
+    //         foreach ($spread as $spread_transaction) {
+    //             if (in_array($account_id, $spread_transaction) && $transaction_effect == VoucherTypeEffectEnum::PAYABLES->getCode()) {
+    //                 $transacted_amount += $spread_transaction['transacted_amount'];
+    //             }
+    //         }
+    //         $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_" . $transaction_effect . "_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
+    //     }
 
-        return $spread_cells;
-    }
+    //     return $spread_cells;
+    // }
 
-    private function receivablesAccountsSpreading($accounts, $spread, $transaction_effect)
-    {
-        $spread_cells = "";
-        foreach ($accounts as $account_id => $account_code) {
-            $transacted_amount = 0;
-            foreach ($spread as $spread_transaction) {
-                if (in_array($account_id, $spread_transaction) && $transaction_effect == VoucherTypeEffectEnum::RECEIVABLES->getCode()) {
-                    $transacted_amount += $spread_transaction['transacted_amount'];
-                }
-            }
+    // private function receivablesAccountsSpreading($accounts, $spread, $transaction_effect)
+    // {
+    //     $spread_cells = "";
+    //     foreach ($accounts as $account_id => $account_code) {
+    //         $transacted_amount = 0;
+    //         foreach ($spread as $spread_transaction) {
+    //             if (in_array($account_id, $spread_transaction) && $transaction_effect == VoucherTypeEffectEnum::RECEIVABLES->getCode()) {
+    //                 $transacted_amount += $spread_transaction['transacted_amount'];
+    //             }
+    //         }
 
-            $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_" . $transaction_effect . "_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
-        }
-        // Fill up empty cells in spread when the account type is an income type
-        $spread_cells .= $this->emptyJournalCells('expense');
+    //         $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_" . $transaction_effect . "_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
+    //     }
+    //     // Fill up empty cells in spread when the account type is an income type
+    //     $spread_cells .= $this->emptyJournalCells('expense');
 
-        return $spread_cells;
-    }
+    //     return $spread_cells;
+    // }
 
     private function contraAccountsSpreading()
     {
@@ -656,7 +676,7 @@ trait JournalBuilder
         foreach ($accounts as $account_id => $account_code) {
             $transacted_amount = 0;
             foreach ($spread as $spread_transaction) {
-                if (in_array($account_id, $spread_transaction) && $transaction_effect == 'income') {
+                if (in_array($account_id, $spread_transaction) && ($transaction_effect == 'income' || $transaction_effect == 'receivables')) {
                     $transacted_amount += $spread_transaction['transacted_amount'];
                 }
             }
@@ -677,7 +697,7 @@ trait JournalBuilder
         foreach ($accounts as $account_id => $account_code) {
             $transacted_amount = 0;
             foreach ($spread as $spread_transaction) {
-                if (in_array($account_id, $spread_transaction) && $transaction_effect == 'expense') {
+                if (in_array($account_id, $spread_transaction) && ($transaction_effect == 'expense' || $transaction_effect == 'settlements' || $transaction_effect == 'payables')) {
                     $transacted_amount += $spread_transaction['transacted_amount'];
                 }
             }
