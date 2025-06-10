@@ -728,137 +728,136 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return $spread_cells;
     }
 
-    public function journalSpread($office_id, $spread, $transacting_month, $account_type = 'bank', $transaction_effect = 'income')
-    {
-        $financial_accounts = $this->financialAccounts($office_id, $transacting_month);
-
-        $accounts = match($transaction_effect){
-            'income',
-            VoucherTypeEffectEnum::RECEIVABLES->getCode(),
-            VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() => $financial_accounts['income'],
-            'expense',
-            VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode(),
-            VoucherTypeEffectEnum::PAYABLES->getCode(),
-            VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode(),
-            VoucherTypeEffectEnum::PREPAYMENTS->getCode(),
-            VoucherTypeEffectEnum::DEPRECIATION->getCode(),
-            VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode() => $financial_accounts['expense'],
-            'bank_contra' => $financial_accounts['bank_contra']??[],
-            'cash_contra' => $financial_accounts['cash_contra']??[],
-            'bank_to_bank_contra' => $financial_accounts['bank_to_bank_contra']??[],
-            'cash_to_cash_contra' => $financial_accounts['cash_to_cash_contra']??[]
-            // VoucherTypeEffectEnum::RECEIVABLES->getCode() => $financial_accounts[VoucherTypeEffectEnum::RECEIVABLES->getCode()],
-            // VoucherTypeEffectEnum::PAYABLES->getCode() => $financial_accounts[VoucherTypeEffectEnum::PAYABLES->getCode()],
-            // VoucherTypeEffectEnum::PREPAYMENTS->getCode() => $financial_accounts[VoucherTypeEffectEnum::PREPAYMENTS->getCode()],
-            // VoucherTypeEffectEnum::DEPRECIATION->getCode() => $financial_accounts[VoucherTypeEffectEnum::DEPRECIATION->getCode()],
-            // VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode() => $financial_accounts[VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode()],
-        };
-
-        $spread_cells       = "";
-
-        if ($transaction_effect == 'expense') {
-            $spread_cells = "";
-            // Fill up empty cells in spread when the account type is an expense type
-            $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'income');
-
-            foreach ($accounts as $account_id => $account_code) {
-                $transacted_amount = 0;
-                foreach ($spread as $spread_transaction) {
-                    if (in_array($account_id, $spread_transaction) && $transaction_effect == 'expense') {
-                        $transacted_amount += $spread_transaction['transacted_amount'];
-                    }
-                }
-                $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_" . $transaction_effect . "_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
-            }
-
-        } elseif ($transaction_effect == 'income') {
-            $spread_cells = "";
-            foreach ($accounts as $account_id => $account_code) {
-                $transacted_amount = 0;
-                foreach ($spread as $spread_transaction) {
-                    if (in_array($account_id, $spread_transaction) && $transaction_effect == 'income') {
-                        $transacted_amount += $spread_transaction['transacted_amount'];
-                    }
-                }
-
-                $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_" . $transaction_effect . "_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
-            }
-            // Fill up empty cells in spread when the account type is an income type
-            $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'expense');
+    public function journalSpread($office_id, $spread, $transacting_month, $account_type = 'bank', $transaction_effect = 'income'){
         
-        } elseif ($transaction_effect == 'cash_contra' || $transaction_effect == 'bank_contra' || $transaction_effect == 'bank_to_bank_contra' || $transaction_effect == 'cash_to_cash_contra') {
-
-            $spread_cells = "";
-            $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'income');
-            $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'expense');
-
-        } elseif ($transaction_effect == VoucherTypeEffectEnum::RECEIVABLES->getCode()) {
-            $spread_cells = "";
-            foreach ($accounts as $account_id => $account_code) {
-                $transacted_amount = 0;
-                foreach ($spread as $spread_transaction) {
-                    if (in_array($account_id, $spread_transaction) && $transaction_effect == VoucherTypeEffectEnum::RECEIVABLES->getCode()) {
-                        $transacted_amount += $spread_transaction['transacted_amount'];
-                    }
-                }
-
-                $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_" . $transaction_effect . "_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
-            }
-            // Fill up empty cells in spread when the account type is an income type
-            $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'expense');
-        
-        }elseif ($transaction_effect == VoucherTypeEffectEnum::PAYABLES->getCode()) {
-            $spread_cells = "";
-            // Fill up empty cells in spread when the account type is an expense type
-            $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'income');
-            foreach ($accounts as $account_id => $account_code) {
-                $transacted_amount = 0;
-                foreach ($spread as $spread_transaction) {
-                    if (in_array($account_id, $spread_transaction) && $transaction_effect == VoucherTypeEffectEnum::PAYABLES->getCode()) {
-                        $transacted_amount += $spread_transaction['transacted_amount'];
-                    }
-                }
-                $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_" . $transaction_effect . "_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
-            }
-
-        }elseif ($transaction_effect == VoucherTypeEffectEnum::PREPAYMENTS->getCode()) {
-            $spread_cells = "";
-            // Fill up empty cells in spread when the account type is an expense type
-            $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'income');
-            foreach ($accounts as $account_id => $account_code) {
-                $transacted_amount = 0;
-                foreach ($spread as $spread_transaction) {
-                    if (in_array($account_id, $spread_transaction) && $transaction_effect == VoucherTypeEffectEnum::PREPAYMENTS->getCode()) {
-                        $transacted_amount += $spread_transaction['transacted_amount'];
-                    }
-                }
-                $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_" . $transaction_effect . "_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
-            }
-
-        }elseif ($transaction_effect == 'payments' || $transaction_effect == 'settlements' || $transaction_effect == 'disbursements') {
-
-            $spread_cells = "";
-            $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'income');
-            $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'expense');
-
-        }elseif ($transaction_effect == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode()) {
-            $spread_cells = "";
-            // Fill up empty cells in spread when the account type is an expense type
-            $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'income');
-            foreach ($accounts as $account_id => $account_code) {
-                $transacted_amount = 0;
-                foreach ($spread as $spread_transaction) {
-                    if (in_array($account_id, $spread_transaction) && $transaction_effect == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode()) {
-                        $transacted_amount += $spread_transaction['transacted_amount'];
-                    }
-                }
-                $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_" . $transaction_effect . "_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
-            }
-
-        }
-
-        return $spread_cells;
     }
+
+    // public function journalSpread($office_id, $spread, $transacting_month, $account_type = 'bank', $transaction_effect = 'income')
+    // {
+    //     $financial_accounts = $this->financialAccounts($office_id, $transacting_month);
+
+    //     $accounts = match($transaction_effect){
+    //         'income',
+    //         VoucherTypeEffectEnum::RECEIVABLES->getCode(),
+    //         VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() => $financial_accounts['income'],
+    //         'expense',
+    //         VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode(),
+    //         VoucherTypeEffectEnum::PAYABLES->getCode(),
+    //         VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode(),
+    //         VoucherTypeEffectEnum::PREPAYMENTS->getCode(),
+    //         VoucherTypeEffectEnum::DEPRECIATION->getCode(),
+    //         VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode() => $financial_accounts['expense'],
+    //         'bank_contra' => $financial_accounts['bank_contra']??[],
+    //         'cash_contra' => $financial_accounts['cash_contra']??[],
+    //         'bank_to_bank_contra' => $financial_accounts['bank_to_bank_contra']??[],
+    //         'cash_to_cash_contra' => $financial_accounts['cash_to_cash_contra']??[]
+    //     };
+
+    //     $spread_cells       = "";
+
+    //     if ($transaction_effect == 'expense') {
+    //         $spread_cells = "";
+    //         // Fill up empty cells in spread when the account type is an expense type
+    //         $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'income');
+
+    //         foreach ($accounts as $account_id => $account_code) {
+    //             $transacted_amount = 0;
+    //             foreach ($spread as $spread_transaction) {
+    //                 if (in_array($account_id, $spread_transaction) && $transaction_effect == 'expense') {
+    //                     $transacted_amount += $spread_transaction['transacted_amount'];
+    //                 }
+    //             }
+    //             $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_" . $transaction_effect . "_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
+    //         }
+
+    //     } elseif ($transaction_effect == 'income') {
+    //         $spread_cells = "";
+    //         foreach ($accounts as $account_id => $account_code) {
+    //             $transacted_amount = 0;
+    //             foreach ($spread as $spread_transaction) {
+    //                 if (in_array($account_id, $spread_transaction) && $transaction_effect == 'income') {
+    //                     $transacted_amount += $spread_transaction['transacted_amount'];
+    //                 }
+    //             }
+
+    //             $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_" . $transaction_effect . "_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
+    //         }
+    //         // Fill up empty cells in spread when the account type is an income type
+    //         $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'expense');
+        
+    //     } elseif ($transaction_effect == 'cash_contra' || $transaction_effect == 'bank_contra' || $transaction_effect == 'bank_to_bank_contra' || $transaction_effect == 'cash_to_cash_contra') {
+
+    //         $spread_cells = "";
+    //         $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'income');
+    //         $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'expense');
+
+    //     } elseif ($transaction_effect == VoucherTypeEffectEnum::RECEIVABLES->getCode()) {
+    //         $spread_cells = "";
+    //         foreach ($accounts as $account_id => $account_code) {
+    //             $transacted_amount = 0;
+    //             foreach ($spread as $spread_transaction) {
+    //                 if (in_array($account_id, $spread_transaction) && $transaction_effect == VoucherTypeEffectEnum::RECEIVABLES->getCode()) {
+    //                     $transacted_amount += $spread_transaction['transacted_amount'];
+    //                 }
+    //             }
+
+    //             $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_" . $transaction_effect . "_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
+    //         }
+    //         // Fill up empty cells in spread when the account type is an income type
+    //         $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'expense');
+        
+    //     }elseif ($transaction_effect == VoucherTypeEffectEnum::PAYABLES->getCode()) {
+    //         $spread_cells = "";
+    //         // Fill up empty cells in spread when the account type is an expense type
+    //         $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'income');
+    //         foreach ($accounts as $account_id => $account_code) {
+    //             $transacted_amount = 0;
+    //             foreach ($spread as $spread_transaction) {
+    //                 if (in_array($account_id, $spread_transaction) && $transaction_effect == VoucherTypeEffectEnum::PAYABLES->getCode()) {
+    //                     $transacted_amount += $spread_transaction['transacted_amount'];
+    //                 }
+    //             }
+    //             $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_" . $transaction_effect . "_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
+    //         }
+
+    //     }elseif ($transaction_effect == VoucherTypeEffectEnum::PREPAYMENTS->getCode()) {
+    //         $spread_cells = "";
+    //         // Fill up empty cells in spread when the account type is an expense type
+    //         $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'income');
+    //         foreach ($accounts as $account_id => $account_code) {
+    //             $transacted_amount = 0;
+    //             foreach ($spread as $spread_transaction) {
+    //                 if (in_array($account_id, $spread_transaction) && $transaction_effect == VoucherTypeEffectEnum::PREPAYMENTS->getCode()) {
+    //                     $transacted_amount += $spread_transaction['transacted_amount'];
+    //                 }
+    //             }
+    //             $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_" . $transaction_effect . "_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
+    //         }
+
+    //     }elseif ($transaction_effect == 'payments' || $transaction_effect == 'settlements' || $transaction_effect == 'disbursements') {
+
+    //         $spread_cells = "";
+    //         $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'income');
+    //         $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'expense');
+
+    //     }elseif ($transaction_effect == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode()) {
+    //         $spread_cells = "";
+    //         // Fill up empty cells in spread when the account type is an expense type
+    //         $spread_cells .= $this->emptyJournalCells($office_id, $transacting_month, 'income');
+    //         foreach ($accounts as $account_id => $account_code) {
+    //             $transacted_amount = 0;
+    //             foreach ($spread as $spread_transaction) {
+    //                 if (in_array($account_id, $spread_transaction) && $transaction_effect == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode()) {
+    //                     $transacted_amount += $spread_transaction['transacted_amount'];
+    //                 }
+    //             }
+    //             $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_" . $transaction_effect . "_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
+    //         }
+
+    //     }
+
+    //     return $spread_cells;
+    // }
 
     public function createNewJournal($journal_date, $office_id)
     {

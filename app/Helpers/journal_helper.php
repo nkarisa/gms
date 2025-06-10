@@ -544,8 +544,8 @@ if (!function_exists('computePayrollLiabilityRunningBalances')) {
 }
 
 
-if (!function_exists('computeCurrentJournalRowBalance')) {
-    function computeCurrentJournalRowBalance($voucher, $bank_id, $bank_income, $bank_expense, $running_bank_balance)
+if (!function_exists('computeCurrentJournalRowBankBalance')) {
+    function computeCurrentJournalRowBankBalance($voucher, $bank_id, $bank_income, $bank_expense, $running_bank_balance)
     {
         $bank_inc = 0;
         $bank_exp = 0;
@@ -571,8 +571,8 @@ if (!function_exists('computeCurrentJournalRowBalance')) {
     }
 }
 
-if (!function_exists('computeCurrentJournalRowBalance')) {
-    function computeCurrentJournalRowBalance($voucher, $cash_id, $cash_income, $cash_expense, $running_petty_cash_balance)
+if (!function_exists('computeCurrentJournalRowCashBalance')) {
+    function computeCurrentJournalRowCashBalance($voucher, $cash_id, $cash_income, $cash_expense, $running_petty_cash_balance)
     {
         $cash_inc = 0;
         $cash_exp = 0;
@@ -594,5 +594,92 @@ if (!function_exists('computeCurrentJournalRowBalance')) {
         }
 
         return compact('cash_inc', 'cash_exp', 'cash_bal');
+    }
+}
+
+if(!function_exists('computeCurrentJournalRowReceivablesBalance')){
+    function computeCurrentJournalRowReceivablesBalance($voucher, $receivables_income, $receivables_expense, $running_receivables_balance){
+        
+        $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
+        $receivables_inc = 0;
+        $receivables_exp = 0;
+        $receivables_bal = 0;
+
+        if ($voucher_type_transaction_effect == 'receivables' || $voucher_type_transaction_effect == 'payments') {
+            $receivables_inc = $receivables_income;
+            $receivables_exp = $receivables_expense;
+            $receivables_bal = $running_receivables_balance;
+        }
+        return compact('receivables_inc', 'receivables_exp', 'receivables_exp');
+    }
+}
+
+
+if(!function_exists('computeCurrentJournalRowPayablesBalance')){
+    function computeCurrentJournalRowPayablesBalance($voucher, $payables_income, $payables_expense, $running_payables_balance){
+        
+        $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
+        $payables_inc = 0;
+        $payables_exp = 0;
+        $payables_bal = 0;
+
+        if ($voucher_type_transaction_effect == 'payables' || $voucher_type_transaction_effect == 'disbursements') {
+            $payables_inc = $payables_income;
+            $payables_exp = $payables_expense;
+            $payables_bal = $running_payables_balance;
+        }
+        return compact('payables_inc', 'payables_exp', 'payables_bal');
+    }
+}
+
+if(!function_exists('computeCurrentJournalRowPrepaymentsBalance')){
+    function computeCurrentJournalRowPrepaymentsBalance($voucher, $prepayments_income, $prepayments_expense, $running_prepayments_balance){
+        
+        $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
+        $prepayments_inc = 0;
+        $prepayments_exp = 0;
+        $prepayments_bal = 0;
+
+        if ($voucher_type_transaction_effect == 'prepayments' || $voucher_type_transaction_effect == 'settlements') {
+            $prepayments_inc = $prepayments_income;
+            $prepayments_exp = $prepayments_expense;
+            $prepayments_bal = $running_prepayments_balance;
+        }
+        return compact('prepayments_inc', 'prepayments_exp', 'prepayments_bal');
+    }
+}
+
+
+if(!function_exists('computeCurrentJournalRowDepreciationBalance')){
+    function computeCurrentJournalRowDepreciationBalance($voucher, $depreciation_income, $depreciation_expense, $running_depreciation_balance){
+        
+        $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
+        $depreciation_inc = 0;
+        $depreciation_exp = 0;
+        $depreciation_bal = 0;
+
+        if ($voucher_type_transaction_effect == 'depreciation') {
+            $depreciation_inc = $depreciation_income;
+            $depreciation_exp = $depreciation_expense;
+            $depreciation_bal = $running_depreciation_balance;
+        }
+        return compact('depreciation_inc', 'depreciation_exp', 'depreciation_bal');
+    }
+}
+
+if(!function_exists('computeCurrentJournalRowPayrollLiabilityBalance')){
+    function computeCurrentJournalRowPayrollLiabilityBalance($voucher, $payroll_liability_income, $payroll_liability_expense, $running_payroll_liability_balance){
+        
+        $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
+        $payroll_liability_inc = 0;
+        $payroll_liability_exp = 0;
+        $payroll_liability_bal = 0;
+
+        if ($voucher_type_transaction_effect == 'payroll_liability') {
+            $payroll_liability_inc = $payroll_liability_income;
+            $payroll_liability_exp = $payroll_liability_expense;
+            $payroll_liability_bal = $running_payroll_liability_balance;
+        }
+        return compact('payroll_liability_inc', 'payroll_liability_exp', 'payroll_liability_bal');
     }
 }
