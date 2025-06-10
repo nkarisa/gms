@@ -567,7 +567,6 @@ trait JournalBuilder
     }
     public function journalSpread($spread, $transaction_effect = 'income')
     {
-        // log_message('error', json_encode($spread))
         // $journalLibrary = new JournalLibrary();
         $financial_accounts = $this->getMonthAccounts();
 
@@ -630,7 +629,7 @@ trait JournalBuilder
                 }
             }
 
-            $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_" . $transaction_effect . "_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
+            $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_income_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
         }
         // Fill up empty cells in spread when the account type is an income type
         $spread_cells .= $this->emptyJournalCells('expense');
@@ -649,7 +648,7 @@ trait JournalBuilder
                     $transacted_amount += $spread_transaction['transacted_amount'];
                 }
             }
-            $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_" . $transaction_effect . "_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
+            $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_expense_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
         }
 
         return $spread_cells;
