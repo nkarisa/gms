@@ -432,6 +432,8 @@ trait JournalBuilder
             $bank_inc = $bank_income[$office_bank_id];
             $bank_exp = $bank_expense[$office_bank_id];
             $bank_bal = $running_bank_balance[$office_bank_id];
+        }else{
+            $bank_bal = $running_bank_balance[$bank_id];
         }
 
         return compact('bank_inc', 'bank_exp', 'bank_bal');
@@ -456,6 +458,8 @@ trait JournalBuilder
             $cash_inc = $cash_income[$office_cash_id];
             $cash_exp = $cash_expense[$office_cash_id];
             $cash_bal = $running_petty_cash_balance[$office_cash_id];
+        }else{
+            $cash_bal = $running_petty_cash_balance[$cash_id];
         }
 
         return compact('cash_inc', 'cash_exp', 'cash_bal');
@@ -473,7 +477,10 @@ trait JournalBuilder
             $receivables_inc = $receivables_income;
             $receivables_exp = $receivables_expense;
             $receivables_bal = $running_receivables_balance;
+        }else{
+            $receivables_bal = $running_receivables_balance;
         }
+
         return compact('receivables_inc', 'receivables_exp', 'receivables_bal');
     }
 
@@ -488,6 +495,8 @@ trait JournalBuilder
         if ($voucher_type_transaction_effect == 'payables' || $voucher_type_transaction_effect == 'disbursements') {
             $payables_inc = $payables_income;
             $payables_exp = $payables_expense;
+            $payables_bal = $running_payables_balance;
+        }else{
             $payables_bal = $running_payables_balance;
         }
         return compact('payables_inc', 'payables_exp', 'payables_bal');
@@ -505,6 +514,8 @@ trait JournalBuilder
             $prepayments_inc = $prepayments_income;
             $prepayments_exp = $prepayments_expense;
             $prepayments_bal = $running_prepayments_balance;
+        }else{
+            $prepayments_bal = $running_prepayments_balance;
         }
         return compact('prepayments_inc', 'prepayments_exp', 'prepayments_bal');
     }
@@ -521,6 +532,8 @@ trait JournalBuilder
             $depreciation_inc = $depreciation_income;
             $depreciation_exp = $depreciation_expense;
             $depreciation_bal = $running_depreciation_balance;
+        }else{
+            $depreciation_bal = $running_depreciation_balance;
         }
         return compact('depreciation_inc', 'depreciation_exp', 'depreciation_bal');
     }
@@ -536,6 +549,8 @@ trait JournalBuilder
         if ($voucher_type_transaction_effect == 'payroll_liability') {
             $payroll_liability_inc = $payroll_liability_income;
             $payroll_liability_exp = $payroll_liability_expense;
+            $payroll_liability_bal = $running_payroll_liability_balance;
+        }else{
             $payroll_liability_bal = $running_payroll_liability_balance;
         }
         return compact('payroll_liability_inc', 'payroll_liability_exp', 'payroll_liability_bal');
