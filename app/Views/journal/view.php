@@ -5,11 +5,68 @@ use \App\Libraries\System\Widgets\WidgetBase;
 $userLibrary = new \App\Libraries\Core\UserLibrary();
 
 extract($result['vouchers']);
-$sum_of_accounts = count($accounts['income']) + count($accounts['expense']);
+// $sum_of_accounts = count($accounts['income']) + count($accounts['expense']);
 $role_has_voucher_create_permission = $userLibrary->checkRoleHasPermissions(ucfirst('voucher'),'create');   
 ?>
 
 <style>
+    /* Style buttons */
+    .btn_reverse {
+        background-color: DodgerBlue;
+        /* Blue background */
+        border: none;
+        /* Remove borders */
+        color: white;
+        /* White text */
+        padding: 12px 16px;
+        /* Some padding */
+        font-size: 16px;
+        /* Set a font size */
+        cursor: pointer;
+        /* Mouse pointer on hover */
+    }
+
+    /* Darker background on mouse-over */
+    .btn_reverse:hover {
+        background-color: RoyalBlue;
+    }
+
+    .edit_journal {
+        cursor: pointer;
+    }
+
+    .table>tbody>tr:hover>td,
+    .table>tbody>tr:hover>th {
+        background-color: #CFF5FF;
+    }
+
+    .table>tbody>tr.active>td,
+    .table>tbody>tr:active>th {
+        background-color: #CFF5FF;
+        color: blue;
+    }
+
+    td.edge_cell,
+    td.edge_cell {
+        border-right: 3px solid dodgerblue;
+    }
+
+    td:not(.edge_cell),
+    th:not(.edge_cell) {
+        border-right: 1px solid black;
+    }
+
+    td.edge_row,
+    th.edge_row {
+        border-top: 1px solid black
+    }
+
+    td.edge_row_bottom,
+    th.edge_row_bottom {
+        border-bottom: 1px solid black;
+        font-weight: bold;
+    }
+
     .align-right{
         text-align:right;
     }
