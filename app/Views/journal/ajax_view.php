@@ -44,10 +44,11 @@
         color: blue;
     }
 
-    td.edge_cell, td.edge_cell {
+    td.edge_cell,
+    td.edge_cell {
         border-right: 3px solid dodgerblue;
     }
-    
+
     td:not(.edge_cell),
     th:not(.edge_cell) {
         border-right: 1px solid black;
@@ -86,7 +87,6 @@ $journal = new \App\Libraries\Grants\Builders\Journal($result);
     'role_has_journal_update_permission' => $role_has_journal_update_permission,
     'check_if_financial_report_is_submitted' => $check_if_financial_report_is_submitted,
     'mfr_submited_status' => $mfr_submited_status,
-    'month_used_accrual_ledgers' => $month_used_accrual_ledgers
 
 ] = $result;
 
@@ -143,8 +143,9 @@ $sum_petty_cash_expense = $cash_accounts;
             <thead>
                 <tr>
                     <!-- Navigation row -->
-                    <th class = "edge_row"><?=$journal->navigation(); ?></th>
-                    <th class = "edge_row" colspan="<?= $journal->titleColspan(); ?>" style='text-align:center;'><?= $journal->title(); ?></th>
+                    <th class="edge_row"><?= $journal->navigation(); ?></th>
+                    <th class="edge_row" colspan="<?= $journal->titleColspan(); ?>" style='text-align:center;'>
+                        <?= $journal->title(); ?></th>
                 </tr>
                 <tr>
                     <!-- Ledger columns headers row -->
@@ -300,7 +301,7 @@ $sum_petty_cash_expense = $cash_accounts;
                             $prepayments_expense,
                             $running_prepayments_balance
                         );
-                        
+
                         $journal->computeDepreciationRunningBalances(
                             $voucher,
                             $voucher_amount,
@@ -330,12 +331,12 @@ $sum_petty_cash_expense = $cash_accounts;
                                 'bank_exp' => $bank_exp,
                                 'bank_bal' => $bank_bal
                             ] = $journal->computeCurrentJournalRowBankBalance(
-                                $voucher,
-                                $bank_id,
-                                $bank_income,
-                                $bank_expense,
-                                $running_bank_balance
-                            );
+                                        $voucher,
+                                        $bank_id,
+                                        $bank_income,
+                                        $bank_expense,
+                                        $running_bank_balance
+                                    );
                             ?>
 
                             <td class='align-right'><?= number_format($bank_inc, 2); ?></td>
@@ -352,56 +353,56 @@ $sum_petty_cash_expense = $cash_accounts;
                                 'cash_exp' => $cash_exp,
                                 'cash_bal' => $cash_bal
                             ] = $journal->computeCurrentJournalRowCashBalance(
-                                $voucher,
-                                $cash_id,
-                                $cash_income,
-                                $cash_expense,
-                                $running_petty_cash_balance
-                            );
+                                        $voucher,
+                                        $cash_id,
+                                        $cash_income,
+                                        $cash_expense,
+                                        $running_petty_cash_balance
+                                    );
                             ?>
 
                             <td class='align-right'><?= number_format($cash_inc, 2); ?></td>
                             <td class='align-right'><?= number_format($cash_exp, 2); ?></td>
                             <td class='align-right edge_cell'><?= number_format($cash_bal, 2); ?></td>
-                        <?php 
+                        <?php
                         }
 
-                            ['receivables_inc' => $receivables_inc, 'receivables_exp' => $receivables_exp,'receivables_bal' => $receivables_bal] = $journal->computeCurrentJournalRowReceivablesBalance(
-                                $voucher,
-                                $receivables_income,
-                                $receivables_expense,
-                                $running_receivables_balance
-                            );
-                            
-                            ['payables_inc' => $payables_inc, 'payables_exp' => $payables_exp, 'payables_bal' => $payables_bal] = $journal->computeCurrentJournalRowPayablesBalance(
-                                $voucher,
-                                $payables_income,
-                                $payables_expense,
-                                $running_payables_balance
-                            );
-                          
-                            ['prepayments_inc' => $prepayments_inc, 'prepayments_exp' => $prepayments_exp, 'prepayments_bal' => $prepayments_bal] = $journal->computeCurrentJournalRowPrepaymentsBalance(
-                                $voucher,
-                                $prepayments_income,
-                                $prepayments_expense,
-                                $running_prepayments_balance
-                            );
+                        ['receivables_inc' => $receivables_inc, 'receivables_exp' => $receivables_exp, 'receivables_bal' => $receivables_bal] = $journal->computeCurrentJournalRowReceivablesBalance(
+                            $voucher,
+                            $receivables_income,
+                            $receivables_expense,
+                            $running_receivables_balance
+                        );
 
-                            ['depreciation_inc' => $depreciation_inc, 'depreciation_exp' => $depreciation_exp, 'depreciation_bal' => $depreciation_bal] = $journal->computeCurrentJournalRowDepreciationBalance(
-                                    $voucher, 
-                                    $depreciation_income, 
-                                    $depreciation_expense, 
-                                    $running_depreciation_balance
-                            );
-                        
-                            ['payroll_liability_inc' => $payroll_liability_inc, 'payroll_liability_exp' => $payroll_liability_exp, 'payroll_liability_bal' => $payroll_liability_bal]= $journal->computeCurrentJournalRowPayrollLiabilityBalance(
-                                $voucher, 
-                                $payroll_liability_income, 
-                                $payroll_liability_expense, 
-                                $running_payroll_liability_balance
-                            );
+                        ['payables_inc' => $payables_inc, 'payables_exp' => $payables_exp, 'payables_bal' => $payables_bal] = $journal->computeCurrentJournalRowPayablesBalance(
+                            $voucher,
+                            $payables_income,
+                            $payables_expense,
+                            $running_payables_balance
+                        );
+
+                        ['prepayments_inc' => $prepayments_inc, 'prepayments_exp' => $prepayments_exp, 'prepayments_bal' => $prepayments_bal] = $journal->computeCurrentJournalRowPrepaymentsBalance(
+                            $voucher,
+                            $prepayments_income,
+                            $prepayments_expense,
+                            $running_prepayments_balance
+                        );
+
+                        ['depreciation_inc' => $depreciation_inc, 'depreciation_exp' => $depreciation_exp, 'depreciation_bal' => $depreciation_bal] = $journal->computeCurrentJournalRowDepreciationBalance(
+                            $voucher,
+                            $depreciation_income,
+                            $depreciation_expense,
+                            $running_depreciation_balance
+                        );
+
+                        ['payroll_liability_inc' => $payroll_liability_inc, 'payroll_liability_exp' => $payroll_liability_exp, 'payroll_liability_bal' => $payroll_liability_bal] = $journal->computeCurrentJournalRowPayrollLiabilityBalance(
+                            $voucher,
+                            $payroll_liability_income,
+                            $payroll_liability_expense,
+                            $running_payroll_liability_balance
+                        );
                         ?>
-                        
+
                         <td class='align-right'><?= number_format($receivables_inc, 2); ?></td>
                         <td class='align-right'><?= number_format($receivables_exp, 2); ?></td>
                         <td class='align-right edge_cell'><?= number_format($receivables_bal, 2); ?></td>
@@ -432,18 +433,22 @@ $sum_petty_cash_expense = $cash_accounts;
             </tbody>
             <tfoot>
                 <tr>
-                    <td class = "edge_row_bottom edge_cell" colspan='7'><?= get_phrase('total_and_balance_b/d'); ?></td>
+                    <td class="edge_row_bottom edge_cell" colspan='7'><?= get_phrase('total_and_balance_b/d'); ?></td>
                     <?php foreach ($month_opening_balance['bank'] as $office_bank_id => $bank_account) { ?>
-                        <td class='align-right edge_row_bottom'><?= number_format($sum_bank_income[$office_bank_id], 2); ?></td>
-                        <td class='align-right edge_row_bottom'><?= number_format($sum_bank_expense[$office_bank_id], 2); ?></td>
+                        <td class='align-right edge_row_bottom'><?= number_format($sum_bank_income[$office_bank_id], 2); ?>
+                        </td>
+                        <td class='align-right edge_row_bottom'><?= number_format($sum_bank_expense[$office_bank_id], 2); ?>
+                        </td>
                         <td class='align-right edge_row_bottom edge_cell'>
                             <?= number_format(($running_bank_balance[$office_bank_id] == 0 && $sum_bank_expense[$office_bank_id] == 0) && isset($month_opening_balance['balance']) ? $month_opening_balance['balance'][$office_bank_id]['amount'] : $running_bank_balance[$office_bank_id], 2); ?>
                         </td>
                     <?php } ?>
 
                     <?php foreach ($month_opening_balance['cash'] as $office_cash_id => $cash_account) { ?>
-                        <td class='align-right edge_row_bottom'><?= number_format($sum_petty_cash_income[$office_cash_id], 2); ?></td>
-                        <td class='align-right edge_row_bottom'><?= number_format($sum_petty_cash_expense[$office_cash_id], 2); ?></td>
+                        <td class='align-right edge_row_bottom'>
+                            <?= number_format($sum_petty_cash_income[$office_cash_id], 2); ?></td>
+                        <td class='align-right edge_row_bottom'>
+                            <?= number_format($sum_petty_cash_expense[$office_cash_id], 2); ?></td>
                         <td class='align-right edge_row_bottom edge_cell'>
                             <?= number_format(($running_petty_cash_balance[$office_cash_id] == 0 && $sum_petty_cash_expense[$office_cash_id] == 0) ? $month_opening_balance['cash'][$office_cash_id]['amount'] : $running_petty_cash_balance[$office_cash_id], 2); ?>
                         </td>
@@ -452,48 +457,62 @@ $sum_petty_cash_expense = $cash_accounts;
 
                     <td class='align-right edge_row_bottom'><?= number_format($sum_receivables_income, 2); ?></td>
                     <td class='align-right edge_row_bottom'><?= number_format($sum_receivables_expense, 2); ?></td>
-                    <td class='align-right edge_row_bottom edge_cell'><?= number_format($running_receivables_balance == 0 && $sum_receivables_expense == 0 ? $journal->getAccrualOpeningBalances()['receivables'] : $running_receivables_balance, 2); ?></td>
+                    <td class='align-right edge_row_bottom edge_cell'>
+                        <?= number_format($running_receivables_balance == 0 && $sum_receivables_expense == 0 ? $journal->getAccrualOpeningBalances()['receivables'] : $running_receivables_balance, 2); ?>
+                    </td>
 
                     <td class='align-right edge_row_bottom'><?= number_format($sum_payables_income, 2); ?></td>
                     <td class='align-right edge_row_bottom'><?= number_format($sum_payables_expense, 2); ?></td>
-                    <td class='align-right edge_row_bottom edge_cell'><?= number_format($running_payables_balance == 0 && $sum_payables_expense == 0 ? $journal->getAccrualOpeningBalances()['payables'] : $running_payables_balance, 2); ?></td>
+                    <td class='align-right edge_row_bottom edge_cell'>
+                        <?= number_format($running_payables_balance == 0 && $sum_payables_expense == 0 ? $journal->getAccrualOpeningBalances()['payables'] : $running_payables_balance, 2); ?>
+                    </td>
 
                     <td class='align-right edge_row_bottom'><?= number_format($sum_prepayments_income, 2); ?></td>
                     <td class='align-right edge_row_bottom'><?= number_format($sum_prepayments_expense, 2); ?></td>
-                    <td class='align-right edge_row_bottom edge_cell'><?= number_format($running_prepayments_balance == 0 && $sum_prepayments_expense == 0 ? $journal->getAccrualOpeningBalances()['prepayments'] : $running_prepayments_balance, 2); ?></td>
+                    <td class='align-right edge_row_bottom edge_cell'>
+                        <?= number_format($running_prepayments_balance == 0 && $sum_prepayments_expense == 0 ? $journal->getAccrualOpeningBalances()['prepayments'] : $running_prepayments_balance, 2); ?>
+                    </td>
 
                     <td class='align-right edge_row_bottom'><?= number_format($sum_depreciation_income, 2); ?></td>
                     <td class='align-right edge_row_bottom'><?= number_format($sum_depreciation_expense, 2); ?></td>
-                    <td class='align-right edge_row_bottom edge_cell'><?= number_format($running_depreciation_balance == 0 && $sum_depreciation_expense == 0 ? $journal->getAccrualOpeningBalances()['depreciation'] : $running_depreciation_balance, 2); ?></td>
+                    <td class='align-right edge_row_bottom edge_cell'>
+                        <?= number_format($running_depreciation_balance == 0 && $sum_depreciation_expense == 0 ? $journal->getAccrualOpeningBalances()['depreciation'] : $running_depreciation_balance, 2); ?>
+                    </td>
 
 
                     <td class='align-right edge_row_bottom'><?= number_format($sum_payroll_liability_income, 2); ?></td>
-                    <td class='align-right edge_row_bottom'><?= number_format($sum_payroll_liability_expense, 2); ?></td>
-                    <td class='align-right edge_row_bottom edge_cell'><?= number_format($running_payroll_liability_balance = 0 && $sum_payroll_liability_expense == 0 ? $journal->getAccrualOpeningBalances()['payroll_liability'] : $running_payroll_liability_balance, 2); ?></td>
+                    <td class='align-right edge_row_bottom'><?= number_format($sum_payroll_liability_expense, 2); ?>
+                    </td>
+                    <td class='align-right edge_row_bottom edge_cell'>
+                        <?= number_format($running_payroll_liability_balance = 0 && $sum_payroll_liability_expense == 0 ? $journal->getAccrualOpeningBalances()['payroll_liability'] : $running_payroll_liability_balance, 2); ?>
+                    </td>
 
                     <!-- Spread totals -->
                     <?php
-                        $cnt = 0; 
-                        foreach ($accounts['income'] as $income_account_id => $income_account_code) { 
-                            $edge_cell  = '';
-                            if($cnt == count($accounts['income']) -1){
-                                $edge_cell = 'edge_cell';
-                            }
-                            $cnt++;    
-                    ?>
-                        <td class='total_income <?=$edge_cell;?> edge_row_bottom total_income_<?= $income_account_id; ?>'>0</td>
+                    $cnt = 0;
+                    foreach ($accounts['income'] as $income_account_id => $income_account_code) {
+                        $edge_cell = '';
+                        if ($cnt == count($accounts['income']) - 1) {
+                            $edge_cell = 'edge_cell';
+                        }
+                        $cnt++;
+                        ?>
+                        <td class='total_income <?= $edge_cell; ?> edge_row_bottom total_income_<?= $income_account_id; ?>'>0
+                        </td>
                     <?php } ?>
 
-                    <?php 
-                        $cnt = 0;
-                        foreach ($accounts['expense'] as $expense_account_id => $expense_account_code) { 
-                            $edge_cell  = '';
-                            if($cnt == count($accounts['expense']) -1){
-                                $edge_cell = 'edge_cell';
-                            }
-                            $cnt++;  
-                    ?>
-                        <td class='total_expense <?=$edge_cell;?> edge_row_bottom total_expense_<?= $expense_account_id; ?>'>0</td>
+                    <?php
+                    $cnt = 0;
+                    foreach ($accounts['expense'] as $expense_account_id => $expense_account_code) {
+                        $edge_cell = '';
+                        if ($cnt == count($accounts['expense']) - 1) {
+                            $edge_cell = 'edge_cell';
+                        }
+                        $cnt++;
+                        ?>
+                        <td
+                            class='total_expense <?= $edge_cell; ?> edge_row_bottom total_expense_<?= $expense_account_id; ?>'>
+                            0</td>
                     <?php } ?>
 
                 </tr>
