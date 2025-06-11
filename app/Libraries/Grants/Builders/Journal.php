@@ -10,6 +10,10 @@ class Journal {
         
     }
 
+    function accrualActivationStatus(){
+        return $this->journalData['accrual_activated'];
+    }
+
     function getNavigationIds(){
         return $this->journalData['vouchers']['navigation'];
     }

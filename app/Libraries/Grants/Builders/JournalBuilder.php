@@ -593,15 +593,20 @@ trait JournalBuilder
 
         if (
             $transaction_effect == 'expense' || 
-            $transaction_effect == 'settlements' ||  
-            $transaction_effect == 'payables' ||
-            $transaction_effect == 'depreciation' ||
-            $transaction_effect == 'payroll_liability'
+            (
+                $this->accrualActivationStatus() &&
+                (
+                    $transaction_effect == 'settlements' ||  
+                    $transaction_effect == 'payables' ||
+                    $transaction_effect == 'depreciation' ||
+                    $transaction_effect == 'payroll_liability'
+                )
+            )
         ) {
             $spread_cells = $this->expenseAccountsSpreading($accounts, $spread, $transaction_effect);
         } elseif (
             $transaction_effect == 'income' || 
-            $transaction_effect == 'receivables'
+            ($transaction_effect == 'receivables' && $this->accrualActivationStatus())
         ) {
             $spread_cells = $this->incomeAccountsSpreading($accounts, $spread, $transaction_effect);
         } elseif (
@@ -609,9 +614,15 @@ trait JournalBuilder
             $transaction_effect == 'bank_contra' || 
             $transaction_effect == 'bank_to_bank_contra' || 
             $transaction_effect == 'cash_to_cash_contra' ||
-            $transaction_effect == 'prepayments' ||
-            $transaction_effect == 'payments' || 
-            $transaction_effect == 'disbursements'
+            (
+                $this->accrualActivationStatus() && 
+                (
+                    $transaction_effect == 'prepayments' ||
+                    $transaction_effect == 'payments' || 
+                    $transaction_effect == 'disbursements'
+                )
+            )
+            
             ) {
             $spread_cells = $this->contraAccountsSpreading();
         }
@@ -633,7 +644,8 @@ trait JournalBuilder
         foreach ($accounts as $account_id => $account_code) {
             $transacted_amount = 0;
             foreach ($spread as $spread_transaction) {
-                if (in_array($account_id, $spread_transaction) && ($transaction_effect == 'income' || $transaction_effect == 'receivables')) {
+                if (in_array($account_id, $spread_transaction) && 
+                        ($transaction_effect == 'income' || ($transaction_effect == 'receivables' && $this->accrualActivationStatus()))) {
                     $transacted_amount += $spread_transaction['transacted_amount'];
                 }
             }
@@ -661,7 +673,19 @@ trait JournalBuilder
         foreach ($accounts as $account_id => $account_code) {
             $transacted_amount = 0;
             foreach ($spread as $spread_transaction) {
-                if (in_array($account_id, $spread_transaction) && ($transaction_effect == 'expense' || $transaction_effect == 'depreciation' || $transaction_effect == 'payroll_liability' || $transaction_effect == 'settlements' || $transaction_effect == 'payables')) {
+                if (in_array($account_id, $spread_transaction) && 
+                    ( 
+                        $transaction_effect == 'expense' ||
+                        (
+                            $this->accrualActivationStatus() &&
+                            (
+                                $transaction_effect == 'depreciation' || 
+                                $transaction_effect == 'payroll_liability' || 
+                                $transaction_effect == 'settlements' || 
+                                $transaction_effect == 'payables'
+                            )
+                        )
+                    )) {
                     $transacted_amount += $spread_transaction['transacted_amount'];
                 }
             }

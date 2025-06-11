@@ -40,6 +40,7 @@ class Journal extends WebController
             $result['check_if_financial_report_is_submitted'] = $financialReportLibrary->checkIfFinancialReportIsSubmitted([$office_id], $transacting_month);
             // Users should be able to reverse voucher even if the MFRs are submitted. This is important to allow handling stale cheques and invalid transactions
             $result['mfr_submited_status'] = $financialReportLibrary->checkIfFinancialReportIsSubmitted([$office_id], $transacting_month);; // A stop gap waiting a discussion with Development Team on this matter so that ticket INC0218239 can be resolved.           
+            $result['accrual_activated'] = false;
           }
 
         return $result;
