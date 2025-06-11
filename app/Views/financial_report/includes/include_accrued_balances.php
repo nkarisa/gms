@@ -15,40 +15,14 @@ thead tr td {
         </tr>
     </thead>
     <tbody>
-        <tr>
-            <td>Receivables</td>
-            <td>0.00</td>
-            <td>0.00</td>
-            <td>0.00</td>
-            <td>0.00</td>
-        </tr>
-        <tr>
-            <td>Payables</td>
-            <td>0.00</td>
-            <td>0.00</td>
-            <td>0.00</td>
-            <td>0.00</td>
-        </tr>
-        <tr>
-            <td>Prepayments</td>
-            <td>0.00</td>
-            <td>0.00</td>
-            <td>0.00</td>
-            <td>0.00</td>
-        </tr>
-        <tr>
-            <td>Depreciation</td>
-            <td>0.00</td>
-            <td>0.00</td>
-            <td>0.00</td>
-            <td>0.00</td>
-        </tr>
-        <tr>
-            <td>Payroll Liability</td>
-            <td>0.00</td>
-            <td>0.00</td>
-            <td>0.00</td>
-            <td>0.00</td>
-        </tr>
+        <?php foreach($accrued_balance_report as $accrued_ledger_account => $accrued_ledger_balance){?>
+            <tr>
+                <td><?= get_phrase($accrued_ledger_account); ?></td>
+                <td><?= number_format($accrued_ledger_balance['opening'],2); ?></td>
+                <td><?= number_format($accrued_ledger_balance['debit'],2); ?></td>
+                <td><?= number_format($accrued_ledger_balance['credit'],2); ?></td>
+                <td><?= number_format($accrued_ledger_balance['closing'],2); ?></td>
+            </tr>
+        <?php }?>
     </tbody>
 </table>

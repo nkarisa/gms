@@ -1625,56 +1625,19 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
         // Decline subsequent submitted financial reports
         $this->declineSubsequentFinancialReports($event_payload['post']['item_id'], $event_payload['post']['next_status']);
     }
-
-    // $this->read_db->select(array('status_approval_direction'));
-    // $this->read_db->join('approval_flow','approval_flow.approval_flow_id=status.fk_approval_flow_id');
-    // $this->read_db->join('approve_item','approve_item.approve_item_id=approval_flow.fk_approve_item_id');
-    // $this->read_db->where(array('approve_item_name' => $event_payload['item'], 'status_id' => $event_payload['post']['next_status'] ));
-    // $status_obj = $this->read_db->get('status');
-
-    // if($status_obj->num_rows() > 0){
-    //   $status_approval_direction = $status_obj->row()->status_approval_direction;
-    // }
-    
-    // Perform actions here if the record is being declined
-    // if($status_approval_direction == -1){ // -1 mean that it is a decline status
-    //     //Unsubmit the current financial report
-    //     $data['financial_report_is_submitted'] = 0;
-    //     $this->write_db->where(['financial_report_id' => $event_payload['post']['item_id']]);
-    //     $this->write_db->update('financial_report', $data);
-        
-    //     // Decline subsequent submitted financial reports
-    //     $this->decline_subsequent_financial_reports($event_payload['post']['item_id'], $event_payload['post']['next_status']);
-    // }
     
   }
 
   function declineSubsequentFinancialReports($financial_report_id, $decline_status){
-    // $this->read_db->reset_query(); 
-    // log_message('error', json_encode([$financial_report_id,$decline_status]));
     
     $builder = $this->read_db->table('financial_report');
     $builder->select(array('financial_report_month','fk_office_id'));
     $builder->Where(array('financial_report_id' => $financial_report_id));
     $financial_report_obj = $builder->get();
-
-    // log_message('error', json_encode([$financial_report_obj->getResultObject()]));
-
-    // $this->read_db->select(array('financial_report_month','fk_office_id'));
-    // $this->read_db->where(array('financial_report_id' => $financial_report_id));
-    // $financial_report_obj = $this->read_db->get('financial_report');
-
-    //log_message('error', json_encode([$financial_report_id,$decline_status, $financial_report_obj->row_array()]));
-
-    //return false;
     
     if($financial_report_obj->getNumRows() > 0){
 
         $financial_report = $financial_report_obj->getRowArray(); 
-        // log_message('error', json_encode([$financial_report]));
-        // log_message('error', json_encode(['fk_office_id' => $financial_report['fk_office_id'], 
-        // 'financial_report_month > ' => $financial_report['financial_report_month']]));
-
         // Check if we have subsequent submit reports and unsubmit them and reset their approval status to step 1
         // $initial_item_status=$this->grants_model->initial_item_status('financial_report');
         $initial_item_status = $this->statusLibrary->initialItemStatus('financial_report');
@@ -1689,12 +1652,20 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
             'financial_report_month > ' => $financial_report['financial_report_month']
         ]);
         $builder2->whereNotIn('fk_status_id', [$initial_item_status, $decline_status]);
-        // log_message('error', json_encode($builder2->getCompiledUpdate()));
-        $builder2->update($subsequent_mfr_data);
-
-        
-        
+        $builder2->update($subsequent_mfr_data);        
     }
+  }
+
+  public function accruedBalanceReport($office_ids, $reporting_month){
+    $rst = [
+        'receivables' => ['opening' => 10000,'debit' => 2000,'credit' => 8000,'closing' => 4000],
+        'payables' => ['opening' => 10000,'debit' => 2000,'credit' => 8000,'closing' => 4000],
+        'prepayments' => ['opening' => 10000,'debit' => 2000,'credit' => 8000,'closing' => 4000],
+        'depreciation' => ['opening' => 10000,'debit' => 2000,'credit' => 8000,'closing' => 4000],
+        'payroll_liability' => ['opening' => 10000,'debit' => 2000,'credit' => 8000,'closing' => 4000],
+    ];
+
+    return $rst;
   }
 
   function lookupTables(): array
