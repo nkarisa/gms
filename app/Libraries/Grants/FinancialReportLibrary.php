@@ -371,7 +371,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
                     $cash_transactions_to_date['bank']['income'] += $row['amount'];
                 }
 
-                if (($row['voucher_type_account_code'] == 'bank' && $row['voucher_type_effect_code'] == 'expense') || ($row['voucher_type_account_code'] == 'bank' && $row['voucher_type_effect_code'] == 'bank_contra')) {
+                if (($row['voucher_type_account_code'] == 'bank' && $row['voucher_type_effect_code'] == 'expense')  || ($row['voucher_type_account_code'] == 'accrual' && ($row['voucher_type_effect_code'] == 'disbursements' || $row['voucher_type_effect_code'] == 'prepayments')) || ($row['voucher_type_account_code'] == 'bank' && $row['voucher_type_effect_code'] == 'bank_contra')) {
                     $cash_transactions_to_date['bank']['expense'] += $row['amount'];
                 }
 
@@ -975,7 +975,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
 
     function getIncomeAccountMonthExpense($office_ids, $start_date_of_month, $project_ids = [], $office_bank_ids = [])
     {
-        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+        $statusLibrary = new StatusLibrary();
         $expense_income = [];
         $max_approval_status_ids = $statusLibrary->getMaxApprovalStatusId('voucher', $office_ids);
 
@@ -1103,7 +1103,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
          $builder->where(array('voucher_date>=' => $start_date_of_reporting_month,
              'voucher_date<=' => $end_date_of_reporting_month
          ));
-         $builder->whereIn('voucher_type_effect_code', ['expense', 'bank_refund']);
+         $builder->whereIn('voucher_type_effect_code', ['expense', 'bank_refund','disbursements','prepayments']);
  
          $builder->join('voucher', 'voucher.voucher_id=voucher_detail.fk_voucher_id');
          $builder->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
@@ -1163,7 +1163,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
              'voucher_date<=' => $end_date_of_reporting_month
          ));
          
-         $builder->whereIn('voucher_type_effect_code', ['expense','bank_refund']);
+         $builder->whereIn('voucher_type_effect_code', ['expense','bank_refund','disbursements','prepayments']);
  
          $builder->join('voucher', 'voucher.voucher_id=voucher_detail.fk_voucher_id');
          $builder->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
