@@ -24,6 +24,7 @@ class Journal extends WebController
 
         if($this->action == 'view'){
             $financialReportLibrary = new \App\Libraries\Grants\FinancialReportLibrary();
+            $journalLibrary = new JournalLibrary();
             $userLibrary = new \App\Libraries\Core\UserLibrary();
 
             $journal_id = hash_id($this->id,'decode');
@@ -39,8 +40,8 @@ class Journal extends WebController
             $result['role_has_journal_update_permission'] = $userLibrary->checkRoleHasPermissions(ucfirst($this->controller), 'update');
             $result['check_if_financial_report_is_submitted'] = $financialReportLibrary->checkIfFinancialReportIsSubmitted([$office_id], $transacting_month);
             // Users should be able to reverse voucher even if the MFRs are submitted. This is important to allow handling stale cheques and invalid transactions
-            $result['mfr_submited_status'] = $financialReportLibrary->checkIfFinancialReportIsSubmitted([$office_id], $transacting_month);; // A stop gap waiting a discussion with Development Team on this matter so that ticket INC0218239 can be resolved.           
-            $result['accrual_activated'] = false;
+            $result['mfr_submited_status'] = $financialReportLibrary->checkIfFinancialReportIsSubmitted([$office_id], $transacting_month); // A stop gap waiting a discussion with Development Team on this matter so that ticket INC0218239 can be resolved.           
+            $result['accrual_activated'] = $journalLibrary->checkIfAccountingSystemAccrualIsActivated($account_system_id, $office_id, $transacting_month);
           }
 
         return $result;

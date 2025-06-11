@@ -1129,4 +1129,32 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
         return $voucher_has_been_cancelled_reused;
     }
+
+    public function checkIfAccountingSystemAccrualIsActivated($account_system_id, $office_id, $transacting_month){
+        $checkIfSet = false;
+        $accountSystemSettingLibrary = new \App\Libraries\Core\AccountSystemSettingLibrary();
+        $account_system_settings = $accountSystemSettingLibrary->getAccountSystemSettings($account_system_id);
+
+        $use_accrual_based_accounting =  $account_system_settings['use_accrual_based_accounting'] ?? 0;
+
+        if($use_accrual_based_accounting){
+            $checkIfSet = true;
+        }
+
+        $transacting_next_month = date('Y-m-t', strtotime('last day of next month', strtotime($transacting_month)));
+        $monthClosingBalances = $this->monthOpeningBankCashBalance($office_id, $transacting_next_month);
+
+        $sum_accrual_closing_balances = 0;
+        foreach($monthClosingBalances as $voucherTypeAccountCode => $monthClosingBalance){
+            if(in_array($voucherTypeAccountCode, ['receivables','payables','prepayments','depreciation','payroll_liability'])){
+                $sum_accrual_closing_balances += $monthClosingBalance['amount'];
+            }
+        }
+
+        if(!$sum_accrual_closing_balances){
+            $checkIfSet = false;
+        }
+
+        return $checkIfSet;
+    }
 }
