@@ -590,7 +590,9 @@ trait JournalBuilder
         if (
             $transaction_effect == 'expense' || 
             $transaction_effect == 'settlements' ||  
-            $transaction_effect == 'payables'
+            $transaction_effect == 'payables' ||
+            $transaction_effect == 'depreciation' ||
+            $transaction_effect == 'payroll_liability'
         ) {
             $spread_cells = $this->expenseAccountsSpreading($accounts, $spread, $transaction_effect);
         } elseif (
@@ -640,11 +642,12 @@ trait JournalBuilder
     private function expenseAccountsSpreading($accounts, $spread, $transaction_effect): string
     {
         // Fill up empty cells in spread when the account type is an expense type
+        // log_message('error', json_encode($spread));
         $spread_cells = $this->emptyJournalCells('income');
         foreach ($accounts as $account_id => $account_code) {
             $transacted_amount = 0;
             foreach ($spread as $spread_transaction) {
-                if (in_array($account_id, $spread_transaction) && ($transaction_effect == 'expense' || $transaction_effect == 'settlements' || $transaction_effect == 'payables')) {
+                if (in_array($account_id, $spread_transaction) && ($transaction_effect == 'expense' || $transaction_effect == 'depreciation' || $transaction_effect == 'payroll_liability' || $transaction_effect == 'settlements' || $transaction_effect == 'payables')) {
                     $transacted_amount += $spread_transaction['transacted_amount'];
                 }
             }

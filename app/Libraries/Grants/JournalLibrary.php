@@ -125,7 +125,13 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
                     $spread[$count]['account_id'] = $fk_income_account_id;
                 } elseif ($voucher_type_effect_code == 'bank_contra' || $voucher_type_effect_code == 'cash_contra') {
                     $spread[$count]['account_id'] = $fk_contra_account_id;
-                } elseif($voucher_type_effect_code == 'expense' || $voucher_type_effect_code == 'settlements' || $voucher_type_effect_code == 'payables') {
+                } elseif(
+                    $voucher_type_effect_code == 'expense' || 
+                    $voucher_type_effect_code == 'settlements' || 
+                    $voucher_type_effect_code == 'payables' || 
+                    $voucher_type_effect_code == 'depreciation' || 
+                    $voucher_type_effect_code == 'payroll_liability'
+                    ) {
                     $spread[$count]['account_id'] = $fk_expense_account_id;
                 }
 
