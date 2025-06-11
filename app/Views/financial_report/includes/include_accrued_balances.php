@@ -1,0 +1,54 @@
+<style>
+thead tr td {
+    font-weight:bold;
+}
+</style>  
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th><?=get_phrase('accrual_ledger');?></th>
+            <th><?=get_phrase('opening_balance');?></th>
+            <th><?=get_phrase('debit');?></th>
+            <th><?=get_phrase('credit');?></th>
+            <th><?=get_phrase('closing_balance');?></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Receivables</td>
+            <td>0.00</td>
+            <td>0.00</td>
+            <td>0.00</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>Payables</td>
+            <td>0.00</td>
+            <td>0.00</td>
+            <td>0.00</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>Prepayments</td>
+            <td>0.00</td>
+            <td>0.00</td>
+            <td>0.00</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>Depreciation</td>
+            <td>0.00</td>
+            <td>0.00</td>
+            <td>0.00</td>
+            <td>0.00</td>
+        </tr>
+        <tr>
+            <td>Payroll Liability</td>
+            <td>0.00</td>
+            <td>0.00</td>
+            <td>0.00</td>
+            <td>0.00</td>
+        </tr>
+    </tbody>
+</table>
