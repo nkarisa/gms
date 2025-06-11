@@ -282,7 +282,7 @@ trait JournalBuilder
         );
     }
 
-    public function computeBankRunningBalances($voucher, $voucher_amount, $sum_bank_income, $sum_bank_expense, &$bank_income, &$bank_expense, &$running_bank_balance)
+    public function computeBankRunningBalances($voucher, $voucher_amount, &$sum_bank_income, &$sum_bank_expense, &$bank_income, &$bank_expense, &$running_bank_balance)
     {
         $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
         $voucher_type_cash_account = $voucher['voucher_type_cash_account'];
@@ -304,11 +304,11 @@ trait JournalBuilder
             $sum_bank_income[$office_bank_id] += $bank_income[$office_bank_id];
             $sum_bank_expense[$office_bank_id] += $bank_expense[$office_bank_id];
 
-            $running_bank_balance[$office_bank_id] += ($sum_bank_income[$office_bank_id] - $sum_bank_expense[$office_bank_id]);
+            $running_bank_balance[$office_bank_id] += ($bank_income[$office_bank_id] - $bank_expense[$office_bank_id]);
         }
     }
 
-    public function computeCashRunningBalances($voucher, $voucher_amount, $sum_petty_cash_income, $sum_petty_cash_expense, &$cash_income, &$cash_expense, &$running_petty_cash_balance)
+    public function computeCashRunningBalances($voucher, $voucher_amount, &$sum_petty_cash_income, &$sum_petty_cash_expense, &$cash_income, &$cash_expense, &$running_petty_cash_balance)
     {
         $voucher_type_cash_account = $voucher['voucher_type_cash_account'];
         $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
@@ -329,12 +329,12 @@ trait JournalBuilder
             $sum_petty_cash_income[$office_cash_id] += $cash_income[$office_cash_id];
             $sum_petty_cash_expense[$office_cash_id] += $cash_expense[$office_cash_id];
             
-            $running_petty_cash_balance[$office_cash_id] += ($sum_petty_cash_income[$office_cash_id] - $sum_petty_cash_expense[$office_cash_id]);
+            $running_petty_cash_balance[$office_cash_id] += ($cash_income[$office_cash_id] - $cash_expense[$office_cash_id]);
         }
 
     }
 
-    public function computePayablesRunningBalances($voucher, $voucher_amount, $sum_payables_income, $sum_payables_expense, &$payables_income, &$payables_expense, &$running_payables_balance)
+    public function computePayablesRunningBalances($voucher, $voucher_amount, &$sum_payables_income, &$sum_payables_expense, &$payables_income, &$payables_expense, &$running_payables_balance)
     {
         $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
 
@@ -345,11 +345,11 @@ trait JournalBuilder
             $sum_payables_income += $payables_income;
             $sum_payables_expense += $payables_expense;
 
-            $running_payables_balance += ($sum_payables_income - $sum_payables_expense);
+            $running_payables_balance += ($payables_income - $payables_expense);
         }
     }
 
-    public function computeReceivablesRunningBalances($voucher, $voucher_amount, $sum_receivables_income, $sum_receivables_expense, &$receivables_income, &$receivables_expense, &$running_receivables_balance)
+    public function computeReceivablesRunningBalances($voucher, $voucher_amount, &$sum_receivables_income, &$sum_receivables_expense, &$receivables_income, &$receivables_expense, &$running_receivables_balance)
     {
         $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
 
@@ -360,12 +360,12 @@ trait JournalBuilder
             $sum_receivables_income += $receivables_income;
             $sum_receivables_expense += $receivables_expense;
 
-            $running_receivables_balance += ($sum_receivables_income - $sum_receivables_expense);
+            $running_receivables_balance += ($receivables_income - $receivables_expense);
         }
 
     }
 
-    public function computePrepaymentsRunningBalances($voucher, $voucher_amount, $sum_prepayments_income, $sum_prepayments_expense, &$prepayments_income, &$prepayments_expense, &$running_prepayments_balance)
+    public function computePrepaymentsRunningBalances($voucher, $voucher_amount, &$sum_prepayments_income, &$sum_prepayments_expense, &$prepayments_income, &$prepayments_expense, &$running_prepayments_balance)
     {
         $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
 
@@ -376,12 +376,12 @@ trait JournalBuilder
             $sum_prepayments_income += $prepayments_income;
             $sum_prepayments_expense += $prepayments_expense;
 
-            $running_prepayments_balance += ($sum_prepayments_income - $sum_prepayments_expense);
+            $running_prepayments_balance += ($prepayments_income - $prepayments_expense);
         }
 
     }
 
-    public function computeDepreciationRunningBalances($voucher, $voucher_amount, $sum_depreciation_income, $sum_depreciation_expense, &$depreciation_income, &$depreciation_expense, &$running_depreciation_balance)
+    public function computeDepreciationRunningBalances($voucher, $voucher_amount, &$sum_depreciation_income, &$sum_depreciation_expense, &$depreciation_income, &$depreciation_expense, &$running_depreciation_balance)
     {
         $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
 
@@ -392,11 +392,11 @@ trait JournalBuilder
             $sum_depreciation_income += $depreciation_income;
             $sum_depreciation_expense += $depreciation_expense;
 
-            $running_depreciation_balance += ($sum_depreciation_income - $sum_depreciation_expense);
+            $running_depreciation_balance += ($depreciation_income - $depreciation_expense);
         }
     }
 
-    public function computePayrollLiabilityRunningBalances($voucher, $voucher_amount, $sum_payroll_liability_income, $sum_payroll_liability_expense, &$payroll_liability_income, &$payroll_liability_expense, &$running_payroll_liability_balance)
+    public function computePayrollLiabilityRunningBalances($voucher, $voucher_amount, &$sum_payroll_liability_income, &$sum_payroll_liability_expense, &$payroll_liability_income, &$payroll_liability_expense, &$running_payroll_liability_balance)
     {
         $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
 
@@ -407,7 +407,7 @@ trait JournalBuilder
             $sum_payroll_liability_income += $payroll_liability_income;
             $sum_payroll_liability_expense += $payroll_liability_expense;
 
-            $running_payroll_liability_balance += ($sum_payroll_liability_income - $sum_payroll_liability_expense);
+            $running_payroll_liability_balance += ($payroll_liability_income - $payroll_liability_expense);
         }
 
     }
