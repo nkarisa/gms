@@ -233,7 +233,7 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
         $system_opening_bank = $this->systemOpeningBankBalance($office_id, $office_bank_id);
         $system_opening_cash = $this->systemOpeningCashBalance($office_id, $office_bank_id);
-        // $system_opening_accrual = $this->systemOpeningAccrualBalance($office_id, $office_bank_id);
+        $system_opening_accrual = $this->systemOpeningAccrualBalance($office_id, $office_bank_id);
 
         $bank_to_date_income  = [];
         $bank_to_date_expense = [];
@@ -379,6 +379,10 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             $total_cost = $total_cost_obj->getRow()->voucher_detail_total_cost;
         }
         return $total_cost;
+    }
+
+    private function systemOpeningAccrualBalance($office_id, $office_bank_id = 0){
+        $account_system_id = $this->getTypeNameById('office', $office_id, 'fk_account_system_id');
     }
 
     private function systemOpeningCashBalance($office_id, $office_bank_id = 0)
