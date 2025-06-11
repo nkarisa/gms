@@ -5,6 +5,6 @@
 <?php } ?>
 
 <?php if ($next) { ?>
-    <a class='pull-right' href="<?= base_url(); ?>vournal/view/<?= hash_id($next); ?>" title='Next Month'>
+    <a class='pull-right' href="<?= base_url(); ?>journal/view/<?= hash_id($next); ?>" title='Next Month'>
         <i class='fa fa-plus-circle' style='font-size:20pt;'></i></a>
 <?php } ?>
