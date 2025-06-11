@@ -328,7 +328,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
 
     function cashTransactionsToDate($office_ids, $reporting_month, $project_ids = [], $office_bank_ids = [], $office_cash_id = 0, $retrieve_only_max_approved = true)
     {
-        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+        $statusLibrary = new StatusLibrary();
         $cash_transactions_to_date = [];
         $max_approval_status_ids = $statusLibrary->getMaxApprovalStatusId('voucher', $office_ids);
         $start_of_reporting_month = date('Y-m-01', strtotime($reporting_month));
@@ -367,7 +367,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
 
             foreach ($cash_transactions_to_date_arr as $row) {
 
-                if (($row['voucher_type_account_code'] == 'bank' && $row['voucher_type_effect_code'] == 'income') || ($row['voucher_type_account_code'] == 'cash' && $row['voucher_type_effect_code'] == 'cash_contra')) {
+                if (($row['voucher_type_account_code'] == 'bank' && $row['voucher_type_effect_code'] == 'income') || ($row['voucher_type_account_code'] == 'accrual' && $row['voucher_type_effect_code'] == 'payments') || ($row['voucher_type_account_code'] == 'cash' && $row['voucher_type_effect_code'] == 'cash_contra')) {
                     $cash_transactions_to_date['bank']['income'] += $row['amount'];
                 }
 
@@ -938,7 +938,7 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
     function getAccountMonthIncome($office_ids, $start_date_of_month, $project_ids = [], $office_bank_ids = [])
     {
 
-        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+        $statusLibrary = new StatusLibrary();
 
         $max_approval_status_ids = $statusLibrary->getMaxApprovalStatusId('voucher', $office_ids);
         $month_income = [];

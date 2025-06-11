@@ -21,8 +21,6 @@ $journal = new \App\Libraries\Grants\Builders\Journal($result);
     'item_max_approval_status_ids' => $item_max_approval_status_ids,
     'item_status' => $item_status,
     'item_initial_item_status_id' => $item_initial_item_status_id,
-    'permissions' => $permissions,
-    'active_approval_actor' => $active_approval_actor
 ] = $result['status_data'];
 
 [
