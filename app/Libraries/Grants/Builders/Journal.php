@@ -49,8 +49,16 @@ class Journal {
     }
 
     function getAccrualOpeningBalances(){
-        $month_used_accrual_ledgers = ['receivables' => 100,'payables' => 200,'prepayments' => 300,'depreciation' => 400,'payroll_liability' => 500];
-        return $month_used_accrual_ledgers;
+
+        $month_opening_balance = $this->journalData['vouchers']['month_opening_balance'];
+
+        $receivables = $month_opening_balance['receivables']['amount'];
+        $payables = $month_opening_balance['payables']['amount'];
+        $prepayments = $month_opening_balance['prepayments']['amount'];
+        $depreciation = $month_opening_balance['depreciation']['amount'];
+        $payroll_liability = $month_opening_balance['payroll_liability']['amount'];
+
+        return compact('receivables','payables', 'prepayments', 'depreciation','payroll_liability');
     }
     function getMonthAccounts(): array {
         return $this->journalData['vouchers']['accounts'];

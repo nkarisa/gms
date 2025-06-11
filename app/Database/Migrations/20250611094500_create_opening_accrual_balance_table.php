@@ -31,7 +31,7 @@ class CreateOpeningAccrualBalanceTable extends Migration
                 'null'       => false,
                 'comment'    => 'Tracking number associated with the accrual balance.',
             ],
-            'fk_system_opening_balanace_id' => [
+            'fk_system_opening_balance_id' => [
                 'type'       => 'INT',
                 'constraint' => 11,
                 'unsigned'   => true, // Assuming system_opening_balance_id is unsigned
@@ -44,7 +44,7 @@ class CreateOpeningAccrualBalanceTable extends Migration
                 'null'       => false,
                 'comment'    => 'Type of account for the accrual balance.',
             ],
-            'opening_accrual_amount' => [
+            'opening_accrual_balance_amount' => [
                 'type'        => 'DECIMAL',
                 'constraint'  => '50,2',
                 'null'        => false,

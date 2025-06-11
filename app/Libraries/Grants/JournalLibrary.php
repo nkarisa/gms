@@ -233,7 +233,7 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
         $system_opening_bank = $this->systemOpeningBankBalance($office_id, $office_bank_id);
         $system_opening_cash = $this->systemOpeningCashBalance($office_id, $office_bank_id);
-        $system_opening_accrual = $this->systemOpeningAccrualBalance($office_id, $office_bank_id);
+        $system_opening_accrual = $this->systemOpeningAccrualBalance($office_id);
 
         $bank_to_date_income  = [];
         $bank_to_date_expense = [];
@@ -242,6 +242,9 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $cash_to_date_income  = [];
         $cash_to_date_expense = [];
         $month_cash_opening   = [];
+        $month_accrual_opening = [];
+
+        $toDateTotals = $this->getAccrualOrCashIncomeOrExpenseToDate($office_id, $transacting_month);
 
         foreach ($system_opening_bank as $office_bank_id_in_loop => $balance_amount) {
             $bank_to_date_income[$office_bank_id_in_loop]                = $this->getCashIncomeOrExpenseToDate($office_id, $transacting_month, 'bank', 'income', $office_bank_id_in_loop);
@@ -257,23 +260,38 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             $month_cash_opening[$office_cash_id]['amount']       = $office_cash_balance['amount'] + ($cash_to_date_income[$office_cash_id] - $cash_to_date_expense[$office_cash_id]);
         }
 
-        // $month_used_accrual_ledgers = ['receivables' => 100,'payables' => 200,'prepayments' => 300,'depreciation' => 400,'payroll_liability' => 500];
-        // foreach ($system_opening_accrual as $accrual_id => $accrual_balance) {
-        //     $accrual_to_date_debit[$accrual_id] = 0;
-        //     $accrual_to_date_credit[$accrual_id] = 0;
-        //     $month_accrual_opening[$accrual_id]['account_name'] = $accrual_balance['account_name'];
-        //     $month_accrual_opening[$accrual_id]['amount'] = $accrual_balance['amount'] + $accrual_to_date_debit[$accrual_id] - $accrual_to_date_credit[$accrual_id];
-        // }
+        foreach ($system_opening_accrual as $accrual_account => $accrual_balance) {
 
+            $debitAmount = '';
+            $creditAmount = '';
 
-        return [
+            if($accrual_account == 'receivables' || $accrual_account == 'payments'){
+                $debitAmount = $toDateTotals['accrual']['receivables'] ?? 0;
+                $creditAmount = $toDateTotals['accrual']['payments'] ?? 0;
+            }elseif($accrual_account == 'payables' || $accrual_account == 'disbursements'){
+                $debitAmount = $toDateTotals['accrual']['disbursements'] ?? 0;
+                $creditAmount = $toDateTotals['accrual']['payables'] ?? 0;
+            }elseif($accrual_account == 'prepayments' || $accrual_account == 'settlements'){
+                $debitAmount = $toDateTotals['accrual']['prepayments'] ?? 0;
+                $creditAmount = $toDateTotals['accrual']['settlements'] ?? 0;
+            }elseif($accrual_account == 'depreciation'){
+                $debitAmount = 0;
+                $creditAmount = $toDateTotals['accrual']['depreciation'] ?? 0;
+            }elseif($accrual_account == 'payroll_liability'){
+                $debitAmount = 0;
+                $creditAmount = $toDateTotals['accrual']['payroll_liability'] ?? 0;
+            }
+            
+            $accrual_to_date_debit[$accrual_account] = $debitAmount; 
+            $accrual_to_date_credit[$accrual_account] = $creditAmount;
+            $month_accrual_opening[$accrual_account]['account_name'] = $accrual_balance['account_name'];
+            $month_accrual_opening[$accrual_account]['amount'] = $accrual_balance['amount'] + $accrual_to_date_debit[$accrual_account] - $accrual_to_date_credit[$accrual_account];
+        }
+
+       return [
             'bank' => $month_bank_opening, 
             'cash' => $month_cash_opening, 
-            'receivables' => ['account_name' => 'receivables', 'amount' => 100], 
-            'payables' => ['account_name' => 'payables', 'amount' => 200],
-            'prepayments' => ['account_name' => 'prepayments', 'amount' => 300],
-            'depreciation' => ['account_name' => 'depreciation', 'amount' => 400],
-            'payroll_liability' => ['account_name' => 'depreciation', 'amount' => 500]
+            ...$month_accrual_opening
         ];
     }
 
@@ -286,7 +304,7 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return $office_bank_project_allocations;
     }
 
-    public function getCashIncomeOrExpenseToDate($office_id, $transacting_month, $cash_account, $transaction_effect, $office_bank_id = 0, $office_cash_id = 0)
+     public function getAccrualOrCashIncomeOrExpenseToDate($office_id, $transacting_month, $office_bank_id = 0, $office_cash_id = 0)
     {
 
         $office_bank_project_allocations = $this->getOfficeBankProjectAllocation($office_bank_id);
@@ -294,11 +312,13 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
         $builder = $this->read_db->table("voucher_detail");
         $builder->selectSum('voucher_detail_total_cost');
+        $builder->select(['voucher_type_account_code', 'voucher_type_effect_code']);
         $builder->where('voucher_date < ', date('Y-m-01', strtotime($transacting_month)));
         $builder->join('voucher', 'voucher.voucher_id=voucher_detail.fk_voucher_id');
         $builder->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
         $builder->join('voucher_type_account', 'voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
         $builder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+        $builder->where(['fk_office_id' => $office_id]);
 
         if ($office_bank_id) {
             $builder->groupStart();
@@ -314,7 +334,56 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         }
 
         if ($office_cash_id) {
-            $builder->where(['fk_office_cash_id' => $office_cash_id, 'fk_office_id' => $office_id]);
+            $builder->where(['fk_office_cash_id' => $office_cash_id]);
+        }
+
+        $builder->groupBy(['voucher_type_account_code', 'voucher_type_effect_code']);
+
+        $total_cost_groups     = [];
+        // log_message('error', $builder->getCompiledSelect());
+        $total_cost_obj = $builder->get();
+
+        if ($total_cost_obj->getNumRows() > 0) {
+            $total_cost_groups_rst = $total_cost_obj->getResultArray();
+
+            foreach($total_cost_groups_rst as $total_cost_group){
+                $total_cost_groups[$total_cost_group['voucher_type_account_code']][$total_cost_group['voucher_type_effect_code']] = $total_cost_group['voucher_detail_total_cost'];
+            }
+        }
+
+        return $total_cost_groups;
+    }
+
+    public function getCashIncomeOrExpenseToDate($office_id, $transacting_month, $cash_account, $transaction_effect, $office_bank_id = 0, $office_cash_id = 0)
+    {
+
+        $office_bank_project_allocations = $this->getOfficeBankProjectAllocation($office_bank_id);
+        $office_bank_ids                 = array_unique(array_column($office_bank_project_allocations, 'fk_office_bank_id'));
+
+        $builder = $this->read_db->table("voucher_detail");
+        $builder->selectSum('voucher_detail_total_cost');
+        $builder->where('voucher_date < ', date('Y-m-01', strtotime($transacting_month)));
+        $builder->join('voucher', 'voucher.voucher_id=voucher_detail.fk_voucher_id');
+        $builder->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+        $builder->join('voucher_type_account', 'voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
+        $builder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+        $builder->where(['fk_office_id' => $office_id]);
+
+        if ($office_bank_id) {
+            $builder->groupStart();
+            $builder->where(['fk_office_bank_id' => $office_bank_id]);
+            $allocation_ids = array_column($office_bank_project_allocations, 'fk_project_allocation_id');
+
+            if (in_array($office_bank_id, $office_bank_ids)) {
+                $builder->orWhereIn('fk_project_allocation_id', $allocation_ids);
+                $builder->where(['fk_office_bank_id' => $office_bank_id]);
+            }
+
+            $builder->groupEnd();
+        }
+
+        if ($office_cash_id) {
+            $builder->where(['fk_office_cash_id' => $office_cash_id]);
         }
 
         /*1: Cash income has [voucher_type_account_code of cash and a voucher_type_effect_code of income]
@@ -370,7 +439,28 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             $builder->groupEnd();
 
             $builder->groupEnd();
+        }elseif($cash_account == 'receivables' && $transaction_effect = 'debit'){
+            $builder->where(['voucher_type_account_code' => 'accrual', 'voucher_type_effect_code' => 'receivables']);
+        }elseif($cash_account == 'receivables' && $transaction_effect = 'credit'){
+            $builder->where(['voucher_type_account_code' => 'accrual', 'voucher_type_effect_code' => 'payments']);
+        }elseif($cash_account == 'payables' && $transaction_effect = 'debit'){
+            $builder->where(['voucher_type_account_code' => 'accrual', 'voucher_type_effect_code' => 'disbursements']);
+        }elseif($cash_account == 'payables' && $transaction_effect = 'credit'){
+            $builder->where(['voucher_type_account_code' => 'accrual', 'voucher_type_effect_code' => 'payables']);
+        }elseif($cash_account == 'prepayments' && $transaction_effect = 'debit'){
+            $builder->where(['voucher_type_account_code' => 'accrual', 'voucher_type_effect_code' => 'prepayments']);
+        }elseif($cash_account == 'prepayments' && $transaction_effect = 'credit'){
+            $builder->where(['voucher_type_account_code' => 'accrual', 'voucher_type_effect_code' => 'settlements']);
+        }elseif($cash_account == 'depreciation' && $transaction_effect = 'debit'){
+            // $builder->where(['voucher_type_account_code' => 'accrual', 'voucher_type_effect_code' => 'settlements']);
+        }elseif($cash_account == 'depreciation' && $transaction_effect = 'credit'){
+            $builder->where(['voucher_type_account_code' => 'accrual', 'voucher_type_effect_code' => 'depreciation']);
+        }elseif($cash_account == 'payroll_liability' && $transaction_effect = 'debit'){
+            // $builder->where(['voucher_type_account_code' => 'accrual', 'voucher_type_effect_code' => 'depreciation']);
+        }elseif($cash_account == 'payroll_liability' && $transaction_effect = 'credit'){
+            $builder->where(['voucher_type_account_code' => 'accrual', 'voucher_type_effect_code' => 'payroll_liability']);
         }
+
 
         $total_cost     = 0;
         $total_cost_obj = $builder->get();
@@ -381,8 +471,45 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return $total_cost;
     }
 
-    private function systemOpeningAccrualBalance($office_id, $office_bank_id = 0){
-        $account_system_id = $this->getTypeNameById('office', $office_id, 'fk_account_system_id');
+    private function systemOpeningAccrualBalance($office_id){
+
+        $accrual_accounts = [
+            'receivables',
+            'payables',
+            'prepayments',
+            'depreciation',
+            'payroll_liability'
+        ];
+
+        $builder = $this->read_db->table('opening_accrual_balance');
+        $builder->selectSum(select: 'opening_accrual_balance_amount');
+        $builder->groupBy('opening_accrual_balance_account');
+        $builder->select(['opening_accrual_balance_account']);
+        $builder->join('system_opening_balance', 'system_opening_balance.system_opening_balance_id=opening_accrual_balance.fk_system_opening_balance_id');
+        $builder->where(['system_opening_balance.fk_office_id' => $office_id]);
+        $opening_accrual_balance_accounts_obj = $builder->get();
+
+        $result = [];
+        if($opening_accrual_balance_accounts_obj->getNumRows() > 0){
+            $opening_accrual_balance_accounts = $opening_accrual_balance_accounts_obj->getResultArray();
+            foreach ($opening_accrual_balance_accounts as $opening_accrual_balance_account) {
+                $result[$opening_accrual_balance_account['opening_accrual_balance_account']]['account_name'] = $opening_accrual_balance_account['opening_accrual_balance_account'];
+                $result[$opening_accrual_balance_account['opening_accrual_balance_account']]['amount']       = $opening_accrual_balance_account['opening_accrual_balance_amount'];
+            }
+        }
+        
+        $accrual_accounts_with_opening_balance = array_column($result,'account_name');
+        $accrual_accounts_without_opening_balance = array_diff($accrual_accounts, $accrual_accounts_with_opening_balance);
+
+        // Fill up accrual accounts with no opening balances with zero amount
+        if (count($accrual_accounts_without_opening_balance) > 0) {
+            foreach ($accrual_accounts_without_opening_balance as $accrual_account) {
+                    $result[$accrual_account]['account_name'] = $accrual_account;
+                    $result[$accrual_account]['amount']       = 0;
+            }
+        }
+
+        return $result;
     }
 
     private function systemOpeningCashBalance($office_id, $office_bank_id = 0)
