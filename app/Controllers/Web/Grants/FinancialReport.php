@@ -1104,7 +1104,7 @@ function result($id = '', $parentId = null)
   $result = parent::result($id, $parentId);
 
   if ($this->action == 'view') {
-
+    $journalLibrary = new \App\Libraries\Grants\JournalLibrary();
     $report = $this->financialReportInformation($this->id);
     extract($report);
 
@@ -1152,7 +1152,7 @@ function result($id = '', $parentId = null)
       'table' => 'financial_report',
       'primary_key' => hash_id($this->id, 'decode'),
       'financial_report_status' => $status_id,
-      
+      'accrualIsActivated' => $journalLibrary->checkIfAccountingSystemAccrualIsActivated($account_system_id, $office_ids[0], $reporting_month),
       'funds_transfers' => $this->voucherLibrary->monthFundsTransferVouchers($office_ids, $reporting_month),
       'is_status_id_max' => $this->statusLibrary->isStatusIdMax('financial_report', hash_id($this->id, 'decode')),
       'office_id' =>$this->getOfficeId(),
@@ -1174,9 +1174,9 @@ function getOfficeId(){
 
 function resultArray($report_id, $office_ids, $reporting_month, $project_ids = [], $office_bank_ids = [])
 {
+  $journalLibrary = new \App\Libraries\Grants\JournalLibrary();
   extract($this->financialReportInformation($report_id));
 
-  
   $month_expenses = $this->expenseReport($office_ids, $reporting_month, $project_ids, $office_bank_ids);
   $fund_balances = $this->fundBalanceReport($office_ids, $reporting_month, $project_ids, $office_bank_ids);
 
@@ -1205,6 +1205,7 @@ function resultArray($report_id, $office_ids, $reporting_month, $project_ids = [
     'cleared_deposit_in_transit' => $this->listClearedEffects($office_ids, $reporting_month, 'income', 'cash_contra', 'bank', $project_ids, $office_bank_ids),
     'expense_report' => $month_expenses,
     'funds_transfers' => $this->voucherLibrary->monthFundsTransferVouchers($office_ids, $reporting_month),
+    'accrualIsActivated' => $journalLibrary->checkIfAccountingSystemAccrualIsActivated($account_system_id, $office_ids[0], $reporting_month),
   ];
 }
 

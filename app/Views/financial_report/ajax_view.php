@@ -1,14 +1,5 @@
 <?php
-// echo $this->id;
-//print_r($result['proof_of_cash']);
-//print_r($this->financial_report_model->bugdet_to_date_by_expense_account([6],'2020-08-01'));
-//print_r($this->financial_report_model->get_office_bank_project_allocation(1));
-// $status_data = $this->general_model->action_button_data('financial_report');
-// echo json_encode($status_data);
 $userLibrary = new \App\Libraries\Core\UserLibrary();
-
-
-
 ?>
 <div id="voucher_print">
     <div class="row">
@@ -38,6 +29,15 @@ $userLibrary = new \App\Libraries\Core\UserLibrary();
             <div class="col-xs-12">
                 <div class="col-xs-12 header"><?= get_phrase('funds_transfers'); ?></div>
                 <?php include "includes/include_funds_transfers.php"; ?>
+            </div>
+        </div>
+    <?php } ?>
+
+    <?php if (!empty($accrualIsActivated)) { ?>
+        <div class='row'>
+            <div class="col-xs-12">
+                <div class="col-xs-12 header"><?= get_phrase('accrued_balances'); ?></div>
+                <?php include "includes/include_accrued_balances.php"; ?>
             </div>
         </div>
     <?php } ?>
