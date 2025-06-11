@@ -560,8 +560,12 @@ trait JournalBuilder
     {
         $spread_cells = '';
         $financial_accounts = $this->getMonthAccounts();
+        $edge_cell = '';
         for ($i = 0; $i < count($financial_accounts[$account_type]); $i++) {
-            $spread_cells .= "<td class='align-right'>0.00</td>";
+            if($i == count($financial_accounts[$account_type]) -1){
+                $edge_cell = 'edge_cell';
+            }
+            $spread_cells .= "<td class='align-right ".$edge_cell."'>0.00</td>";
         }
         return $spread_cells;
     }
@@ -623,6 +627,9 @@ trait JournalBuilder
     private function incomeAccountsSpreading($accounts, $spread, $transaction_effect)
     {
         $spread_cells = "";
+        $edge_cell = "";
+
+        $cnt = 0;
         foreach ($accounts as $account_id => $account_code) {
             $transacted_amount = 0;
             foreach ($spread as $spread_transaction) {
@@ -631,7 +638,12 @@ trait JournalBuilder
                 }
             }
 
-            $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_income_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
+            
+            if($cnt == count($accounts) -1){
+                $edge_cell = 'edge_cell';
+            }
+            $cnt++;
+            $spread_cells .= "<td class='align-right ".$edge_cell." spread_" . $transaction_effect . " spread_income_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
         }
         // Fill up empty cells in spread when the account type is an income type
         $spread_cells .= $this->emptyJournalCells('expense');
@@ -644,6 +656,8 @@ trait JournalBuilder
         // Fill up empty cells in spread when the account type is an expense type
         // log_message('error', json_encode($spread));
         $spread_cells = $this->emptyJournalCells('income');
+        $cnt = 0;
+        $edge_cell = '';
         foreach ($accounts as $account_id => $account_code) {
             $transacted_amount = 0;
             foreach ($spread as $spread_transaction) {
@@ -651,7 +665,13 @@ trait JournalBuilder
                     $transacted_amount += $spread_transaction['transacted_amount'];
                 }
             }
-            $spread_cells .= "<td class='align-right spread_" . $transaction_effect . " spread_expense_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
+
+            if($cnt == count($accounts) -1){
+                $edge_cell = 'edge_cell';
+            }
+            $cnt++;
+
+            $spread_cells .= "<td class='align-right ".$edge_cell." spread_" . $transaction_effect . " spread_expense_" . $account_id . "'>" . number_format($transacted_amount, 2) . "</td>";
         }
 
         return $spread_cells;
