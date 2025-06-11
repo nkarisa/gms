@@ -996,10 +996,11 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
         $officeBankLibrary = new OfficeBankLibrary();
         $chequeBookLibrary = new ChequeBookLibrary();
+        $journalLibrary = new JournalLibrary();
         
         $accountSystemSettingLibrary = new \App\Libraries\Core\AccountSystemSettingLibrary();
         $account_system_settings = $accountSystemSettingLibrary->getAccountSystemSettings($this->session->user_account_system_id);
-
+        $isAccrualActivated = $journalLibrary->checkIfAccountingSystemAccrualIsActivated($account_system_id, $office_id, $transaction_date, false);
 
         $office_banks_for_office = $officeBankLibrary->getOfficeBanksForOffice($office_id);
         // Do not show bank_to_bank_contra voucher effect types if the office has only 1 bank
@@ -1007,8 +1008,6 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         if (count($office_banks_for_office['is_active']) < 2) {
             $builder->whereNotIn('voucher_type_effect_code', ['bank_to_bank_contra']);
         }
-
-
 
         if (!empty($office_banks_for_office['chequebook_exemption_expiry_date'])) {
 
@@ -1022,6 +1021,10 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
                 }
             }
 
+        }
+
+        if(!$isAccrualActivated){
+            $builder->where(['voucher_type_account_code <> ' => 'accrual']);
         }
 
         $builder->select(array('voucher_type_id', 'voucher_type_name', 'voucher_type_account_code', 'voucher_type_effect_code'));
