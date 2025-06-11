@@ -234,37 +234,10 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return $result;
     }
 
-    public function monthOpeningBankCashBalance($office_id, $transacting_month, $office_bank_id = 0)
-    {
-
-        $system_opening_bank = $this->systemOpeningBankBalance($office_id, $office_bank_id);
-        $system_opening_cash = $this->systemOpeningCashBalance($office_id, $office_bank_id);
+    public function monthOpeningAccrualBalance($office_id, $transacting_month){
         $system_opening_accrual = $this->systemOpeningAccrualBalance($office_id);
-
-        $bank_to_date_income  = [];
-        $bank_to_date_expense = [];
-        $month_bank_opening   = [];
-
-        $cash_to_date_income  = [];
-        $cash_to_date_expense = [];
-        $month_cash_opening   = [];
         $month_accrual_opening = [];
-
         $toDateTotals = $this->getAccrualOrCashIncomeOrExpenseToDate($office_id, $transacting_month);
-
-        foreach ($system_opening_bank as $office_bank_id_in_loop => $balance_amount) {
-            $bank_to_date_income[$office_bank_id_in_loop]                = $this->getCashIncomeOrExpenseToDate($office_id, $transacting_month, 'bank', 'income', $office_bank_id_in_loop);
-            $bank_to_date_expense[$office_bank_id_in_loop]               = $this->getCashIncomeOrExpenseToDate($office_id, $transacting_month, 'bank', 'expense', $office_bank_id_in_loop);
-            $month_bank_opening[$office_bank_id_in_loop]['account_name'] = $system_opening_bank[$office_bank_id_in_loop]['account_name'];
-            $month_bank_opening[$office_bank_id_in_loop]['amount']       = $system_opening_bank[$office_bank_id_in_loop]['amount'] + ($bank_to_date_income[$office_bank_id_in_loop] - $bank_to_date_expense[$office_bank_id_in_loop]);
-        }
-
-        foreach ($system_opening_cash as $office_cash_id => $office_cash_balance) {
-            $cash_to_date_income[$office_cash_id]                = $this->getCashIncomeOrExpenseToDate($office_id, $transacting_month, 'cash', 'income', $office_bank_id, $office_cash_id);
-            $cash_to_date_expense[$office_cash_id]               = $this->getCashIncomeOrExpenseToDate($office_id, $transacting_month, 'cash', 'expense', $office_bank_id, $office_cash_id);
-            $month_cash_opening[$office_cash_id]['account_name'] = $office_cash_balance['account_name'];
-            $month_cash_opening[$office_cash_id]['amount']       = $office_cash_balance['amount'] + ($cash_to_date_income[$office_cash_id] - $cash_to_date_expense[$office_cash_id]);
-        }
 
         foreach ($system_opening_accrual as $accrual_account => $accrual_balance) {
 
@@ -292,6 +265,38 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             $accrual_to_date_credit[$accrual_account] = $creditAmount;
             $month_accrual_opening[$accrual_account]['account_name'] = $accrual_balance['account_name'];
             $month_accrual_opening[$accrual_account]['amount'] = $accrual_balance['amount'] + $accrual_to_date_debit[$accrual_account] - $accrual_to_date_credit[$accrual_account];
+        }
+
+        return $month_accrual_opening;
+    }
+
+    public function monthOpeningBankCashBalance($office_id, $transacting_month, $office_bank_id = 0)
+    {
+
+        $system_opening_bank = $this->systemOpeningBankBalance($office_id, $office_bank_id);
+        $system_opening_cash = $this->systemOpeningCashBalance($office_id, $office_bank_id);
+
+        $bank_to_date_income  = [];
+        $bank_to_date_expense = [];
+        $month_bank_opening   = [];
+
+        $cash_to_date_income  = [];
+        $cash_to_date_expense = [];
+        $month_cash_opening   = [];
+        $month_accrual_opening = $this->monthOpeningAccrualBalance($office_id, $transacting_month);
+
+        foreach ($system_opening_bank as $office_bank_id_in_loop => $balance_amount) {
+            $bank_to_date_income[$office_bank_id_in_loop]                = $this->getCashIncomeOrExpenseToDate($office_id, $transacting_month, 'bank', 'income', $office_bank_id_in_loop);
+            $bank_to_date_expense[$office_bank_id_in_loop]               = $this->getCashIncomeOrExpenseToDate($office_id, $transacting_month, 'bank', 'expense', $office_bank_id_in_loop);
+            $month_bank_opening[$office_bank_id_in_loop]['account_name'] = $system_opening_bank[$office_bank_id_in_loop]['account_name'];
+            $month_bank_opening[$office_bank_id_in_loop]['amount']       = $system_opening_bank[$office_bank_id_in_loop]['amount'] + ($bank_to_date_income[$office_bank_id_in_loop] - $bank_to_date_expense[$office_bank_id_in_loop]);
+        }
+
+        foreach ($system_opening_cash as $office_cash_id => $office_cash_balance) {
+            $cash_to_date_income[$office_cash_id]                = $this->getCashIncomeOrExpenseToDate($office_id, $transacting_month, 'cash', 'income', $office_bank_id, $office_cash_id);
+            $cash_to_date_expense[$office_cash_id]               = $this->getCashIncomeOrExpenseToDate($office_id, $transacting_month, 'cash', 'expense', $office_bank_id, $office_cash_id);
+            $month_cash_opening[$office_cash_id]['account_name'] = $office_cash_balance['account_name'];
+            $month_cash_opening[$office_cash_id]['amount']       = $office_cash_balance['amount'] + ($cash_to_date_income[$office_cash_id] - $cash_to_date_expense[$office_cash_id]);
         }
 
        return [

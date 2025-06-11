@@ -1656,16 +1656,23 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
     }
   }
 
-  public function accruedBalanceReport($office_ids, $reporting_month){
-    $rst = [
-        'receivables' => ['opening' => 10000,'debit' => 2000,'credit' => 8000,'closing' => 4000],
-        'payables' => ['opening' => 10000,'debit' => 2000,'credit' => 8000,'closing' => 4000],
-        'prepayments' => ['opening' => 10000,'debit' => 2000,'credit' => 8000,'closing' => 4000],
-        'depreciation' => ['opening' => 10000,'debit' => 2000,'credit' => 8000,'closing' => 4000],
-        'payroll_liability' => ['opening' => 10000,'debit' => 2000,'credit' => 8000,'closing' => 4000],
-    ];
+  public function accruedBalanceReport($office_id, $reporting_month){
+    $journalLibrary = new \App\Libraries\Grants\JournalLibrary();
+    $monthOpeningAccrualBalance = $journalLibrary->monthOpeningAccrualBalance($office_id, $reporting_month);
+    $accrualLedgers = ['receivables', 'payables', 'prepayments', 'depreciation', 'payroll_liability'];
 
-    return $rst;
+    $balanceReport = [];
+    foreach($accrualLedgers as $accrualLedger){
+        if(array_key_exists($accrualLedger, $monthOpeningAccrualBalance)){
+           $balanceReport[$accrualLedger]['opening'] = $monthOpeningAccrualBalance[$accrualLedger]['amount'];
+           $balanceReport[$accrualLedger]['debit'] = 0;
+           $balanceReport[$accrualLedger]['credit'] = 0;
+
+           $balanceReport[$accrualLedger]['closing'] = $balanceReport[$accrualLedger]['opening'] + $balanceReport[$accrualLedger]['debit'] - $balanceReport[$accrualLedger]['credit'];
+        }
+    }
+
+    return $balanceReport;
   }
 
   function lookupTables(): array

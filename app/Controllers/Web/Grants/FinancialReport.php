@@ -1154,7 +1154,7 @@ function result($id = '', $parentId = null)
       'financial_report_status' => $status_id,
       'accrualIsActivated' => $journalLibrary->checkIfAccountingSystemAccrualIsActivated($account_system_id, $office_ids[0], $reporting_month),
       'funds_transfers' => $this->voucherLibrary->monthFundsTransferVouchers($office_ids, $reporting_month),
-      'accrued_balance_report' => $this->library->accruedBalanceReport($office_ids, $reporting_month),
+      'accrued_balance_report' => $this->library->accruedBalanceReport($office_ids[0], $reporting_month),
       'is_status_id_max' => $this->statusLibrary->isStatusIdMax('financial_report', hash_id($this->id, 'decode')),
       'office_id' =>$this->getOfficeId(),
       'action_lable'=>$action_label['status_name'],
@@ -1207,7 +1207,7 @@ function resultArray($report_id, $office_ids, $reporting_month, $project_ids = [
     'expense_report' => $month_expenses,
     'funds_transfers' => $this->voucherLibrary->monthFundsTransferVouchers($office_ids, $reporting_month),
     'accrualIsActivated' => $journalLibrary->checkIfAccountingSystemAccrualIsActivated($account_system_id, $office_ids[0], $reporting_month),
-    'accrued_balance_report' => $this->library->accruedBalanceReport($office_ids, $reporting_month),
+    'accrued_balance_report' => $this->library->accruedBalanceReport($office_ids[0], $reporting_month),
   ];
 }
 
