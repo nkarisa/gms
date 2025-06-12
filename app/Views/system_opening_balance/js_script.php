@@ -674,8 +674,20 @@ function deposit_transit_row(options) {
         function create_accrual_accounts_options($selected_options = 0){
           let options = '<option value = ""><?= get_phrase('select_ledger_account'); ?></option>'
           const accrual_accounts = ['receivables','payables','prepayments','depreciation','payroll_liability'];
+          const accrual_account_codes = $('.accrual_account_codes')
+          
 
           for (let i = 0; i < accrual_accounts.length; i++) {
+            let breakEqual = false
+            for (let j = 0; j < accrual_account_codes.length; j++) {
+              if(accrual_accounts[i] == $(accrual_account_codes[j]).val()){
+                breakEqual = true
+                break
+              }
+            }
+
+            if(breakEqual) continue
+            
             options += `<option value = '${accrual_accounts[i]}' ${selected_option_value == accrual_accounts[i] ? 'selected' : ''} >${accrual_accounts[i]}</option>`
           }
 
