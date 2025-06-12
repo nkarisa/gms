@@ -38,10 +38,10 @@ class VoucherTypeEffectLibrary extends GrantsLibrary implements \App\Interfaces\
         $voucherTypeEffects = [];
 
         if($voucherTypeEffectObj->getNumRows() > 0){
-            $$voucherTypeEffects = $voucherTypeEffectObj->getResultArray();
+            $voucherTypeEffects = $voucherTypeEffectObj->getResultArray();
         }
 
-        return $$voucherTypeEffects;
+        return $voucherTypeEffects;
     }
    
 }

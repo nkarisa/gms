@@ -375,10 +375,11 @@ class VoucherTypeLibrary extends GrantsLibrary implements \App\Interfaces\Librar
     private function getCountAccrualVoucherTypesByAccountSystem(){
       $voucherTypeReadBuilder = $this->read_db->table('voucher_type');
 
-      $voucherTypeReadBuilder->selectCount(alias: 'count');
-      $$voucherTypeReadBuilder->select('fk_account_system_id');
+      $voucherTypeReadBuilder->selectCount(alias: 'count', select: 'fk_account_system_id');
+      $voucherTypeReadBuilder->select(['fk_account_system_id']);
       $voucherTypeReadBuilder->where(['voucher_type_account_code' => 'accrual']);
-      $$voucherTypeReadBuilder->groupBy('fk_account_system_id');
+      $voucherTypeReadBuilder->join('voucher_type_account','voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
+      $voucherTypeReadBuilder->groupBy('fk_account_system_id');
       $rstObj = $voucherTypeReadBuilder->get();
 
       $result = [];
@@ -439,7 +440,7 @@ class VoucherTypeLibrary extends GrantsLibrary implements \App\Interfaces\Librar
             $trackNumberAndName = $this->generateItemTrackNumberAndName('voucher_type');
             $effectCode = $accrualAccountsCode[$accrualVoucherTypeEffects[$i]['voucher_type_effect_code']];
             $voucherTypesArray[$i]['voucher_type_track_number'] = $trackNumberAndName['voucher_type_track_number'];
-            $voucherTypesArray[$i]['voucher_type_track_name'] = $trackNumberAndName['voucher_type_track_name'];
+            $voucherTypesArray[$i]['voucher_type_name'] = $account_system_code.'-'.$accrualVoucherTypeEffects[$i]['voucher_type_effect_name'];
             $voucherTypesArray[$i]['voucher_type_is_active'] = 1;
             $voucherTypesArray[$i]['voucher_type_abbrev'] = $account_system_code.$effectCode;
             $voucherTypesArray[$i]['fk_voucher_type_account_id'] = $accrualVoucherTypeAccounts[0]['voucher_type_account_id'];

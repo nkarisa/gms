@@ -351,7 +351,6 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $builder->groupBy(['voucher_type_account_code', 'voucher_type_effect_code']);
 
         $total_cost_groups     = [];
-        // log_message('error', $builder->getCompiledSelect());
         $total_cost_obj = $builder->get();
 
         if ($total_cost_obj->getNumRows() > 0) {
