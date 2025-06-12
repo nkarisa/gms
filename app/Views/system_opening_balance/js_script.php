@@ -24,6 +24,12 @@ extract($result);
     amount: 0
   }
 
+    const initial_accrual_account_data = {
+    accrual_account: '',
+    accrual_effect: 0,
+    amount: 0
+  }
+
   $(document).ready(function() {
     bank_reconciliation_check()
     proof_of_cash_check()
@@ -76,6 +82,11 @@ extract($result);
     $('#fund_balance_table').find('tbody').append(row);
   })
 
+  $('#insert_accrual_balance').on('click', function() {
+    const row = accrual_balance_row({is_first_row: false, accrual_account_options: create_accrual_accounts_options(), accrual_ledger_options: create_accrual_ledger_options(), data: initial_accrual_account_data})
+    $('#accrual_balance_table').find('tbody').append(row);
+  })
+
   $('#insert_outstanding_cheque').on('click', function() {
     const row = outstanding_cheque_row({is_first_row: false, data: initial_outstanding_cheque_data})
     $('#outstanding_cheque_table').find('tbody').append(row);
@@ -115,6 +126,29 @@ extract($result);
 
     return row
   }
+
+  function accrual_balance_row(options) { //is_first_row = false
+
+    const {
+      is_first_row,
+      accrual_account_options,
+      accrual_ledger_options,
+      data
+    } = options
+
+    const action_button = `<div class = 'btn btn-danger remove_row outstanding_cheque_remove'>${'<?= get_phrase('remove_row'); ?>'}</div>`
+    const accrual_account_code_select = `<select name = "accrual_account_codes[]" class = "form-control accrual_account_codes mandatory">${accrual_account_options}</select>`
+    const accrual_ledger_effect_select = `<select name = "accrual_ledger_effect[]" class = "form-control accrual_ledger_effect mandatory">${accrual_ledger_options}</select>`
+    const accrual_account_amount_input = `<input  value = "${data.amount}" name = "cheque_amount[]" type = "number" class = "form-control cheque_amount bank_reconciliation_fields outstanding_cheque mandatory" />`
+   
+    const row = `
+                  <tr><td>${is_first_row ? '' : action_button}</td>
+                  <td>${accrual_account_code_select}</td>
+                  <td>${accrual_ledger_effect_select}</td>
+                  <td>${accrual_account_amount_input}</td>
+                `
+    return row
+}
 
   function outstanding_cheque_row(options) { //is_first_row = false
 
@@ -637,4 +671,11 @@ function deposit_transit_row(options) {
             // }
         });
  
+        function create_accrual_accounts_options(){
+
+        }
+
+        function create_accrual_ledger_options(){
+          
+        }
 </script>

@@ -162,46 +162,70 @@ if(empty($office_banks)){
         <table class="table table-stripped balance_table" id="fund_balance_table">
         <thead>
             <tr>
-            <th class="header_label" colspan="7"><?= get_phrase('fund_balance'); ?></th>
+                <th class="header_label" colspan="7"><?= get_phrase('fund_balance'); ?></th>
             </tr>
             <tr>
-            <th colspan="7" style="text-align:center;">
-                <div id="insert_fund_balance" class="btn btn-success"><?= get_phrase('insert_fund_balance_row'); ?></div>
-                <div id="reset_fund_balance" class="btn btn-danger"><?= get_phrase('reset_fund_balance_report'); ?></div>
-            </th>
+                <th colspan="7" style="text-align:center;">
+                    <div id="insert_fund_balance" class="btn btn-success"><?= get_phrase('insert_fund_balance_row'); ?></div>
+                    <div id="reset_fund_balance" class="btn btn-danger"><?= get_phrase('reset_fund_balance_report'); ?></div>
+                </th>
             </tr>
             <tr>
-            <th><?= get_phrase('action'); ?></th>
-            <th><?= get_phrase('project'); ?></th>
-            <th><?= get_phrase('account'); ?></th>
-            <th><?= get_phrase('month_opening'); ?></th>
-            <th><?= get_phrase('month_income'); ?></th>
-            <th><?= get_phrase('month_expense'); ?></th>
-            <th><?= get_phrase('closing_balance'); ?></th>
+                <th><?= get_phrase('action'); ?></th>
+                <th><?= get_phrase('project'); ?></th>
+                <th><?= get_phrase('account'); ?></th>
+                <th><?= get_phrase('month_opening'); ?></th>
+                <th><?= get_phrase('month_income'); ?></th>
+                <th><?= get_phrase('month_expense'); ?></th>
+                <th><?= get_phrase('closing_balance'); ?></th>
             </tr>
         </thead>
-        <tbody>
-
-        </tbody>
+        <tbody></tbody>
         <tfoot>
             <tr>
-            <td style="font-weight: bold;" colspan='6'>
-                <?= get_phrase('total_fund_balance'); ?> <span style='color:brown;font-weight:bold;'>(C)</span>
-            </td>
-            <td><input class="form-control" type='number' onkeypress="return false;" name='total_fund_balance' id='total_fund_balance' value="0" /></td>
+                <td style="font-weight: bold;" colspan='6'>
+                    <?= get_phrase('total_fund_balance'); ?> <span style='color:brown;font-weight:bold;'>(C)</span>
+                </td>
+                <td><input class="form-control" type='number' onkeypress="return false;" name='total_fund_balance' id='total_fund_balance' value="0" /></td>
             </tr>
             <tr>
-            <td style="font-weight: bold;" colspan='5'><?= get_phrase('proof_of_cash_check'); ?></td>
-            <td>
-                <i class='label label-danger' id="proof_of_cash_check"><?= get_phrase('proof_of_cash_error'); ?></i>
-                <span style='color:brown;font-weight:bold;'>D = (B = C)</span>
-            </td>
+                <td style="font-weight: bold;" colspan='5'><?= get_phrase('proof_of_cash_check'); ?></td>
+                <td>
+                    <i class='label label-danger' id="proof_of_cash_check"><?= get_phrase('proof_of_cash_error'); ?></i>
+                    <span style='color:brown;font-weight:bold;'>D = (B = C)</span>
+                </td>
             </tr>
         </tfoot>
         </table>
     </div>
     </div>
 
+    <hr/>
+
+     <div class="row">
+    <div class="col-xs-12">
+        <table class="table table-stripped balance_table" id="accrual_balance_table">
+            <thead>
+                <tr>
+                    <th class="header_label" colspan="4"><?= get_phrase('accrual_balance'); ?></th>
+                </tr>
+                <tr>
+                    <th colspan="4" style="text-align:center;">
+                        <div id="insert_accrual_balance" class="btn btn-success"><?= get_phrase('insert_accrual_balance_row'); ?></div>
+                        <div id="reset_accrual_balance" class="btn btn-danger"><?= get_phrase('reset_accrual_balance_report'); ?></div>
+                    </th>
+                </tr>
+                <tr>
+                    <th><?=get_phrase('action');?></th>
+                    <th><?=get_phrase('accrual_account');?></th>
+                    <th><?=get_phrase('accrual_ledger_effect');?></th>
+                    <th><?=get_phrase('amount');?></th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>    
     <hr />
 
     <div class='row'>
