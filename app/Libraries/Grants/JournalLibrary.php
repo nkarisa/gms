@@ -5,6 +5,8 @@ use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\JournalModel;
 use \App\Enums\VoucherTypeEffectEnum;
 
+use function GuzzleHttp\json_encode;
+
 class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
     protected $table;
@@ -1138,7 +1140,6 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $checkIfSet = false;
         $accountSystemSettingLibrary = new \App\Libraries\Core\AccountSystemSettingLibrary();
         $account_system_settings = $accountSystemSettingLibrary->getAccountSystemSettings($account_system_id);
-
         $use_accrual_based_accounting =  $account_system_settings['use_accrual_based_accounting'] ?? 0;
 
         if($use_accrual_based_accounting){
