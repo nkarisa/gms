@@ -1656,17 +1656,99 @@ class FinancialReportLibrary extends GrantsLibrary implements \App\Interfaces\Li
     }
   }
 
+  public function getAccountAndEffectGroupedOfficeAccrualTransactionsOfMonth($office_id, $reporting_month){
+    $voucherReadBuilder = $this->read_db->table('voucher');
+
+    $month_start_date = date('Y-m-01',  strtotime($reporting_month));
+    $month_end_date = date('Y-m-t',  strtotime($reporting_month));
+
+    $voucherReadBuilder->selectSum('voucher_detail_total_cost');
+    $voucherReadBuilder->select(['voucher_type_effect_code']);
+    $voucherReadBuilder->join('voucher_detail','voucher_detail.fk_voucher_id=voucher.voucher_id');
+    $voucherReadBuilder->join('voucher_type','voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+    $voucherReadBuilder->join('voucher_type_account','voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
+    $voucherReadBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+    $voucherReadBuilder->groupBy('voucher_type_effect_code');
+    $voucherReadBuilder->where(
+        [
+            'voucher.fk_office_id' => $office_id, 
+            'voucher.voucher_date >=' => $month_start_date, 
+            'voucher.voucher_date <=' => $month_end_date,
+            'voucher_type_account_code' => 'accrual'
+        ]
+    );
+    
+    $groupedAccruedVouchersObj = $voucherReadBuilder->get();
+    $groupedAccruedVouchers = [];
+
+    if($groupedAccruedVouchersObj->getNumRows() > 0){
+        $groupedAccruedVouchers = $groupedAccruedVouchersObj->getResultArray();
+    }
+
+    return $groupedAccruedVouchers;
+  }
+
+  private function groupAccrualTransactionByLedgerEffect(array $transactions){
+
+    // $accrualVoucherTypeEffects = ['receivables', 'payments', 'payables', 'disbursements', 'prepayments', 'settlements', 'depreciation', 'payroll_liability'];
+
+    // $matchEffects = match($accrualVoucherTypeEffects){
+    //     'receivables','payments' => ['debit' => 'receivables', 'credit' => 'payments'],
+    //     'payables','disbursements' => ['debit' => 'disbursements', 'credit' => 'payables'],
+    //     'prepayments', 'settlements' => ['debit' => 'prepayments', 'credit' => 'settlements'],
+    //     'depreciation' => ['debit' => NULL, 'credit' => 'depreciation'], 
+    //     'payroll_liability' => ['debit' => NULL, 'credit' => 'payroll_liability']
+    // };
+
+    $monthAmount = [
+        'receivables' => ['debit' => 0, 'credit' => 0], 
+        'payables' => ['debit' => 0, 'credit' => 0], 
+        'prepayments' => ['debit' => 0, 'credit' => 0], 
+        'depreciation' => ['debit' => 0, 'credit' => 0], 
+        'payroll_liability' => ['debit' => 0, 'credit' => 0]
+    ];
+
+
+    foreach($transactions as $transaction){
+        $voucher_type_effect_code = $transaction['voucher_type_effect_code'];
+        $amount = $transaction['voucher_detail_total_cost'];
+
+        if($voucher_type_effect_code == 'receivables'){
+            $monthAmount['receivables']['debit'] += $amount; 
+        }elseif($voucher_type_effect_code == 'payments'){
+            $monthAmount['receivables']['credit'] += $amount; 
+        }elseif($voucher_type_effect_code == 'payables'){
+            $monthAmount['payables']['credit'] += $amount; 
+        }elseif($voucher_type_effect_code == 'disbursements'){
+            $monthAmount['payables']['debit'] += $amount; 
+        }elseif($voucher_type_effect_code == 'prepayments'){
+            $monthAmount['prepayments']['debit'] += $amount; 
+        }elseif($voucher_type_effect_code == 'settlements'){
+            $monthAmount['prepayments']['credit'] += $amount; 
+        }elseif($voucher_type_effect_code == 'depreciation'){
+            $monthAmount['depreciation']['credit'] += $amount; 
+        }elseif($voucher_type_effect_code == 'payroll_liability'){
+            $monthAmount['payroll_liability']['credit'] += $amount; 
+        }
+    }
+
+    return $monthAmount;
+  }
+
   public function accruedBalanceReport($office_id, $reporting_month){
     $journalLibrary = new \App\Libraries\Grants\JournalLibrary();
     $monthOpeningAccrualBalance = $journalLibrary->monthOpeningAccrualBalance($office_id, $reporting_month);
     $accrualLedgers = ['receivables', 'payables', 'prepayments', 'depreciation', 'payroll_liability'];
 
+    $monthAccruedVouchers = $this->getAccountAndEffectGroupedOfficeAccrualTransactionsOfMonth($office_id, $reporting_month);
+    $ledgerEffectGroupedTransactions = $this->groupAccrualTransactionByLedgerEffect($monthAccruedVouchers);
+
     $balanceReport = [];
     foreach($accrualLedgers as $accrualLedger){
         if(array_key_exists($accrualLedger, $monthOpeningAccrualBalance)){
            $balanceReport[$accrualLedger]['opening'] = $monthOpeningAccrualBalance[$accrualLedger]['amount'];
-           $balanceReport[$accrualLedger]['debit'] = 0;
-           $balanceReport[$accrualLedger]['credit'] = 0;
+           $balanceReport[$accrualLedger]['debit'] = $ledgerEffectGroupedTransactions[$accrualLedger]['debit'];
+           $balanceReport[$accrualLedger]['credit'] = $ledgerEffectGroupedTransactions[$accrualLedger]['credit'];
 
            $balanceReport[$accrualLedger]['closing'] = $balanceReport[$accrualLedger]['opening'] + $balanceReport[$accrualLedger]['debit'] - $balanceReport[$accrualLedger]['credit'];
         }
