@@ -671,11 +671,60 @@ function deposit_transit_row(options) {
             // }
         });
  
-        function create_accrual_accounts_options(){
+        function create_accrual_accounts_options($selected_options = 0){
+          let options = '<option value = ""><?= get_phrase('select_ledger_account'); ?></option>'
+          const accrual_accounts = ['receivables','payables','prepayments','depreciation','payroll_liability'];
 
+          for (let i = 0; i < accrual_accounts.length; i++) {
+            options += `<option value = '${accrual_accounts[i]}' ${selected_option_value == accrual_accounts[i] ? 'selected' : ''} >${accrual_accounts[i]}</option>`
+          }
+
+          return options
         }
 
-        function create_accrual_ledger_options(){
-          
+        function create_accrual_ledger_options(selected_option_value = 0){
+          let options = '<option value = ""><?= get_phrase('select_ledger_effect'); ?></option>'
+          const accrual_ledgers = ['debit','credit'];
+
+          for (let i = 0; i < accrual_ledgers.length; i++) {
+            options += `<option value = '${accrual_ledgers[i]}' ${selected_option_value == accrual_ledgers[i] ? 'selected' : ''} >${accrual_ledgers[i]}</option>`
+          }
+
+          return options
         }
+
+        $(document).on('change', '.accrual_account_codes', function(){
+          const accrual_account_codes = $(this)
+          const closest_accrual_ledger_effect = accrual_account_codes.closest('tr').find('.accrual_ledger_effect');
+          let default_accrual_effect = 'credit';
+          const accrual_account_codes_name = accrual_account_codes.val();
+
+          if(accrual_account_codes_name == 'receivables' || accrual_account_codes_name == 'prepayments'){
+            default_accrual_effect = 'debit';
+          }
+
+          closest_accrual_ledger_effect.val(default_accrual_effect)
+        })
+
+        $(document).on('change', '.accrual_ledger_effect', function(ev){
+          const cnf = confirm('<?=get_phrase('alert_change_accrual_effect','Are you sure you want to change the default effect');?>');
+          const accrual_account_codes_name = $(this).closest('tr').find('.accrual_account_codes').val()
+          let default_accrual_effect = 'credit'
+          const selected_option = $(this).val()
+
+          if(accrual_account_codes_name == 'receivables' || accrual_account_codes_name == 'prepayments'){
+            default_accrual_effect = 'debit';
+          }
+
+          if(!cnf && selected_option != default_accrual_effect){
+            alert('<?=get_phrase('process_aborted');?>')
+            $(this).val(default_accrual_effect)
+          }
+
+          if(!cnf && selected_option == default_accrual_effect){
+            alert('<?=get_phrase('process_aborted');?>')
+            $(this).val(selected_option == 'credit' ? 'debit' : 'credit')
+          }
+
+        });
 </script>
