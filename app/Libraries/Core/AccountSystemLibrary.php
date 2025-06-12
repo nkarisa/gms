@@ -1318,5 +1318,21 @@ class AccountSystemLibrary extends GrantsLibrary implements \App\Interfaces\Libr
   {
       return ['account_system_code'];
   }
+
+  public function getAccountSystemsByIds(array $accountSystemIds){
+    $accountSystemReadBuilder = $this->read_db->table('account_system');
+
+    $accountSystemReadBuilder->select(['account_system_id','account_system_name','account_system_code','account_system_is_active','account_system_level']);
+    $accountSystemReadBuilder->whereIn('account_system_id', $accountSystemIds);
+    $accountSystemsObj = $accountSystemReadBuilder->get();
+
+    $accountSystems = [];
+
+    if($accountSystemsObj->getNumRows() > 0){
+      $accountSystems = $accountSystemsObj->getResultArray();
+    }
+
+    return $accountSystems;
+  }
   
 }

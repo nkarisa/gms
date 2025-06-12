@@ -371,4 +371,90 @@ class VoucherTypeLibrary extends GrantsLibrary implements \App\Interfaces\Librar
 
         return $voucherType;
     }
+
+    private function getCountAccrualVoucherTypesByAccountSystem(){
+      $voucherTypeReadBuilder = $this->read_db->table('voucher_type');
+
+      $voucherTypeReadBuilder->selectCount(alias: 'count');
+      $$voucherTypeReadBuilder->select('fk_account_system_id');
+      $voucherTypeReadBuilder->where(['voucher_type_account_code' => 'accrual']);
+      $$voucherTypeReadBuilder->groupBy('fk_account_system_id');
+      $rstObj = $voucherTypeReadBuilder->get();
+
+      $result = [];
+
+      if($rstObj->getNumRows() > 0){
+        $rawResult = $rstObj->getResultArray();
+
+        foreach($rawResult as $row){
+          $result[$row['fk_account_system_id']] = $row['count'];
+        }
+      }
+
+      return $result;
+    }
+    public function createAccountingSystemAccrualVoucherTypes(array $accountsystemIds){
+        // Get Accounts System Codes 
+        $accontSystemLibrary = new \App\Libraries\Core\AccountSystemLibrary();
+        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+        $voucherTypeWriteBuilder = $this->write_db->table('voucher_type');
+
+        $accountSystems = $accontSystemLibrary->getAccountSystemsByIds($accountsystemIds);
+        $account_system_ids = array_column($accountSystems, 'account_system_id');
+        $account_system_codes = array_column($accountSystems, 'account_system_code');
+        $account_system_ids_codes = array_combine($account_system_ids, $account_system_codes);
+
+        // Get Accrual Voucher Type Effects
+        $voucherTypeEffectLibrary = new \App\Libraries\Grants\VoucherTypeEffectLibrary();
+        $accrualVoucherTypeEffects = $voucherTypeEffectLibrary->getAccrualVoucherTypeEffects();
+
+        // Get Accrual Voucher Type Account
+        $voucherTypeAccountLibrary = new \App\Libraries\Grants\VoucherTypeAccountLibrary();
+        $accrualVoucherTypeAccounts = $voucherTypeAccountLibrary->getAccrualVoucherTypeAccounts();
+
+        // Accrual Accounts Codes
+        $accrualAccountsCode = [
+          'receivables' => 'RCB',
+          'payments' => 'PMT',
+          'payables' => 'PYB',
+          'disbursements' => 'DBM',
+          'prepayments' => 'PPM',
+          'settlements' => 'SMT',
+          'depreciation' => 'DPN',
+          'payroll_liability' => 'PRL'
+        ];
+
+        // Account Systems with Accrual Voucher Types
+        $accountSystemAccrualVoucherCounts = $accountSystemWithAccrualVoucherTypes = $this->getCountAccrualVoucherTypesByAccountSystem();
+
+        foreach($accountsystemIds as $accountsystemId){
+          // Prevent creating voucher types if the account system has an accrual voucher types already created
+          if(isset($accountSystemAccrualVoucherCounts[$accountsystemId]) && $accountSystemAccrualVoucherCounts[$accountsystemId] > 0){
+              continue;
+          }
+
+          $account_system_code = $account_system_ids_codes[$accountsystemId];
+          $voucherTypesArray = [];
+          for($i = 0; $i < count($accrualVoucherTypeEffects); $i++){
+            $trackNumberAndName = $this->generateItemTrackNumberAndName('voucher_type');
+            $effectCode = $accrualAccountsCode[$accrualVoucherTypeEffects[$i]['voucher_type_effect_code']];
+            $voucherTypesArray[$i]['voucher_type_track_number'] = $trackNumberAndName['voucher_type_track_number'];
+            $voucherTypesArray[$i]['voucher_type_track_name'] = $trackNumberAndName['voucher_type_track_name'];
+            $voucherTypesArray[$i]['voucher_type_is_active'] = 1;
+            $voucherTypesArray[$i]['voucher_type_abbrev'] = $account_system_code.$effectCode;
+            $voucherTypesArray[$i]['fk_voucher_type_account_id'] = $accrualVoucherTypeAccounts[0]['voucher_type_account_id'];
+            $voucherTypesArray[$i]['fk_voucher_type_effect_id'] = $accrualVoucherTypeEffects[$i]['voucher_type_effect_id'];
+            $voucherTypesArray[$i]['voucher_type_is_cheque_referenced'] = 0;
+            $voucherTypesArray[$i]['voucher_type_is_hidden'] = 0;
+            $voucherTypesArray[$i]['fk_account_system_id'] = $accountsystemId;
+            $voucherTypesArray[$i]['voucher_type_created_by'] = $this->session->user_id;
+            $voucherTypesArray[$i]['voucher_type_created_date'] = date('Y-m-d');
+            $voucherTypesArray[$i]['voucher_type_last_modified_by'] = $this->session->user_id;
+            $voucherTypesArray[$i]['voucher_type_last_modified_date'] = date('Y-m-d');
+            $voucherTypesArray[$i]['fk_approval_id'] = NULL;
+            $voucherTypesArray[$i]['fk_status_id'] = $statusLibrary->initialItemStatus('voucher_type');
+          }
+          $voucherTypeWriteBuilder->insertBatch($voucherTypesArray);
+        }
+    }
 }

@@ -2996,7 +2996,8 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             $results = $resultObj->getResultArray();
             $voucherNumbers = array_column($results, 'voucher_number');
         }
-        log_message('error', json_encode($voucherNumbers));
+        // log_message('error', json_encode($voucherNumbers));
         return $voucherNumbers;
     }
+
 }

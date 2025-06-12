@@ -148,4 +148,13 @@ class AccountSystemSettingLibrary extends GrantsLibrary implements \App\Interfac
         'account_system_setting_value'
       ];
     }
+
+    public function actionAfterEdit(array $postData, int $approveId, int $itemId): bool{
+      if($postData['account_system_setting_name'] == 'use_accrual_based_accounting'){
+        $voucherTypeLibrary = new \App\Libraries\Grants\VoucherTypeLibrary();
+        $account_system_ids = json_decode($postData['account_system_setting_accounts']);
+        $voucherTypeLibrary->createAccountingSystemAccrualVoucherTypes($account_system_ids);
+      }
+      return true;
+    }
 }
