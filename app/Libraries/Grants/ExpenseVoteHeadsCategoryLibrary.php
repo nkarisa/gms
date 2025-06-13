@@ -44,7 +44,7 @@ class ExpenseVoteHeadsCategoryLibrary extends GrantsLibrary implements \App\Inte
 
             $voteHeadData['expense_vote_heads_category_track_number'] = $itemTrackNumberAndName['expense_vote_heads_category_track_number'];
             $voteHeadData['expense_vote_heads_category_name'] = $accrualExpenseAccountCode->value;
-            $voteHeadData['expense_vote_heads_category_description'] = $$accrualExpenseAccountCode->value;
+            $voteHeadData['expense_vote_heads_category_description'] = $accrualExpenseAccountCode->value;
             $voteHeadData['fk_funding_stream_id'] = $supportFundingStreamId;
             $voteHeadData['expense_vote_heads_category_is_active'] = 1;
             $voteHeadData['expense_vote_heads_category_created_date'] = date('Y-m-d');
