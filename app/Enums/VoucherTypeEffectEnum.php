@@ -1,22 +1,22 @@
 <?php 
 namespace App\Enums;
-enum VoucherTypeEffectEnum {
+enum VoucherTypeEffectEnum: string {
 
-    case INCOME;
-    case EXPENSE;
-    case BANK_CONTRA;
-    case CASH_CONTRA;
-    case BANK_TO_BANK_CONTRA;
-    case CASH_TO_CASH_CONTRA;
-    case BANK_REFUND;
-    case RECEIVABLES;
-    case PAYABLES;
-    case PREPAYMENTS; 
-    case RECEIVABLES_PAYMENTS;
-    case PAYABLE_DISBURSEMENTS;
-    case PREPAYMENT_SETTLEMENTS;
-    case DEPRECIATION;
-    case PAYROLL_LIABILITY;
+    case INCOME = 'income';
+    case EXPENSE = 'expense';
+    case BANK_CONTRA = 'bank_contra';
+    case CASH_CONTRA = 'cash_contra';
+    case BANK_TO_BANK_CONTRA = 'bank_to_bank_contra';
+    case CASH_TO_CASH_CONTRA = 'cash_to_cash_contra';
+    case BANK_REFUND = 'bank_refund';
+    case RECEIVABLES = 'receivables';
+    case PAYABLES = 'payables';
+    case PREPAYMENTS = 'prepayments'; 
+    case RECEIVABLES_PAYMENTS = 'payments';
+    case PAYABLE_DISBURSEMENTS = 'disbursements';
+    case PREPAYMENT_SETTLEMENTS = 'settlements';
+    case DEPRECIATION = 'depreciation';
+    case PAYROLL_LIABILITY = 'payroll_liability';
 
     public function getCode(): string{
         return match($this) {
