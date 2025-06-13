@@ -118,4 +118,11 @@ class IncomeAccountLibrary extends GrantsLibrary implements \App\Interfaces\Libr
 
     return $income_account_id;
   }
+
+  public function getSupportIncomeAccountsByAccountSystemIds(array $accountSystemIds){
+    $incomeAccountReadBuilder = $this->read_db->table('income_account');
+    $incomeAccountWriteBuilder = $this->write_db->table('income_account');
+
+    
+  }
 }

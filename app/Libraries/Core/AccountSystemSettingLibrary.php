@@ -153,7 +153,14 @@ class AccountSystemSettingLibrary extends GrantsLibrary implements \App\Interfac
       if($postData['account_system_setting_name'] == 'use_accrual_based_accounting'){
         $voucherTypeLibrary = new \App\Libraries\Grants\VoucherTypeLibrary();
         $account_system_ids = json_decode($postData['account_system_setting_accounts']);
+
+        // Create accrual vouchers
         $voucherTypeLibrary->createAccountingSystemAccrualVoucherTypes($account_system_ids);
+
+        // Create depreciation and payroll liability expense accounts in support funds
+        $expenseAccountsLibrary = new \App\Libraries\Grants\ExpenseAccountLibrary();
+        $expenseAccountsLibrary->createAccountSystemDepreactionExpenseAccount($account_system_ids);
+        $expenseAccountsLibrary->createAccountSystemPayrollLiabilityExpenseAccount($account_system_ids);
       }
       return true;
     }
