@@ -66,12 +66,12 @@ class ExpenseAccountLibrary extends GrantsLibrary implements \App\Interfaces\Lib
     $expenseAccountReadBuilder->join('income_account','income_account.income_account_id=expense_account.fk_income_account_id');
     $accrualExpenseAccountsObj = $expenseAccountReadBuilder->get();
 
-    $accrualExpenseAccountsByAccountingSystemId = [];
+    $accrualExpenseAccountsByAccountingSystemIds = [];
     if($accrualExpenseAccountsObj->getNumRows() > 0){
       $accrualExpenseAccounts = $accrualExpenseAccountsObj->getResultArray();
 
       foreach($accrualExpenseAccounts as $accrualExpenseAccount){
-        $accrualExpenseAccountsByAccountingSystemId[$accrualExpenseAccount['fk_account_system_id']] = $accrualExpenseAccount;
+        $accrualExpenseAccountsByAccountingSystemIds[$accrualExpenseAccount['fk_account_system_id']] = $accrualExpenseAccount;
       }
     }
 
@@ -89,7 +89,7 @@ class ExpenseAccountLibrary extends GrantsLibrary implements \App\Interfaces\Lib
     $supportIncomeAccountsIds = $incomeAccountLibrary->getSupportIncomeAccountsByAccountSystemIds($accountSystemIds, $accountSystemIdsWithCodes);
 
     foreach($accountSystemIds as $accountSystemId){
-      if(!array_key_exists($accountSystemId, $accrualExpenseAccountsByAccountingSystemId)){
+      if(!array_key_exists($accountSystemId, $accrualExpenseAccountsByAccountingSystemIds)){
         // Create the depreciation expense account if missing
         $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('expense_account');
         $statusLibrary = new \App\Libraries\Core\StatusLibrary();
@@ -113,8 +113,18 @@ class ExpenseAccountLibrary extends GrantsLibrary implements \App\Interfaces\Lib
         $expenseAccountData['fk_status_id'] = $statusLibrary->initialItemStatus('expense_account');
 
         $expenseAccountWriteBuilder->insert($expenseAccountData);
+        $expenseAccountId = $this->write_db->insertID();
+        $accrualExpenseAccountsByAccountingSystemIds[$accountSystemId] = [
+          'income_account_id' => $supportIncomeAccountsIds[$accountSystemId]['income_account_id'],
+          'expense_account_id' => $expenseAccountId,
+          'income_account_code' => $supportIncomeAccountsIds[$accountSystemId]['income_account_code'],
+          'expense_account_code' => $expenseAccountCode,
+          'fk_account_system_id' => $accountSystemId
+        ];
       }
     }
+
+    return $accrualExpenseAccountsByAccountingSystemIds;
   }
 
   // public function createAccountSystemDepreactionExpenseAccount(array $accountSystemIds){

@@ -152,16 +152,29 @@ class AccountSystemSettingLibrary extends GrantsLibrary implements \App\Interfac
 
     public function actionAfterEdit(array $postData, int $approveId, int $itemId): bool{
       if($postData['account_system_setting_name'] == 'use_accrual_based_accounting'){
+
+        $this->write_db->transStart();
+
         $voucherTypeLibrary = new \App\Libraries\Grants\VoucherTypeLibrary();
         $account_system_ids = json_decode($postData['account_system_setting_accounts']);
 
-        // Create accrual vouchers
-        $voucherTypeLibrary->createAccountingSystemAccrualVoucherTypes($account_system_ids);
-
         // Create depreciation and payroll liability expense accounts in support funds
         $expenseAccountsLibrary = new \App\Libraries\Grants\ExpenseAccountLibrary();
-        $expenseAccountsLibrary->createAccountSystemAccrualExpenseAccount($account_system_ids, AccrualExpenseAccountCodes::DEPRECIATION);
-        $expenseAccountsLibrary->createAccountSystemAccrualExpenseAccount($account_system_ids, AccrualExpenseAccountCodes::PAYROLL);
+        $depreciationExpenseAccountsGroupedByAccountSystemId = $expenseAccountsLibrary->createAccountSystemAccrualExpenseAccount($account_system_ids, AccrualExpenseAccountCodes::DEPRECIATION);
+        $payrollLiabilityExpenseAccountsGroupedByAccountSystemId= $expenseAccountsLibrary->createAccountSystemAccrualExpenseAccount($account_system_ids, AccrualExpenseAccountCodes::PAYROLL);
+        
+        $expenseAccounts = [
+          'depreciationExpenseAccounts' => $depreciationExpenseAccountsGroupedByAccountSystemId,
+          'payrollLiabilityExpenseAccounts' => $payrollLiabilityExpenseAccountsGroupedByAccountSystemId
+        ];
+        // Create accrual vouchers
+        $voucherTypeLibrary->createAccountingSystemAccrualVoucherTypes($account_system_ids, $expenseAccounts);
+        
+        $this->write_db->transComplete();
+      
+        if($this->write_db->transStatus() == false){
+          return false;
+        }
       }
       return true;
     }

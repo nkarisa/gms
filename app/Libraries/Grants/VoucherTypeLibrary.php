@@ -394,7 +394,8 @@ class VoucherTypeLibrary extends GrantsLibrary implements \App\Interfaces\Librar
 
       return $result;
     }
-    public function createAccountingSystemAccrualVoucherTypes(array $accountsystemIds){
+    public function createAccountingSystemAccrualVoucherTypes(array $accountsystemIds, array $accountSystemGroupedExpenseAccounts){
+        // log_message('error', json_encode(compact('accountsystemIds','accountSystemGroupedExpenseAccounts')));
         // Get Accounts System Codes 
         $accontSystemLibrary = new \App\Libraries\Core\AccountSystemLibrary();
         $statusLibrary = new \App\Libraries\Core\StatusLibrary();
@@ -426,7 +427,7 @@ class VoucherTypeLibrary extends GrantsLibrary implements \App\Interfaces\Librar
         ];
 
         // Account Systems with Accrual Voucher Types
-        $accountSystemAccrualVoucherCounts = $accountSystemWithAccrualVoucherTypes = $this->getCountAccrualVoucherTypesByAccountSystem();
+        $accountSystemAccrualVoucherCounts = $this->getCountAccrualVoucherTypesByAccountSystem();
 
         foreach($accountsystemIds as $accountsystemId){
           // Prevent creating voucher types if the account system has an accrual voucher types already created
@@ -445,6 +446,15 @@ class VoucherTypeLibrary extends GrantsLibrary implements \App\Interfaces\Librar
             $voucherTypesArray[$i]['voucher_type_abbrev'] = $account_system_code.$effectCode;
             $voucherTypesArray[$i]['fk_voucher_type_account_id'] = $accrualVoucherTypeAccounts[0]['voucher_type_account_id'];
             $voucherTypesArray[$i]['fk_voucher_type_effect_id'] = $accrualVoucherTypeEffects[$i]['voucher_type_effect_id'];
+
+            $voucher_type_expense_accounts = NULL;
+            if($accrualVoucherTypeEffects[$i]['voucher_type_effect_code'] == 'depreciation'){
+              $voucher_type_expense_accounts = json_encode([$accountSystemGroupedExpenseAccounts['depreciationExpenseAccounts'][$accountsystemId]['expense_account_id']]);
+            }elseif($accrualVoucherTypeEffects[$i]['voucher_type_effect_code'] == 'payroll_liability'){
+              $voucher_type_expense_accounts = json_encode([$accountSystemGroupedExpenseAccounts['payrollLiabilityExpenseAccounts'][$accountsystemId]['expense_account_id']]);
+            }
+
+            $voucherTypesArray[$i]['voucher_type_expense_accounts'] = $voucher_type_expense_accounts;
             $voucherTypesArray[$i]['voucher_type_is_cheque_referenced'] = 0;
             $voucherTypesArray[$i]['voucher_type_is_hidden'] = 0;
             $voucherTypesArray[$i]['fk_account_system_id'] = $accountsystemId;
@@ -455,7 +465,9 @@ class VoucherTypeLibrary extends GrantsLibrary implements \App\Interfaces\Librar
             $voucherTypesArray[$i]['fk_approval_id'] = NULL;
             $voucherTypesArray[$i]['fk_status_id'] = $statusLibrary->initialItemStatus('voucher_type');
           }
-          $voucherTypeWriteBuilder->insertBatch($voucherTypesArray);
+          if(count($voucherTypesArray) > 0){
+            $voucherTypeWriteBuilder->insertBatch($voucherTypesArray);
+          }
         }
     }
 }
