@@ -119,10 +119,69 @@ class IncomeAccountLibrary extends GrantsLibrary implements \App\Interfaces\Libr
     return $income_account_id;
   }
 
-  public function getSupportIncomeAccountsByAccountSystemIds(array $accountSystemIds){
+  public function getSupportIncomeAccountsByAccountSystemIds(array $accountSystemIds, array $accountSystemIdsWithCodes){
     $incomeAccountReadBuilder = $this->read_db->table('income_account');
     $incomeAccountWriteBuilder = $this->write_db->table('income_account');
 
-    
+    // Get support income account id
+    $incomeAccountReadBuilder->select(['income_account_id','income_account_name','income_account_code','fk_account_system_id']);
+    $incomeAccountReadBuilder->whereIn('fk_account_system_id', $accountSystemIds);
+    $incomeAccountReadBuilder->join('income_vote_heads_category','income_vote_heads_category.income_vote_heads_category_id=income_account.fk_income_vote_heads_category_id');
+    $incomeAccountReadBuilder->where(['income_vote_heads_category_code' => 'support']);
+    $supportIncomeAccountObj = $incomeAccountReadBuilder->get();
+
+    $supportIncomeAccountsByAccountSystemIds = [];
+
+    if($supportIncomeAccountObj->getNumRows() > 0){
+      $incomeAccountsResult = $supportIncomeAccountObj->getResultArray();
+
+      foreach($incomeAccountsResult as $incomeAccount){
+        $supportIncomeAccountsByAccountSystemIds[$incomeAccount['fk_account_system_id']] = $incomeAccount;
+      }
+    }
+
+    // Get support income vote heads category
+    $incomeVoteHeadsCategoryLibrary = new \App\Libraries\Grants\IncomeVoteHeadsCategoryLibrary();
+    $supportVoteHeadCategoryId = $incomeVoteHeadsCategoryLibrary->getSupportIncomeVoteHeadsCategoryId();
+
+    foreach($accountSystemIds as $accountSystemId){
+      if(!array_key_exists($accountSystemId, $supportIncomeAccountsByAccountSystemIds)){
+        // Create a support income account if not existing and add it to the supportIncomeAccountsByAccountSystemIds
+        $itemTrackNumberAndName = $this->generateItemTrackNumberAndName('income_account');
+        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+
+        $incomeAccountCode = $accountSystemIdsWithCodes[$accountSystemId].'R001';
+
+        $incomeAccountData['income_account_track_number'] = $itemTrackNumberAndName['income_account_track_number'];
+        $incomeAccountData['income_account_name'] = $incomeAccountCode.'-'.get_phrase('child_support');
+        $incomeAccountData['income_account_description'] = get_phrase('child_support_funds_desciption');
+        $incomeAccountData['income_account_code'] = $incomeAccountCode;
+        $incomeAccountData['income_account_reconciliation_is_required'] = 0;
+        $incomeAccountData['income_account_is_active'] = 1;
+        $incomeAccountData['fk_income_vote_heads_category_id'] = $supportVoteHeadCategoryId;
+        $incomeAccountData['income_account_is_budgeted'] = 1;
+        $incomeAccountData['income_account_is_donor_funded'] = 0;
+        $incomeAccountData['fk_account_system_id'] = $accountSystemId;
+        $incomeAccountData['income_account_created_date'] = date('Y-m-d');
+        $incomeAccountData['income_account_last_modified_date'] = date('Y-m-d');
+        $incomeAccountData['income_account_created_by'] = $this->session->user_id;
+        $incomeAccountData['income_account_last_modified_by'] = $this->session->user_id;
+        $incomeAccountData['fk_approval_id'] = NULL;
+        $incomeAccountData['fk_status_id'] = $statusLibrary->initialItemStatus('income_account');
+
+        $incomeAccountWriteBuilder->insert($incomeAccountData);
+
+        $incomeAccountId = $this->write_db->insertID();
+
+        $supportIncomeAccountsByAccountSystemIds[$accountSystemId] = [
+          'income_account_id' => $incomeAccountId,
+          'income_account_name' => $incomeAccountData['income_account_name'],
+          'income_account_code' => $incomeAccountData['income_account_code'],
+          'fk_account_system_id'  => $incomeAccountData['fk_account_system_id'],
+        ];
+      }
+    }
+
+    return $supportIncomeAccountsByAccountSystemIds;
   }
 }

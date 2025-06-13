@@ -4,6 +4,7 @@ namespace App\Libraries\Core;
 
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Core\AccountSystemSettingModel;
+use App\Enums\AccrualExpenseAccountCodes;
 class AccountSystemSettingLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
 
@@ -159,8 +160,8 @@ class AccountSystemSettingLibrary extends GrantsLibrary implements \App\Interfac
 
         // Create depreciation and payroll liability expense accounts in support funds
         $expenseAccountsLibrary = new \App\Libraries\Grants\ExpenseAccountLibrary();
-        $expenseAccountsLibrary->createAccountSystemDepreactionExpenseAccount($account_system_ids);
-        $expenseAccountsLibrary->createAccountSystemPayrollLiabilityExpenseAccount($account_system_ids);
+        $expenseAccountsLibrary->createAccountSystemAccrualExpenseAccount($account_system_ids, AccrualExpenseAccountCodes::DEPRECIATION);
+        $expenseAccountsLibrary->createAccountSystemAccrualExpenseAccount($account_system_ids, AccrualExpenseAccountCodes::PAYROLL);
       }
       return true;
     }
