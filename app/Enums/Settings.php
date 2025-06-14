@@ -13,6 +13,11 @@ enum Settings {
     case CASH_INCOME;
     case CASH_EXPENSE;
     case INCOME_SPREAD;
+    case CONTRA_SPREAD;
+    case ACRRUAL_EXPENSE_SPREAD;
+    case ACRRUAL_INCOME_SPREAD;
+    case ACRRUAL_CONTRA_SPREAD;
+    
 
     function getSettings(){
         return match($this){
@@ -26,7 +31,7 @@ enum Settings {
         };
     }
 
-    function getTransactionEffect($transaction_account, $transaction_effect){
+    function getTransactionEffectCondition($transaction_account, $transaction_effect){
         return match($this){
             self::BANK_INCOME => 
                     (
@@ -83,9 +88,28 @@ enum Settings {
         };
     }
 
-    // function spreadEffect(){
-    //     return match($this){
-    //         self::INCOME_SPREAD => ['income', VoucherTypeEffectEnum::RECEIVABLES->value,VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->value]
-    //     };
-    // }
+
+    function journalExpenseAccrualEffectsCondition($transaction_effect): bool{
+        return match($this){
+            self::ACRRUAL_EXPENSE_SPREAD => (
+                $transaction_effect == VoucherTypeEffectEnum::DEPRECIATION->value || 
+                $transaction_effect == VoucherTypeEffectEnum::PAYROLL_LIABILITY->value || 
+                $transaction_effect == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->value || 
+                $transaction_effect == VoucherTypeEffectEnum::PAYABLES->value
+            ),
+            self::ACRRUAL_INCOME_SPREAD => $transaction_effect == VoucherTypeEffectEnum::RECEIVABLES->value,
+            self::ACRRUAL_CONTRA_SPREAD => (
+                    $transaction_effect == VoucherTypeEffectEnum::PREPAYMENTS->value ||
+                    $transaction_effect == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->value || 
+                    $transaction_effect == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->value
+            ),
+            self::CONTRA_SPREAD => (
+                $transaction_effect == VoucherTypeEffectEnum::CASH_CONTRA->value || 
+                $transaction_effect == VoucherTypeEffectEnum::BANK_CONTRA->value || 
+                $transaction_effect == VoucherTypeEffectEnum::BANK_TO_BANK_CONTRA->value || 
+                $transaction_effect == VoucherTypeEffectEnum::CASH_TO_CASH_CONTRA->value
+            )
+        };
+    }
+
 }

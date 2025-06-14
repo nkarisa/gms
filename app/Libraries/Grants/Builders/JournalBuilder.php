@@ -299,9 +299,9 @@ trait JournalBuilder
         }
 
         if ($office_bank_id) {
-            $bank_income[$office_bank_id] = Settings::BANK_INCOME->getTransactionEffect($voucher_type_cash_account, $voucher_type_transaction_effect) ? $voucher_amount : 0;
+            $bank_income[$office_bank_id] = Settings::BANK_INCOME->getTransactionEffectCondition($voucher_type_cash_account, $voucher_type_transaction_effect) ? $voucher_amount : 0;
 
-            $bank_expense[$office_bank_id] = Settings::BANK_EXPENSE->getTransactionEffect($voucher_type_cash_account, $voucher_type_transaction_effect) ? $voucher_amount : 0;
+            $bank_expense[$office_bank_id] = Settings::BANK_EXPENSE->getTransactionEffectCondition($voucher_type_cash_account, $voucher_type_transaction_effect) ? $voucher_amount : 0;
 
             $sum_bank_income[$office_bank_id] += $bank_income[$office_bank_id];
             $sum_bank_expense[$office_bank_id] += $bank_expense[$office_bank_id];
@@ -324,9 +324,9 @@ trait JournalBuilder
         }
 
         if ($office_cash_id) {
-            $cash_income[$office_cash_id] = Settings::CASH_INCOME->getTransactionEffect($voucher_type_cash_account, $voucher_type_transaction_effect) ? $voucher_amount : 0;
+            $cash_income[$office_cash_id] = Settings::CASH_INCOME->getTransactionEffectCondition($voucher_type_cash_account, $voucher_type_transaction_effect) ? $voucher_amount : 0;
 
-            $cash_expense[$office_cash_id] = Settings::CASH_EXPENSE->getTransactionEffect($voucher_type_cash_account, $voucher_type_transaction_effect) ? $voucher_amount : 0;
+            $cash_expense[$office_cash_id] = Settings::CASH_EXPENSE->getTransactionEffectCondition($voucher_type_cash_account, $voucher_type_transaction_effect) ? $voucher_amount : 0;
 
             $sum_petty_cash_income[$office_cash_id] += $cash_income[$office_cash_id];
             $sum_petty_cash_expense[$office_cash_id] += $cash_expense[$office_cash_id];
@@ -595,34 +595,29 @@ trait JournalBuilder
         };
 
         if (
-            $transaction_effect == 'expense' || 
+            $transaction_effect == VoucherTypeEffectEnum::EXPENSE->value || 
             (
                 $this->accrualActivationStatus() &&
                 (
-                    $transaction_effect == 'settlements' ||  
-                    $transaction_effect == 'payables' ||
-                    $transaction_effect == 'depreciation' ||
-                    $transaction_effect == 'payroll_liability'
+                    Settings::ACRRUAL_EXPENSE_SPREAD->journalExpenseAccrualEffectsCondition($transaction_effect)
                 )
             )
         ) {
             $spread_cells = $this->expenseAccountsSpreading($accounts, $spread, $transaction_effect);
         } elseif (
-            $transaction_effect == 'income' || 
-            ($transaction_effect == 'receivables' && $this->accrualActivationStatus())
+            $transaction_effect == VoucherTypeEffectEnum::INCOME->value || 
+            (
+                Settings::ACRRUAL_INCOME_SPREAD->journalExpenseAccrualEffectsCondition($transaction_effect) && 
+                $this->accrualActivationStatus()
+            )
         ) {
             $spread_cells = $this->incomeAccountsSpreading($accounts, $spread, $transaction_effect);
         } elseif (
-            $transaction_effect == 'cash_contra' || 
-            $transaction_effect == 'bank_contra' || 
-            $transaction_effect == 'bank_to_bank_contra' || 
-            $transaction_effect == 'cash_to_cash_contra' ||
+            Settings::CONTRA_SPREAD->journalExpenseAccrualEffectsCondition($transaction_effect) ||
             (
                 $this->accrualActivationStatus() && 
                 (
-                    $transaction_effect == 'prepayments' ||
-                    $transaction_effect == 'payments' || 
-                    $transaction_effect == 'disbursements'
+                    Settings::ACRRUAL_CONTRA_SPREAD->journalExpenseAccrualEffectsCondition($transaction_effect)
                 )
             )
             
@@ -648,7 +643,11 @@ trait JournalBuilder
             $transacted_amount = 0;
             foreach ($spread as $spread_transaction) {
                 if (in_array($account_id, $spread_transaction) && 
-                        ($transaction_effect == 'income' || ($transaction_effect == 'receivables' && $this->accrualActivationStatus()))) {
+                        ($transaction_effect == VoucherTypeEffectEnum::INCOME->value || 
+                        (
+                            Settings::ACRRUAL_INCOME_SPREAD->journalExpenseAccrualEffectsCondition($transaction_effect) && 
+                            $this->accrualActivationStatus()))
+                    ) {
                     $transacted_amount += $spread_transaction['transacted_amount'];
                 }
             }
@@ -669,7 +668,6 @@ trait JournalBuilder
     private function expenseAccountsSpreading($accounts, $spread, $transaction_effect): string
     {
         // Fill up empty cells in spread when the account type is an expense type
-        // log_message('error', json_encode($spread));
         $spread_cells = $this->emptyJournalCells('income');
         $cnt = 0;
         $edge_cell = '';
@@ -678,14 +676,11 @@ trait JournalBuilder
             foreach ($spread as $spread_transaction) {
                 if (in_array($account_id, $spread_transaction) && 
                     ( 
-                        $transaction_effect == 'expense' ||
+                        $transaction_effect == VoucherTypeEffectEnum::EXPENSE->value ||
                         (
                             $this->accrualActivationStatus() &&
                             (
-                                $transaction_effect == 'depreciation' || 
-                                $transaction_effect == 'payroll_liability' || 
-                                $transaction_effect == 'settlements' || 
-                                $transaction_effect == 'payables'
+                                Settings::ACRRUAL_EXPENSE_SPREAD->journalExpenseAccrualEffectsCondition($transaction_effect)
                             )
                         )
                     )) {
