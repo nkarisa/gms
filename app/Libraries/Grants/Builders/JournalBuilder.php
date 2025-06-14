@@ -475,7 +475,7 @@ trait JournalBuilder
         $receivables_exp = 0;
         $receivables_bal = 0;
 
-        if ($voucher_type_transaction_effect == 'receivables' || $voucher_type_transaction_effect == 'payments') {
+        if (AccrualLedgerAccounts::RECEIVABLES->effectsPair($voucher_type_transaction_effect)) {
             $receivables_inc = $receivables_income;
             $receivables_exp = $receivables_expense;
             $receivables_bal = $running_receivables_balance;
@@ -494,7 +494,7 @@ trait JournalBuilder
         $payables_exp = 0;
         $payables_bal = 0;
 
-        if ($voucher_type_transaction_effect == 'payables' || $voucher_type_transaction_effect == 'disbursements') {
+        if (AccrualLedgerAccounts::PAYABLES->effectsPair($voucher_type_transaction_effect)) {
             $payables_inc = $payables_income;
             $payables_exp = $payables_expense;
             $payables_bal = $running_payables_balance;
@@ -512,7 +512,7 @@ trait JournalBuilder
         $prepayments_exp = 0;
         $prepayments_bal = 0;
 
-        if ($voucher_type_transaction_effect == 'prepayments' || $voucher_type_transaction_effect == 'settlements') {
+        if (AccrualLedgerAccounts::PREPAYMENTS->effectsPair($voucher_type_transaction_effect)) {
             $prepayments_inc = $prepayments_income;
             $prepayments_exp = $prepayments_expense;
             $prepayments_bal = $running_prepayments_balance;
@@ -530,7 +530,7 @@ trait JournalBuilder
         $depreciation_exp = 0;
         $depreciation_bal = 0;
 
-        if ($voucher_type_transaction_effect == 'depreciation') {
+        if (AccrualLedgerAccounts::DEPRECIATION->effectsPair($voucher_type_transaction_effect)) {
             $depreciation_inc = $depreciation_income;
             $depreciation_exp = $depreciation_expense;
             $depreciation_bal = $running_depreciation_balance;
@@ -548,7 +548,7 @@ trait JournalBuilder
         $payroll_liability_exp = 0;
         $payroll_liability_bal = 0;
 
-        if ($voucher_type_transaction_effect == 'payroll_liability') {
+        if (AccrualLedgerAccounts::PAYROLL_LIABILITY->effectsPair($voucher_type_transaction_effect)) {
             $payroll_liability_inc = $payroll_liability_income;
             $payroll_liability_exp = $payroll_liability_expense;
             $payroll_liability_bal = $running_payroll_liability_balance;
@@ -573,24 +573,25 @@ trait JournalBuilder
     }
     public function journalSpread($spread, $transaction_effect = 'income')
     {
-        // $journalLibrary = new JournalLibrary();
         $financial_accounts = $this->getMonthAccounts();
 
         $accounts = match ($transaction_effect) {
-            'income',
-            VoucherTypeEffectEnum::RECEIVABLES->getCode(),
-            VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() => $financial_accounts['income'],
-            'expense',
-            VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode(),
-            VoucherTypeEffectEnum::PAYABLES->getCode(),
-            VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode(),
-            VoucherTypeEffectEnum::PREPAYMENTS->getCode(),
-            VoucherTypeEffectEnum::DEPRECIATION->getCode(),
-            VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode() => $financial_accounts['expense'],
-            'bank_contra' => $financial_accounts['bank_contra'] ?? [],
-            'cash_contra' => $financial_accounts['cash_contra'] ?? [],
-            'bank_to_bank_contra' => $financial_accounts['bank_to_bank_contra'] ?? [],
-            'cash_to_cash_contra' => $financial_accounts['cash_to_cash_contra'] ?? []
+            VoucherTypeEffectEnum::INCOME->value,
+            VoucherTypeEffectEnum::RECEIVABLES->value,
+            VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->value 
+            => $financial_accounts[VoucherTypeEffectEnum::INCOME->value],
+            VoucherTypeEffectEnum::EXPENSE->value,
+            VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->value,
+            VoucherTypeEffectEnum::PAYABLES->value,
+            VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->value,
+            VoucherTypeEffectEnum::PREPAYMENTS->value,
+            VoucherTypeEffectEnum::DEPRECIATION->value,
+            VoucherTypeEffectEnum::PAYROLL_LIABILITY->value 
+            => $financial_accounts[VoucherTypeEffectEnum::EXPENSE->value],
+            VoucherTypeEffectEnum::BANK_CONTRA->value => $financial_accounts[VoucherTypeEffectEnum::BANK_CONTRA->value] ?? [],
+            VoucherTypeEffectEnum::CASH_CONTRA->value => $financial_accounts[VoucherTypeEffectEnum::CASH_CONTRA->value] ?? [],
+            VoucherTypeEffectEnum::BANK_TO_BANK_CONTRA->value => $financial_accounts[VoucherTypeEffectEnum::BANK_TO_BANK_CONTRA->value] ?? [],
+            VoucherTypeEffectEnum::CASH_TO_CASH_CONTRA->value => $financial_accounts[VoucherTypeEffectEnum::CASH_TO_CASH_CONTRA->value] ?? []
         };
 
         if (

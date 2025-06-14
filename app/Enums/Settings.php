@@ -12,6 +12,7 @@ enum Settings {
     case BANK_EXPENSE;
     case CASH_INCOME;
     case CASH_EXPENSE;
+    case INCOME_SPREAD;
 
     function getSettings(){
         return match($this){
@@ -81,4 +82,10 @@ enum Settings {
 
         };
     }
+
+    // function spreadEffect(){
+    //     return match($this){
+    //         self::INCOME_SPREAD => ['income', VoucherTypeEffectEnum::RECEIVABLES->value,VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->value]
+    //     };
+    // }
 }
