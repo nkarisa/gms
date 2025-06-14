@@ -2,8 +2,10 @@
 
 namespace App\Libraries\Grants\Builders;
 
-use \App\Libraries\Grants\JournalLibrary;
-use \App\Enums\VoucherTypeEffectEnum;
+use App\Controllers\Web\Core\Setting;
+use App\Enums\VoucherTypeEffectEnum;
+use App\Enums\Settings;
+use App\Enums\AccrualLedgerAccounts;
 trait JournalBuilder
 {
 
@@ -22,8 +24,9 @@ trait JournalBuilder
 
     public function titleColspan()
     {
-        $count_of_month_used_accrual_ledgers = 5;
-        return $this->getMonthSumAccounts() + ($count_of_month_used_accrual_ledgers * 3) + $this->journalDetailColumns + (count($this->getMonthBankOpeningBalance()) * 3) + (count($this->getMonthCashOpeningBalance()) * 3);
+        $accrualLedgers = Settings::ACCRUAL_LEDGERS->getSettings();
+        $count_of_month_used_accrual_ledgers = count($accrualLedgers);
+        return $this->getMonthSumAccounts() + $count_of_month_used_accrual_ledgers * 3 + $this->journalDetailColumns + count($this->getMonthBankOpeningBalance()) * 3 + count($this->getMonthCashOpeningBalance()) * 3;
     }
 
     public function bankLedgerColumnHeaders()
@@ -296,10 +299,9 @@ trait JournalBuilder
         }
 
         if ($office_bank_id) {
-            $bank_income[$office_bank_id] = (($voucher_type_cash_account == 'bank' && $voucher_type_transaction_effect == 'income') ||  ($voucher_type_cash_account == 'cash' && $voucher_type_transaction_effect == 'cash_contra')) ||
-            $voucher_type_transaction_effect == 'payments' ? $voucher_amount : 0;
+            $bank_income[$office_bank_id] = Settings::BANK_INCOME->getTransactionEffect($voucher_type_cash_account, $voucher_type_transaction_effect) ? $voucher_amount : 0;
 
-            $bank_expense[$office_bank_id] = (($voucher_type_cash_account == 'bank' && $voucher_type_transaction_effect == 'expense') || $voucher_type_transaction_effect == 'prepayments' || $voucher_type_transaction_effect == 'disbursements' || ($voucher_type_cash_account == 'bank' && ($voucher_type_transaction_effect == 'bank_contra' || $voucher_type_transaction_effect == 'bank_to_bank_contra'))) ? $voucher_amount : 0;
+            $bank_expense[$office_bank_id] = Settings::BANK_EXPENSE->getTransactionEffect($voucher_type_cash_account, $voucher_type_transaction_effect) ? $voucher_amount : 0;
 
             $sum_bank_income[$office_bank_id] += $bank_income[$office_bank_id];
             $sum_bank_expense[$office_bank_id] += $bank_expense[$office_bank_id];
@@ -322,9 +324,9 @@ trait JournalBuilder
         }
 
         if ($office_cash_id) {
-            $cash_income[$office_cash_id] = (($voucher_type_cash_account == 'cash' && $voucher_type_transaction_effect == 'income') || ($voucher_type_cash_account == 'bank' && $voucher_type_transaction_effect == 'bank_contra')) ? $voucher_amount : 0;
+            $cash_income[$office_cash_id] = Settings::CASH_INCOME->getTransactionEffect($voucher_type_cash_account, $voucher_type_transaction_effect) ? $voucher_amount : 0;
 
-            $cash_expense[$office_cash_id] = (($voucher_type_cash_account == 'cash' && $voucher_type_transaction_effect == 'expense') || ($voucher_type_cash_account == 'cash' && $voucher_type_transaction_effect == 'cash_contra' || $voucher_type_transaction_effect == 'cash_to_cash_contra')) ? $voucher_amount : 0;
+            $cash_expense[$office_cash_id] = Settings::CASH_EXPENSE->getTransactionEffect($voucher_type_cash_account, $voucher_type_transaction_effect) ? $voucher_amount : 0;
 
             $sum_petty_cash_income[$office_cash_id] += $cash_income[$office_cash_id];
             $sum_petty_cash_expense[$office_cash_id] += $cash_expense[$office_cash_id];
@@ -338,9 +340,9 @@ trait JournalBuilder
     {
         $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
 
-        if ($voucher_type_transaction_effect == 'payables' || $voucher_type_transaction_effect == 'disbursements') {
-            $payables_income = $voucher_type_transaction_effect == 'disbursements' ? $voucher_amount : 0;
-            $payables_expense = $voucher_type_transaction_effect == 'payables' ? $voucher_amount : 0;
+        if (AccrualLedgerAccounts::PAYABLES->effectsPair($voucher_type_transaction_effect)) {
+            $payables_income = $voucher_type_transaction_effect == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->value ? $voucher_amount : 0;
+            $payables_expense = $voucher_type_transaction_effect == VoucherTypeEffectEnum::PAYABLES->value ? $voucher_amount : 0;
 
             $sum_payables_income += $payables_income;
             $sum_payables_expense += $payables_expense;
@@ -353,9 +355,9 @@ trait JournalBuilder
     {
         $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
 
-        if ($voucher_type_transaction_effect == 'receivables' || $voucher_type_transaction_effect == 'payments') {
-            $receivables_income = $voucher_type_transaction_effect == 'receivables' ? $voucher_amount : 0;
-            $receivables_expense = $voucher_type_transaction_effect == 'payments' ? $voucher_amount : 0;
+        if (AccrualLedgerAccounts::RECEIVABLES->effectsPair($voucher_type_transaction_effect)) {
+            $receivables_income = $voucher_type_transaction_effect == VoucherTypeEffectEnum::RECEIVABLES->value ? $voucher_amount : 0;
+            $receivables_expense = $voucher_type_transaction_effect == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->value ? $voucher_amount : 0;
 
             $sum_receivables_income += $receivables_income;
             $sum_receivables_expense += $receivables_expense;
@@ -369,9 +371,9 @@ trait JournalBuilder
     {
         $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
 
-        if ($voucher_type_transaction_effect == 'prepayments' || $voucher_type_transaction_effect == 'settlements') {
-            $prepayments_income = $voucher_type_transaction_effect == 'prepayments' ? $voucher_amount : 0;
-            $prepayments_expense = $voucher_type_transaction_effect == 'settlements' ? $voucher_amount : 0;
+        if (AccrualLedgerAccounts::PREPAYMENTS->effectsPair($voucher_type_transaction_effect)) {
+            $prepayments_income = $voucher_type_transaction_effect == VoucherTypeEffectEnum::PREPAYMENTS->value ? $voucher_amount : 0;
+            $prepayments_expense = $voucher_type_transaction_effect == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->value ? $voucher_amount : 0;
 
             $sum_prepayments_income += $prepayments_income;
             $sum_prepayments_expense += $prepayments_expense;
@@ -385,9 +387,9 @@ trait JournalBuilder
     {
         $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
 
-        if ($voucher_type_transaction_effect == 'depreciation') {
+        if (AccrualLedgerAccounts::DEPRECIATION->effectsPair($voucher_type_transaction_effect)) {
             $depreciation_income = 0;
-            $depreciation_expense = $voucher_type_transaction_effect == 'depreciation' ? $voucher_amount : 0;
+            $depreciation_expense = $voucher_type_transaction_effect == VoucherTypeEffectEnum::DEPRECIATION->value ? $voucher_amount : 0;
 
             $sum_depreciation_income += $depreciation_income;
             $sum_depreciation_expense += $depreciation_expense;
@@ -400,9 +402,9 @@ trait JournalBuilder
     {
         $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
 
-        if ($voucher_type_transaction_effect == 'payroll_liability') {
+        if (AccrualLedgerAccounts::PAYROLL_LIABILITY->effectsPair($voucher_type_transaction_effect)) {
             $payroll_liability_income = 0;
-            $payroll_liability_expense = $voucher_type_transaction_effect == 'payroll_liability' ? $voucher_amount : 0;
+            $payroll_liability_expense = $voucher_type_transaction_effect == VoucherTypeEffectEnum::PAYROLL_LIABILITY->value ? $voucher_amount : 0;
 
             $sum_payroll_liability_income += $payroll_liability_income;
             $sum_payroll_liability_expense += $payroll_liability_expense;

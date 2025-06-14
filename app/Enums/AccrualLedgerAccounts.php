@@ -40,4 +40,14 @@ enum AccrualLedgerAccounts: string {
             self::PAYROLL_LIABILITY => NULL
         };
     }
+
+    function effectsPair($transactionEffect){
+        return match($this){
+            self::PAYABLES => $transactionEffect == VoucherTypeEffectEnum::PAYABLES->value || $transactionEffect == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->value,
+            self::RECEIVABLES => $transactionEffect == VoucherTypeEffectEnum::RECEIVABLES->value || $transactionEffect == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->value,
+            self::PREPAYMENTS => $transactionEffect == VoucherTypeEffectEnum::PREPAYMENTS->value || $transactionEffect == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->value,
+            self::DEPRECIATION => $transactionEffect == VoucherTypeEffectEnum::DEPRECIATION->value,
+            self::PAYROLL_LIABILITY => $transactionEffect == VoucherTypeEffectEnum::PAYROLL_LIABILITY->value
+        };
+    }
 }

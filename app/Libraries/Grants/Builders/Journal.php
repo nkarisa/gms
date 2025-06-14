@@ -65,8 +65,7 @@ class Journal {
             $$accrualLedger = $month_opening_balance[$accrualLedger]['amount'];
         }
 
-        //  return compact(implode(',',Settings::ACCRUAL_LEDGERS->getSettings()));
-        return compact('receivables','payables', 'prepayments', 'depreciation','payroll_liability');
+        return compact(...$accrualLedgers);
     }
     function getMonthAccounts(): array {
         return $this->journalData['vouchers']['accounts'];
