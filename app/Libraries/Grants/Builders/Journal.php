@@ -2,6 +2,9 @@
 
 namespace App\Libraries\Grants\Builders;
 
+use App\Enums\AccrualLedgerAccounts;
+use App\Enums\VoucherTypeEffectEnum;
+use App\Enums\Settings;
 class Journal {
 
     use JournalBuilder;
@@ -56,12 +59,13 @@ class Journal {
 
         $month_opening_balance = $this->journalData['vouchers']['month_opening_balance'];
 
-        $receivables = $month_opening_balance['receivables']['amount'];
-        $payables = $month_opening_balance['payables']['amount'];
-        $prepayments = $month_opening_balance['prepayments']['amount'];
-        $depreciation = $month_opening_balance['depreciation']['amount'];
-        $payroll_liability = $month_opening_balance['payroll_liability']['amount'];
+        $accrualLedgers = Settings::ACCRUAL_LEDGERS->getSettings();
 
+        foreach($accrualLedgers as $accrualLedger){
+            $$accrualLedger = $month_opening_balance[$accrualLedger]['amount'];
+        }
+
+        //  return compact(implode(',',Settings::ACCRUAL_LEDGERS->getSettings()));
         return compact('receivables','payables', 'prepayments', 'depreciation','payroll_liability');
     }
     function getMonthAccounts(): array {
