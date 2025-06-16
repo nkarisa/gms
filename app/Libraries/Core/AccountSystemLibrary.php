@@ -238,6 +238,11 @@ class AccountSystemLibrary extends GrantsLibrary implements \App\Interfaces\Libr
         $accountSystemSettingsWriteBuilder->where(['account_system_setting_name' => $account_system_setting_name]);
         $accountSystemSettingsWriteBuilder->update(['account_system_setting_accounts' => json_encode($accountSystemSettingAccountsArray)]);
       }
+
+      if($account_system_setting_name == 'use_accrual_based_accounting'){
+        $accountSystemSettingLibrary = new \App\Libraries\Core\AccountSystemSettingLibrary();
+        $accountSystemSettingLibrary->createVoucherTypesAndExpenseAccountsForAccrual([$account_system_id]);
+      } 
     }
   }
 
