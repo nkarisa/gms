@@ -120,8 +120,8 @@ class IncomeAccountLibrary extends GrantsLibrary implements \App\Interfaces\Libr
   }
 
   public function getSupportIncomeAccountsByAccountSystemIds(array $accountSystemIds, array $accountSystemIdsWithCodes){
-    $incomeAccountReadBuilder = $this->read_db->table('income_account');
-    $incomeAccountWriteBuilder = $this->write_db->table('income_account');
+    $incomeAccountReadBuilder = $this->write_db->table('income_account'); // Should be write_db/ called when writing new account system
+    $incomeAccountWriteBuilder = $this->write_db->table('income_account'); // Should be write_db/ called when writing new account system
 
     // Get support income account id
     $incomeAccountReadBuilder->select(['income_account_id','income_account_name','income_account_code','fk_account_system_id']);
@@ -156,7 +156,7 @@ class IncomeAccountLibrary extends GrantsLibrary implements \App\Interfaces\Libr
         $incomeAccountData['income_account_name'] = $incomeAccountCode.'-'.get_phrase('child_support');
         $incomeAccountData['income_account_description'] = get_phrase('child_support_funds_desciption');
         $incomeAccountData['income_account_code'] = $incomeAccountCode;
-        $incomeAccountData['income_account_reconciliation_is_required'] = 0;
+        $incomeAccountData['income_account_reconciliation_is_required'] = NULL;
         $incomeAccountData['income_account_is_active'] = 1;
         $incomeAccountData['fk_income_vote_heads_category_id'] = $supportVoteHeadCategoryId;
         $incomeAccountData['income_account_is_budgeted'] = 1;

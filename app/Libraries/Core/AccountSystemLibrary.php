@@ -109,20 +109,26 @@ class AccountSystemLibrary extends GrantsLibrary implements \App\Interfaces\Libr
     $languages = $builder->get()->getResultArray();
 
     $fields['language_name']['field_type'] = 'select';
+    $fields['language_name']['options'] = [];
     foreach ($languages as $language) {
       $fields['language_name']['options'][$language['language_id']] = $language['language_name'];
     }
 
     // Get account systm settings
-    $builder = $this->read_db->table('account_system_setting');
-    $builder->select(['account_system_setting_name']);
-    $builder->where(['account_system_setting_value' => 1]);
-    $account_system_settings = $builder->get()->getResultArray();
+    $accountSystemSettingbuilder = $this->read_db->table('account_system_setting');
+    $accountSystemSettingbuilder->select(['account_system_setting_name']);
+    $accountSystemSettingbuilder->where(['account_system_setting_value' => 1]);
+    $account_system_settings_obj = $accountSystemSettingbuilder->get();
 
     $fields['account_system_settings']['field_type'] = 'select';
     $fields['account_system_settings']['select2'] = true;
-    foreach ($account_system_settings as $account_system_setting) {
-      $fields['account_system_settings']['options'][$account_system_setting['account_system_setting_name']] = get_phrase($account_system_setting['account_system_setting_name']);
+    $fields['account_system_settings']['options'] = [];
+
+    if($account_system_settings_obj->getNumRows() > 0){
+      $account_system_settings = $account_system_settings_obj->getResultArray();  
+      foreach ($account_system_settings as $account_system_setting) {
+        $fields['account_system_settings']['options'][$account_system_setting['account_system_setting_name']] = get_phrase($account_system_setting['account_system_setting_name']);
+      }
     }
 
     $fields['country_currency_name']['field_type'] = 'select';
@@ -130,35 +136,36 @@ class AccountSystemLibrary extends GrantsLibrary implements \App\Interfaces\Libr
     $currency_data = json_decode($currency_json, true);
 
     $fields['default_project_start_date']['field_type'] = 'date';
-
+    $fields['country_currency_name']['options'] = [];
     foreach ($currency_data as $currency) {
       $fields['country_currency_name']['options'][$currency['code'] . '--' . $currency['name']] = $currency['name'] . " (" . $currency['code'] . ")";
     }
 
     // Get Account System Settings
-    $builder = $this->read_db->table('account_system_setting');
-    $builder->select(['account_system_setting_name']);
-    $builder->where(['account_system_setting_value' => 1]);
-    $account_system_settings = $builder->get()->getResultArray();
+    // $builder = $this->read_db->table('account_system_setting');
+    // $builder->select(['account_system_setting_name']);
+    // $builder->where(['account_system_setting_value' => 1]);
+    // $account_system_settings = $builder->get()->getResultArray();
 
 
     $fields['account_system_level']['field_type'] = 'select';
     $levels = ['4' => get_phrase('country'), '5' => get_phrase('region')];
-
+    $fields['account_system_level']['options'] = [];
     foreach ($levels as $key => $level) {
       $fields['account_system_level']['options'][$key] = $level;
     }
 
-    $fields['template_account_system']['field_type'] = 'select';
     // Get all country, region, global
     $accountSystemReadBuilder = $this->read_db->table('account_system');
     $accountSystemReadBuilder->select(['account_system_id', 'account_system_name']);
     $accountSystemReadBuilder->where(['account_system_is_active' => 1, 'account_system_level>' => 4]);
     $activeAccountSystemObj = $accountSystemReadBuilder->get();
+    
+    $fields['template_account_system']['field_type'] = 'select';
+    $fields['template_account_system']['options'] = [];
 
     if ($activeAccountSystemObj->getNumRows() > 0) {
       $activeAccountSystems = $activeAccountSystemObj->getResultArray();
-
       foreach ($activeAccountSystems as $activeAccountSystem) {
         $fields['template_account_system']['options'][$activeAccountSystem['account_system_id']] = $activeAccountSystem['account_system_name'];
       }
@@ -420,27 +427,43 @@ class AccountSystemLibrary extends GrantsLibrary implements \App\Interfaces\Libr
    */
   private function createIncomeAccount(StatusLibrary $statusLib, array $globalIncomeAccount, int $account_system_id, string $account_system_code): int
   {
-    $incomeAccountWriteBuilder = $this->write_db->table('income_account');
-    $incomeAccountTrackNumberAndName = $this->generateItemTrackNumberAndName('income_account');
-    // Create a new Income Account for the Account System
-    $incomeAccountInsert['income_account_name'] = $account_system_code . '-' . $globalIncomeAccount['income_account_name'];
-    $incomeAccountInsert['income_account_track_number'] = $incomeAccountTrackNumberAndName['income_account_track_number'];
-    $incomeAccountInsert['income_account_description'] = $globalIncomeAccount['income_account_description'];
-    $incomeAccountInsert['income_account_code'] = $account_system_code . $globalIncomeAccount['income_account_code'];
-    $incomeAccountInsert['income_account_is_active'] = 1;
-    $incomeAccountInsert['fk_income_vote_heads_category_id'] = $globalIncomeAccount['fk_income_vote_heads_category_id'];
-    $incomeAccountInsert['income_account_is_budgeted'] = $globalIncomeAccount['income_account_is_budgeted'];
-    $incomeAccountInsert['income_account_is_donor_funded'] = $globalIncomeAccount['income_account_is_donor_funded'];
-    $incomeAccountInsert['fk_account_system_id'] = $account_system_id;
-    $incomeAccountInsert['income_account_created_date'] = date('Y-m-d');
-    $incomeAccountInsert['income_account_created_by'] = $this->session->user_id;
-    $incomeAccountInsert['income_account_last_modified_date'] = date('Y-m-d');
-    $incomeAccountInsert['income_account_last_modified_by'] = $this->session->user_id;
-    $incomeAccountInsert['fk_status_id'] = $statusLib->initialItemStatus('income_account');
-    $incomeAccountInsert['fk_approval_id'] = 0;
 
-    $incomeAccountWriteBuilder->insert($incomeAccountInsert);
-    return $this->write_db->insertID();
+    $incomeAccountWriteBuilder = $this->write_db->table('income_account');
+    $statusLib = new \App\Libraries\Core\StatusLibrary();
+
+    // Get support income account id
+    $incomeAccountWriteBuilder->select(['income_account_id','income_account_name','income_account_code','fk_account_system_id']);
+    $incomeAccountWriteBuilder->where('fk_account_system_id', $account_system_id);
+    $incomeAccountWriteBuilder->join('income_vote_heads_category','income_vote_heads_category.income_vote_heads_category_id=income_account.fk_income_vote_heads_category_id');
+    $incomeAccountWriteBuilder->where(['income_vote_heads_category_code' => 'support']);
+    $supportIncomeAccountObj = $incomeAccountWriteBuilder->get();
+
+    if($supportIncomeAccountObj->getNumRows() == 0){
+        $incomeAccountTrackNumberAndName = $this->generateItemTrackNumberAndName('income_account');
+
+        // Create a new Income Account for the Account System
+        $incomeAccountInsert['income_account_name'] = $account_system_code . '-' . $globalIncomeAccount['income_account_name'];
+        $incomeAccountInsert['income_account_track_number'] = $incomeAccountTrackNumberAndName['income_account_track_number'];
+        $incomeAccountInsert['income_account_description'] = $globalIncomeAccount['income_account_description'];
+        $incomeAccountInsert['income_account_code'] = $account_system_code . $globalIncomeAccount['income_account_code'];
+        $incomeAccountInsert['income_account_is_active'] = 1;
+        $incomeAccountInsert['fk_income_vote_heads_category_id'] = $globalIncomeAccount['fk_income_vote_heads_category_id'];
+        $incomeAccountInsert['income_account_is_budgeted'] = $globalIncomeAccount['income_account_is_budgeted'];
+        $incomeAccountInsert['income_account_is_donor_funded'] = $globalIncomeAccount['income_account_is_donor_funded'];
+        $incomeAccountInsert['fk_account_system_id'] = $account_system_id;
+        $incomeAccountInsert['income_account_created_date'] = date('Y-m-d');
+        $incomeAccountInsert['income_account_created_by'] = $this->session->user_id;
+        $incomeAccountInsert['income_account_last_modified_date'] = date('Y-m-d');
+        $incomeAccountInsert['income_account_last_modified_by'] = $this->session->user_id;
+        $incomeAccountInsert['fk_status_id'] = $statusLib->initialItemStatus('income_account');
+        $incomeAccountInsert['fk_approval_id'] = 0;
+
+        $incomeAccountWriteBuilder->insert($incomeAccountInsert);
+        return $this->write_db->insertID();
+    }else{
+      return $supportIncomeAccountObj->getRowArray()['income_account_id'];
+    }
+
   }
   /**
    * Summary of createExpenseAccount
@@ -1325,7 +1348,7 @@ class AccountSystemLibrary extends GrantsLibrary implements \App\Interfaces\Libr
   }
 
   public function getAccountSystemsByIds(array $accountSystemIds){
-    $accountSystemReadBuilder = $this->read_db->table('account_system');
+    $accountSystemReadBuilder = $this->write_db->table('account_system'); // Should be write_db/ called when writing new account system
 
     $accountSystemReadBuilder->select(['account_system_id','account_system_name','account_system_code','account_system_is_active','account_system_level']);
     $accountSystemReadBuilder->whereIn('account_system_id', $accountSystemIds);
