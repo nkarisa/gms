@@ -24,7 +24,7 @@ trait JournalBuilder
 
     public function titleColspan()
     {
-        $accrualLedgers = Settings::ACCRUAL_LEDGERS->getSettings();
+        $accrualLedgers = AccrualLedgerAccounts::cases(); //Settings::ACCRUAL_LEDGERS->getSettings();
         $count_of_month_used_accrual_ledgers = count($accrualLedgers);
         return $this->getMonthSumAccounts() + $count_of_month_used_accrual_ledgers * 3 + $this->journalDetailColumns + count($this->getMonthBankOpeningBalance()) * 3 + count($this->getMonthCashOpeningBalance()) * 3;
     }

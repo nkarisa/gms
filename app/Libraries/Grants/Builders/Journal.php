@@ -55,18 +55,19 @@ class Journal {
         return $this->journalData['vouchers']['month_opening_balance']['cash'];
     }
 
-    function getAccrualOpeningBalances(){
-
+    public function getAccrualOpeningBalances(): array {
         $month_opening_balance = $this->journalData['vouchers']['month_opening_balance'];
+        $accrualLedgers = AccrualLedgerAccounts::cases();
+        $openingBalances = []; 
 
-        $accrualLedgers = Settings::ACCRUAL_LEDGERS->getSettings();
-
-        foreach($accrualLedgers as $accrualLedger){
-            $$accrualLedger = $month_opening_balance[$accrualLedger]['amount'];
+        foreach($accrualLedgers as $accrualLedgerObj){
+            $accrualLedgerName = $accrualLedgerObj->value;
+            $openingBalances[$accrualLedgerName] = $month_opening_balance[$accrualLedgerName]['amount'] ?? null;
         }
 
-        return compact(...$accrualLedgers);
+        return $openingBalances; 
     }
+
     function getMonthAccounts(): array {
         return $this->journalData['vouchers']['accounts'];
     }

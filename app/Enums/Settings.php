@@ -19,17 +19,17 @@ enum Settings {
     case ACRRUAL_CONTRA_SPREAD;
     
 
-    function getSettings(){
-        return match($this){
-            self::ACCRUAL_LEDGERS => [
-                AccrualLedgerAccounts::RECEIVABLES->value,
-                AccrualLedgerAccounts::PAYABLES->value,
-                AccrualLedgerAccounts::PREPAYMENTS->value,
-                AccrualLedgerAccounts::DEPRECIATION->value,
-                AccrualLedgerAccounts::PAYROLL_LIABILITY->value
-            ],
-        };
-    }
+    // function getSettings(){
+    //     return match($this){
+    //         self::ACCRUAL_LEDGERS => [
+    //             AccrualLedgerAccounts::RECEIVABLES->value,
+    //             AccrualLedgerAccounts::PAYABLES->value,
+    //             AccrualLedgerAccounts::PREPAYMENTS->value,
+    //             AccrualLedgerAccounts::DEPRECIATION->value,
+    //             AccrualLedgerAccounts::PAYROLL_LIABILITY->value
+    //         ],
+    //     };
+    // }
 
     function getTransactionEffectCondition($transaction_account, $transaction_effect){
         return match($this){
