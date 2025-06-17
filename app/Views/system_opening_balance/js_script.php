@@ -1,4 +1,6 @@
 <?php 
+use App\Enums\AccrualLedgerAccounts;
+
 extract($result);
 ?>
 <script>
@@ -83,8 +85,19 @@ extract($result);
   })
 
   $('#insert_accrual_balance').on('click', function() {
+    const accrual_balance_table  = $("#accrual_balance_table").find('tbody')
+    if(accrual_balance_table.children().length == '<?=count(AccrualLedgerAccounts::cases()) - 1;?>'){
+      $("#insert_accrual_balance").addClass('disabled')
+    }
     const row = accrual_balance_row({is_first_row: false, accrual_account_options: create_accrual_accounts_options(), accrual_ledger_options: create_accrual_ledger_options(), data: initial_accrual_account_data})
     $('#accrual_balance_table').find('tbody').append(row);
+  })
+
+  $(document).on('click', ".accrual_account_remove", function () {
+    const insert_accrual_balance  = $("#insert_accrual_balance")
+    if(insert_accrual_balance.hasClass('disabled')){
+      insert_accrual_balance.removeClass('disabled')
+    }
   })
 
   $('#insert_outstanding_cheque').on('click', function() {
@@ -136,7 +149,7 @@ extract($result);
       data
     } = options
 
-    const action_button = `<div class = 'btn btn-danger remove_row outstanding_cheque_remove'>${'<?= get_phrase('remove_row'); ?>'}</div>`
+    const action_button = `<div class = 'btn btn-danger remove_row accrual_account_remove'>${'<?= get_phrase('remove_row'); ?>'}</div>`
     const accrual_account_code_select = `<select name = "accrual_account_codes[]" class = "form-control accrual_account_codes mandatory">${accrual_account_options}</select>`
     const accrual_ledger_effect_select = `<select name = "accrual_ledger_effect[]" class = "form-control accrual_ledger_effect mandatory">${accrual_ledger_options}</select>`
     const accrual_account_amount_input = `<input  value = "${data.amount}" name = "cheque_amount[]" type = "number" class = "form-control cheque_amount bank_reconciliation_fields outstanding_cheque mandatory" />`
