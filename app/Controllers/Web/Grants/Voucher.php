@@ -39,11 +39,7 @@ class Voucher extends WebController
       $result['voucher_status_is_max'] = $statusLibrary->isStatusIdMax('voucher', hash_id($this->id, 'decode'));
     } elseif ($this->action == 'multiFormAdd') {
       $result['office_has_request'] = $requestLibrary->getOfficeRequestCount() == 0 ? false : true;
-    } elseif ($this->action == 'edit') {
-      //$result = [];
-      
-     //$this->id=$this->request->getUri()->getSegment(3);
-
+    } elseif ($this->action == 'edit') {      
       $result['voucher_header_info'] = $this->library->getVoucherHeaderToEdit(hash_id($this->id, 'decode'));
     }
 
@@ -440,10 +436,10 @@ class Voucher extends WebController
     ) {
 
       if(
-        $voucher_type_effect_and_code->voucher_type_effect_code == 'bank_refund' || 
-        $voucher_type_effect_and_code->voucher_type_effect_code == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() || 
-        $voucher_type_effect_and_code->voucher_type_effect_code == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() || 
-        $voucher_type_effect_and_code->voucher_type_effect_code == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode()
+        $voucher_type_effect_and_code->voucher_type_effect_code == VoucherTypeEffectEnum::BANK_REFUND->value || 
+        $voucher_type_effect_and_code->voucher_type_effect_code == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->value || 
+        $voucher_type_effect_and_code->voucher_type_effect_code == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->value || 
+        $voucher_type_effect_and_code->voucher_type_effect_code == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->value
         ){
         $voucherDetailReadBuilder = $this->read_db->table('voucher_detail');
         $voucherDetailReadBuilder->select(['DISTINCT(project_allocation_id) as project_allocation_id','project_name as project_allocation_name']);
@@ -868,13 +864,13 @@ class Voucher extends WebController
    *get_voucher_detail_to_edit(): Returns a rows of voucher details information from voucher_detail table
    * @author Livingstone Onduso: Dated 08-05-2023
    * @access public
-   * @param Int $voucher_id - voucher id
+   * @param int $voucher_id - voucher id
    * @return void
    */
-  function getVoucherDetailToEdit(int $voucher_id, string $voucher_type_effect_name): ResponseInterface
+  function getVoucherDetailToEdit(int $voucher_id, string $voucher_type_effect_code): ResponseInterface
   {
     $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
-    $voucher_detail_records_to_edit = $voucherLibrary->getVoucherDetailToEdit($voucher_id, $voucher_type_effect_name);
+    $voucher_detail_records_to_edit = $voucherLibrary->getVoucherDetailToEdit($voucher_id, $voucher_type_effect_code);
 
     return $this->response->setJSON($voucher_detail_records_to_edit);
   }

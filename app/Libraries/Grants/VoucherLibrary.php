@@ -5,6 +5,7 @@ namespace App\Libraries\Grants;
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\VoucherModel;
 use App\Enums\AccountSystemSettingEnum;
+use App\Enums\AccrualVoucherTypeEffects;
 use App\Enums\VoucherTypeEffectEnum;
 
 class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
@@ -534,7 +535,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
     public function getVoucherHeaderToEdit(int $voucher_id): array
     {
         $builder = $this->read_db->table("voucher");
-        $builder->select(['voucher_id', 'office_id', 'office_code', 'voucher_type_account_name', 'voucher_type_effect_name', 'voucher_type_is_cheque_referenced', 'voucher_number', 'voucher_date', 'fk_voucher_type_id', 'voucher_type_name', 'fk_office_bank_id', 'fk_office_cash_id', 'office_bank_name', 'voucher_cheque_number', 'voucher_vendor', 'voucher_vendor_address', 'voucher_description']);
+        $builder->select(['voucher_id', 'office_id', 'office_code', 'voucher_type_account_name', 'voucher_type_effect_name','voucher_type_effect_code', 'voucher_type_is_cheque_referenced', 'voucher_number', 'voucher_date', 'fk_voucher_type_id', 'voucher_type_name', 'fk_office_bank_id', 'fk_office_cash_id', 'office_bank_name', 'voucher_cheque_number', 'voucher_vendor', 'voucher_vendor_address', 'voucher_description']);
         $builder->join('office', 'office.office_id=voucher.fk_office_id');
         $builder->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
         $builder->join('voucher_type_account', 'voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
@@ -2391,22 +2392,33 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
      * @param Int $voucher_id - voucher id String voucher_effect_name
      * @return array - returns array
      */
-    public function getVoucherDetailToEdit(int $voucher_id, string $voucher_effect_name): array
-    {
+    public function getVoucherDetailToEdit(int $voucher_id, string $voucher_type_effect_code): array
+    {   
         $voucherDetailReadBuilder = $this->read_db->table('voucher_detail');
-
-        $voucherDetailReadBuilder->select(['voucher_detail_id', 'voucher_detail_quantity', 'voucher_detail_unit_cost', 'voucher_detail_total_cost', 'voucher_detail_description', 'fk_project_allocation_id', 'project_name', 'fk_contra_account_id', 'project_id']);
+        $voucherDetailReadBuilder->select(['voucher_detail_id', 'voucher_detail_quantity', 'voucher_detail_unit_cost', 'voucher_detail_total_cost', 'voucher_detail_description', 'fk_project_allocation_id', 'project_name', 'project_id']);
         
         //Check if contra or expense. Always transaction will account_id so no need to check if income
         
-        if ($voucher_effect_name == 'Expense') {
+        if (
+                $voucher_type_effect_code == VoucherTypeEffectEnum::EXPENSE->value || 
+                $voucher_type_effect_code == VoucherTypeEffectEnum::PAYABLES->value ||
+                $voucher_type_effect_code == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->value  || 
+                $voucher_type_effect_code == VoucherTypeEffectEnum::PREPAYMENTS->value ||
+                $voucher_type_effect_code == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->value ||
+                $voucher_type_effect_code == VoucherTypeEffectEnum::DEPRECIATION->value ||
+                $voucher_type_effect_code == VoucherTypeEffectEnum::PAYROLL_LIABILITY->value 
+            ) {
             $voucherDetailReadBuilder->select(['fk_expense_account_id', 'expense_account_name', 'expense_account.fk_income_account_id', 'income_account_name']);
             $voucherDetailReadBuilder->join('expense_account', 'expense_account.expense_account_id=voucher_detail.fk_expense_account_id','left');
             $voucherDetailReadBuilder->join('income_account', 'income_account.income_account_id=voucher_detail.fk_income_account_id','left');
-        } elseif ($voucher_effect_name == 'Cash_contra' || $voucher_effect_name == 'Bank_contra') {
+        } elseif ($voucher_type_effect_code == VoucherTypeEffectEnum::CASH_CONTRA->value || $voucher_type_effect_code == VoucherTypeEffectEnum::BANK_CONTRA->value) {
             $voucherDetailReadBuilder->select(['contra_account_name']);
             $voucherDetailReadBuilder->join('contra_account', 'contra_account.contra_account_id=voucher_detail.fk_contra_account_id');
-        } elseif ($voucher_effect_name == 'Income') {
+        } elseif (
+                $voucher_type_effect_code == VoucherTypeEffectEnum::INCOME->value || 
+                $voucher_type_effect_code == VoucherTypeEffectEnum::RECEIVABLES->value ||
+                $voucher_type_effect_code == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->value 
+            ) {
             $voucherDetailReadBuilder->select(array('income_account_name', 'fk_income_account_id'));
             $voucherDetailReadBuilder->join('income_account', 'income_account.income_account_id=voucher_detail.fk_income_account_id','left');
         }
@@ -2424,7 +2436,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $amount['total_voucher_amount'] = $voucher_total_amount;
 
         array_push($voucher_detail_to_edit, $amount);
-
+        // log_message('error', json_encode($voucher_detail_to_edit));
         return $voucher_detail_to_edit;
     }
 
@@ -2447,10 +2459,12 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $project_income_account_ids = $projectIncomeAccountReadBuilder->get()->getResultArray();
 
         $income_ids = [];
+        $accounts_ids_and_names = [];
 
         foreach ($project_income_account_ids as $project_income_account_id) {
             $income_ids[] = $project_income_account_id['fk_income_account_id'];
         }
+        
 
         //if voucher_type=income get the income names and codes
         if ($voucher_type_effect == 'income') {
@@ -2464,9 +2478,34 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
             //what of contra
             $accounts_ids_and_names = $this->getAccountsIdsAndName('contra_account', 'contra_account_id', $income_ids);
+        }elseif(AccrualVoucherTypeEffects::tryFrom($voucher_type_effect)){
+            $accounts_ids_and_names = match($voucher_type_effect){
+                AccrualVoucherTypeEffects::RECEIVABLES->value => $this->getIncomeAccountsByIds($income_ids),
+            };
         }
 
         return $accounts_ids_and_names;
+    }
+
+    private function getIncomeAccountsByIds($income_ids){
+        $incomeAccountReadBuilder = $this->read_db->table('income_account');
+
+        $incomeAccountReadBuilder->select(['income_account_id', 'income_account_name']);
+        $incomeAccountReadBuilder->whereIn('income_account_id', $income_ids);
+        $income_account_obj = $incomeAccountReadBuilder->get();
+
+        $income_account = [];
+
+        if($income_account_obj->getNumRows() > 0){
+            $result = $income_account_obj->getResultArray();
+
+            $ids = array_column($result, 'income_account_id');
+            $names = array_column($result, 'income_account_name');
+
+            $income_account = array_combine($ids, $names);
+        }
+
+        return $income_account;
     }
 
     /**

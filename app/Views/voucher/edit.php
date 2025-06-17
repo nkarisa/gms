@@ -1068,22 +1068,12 @@ $voucher_missing_details = $voucherLibrary->isVoucherMissingVoucherDetails($vouc
     function updateAccountAndAllocationField_edit() {
 
         let office_id = '<?= $voucher_header_info['office_id'] ?>';
-
         let voucher_type_id = '<?= $voucher_header_info['fk_voucher_type_id'] ?>';
-
         let transaction_date = '<?= $voucher_header_info['voucher_date'] ?>';
-
         let office_bank_id = '<?= $voucher_header_info['fk_office_bank_id'] ?>';
-
         let voucher_id = '<?= $voucher_header_info['voucher_id'] ?>';
-
-        let voucher_type_effect_name = '<?= $voucher_header_info['voucher_type_effect_name'] ?>';
-
-
-        // alert(voucher_type_effect_name);
-        //console.log(voucher_type_effect_name);
-
-        var extra_data = {
+        let voucher_type_effect_code = '<?= $voucher_header_info['voucher_type_effect_code'] ?>';
+        let extra_data = {
             'office_bank_id': office_bank_id,
             'bank_refund_from': $('#bank_refund').length > 0 && $('#bank_refund').val() > 0 ? $('#bank_refund').val() : 0
         };
@@ -1098,52 +1088,34 @@ $voucher_missing_details = $voucherLibrary->isVoucherMissingVoucherDetails($vouc
 
             },
             success: function(response_objects) {
-                var account_select_option = "<option value=''>Select an account</option>";
-                var allocation_select_option = "<option value=''>Select an allocation code</option>";
-                // var response_objects = JSON.parse(response);
-                var response_allocation = response_objects['project_allocation'];
-                var response_is_contra = response_objects['is_contra'];
-                let url_saved_voucher_details = '<?= base_url(); ?>ajax/voucher/getVoucherDetailToEdit/' + voucher_id + '/' + voucher_type_effect_name;
+                let account_select_option = "<option value=''>Select an account</option>";
+                let allocation_select_option = "<option value=''>Select an allocation code</option>";
+                let response_allocation = response_objects['project_allocation'];
+                let response_is_contra = response_objects['is_contra'];
+                let url_saved_voucher_details = '<?= base_url(); ?>ajax/voucher/getVoucherDetailToEdit/' + voucher_id + '/' + voucher_type_effect_code;
 
                 $.get(url_saved_voucher_details, function(voucher_details) {
-
                     //Get the last Element value
                     let total_amount = voucher_details.pop();
-
                     $.each(voucher_details, function(i, elm) {
-
                         let income_account = parseInt(elm.fk_income_account_id);
-
-                        //console.log(income_account);
-
                         let expense_account = parseInt(elm.fk_expense_account_id);
-
                         let contra_account = parseInt(elm.fk_contra_account_id);
-
                         let allocation_id = parseInt(elm.fk_project_allocation_id);
-
                         let project_id = parseInt(elm.project_id);
-
-                        //console.log(project_id);
 
                         //Insert Row
                         if (expense_account > 0) {
-
                             insertRow_to_edit_voucher(response_is_contra, elm.voucher_detail_id, elm.voucher_detail_quantity, elm.voucher_detail_description, elm.voucher_detail_unit_cost, elm.voucher_detail_total_cost, allocation_id, elm.fk_expense_account_id, elm.expense_account_name, elm.fk_income_account_id);
-                            //console.log(income_account);
-                            // alert(contra_account)
                         } else if (contra_account > 0) {
-                            // alert('Hello 1')
                             insertRow_to_edit_voucher(response_is_contra, elm.voucher_detail_id, elm.voucher_detail_quantity, elm.voucher_detail_description, elm.voucher_detail_unit_cost, elm.voucher_detail_total_cost, allocation_id, contra_account, elm.contra_account_name, elm.fk_income_account_id);
                         } else {
-                            //alert(allocation_id);
                             insertRow_to_edit_voucher(response_is_contra, elm.voucher_detail_id, elm.voucher_detail_quantity, elm.voucher_detail_description, elm.voucher_detail_unit_cost, elm.voucher_detail_total_cost, allocation_id, elm.fk_income_account_id, elm.income_account_name, elm.fk_income_account_id);
                         }
 
                         //Add Allocations
                         create_allocation_select_options_edit(response_allocation, allocation_id, elm.project_name);
                         //Populate other expense accounts
-
                         populate_other_active_expense_accounts(project_id, expense_account, income_account, contra_account, voucher_type_id);
 
                     });
