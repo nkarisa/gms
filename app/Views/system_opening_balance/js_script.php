@@ -186,7 +186,6 @@ extract($result);
   }
 
   function accrual_balance_row(options) { //is_first_row = false
-
     const {
       is_first_row,
       accrual_account_options,
@@ -584,7 +583,6 @@ extract($result);
     const total_cash = $('#total_cash').val()
     const proof_of_cash_check = compute_proof_of_cash_check()
     const bank_reconciliation_check = compute_bank_reconciliation_check()
-    // const post_data = $('#frm_system_opening_balance').serializeArray();
     const url = '<?= base_url(); ?>ajax/system_opening_balance/saveOpeningBalances/<?= hash_id($id, 'decode') ?>'
     const btn = $(this)
 
@@ -624,17 +622,7 @@ extract($result);
           $("#overlay").css("display", "none");
         }
       });
-      // $.post(url, post_data, function (response) {
-      //   if(response){
-      //     alert('Opening Financial Report Saved successfully');
-      //     if(btn.hasClass('save_exit')){
-      //       // alert('Opening Financial Report Saved successfully');
-      //       location.href = document.referrer;
-      //     }
-      //   }else{
-      //     alert('Error in saving')
-      //   }
-      // })
+      
     } else {
       $message = 'Opening Balanced are not reconciling. Please check on on the following areas: \n'
 
@@ -729,7 +717,8 @@ extract($result);
     // }
   });
 
-  function create_accrual_accounts_options($selected_options = 0) {
+  function create_accrual_accounts_options(selected_options = 0) {
+    // console.log(selected_options)
     let options = '<option value = "">--- <?= get_phrase('select_ledger_account'); ?> ---</option>'
     const accrual_accounts = ['receivables', 'payables', 'prepayments', 'depreciation', 'payroll_liability'];
     const accrual_account_codes = $('.accrual_account_codes')
@@ -746,7 +735,7 @@ extract($result);
 
       if (breakEqual) continue
 
-      options += `<option value = '${accrual_accounts[i]}' ${selected_option_value == accrual_accounts[i] ? 'selected' : ''} >${accrual_accounts[i]}</option>`
+      options += `<option value = '${accrual_accounts[i]}' ${selected_options == accrual_accounts[i] ? 'selected' : ''} >${accrual_accounts[i]}</option>`
     }
 
     return options

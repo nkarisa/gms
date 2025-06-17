@@ -443,6 +443,24 @@ if(empty($office_banks)){
 
             $('#total_fund_balance').val(total_fund_balance.toFixed(2))
 
+            // Accrual balances
+            let total_accrual_balance = 0
+
+            for (const key in responseObj.accrual_balance) {
+                
+                const balance_row = responseObj.accrual_balance[key];
+                let is_first_row = false 
+                const data = {
+                        accrual_account: balance_row.opening_accrual_balance_account,
+                        accrual_effect: balance_row.opening_accrual_balance_effect,
+                        amount: balance_row.opening_accrual_balance_amount
+                }
+                
+                options = {is_first_row, accrual_account_options: create_accrual_accounts_options(balance_row.opening_accrual_balance_account),accrual_ledger_options: create_accrual_ledger_options(balance_row.opening_accrual_balance_effect), data}                
+                
+                $('#accrual_balance_table').find('tbody').append(accrual_balance_row(options))
+            }
+
             // Outstanding Cheques 
             let total_outstanding_cheques = 0
                 // console.log(responseObj.outstanding_cheques)

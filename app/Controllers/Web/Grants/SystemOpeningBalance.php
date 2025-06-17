@@ -228,6 +228,8 @@ class SystemOpeningBalance extends WebController
 
         $result['bank_statements_uploads'] = view('system_opening_balance/list_statements', ['bank_statements_uploads' => $bank_statements_uploads]);
 
+        // Fund Balance
+
         $openingFundBalanceReadBuilder->select(array('fk_project_id as  project_id', 'fk_income_account_id as income_account_id', 'income_account_name', 'opening_fund_balance_opening as opening', 'opening_fund_balance_income income', 'opening_fund_balance_expense expense', 'opening_fund_balance_amount closing'));
         $openingFundBalanceReadBuilder->where(array('opening_fund_balance.fk_system_opening_balance_id' => $system_opening_balance_id, 'fk_project_id >' => 0));
         $openingFundBalanceReadBuilder->join('income_account', 'income_account.income_account_id=opening_fund_balance.fk_income_account_id');
@@ -245,9 +247,29 @@ class SystemOpeningBalance extends WebController
             $fund_balance[$i]['closing'] = $balance['closing'] != NULL ? $balance['closing'] : 0;
             $i++;
         }
-
-        // Fund Balance
+        
         $result['fund_balance'] = $fund_balance;
+
+        // Accrual Balance
+        $this->openingAccrualLedgerReadBuilder->select(array('opening_accrual_balance_account', 'opening_accrual_balance_effect', 'opening_accrual_balance_amount'));
+        $this->openingAccrualLedgerReadBuilder->where(array('opening_accrual_balance.fk_system_opening_balance_id' => $system_opening_balance_id));
+        $opening_accrual_balance_obj = $this->openingAccrualLedgerReadBuilder->get();
+
+        $accrual_balance = [];
+
+        if($opening_accrual_balance_obj->getNumRows() > 0){
+          $opening_accrual_balance = $opening_accrual_balance_obj->getResultArray();
+          $i = 0;
+        foreach ($opening_accrual_balance as $balance) {
+            $accrual_balance[$i]['opening_accrual_balance_account'] = $balance['opening_accrual_balance_account'];
+            $accrual_balance[$i]['opening_accrual_balance_effect'] = $balance['opening_accrual_balance_effect'];
+            $accrual_balance[$i]['opening_accrual_balance_amount'] = $balance['opening_accrual_balance_effect'] == 'credit' ? abs($balance['opening_accrual_balance_amount']): $balance['opening_accrual_balance_amount'];
+            $i++;
+        }
+        }
+        
+
+        $result['accrual_balance'] = $accrual_balance;
 
         // Outstanding Cheques
         $result['outstanding_cheques'] = [];
@@ -476,7 +498,7 @@ class SystemOpeningBalance extends WebController
       $insert_accrual_balance_batch[$i]['fk_status_id'] = $this->statusLibrary->initialItemStatus('opening_accrual_balance');
     }
 
-    if(!empty($opening_acccrual_balances)){
+    if(!empty($opening_accrual_balances)){
       $this->openingAccrualLedgerWriteBuilder->where(array('fk_system_opening_balance_id' => $system_opening_balance_id));
       $this->openingAccrualLedgerWriteBuilder->delete();
     }
@@ -695,7 +717,7 @@ class SystemOpeningBalance extends WebController
             $system_opening_balance_id, 
             $post['accrual_account_codes'], 
             $post['accrual_ledger_effect'], 
-            $post['accrual_account_amount'],
+            $post['accrual_ledger_effect'] == 'credit' ? -$post['accrual_account_amount'] : $post['accrual_account_amount'],
           );
         }
     
