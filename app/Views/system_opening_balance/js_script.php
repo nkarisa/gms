@@ -1,10 +1,10 @@
-<?php 
+<?php
 use App\Enums\AccrualLedgerAccounts;
 
 extract($result);
 ?>
 <script>
-  
+
   const selected_option_value = 0
   const balances = {
     opening: 0,
@@ -26,20 +26,23 @@ extract($result);
     amount: 0
   }
 
-    const initial_accrual_account_data = {
+  const initial_accrual_account_data = {
     accrual_account: '',
     accrual_effect: 0,
     amount: 0
   }
 
-  $(document).ready(function() {
+  const ACCRUAL_LEDGER_ACCOUNTS = ['receivables', 'payables', 'prepayments', 'depreciation', 'payroll_liability']
+
+
+  $(document).ready(function () {
     bank_reconciliation_check()
     proof_of_cash_check()
   })
 
   $(document).on('change', ".project_ids", function () {
     const project_id = $(this).val()
-    const url = '<?=base_url();?>ajax/system_opening_balance/getProjectIncomeAccounts/' + project_id
+    const url = '<?= base_url(); ?>ajax/system_opening_balance/getProjectIncomeAccounts/' + project_id
     let tr = $(this).closest('tr')
     let income_account_select = tr.find('.income_account_ids')
     let options = '<option value = ""><?= get_phrase('select_income_account'); ?></option>'
@@ -75,38 +78,77 @@ extract($result);
     return options
   }
 
-  $('#fund_balance_table').find('tbody').append(fund_balance_row({is_first_row: true, projects_options: create_projects_options(selected_option_value),income_account_options: create_income_account_options(selected_option_value), balances}));
-  $('#outstanding_cheque_table').find('tbody').append(outstanding_cheque_row({is_first_row: true, data: initial_outstanding_cheque_data}));
-  $('#deposit_in_transit_table').find('tbody').append(deposit_transit_row({is_first_row: true, data: initial_deposit_transit_data}));
+  $('#fund_balance_table').find('tbody').append(fund_balance_row({ is_first_row: true, projects_options: create_projects_options(selected_option_value), income_account_options: create_income_account_options(selected_option_value), balances }));
+  $('#outstanding_cheque_table').find('tbody').append(outstanding_cheque_row({ is_first_row: true, data: initial_outstanding_cheque_data }));
+  $('#deposit_in_transit_table').find('tbody').append(deposit_transit_row({ is_first_row: true, data: initial_deposit_transit_data }));
 
-  $('#insert_fund_balance').on('click', function() {
-    const row = fund_balance_row({is_first_row: false,projects_options: create_projects_options(),income_account_options: create_income_account_options(),balances})
+  $('#insert_fund_balance').on('click', function () {
+    const row = fund_balance_row({ is_first_row: false, projects_options: create_projects_options(), income_account_options: create_income_account_options(), balances })
     $('#fund_balance_table').find('tbody').append(row);
   })
 
-  $('#insert_accrual_balance').on('click', function() {
-    const accrual_balance_table  = $("#accrual_balance_table").find('tbody')
-    if(accrual_balance_table.children().length == '<?=count(AccrualLedgerAccounts::cases()) - 1;?>'){
+  $('#insert_accrual_balance').on('click', function () {
+    const accrual_balance_table = $("#accrual_balance_table").find('tbody')
+    if (accrual_balance_table.children().length == '<?= count(AccrualLedgerAccounts::cases()) - 1; ?>') {
       $("#insert_accrual_balance").addClass('disabled')
     }
-    const row = accrual_balance_row({is_first_row: false, accrual_account_options: create_accrual_accounts_options(), accrual_ledger_options: create_accrual_ledger_options(), data: initial_accrual_account_data})
+    const row = accrual_balance_row({ is_first_row: false, accrual_account_options: create_accrual_accounts_options(), accrual_ledger_options: create_accrual_ledger_options(), data: initial_accrual_account_data })
     $('#accrual_balance_table').find('tbody').append(row);
   })
 
   $(document).on('click', ".accrual_account_remove", function () {
-    const insert_accrual_balance  = $("#insert_accrual_balance")
-    if(insert_accrual_balance.hasClass('disabled')){
+    const insert_accrual_balance = $("#insert_accrual_balance")
+    if (insert_accrual_balance.hasClass('disabled')) {
       insert_accrual_balance.removeClass('disabled')
     }
   })
 
-  $('#insert_outstanding_cheque').on('click', function() {
-    const row = outstanding_cheque_row({is_first_row: false, data: initial_outstanding_cheque_data})
+  $(document).on('change', '.accrual_account_codes', function () {
+    // const code = $(this)
+    const accrual_account_codes = $(".accrual_account_codes")
+
+    const selectedAccountsInRows = new Set();
+
+    accrual_account_codes.each(function () {
+      const selectedValue = $(this).val();
+      if (selectedValue && selectedValue !== '') {
+        selectedAccountsInRows.add(selectedValue);
+      }
+    });
+
+    accrual_account_codes.each(function () {
+      const $currentSelect = $(this);
+      // Store the currently selected value before clearing options
+      const previouslySelected = $currentSelect.val();
+
+      $currentSelect.empty(); // Clear existing options
+      $currentSelect.append('<option value="">-- <?= get_phrase('select_ledger_account'); ?> --</option>'); // Add default option
+
+      // Add options based on ALL_STUDENTS, filtering out those already selected elsewhere
+      ACCRUAL_LEDGER_ACCOUNTS.forEach(account => {
+        // A account is available if:
+        // - They are not selected in any other row OR
+        // - They are the account currently selected in *this* particular dropdown
+        if (!selectedAccountsInRows.has(account) || account === previouslySelected) {
+          $currentSelect.append(`<option value="${account}">${account}</option>`);
+        }
+      });
+
+      // Re-select the account that was previously chosen in this dropdown, if it's still an option.
+      // This is crucial to maintain the user's selection after refresh.
+      if (previouslySelected) {
+        $currentSelect.val(previouslySelected);
+      }
+    });
+  })
+
+  $('#insert_outstanding_cheque').on('click', function () {
+    const row = outstanding_cheque_row({ is_first_row: false, data: initial_outstanding_cheque_data })
     $('#outstanding_cheque_table').find('tbody').append(row);
   })
 
-  $('#insert_deposit_in_transit').on('click', function() {
-    const row = deposit_transit_row({is_first_row: false, data: initial_deposit_transit_data})
+  $('#insert_deposit_in_transit').on('click', function () {
+    const row = deposit_transit_row({ is_first_row: false, data: initial_deposit_transit_data })
     $('#deposit_in_transit_table').find('tbody').append(row);
   })
 
@@ -153,7 +195,7 @@ extract($result);
     const accrual_account_code_select = `<select name = "accrual_account_codes[]" class = "form-control accrual_account_codes mandatory">${accrual_account_options}</select>`
     const accrual_ledger_effect_select = `<select name = "accrual_ledger_effect[]" class = "form-control accrual_ledger_effect mandatory">${accrual_ledger_options}</select>`
     const accrual_account_amount_input = `<input  value = "${data.amount}" name = "cheque_amount[]" type = "number" class = "form-control cheque_amount bank_reconciliation_fields outstanding_cheque mandatory" />`
-   
+
     const row = `
                   <tr><td>${is_first_row ? '' : action_button}</td>
                   <td>${accrual_account_code_select}</td>
@@ -161,7 +203,7 @@ extract($result);
                   <td>${accrual_account_amount_input}</td>
                 `
     return row
-}
+  }
 
   function outstanding_cheque_row(options) { //is_first_row = false
 
@@ -175,7 +217,7 @@ extract($result);
     const cheque_number_input = `<input  value = "${data.cheque_number}" name = "cheque_number[]" type = "number" class = "form-control cheque_number outstanding_cheque mandatory"  />`
     const cheque_description_input = `<input  value = "${data.description}" name = "cheque_description[]" type = "text" class = "form-control cheque_description outstanding_cheque mandatory"  />`
     const cheque_amount_input = `<input  value = "${data.amount}" name = "cheque_amount[]" type = "number" class = "form-control cheque_amount bank_reconciliation_fields outstanding_cheque mandatory" />`
-   
+
     const row = `
                   <tr><td>${is_first_row ? '' : action_button}</td>
                   <td>${transaction_date_input}</td>
@@ -185,34 +227,34 @@ extract($result);
                 `
 
     return row
-}
+  }
 
-function deposit_transit_row(options) {
+  function deposit_transit_row(options) {
 
-  const {
+    const {
       is_first_row,
       data
     } = options
 
-  const action_button = `<div class = 'btn btn-danger remove_row deposit_in_transit_remove'>${'<?= get_phrase('remove_row'); ?>'}</div>`
-  const transaction_date_input = `<input onkeydown='return false;' value = "${data.transaction_date}" name = "deposit_transaction_date[]" type = "text" data-format = 'yyyy-mm-dd' class = "form-control datepicker transaction_date deposit_transit mandatory" onkeyup = 'return false;'  />`
-  const transaction_description_input = `<input value = "${data.description}" name = "transaction_description[]" type = "text" class = "form-control transaction_description deposit_transit mandatory"  />`
-  const transaction_amount_input = `<input value = "${data.amount}" name = "transaction_amount[]" type = "number" class = "form-control transaction_amount bank_reconciliation_fields deposit_transit mandatory"  />`
+    const action_button = `<div class = 'btn btn-danger remove_row deposit_in_transit_remove'>${'<?= get_phrase('remove_row'); ?>'}</div>`
+    const transaction_date_input = `<input onkeydown='return false;' value = "${data.transaction_date}" name = "deposit_transaction_date[]" type = "text" data-format = 'yyyy-mm-dd' class = "form-control datepicker transaction_date deposit_transit mandatory" onkeyup = 'return false;'  />`
+    const transaction_description_input = `<input value = "${data.description}" name = "transaction_description[]" type = "text" class = "form-control transaction_description deposit_transit mandatory"  />`
+    const transaction_amount_input = `<input value = "${data.amount}" name = "transaction_amount[]" type = "number" class = "form-control transaction_amount bank_reconciliation_fields deposit_transit mandatory"  />`
 
-  const row = `
+    const row = `
                 <tr><td>${is_first_row ? '' : action_button}</td>
                 <td>${transaction_date_input}</td>
                 <td>${transaction_description_input}</td>
                 <td>${transaction_amount_input}</td>
               `
 
-  return row
-}
+    return row
+  }
 
-  function compute_total_fund_balance(){
+  function compute_total_fund_balance() {
     let total_fund_balance = 0
 
-    $('.closing').each(function(index, elem) {
+    $('.closing').each(function (index, elem) {
       if ($(elem).val() != "") {
         total_fund_balance += parseFloat($(elem).val())
       }
@@ -221,10 +263,10 @@ function deposit_transit_row(options) {
     return total_fund_balance
   }
 
-  function compute_total_outstanding_cheques(){
+  function compute_total_outstanding_cheques() {
     let total_outstanding_cheques = 0
 
-    $('.cheque_amount').each(function(index, elem) {
+    $('.cheque_amount').each(function (index, elem) {
       if ($(elem).val() != "") {
         total_outstanding_cheques += parseFloat($(elem).val())
       }
@@ -233,10 +275,10 @@ function deposit_transit_row(options) {
     return total_outstanding_cheques
   }
 
-  function compute_total_deposit_in_transit(){
+  function compute_total_deposit_in_transit() {
     let total_deposit_in_transit = 0
 
-    $('.transaction_amount').each(function(index, elem) {
+    $('.transaction_amount').each(function (index, elem) {
       if ($(elem).val() != "") {
         total_deposit_in_transit += parseFloat($(elem).val())
       }
@@ -245,7 +287,7 @@ function deposit_transit_row(options) {
     return total_deposit_in_transit
   }
 
-  $(document).on('keyup', '.fund_balance_amount', function() {
+  $(document).on('keyup', '.fund_balance_amount', function () {
     const row = $(this).closest('tr')
     const opening = parseFloat(row.find('.opening').val())
     const income = parseFloat(row.find('.income').val())
@@ -258,11 +300,11 @@ function deposit_transit_row(options) {
     proof_of_cash_check()
   })
 
-  $(document).on('keyup', '.cheque_amount', function() {
+  $(document).on('keyup', '.cheque_amount', function () {
 
     let total_cheque_amount = 0
 
-    $('.cheque_amount').each(function(index, elem) {
+    $('.cheque_amount').each(function (index, elem) {
       if ($(elem).val() != "") {
         total_cheque_amount += parseFloat($(elem).val())
       }
@@ -272,9 +314,9 @@ function deposit_transit_row(options) {
     bank_reconciliation_check()
   })
 
-  $(document).on('keyup', '.transaction_amount', function() {
+  $(document).on('keyup', '.transaction_amount', function () {
     let total_transaction_amount = 0
-    $('.transaction_amount').each(function(index, elem) {
+    $('.transaction_amount').each(function (index, elem) {
       if ($(elem).val() != "") {
         total_transaction_amount += parseFloat($(elem).val())
       }
@@ -283,11 +325,11 @@ function deposit_transit_row(options) {
     bank_reconciliation_check()
   })
 
-  $('.proof_of_cash').on('keyup', function() {
+  $('.proof_of_cash').on('keyup', function () {
     const proof_of_cash_elemnts = $('.proof_of_cash')
     let sum_cash = 0;
 
-    proof_of_cash_elemnts.each(function(index, elem) {
+    proof_of_cash_elemnts.each(function (index, elem) {
       if ($(elem).val() != "") {
         sum_cash += parseFloat($(elem).val())
       }
@@ -297,16 +339,16 @@ function deposit_transit_row(options) {
     proof_of_cash_check()
   })
 
-  function reset_office_bank_selection(){
+  function reset_office_bank_selection() {
     $("#office_bank_id").prop('selectedIndex', 0).val()
   }
 
-  function reset_proof_of_cash(){
+  function reset_proof_of_cash() {
     $('.proof_of_cash, #total_cash').val(0);
     proof_of_cash_check()
   }
 
-  $('#reset_cash_balance').on('click', function() {
+  $('#reset_cash_balance').on('click', function () {
     const cnf = confirm('<?= get_phrase('confirm_clearing_cash_balances', 'Are you sure you want to clear the cash and bank balance?'); ?>')
 
     if (!cnf) {
@@ -317,7 +359,7 @@ function deposit_transit_row(options) {
     reset_proof_of_cash()
   })
 
-  function reset_fund_balance(){
+  function reset_fund_balance() {
     let tbody = $('#fund_balance_table tbody');
     let rowsToRemove = tbody.find('tr:not(:first)');
 
@@ -326,8 +368,8 @@ function deposit_transit_row(options) {
     proof_of_cash_check()
   }
 
-  $(document).on('click','#reset_fund_balance', function() {
-    
+  $(document).on('click', '#reset_fund_balance', function () {
+
     const cnf = confirm('<?= get_phrase('confirm_row_delete', 'Are you sure you want to delete the rows in this section?'); ?>')
 
     if (!cnf) {
@@ -337,7 +379,7 @@ function deposit_transit_row(options) {
     reset_fund_balance()
   })
 
-  function reset_outstanding_cheque(){
+  function reset_outstanding_cheque() {
     let tbody = $('#outstanding_cheque_table tbody');
     let rowsToRemove = tbody.find('tr:not(:first)');
 
@@ -346,8 +388,8 @@ function deposit_transit_row(options) {
     bank_reconciliation_check()
   }
 
-  $(document).on('click','#reset_outstanding_cheque', function() {
-    
+  $(document).on('click', '#reset_outstanding_cheque', function () {
+
     const cnf = confirm('<?= get_phrase('confirm_row_delete', 'Are you sure you want to delete the rows in this section?'); ?>')
 
     if (!cnf) {
@@ -358,7 +400,7 @@ function deposit_transit_row(options) {
     reset_outstanding_cheque()
   })
 
-  function reset_deposit_in_transit(){
+  function reset_deposit_in_transit() {
 
     let tbody = $('#deposit_in_transit_table tbody');
     let rowsToRemove = tbody.find('tr:not(:first)');
@@ -368,7 +410,7 @@ function deposit_transit_row(options) {
     bank_reconciliation_check()
   }
 
-  $(document).on('click','#reset_deposit_in_transit', function() {
+  $(document).on('click', '#reset_deposit_in_transit', function () {
 
     const cnf = confirm('<?= get_phrase('confirm_row_delete', 'Are you sure you want to delete the rows in this section?'); ?>')
 
@@ -380,12 +422,12 @@ function deposit_transit_row(options) {
     reset_deposit_in_transit()
   })
 
-  function removeErrorStyles(){
+  function removeErrorStyles() {
     $('#total_cash, #total_fund_balance').removeAttr('style')
     $('#book_bank_balance, #reconciled_statement_balance').removeAttr('style')
   }
 
-  function compute_proof_of_cash_check(){
+  function compute_proof_of_cash_check() {
     const total_cash = $('#total_cash').val()
     const total_fund_balance = $('#total_fund_balance').val()
 
@@ -393,7 +435,7 @@ function deposit_transit_row(options) {
   }
 
   function proof_of_cash_check() {
-    
+
     const proof_of_cash_check = $('#proof_of_cash_check')
 
     if (compute_proof_of_cash_check()) {
@@ -413,7 +455,7 @@ function deposit_transit_row(options) {
     }
   }
 
-  function compute_bank_reconciliation_check(){
+  function compute_bank_reconciliation_check() {
     update_reconciled_bank_balance()
     const book_bank_balance = $('#book_bank_balance').val()
     const reconciled_statement_balance = $('#reconciled_statement_balance').val()
@@ -422,7 +464,7 @@ function deposit_transit_row(options) {
     return reconciliation_difference;
   }
 
-  function bank_reconciled_difference(){
+  function bank_reconciled_difference() {
     const book_bank_balance = $('#book_bank_balance').val()
     const reconciled_statement_balance = $('#reconciled_statement_balance').val()
 
@@ -430,7 +472,7 @@ function deposit_transit_row(options) {
   }
 
   function bank_reconciliation_check() {
-    
+
     const reconciliation_error_check = $('#reconciliation_error')
 
     $('#bank_reconciled_difference').val(bank_reconciled_difference())
@@ -453,31 +495,31 @@ function deposit_transit_row(options) {
   }
 
   //fund_balance_amount, .proof_of_cash, #statement_balance, .cheque_amount,.cheque_number
-  $(document).on('click','input', function() {
+  $(document).on('click', 'input', function () {
     if ($(this).val() == 0) {
       $(this).val('')
     }
   })
 
-  $(document).on('click','.remove_row', function (){
-    const cnf = confirm('<?=get_phrase('confirm_opening_balance_row_remove','Are you sure you want to remove this row?');?>')
+  $(document).on('click', '.remove_row', function () {
+    const cnf = confirm('<?= get_phrase('confirm_opening_balance_row_remove', 'Are you sure you want to remove this row?'); ?>')
 
-    if(!cnf){
-      alert('<?=get_phrase('proccess_aborted');?>')
+    if (!cnf) {
+      alert('<?= get_phrase('proccess_aborted'); ?>')
       return false;
     }
 
     $(this).closest('tr').remove()
-    
-    if($(this).hasClass('fund_balance_remove')){
+
+    if ($(this).hasClass('fund_balance_remove')) {
       $('#total_fund_balance').val(compute_total_fund_balance().toFixed(2))
     }
 
-    if($(this).hasClass('outstanding_cheque_remove')){
+    if ($(this).hasClass('outstanding_cheque_remove')) {
       $("#total_outstanding_cheque").val(compute_total_outstanding_cheques().toFixed(2))
     }
 
-    if($(this).hasClass('deposit_in_transit_remove')){
+    if ($(this).hasClass('deposit_in_transit_remove')) {
       $("#total_deposit_in_transit").val(compute_total_deposit_in_transit())
     }
 
@@ -486,39 +528,39 @@ function deposit_transit_row(options) {
     // compute_bank_reconciliation_check()
   })
 
-  function compute_reconciled_bank_balance(){
-    const book_bank_balance = $('#book_bank_balance').val() != "" ? $('#book_bank_balance').val() : 0 
+  function compute_reconciled_bank_balance() {
+    const book_bank_balance = $('#book_bank_balance').val() != "" ? $('#book_bank_balance').val() : 0
     const total_outstanding_cheque = $('#total_outstanding_cheque').val() != "" ? $('#total_outstanding_cheque').val() : 0
     const total_deposit_in_transit = $('#total_deposit_in_transit').val() != "" ? $('#total_deposit_in_transit').val() : 0
     const statement_balance = $('#statement_balance').val() != "" ? $('#statement_balance').val() : 0
 
     const reconciled_statement_balance = parseFloat(statement_balance) + parseFloat(total_deposit_in_transit) - parseFloat(total_outstanding_cheque);
-    
+
     return reconciled_statement_balance
   }
 
-  function update_reconciled_bank_balance(){
+  function update_reconciled_bank_balance() {
     const reconciled_statement_balance = compute_reconciled_bank_balance()
 
     $('#reconciled_statement_balance').val(reconciled_statement_balance.toFixed(2));
   }
 
 
-  $(document).on('keyup','.bank_reconciliation_fields', function () {
+  $(document).on('keyup', '.bank_reconciliation_fields', function () {
     update_reconciled_bank_balance()
     bank_reconciliation_check()
   })
 
-  function reset_reconciliation_statement(){
+  function reset_reconciliation_statement() {
     $('.reconciliation_statement').val('')
   }
 
-  function clearTextInputs(){
+  function clearTextInputs() {
     $('input[type=text]').val('')
     $('input[type=number]').val(0)
   }
 
-  function reset_balance_form(){
+  function reset_balance_form() {
     reset_proof_of_cash()
     reset_fund_balance()
     reset_outstanding_cheque()
@@ -527,58 +569,58 @@ function deposit_transit_row(options) {
     removeErrorStyles()
     clearTextInputs()
   }
- 
-  $(document).on('click','#reset', function () {
+
+  $(document).on('click', '#reset', function () {
     reset_office_bank_selection()
     reset_balance_form()
   })
 
 
-  $(document).on('click','.save', function () {
+  $(document).on('click', '.save', function () {
 
     const total_cash = $('#total_cash').val()
     const proof_of_cash_check = compute_proof_of_cash_check()
     const bank_reconciliation_check = compute_bank_reconciliation_check()
     // const post_data = $('#frm_system_opening_balance').serializeArray();
-    const url = '<?=base_url();?>ajax/system_opening_balance/saveOpeningBalances/<?=hash_id($id, 'decode')?>'
+    const url = '<?= base_url(); ?>ajax/system_opening_balance/saveOpeningBalances/<?= hash_id($id, 'decode') ?>'
     const btn = $(this)
 
     let mandatory_fields = $('.mandatory')
     let count_empty_fields = 0;
-    $.each(mandatory_fields, function(index, elem){
-      if($(elem).val() == ""){
+    $.each(mandatory_fields, function (index, elem) {
+      if ($(elem).val() == "") {
         ++count_empty_fields
-        $(elem).css('border','1px solid red');
+        $(elem).css('border', '1px solid red');
       }
     });
 
-    if(count_empty_fields > 0){
-      alert('<?=get_phrase('empty_fields',"You have empty fields that are required")?>');
+    if (count_empty_fields > 0) {
+      alert('<?= get_phrase('empty_fields', "You have empty fields that are required") ?>');
       return false;
     }
 
-    if(total_cash != 0 && proof_of_cash_check && bank_reconciliation_check){  
+    if (total_cash != 0 && proof_of_cash_check && bank_reconciliation_check) {
       let form_data = new FormData($('form')[0]);
       $.ajax({
-          type: 'POST',
-          url: url,
-          data: form_data,
-          processData: false,
-          contentType: false,
-          beforeSend: function () {
-            $("#overlay").css("display", "block");
-          },
-          success: function(responseObj) {
-            alert('Opening Financial Report Saved successfully');
-            if(btn.hasClass('save_exit')){
-              location.href = document.referrer;
-            }else{
-              $('#list_statements').html(responseObj.bank_statements_uploads)
-            }
-
-            $("#overlay").css("display", "none");
+        type: 'POST',
+        url: url,
+        data: form_data,
+        processData: false,
+        contentType: false,
+        beforeSend: function () {
+          $("#overlay").css("display", "block");
+        },
+        success: function (responseObj) {
+          alert('Opening Financial Report Saved successfully');
+          if (btn.hasClass('save_exit')) {
+            location.href = document.referrer;
+          } else {
+            $('#list_statements').html(responseObj.bank_statements_uploads)
           }
-      });   
+
+          $("#overlay").css("display", "none");
+        }
+      });
       // $.post(url, post_data, function (response) {
       //   if(response){
       //     alert('Opening Financial Report Saved successfully');
@@ -590,31 +632,31 @@ function deposit_transit_row(options) {
       //     alert('Error in saving')
       //   }
       // })
-    }else{
+    } else {
       $message = 'Opening Balanced are not reconciling. Please check on on the following areas: \n'
 
-      if(total_cash == 0){
+      if (total_cash == 0) {
         $message += " => The total cash balance MUST be a value not equal to zero. See validation (B) \n"
       }
 
-      if(!proof_of_cash_check){
+      if (!proof_of_cash_check) {
         $message += " => The total cash (B) and and total fund balance (C) MUST be equal. See validation (D) \n"
       }
 
-      if(!bank_reconciliation_check){
+      if (!bank_reconciliation_check) {
         $message += " => The book bank balance (A) and the reconciled statement balance (G) MUST be equal. See validation (J) \n"
       }
 
       alert($message)
 
       // alert($('#book_bank_balance').val())
-      
-      if($(this).hasClass('save_continue')){
+
+      if ($(this).hasClass('save_continue')) {
         $.post(url, post_data, function (response) {
-        
+
         })
       }
-      
+
     }
   })
 
@@ -630,9 +672,9 @@ function deposit_transit_row(options) {
   //   alert('Hello')
   // })
 
-  function delete_statement(attachment_id){
-    const url = '<?=base_url();?>system_opening_balance/delete_statement/'
-    const system_opening_balance_id = "<?=hash_id($id,'decode');?>"
+  function delete_statement(attachment_id) {
+    const url = '<?= base_url(); ?>system_opening_balance/delete_statement/'
+    const system_opening_balance_id = "<?= hash_id($id, 'decode'); ?>"
     const data = {
       attachment_id,
       system_opening_balance_id
@@ -642,114 +684,114 @@ function deposit_transit_row(options) {
       type: 'POST',
       url: url,
       data: data,
-      success: function(responseObj) {
+      success: function (responseObj) {
         $('#list_statements').html(responseObj.bank_statements_uploads)
       }
     })
   }
 
-  $('#upload_statement').on('change', function() {
-            var file = this.files[0];
-            var maxSize = 2 * 1024 * 1024; // 2 MB
-            var allowedType = 'application/pdf'; // MIME type for PDF files
+  $('#upload_statement').on('change', function () {
+    var file = this.files[0];
+    var maxSize = 2 * 1024 * 1024; // 2 MB
+    var allowedType = 'application/pdf'; // MIME type for PDF files
 
-            if (file) {
-              let message = '';
-                if (file.size > maxSize) {
-                    message += 'File size exceeds 2 MB. Please choose a smaller file. \n';
-                    // $(this).val(''); // Clear the input field
-                }
-                
-                if (file.type !== allowedType) {
-                    message += 'Invalid file type. Please upload a PDF file.\n'
-                    // $(this).val(''); // Clear the input field
-                } 
+    if (file) {
+      let message = '';
+      if (file.size > maxSize) {
+        message += 'File size exceeds 2 MB. Please choose a smaller file. \n';
+        // $(this).val(''); // Clear the input field
+      }
 
-                if(message != ""){
-                  $('#error').text(message);
-                }else{
-                  $('#error').text(''); // Clear the error message
-                }
+      if (file.type !== allowedType) {
+        message += 'Invalid file type. Please upload a PDF file.\n'
+        // $(this).val(''); // Clear the input field
+      }
 
-            }
-            // var file = this.files[0];
-            // var maxSize = 2 * 1024 * 1024; // 2 MB
+      if (message != "") {
+        $('#error').text(message);
+      } else {
+        $('#error').text(''); // Clear the error message
+      }
 
-            // if (file.size > maxSize) {
-            //     $('#error').text('File size exceeds 2 MB. Please choose a smaller file.');
-            //     $(this).val(''); // Clear the input field
-            // } 
-            // else {
-            //     $('#error').text(''); // Clear the error message
-            // }
-        });
- 
-        function create_accrual_accounts_options($selected_options = 0){
-          let options = '<option value = ""><?= get_phrase('select_ledger_account'); ?></option>'
-          const accrual_accounts = ['receivables','payables','prepayments','depreciation','payroll_liability'];
-          const accrual_account_codes = $('.accrual_account_codes')
-          
+    }
+    // var file = this.files[0];
+    // var maxSize = 2 * 1024 * 1024; // 2 MB
 
-          for (let i = 0; i < accrual_accounts.length; i++) {
-            let breakEqual = false
-            for (let j = 0; j < accrual_account_codes.length; j++) {
-              if(accrual_accounts[i] == $(accrual_account_codes[j]).val()){
-                breakEqual = true
-                break
-              }
-            }
+    // if (file.size > maxSize) {
+    //     $('#error').text('File size exceeds 2 MB. Please choose a smaller file.');
+    //     $(this).val(''); // Clear the input field
+    // } 
+    // else {
+    //     $('#error').text(''); // Clear the error message
+    // }
+  });
 
-            if(breakEqual) continue
-            
-            options += `<option value = '${accrual_accounts[i]}' ${selected_option_value == accrual_accounts[i] ? 'selected' : ''} >${accrual_accounts[i]}</option>`
-          }
+  function create_accrual_accounts_options($selected_options = 0) {
+    let options = '<option value = "">--- <?= get_phrase('select_ledger_account'); ?> ---</option>'
+    const accrual_accounts = ['receivables', 'payables', 'prepayments', 'depreciation', 'payroll_liability'];
+    const accrual_account_codes = $('.accrual_account_codes')
 
-          return options
+
+    for (let i = 0; i < accrual_accounts.length; i++) {
+      let breakEqual = false
+      for (let j = 0; j < accrual_account_codes.length; j++) {
+        if (accrual_accounts[i] == $(accrual_account_codes[j]).val()) {
+          breakEqual = true
+          break
         }
+      }
 
-        function create_accrual_ledger_options(selected_option_value = 0){
-          let options = '<option value = ""><?= get_phrase('select_ledger_effect'); ?></option>'
-          const accrual_ledgers = ['debit','credit'];
+      if (breakEqual) continue
 
-          for (let i = 0; i < accrual_ledgers.length; i++) {
-            options += `<option value = '${accrual_ledgers[i]}' ${selected_option_value == accrual_ledgers[i] ? 'selected' : ''} >${accrual_ledgers[i]}</option>`
-          }
+      options += `<option value = '${accrual_accounts[i]}' ${selected_option_value == accrual_accounts[i] ? 'selected' : ''} >${accrual_accounts[i]}</option>`
+    }
 
-          return options
-        }
+    return options
+  }
 
-        $(document).on('change', '.accrual_account_codes', function(){
-          const accrual_account_codes = $(this)
-          const closest_accrual_ledger_effect = accrual_account_codes.closest('tr').find('.accrual_ledger_effect');
-          let default_accrual_effect = 'credit';
-          const accrual_account_codes_name = accrual_account_codes.val();
+  function create_accrual_ledger_options(selected_option_value = 0) {
+    let options = '<option value = ""><?= get_phrase('select_ledger_effect'); ?></option>'
+    const accrual_ledgers = ['debit', 'credit'];
 
-          if(accrual_account_codes_name == 'receivables' || accrual_account_codes_name == 'prepayments'){
-            default_accrual_effect = 'debit';
-          }
+    for (let i = 0; i < accrual_ledgers.length; i++) {
+      options += `<option value = '${accrual_ledgers[i]}' ${selected_option_value == accrual_ledgers[i] ? 'selected' : ''} >${accrual_ledgers[i]}</option>`
+    }
 
-          closest_accrual_ledger_effect.val(default_accrual_effect)
-        })
+    return options
+  }
 
-        $(document).on('change', '.accrual_ledger_effect', function(ev){
-          const cnf = confirm('<?=get_phrase('alert_change_accrual_effect','Are you sure you want to change the default effect');?>');
-          const accrual_account_codes_name = $(this).closest('tr').find('.accrual_account_codes').val()
-          let default_accrual_effect = 'credit'
-          const selected_option = $(this).val()
+  $(document).on('change', '.accrual_account_codes', function () {
+    const accrual_account_codes = $(this)
+    const closest_accrual_ledger_effect = accrual_account_codes.closest('tr').find('.accrual_ledger_effect');
+    let default_accrual_effect = 'credit';
+    const accrual_account_codes_name = accrual_account_codes.val();
 
-          if(accrual_account_codes_name == 'receivables' || accrual_account_codes_name == 'prepayments'){
-            default_accrual_effect = 'debit';
-          }
+    if (accrual_account_codes_name == 'receivables' || accrual_account_codes_name == 'prepayments') {
+      default_accrual_effect = 'debit';
+    }
 
-          if(!cnf && selected_option != default_accrual_effect){
-            alert('<?=get_phrase('process_aborted');?>')
-            $(this).val(default_accrual_effect)
-          }
+    closest_accrual_ledger_effect.val(default_accrual_effect)
+  })
 
-          if(!cnf && selected_option == default_accrual_effect){
-            alert('<?=get_phrase('process_aborted');?>')
-            $(this).val(selected_option == 'credit' ? 'debit' : 'credit')
-          }
+  $(document).on('change', '.accrual_ledger_effect', function (ev) {
+    const cnf = confirm('<?= get_phrase('alert_change_accrual_effect', 'Are you sure you want to change the default effect'); ?>');
+    const accrual_account_codes_name = $(this).closest('tr').find('.accrual_account_codes').val()
+    let default_accrual_effect = 'credit'
+    const selected_option = $(this).val()
 
-        });
+    if (accrual_account_codes_name == 'receivables' || accrual_account_codes_name == 'prepayments') {
+      default_accrual_effect = 'debit';
+    }
+
+    if (!cnf && selected_option != default_accrual_effect) {
+      alert('<?= get_phrase('process_aborted'); ?>')
+      $(this).val(default_accrual_effect)
+    }
+
+    if (!cnf && selected_option == default_accrual_effect) {
+      alert('<?= get_phrase('process_aborted'); ?>')
+      $(this).val(selected_option == 'credit' ? 'debit' : 'credit')
+    }
+
+  });
 </script>
