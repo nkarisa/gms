@@ -786,4 +786,13 @@ extract($result);
     }
 
   });
+
+  $(document).on('change', '.accrual_account_amount', function(){
+      let value = parseFloat($(this).val());
+      // If the value is not a number, or is less than or equal to 0, clear the input
+      if (isNaN(value) || value <= 0) {
+        $(this).val(0); // Clear the input if it's not a positive number
+        alert('<?=get_phrase('negative_value_disallowed');?>')
+      }
+  })
 </script>

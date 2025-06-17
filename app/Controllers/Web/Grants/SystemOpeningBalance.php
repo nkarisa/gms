@@ -490,7 +490,8 @@ class SystemOpeningBalance extends WebController
       $insert_accrual_balance_batch[$i]['opening_accrual_balance_track_number'] = $track_number_and_name['opening_accrual_balance_track_number'];
       $insert_accrual_balance_batch[$i]['opening_accrual_balance_name'] = $track_number_and_name['opening_accrual_balance_name'];
       $insert_accrual_balance_batch[$i]['opening_accrual_balance_account'] = $accrual_account_codes[$i];
-      $insert_accrual_balance_batch[$i]['opening_accrual_balance_amount'] = $accrual_account_amount[$i];
+      $insert_accrual_balance_batch[$i]['opening_accrual_balance_effect'] = $accrual_ledger_effect[$i];
+      $insert_accrual_balance_batch[$i]['opening_accrual_balance_amount'] = $accrual_ledger_effect[$i] == 'credit' ? -$accrual_account_amount[$i]: $accrual_account_amount[$i];
 
       $insert_accrual_balance_batch[$i]['opening_accrual_balance_created_date'] = date('Y-m-d');
       $insert_accrual_balance_batch[$i]['opening_accrual_balance_created_by'] = $this->session->user_id;
@@ -717,7 +718,7 @@ class SystemOpeningBalance extends WebController
             $system_opening_balance_id, 
             $post['accrual_account_codes'], 
             $post['accrual_ledger_effect'], 
-            $post['accrual_ledger_effect'] == 'credit' ? -$post['accrual_account_amount'] : $post['accrual_account_amount'],
+            $post['accrual_account_amount'],
           );
         }
     
