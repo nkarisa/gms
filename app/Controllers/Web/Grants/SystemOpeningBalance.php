@@ -17,6 +17,8 @@ class SystemOpeningBalance extends WebController
     private $openingCashBalanceWriteBuilder;
     private $openingFundBalanceReadBuilder;
     private $openingFundBalanceWriteBuilder;
+    private $openingAccrualLedgerReadBuilder;
+    private $openingAccrualLedgerWriteBuilder;
     private $outstandingChequeReadBuilder;
     private $outstandingChequeWriteBuilder;
     private $openingDepositTransitReadBuilder;
@@ -40,6 +42,8 @@ class SystemOpeningBalance extends WebController
         $this->officeCashReadBuilder = $this->read_db->table('office_cash');
         $this->openingFundBalanceReadBuilder = $this->read_db->table('opening_fund_balance');
         $this->openingFundBalanceWriteBuilder = $this->write_db->table('opening_fund_balance');
+        $this->openingAccrualLedgerReadBuilder = $this->read_db->table('opening_accrual_balance');
+        $this->openingAccrualLedgerWriteBuilder = $this->write_db->table('opening_accrual_balance');
         $this->outstandingChequeReadBuilder  = $this->read_db->table('opening_outstanding_cheque');
         $this->outstandingChequeWriteBuilder  = $this->write_db->table('opening_outstanding_cheque');
         $this->openingDepositTransitReadBuilder = $this->read_db->table('opening_deposit_transit');
@@ -443,6 +447,42 @@ class SystemOpeningBalance extends WebController
     }
   }
 
+  private function upsertAccrualLedgerBalances(
+    $system_opening_balance_id, 
+    $accrual_account_codes, 
+    $accrual_ledger_effect, 
+    $accrual_account_amount,
+  ){
+    $opening_accrual_balances = [];
+    $this->openingAccrualLedgerReadBuilder->where(array('fk_system_opening_balance_id' => $system_opening_balance_id));
+    $opening_accrual_balance_obj = $this->openingAccrualLedgerReadBuilder->get();
+
+    if($opening_accrual_balance_obj->getNumRows() > 0){
+      $opening_accrual_balances = $opening_accrual_balance_obj->getResultArray();
+    }
+
+    $track_number_and_name = $this->libs->generateItemTrackNumberAndName('opening_accrual_balance');
+
+    for($i = 0; $i < sizeof($accrual_account_codes); $i++){
+      $insert_accrual_balance_batch[$i]['fk_system_opening_balance_id'] = $system_opening_balance_id;
+      $insert_accrual_balance_batch[$i]['opening_accrual_balance_track_number'] = $track_number_and_name['opening_accrual_balance_track_number'];
+      $insert_accrual_balance_batch[$i]['opening_accrual_balance_name'] = $track_number_and_name['opening_accrual_balance_name'];
+      $insert_accrual_balance_batch[$i]['opening_accrual_balance_account'] = $accrual_account_codes[$i];
+      $insert_accrual_balance_batch[$i]['opening_accrual_balance_amount'] = $accrual_account_amount[$i];
+
+      $insert_accrual_balance_batch[$i]['opening_accrual_balance_created_date'] = date('Y-m-d');
+      $insert_accrual_balance_batch[$i]['opening_accrual_balance_created_by'] = $this->session->user_id;
+      $insert_accrual_balance_batch[$i]['fk_approval_id'] = $this->approvalLibrary->insertApprovalRecord('opening_accrual_balance');
+      $insert_accrual_balance_batch[$i]['fk_status_id'] = $this->statusLibrary->initialItemStatus('opening_accrual_balance');
+    }
+
+    if(!empty($opening_acccrual_balances)){
+      $this->openingAccrualLedgerWriteBuilder->where(array('fk_system_opening_balance_id' => $system_opening_balance_id));
+      $this->openingAccrualLedgerWriteBuilder->delete();
+    }
+    $this->openingAccrualLedgerWriteBuilder->insertBatch($insert_accrual_balance_batch);    
+  }
+
   private function upsertFundBalances(
     $system_opening_balance_id,
     $office_bank_id, 
@@ -647,6 +687,15 @@ class SystemOpeningBalance extends WebController
             $post['opening_amounts'], 
             $post['income_amounts'], 
             $post['expense_amounts']
+          );
+        }
+
+        if(isset($post['accrual_account_codes'])){
+          $this->upsertAccrualLedgerBalances(
+            $system_opening_balance_id, 
+            $post['accrual_account_codes'], 
+            $post['accrual_ledger_effect'], 
+            $post['accrual_account_amount'],
           );
         }
     

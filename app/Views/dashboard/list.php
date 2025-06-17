@@ -2,7 +2,10 @@
 // $journalData = json_decode(file_get_contents(APPPATH.'Data/journalData.json'), true);
 // $journalBuilder = new \App\Libraries\Grants\Builders\Journal($journalData);
 // echo json_encode($journalBuilder->getMonthBankOpeningBalance());
-?>
+// $db = \Config\Database::connect();
+// $fieldData = $db->getFieldData('opening_accrual_balance');
+// echo json_encode($fieldData);
+// ?>
 <div class = 'row'>
     <div class="col-sm-12">
         <div class="well">

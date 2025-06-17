@@ -103,8 +103,7 @@ extract($result);
     }
   })
 
-  $(document).on('change', '.accrual_account_codes', function () {
-    // const code = $(this)
+  function updateAllAccrualLedgerSelects(){
     const accrual_account_codes = $(".accrual_account_codes")
 
     const selectedAccountsInRows = new Set();
@@ -124,7 +123,7 @@ extract($result);
       $currentSelect.empty(); // Clear existing options
       $currentSelect.append('<option value="">-- <?= get_phrase('select_ledger_account'); ?> --</option>'); // Add default option
 
-      // Add options based on ALL_STUDENTS, filtering out those already selected elsewhere
+      // Add options based on ACCRUAL_LEDGER_ACCOUNTS, filtering out those already selected elsewhere
       ACCRUAL_LEDGER_ACCOUNTS.forEach(account => {
         // A account is available if:
         // - They are not selected in any other row OR
@@ -140,6 +139,10 @@ extract($result);
         $currentSelect.val(previouslySelected);
       }
     });
+  }
+
+  $(document).on('change', '.accrual_account_codes', function () {
+    updateAllAccrualLedgerSelects();
   })
 
   $('#insert_outstanding_cheque').on('click', function () {
@@ -194,7 +197,7 @@ extract($result);
     const action_button = `<div class = 'btn btn-danger remove_row accrual_account_remove'>${'<?= get_phrase('remove_row'); ?>'}</div>`
     const accrual_account_code_select = `<select name = "accrual_account_codes[]" class = "form-control accrual_account_codes mandatory">${accrual_account_options}</select>`
     const accrual_ledger_effect_select = `<select name = "accrual_ledger_effect[]" class = "form-control accrual_ledger_effect mandatory">${accrual_ledger_options}</select>`
-    const accrual_account_amount_input = `<input  value = "${data.amount}" name = "cheque_amount[]" type = "number" class = "form-control cheque_amount bank_reconciliation_fields outstanding_cheque mandatory" />`
+    const accrual_account_amount_input = `<input  value = "${data.amount}" name = "accrual_account_amount[]" type = "number" class = "form-control accrual_account_amount mandatory" />`
 
     const row = `
                   <tr><td>${is_first_row ? '' : action_button}</td>
