@@ -3,6 +3,8 @@
 namespace App\Controllers\Web\Grants;
 
 use App\Controllers\Web\WebController;
+use App\Enums\AccrualLedgerAccounts;
+use App\Enums\AccrualVoucherTypeEffects;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
@@ -115,22 +117,25 @@ class Voucher extends WebController
     $response['office_cash'] = [];
     $response['is_bank_payment'] = false;
     $response['is_bank_refund'] = false;
+    $response['accrual_voucher_effect'] = '';
 
     $officeBankLibrary = new Grants\OfficeBankLibrary();
     // $voucherLibrary = new Grants\VoucherLibrary();
 
     $response['voucher_type_requires_cheque_referencing'] = $this->library->voucherTypeRequiresChequeReferencing($voucher_type_id);
-
     $voucher_type_effect_and_code = $this->library->voucherTypeEffectAndCode($voucher_type_id);
-
     $voucher_type_effect = $voucher_type_effect_and_code->voucher_type_effect_code;
     $voucher_type_account = $voucher_type_effect_and_code->voucher_type_account_code;
-
     $office_accounting_system = $this->library->officeAccountSystem($office_id);
 
     if (count($officeBankLibrary->getActiveOfficeBanks($office_id)) > 1 && $voucher_type_account == 'cash') {
       $response['office_banks'] = $this->library->getOfficeBanks($office_id);
     }
+
+    if(AccrualVoucherTypeEffects::tryFrom($voucher_type_effect)){
+        $response['accrual_voucher_effect'] = $voucher_type_effect;
+     }
+
 
     if ($voucher_type_account == 'cash' || $voucher_type_effect == 'bank_contra' || $voucher_type_effect == 'cash_to_cash_contra') {
       $response['office_cash'] = $this->read_db->table('office_cash')

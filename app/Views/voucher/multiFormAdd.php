@@ -1,5 +1,6 @@
 <?php 
 use \App\Libraries\System\Widgets\WidgetBase;
+use App\Enums\AccrualVoucherTypeEffects;
 ?>
 
 <style>
@@ -295,110 +296,6 @@ extract($result);
             }
         });
     }
-
-    $(document).on('change', '#voucher_type', function() {
-
-        remove_voucher_detail_rows();
-
-        var office = $('#office').val();
-        var voucher_type_id = $(this).val();
-        var active_request_url = "<?= base_url(); ?>ajax/voucher/getCountOfUnvouchedRequest/" + office;
-        var url = "<?= base_url(); ?>ajax/voucher/checkVoucherTypeAffectsBank/" + office + "/" + voucher_type_id;
-
-        if (!voucher_type_id) {
-            hide_buttons();
-            $(".account_fields").closest('span').addClass('hidden');
-            return false;
-        }
-
-        $("#bank_balance, #unapproved_and_approved_vouchers_cash_balance").closest('span').addClass('hidden');
-        $("#bank_balance, #unapproved_and_approved_vouchers_cash_balance").val(0);
-
-        $("#bank_balance, #approved_vouchers_cash_balance").closest('span').addClass('hidden');
-        $("#bank_balance, #approved_vouchers_cash_balance").val(0);
-
-        $("#refund_voucher_amount").closest('span').addClass('hidden');
-        $("#refund_voucher_amount").val(0);
-
-        $("#cash_account").val(0);
-
-        checkIfDateIsSelected() ? getRequest(url, function(response_objects) {
-            // console.log(response_objects)
-            let response_office_cash = response_objects['office_cash'];
-            let response_office_bank = response_objects['office_banks'];
-            let response_is_transfer_contra = response_objects['is_transfer_contra'];
-            let response_is_bank_payment = response_objects['is_bank_payment'];
-            let response_is_bank_refund = response_objects['is_bank_refund'];
-            let response_is_voucher_type_requires_cheque_referencing = response_objects['voucher_type_requires_cheque_referencing'];
-
-
-            $.get(active_request_url, office, function(response) {
-                let badges = $(".requests_badge");
-                badges.html(response);
-
-            })
-
-
-            if (response_office_cash.length > 0) {
-
-                add_options_to_cash_select(response_office_cash);
-
-                if (response_office_bank.length > 0) {
-                    add_options_to_bank_select(response_office_bank, true);
-                }
-
-            } else if (response_office_bank.length > 0) {
-
-                add_options_to_bank_select(response_office_bank);
-
-                if (response_office_cash.length > 0) {
-                    add_options_to_cash_select(response_office_cash, true);
-                }
-
-            }
-
-            if (response_is_transfer_contra) {
-                $("#cash_recipient_account").closest('span').removeClass('hidden');
-                $("#cash_recipient_account").removeAttr('disabled');
-                $("#cash_recipient_account").html('');
-            } else {
-                $("#cash_recipient_account").closest('span').addClass('hidden');
-            }
-
-            if (response_is_bank_payment) {
-                $("#cheque_number").closest('span').removeClass('hidden');
-
-                change_voucher_number_field_to_eft_number(response_is_voucher_type_requires_cheque_referencing);
-
-            } else {
-                $("#cheque_number").closest('span').addClass('hidden');
-                //$("#cheque_number").prop("selectedIndex", 0);
-                $("#cheque_number option:first").attr('selected', 'selected');
-            }
-
-            if(response_is_bank_refund){
-                $("#bank_refund, #refund_voucher_amount, #bank_balance").closest('span').removeClass('hidden');
-                $("#bank_refund").removeAttr('disabled');
-                $("#bank_refund").removeAttr('readonly');
-                // Populate refund voucher list
-                // populateVoucherInRefundList(response_objects['valid_refund_vouchers']);
-                $("#refund_voucher_amount").val(0)
-            }else{
-                $("#bank_refund").closest('span').addClass('hidden');
-                $("#bank_refund option:first").attr('selected', 'selected');
-            }
-
-            if (voucher_type_id && !response_is_bank_refund) {
-                //update_request_details_count_on_badge();
-                $(".btn-insert").show();
-                $(".btn-retrieve-request").show();
-            } else {
-                hide_buttons();
-            }
-
-        }) : alert("Choose a valid date");
-
-    });
 
 
     function populateVoucherInRefundList(voucherList){
@@ -991,28 +888,38 @@ extract($result);
         populate_select(response_office_cash, $("#cash_account"), 'Select a cash account');
     }
 
-    // $("#bank").on('change', function(){
-    //     let office_id = $('#office').val();
-    //     let voucher_type_id = $("#voucher_type").val();
-    //     let url = "<?= base_url(); ?>ajax/voucher/getValidVoucherListForRefund/" + office_id + "/" + voucher_type_id;
-        
-    //     getRequest(url, function(response_objects){
-    //         let response_is_bank_refund = response_objects['is_bank_refund'];
-    //         if(response_is_bank_refund){
-    //             $("#bank_refund, #refund_voucher_amount, #bank_balance").closest('span').removeClass('hidden');
-    //             // Populate refund voucher list
-    //             populateVoucherInRefundList(response_objects['valid_refund_vouchers']);
-    //             $("#refund_voucher_amount").val(0)
-    //         }
-    //     })
-    // })
 
-    $("#voucher_type").on('change', function(){
-        let office_id = $('#office').val();
+    $(document).on('change', '#voucher_type', function() {
+
+        remove_voucher_detail_rows();
+
+        let office = $('#office').val();
         let voucher_type_id = $("#voucher_type").val();
-        let url = "<?= base_url(); ?>ajax/voucher/getValidVoucherListForRefund/" + office_id + "/" + voucher_type_id;
+        var active_request_url = "<?= base_url(); ?>ajax/voucher/getCountOfUnvouchedRequest/" + office;
+        var url = "<?= base_url(); ?>ajax/voucher/checkVoucherTypeAffectsBank/" + office + "/" + voucher_type_id;
+
+        let office_id = $('#office').val();
+        let bankRefundUrl = "<?= base_url(); ?>ajax/voucher/getValidVoucherListForRefund/" + office_id + "/" + voucher_type_id;
         
-        getRequest(url, function(response_objects){
+        if (!voucher_type_id) {
+            hide_buttons();
+            $(".account_fields").closest('span').addClass('hidden');
+            return false;
+        }
+
+        $("#bank_balance, #unapproved_and_approved_vouchers_cash_balance").closest('span').addClass('hidden');
+        $("#bank_balance, #unapproved_and_approved_vouchers_cash_balance").val(0);
+
+        $("#bank_balance, #approved_vouchers_cash_balance").closest('span').addClass('hidden');
+        $("#bank_balance, #approved_vouchers_cash_balance").val(0);
+
+        $("#refund_voucher_amount").closest('span').addClass('hidden');
+        $("#refund_voucher_amount").val(0);
+
+        $("#cash_account").val(0);
+
+        
+        getRequest(bankRefundUrl, function(response_objects){
             let response_is_bank_refund = response_objects['is_bank_refund'];
             if(response_is_bank_refund){
                 $("#bank_refund, #refund_voucher_amount, #bank_balance").closest('span').removeClass('hidden');
@@ -1020,8 +927,96 @@ extract($result);
                 populateVoucherInRefundList(response_objects['valid_refund_vouchers']);
                 $("#refund_voucher_amount").val(0)
             }
-        })
-    })
+        });
+
+        
+        checkIfDateIsSelected() ? getRequest(url, function(response_objects) {
+            console.log(response_objects)
+            let response_office_cash = response_objects['office_cash'];
+            let response_office_bank = response_objects['office_banks'];
+            let response_is_transfer_contra = response_objects['is_transfer_contra'];
+            let response_is_bank_payment = response_objects['is_bank_payment'];
+            let response_is_bank_refund = response_objects['is_bank_refund'];
+            let response_is_voucher_type_requires_cheque_referencing = response_objects['voucher_type_requires_cheque_referencing'];
+            let response_accrual_voucher_effect = response_objects['accrual_voucher_effect'];
+
+            $.get(active_request_url, office, function(response) {
+                let badges = $(".requests_badge");
+                badges.html(response);
+
+            })
+
+
+            if (response_office_cash.length > 0) {
+                add_options_to_cash_select(response_office_cash);
+                if (response_office_bank.length > 0) {
+                    add_options_to_bank_select(response_office_bank, true);
+                }
+            } else if (response_office_bank.length > 0) {
+                add_options_to_bank_select(response_office_bank);
+                if (response_office_cash.length > 0) {
+                    add_options_to_cash_select(response_office_cash, true);
+                }
+            }
+
+            if (response_is_transfer_contra) {
+                $("#cash_recipient_account").closest('span').removeClass('hidden');
+                $("#cash_recipient_account").removeAttr('disabled');
+                $("#cash_recipient_account").html('');
+            } else {
+                $("#cash_recipient_account").closest('span').addClass('hidden');
+            }
+
+            if (response_is_bank_payment) {
+                $("#cheque_number").closest('span').removeClass('hidden');
+
+                change_voucher_number_field_to_eft_number(response_is_voucher_type_requires_cheque_referencing);
+
+            } else {
+                $("#cheque_number").closest('span').addClass('hidden');
+                //$("#cheque_number").prop("selectedIndex", 0);
+                $("#cheque_number option:first").attr('selected', 'selected');
+            }
+
+            if(response_is_bank_refund){
+                $("#bank_refund, #refund_voucher_amount, #bank_balance").closest('span').removeClass('hidden');
+                $("#bank_refund").removeAttr('disabled');
+                $("#bank_refund").removeAttr('readonly');
+                // Populate refund voucher list
+                // populateVoucherInRefundList(response_objects['valid_refund_vouchers']);
+                $("#refund_voucher_amount").val(0)
+            }else{
+                $("#bank_refund").closest('span').addClass('hidden');
+                $("#bank_refund option:first").attr('selected', 'selected');
+            }
+
+            if (voucher_type_id && !response_is_bank_refund) {
+                //update_request_details_count_on_badge();
+                $(".btn-insert").show();
+                $(".btn-retrieve-request").show();
+            } else {
+                hide_buttons();
+            }
+
+            if(response_accrual_voucher_effect != ""){
+                accrualBankAndCashAccountsControl(response_accrual_voucher_effect);
+            }
+
+        }) : alert("Choose a valid date");
+
+    });
+
+    function accrualBankAndCashAccountsControl(selectedVoucherTypeEffect){
+        if(
+            selectedVoucherTypeEffect == '<?=AccrualVoucherTypeEffects::RECEIVABLES->value;?>' ||
+            selectedVoucherTypeEffect == '<?=AccrualVoucherTypeEffects::PAYABLES->value;?>' ||
+            selectedVoucherTypeEffect == '<?=AccrualVoucherTypeEffects::PREPAYMENT_SETTLEMENTS->value;?>' ||
+            selectedVoucherTypeEffect == '<?=AccrualVoucherTypeEffects::DEPRECIATION->value;?>'         
+        ){
+            $('#bank').val("")
+            $('#bank').closest('span').addClass('hidden')
+        }
+    }
 
     function get_bank_cash_information(OfficeBankSelect) {
 
