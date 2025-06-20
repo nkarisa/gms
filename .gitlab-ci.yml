@@ -9,7 +9,7 @@ include:
       is_http_service: false
       build_and_test_image_version: '8.2'
       build_and_test_image: php
-      # service_language: php
+      service_language: php
       include_build_job: false
       deploy_tooling: 'terraform'
       terraform_dir: 'build/config/terraform'
