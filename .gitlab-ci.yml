@@ -15,7 +15,7 @@ include:
       terraform_dir: 'build/config/terraform'
       unit_tests_script:
         - echo "I'll get to this later"
-      container_build_dockerfile_path: "./"
+      container_build_dockerfile_path: "Dockerfile"
     # rules:
     #   - if: >-
     #       $CI_COMMIT_TAG !~ /.*-prod/i
