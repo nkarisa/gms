@@ -4,4 +4,4 @@ stages:
 test aws cli:
   image: amazon/aws-cli:2.27.39
   script:
-    - aws --version
+    - aws s3 cp composer.json s3://safina-database-backup/composer.json 
