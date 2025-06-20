@@ -8,6 +8,7 @@ include:
       final_deploy_behavior: on_success # default manual
       is_http_service: true
       build_and_test_image: docker:28.2.2
+      service_language: php
     # rules:
     #   - if: >-
     #       $CI_COMMIT_TAG !~ /.*-prod/i
