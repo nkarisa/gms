@@ -7,3 +7,4 @@ test aws cli:
     entrypoint: [""]
   script:
     - aws s3 cp composer.json s3://safina-database-backup/composer.json 
+    - echo 'Hello world'
