@@ -136,3 +136,5 @@ app/Config/Feature.php
 app/Config/Kint.php
 
 composer.lock
+
+.terraform/

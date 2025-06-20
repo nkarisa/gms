@@ -1,14 +1,18 @@
 include:
-  - component: &core-yaml-tpl $CI_SERVER_FQDN/ciorg/community/cmf/pipeline/core-yaml/include@v2.1.0
+  - component: &core-yaml-tpl $CI_SERVER_FQDN/ciorg/community/cmf/pipeline/core-yaml/include@2.4
     inputs: &core-yaml-input
       deploy_stages: ''
       feature_deploy_stages: ''
       manual_promote_to_stage: 'no' # auto promote to stage
       manual_promote_to_prod: 'no' # auto promte to prod
       final_deploy_behavior: on_success # default manual
-      is_http_service: true
-      build_and_test_image: docker:28.2.2
-      service_language: php
+      is_http_service: false
+      build_and_test_image_version: '8.2'
+      build_and_test_image: php
+      # service_language: php
+      include_build_job: false
+      deploy_tooling: 'terraform'
+      terraform_dir: 'build/config/terraform'
     # rules:
     #   - if: >-
     #       $CI_COMMIT_TAG !~ /.*-prod/i
