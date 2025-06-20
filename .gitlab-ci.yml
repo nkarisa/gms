@@ -9,10 +9,12 @@ include:
       is_http_service: false
       build_and_test_image_version: '8.2'
       build_and_test_image: php
-      service_language: php
+      service_language: golang
       include_build_job: false
       deploy_tooling: 'terraform'
       terraform_dir: 'build/config/terraform'
+      unit_tests_script:
+        - echo "I'll get to this later"
     # rules:
     #   - if: >-
     #       $CI_COMMIT_TAG !~ /.*-prod/i
