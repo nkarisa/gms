@@ -6,7 +6,7 @@ RUN install-php-extensions bcmath intl mysqli
 
 USER www-data
 COPY --chown=www-data:www-data . .
-RUN mv .env.docker .env
+RUN mv env .env
 
 # Run composer update as www-data user
 RUN composer install
