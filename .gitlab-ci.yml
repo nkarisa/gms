@@ -1,39 +1,7 @@
-# Pipeline stages
 stages:
-  - build
-  - deploy
+  - test
 
-# Default settings for all jobs
-default:
-  image: docker:latest
-  services:
-    - docker:dind
-
-build_docker_image:
-  stage: build
-  variables:
-    DOCKER_IMAGE_NAME: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
-    LATEST_DOCKER_IMAGE_NAME: $CI_REGISTRY_IMAGE:latest
+test aws cli:
+  image: amazon/aws-cli:2.27.39
   script:
-    - docker info
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
-    - docker build -t $DOCKER_IMAGE_NAME -t $LATEST_DOCKER_IMAGE_NAME .
-    - docker push $DOCKER_IMAGE_NAME
-    - docker push $LATEST_DOCKER_IMAGE_NAME
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-
-# # Deploy the application to AWS ECS
-# deploy_to_ecs:
-#   stage: deploy
-#   image: python:latest # Install and use AWS CLI with Python
-#   before_script:
-#     - pip install awscli
-#     - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-#     - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-#     - export AWS_DEFAULT_REGION=$AWS_REGION
-#   script:
-#     # Get the current task definition family
-#     # This fetches the active task definition for the service
-#     - TASK_DEFINITION_FAMILY=$(aws ecs describe-services --cluster $AWS_ECS_CLUSTER_NAME --services $AWS_ECS_SERVICE_NAME --query 'services[0].taskDefinition' --output text | awk -F'/' '{print $2}' | awk -F':' '{print $1}')
-#     - echo "Found Task Definition Family: $TASK_DEFINITION_FAMILY"
+    - aws --version
