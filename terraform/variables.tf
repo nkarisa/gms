@@ -63,14 +63,14 @@ variable "create_load_balancer" {
   default     = true
 }
 
-variable "gitlab_registry_username" {
-  description = "Username for GitLab Container Registry (typically 'gitlab-ci-token' for CI/CD)."
-  type        = string
-  sensitive   = true
-}
+# variable "gitlab_registry_username" {
+#   description = "Username for GitLab Container Registry (typically 'gitlab-ci-token' for CI/CD)."
+#   type        = string
+#   sensitive   = true
+# }
 
-variable "gitlab_registry_password" {
-  description = "Password/token for GitLab Container Registry (e.g., your deploy token or CI_JOB_TOKEN)."
-  type        = string
-  sensitive   = true
-}
+# variable "gitlab_registry_password" {
+#   description = "Password/token for GitLab Container Registry (e.g., your deploy token or CI_JOB_TOKEN)."
+#   type        = string
+#   sensitive   = true
+# }
