@@ -125,7 +125,7 @@ resource "aws_ecs_service" "update_service" {
     subnets         = var.subnet_ids
     security_groups = var.security_group_ids
     # This should typically be set to true for services running in awsvpc mode
-    assign_public_ip = true # Or false, depending on your network design (e.g., if you have a NAT Gateway)
+    assign_public_ip = false # Or false, depending on your network design (e.g., if you have a NAT Gateway)
   }
 
   # By default, Terraform will manage the service as a whole.
