@@ -53,6 +53,18 @@ variable "security_group_ids" {
   # Provide your actual security group IDs here
 }
 
+
+# --- Data Source to get an existing ECS Cluster ---
+data "aws_ecs_cluster" "existing_cluster" {
+  cluster_name = var.cluster_name 
+}
+
+# --- Data Source to get the existing ECS Service ---
+data "aws_ecs_service" "existing_service" {
+  service_name = var.service_name # Replace with your actual ECS service name
+  cluster_arn  = data.aws_ecs_cluster.existing_cluster.arn
+}
+
 # Define local values for dynamic configurations
 locals {
   container_definitions = [
@@ -116,7 +128,7 @@ resource "aws_ecs_task_definition" "new_revision" {
 # of the ECS service, initiating a new deployment with the new task definition revision.
 resource "aws_ecs_service" "update_service" {
   name            = var.service_name
-  cluster         = var.cluster_name
+  cluster         = data.aws_ecs_cluster.existing_cluster.id
   # Reference the ARN of the newly created task definition revision.
   task_definition = aws_ecs_task_definition.new_revision.arn
 
@@ -128,23 +140,6 @@ resource "aws_ecs_service" "update_service" {
     assign_public_ip = false # Or false, depending on your network design (e.g., if you have a NAT Gateway)
   }
 
-  # By default, Terraform will manage the service as a whole.
-  # If you want to prevent Terraform from managing other aspects of the service
-  # that might be managed manually or by other tools, you might need to
-  # use 'lifecycle { ignore_changes = [...] }'. However, for a standard update,
-  # it's usually fine to let Terraform manage.
-
-  # Important: Do not set 'desired_count' here if you want ECS service auto-scaling to manage it.
-  # If 'desired_count' is set, Terraform will try to enforce that count,
-  # potentially conflicting with auto-scaling policies.
-  # You can fetch it from existing service data source if needed for consistency.
-  # For this example, we assume `desired_count` is managed outside Terraform or
-  # you are intentionally setting it here for the update.
-  # desired_count   = data.aws_ecs_service.existing.desired_count # Example if you want to explicitly keep current count
-
-  # You can fetch existing service details if you need to copy other configurations
-  # such as load balancers, deployment circuit breakers, etc.
-  # For simplicity, this example only updates the task definition.
 }
 
 # Data source to fetch existing service details if needed for copying other properties.
