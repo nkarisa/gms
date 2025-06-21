@@ -1,7 +1,7 @@
 variable "security_group_ids" {
   description = "Desired task count"
   type        = list(string)
-  default     = ["sg-0850a8407b905cc9e","sg-0e19f4f7cd34fd03e","sg-0b823459bcef5d710","sg-05fac8023c682f93c"]
+#   default     = ["sg-0850a8407b905cc9e","sg-0e19f4f7cd34fd03e","sg-0b823459bcef5d710","sg-05fac8023c682f93c"]
 }
 
 variable "desired_count" {
@@ -13,7 +13,7 @@ variable "desired_count" {
 variable "service_name" {
   description = "Service Name"
   type        = string
-  default     = "safina-ecs-service-devint"
+#   default     = "safina-ecs-service-devint"
 }
 
 variable "target_group_name" {
@@ -25,37 +25,37 @@ variable "target_group_name" {
 variable "elb_name" {
   description = "ELB"
   type        = string
-  default     = "Safina-sandbox-ELB"
+#   default     = "Safina-sandbox-ELB"
 }
 
 variable "vpc_id" {
   description = "Task Definition"
   type        = string
-  default     = "vpc-0f2a934dedb428d4f"
+#   default     = "vpc-0f2a934dedb428d4f"
 }
 
 variable "task_definition_family" {
   description = "Task Definition"
   type        = string
-  default     = "safina-app-task-def-devint"
+#   default     = "safina-app-task-def-devint"
 }
 
 variable "cluster_name" {
   description = "ECS Cluster"
   type        = string
-  default     = "safina-app-cluster" 
+#   default     = "safina-app-cluster" 
 }
 
 variable "container_name" {
   description = "Task Container Name"
   type        = string
-  default     = "safina-app" 
+#   default     = "safina-app" 
 }
 
 variable "image_name" {
   description = "Task Image"
   type        = string
-  default     = "nginx:1.28"
+#   default     = "nginx:1.28"
 }
 
 variable "aws_region" {
