@@ -10,8 +10,8 @@ terraform {
   required_version = ">= 1.0.0"
 
   backend "s3" {
-    bucket         = "safina-terraform-state" # Replace with your S3 bucket name
-    key            = "devint/terraform.tfstate" # Path within the bucket for your state file
+    bucket         = "runner-cache-africanonprod" # runner-cache-africanonprod # Replace with your S3 bucket name
+    key            = "ciorg/regional/africa-developers/safinav3/devint/terraform.tfstate" # ciorg/regional/africa-developers/safinav3/devint/terraform.tfstate  # Path within the bucket for your state file
     region         = "eu-west-1"                     # AWS region where your S3 bucket is located
     encrypt        = true                            # Enable server-side encryption for the state file
   }
