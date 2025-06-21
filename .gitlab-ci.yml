@@ -12,7 +12,7 @@ include:
       service_language: golang
       include_build_job: false
       deploy_tooling: 'terraform'
-      terraform_dir: 'build/config/terraform'
+      terraform_dir: 'terraform'
       unit_tests_script:
         - echo "I'll get to this later"
       container_build_dockerfile_path: "./Dockerfile"
