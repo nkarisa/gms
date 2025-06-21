@@ -4,19 +4,39 @@
 variable "cluster_name" {
   description = "The name of your existing ECS cluster."
   type        = string
-  default     = "safina-cluster" # <<< REPLACE WITH YOUR CLUSTER NAME
+  # default     = "safina-cluster" # <<< REPLACE WITH YOUR CLUSTER NAME
 }
+
+variable "image_name" {
+  description = "The name of your image."
+  type        = string
+  # default     = "safina-cluster" # <<< REPLACE WITH YOUR CLUSTER NAME
+}
+
+variable "conatiner_name" {
+  description = "The name of task the container."
+  type        = string
+  default     = "app"
+}
+
+
+variable "aws_region" {
+  description = "The name of your image."
+  type        = string
+  default     = "eu-west-1" # <<< REPLACE WITH YOUR CLUSTER NAME
+}
+
 
 variable "task_definition_family" {
   description = "The family name of your existing ECS task definition."
   type        = string
-  default     = "safina-app-task-def" # <<< REPLACE WITH YOUR TASK DEFINITION FAMILY
+  # default     = "safina-app-task-def" # <<< REPLACE WITH YOUR TASK DEFINITION FAMILY
 }
 
 variable "service_name" {
   description = "The name of your existing ECS service."
   type        = string
-  default     = "safina-devint-service" # <<< REPLACE WITH YOUR SERVICE NAME
+  # default     = "safina-devint-service" # <<< REPLACE WITH YOUR SERVICE NAME
 }
 
 variable "container_definitions_json" {
@@ -29,8 +49,8 @@ variable "container_definitions_json" {
   # A common update is changing the 'image' tag to deploy a new application version.
   default = [
     {
-      name        = "my-container"
-      image       = "nginx:1.23.4" # <<< UPDATE THIS TO YOUR NEW IMAGE VERSION
+      name        = var.container_name
+      image       = var.image_name # <<< UPDATE THIS TO YOUR NEW IMAGE VERSION
       cpu         = 256
       memory      = 512
       essential   = true
@@ -44,7 +64,7 @@ variable "container_definitions_json" {
         logDriver = "awslogs"
         options = {
           "awslogs-group"         = "/ecs/my-app-task"
-          "awslogs-region"        = "us-east-1" # <<< REPLACE WITH YOUR AWS REGION
+          "awslogs-region"        = var.aws_region # <<< REPLACE WITH YOUR AWS REGION
           "awslogs-stream-prefix" = "ecs"
         }
       }
