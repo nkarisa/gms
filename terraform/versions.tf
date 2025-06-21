@@ -21,6 +21,24 @@ provider "aws" {
   region = "eu-west-1"  # Replace with your desired AWS region
 }
 
+variable "security_group_ids" {
+  description = "Desired task count"
+  type        = list(string)
+  default     = ["sg-0850a8407b905cc9e","sg-0e19f4f7cd34fd03e","sg-0b823459bcef5d710","sg-05fac8023c682f93c"]
+}
+
+variable "desired_count" {
+  description = "Desired task count"
+  type        = number
+  default     = 2
+}
+
+variable "service_name" {
+  description = "Service Name"
+  type        = string
+  default     = "safina-ecs-service-devint"
+}
+
 variable "target_group_name" {
   description = "Target Group"
   type        = string
@@ -242,56 +260,42 @@ resource "aws_ecs_task_definition" "task_definition" {
 }
 
 # Create the AWS ECS Service
-# resource "aws_ecs_service" "_service" {
-#   name            = "nginx-ecs-service"
-#   cluster         = aws_ecs_cluster.my_ecs_cluster.id
-#   task_definition = aws_ecs_task_definition.nginx_task_definition.arn
-#   desired_count   = 2
-#   launch_type     = "FARGATE"
-
-#   network_configuration {
-#     subnets         = data.aws_subnets.selected_subnets.ids
-#     security_groups = ["sg-123456", "sg-7890123"] # Replace with your actual security group IDs
-#     assign_public_ip = false
-#   }
-
-#   load_balancer {
-#     target_group_arn = data.aws_lb_target_group.safina_ecs_tg.arn
-#     container_name   = "nginx-container" # Must match the 'name' in your container_definitions
-#     container_port   = 80                # Must match the 'containerPort' in your container_definitions
-#   }
-
-#   # Optional: Enable service discovery, auto scaling, etc.
-#   tags = {
-#     Environment = "Development"
-#     Service     = "Nginx"
-#   }
-
-#   # Ensure the service is created after the listener is ready
-#   depends_on = [
-#     aws_iam_role_policy_attachment.ecs_task_execution_policy,
-#     aws_iam_role_policy_attachment.ecs_task_s3_admin_policy,
-#     data.aws_lb_listener.safina_listener_https_443,
-#     data.aws_lb_target_group.safina_ecs_tg
-#   ]
-# }
+resource "aws_ecs_service" "ecs_service" {
+  name            = var.service_name
+  cluster         = aws_ecs_cluster.safina_app_cluster.id
+  task_definition = aws_ecs_task_definition.task_definition.arn
+  desired_count   = var.desired_count
+  launch_type     = "FARGATE"
 
 
-# resource "aws_ecs_service" "update_service" {
-#   name            = var.service_name
-#   cluster         = data.aws_ecs_cluster.existing_cluster.id
-#   # Reference the ARN of the newly created task definition revision.
-#   task_definition = aws_ecs_task_definition.new_revision.arn
+  network_configuration {
+    subnets         = data.aws_subnets.selected_subnets.ids
+    security_groups = var.security_group_ids
+    # This should typically be set to true for services running in awsvpc mode
+    assign_public_ip = false # Or false, depending on your network design (e.g., if you have a NAT Gateway)
+  }
 
-#   # Add this network_configuration block
-#   network_configuration {
-#     subnets         = var.subnet_ids
-#     security_groups = var.security_group_ids
-#     # This should typically be set to true for services running in awsvpc mode
-#     assign_public_ip = false # Or false, depending on your network design (e.g., if you have a NAT Gateway)
-#   }
+  load_balancer {
+    target_group_arn = data.aws_lb_target_group.safina_ecs_tg.arn
+    container_name   = var.container_name # Must match the 'name' in your container_definitions
+    container_port   = 80                # Must match the 'containerPort' in your container_definitions
+  }
 
-# }
+  # Optional: Enable service discovery, auto scaling, etc.
+  tags = {
+    Environment = "Development"
+    Service     = "Safina"
+  }
+  
+
+  # Ensure the service is created after the listener is ready
+  depends_on = [
+    aws_iam_role_policy_attachment.ecs_task_execution_policy,
+    aws_iam_role_policy_attachment.ecs_task_s3_admin_policy,
+    data.aws_lb_listener.safina_listener_https_443,
+    data.aws_lb_target_group.safina_ecs_tg
+  ]
+}
 
 
 # Output the ARN of the created ECS cluster
@@ -323,3 +327,8 @@ output "ecs_task_role_s3_admin_arn" {
   description = "The Amazon Resource Name (ARN) of the ECS Task Role with S3 Admin Access."
   value       = aws_iam_role.ecs_task_role_s3_admin.arn
 }
+
+# output "ecs_service_arn" {
+#   description = "The Amazon Resource Name (ARN) of the created ECS service."
+#   value       = aws_ecs_service.ecs_service.arn
+# }
