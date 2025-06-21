@@ -63,8 +63,8 @@ variable "container_definitions_json" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          "awslogs-group"         = "/ecs/my-app-task"
-          "awslogs-region"        = var.aws_region # <<< REPLACE WITH YOUR AWS REGION
+          "awslogs-group"         = "/ecs/safina-app-task"
+          "awslogs-region"        = "eu-west-1" # <<< REPLACE WITH YOUR AWS REGION
           "awslogs-stream-prefix" = "ecs"
         }
       }
