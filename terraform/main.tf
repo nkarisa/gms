@@ -149,7 +149,7 @@ output "new_task_definition_arn" {
 }
 
 # Output the name of the updated ECS service.
-output "updated_service_name" {
-  description = "The name of the updated ECS service."
-  value       = aws_ecs_service.update_service.name
-}
+# output "updated_service_name" {
+#   description = "The name of the updated ECS service."
+#   value       = aws_ecs_service.update_service.name
+# }
