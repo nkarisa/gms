@@ -13,7 +13,7 @@ variable "image_name" {
   # default     = "safina-cluster" # <<< REPLACE WITH YOUR CLUSTER NAME
 }
 
-variable "conatiner_name" {
+variable "container_name" { # Corrected typo: "conatiner_name" -> "container_name"
   description = "The name of task the container."
   type        = string
   default     = "app"
@@ -39,18 +39,14 @@ variable "service_name" {
   # default     = "safina-devint-service" # <<< REPLACE WITH YOUR SERVICE NAME
 }
 
-variable "container_definitions_json" {
-  description = "A list of maps defining your updated container definitions. This will create a new task definition revision."
-  # Changed type to 'any' to allow direct list of maps in default,
-  # and will apply jsonencode where it's used.
-  type        = any
-  # <<< IMPORTANT: REPLACE THE EXAMPLE BELOW WITH YOUR ACTUAL, UPDATED CONTAINER DEFINITIONS
-  # Ensure this structure is valid and includes all necessary fields (e.g., 'name', 'image', 'portMappings', 'cpu', 'memory').
-  # A common update is changing the 'image' tag to deploy a new application version.
-  default = [
+# --- REMOVE THE 'variable "container_definitions_json"' BLOCK HERE ---
+
+# Define local values for dynamic configurations
+locals {
+  container_definitions = [
     {
       name        = var.container_name
-      image       = var.image_name # <<< UPDATE THIS TO YOUR NEW IMAGE VERSION
+      image       = var.image_name # This is now valid!
       cpu         = 256
       memory      = 512
       essential   = true
@@ -64,7 +60,7 @@ variable "container_definitions_json" {
         logDriver = "awslogs"
         options = {
           "awslogs-group"         = "/ecs/safina-app-task"
-          "awslogs-region"        = "eu-west-1" # <<< REPLACE WITH YOUR AWS REGION
+          "awslogs-region"        = var.aws_region # This is now valid!
           "awslogs-stream-prefix" = "ecs"
         }
       }
@@ -87,8 +83,8 @@ data "aws_ecs_task_definition" "existing" {
 # By providing the 'family' that already exists, ECS will create a new revision number.
 resource "aws_ecs_task_definition" "new_revision" {
   family                   = var.task_definition_family
-  # Apply jsonencode here, as 'container_definitions' expects a JSON string.
-  container_definitions    = jsonencode(var.container_definitions_json)
+  # Apply jsonencode here, referencing the new local value.
+  container_definitions    = jsonencode(local.container_definitions)
   # Inherit common properties from the existing task definition.
   # Adjust these if you intend to change them for the new revision.
   network_mode             = data.aws_ecs_task_definition.existing.network_mode
