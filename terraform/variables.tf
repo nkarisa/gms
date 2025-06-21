@@ -1,13 +1,13 @@
 variable "project_name" {
   description = "A unique name for your project, used for resource naming."
   type        = string
-  default     = "my-gitlab-ecs-app"
+  default     = "Safina ECS App"
 }
 
 variable "aws_region" {
   description = "The AWS region to deploy resources into."
   type        = string
-  default     = "us-east-1" # Replace with your desired AWS region
+  default     = "eu-west-1" # Replace with your desired AWS region
 }
 
 variable "gitlab_image_name" {
@@ -56,21 +56,3 @@ variable "public_subnet_ids" {
   type        = list(string)
   default     = []
 }
-
-variable "create_load_balancer" {
-  description = "Set to true to create an Application Load Balancer (ALB) for the service."
-  type        = bool
-  default     = true
-}
-
-# variable "gitlab_registry_username" {
-#   description = "Username for GitLab Container Registry (typically 'gitlab-ci-token' for CI/CD)."
-#   type        = string
-#   sensitive   = true
-# }
-
-# variable "gitlab_registry_password" {
-#   description = "Password/token for GitLab Container Registry (e.g., your deploy token or CI_JOB_TOKEN)."
-#   type        = string
-#   sensitive   = true
-# }
