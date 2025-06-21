@@ -15,6 +15,10 @@ include:
       terraform_dir: 'terraform'
       unit_tests_script:
         - echo "I'll get to this later"
+      smoke_tests_script:
+        - echo "I'll get to this later"
+      integration_tests_script:
+        - echo "I'll get to this later"
       container_build_dockerfile_path: "./Dockerfile"
     # rules:
     #   - if: >-

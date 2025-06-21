@@ -65,16 +65,6 @@ data "aws_ecs_service" "existing_service" {
   cluster_arn  = data.aws_ecs_cluster.existing_cluster.arn
 }
 
-# Data source to fetch the existing task definition details.
-# This is useful to retrieve properties like 'network_mode', 'requires_compatibilities', 'cpu', 'memory',
-# and 'execution_role_arn' from the current active revision, ensuring the new revision
-# inherits these properties unless explicitly overridden.
-data "aws_ecs_task_definition" "existing" {
-  # We use the family and a regex to ensure we get the latest active revision for the family.
-  # Terraform will automatically pick the highest revision number.
-  task_definition = var.task_definition_family
-}
-
 # Define local values for dynamic configurations
 locals {
   container_definitions = [
@@ -102,6 +92,16 @@ locals {
   ]
 }
 
+# Data source to fetch the existing task definition details.
+# This is useful to retrieve properties like 'network_mode', 'requires_compatibilities', 'cpu', 'memory',
+# and 'execution_role_arn' from the current active revision, ensuring the new revision
+# inherits these properties unless explicitly overridden.
+data "aws_ecs_task_definition" "existing" {
+  # We use the family and a regex to ensure we get the latest active revision for the family.
+  # Terraform will automatically pick the highest revision number.
+  task_definition = var.task_definition_family
+}
+
 
 # Resource to create a new revision of the ECS Task Definition.
 # By providing the 'family' that already exists, ECS will create a new revision number.
@@ -124,26 +124,38 @@ resource "aws_ecs_task_definition" "new_revision" {
 }
 
 # Resource to update the existing ECS Service to use the new task definition revision.
+# Terraform will detect that the 'task_definition' attribute has changed and perform an in-place update
+# of the ECS service, initiating a new deployment with the new task definition revision.
+resource "aws_ecs_service" "update_service" {
+  name            = var.service_name
+  cluster         = data.aws_ecs_cluster.existing_cluster.id
+  # Reference the ARN of the newly created task definition revision.
+  task_definition = aws_ecs_task_definition.new_revision.arn
 
-# resource "aws_ecs_service" "update_service" {
-#   name            = var.service_name
-#   cluster         = data.aws_ecs_cluster.existing_cluster.id
-#   # Reference the ARN of the newly created task definition revision.
-#   task_definition = aws_ecs_task_definition.new_revision.arn
+  # Add this network_configuration block
+  network_configuration {
+    subnets         = var.subnet_ids
+    security_groups = var.security_group_ids
+    # This should typically be set to true for services running in awsvpc mode
+    assign_public_ip = false # Or false, depending on your network design (e.g., if you have a NAT Gateway)
+  }
 
-#   # Add this network_configuration block
-#   network_configuration {
-#     subnets         = var.subnet_ids
-#     security_groups = var.security_group_ids
-#     # This should typically be set to true for services running in awsvpc mode
-#     assign_public_ip = false # Or false, depending on your network design (e.g., if you have a NAT Gateway)
-#   }
+}
 
+# Data source to fetch existing service details if needed for copying other properties.
+# data "aws_ecs_service" "existing" {
+#   cluster_arn = "arn:aws:ecs:us-east-1:123456789012:cluster/${var.cluster_name}" # Replace with your cluster ARN
+#   service_name = var.service_name
 # }
-
 
 # Output the ARN of the new task definition revision for verification.
 output "new_task_definition_arn" {
   description = "The ARN of the new ECS task definition revision."
   value       = aws_ecs_task_definition.new_revision.arn
+}
+
+# Output the name of the updated ECS service.
+output "updated_service_name" {
+  description = "The name of the updated ECS service."
+  value       = aws_ecs_service.update_service.name
 }
