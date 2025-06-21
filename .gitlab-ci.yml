@@ -21,3 +21,5 @@ include:
     #       $CI_COMMIT_TAG !~ /.*-prod/i
 
   
+before_script:
+    - terraform import aws_ecs_service.$TF_VAR_service_name $TF_VAR_cluster_name/$TF_VAR_service_name
