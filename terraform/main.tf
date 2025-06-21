@@ -39,7 +39,19 @@ variable "service_name" {
   # default     = "safina-devint-service" # <<< REPLACE WITH YOUR SERVICE NAME
 }
 
-# --- REMOVE THE 'variable "container_definitions_json"' BLOCK HERE ---
+
+# Add these variables if you don't have them already
+variable "subnet_ids" {
+  description = "A list of subnet IDs for the ECS service."
+  type        = list(string)
+  # Provide your actual subnet IDs here
+}
+
+variable "security_group_ids" {
+  description = "A list of security group IDs for the ECS service."
+  type        = list(string)
+  # Provide your actual security group IDs here
+}
 
 # Define local values for dynamic configurations
 locals {
@@ -107,6 +119,14 @@ resource "aws_ecs_service" "update_service" {
   cluster         = var.cluster_name
   # Reference the ARN of the newly created task definition revision.
   task_definition = aws_ecs_task_definition.new_revision.arn
+
+  # Add this network_configuration block
+  network_configuration {
+    subnets         = var.subnet_ids
+    security_groups = var.security_group_ids
+    # This should typically be set to true for services running in awsvpc mode
+    assign_public_ip = true # Or false, depending on your network design (e.g., if you have a NAT Gateway)
+  }
 
   # By default, Terraform will manage the service as a whole.
   # If you want to prevent Terraform from managing other aspects of the service
