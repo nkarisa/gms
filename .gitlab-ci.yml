@@ -14,11 +14,11 @@ include:
       deploy_tooling: 'terraform'
       terraform_dir: 'terraform'
       unit_tests_script:
-        - echo "I'll get to this later"
+        - echo "Unit test comming later"
       smoke_tests_script:
-        - echo "I'll get to this later"
+        - echo "Smoke test coming later"
       integration_tests_script:
-        - echo "I'll get to this later"
+        - echo "Integration test coming later"
       container_build_dockerfile_path: "./Dockerfile"
       feature_deploy_env: devint
       state_type: "s3_bypath"
