@@ -81,6 +81,16 @@ resource "aws_iam_role_policy_attachment" "ecs_task_s3_admin_policy" {
 }
 
 
+# --- CloudWatch Log Group for ECS Service ---
+resource "aws_cloudwatch_log_group" "safina_ecs_log_group" {
+  name              = "/ecs/safina-app" # This must match awslogs-group in task definition
+  retention_in_days = 7                # Retain logs for 7 days (adjust as needed)
+
+  tags = {
+    Environment = "Development"
+    Service     = "Safina App"
+  }
+}
 
 # Define the AWS ECS Task Definition for Nginx
 resource "aws_ecs_task_definition" "task_definition" {
@@ -138,7 +148,8 @@ resource "aws_ecs_service" "ecs_service" {
     aws_iam_role_policy_attachment.ecs_task_execution_policy,
     aws_iam_role_policy_attachment.ecs_task_s3_admin_policy,
     data.aws_lb_listener.safina_listener_https_443,
-    data.aws_lb_target_group.safina_ecs_tg
+    data.aws_lb_target_group.safina_ecs_tg,
+    aws_cloudwatch_log_group.safina_ecs_log_group 
   ]
 }
 

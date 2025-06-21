@@ -60,7 +60,7 @@ locals {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          "awslogs-group"         = "/ecs/safina-app-task"
+          "awslogs-group"         = aws_cloudwatch_log_group.safina_ecs_log_group.name
           "awslogs-region"        = var.aws_region # This is now valid!
           "awslogs-stream-prefix" = "ecs"
         }
