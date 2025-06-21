@@ -4,16 +4,46 @@ variable "project_name" {
   default     = "Safina ECS App"
 }
 
+variable "cluster_name" {
+  description = "A unique name for your project, used for resource naming."
+  type        = string
+  default     = "safina-cluster"
+}
+
+variable "service_name" {
+  description = "The name of the ECS service to update."
+  type        = string
+  default     = "nginx-ecs-service"  # To be removed
+}
+
+variable "ecs_task_execution_role_arn" {
+  description = "The name of the ECS service to update."
+  type        = string
+  default     = "arn:aws:iam::234204504144:role/ecsTaskExecutionRole"  # To be removed
+}
+
+variable "ecs_task_definition_family" {
+  description = "The name of the ECS cluster the service belongs to."
+  type        = string
+  default     = "safina-app-task-def" # To be removed
+}
+
 variable "aws_region" {
   description = "The AWS region to deploy resources into."
   type        = string
   default     = "eu-west-1" # Replace with your desired AWS region
 }
 
-variable "gitlab_image_name" {
-  description = "The full path to your container image in GitLab Container Registry (e.g., registry.gitlab.com/user/repo/image:tag)"
+variable "image_name" {
+  description = "The name of the ECS cluster the service belongs to."
   type        = string
+  default     = "nginx:1.28.0" # To be removed
 }
+
+# variable "gitlab_image_name" {
+#   description = "The full path to your container image in GitLab Container Registry (e.g., registry.gitlab.com/user/repo/image:tag)"
+#   type        = string
+# }
 
 variable "container_port" {
   description = "The port your application container exposes."
