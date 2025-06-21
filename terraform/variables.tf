@@ -54,7 +54,7 @@ variable "container_port" {
 variable "desired_count" {
   description = "The desired number of tasks to run in the ECS service."
   type        = number
-  default     = 1
+  default     = 2
 }
 
 variable "ecs_fargate_cpu" {

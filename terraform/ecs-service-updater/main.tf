@@ -11,12 +11,12 @@ resource "aws_ecs_service" "this" {
   # This is the most common reason to update a service.
   # If you provide a new task_definition_arn, the service will perform a rolling update.
   # The `force_new_deployment` flag ensures a new deployment is triggered even if the task definition ARN hasn't technically changed (e.g., due to an in-place update of the task definition that doesn't generate a new ARN).
-  count = var.task_definition_arn != null || var.force_new_deployment ? 1 : 0
+  # count = var.task_definition_arn != null || var.force_new_deployment ? 1 : 0
   task_definition = var.task_definition_arn
   force_new_deployment = var.force_new_deployment
 
   # Desired Count Update
-  desired_count = var.desired_count != null ? var.desired_count : null
+  desired_count = var.desired_count # != null ? var.desired_count : null
 
   # Deployment Configuration Update
   deployment_circuit_breaker {
