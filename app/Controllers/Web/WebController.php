@@ -142,7 +142,7 @@ class WebController extends BaseController
     $this->read_db->query("SET sql_mode = ''");
     $this->read_db->query("SET sql_mode = ''");
 
-    // log_message('info', "User $this->id accessing $this->controller $this->action", ['feature' => $this->controller, 'action' => $this->action]);
+    log_message('info', "User $this->id accessing $this->controller $this->action", ['feature' => $this->controller, 'action' => $this->action]);
   }
 
 
