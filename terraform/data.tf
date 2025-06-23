@@ -8,10 +8,10 @@ data "aws_iam_role" "ecs_task_role_s3_admin" {
   name = "ecs_task_role_s3_admin"
 }
 
-# data "aws_ecs_service" "ecs_service" {
-#   service_name = "afina-app-devint-service"
-#   cluster_arn  = data.aws_ecs_cluster.safina_app_cluster.arn
-# }
+data "aws_ecs_service" "ecs_service" {
+  service_name = "safina-app-service-devint"
+  cluster_arn  = data.aws_ecs_cluster.safina_app_cluster.arn
+}
 
 # data "aws_ecs_task_definition" "task_definition" {
 #   task_definition = var.task_definition_family

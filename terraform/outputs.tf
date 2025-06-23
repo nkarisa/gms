@@ -29,10 +29,10 @@ output "task_definition_arn" {
 #   value       = aws_iam_role.ecs_task_role_s3_admin.arn
 # }
 
-# output "ecs_service_arn" {
-#   description = "The Amazon Resource Name (ARN) of the created ECS service."
-#   value       = aws_ecs_service.ecs_service.arn
-# }
+output "ecs_service_arn" {
+  description = "The Amazon Resource Name (ARN) of the created ECS service."
+  value       = aws_ecs_service.new_ecs_service.arn
+}
 
 # output "nginx_log_group_arn" {
 #   description = "The Amazon Resource Name (ARN) of the CloudWatch Log Group for Nginx."

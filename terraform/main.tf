@@ -113,7 +113,7 @@ resource "aws_ecs_task_definition" "task_definition" {
 }
 
 # Create the AWS ECS Service 
-resource "aws_ecs_service" "ecs_service" {
+resource "aws_ecs_service" "new_ecs_service" {
   name            = var.service_name
   cluster         = data.aws_ecs_cluster.safina_app_cluster.id
   task_definition = aws_ecs_task_definition.task_definition.arn
@@ -148,7 +148,7 @@ resource "aws_ecs_service" "ecs_service" {
   #   # This ensures a deployment on every `terraform apply`
   #   redeploy_timestamp = timestamp()
   # }
-  
+
   # Optional: Enable service discovery, auto scaling, etc.
   tags = {
     Environment = "Development"
@@ -160,6 +160,7 @@ resource "aws_ecs_service" "ecs_service" {
   depends_on = [
     # aws_iam_role_policy_attachment.ecs_task_execution_policy,
     # aws_iam_role_policy_attachment.ecs_task_s3_admin_policy,
+    data.aws_ecs_service.ecs_service
     data.aws_lb_listener.safina_listener_https_443,
     data.aws_lb_target_group.safina_ecs_tg,
     aws_cloudwatch_log_group.safina_ecs_log_group 
