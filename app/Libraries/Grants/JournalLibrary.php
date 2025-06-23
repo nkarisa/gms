@@ -1,6 +1,7 @@
 <?php
 namespace App\Libraries\Grants;
 
+use App\Enums\VoucherTypeAccountEnum;
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\JournalModel;
 use \App\Enums\VoucherTypeEffectEnum;
@@ -1136,30 +1137,72 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return $voucher_has_been_cancelled_reused;
     }
 
+    private function monthAccrualTransactions(int $office_id, string $transacting_month){
+        $journalRecords = $this->journalRecords($office_id, $transacting_month);
+
+        $resultArray = [];
+
+        foreach($journalRecords as $journalRecord){
+            if($journalRecord['voucher_type_cash_account'] == VoucherTypeAccountEnum::ACCRUAL->value){
+                $resultArray['voucher_type_transaction_effect'] = array_column($resultArray['spread'],'transacted_amount');
+            }
+        }
+    }
+
     public function checkIfAccountingSystemAccrualIsActivated($account_system_id, $office_id, $transacting_month, $checkWithTransactions = true){
         $checkIfSet = false;
         $accountSystemSettingLibrary = new \App\Libraries\Core\AccountSystemSettingLibrary();
         $account_system_settings = $accountSystemSettingLibrary->getAccountSystemSettings($account_system_id);
         $use_accrual_based_accounting =  $account_system_settings['use_accrual_based_accounting'] ?? 0;
-        log_message('error', $use_accrual_based_accounting);
-        if($use_accrual_based_accounting){
+        
+        if($use_accrual_based_accounting == 1){
             $checkIfSet = true;
         }
 
-        $transacting_next_month = date('Y-m-t', strtotime('last day of next month', strtotime($transacting_month)));
+        $transacting_next_month = date('Y-m-t', strtotime('last day of next month', strtotime($transacting_month)));        
         $monthClosingBalances = $this->monthOpeningBankCashBalance($office_id, $transacting_next_month);
+        $this->monthAccrualTransactions($office_id, $transacting_month);
+        $monthAccrualTransactions = [
+            'receivables' => [
+                'receivables' => 100,
+                'payments' => 100,
+            ],
+            'payables' => [
+                'payables' => 200,
+                'disbursements' => 200,
+            ],
+            'prepayments' => [
+                'prepayments' => 300,
+                'settlements' => 300
+            ],
+            'depreciation' => [
+               'depreciation' => 400 
+            ],
+            'payroll_liability' => [
+                'payroll_liability' => 500
+            ]
+        ];
 
         if($checkWithTransactions){
             $sum_accrual_closing_balances = 0;
+            $accrualAccrualLedgers = ['receivables','payables','prepayments','depreciation','payroll_liability'];
             foreach($monthClosingBalances as $voucherTypeAccountCode => $monthClosingBalance){
-                if(in_array($voucherTypeAccountCode, ['receivables','payables','prepayments','depreciation','payroll_liability'])){
+                $ledgerInClosingMonthBalance = in_array($voucherTypeAccountCode, $accrualAccrualLedgers);
+                if($ledgerInClosingMonthBalance){
                     $sum_accrual_closing_balances += $monthClosingBalance['amount'];
                 }
             }
 
             if(!$sum_accrual_closing_balances){
                 $checkIfSet = false;
-            }    
+            }
+
+            foreach($monthAccrualTransactions as $ledgerAccount => $monthAccrualTransaction){
+                if(array_sum(array_values($monthAccrualTransaction)) > 0){
+                    $checkIfSet = true;
+                }
+            }
+            
         }
         
 

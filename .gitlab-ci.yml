@@ -9,7 +9,7 @@ include:
       is_http_service: false
       build_and_test_image_version: '8.2'
       build_and_test_image: php
-      service_language: golang
+      service_language: golang # Ignore this one. Used only to satisfy the logic checks
       include_build_job: false
       deploy_tooling: 'terraform'
       terraform_dir: 'terraform'
@@ -21,7 +21,7 @@ include:
         - echo "Integration test successful"
       container_build_dockerfile_path: "./Dockerfile"
       feature_deploy_env: devint
-      state_type: "s3_bypath"
+      state_type: "s3_bypath" 
 
   #   rules:
   #     - if: >-
