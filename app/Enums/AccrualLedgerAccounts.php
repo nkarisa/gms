@@ -50,4 +50,24 @@ enum AccrualLedgerAccounts: string {
             self::PAYROLL_LIABILITY => $transactionEffect == VoucherTypeEffectEnum::PAYROLL_LIABILITY->value
         };
     }
+
+    function accrualLedgerClearingEffect(){
+         return match($this){
+            self::PAYABLES => VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->value,
+            self::RECEIVABLES => VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->value,
+            self::PREPAYMENTS => VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->value,
+            self::DEPRECIATION => NULL,
+            self::PAYROLL_LIABILITY => NULL
+        };
+    }
+
+    // function clearanceBankingRequirements(){
+    //     return match($this){
+    //         self::PAYABLES => ['office_bank', 'bank_reference'],
+    //         self::RECEIVABLES => ['office_bank'],
+    //         self::PREPAYMENTS => NULL,
+    //         self::DEPRECIATION => NULL,
+    //         self::PAYROLL_LIABILITY => NULL
+    //     };
+    // }
 }

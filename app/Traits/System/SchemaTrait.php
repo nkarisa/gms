@@ -70,7 +70,7 @@ trait SchemaTrait
      *
      * @throws \Exception If the table does not exist in the schema or if the field data is not defined.
      */
-    private function fieldData($table)
+    protected function fieldData($table)
     {
         $field_data = [];
         $get_schema = $this->getSchema();

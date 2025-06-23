@@ -1,5 +1,7 @@
 <?php 
-// log_message('error', 'This is a monolog stdout')
+    // $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+    // $voucher = $voucherLibrary->clearAccrualTransaction(1739905);
+    // echo json_encode($voucher);
 ?>
 <div class = 'row'>
     <div class="col-sm-12">
