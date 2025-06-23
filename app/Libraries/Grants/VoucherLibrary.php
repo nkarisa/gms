@@ -7,6 +7,7 @@ use App\Models\Grants\VoucherModel;
 use App\Enums\AccountSystemSettingEnum;
 use App\Enums\AccrualVoucherTypeEffects;
 use App\Enums\VoucherTypeEffectEnum;
+use App\Enums\AccrualLedgerAccounts;
 
 class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
@@ -1581,7 +1582,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             $builder->update( ['cheque_book_is_used' => 1]);
         }
 
-        if ($post['cash_recipient_account'] !== null) {
+        if (isset($post['cash_recipient_account'])) {
             $this->createCashRecipientAccountRecord($header_id, $post);
         }
 
@@ -3281,6 +3282,14 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
     }
 
     function clearAccrualTransaction($incurringVoucherId){
-        
+        // addVoucher
+        $voucherReadBuilder = $this->read_db->table('voucher');
+
+        // Get incurring voucher
+        $accrualLedgers = AccrualLedgerAccounts::cases();
+
+        $voucherReadBuilder->where('voucher_id', $incurringVoucherId);
+        $voucherReadBuilder->whereIn('voucher_type_efect_code', $accrualLedgers);
+        $incurringVoucherObj = $voucherReadBuilder->get();
     }
 }
