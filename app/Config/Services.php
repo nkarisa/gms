@@ -3,6 +3,10 @@
 namespace Config;
 
 use CodeIgniter\Config\BaseService;
+use Monolog\Level;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Logtail\Monolog\LogtailHandlerBuilder;
 
 /**
  * Services Configuration file.
@@ -51,4 +55,21 @@ class Services extends BaseService
      
           return new \App\Libraries\System\GrantsLibrary();
     }
+
+    public static function logger($getShared = true)
+      {
+          if ($getShared) {
+              return static::getSharedInstance('logger');
+          }
+     
+        $logger = new Logger('safina');
+        $stdoutHandler = new StreamHandler('php://stdout', Level::Info);
+        $logtailHandler = LogtailHandlerBuilder::withSourceToken(env('LOGTAIL_TOKEN'))
+        ->withEndpoint("https://s1353094.eu-nbg-2.betterstackdata.com")
+        ->build();
+        $logger->pushHandler($stdoutHandler);
+        $logger->pushHandler($logtailHandler);
+        
+        return $logger;
+      }
 }
