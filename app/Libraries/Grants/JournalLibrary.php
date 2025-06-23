@@ -1142,9 +1142,9 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
         $resultArray = [];
 
-        foreach($journalRecords as $journalRecord){
+        foreach($journalRecords as $voucherId => $journalRecord){
             if($journalRecord['voucher_type_cash_account'] == VoucherTypeAccountEnum::ACCRUAL->value){
-                $resultArray['voucher_type_transaction_effect'] += $resultArray['voucher_type_transaction_effect'] ?? array_sum(array_column($journalRecord['spread'],'transacted_amount'));
+                $resultArray[$journalRecord['voucher_type_transaction_effect']][$voucherId] = array_sum(array_column($journalRecord['spread'],'transacted_amount'));
             }
         }
 
@@ -1181,8 +1181,8 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             //     $checkIfSet = false;
             // }
 
-            foreach($monthAccrualTransactions as $ledgerAccountEffect => $monthAccrualTransactionAmount){
-                if($monthAccrualTransactionAmount > 0){
+            foreach($monthAccrualTransactions as $ledgerAccountEffect => $monthAccrualTransactionAmounts){
+                if(array_sum($monthAccrualTransactionAmounts) > 0){
                     $checkIfSet = true;
                     break;
                 }
