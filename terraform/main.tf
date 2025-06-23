@@ -97,7 +97,7 @@ resource "aws_ecs_task_definition" "task_definition" {
   network_mode             = "awsvpc"    # Recommended network mode for Fargate
   requires_compatibilities = ["FARGATE"] # Or ["EC2"] if you're using EC2 launch type
   execution_role_arn       =  "arn:aws:iam::234204504144:role/ecsTaskExecutionRole" # aws_iam_role.ecs_task_execution_role.arn # Reference the new execution role
-  task_role_arn            = data.ecs_task_role_s3_admin.arn  # Reference the new task role with S3 access
+  task_role_arn            = data.aws_iam_role.ecs_task_role_s3_admin.arn  # Reference the new task role with S3 access
 
   runtime_platform {
     operating_system_family = "LINUX"
