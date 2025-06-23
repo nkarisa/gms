@@ -112,7 +112,7 @@ resource "aws_ecs_task_definition" "task_definition" {
   }
 }
 
-# Create the AWS ECS Service
+# Create the AWS ECS Service 
 resource "aws_ecs_service" "ecs_service" {
   name            = var.service_name
   cluster         = data.aws_ecs_cluster.safina_app_cluster.id
