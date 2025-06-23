@@ -1,5 +1,5 @@
 <?php 
-log_message('error', 'This is a monolog stdout')
+// log_message('error', 'This is a monolog stdout')
 ?>
 <div class = 'row'>
     <div class="col-sm-12">
