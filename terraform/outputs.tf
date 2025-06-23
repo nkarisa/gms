@@ -29,6 +29,7 @@ output "task_definition_arn" {
 #   value       = aws_iam_role.ecs_task_role_s3_admin.arn
 # }
 
+
 # output "ecs_service_arn" {
 #   description = "The Amazon Resource Name (ARN) of the created ECS service."
 #   value       = aws_ecs_service.new_ecs_service.arn
