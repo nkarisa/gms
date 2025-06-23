@@ -1201,7 +1201,249 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return $builder->get()->getRow();
     }
 
-    function add()
+    // function add()
+    // {
+
+    //     $journalLibrary = new JournalLibrary();
+    //     $financialReportLibrary = new FinancialReportLibrary();
+    //     $chequeInjectionLibrary = new ChequeInjectionLibrary();
+    //     $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+    //     $approvalLibrary = new \App\Libraries\Core\ApprovalLibrary();
+    //     $expenseAccountLibrary = new ExpenseAccountLibrary();
+    //     $post = $this->request->getPost();
+
+    //     $flag = false;
+    //     $message = get_phrase('voucher_creation_failed');
+
+    //     $header = [];
+    //     $detail = [];
+    //     $row = [];
+    //     $office_id = $post['fk_office_id'];
+    //     $voucher_number = $post['voucher_number'];
+    //     $voucher_date = $post['voucher_date'];
+
+    //     $builder = $this->write_db->table("voucher");
+    //     $builder->where(array('fk_office_id' => $office_id, 
+    //     'voucher_number' => $voucher_number));
+    //     $voucher_obj = $builder->get();
+
+    //     if ($voucher_obj->getNumRows() > 0) {
+    //         $voucher_number = $this->getVoucherNumber($office_id);
+    //     }
+
+    //     $this->write_db->transBegin();
+
+    //     // Check if this is the first voucher in the month, if so create a new journal record for the month
+    //     // This must be run before a voucher is created
+    //     if (!$this->officeHasVouchersForTheTransactingMonth($office_id, $voucher_date)) {
+
+    //         // Create a journal record
+    //         $journalLibrary->createNewJournal(date("Y-m-01", strtotime($voucher_date)), $office_id);
+
+    //         // Insert the month MFR Record
+    //         $financialReportLibrary->createFinancialReport(date("Y-m-01", strtotime($voucher_date)), $office_id);
+    //     }
+
+    //     //Retry ro Create new_journal_of_month and MFR if it was not created on the first instance when creating first voucher of the month 
+    //     $journal_of_month_exists_flag = $this->getJournalForCurrentVouchingMonth(date("Y-m-01", strtotime($voucher_date)), $office_id);
+
+    //     $finacial_report_of_month_exists_flag = $this->getFinancialReportForCurrentVouchingMonth(date("Y-m-01", strtotime($voucher_date)), $office_id);
+
+    //     if (!$journal_of_month_exists_flag) {
+    //         // Create a journal record
+    //         $journalLibrary->createNewJournal(date("Y-m-01", strtotime($voucher_date)), $office_id);
+    //     }
+
+    //     if (!$finacial_report_of_month_exists_flag) {
+    //         // Create financial report record
+    //         $financialReportLibrary->createFinancialReport(date("Y-m-01", strtotime($voucher_date)), $office_id);
+    //     }
+
+    //     // Check voucher type
+
+    //     $voucher_type_effect_and_account = $this->voucherTypeEffectAndCode($post['fk_voucher_type_id']);
+    //     $voucher_type_effect_code = $voucher_type_effect_and_account->voucher_type_effect_code;
+    //     $voucher_type_account_code = $voucher_type_effect_and_account->voucher_type_account_code;
+
+    //     $track = $this->generateItemTrackNumberAndName('voucher');
+    //     $header['voucher_track_number'] = $track['voucher_track_number'];
+    //     $header['voucher_name'] = $track['voucher_name'];
+
+    //     $header['fk_office_id'] = $office_id;
+    //     $header['voucher_date'] = $voucher_date;
+    //     $header['voucher_number'] = $voucher_number; 
+    //     $header['fk_voucher_type_id'] = $post['fk_voucher_type_id'];
+
+    //     $office_bank_id = $this->getOfficeBankIdToPost($office_id);
+    //     $header['fk_office_bank_id'] = $office_bank_id;
+
+    //     $header['fk_office_cash_id'] = !isset($post['fk_office_cash_id']) ? 0 : $post['fk_office_cash_id'];
+    //     $voucher_cheque_number = !isset($post['voucher_cheque_number']) ? 0 : $post['voucher_cheque_number'];
+    //     $header['voucher_cheque_number'] = $voucher_cheque_number;
+        
+    //     $chequeInjectionLibrary->updateInjectedChequeStatus($office_bank_id, $voucher_cheque_number);
+    //     $chequeBookLibary = new ChequeBookLibrary();
+    //     $header['fk_cheque_book_id'] = $this->isVoucherTypeChequeReferenced($header['fk_voucher_type_id']) ? $chequeBookLibary->getChequeBookIdForChequeNumber($header['voucher_cheque_number'], $header['fk_office_bank_id']) : NULL;
+    //     $header['voucher_vendor'] = $post['voucher_vendor'];
+    //     $header['voucher_vendor_address'] = $post['voucher_vendor_address'];
+    //     $header['voucher_description'] = $post['voucher_description'];
+
+    //     $header['voucher_created_by'] = $this->session->user_id;
+    //     $header['voucher_created_date'] = date('Y-m-d');
+    //     $header['voucher_last_modified_by'] = $this->session->user_id;
+
+    //     $reverse_from_voucher_id = 0;
+    //     $reverse_from_voucher_number = '';
+        
+    //     if(
+    //         $voucher_type_effect_code == 'bank_refund' ||
+    //         $voucher_type_effect_code == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() ||
+    //         $voucher_type_effect_code == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() ||
+    //         $voucher_type_effect_code == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode()
+    //     ){
+    //         $reverse_from_voucher = $this->getRefundFromVoucher($office_id, $post['bank_refund']);
+    //         $reverse_from_voucher_number = $reverse_from_voucher['voucher_number'];
+    //         $reverse_from_voucher_id = $reverse_from_voucher['voucher_id'];
+
+    //         if($voucher_type_effect_code == 'bank_refund') {
+    //             $header['voucher_reversal_from'] = $reverse_from_voucher_id;
+    //             $header['voucher_description'] = '<strike>'.$post['voucher_description'].'</strike>';
+    //             $header['voucher_is_reversed'] = 1;
+    //         }elseif(
+    //             $voucher_type_effect_code == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() ||
+    //             $voucher_type_effect_code == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() ||
+    //             $voucher_type_effect_code == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode()
+    //         ){
+    //             $title = match($voucher_type_effect_code){
+    //                 VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() => VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getName(),
+    //                 VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() => VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getName(),
+    //                 VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode() => VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getName(),
+    //             };
+    //             $header['voucher_cleared_from'] = $reverse_from_voucher_id;
+    //             $header['voucher_description'] = $post['voucher_description'].' ['.get_phrase('voucher_number').' '.$reverse_from_voucher['voucher_number']. ' ' .$title.']';
+    //         }
+    //     }else{
+    //         $header['voucher_description'] = $post['voucher_description'];
+    //     }
+
+    //     $header['fk_approval_id'] = $approvalLibrary->insertApprovalRecord('voucher');
+    //     $header['fk_status_id'] = $statusLibrary->initialItemStatus('voucher');
+
+    //     $this->write_db->table('voucher')->insert( $header);
+
+    //     $header_id = $this->write_db->insertId();
+
+    //     if ($header['fk_cheque_book_id'] != NULL) {
+    //         $builder = $this->write_db->table('cheque_book');
+    //         $builder->where(array('cheque_book_id' => $header['fk_cheque_book_id']));
+    //         $builder->update( ['cheque_book_is_used' => 1]);
+    //     }
+
+    //     if ($this->request->getPost('cash_recipient_account') !== null) {
+    //         $this->createCashRecipientAccountRecord($header_id, $this->request->getPost());
+    //     }
+
+    //     $total_voucher_cost = 0;
+    //     if (!empty($this->request->getPost('voucher_detail_quantity'))) {
+    //         for ($i = 0; $i < sizeof($this->request->getPost('voucher_detail_quantity')); $i++) {
+    //             $voucher_detail_quantity = str_replace(",", "", $this->request->getPost('voucher_detail_quantity')[$i]);
+    //             $voucher_detail_unit_cost = str_replace(",", "", $this->request->getPost('voucher_detail_unit_cost')[$i]);
+    //             $voucher_detail_total_cost = str_replace(",", "", $this->request->getPost('voucher_detail_total_cost')[$i]);
+
+    //             $detail['fk_voucher_id'] = $header_id;
+    //             $tracking = $this->generateItemTrackNumberAndName('voucher_detail');
+    //             $detail['voucher_detail_track_number'] = $tracking['voucher_detail_track_number'];
+    //             $detail['voucher_detail_name'] = $tracking['voucher_detail_name'];
+
+    //             $detail['voucher_detail_quantity'] = $voucher_detail_quantity;
+    //             $detail['voucher_detail_description'] = $this->request->getPost('voucher_detail_description')[$i];
+    //             $detail['voucher_detail_unit_cost'] = $voucher_detail_unit_cost;
+    //             $detail['voucher_detail_total_cost'] = $voucher_detail_total_cost;
+    //             // log_message('error', json_encode(['voucher_type_effect_code' => $voucher_type_effect_code, 'detail' => $detail]));
+    //             if (
+    //                 $voucher_type_effect_code == 'expense' || 
+    //                 $voucher_type_effect_code == 'bank_refund' || 
+    //                 $voucher_type_effect_code == VoucherTypeEffectEnum::PAYABLES->getCode() || 
+    //                 $voucher_type_effect_code == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() || 
+    //                 $voucher_type_effect_code == VoucherTypeEffectEnum::PREPAYMENTS->getCode() || 
+    //                 $voucher_type_effect_code == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode() || 
+    //                 $voucher_type_effect_code == VoucherTypeEffectEnum::DEPRECIATION->getCode() || 
+    //                 $voucher_type_effect_code == VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode()
+    //                 ) {
+    //                 $expense_account_id = $this->request->getPost('voucher_detail_account')[$i];
+    //                 $detail['fk_expense_account_id'] = $expense_account_id;
+    //                 $detail['fk_income_account_id'] = $expenseAccountLibrary->getExpenseIncomeAccountId($expense_account_id);
+    //                 $detail['fk_contra_account_id'] = 0;
+    //             } elseif (
+    //                 $voucher_type_effect_code == 'income' || 
+    //                 $voucher_type_effect_code == 'bank_to_bank_contra' ||
+    //                 $voucher_type_effect_code == VoucherTypeEffectEnum::RECEIVABLES->getCode() || 
+    //                 $voucher_type_effect_code == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode()
+    //                 ) {
+    //                 $detail['fk_expense_account_id'] = 0;
+    //                 $detail['fk_income_account_id'] = $this->request->getPost('voucher_detail_account')[$i];
+    //                 $detail['fk_contra_account_id'] = 0;
+    //             } elseif ($voucher_type_effect_code == 'bank_contra' || $voucher_type_effect_code == 'cash_contra') {
+    //                 $detail['fk_expense_account_id'] = 0;
+    //                 $detail['fk_income_account_id'] = 0;
+    //                 $detail['fk_contra_account_id'] = $this->request->getPost('voucher_detail_account')[$i];
+    //             } elseif ($voucher_type_account_code == 'cash' || $voucher_type_effect_code == 'cash_contra') {
+    //                 $detail['fk_expense_account_id'] = 0;
+    //                 $detail['fk_income_account_id'] = 0;
+    //                 $detail['fk_contra_account_id'] = $this->request->getPost('voucher_detail_account')[$i];
+    //             }
+
+
+    //             $detail['fk_project_allocation_id'] = isset($this->request->getPost('fk_project_allocation_id')[$i]) ? $this->request->getPost('fk_project_allocation_id')[$i] : 0;
+    //             $detail['fk_request_detail_id'] = isset($this->request->getPost('fk_request_detail_id')[$i]) ? $this->request->getPost('fk_request_detail_id')[$i] : 0;
+    //             $detail['fk_approval_id'] = $approvalLibrary->insertApprovalRecord('voucher_detail');
+    //             $detail['fk_status_id'] = $statusLibrary->initialItemStatus('voucher_detail');
+
+    //             // if request_id > 0 give the item the final status
+    //             if (isset($this->request->getPost('fk_request_detail_id')[$i]) && $this->request->getPost('fk_request_detail_id')[$i] > 0) {
+    //                 $this->updateRequestDetailStatusOnVouching($this->request->getPost('fk_request_detail_id')[$i], $header_id);
+    //                 // Check if all request detail items in the request has the last status and update the request to last status too
+    //                 $this->updateRequestOnPayingAllDetails($this->request->getPost('fk_request_detail_id')[$i]);
+    //             }
+
+    //             $total_voucher_cost += $voucher_detail_total_cost;
+
+    //             $row[] = $detail;
+    //         }
+
+    //         $this->write_db->table('voucher_detail')->insertBatch( $row);
+    //     }
+
+    //     if($voucher_type_effect_code == 'bank_refund') {
+    //         $this->updateReversalFromVoucher($reverse_from_voucher_id, $header_id, $reverse_from_voucher_number, $header['voucher_description'], $total_voucher_cost, 'bank_refund');
+    //     }elseif(
+    //         $voucher_type_effect_code == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode() ||
+    //         $voucher_type_effect_code == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() ||
+    //         $voucher_type_effect_code == VoucherTypeEffectEnum::PREPAYMENT_SETTLEMENTS->getCode()
+    //     ){
+    //         $this->updateReversalFromVoucher($reverse_from_voucher_id, $header_id, $reverse_from_voucher_number, $header['voucher_description'], $total_voucher_cost,'accrual');
+    //     }
+      
+    //       $voucher_posting_condition = $this->voucherPostingCondition($post);
+
+    //     if ($this->write_db->transStatus() === FALSE  || !$voucher_posting_condition) {
+    //         $this->write_db->transRollback();
+    //     } else {
+    //         $this->write_db->transCommit();
+    //         $flag = true;
+    //         $message = get_phrase('voucher_creation_success');
+    //     }
+
+    //     return $this->response->setJSON(['flag' => $flag,'message' => $message]);
+    // }
+
+    function add(){
+        $post = $this->request->getPost();
+        $responseArr = $this->addVoucher($post);
+        return $this->response->setJSON($responseArr);
+    }   
+
+    private function addVoucher($post)
     {
 
         $journalLibrary = new JournalLibrary();
@@ -1210,7 +1452,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $statusLibrary = new \App\Libraries\Core\StatusLibrary();
         $approvalLibrary = new \App\Libraries\Core\ApprovalLibrary();
         $expenseAccountLibrary = new ExpenseAccountLibrary();
-        $post = $this->request->getPost();
+        
 
         $flag = false;
         $message = get_phrase('voucher_creation_failed');
@@ -1271,14 +1513,13 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
         $header['fk_office_id'] = $office_id;
         $header['voucher_date'] = $voucher_date;
-        $header['voucher_number'] = $voucher_number; //$this->input->post('voucher_number');
+        $header['voucher_number'] = $voucher_number; 
         $header['fk_voucher_type_id'] = $post['fk_voucher_type_id'];
 
         $office_bank_id = $this->getOfficeBankIdToPost($office_id);
         $header['fk_office_bank_id'] = $office_bank_id;
 
         $header['fk_office_cash_id'] = !isset($post['fk_office_cash_id']) ? 0 : $post['fk_office_cash_id'];
-        // log_message('error', json_encode($this->input->post('fk_office_cash_id')));
         $voucher_cheque_number = !isset($post['voucher_cheque_number']) ? 0 : $post['voucher_cheque_number'];
         $header['voucher_cheque_number'] = $voucher_cheque_number;
         
@@ -1340,16 +1581,16 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             $builder->update( ['cheque_book_is_used' => 1]);
         }
 
-        if ($this->request->getPost('cash_recipient_account') !== null) {
-            $this->createCashRecipientAccountRecord($header_id, $this->request->getPost());
+        if ($post['cash_recipient_account'] !== null) {
+            $this->createCashRecipientAccountRecord($header_id, $post);
         }
 
         $total_voucher_cost = 0;
-        if (!empty($this->request->getPost('voucher_detail_quantity'))) {
-            for ($i = 0; $i < sizeof($this->request->getPost('voucher_detail_quantity')); $i++) {
-                $voucher_detail_quantity = str_replace(",", "", $this->request->getPost('voucher_detail_quantity')[$i]);
-                $voucher_detail_unit_cost = str_replace(",", "", $this->request->getPost('voucher_detail_unit_cost')[$i]);
-                $voucher_detail_total_cost = str_replace(",", "", $this->request->getPost('voucher_detail_total_cost')[$i]);
+        if (!empty($post['voucher_detail_quantity'])) {
+            for ($i = 0; $i < sizeof($post['voucher_detail_quantity']); $i++) {
+                $voucher_detail_quantity = str_replace(",", "", $post['voucher_detail_quantity'][$i]);
+                $voucher_detail_unit_cost = str_replace(",", "", $post['voucher_detail_unit_cost'][$i]);
+                $voucher_detail_total_cost = str_replace(",", "", $post['voucher_detail_total_cost'][$i]);
 
                 $detail['fk_voucher_id'] = $header_id;
                 $tracking = $this->generateItemTrackNumberAndName('voucher_detail');
@@ -1357,7 +1598,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
                 $detail['voucher_detail_name'] = $tracking['voucher_detail_name'];
 
                 $detail['voucher_detail_quantity'] = $voucher_detail_quantity;
-                $detail['voucher_detail_description'] = $this->request->getPost('voucher_detail_description')[$i];
+                $detail['voucher_detail_description'] = $post['voucher_detail_description'][$i];
                 $detail['voucher_detail_unit_cost'] = $voucher_detail_unit_cost;
                 $detail['voucher_detail_total_cost'] = $voucher_detail_total_cost;
                 // log_message('error', json_encode(['voucher_type_effect_code' => $voucher_type_effect_code, 'detail' => $detail]));
@@ -1371,7 +1612,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
                     $voucher_type_effect_code == VoucherTypeEffectEnum::DEPRECIATION->getCode() || 
                     $voucher_type_effect_code == VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode()
                     ) {
-                    $expense_account_id = $this->request->getPost('voucher_detail_account')[$i];
+                    $expense_account_id = $post['voucher_detail_account'][$i];
                     $detail['fk_expense_account_id'] = $expense_account_id;
                     $detail['fk_income_account_id'] = $expenseAccountLibrary->getExpenseIncomeAccountId($expense_account_id);
                     $detail['fk_contra_account_id'] = 0;
@@ -1382,29 +1623,29 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
                     $voucher_type_effect_code == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode()
                     ) {
                     $detail['fk_expense_account_id'] = 0;
-                    $detail['fk_income_account_id'] = $this->request->getPost('voucher_detail_account')[$i];
+                    $detail['fk_income_account_id'] = $post['voucher_detail_account'][$i];
                     $detail['fk_contra_account_id'] = 0;
                 } elseif ($voucher_type_effect_code == 'bank_contra' || $voucher_type_effect_code == 'cash_contra') {
                     $detail['fk_expense_account_id'] = 0;
                     $detail['fk_income_account_id'] = 0;
-                    $detail['fk_contra_account_id'] = $this->request->getPost('voucher_detail_account')[$i];
+                    $detail['fk_contra_account_id'] = $post['voucher_detail_account'][$i];
                 } elseif ($voucher_type_account_code == 'cash' || $voucher_type_effect_code == 'cash_contra') {
                     $detail['fk_expense_account_id'] = 0;
                     $detail['fk_income_account_id'] = 0;
-                    $detail['fk_contra_account_id'] = $this->request->getPost('voucher_detail_account')[$i];
+                    $detail['fk_contra_account_id'] = $post['voucher_detail_account'][$i];
                 }
 
 
-                $detail['fk_project_allocation_id'] = isset($this->request->getPost('fk_project_allocation_id')[$i]) ? $this->request->getPost('fk_project_allocation_id')[$i] : 0;
-                $detail['fk_request_detail_id'] = isset($this->request->getPost('fk_request_detail_id')[$i]) ? $this->request->getPost('fk_request_detail_id')[$i] : 0;
+                $detail['fk_project_allocation_id'] = isset($post['fk_project_allocation_id'][$i]) ? $post['fk_project_allocation_id'][$i] : 0;
+                $detail['fk_request_detail_id'] = isset($post['fk_request_detail_id'][$i]) ? $post['fk_request_detail_id'][$i] : 0;
                 $detail['fk_approval_id'] = $approvalLibrary->insertApprovalRecord('voucher_detail');
                 $detail['fk_status_id'] = $statusLibrary->initialItemStatus('voucher_detail');
 
                 // if request_id > 0 give the item the final status
-                if (isset($this->request->getPost('fk_request_detail_id')[$i]) && $this->request->getPost('fk_request_detail_id')[$i] > 0) {
-                    $this->updateRequestDetailStatusOnVouching($this->request->getPost('fk_request_detail_id')[$i], $header_id);
+                if (isset($post['fk_request_detail_id'][$i]) && $post['fk_request_detail_id'][$i] > 0) {
+                    $this->updateRequestDetailStatusOnVouching($post['fk_request_detail_id'][$i], $header_id);
                     // Check if all request detail items in the request has the last status and update the request to last status too
-                    $this->updateRequestOnPayingAllDetails($this->request->getPost('fk_request_detail_id')[$i]);
+                    $this->updateRequestOnPayingAllDetails($post['fk_request_detail_id'][$i]);
                 }
 
                 $total_voucher_cost += $voucher_detail_total_cost;
@@ -1435,7 +1676,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             $message = get_phrase('voucher_creation_success');
         }
 
-        return $this->response->setJSON(['flag' => $flag,'message' => $message]);
+        return ['flag' => $flag,'message' => $message];
     }
 
     private function voucherPostingCondition($post){
@@ -3039,4 +3280,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return $voucherNumbers;
     }
 
+    function clearAccrualTransaction($incurringVoucherId){
+        
+    }
 }
