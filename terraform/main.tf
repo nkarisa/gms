@@ -136,18 +136,18 @@ resource "aws_ecs_service" "ecs_service" {
 
   force_new_deployment = true 
 
-  lifecycle {
-    # This prevents Terraform from trying to recreate the service
-    # if only 'triggers' changes. It just forces an update.
-    ignore_changes = [
-      triggers,
-    ]
-  }
+  # lifecycle {
+  #   # This prevents Terraform from trying to recreate the service
+  #   # if only 'triggers' changes. It just forces an update.
+  #   ignore_changes = [
+  #     triggers,
+  #   ]
+  # }
 
-  triggers = {
-    # This ensures a deployment on every `terraform apply`
-    redeploy_timestamp = timestamp()
-  }
+  # triggers = {
+  #   # This ensures a deployment on every `terraform apply`
+  #   redeploy_timestamp = timestamp()
+  # }
 
   # Optional: Enable service discovery, auto scaling, etc.
   tags = {

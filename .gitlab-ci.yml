@@ -1,5 +1,5 @@
-variables:
-  TF_VAR_service_name: "safina-app-service-devint-$CI_PIPELINE_IID"
+# variables:
+  # TF_VAR_service_name: "safina-app-service-devint-$CI_PIPELINE_IID"
 
 include:
   - component: &core-yaml-tpl $CI_SERVER_FQDN/ciorg/community/cmf/pipeline/core-yaml/include@2.4.2
