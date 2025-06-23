@@ -1,6 +1,3 @@
-
-
-
 # Define the AWS ECS Cluster resource
 # resource "aws_ecs_cluster" "safina_app_cluster" {
 #   name = var.cluster_name # Give your cluster a meaningful name
@@ -116,41 +113,56 @@ resource "aws_ecs_task_definition" "task_definition" {
 }
 
 # Create the AWS ECS Service
-# resource "aws_ecs_service" "ecs_service" {
-#   name            = var.service_name
-#   cluster         = aws_ecs_cluster.safina_app_cluster.id
-#   task_definition = aws_ecs_task_definition.task_definition.arn
-#   desired_count   = var.desired_count
-#   launch_type     = "FARGATE"
+resource "aws_ecs_service" "ecs_service" {
+  name            = var.service_name
+  cluster         = data.aws_ecs_cluster.safina_app_cluster.id
+  task_definition = aws_ecs_task_definition.task_definition.arn
+  desired_count   = var.desired_count
+  launch_type     = "FARGATE"
 
 
-#   network_configuration {
-#     subnets         = data.aws_subnets.selected_subnets.ids
-#     security_groups = var.security_group_ids
-#     # This should typically be set to true for services running in awsvpc mode
-#     assign_public_ip = false # Or false, depending on your network design (e.g., if you have a NAT Gateway)
-#   }
+  network_configuration {
+    subnets         = data.aws_subnets.selected_subnets.ids
+    security_groups = var.security_group_ids
+    # This should typically be set to true for services running in awsvpc mode
+    assign_public_ip = false # Or false, depending on your network design (e.g., if you have a NAT Gateway)
+  }
 
-#   load_balancer {
-#     target_group_arn = data.aws_lb_target_group.safina_ecs_tg.arn
-#     container_name   = var.container_name # Must match the 'name' in your container_definitions
-#     container_port   = 80                # Must match the 'containerPort' in your container_definitions
-#   }
+  load_balancer {
+    target_group_arn = data.aws_lb_target_group.safina_ecs_tg.arn
+    container_name   = var.container_name # Must match the 'name' in your container_definitions
+    container_port   = 80                # Must match the 'containerPort' in your container_definitions
+  }
 
-#   # Optional: Enable service discovery, auto scaling, etc.
-#   tags = {
-#     Environment = "Development"
-#     Service     = "Safina"
-#   }
+  force_new_deployment = true 
+
+  lifecycle {
+    # This prevents Terraform from trying to recreate the service
+    # if only 'triggers' changes. It just forces an update.
+    ignore_changes = [
+      triggers,
+    ]
+  }
+
+  triggers = {
+    # This ensures a deployment on every `terraform apply`
+    redeploy_timestamp = timestamp()
+  }
+
+  # Optional: Enable service discovery, auto scaling, etc.
+  tags = {
+    Environment = "Development"
+    Service     = "Safina"
+  }
   
 
-#   # Ensure the service is created after the listener is ready
-#   depends_on = [
-#     aws_iam_role_policy_attachment.ecs_task_execution_policy,
-#     aws_iam_role_policy_attachment.ecs_task_s3_admin_policy,
-#     data.aws_lb_listener.safina_listener_https_443,
-#     data.aws_lb_target_group.safina_ecs_tg,
-#     aws_cloudwatch_log_group.safina_ecs_log_group 
-#   ]
-# }
+  # Ensure the service is created after the listener is ready
+  depends_on = [
+    # aws_iam_role_policy_attachment.ecs_task_execution_policy,
+    # aws_iam_role_policy_attachment.ecs_task_s3_admin_policy,
+    data.aws_lb_listener.safina_listener_https_443,
+    data.aws_lb_target_group.safina_ecs_tg,
+    aws_cloudwatch_log_group.safina_ecs_log_group 
+  ]
+}
 
