@@ -63,7 +63,7 @@ class Services extends BaseService
           }
      
         $logger = new Logger('safina');
-        $stdoutHandler = new StreamHandler('php://stdout', Level::Info);
+        $stdoutHandler = new StreamHandler('php://stdout', Level::Error);
         $logtailHandler = LogtailHandlerBuilder::withSourceToken(env('LOGTAIL_TOKEN'))
         ->withEndpoint("https://s1353094.eu-nbg-2.betterstackdata.com")
         ->build();
