@@ -75,6 +75,7 @@ $sum_petty_cash_income = $cash_accounts;
 $sum_petty_cash_expense = $cash_accounts;
 
 $accrual_activated = $result['accrual_activated'];
+
 ?>
 
 <hr />

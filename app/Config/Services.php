@@ -62,8 +62,11 @@ class Services extends BaseService
               return static::getSharedInstance('logger');
           }
      
+        $logFile = WRITEPATH.'logs/log-'.date('Y-m-d').'.log';
+        $stream = ENVIRONMENT == 'production' ? 'php://stdout' : $logFile;
+
         $logger = new Logger('safina');
-        $stdoutHandler = new StreamHandler('php://stdout', Level::Info);
+        $stdoutHandler = new StreamHandler($stream, Level::Info);
         $logtailHandler = LogtailHandlerBuilder::withSourceToken(env('LOGTAIL_TOKEN'))
         ->withEndpoint("https://s1353094.eu-nbg-2.betterstackdata.com")
         ->build();

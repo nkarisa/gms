@@ -1141,7 +1141,7 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $accountSystemSettingLibrary = new \App\Libraries\Core\AccountSystemSettingLibrary();
         $account_system_settings = $accountSystemSettingLibrary->getAccountSystemSettings($account_system_id);
         $use_accrual_based_accounting =  $account_system_settings['use_accrual_based_accounting'] ?? 0;
-
+        log_message('error', $use_accrual_based_accounting);
         if($use_accrual_based_accounting){
             $checkIfSet = true;
         }

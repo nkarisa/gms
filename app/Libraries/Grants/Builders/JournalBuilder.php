@@ -616,9 +616,8 @@ trait JournalBuilder
             Settings::CONTRA_SPREAD->journalExpenseAccrualEffectsCondition($transaction_effect) ||
             (
                 $this->accrualActivationStatus() && 
-                (
-                    Settings::ACRRUAL_CONTRA_SPREAD->journalExpenseAccrualEffectsCondition($transaction_effect)
-                )
+                Settings::ACRRUAL_CONTRA_SPREAD->journalExpenseAccrualEffectsCondition($transaction_effect)
+                
             )
             
             ) {
