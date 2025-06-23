@@ -148,7 +148,7 @@ resource "aws_ecs_service" "ecs_service" {
   #   # This ensures a deployment on every `terraform apply`
   #   redeploy_timestamp = timestamp()
   # }
-
+  
   # Optional: Enable service discovery, auto scaling, etc.
   tags = {
     Environment = "Development"
