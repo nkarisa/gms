@@ -6,6 +6,7 @@ use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\JournalModel;
 use \App\Enums\VoucherTypeEffectEnum;
 
+use Exception;
 use function GuzzleHttp\json_encode;
 
 class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
@@ -29,12 +30,22 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
     public function getOfficeDataFromJournal($journal_id)
     {
         $builder = $this->read_db->table("office");
-        $builder->select(['office_id', 'office_name', 'journal_id', 'journal_month', 'fk_account_system_id']);
-        $builder->join('journal', 'journal.fk_office_id=office.office_id');
-        $builder->where(['journal_id' => $journal_id]);
-        $row = $builder->get()->getRow();
 
-        return $row;
+        try {
+            $builder->select(['office_id', 'office_name', 'journal_id', 'journal_month', 'fk_account_system_id']);
+            $builder->join('journal', 'journal.fk_office_id=office.office_id');
+            $builder->where(['journal_id' => $journal_id]);
+            $journal = $builder->get()->getRow();
+
+            if($journal == null){
+                throw new \CodeIgniter\Database\Exceptions\DatabaseException("Journal record with Id $journal_id not found");
+            }
+
+        }catch(Exception $e){
+            log_message('error', $e->getMessage());
+        }
+
+        return $journal;
     }
 
     public function getVouchersOfTheMonth($office_id, $transacting_month, $journal_id, $office_bank_id = 0, $project_allocation_ids = [])
@@ -53,7 +64,7 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             'office_has_multiple_bank_accounts' => $officeBankLibrary->officeHasMultipleBankAccounts($office_id),
             'transacting_month'                 => $transacting_month,
             'office_id'                         => $office_id,
-            'office_name'                       => $this->getOfficeDataFromJournal($journal_id)->office_name,
+            'office_name'                       => $this->getOfficeDataFromJournal($journal_id)->office_name ?? '',
             'navigation'                        => $this->journalNavigation($office_id, $transacting_month),
             'accounts'                          => $this->financialAccounts($office_id, $transacting_month),
             'month_opening_balance'             => $this->monthOpeningBankCashBalance($office_id, $transacting_month, $office_bank_id),

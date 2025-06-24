@@ -129,10 +129,11 @@ trait JournalBuilder
     }
 
     public function journalAccrualClearAction($voucherId){
-        $hasVoucherEditPermission = true;
+        $userLibrary = new \App\Libraries\Core\UserLibrary();
+        $hasVoucherCreatePermission = $userLibrary->checkRoleHasPermissions('voucher', 'create');
         return view(
             'journal/components/journalAccrualClearAction',
-            compact('voucherId', 'hasVoucherEditPermission')
+            compact('voucherId', 'hasVoucherCreatePermission')
         );
     }
 
