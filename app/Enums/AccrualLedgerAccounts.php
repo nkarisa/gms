@@ -61,13 +61,4 @@ enum AccrualLedgerAccounts: string {
         };
     }
 
-    // function clearanceBankingRequirements(){
-    //     return match($this){
-    //         self::PAYABLES => ['office_bank', 'bank_reference'],
-    //         self::RECEIVABLES => ['office_bank'],
-    //         self::PREPAYMENTS => NULL,
-    //         self::DEPRECIATION => NULL,
-    //         self::PAYROLL_LIABILITY => NULL
-    //     };
-    // }
 }

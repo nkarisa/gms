@@ -100,6 +100,9 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
                 'voucher_is_reversed'               => $voucher_is_reversed,
                 'voucher_reversal_from'             => $voucher_reversal_from,
                 'voucher_reversal_to'               => $voucher_reversal_to,
+                'voucher_cleared_from'              => $voucher_cleared_from,
+                'voucher_cleared_to'                => $voucher_cleared_to,
+                'voucher_transaction_cleared_date'  => $voucher_transaction_cleared_date,
                 'voucher_is_cleared'                => $voucher_cleared,
                 'voucher_type_is_cheque_referenced' => $voucher_type_is_cheque_referenced,
                 'spread'                            => $this->getVoucherSpread($raw_array_of_vouchers, $voucher_id),
@@ -192,6 +195,7 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
                 'voucher_cheque_number',
                 'voucher_description',
                 'voucher_cleared_month',
+                'voucher_transaction_cleared_date',
                 'voucher.fk_status_id as fk_status_id',
                 'voucher_created_date',
                 'voucher_is_reversed',
@@ -199,6 +203,8 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
                 'voucher_cleared_month',
                 'voucher_reversal_from',
                 'voucher_reversal_to',
+                'voucher_cleared_from',
+                'voucher_cleared_to',
                 'voucher_type_is_cheque_referenced',
             ]);
             $builder->select(['voucher_type_abbrev', 'voucher_type_name']);

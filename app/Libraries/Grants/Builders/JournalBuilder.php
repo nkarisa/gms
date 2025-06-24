@@ -6,6 +6,8 @@ use App\Controllers\Web\Core\Setting;
 use App\Enums\VoucherTypeEffectEnum;
 use App\Enums\Settings;
 use App\Enums\AccrualLedgerAccounts;
+use App\Enums\AccrualVoucherTypeEffects;
+use App\Enums\VoucherTypeAccountEnum;
 trait JournalBuilder
 {
 
@@ -126,6 +128,13 @@ trait JournalBuilder
         );
     }
 
+    public function journalAccrualClearAction($voucher_id){
+        return view(
+            'journal/components/journalAccrualClearAction',
+            compact('voucher_id')
+        );
+    }
+
     public function journalActionRelatedVouchers($voucher_reversal_from, $voucher_reversal_to)
     {
         $related_voucher_id = hash_id($voucher_reversal_from, 'encode');
@@ -140,6 +149,7 @@ trait JournalBuilder
             compact('voucher_reversal_from', 'voucher_reversal_to', 'related_voucher_id', 'reverse_btn_label')
         );
     }
+
 
     public function journalActionApprovalAndReturn($voucher, $voucher_id, $status_id, $item_initial_item_status_id, $item_max_approval_status_ids, $role_has_journal_update_permission, $item_status)
     {
@@ -198,6 +208,8 @@ trait JournalBuilder
         $item_max_approval_status_ids,
         $check_if_financial_report_is_submitted
     ) {
+        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+
         $return_string = '';
         $voucher_is_reversed = $voucher['voucher_is_reversed'];
         $voucher_reversal_from = $voucher['voucher_reversal_from'];
@@ -206,6 +218,28 @@ trait JournalBuilder
         $status_id = $voucher['status_id'];
         $voucher_type_is_cheque_referenced = $voucher['voucher_type_is_cheque_referenced'];
         $cheque_number = $voucher['cheque_number'];
+
+        $voucher_cleared_to = $voucher['voucher_cleared_to'];
+        $voucher_cleared_from = $voucher['voucher_cleared_from'];
+        $voucher_transaction_cleared_date = $voucher['voucher_cleared_to'];
+        $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
+        $voucher_type_cash_account = $voucher['voucher_type_cash_account'];
+        $isAccrualEffect = AccrualVoucherTypeEffects::tryFrom($voucher_type_transaction_effect);
+        $isAccruingEffect = AccrualLedgerAccounts::tryFrom($voucher_type_transaction_effect);
+        $isAccrualAccount = VoucherTypeAccountEnum::ACCRUAL->value;
+        $maxStatusIds = $statusLibrary->getMaxApprovalStatusId('voucher');
+
+        if(
+            $isAccrualEffect && 
+            $isAccruingEffect && 
+            $voucher_type_cash_account == $isAccrualAccount && 
+            !$voucher_cleared_to && 
+            !$voucher_cleared_from && 
+            $voucher_transaction_cleared_date == NULL &&
+            in_array($status_id, $maxStatusIds)
+        ){
+            $return_string .= $this->journalAccrualClearAction($voucher_id);
+        }
 
         if ($voucher_is_reversed && ($voucher_reversal_from || $voucher_reversal_to)) {
             $return_string .= $this->journalActionRelatedVouchers($voucher_reversal_from, $voucher_reversal_to);

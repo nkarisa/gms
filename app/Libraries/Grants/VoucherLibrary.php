@@ -3320,8 +3320,8 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $voucherDetailColumns = array_column($this->fieldData('voucher_detail'),'name');
 
         // Get incurring voucher
-        $accrualLedgersEnum = AccrualLedgerAccounts::cases();
-        $accrualLedgers = array_map(fn($accrualLedger) => $accrualLedger->value, $accrualLedgersEnum);
+        // $accrualLedgersEnum = AccrualLedgerAccounts::cases();
+        $accrualLedgers =  $this->getAccrualLedgers();// array_map(fn($accrualLedger) => $accrualLedger->value, $accrualLedgersEnum);
 
         $voucherReadBuilder->where('voucher_id', $incurringVoucherId);
         $voucherReadBuilder->where('voucher_transaction_cleared_date', NULL);
@@ -3432,7 +3432,36 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         }else{
             return ['flag' => false,'message' => get_phrase('voucher_creation_failed')];
         }
+    }
 
-        // return $incurringVoucher;
+    function checkIfAccrualVoucherCanBeClearedByVouchers($voucherId, $monthsVouchers = []){
+        
+    }
+
+    function checkIfAccrualVoucherCanBeClearedById($voucherId){
+   
+        $voucherReadBuilder = $this->read_db->table('voucher');
+        $accrualLedgers = $this->getAccrualLedgers();
+
+        $voucherReadBuilder->where([
+            'voucher_id' => $voucherId, 
+            'voucher_type_account_code' => 'accrual', 
+            'voucher_transaction_cleared_date' => NULL
+        ]);
+
+        $voucherReadBuilder->whereIn('voucher_type_effect_code', $accrualLedgers);
+        $voucherReadBuilder->join('voucher_type','voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+        $voucherReadBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+        $voucherReadBuilder->join('voucher_type_account','voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
+        $countUnclearedAccrualVouchers = $voucherReadBuilder->countAllResults();
+
+        return $countUnclearedAccrualVouchers ? true : false;
+    }
+
+    function getAccrualLedgers(){
+        $accrualLedgersEnum = AccrualLedgerAccounts::cases();
+        $accrualLedgers = array_map(fn($accrualLedger) => $accrualLedger->value, $accrualLedgersEnum);
+
+        return $accrualLedgers;
     }
 }

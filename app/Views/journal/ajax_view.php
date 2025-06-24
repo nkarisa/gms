@@ -33,6 +33,8 @@ $journal = new \App\Libraries\Grants\Builders\Journal($result);
 
 $vouchers = $result['vouchers']['vouchers'];
 
+// echo json_encode($vouchers);
+
 // Create array of office_cash and office_bank ids keys with zero values
 $bank_accounts = array_map(function ($elem) {
     return 0;

@@ -1,6 +1,6 @@
 <?php 
     // $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
-    // $voucher = $voucherLibrary->clearAccrualTransaction(1739905);
+    // $voucher = $voucherLibrary->checkIfAccrualVoucherCanBeCleared(1739905);
     // echo json_encode($voucher);
 ?>
 <div class = 'row'>
