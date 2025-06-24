@@ -128,10 +128,11 @@ trait JournalBuilder
         );
     }
 
-    public function journalAccrualClearAction($voucher_id){
+    public function journalAccrualClearAction($voucherId){
+        $hasVoucherEditPermission = true;
         return view(
             'journal/components/journalAccrualClearAction',
-            compact('voucher_id')
+            compact('voucherId', 'hasVoucherEditPermission')
         );
     }
 
@@ -221,7 +222,7 @@ trait JournalBuilder
 
         $voucher_cleared_to = $voucher['voucher_cleared_to'];
         $voucher_cleared_from = $voucher['voucher_cleared_from'];
-        $voucher_transaction_cleared_date = $voucher['voucher_cleared_to'];
+        $voucher_transaction_cleared_date = $voucher['voucher_transaction_cleared_date'];
         $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
         $voucher_type_cash_account = $voucher['voucher_type_cash_account'];
         $isAccrualEffect = AccrualVoucherTypeEffects::tryFrom($voucher_type_transaction_effect);
@@ -253,6 +254,7 @@ trait JournalBuilder
             $return_string .= $this->journalActionCancelAndReuse($voucher_id, $cheque_number, $role_has_journal_update_permission, $voucher_is_cleared, $voucher_is_reversed, $mfr_submited_status);
         }
 
+        return $return_string;
     }
 
     public function formatBankReference($cheque_number, $voucher_type_abbrev)
