@@ -37,23 +37,26 @@
 
             $.post(url, data, function(response){
                 if(response.requireBankRef){
-                    let bankRef = getUserInput('<?=get_phrase('bank_reference_required');?>') // A more advanced interface is required here
-                    data = {
-                        voucherId,
-                        bankRef
-                    }
-                    $.post(url, data, function(response){
-                        if(response.message == ""){
-                            alert('Please provide all transaction requirements')
-                            return false;
-                        }
-                        if(response.success){
-                            alert(response.message)
-                            window.location.replace('<?=base_url('voucher/list');?>');
-                        }else{
-                            alert(response.message)
-                        }
-                    })
+                    // let bankRef = 
+                    getUserInput('<?=get_phrase('bank_reference_required');?>') // A more advanced interface is required here
+                    
+                    // data = {
+                    //     voucherId,
+                    //     bankRef: ''
+                    // }
+                    // $.post(url, data, function(response){
+                    //     if(response.message == ""){
+                    //         alert('Please provide all transaction requirements')
+                    //         return false;
+                    //     }
+                    //     if(response.success){
+                    //         alert(response.message)
+                    //         window.location.replace('<?=base_url('voucher/list');?>');
+                    //     }else{
+                    //         alert(response.message)
+                    //     }
+                    // })
+
                 }else{
                     if(response.success){
                         alert(response.message)
