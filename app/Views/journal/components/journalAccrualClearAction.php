@@ -9,19 +9,50 @@
 <?php }?>
 
 <script>
+    //   document.getElementById('showPromptButton').addEventListener('click', async () => {
+    //     const result = await bootstrapPrompt('What is your name?', 'Guest');
+    //     if (result !== null) {
+    //         alert('You entered: ' + result);
+    //     } else {
+    //         alert('Prompt was cancelled.');
+    //     }
+    //     });
+
     $(".clear_accrual").on('click', function(ev){
         const voucherId = $(this).data('voucher_id')
         const url = "<?=base_url();?>ajax/journal/clearAccrualTransaction";
-        const data = {
-            voucherId
+        let data = {
+            voucherId,
+            bankRef: ''
         }
+
         if(voucherId == '<?=$voucherId;?>'){
             $.post(url, data, function(response){
-                if(response.success){
-                    alert(response.message)
-                    window.location.replace('<?=base_url('voucher/list');?>');
+                if(response.requireBankRef){
+                    let bankRef = getUserInput('<?=get_phrase('bank_reference_required');?>') // A more advanced interface is required here
+                    data = {
+                        voucherId,
+                        bankRef
+                    }
+                    $.post(url, data, function(response){
+                        if(response.message == ""){
+                            alert('Please provide all transaction requirements')
+                            return false;
+                        }
+                        if(response.success){
+                            alert(response.message)
+                            window.location.replace('<?=base_url('voucher/list');?>');
+                        }else{
+                            alert(response.message)
+                        }
+                    })
                 }else{
-                    alert(response.message)
+                    if(response.success){
+                        alert(response.message)
+                        window.location.replace('<?=base_url('voucher/list');?>');
+                    }else{
+                        alert(response.message)
+                    }
                 }
             })
         }

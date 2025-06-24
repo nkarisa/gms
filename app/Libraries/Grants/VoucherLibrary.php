@@ -3220,7 +3220,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $voucherReadBuilder->select('voucher_number');
         $voucherReadBuilder->orderBy('voucher_date DESC');
         $voucherReadBuilder->where(['voucher.fk_office_id' => $officeId, 'voucher_type_effect_code' => VoucherTypeEffectEnum::RECEIVABLES->getCode()]);
-        $voucherReadBuilder->where(['voucher.voucher_date >=' => $voucherValidPeriod, 'voucher_cleared' => 0, 'voucher_cleared_to' => 0]);
+        $voucherReadBuilder->where(['voucher.voucher_date >=' => $voucherValidPeriod, 'voucher_transaction_cleared_date' => NULL]);
         $voucherReadBuilder->join('voucher_type','voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
         $voucherReadBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
         $resultObj = $voucherReadBuilder->get();
@@ -3244,7 +3244,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $voucherReadBuilder->select('voucher_number');
         $voucherReadBuilder->orderBy('voucher_date DESC');
         $voucherReadBuilder->where(['voucher.fk_office_id' => $officeId, 'voucher_type_effect_code' => VoucherTypeEffectEnum::PAYABLES->getCode()]);
-        $voucherReadBuilder->where(['voucher.voucher_date >=' => $voucherValidPeriod, 'voucher_cleared' => 0, 'voucher_cleared_to' => 0]);
+        $voucherReadBuilder->where(['voucher.voucher_date >=' => $voucherValidPeriod, 'voucher_transaction_cleared_date' => NULL]);
         $voucherReadBuilder->join('voucher_type','voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
         $voucherReadBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
         $resultObj = $voucherReadBuilder->get();
@@ -3268,7 +3268,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $voucherReadBuilder->select('voucher_number');
         $voucherReadBuilder->orderBy('voucher_date DESC');
         $voucherReadBuilder->where(['voucher.fk_office_id' => $officeId, 'voucher_type_effect_code' => VoucherTypeEffectEnum::PREPAYMENTS->getCode()]);
-        $voucherReadBuilder->where(['voucher.voucher_date >=' => $voucherValidPeriod, 'voucher_cleared' => 0, 'voucher_cleared_to' => 0]);
+        $voucherReadBuilder->where(['voucher.voucher_date >=' => $voucherValidPeriod, 'voucher_transaction_cleared_date' => NULL]);
         $voucherReadBuilder->join('voucher_type','voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
         $voucherReadBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
         $resultObj = $voucherReadBuilder->get();
@@ -3429,6 +3429,15 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             if (empty($incurringVoucher)) {
                 throw new Exception('Invalid accrual transaction. The transaction cannot be cleared');
             }
+
+            $userLibrary = new \App\Libraries\Core\UserLibrary();
+            $hasVoucherCreatePermission = $userLibrary->checkRoleHasPermissions('voucher', 'create');
+            $user_id = $this->session->user_id;
+
+            if(!$hasVoucherCreatePermission){
+                 throw new Exception("User  Id $user_id has no permission to create a voucher");
+            }
+
             $cnt = 0;
             foreach ($incurringVoucher['voucher_detail_account'] as $detailAccounts) {
                 foreach ($detailAccounts as $accountType => $accountCode) {

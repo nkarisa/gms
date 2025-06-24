@@ -3,6 +3,8 @@
 namespace App\Controllers\Web\Grants;
 
 use App\Controllers\Web\WebController;
+use App\Enums\AccrualLedgerAccounts;
+use App\Enums\AccrualVoucherTypeEffects;
 use App\Libraries\Grants\JournalLibrary;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -148,11 +150,38 @@ class Journal extends WebController
 
       function clearAccrualTransaction(){
         $post = $this->request->getPost();
-        ['voucherId' => $voucherId] = $post;
+        ['voucherId' => $voucherId, 'bankRef' => $bankRef] = $post;
+
+        // Check if a voucher type effect clearance require a bank reference. In the meantime only Payable Disbursements requires a bank reference
+        $checkIfRefRequired = $this->checkIfAccrualLedgerClearanceRequiresBankRefByVoucherId($voucherId);
+
+        if($checkIfRefRequired && $bankRef == ""){
+          return $this->response->setJSON(['success' => true ,'message' => '', 'requireBankRef' => true]);
+        }
         
         $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
-        $response = $voucherLibrary->clearAccrualTransaction($voucherId);
+        $response = $voucherLibrary->clearAccrualTransaction($voucherId, $bankRef);
 
-        return $this->response->setJSON(['success' => $response['flag'] ,'message' => $response['message']]);
+        return $this->response->setJSON(['success' => $response['flag'] ,'message' => $response['message'], 'requireBankRef' => false]);
+      }
+
+      function checkIfAccrualLedgerClearanceRequiresBankRefByVoucherId(int $voucherId){
+
+        $checkIf = false;
+
+        $voucherReadBuilder = $this->read_db->table('voucher');
+
+        $voucherReadBuilder->where(['voucher_id' => $voucherId]);
+        $voucherReadBuilder->join('voucher_type','voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+        $voucherReadBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+        $incurredVoucher = $voucherReadBuilder->get()->getRowArray();
+
+        $clearingVoucherEffect = AccrualLedgerAccounts::tryFrom($incurredVoucher['voucher_type_effect_code'])->accrualLedgerClearingEffect();
+
+        if(in_array($clearingVoucherEffect, [AccrualVoucherTypeEffects::PAYABLE_DISBURSEMENTS->value])){
+          $checkIf = true;
+        }
+
+        return $checkIf;
       }
 }

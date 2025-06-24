@@ -221,9 +221,9 @@ trait JournalBuilder
         $voucher_type_is_cheque_referenced = $voucher['voucher_type_is_cheque_referenced'];
         $cheque_number = $voucher['cheque_number'];
 
-        $voucher_cleared_to = $voucher['voucher_cleared_to'];
-        $voucher_cleared_from = $voucher['voucher_cleared_from'];
-        $voucher_transaction_cleared_date = $voucher['voucher_transaction_cleared_date'];
+        // $voucher_cleared_to = $voucher['voucher_cleared_to'];
+        // $voucher_cleared_from = $voucher['voucher_cleared_from'];
+        // $voucher_transaction_cleared_date = $voucher['voucher_transaction_cleared_date'];
         $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
         $voucher_type_cash_account = $voucher['voucher_type_cash_account'];
         $isAccrualEffect = AccrualVoucherTypeEffects::tryFrom($voucher_type_transaction_effect);
