@@ -130,7 +130,7 @@ if (empty($transacting_month)) {
     </div>
 <?php
 }
-// include 'components/bankRefPrompt.php';
+include 'components/bankRefPrompt.php';
 ?>
 
 <script>

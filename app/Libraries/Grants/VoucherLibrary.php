@@ -1711,7 +1711,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $voucher_refunding_to_json = $this->read_db->table('voucher')->where( ['voucher_id' => $from_id])
         ->get()->getRow()->voucher_refunding_to;
         
-        // log_message('error', json_encode(compact('from_id','to_id','voucher_number_from','new_voucher_description','total_voucher_cost','settlementType','voucher_refunding_to_json')));
+        log_message('error', json_encode(compact('from_id','to_id','voucher_number_from','new_voucher_description','total_voucher_cost','settlementType','voucher_refunding_to_json','unrefunded_amount')));
 
         $voucher_refunding_to_ids = [];
 

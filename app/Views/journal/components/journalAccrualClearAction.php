@@ -27,6 +27,14 @@
         }
 
         if(voucherId == '<?=$voucherId;?>'){
+
+            let cnf = confirm('<?=get_phrase('verify_user_action','Are you sure you want to peform this action?');?>')
+
+            if(!cnf){
+                alert('<?=get_phrase('action_aborted');?>')
+                return false;
+            }
+
             $.post(url, data, function(response){
                 if(response.requireBankRef){
                     let bankRef = getUserInput('<?=get_phrase('bank_reference_required');?>') // A more advanced interface is required here
