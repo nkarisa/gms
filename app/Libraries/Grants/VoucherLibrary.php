@@ -1707,11 +1707,12 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
     function updateReversalFromVoucher($from_id, $to_id, $voucher_number_from, $new_voucher_description, $total_voucher_cost, $settlementType = 'bank_refund'){
 
         $unrefunded_amount = $this->unrefundedAmountByFromVoucherId($from_id, $settlementType);
-        
         // Get existing voucher_refunding_to ids
         $voucher_refunding_to_json = $this->read_db->table('voucher')->where( ['voucher_id' => $from_id])
         ->get()->getRow()->voucher_refunding_to;
         
+        // log_message('error', json_encode(compact('from_id','to_id','voucher_number_from','new_voucher_description','total_voucher_cost','settlementType','voucher_refunding_to_json')));
+
         $voucher_refunding_to_ids = [];
 
         if($voucher_refunding_to_json != null){
@@ -1726,11 +1727,12 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
         if(($total_voucher_cost - $unrefunded_amount) == 0){
             if($settlementType == 'bank_refund') {
+                // log_message('error', 'We are on this');
                 $desc['voucher_description'] = "$new_voucher_description [Refunded to $voucher_number_from]";
-      
                 $data['voucher_reversal_to'] = $to_id;
                 $data['voucher_is_reversed'] = 1;
             }else{
+                // log_message('error', 'We are here');
                 $desc['voucher_description'] = "$new_voucher_description";
                 $data['voucher_cleared_to'] = $to_id;
                 $data['voucher_transaction_cleared_date'] = date('Y-m-01');
@@ -3312,29 +3314,29 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return $officeBank;
     }
 
-    function clearAccrualTransaction($incurringVoucherId, $clearingBankRef = ""){
+    function clearAccrualTransaction($incurringVoucherId, $clearingBankRef = "")
+    {
         // addVoucher
         $voucherReadBuilder = $this->read_db->table('voucher');
-        $voucherColumns = array_column($this->fieldData('voucher'),'name');
+        $voucherColumns = array_column($this->fieldData('voucher'), 'name');
         array_push($voucherColumns, 'voucher_type_effect_code', 'bank_refund');
-        $voucherDetailColumns = array_column($this->fieldData('voucher_detail'),'name');
+        $voucherDetailColumns = array_column($this->fieldData('voucher_detail'), 'name');
 
         // Get incurring voucher
-        // $accrualLedgersEnum = AccrualLedgerAccounts::cases();
-        $accrualLedgers =  $this->getAccrualLedgers();// array_map(fn($accrualLedger) => $accrualLedger->value, $accrualLedgersEnum);
+        $accrualLedgers = $this->getAccrualLedgers();
 
         $voucherReadBuilder->where('voucher_id', $incurringVoucherId);
-        $voucherReadBuilder->where('voucher_transaction_cleared_date', NULL);
+        $voucherReadBuilder->where('voucher_refunding_to', NULL);
         $voucherReadBuilder->whereIn('voucher_type_effect_code', $accrualLedgers);
-        $voucherReadBuilder->join('voucher_detail','voucher_detail.fk_voucher_id=voucher.voucher_id');
-        $voucherReadBuilder->join('voucher_type','voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
-        $voucherReadBuilder->join('office','office.office_id=voucher.fk_office_id');
-        $voucherReadBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+        $voucherReadBuilder->join('voucher_detail', 'voucher_detail.fk_voucher_id=voucher.voucher_id');
+        $voucherReadBuilder->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+        $voucherReadBuilder->join('office', 'office.office_id=voucher.fk_office_id');
+        $voucherReadBuilder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
         $incurringVoucherObj = $voucherReadBuilder->get();
 
         $incurringVoucher = [];
-
-        if($incurringVoucherObj->getNumRows() > 0){
+        $voucherTypeEffectCode = '';
+        if ($incurringVoucherObj->getNumRows() > 0) {
             $voucherInfo = $incurringVoucherObj->getResultArray();
             $accountSystemId = $voucherInfo[0]['fk_account_system_id'];
             $voucherTypeEffectCode = $voucherInfo[0]['voucher_type_effect_code'];
@@ -3343,42 +3345,45 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             $bankRefundVoucherNumber = $voucherInfo[0]['voucher_number'];
 
             $detailRowCount = 0;
-            foreach($voucherInfo as $row){
-                foreach($row as $voucherColumn => $voucherValue){
+            foreach ($voucherInfo as $row) {
+                foreach ($row as $voucherColumn => $voucherValue) {
                     // !$voucherValue || 
-                    if(in_array($voucherColumn, [
-                        'voucher_id',
-                        'voucher_detail_id',
-                        'voucher_track_number',
-                        'voucher_detail_track_number',
-                        'fk_status_id',
-                        'fk_approval_id',
-                        'voucher_name',
-                        'voucher_detail_name',
-                        'voucher_created_date',
-                        'voucher_created_by',
-                        'voucher_last_modified_by',
-                        'voucher_last_modified_date',
-                        'voucher_detail_created_date',
-                        'voucher_detail_created_by',
-                        'voucher_detail_last_modified_by',
-                        'voucher_detail_last_modified_date'
-                        ])) continue;
-                    
-                    if(in_array($voucherColumn, $voucherColumns)){
+                    if (
+                        in_array($voucherColumn, [
+                            'voucher_id',
+                            'voucher_detail_id',
+                            'voucher_track_number',
+                            'voucher_detail_track_number',
+                            'fk_status_id',
+                            'fk_approval_id',
+                            'voucher_name',
+                            'voucher_detail_name',
+                            'voucher_created_date',
+                            'voucher_created_by',
+                            'voucher_last_modified_by',
+                            'voucher_last_modified_date',
+                            'voucher_detail_created_date',
+                            'voucher_detail_created_by',
+                            'voucher_detail_last_modified_by',
+                            'voucher_detail_last_modified_date'
+                        ])
+                    )
+                        continue;
+
+                    if (in_array($voucherColumn, $voucherColumns)) {
                         // Construct voucher header 
-                        if($voucherColumn == 'fk_voucher_type_id'){
+                        if ($voucherColumn == 'fk_voucher_type_id') {
                             $voucherTypeId = $this->getAccountSystemClearingVoucherTypeByEffect($accountSystemId, $clearingVoucherTypeEffect)['voucher_type_id'];
                             $voucherValue = $voucherTypeId;
                         }
 
-                        if(
+                        if (
                             $voucherTypeEffectCode == AccrualLedgerAccounts::RECEIVABLES->value ||
                             $voucherTypeEffectCode == AccrualLedgerAccounts::PAYABLES->value
-                        ){
-                            if($voucherColumn == 'fk_office_bank_id'){
+                        ) {
+                            if ($voucherColumn == 'fk_office_bank_id') {
                                 $officeBank = $this->getOfficeDefaultBank($officeId);
-                                if(empty($officeBank)){
+                                if (empty($officeBank)) {
                                     throw new Exception('Office is missing default active office bank');
                                 }
 
@@ -3386,9 +3391,9 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
                             }
                         }
 
-                        if($voucherTypeEffectCode == AccrualLedgerAccounts::PAYABLES->value){
-                            if($voucherColumn == 'voucher_cheque_number'){
-                                if($clearingBankRef == ""){
+                        if ($voucherTypeEffectCode == AccrualLedgerAccounts::PAYABLES->value) {
+                            if ($voucherColumn == 'voucher_cheque_number') {
+                                if ($clearingBankRef == "") {
                                     throw new Exception('Bank reference is required for this clearance');
                                 }
 
@@ -3397,11 +3402,11 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
                         }
 
                         $incurringVoucher[$voucherColumn] = $voucherValue;
-                    }elseif(in_array($voucherColumn,$voucherDetailColumns)){
+                    } elseif (in_array($voucherColumn, $voucherDetailColumns)) {
                         // Construct voucher details
-                        if(in_array($voucherColumn, ['fk_income_account_id','fk_expense_account_id','fk_contra_account_id'])){
+                        if (in_array($voucherColumn, ['fk_income_account_id', 'fk_expense_account_id', 'fk_contra_account_id'])) {
                             $incurringVoucher['voucher_detail_account'][$detailRowCount][$voucherColumn] = $voucherValue;
-                        }else{
+                        } else {
                             $incurringVoucher[$voucherColumn][$detailRowCount] = $voucherValue;
                         }
                     }
@@ -3413,25 +3418,38 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         }
 
         unset($incurringVoucher['voucher_type_effect_code']);
-       
-        if(!empty($incurringVoucher)){
+
+        $output = ['flag' => false, 'message' => get_phrase('voucher_creation_failed')];
+
+        try {
+            if ($voucherTypeEffectCode == AccrualVoucherTypeEffects::PAYABLE_DISBURSEMENTS->value && $clearingBankRef == "") {
+                throw new Exception('Voucher clearance that require a reference number was not provided');
+            }
+
+            if (empty($incurringVoucher)) {
+                throw new Exception('Invalid accrual transaction. The transaction cannot be cleared');
+            }
             $cnt = 0;
-            foreach($incurringVoucher['voucher_detail_account'] as $detailAccounts){
-                foreach($detailAccounts as $accountType => $accountCode){
-                    if($accountType == 'fk_contra_account_id' && $accountCode > 0){
+            foreach ($incurringVoucher['voucher_detail_account'] as $detailAccounts) {
+                foreach ($detailAccounts as $accountType => $accountCode) {
+                    if ($accountType == 'fk_contra_account_id' && $accountCode > 0) {
                         $incurringVoucher['voucher_detail_account'][$cnt] = $accountCode;
-                    }elseif($accountType == 'fk_expense_account_id' && $accountCode > 0){
+                    } elseif ($accountType == 'fk_expense_account_id' && $accountCode > 0) {
                         $incurringVoucher['voucher_detail_account'][$cnt] = $accountCode;
-                    }elseif($accountType == 'fk_income_account_id' && $accountCode > 0){
+                    } elseif ($accountType == 'fk_income_account_id' && $accountCode > 0) {
                         $incurringVoucher['voucher_detail_account'][$cnt] = $accountCode;
                     }
                 }
                 $cnt++;
             }
-            return $this->addVoucher($incurringVoucher);
-        }else{
-            return ['flag' => false,'message' => get_phrase('voucher_creation_failed')];
+
+            $output = $this->addVoucher($incurringVoucher);
+
+        } catch (Exception $e) {
+            log_message('error', $e->getMessage(), ['line' => $e->getLine(), 'file' => $e->getFile(), 'trace' => $e->getTrace()]);
         }
+
+        return $output;
     }
 
     function checkIfAccrualVoucherCanBeClearedByVouchers($voucherId, $monthsVouchers = []){

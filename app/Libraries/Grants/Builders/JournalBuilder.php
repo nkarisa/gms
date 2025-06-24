@@ -230,14 +230,17 @@ trait JournalBuilder
         $isAccruingEffect = AccrualLedgerAccounts::tryFrom($voucher_type_transaction_effect);
         $isAccrualAccount = VoucherTypeAccountEnum::ACCRUAL->value;
         $maxStatusIds = $statusLibrary->getMaxApprovalStatusId('voucher');
+        $voucher_refunding_to = $voucher['voucher_refunding_to'];
+        // log_message('error', json_encode($voucher));
 
         if(
             $isAccrualEffect && 
             $isAccruingEffect && 
             $voucher_type_cash_account == $isAccrualAccount && 
-            !$voucher_cleared_to && 
-            !$voucher_cleared_from && 
-            $voucher_transaction_cleared_date == NULL &&
+            $voucher_refunding_to == NULL &&
+            // !$voucher_cleared_to && 
+            // !$voucher_cleared_from && 
+            // $voucher_transaction_cleared_date == NULL &&
             in_array($status_id, $maxStatusIds)
         ){
             $return_string .= $this->journalAccrualClearAction($voucher_id);

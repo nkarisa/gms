@@ -145,4 +145,14 @@ class Journal extends WebController
         //log_message('error', json_encode($voucherToReverse));
         echo $voucherToReverse;
       }
+
+      function clearAccrualTransaction(){
+        $post = $this->request->getPost();
+        ['voucherId' => $voucherId] = $post;
+        
+        $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+        $response = $voucherLibrary->clearAccrualTransaction($voucherId);
+
+        return $this->response->setJSON(['success' => $response['flag'] ,'message' => $response['message']]);
+      }
 }

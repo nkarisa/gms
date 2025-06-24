@@ -38,7 +38,7 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             $journal = $builder->get()->getRow();
 
             if($journal == null){
-                throw new \CodeIgniter\Database\Exceptions\DatabaseException("Journal record with Id $journal_id not found");
+                throw new \CodeIgniter\Database\Exceptions\DatabaseException("Journal record with Id $journal_id not found", DB_ERROR_MISSING_RECORD);
             }
 
         }catch(Exception $e){
@@ -116,6 +116,7 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
                 'voucher_transaction_cleared_date'  => $voucher_transaction_cleared_date,
                 'voucher_is_cleared'                => $voucher_cleared,
                 'voucher_type_is_cheque_referenced' => $voucher_type_is_cheque_referenced,
+                'voucher_refunding_to'              => $voucher_refunding_to,
                 'spread'                            => $this->getVoucherSpread($raw_array_of_vouchers, $voucher_id),
 
             ];
@@ -217,6 +218,7 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
                 'voucher_cleared_from',
                 'voucher_cleared_to',
                 'voucher_type_is_cheque_referenced',
+                'voucher_refunding_to',
             ]);
             $builder->select(['voucher_type_abbrev', 'voucher_type_name']);
             $builder->select(['voucher_type_account_code']);

@@ -11,7 +11,20 @@
 <script>
     $(".clear_accrual").on('click', function(ev){
         const voucherId = $(this).data('voucher_id')
-        alert(voucherId)
+        const url = "<?=base_url();?>ajax/journal/clearAccrualTransaction";
+        const data = {
+            voucherId
+        }
+        if(voucherId == '<?=$voucherId;?>'){
+            $.post(url, data, function(response){
+                if(response.success){
+                    alert(response.message)
+                    window.location.replace('<?=base_url('voucher/list');?>');
+                }else{
+                    alert(response.message)
+                }
+            })
+        }
         ev.preventDefault()
     })
 </script>

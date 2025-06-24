@@ -543,7 +543,7 @@ trait ApprovalTrait {
 
     $approval_button_info = [];
 
-    $item_status = $this->getStatusId($table, $primary_key);
+    $item_status = $this->getStatusId($table, $primary_key ?? 0);
     //echo $primary_key;
     if ($item_status > 0) {
 

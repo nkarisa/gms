@@ -9,6 +9,8 @@ use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
+defined('DB_ERROR_MISSING_RECORD') || define('DB_ERROR_MISSING_RECORD', '410');
+
 /**
  * Class BaseController
  *
