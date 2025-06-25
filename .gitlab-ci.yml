@@ -33,6 +33,8 @@ include:
       terraform_dir: 'terraform'
       unit_tests_script: 
         - composer --version
+        - composer require --dev phpunit/phpunit
+        - phpunit --version
       smoke_tests_script:
         - echo "Smoke test successful"
       integration_tests_script:
