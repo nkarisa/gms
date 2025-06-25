@@ -2,7 +2,7 @@ cache:
     paths:
       - vendor/
       
-# image: php:8.3.0
+image: php:8.3.0
 
 before_script:
   # Install dependencies
