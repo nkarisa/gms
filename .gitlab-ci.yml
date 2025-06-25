@@ -27,36 +27,49 @@ variables: # <--- This is the global variables section for all jobs
 
 
 .dependancy_scripts: &testing_dep_script
-  ## --- PHP Extension Installations ---
-  - apk add --no-cache --update icu-dev # For ext-intl
+    ## --- PHP Extension Installations ---
+  - apk add --no-cache --update icu-dev
   - docker-php-ext-install intl
   - docker-php-ext-install mysqli
-  - docker-php-ext-install pdo_mysql # Common for database interactions
-  # Optional: Verify extension loads
+  - docker-php-ext-install pdo_mysql
   - php -m | grep intl || { echo "intl extension not found!"; exit 1; }
   - php -m | grep mysqli || { echo "mysqli extension not found!"; exit 1; }
   - php -m | grep pdo_mysql || { echo "pdo_mysql extension not found!"; exit 1; }
 
   ## --- MySQL Client Installation & Database Setup ---
-  - apk add --no-cache mysql-client
+  # *** CHANGE THIS LINE ***
+  - apk add --no-cache mariadb-client-extra # <--- Use this more robust client
+
+  # Ensure the cache directory exists (if you're using pseudo-caching)
+  - mkdir -p ./.cache
 
   # Wait for the MySQL service to be ready
   - echo "Waiting for MySQL service to start..."
-  - | # <--- Add this pipe symbol here
+  - |
     for i in $(seq 1 30); do
-      mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD"  -e "select 1" >/dev/null 2>&1 && break;
+      # Keep --skip-ssl for compatibility, though MYSQL_SERVER_SSL: "0" should negate the need
+      mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl -e "select 1" >/dev/null 2>&1 && break;
       echo "Waiting for MySQL... ($i/30)"
       sleep 1;
     done
 
-  # Create the database 'toolkit'
-  - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
+  # Create/Import logic (using the pseudo-caching example)
+  - if [ -f "./.cache/schema.sql" ]; then
+      echo "Found cached MySQL dump. Restoring..."
+      - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
+      - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl "$MYSQL_DATABASE" < ./.cache/schema.sql
+      echo "Cached SQL dump restored."
+    else
+      echo "No cached MySQL dump found. Setting up from scratch..."
+      - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
+      - echo "Importing SQL schema from 'database/schema.sql'..."
+      - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl "$MYSQL_DATABASE" < app/Database/schema.sql
+      echo "SQL schema imported successfully."
+      - echo "Dumping database for cache..."
+      - mysqldump -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl "$MYSQL_DATABASE" > ./.cache/schema.sql
+      echo "Database dumped to ./.cache/schema.sql"
+    fi
 
-  # Import the SQL schema
-  - echo "Importing SQL schema from 'app/Database/schema.sql'..."
-  # - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" < app/Database/schema.sql
-  - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" < app/Database/schema.sql
-  - echo "SQL schema imported successfully."
 
 
 include:
