@@ -22,7 +22,7 @@ services:
   - pwd
   - ls -la
   - composer install --prefer-dist --no-interaction --optimize-autoloader
-  - if [ -f .env.example ]; then cp .env.example .env; fi.
+  - if [ -f .env.example ]; then cp .env.example .env; fi
   - chmod -R 777 writable/
   # If your .env uses different variable names, adjust these.
   - echo "database.default.hostname = ${MYSQL_HOST}" >> .env
