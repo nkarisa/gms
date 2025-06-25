@@ -1,31 +1,3 @@
-cache:
-    paths:
-      - vendor/
-
-# services:
-#   - name: mysql:latest # Use a recent MySQL image
-#     alias: mysql        # This makes the MySQL service accessible at 'mysql' hostname
-
-# variables:
-#   MYSQL_DATABASE: toolkit         # The name of your database
-#   MYSQL_ROOT_PASSWORD: root       # Root password for the MySQL service (for CI only, keep it simple)
-#   MYSQL_ALLOW_EMPTY_PASSWORD: "yes" # Allows root login without password initially
-
-services:
-  - name: mysql:latest
-    alias: mysql
-    # The correct way to pass environment variables to a service
-    variables: # <--- CHANGE 'environment' TO 'variables' HERE
-      MYSQL_SERVER_SSL: "0"
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-
-variables: # <--- This is the global variables section for all jobs
-  MYSQL_DATABASE: toolkit
-  # MYSQL_ROOT_PASSWORD: root # This can be removed if defined in service variables
-  # MYSQL_ALLOW_EMPTY_PASSWORD: "yes" # This can be removed if defined in service variables
-
-
 .dependancy_scripts: &testing_dep_script
     ## --- PHP Extension Installations ---
   - apk add --no-cache --update icu-dev
@@ -37,11 +9,9 @@ variables: # <--- This is the global variables section for all jobs
   - php -m | grep pdo_mysql || { echo "pdo_mysql extension not found!"; exit 1; }
 
   ## --- MySQL Client Installation & Database Setup ---
-  # *** CHANGE THIS LINE ***
-  # - apk add --no-cache mariadb-client-extra # <--- Use this more robust client
   - apk update -f --progress # Force update package indexes before installing
   - apk upgrade --no-cache # Upgrade all installed packages to their latest versions
-  - apk add --no-cache mariadb-client # <--- Use standard mariadb-client here
+  - apk add --no-cache mariadb-client
 
   # Ensure the cache directory exists (if you're using pseudo-caching)
   - mkdir -p ./.cache
@@ -59,17 +29,17 @@ variables: # <--- This is the global variables section for all jobs
   # Create/Import logic (using the pseudo-caching example)
   - if [ -f "./.cache/schema.sql" ]; then
       echo "Found cached MySQL dump. Restoring..."
-      - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
-      - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl "$MYSQL_DATABASE" < ./.cache/schema.sql
+      mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
+      mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl "$MYSQL_DATABASE" < ./.cache/schema.sql
       echo "Cached SQL dump restored."
     else
       echo "No cached MySQL dump found. Setting up from scratch..."
-      - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
-      - echo "Importing SQL schema from 'database/schema.sql'..."
-      - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl "$MYSQL_DATABASE" < app/Database/schema.sql
+      mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
+      echo "Importing SQL schema from 'database/schema.sql'..."
+      mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl "$MYSQL_DATABASE" < app/Database/schema.sql
       echo "SQL schema imported successfully."
-      - echo "Dumping database for cache..."
-      - mysqldump -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl "$MYSQL_DATABASE" > ./.cache/schema.sql
+      echo "Dumping database for cache..."
+      mysqldump -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl "$MYSQL_DATABASE" > ./.cache/schema.sql
       echo "Database dumped to ./.cache/schema.sql"
     fi
 
