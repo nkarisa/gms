@@ -2,6 +2,45 @@ cache:
     paths:
       - vendor/
 
+services:
+  - name: mysql:latest # Use a recent MySQL image
+    alias: mysql        # This makes the MySQL service accessible at 'mysql' hostname
+
+variables:
+  MYSQL_DATABASE: toolkit         # The name of your database
+  MYSQL_ROOT_PASSWORD: root       # Root password for the MySQL service (for CI only, keep it simple)
+  MYSQL_ALLOW_EMPTY_PASSWORD: "yes" # Allows root login without password initially
+
+.dependancy_scripts: &testing_dep_script
+  ## --- PHP Extension Installations ---
+  - apk add --no-cache --update icu-dev # For ext-intl
+  - docker-php-ext-install intl
+  - docker-php-ext-install mysqli
+  - docker-php-ext-install pdo_mysql # Common for database interactions
+  # Optional: Verify extension loads
+  - php -m | grep intl || { echo "intl extension not found!"; exit 1; }
+  - php -m | grep mysqli || { echo "mysqli extension not found!"; exit 1; }
+  - php -m | grep pdo_mysql || { echo "pdo_mysql extension not found!"; exit 1; }
+
+  ## --- MySQL Client Installation & Database Setup ---
+  - apk add --no-cache mysql-client
+
+  # Wait for the MySQL service to be ready
+  - echo "Waiting for MySQL service to start..."
+  - | # <--- Add this pipe symbol here
+    for i in $(seq 1 30); do
+      mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "select 1" >/dev/null 2>&1 && break;
+      echo "Waiting for MySQL... ($i/30)"
+      sleep 1;
+    done
+
+  # Create the database 'toolkit'
+  - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
+
+  # Import the SQL schema
+  - echo "Importing SQL schema from 'database/schema.sql'..."
+  - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" < database/schema.sql
+  - echo "SQL schema imported successfully."
 include:
   - component: &core-yaml-tpl $CI_SERVER_FQDN/ciorg/community/cmf/pipeline/core-yaml/include@2.4
     inputs: &core-yaml-input
@@ -18,16 +57,7 @@ include:
       deploy_tooling: 'terraform'
       terraform_dir: 'terraform'
       unit_tests_script: 
-        - apk add --no-cache --update icu-dev
-        - docker-php-ext-install intl
-        - php -m | grep intl || { echo "intl extension not found!"; exit 1; } # Verify intl is enabled
-        - docker-php-ext-install mysqli
-        # If your application also uses PDO with MySQL (pdo_mysql), you'll want to install that too:
-        - docker-php-ext-install pdo_mysql
-        # Optional: Verify that the mysqli extension is now loaded
-        - php -m | grep mysqli || { echo "mysqli extension not found!"; exit 1; }
-        # Optional: Verify PDO MySQL if you installed it
-        - php -m | grep pdo_mysql || { echo "pdo_mysql extension not found!"; exit 1; }
+        - *testing_dep_script
         - composer --version
         - composer require --ignore-platform-req=ext-intl --dev phpunit/phpunit
         - composer update
