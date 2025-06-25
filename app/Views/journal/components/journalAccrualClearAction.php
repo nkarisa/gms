@@ -42,7 +42,7 @@
                     
                     data = {
                         voucherId,
-                        bankRef: ''
+                        bankRef: bankRef
                     }
                     $.post(url, data, function(response){
                         if(response.message == ""){
