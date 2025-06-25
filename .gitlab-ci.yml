@@ -44,18 +44,18 @@ variables: # <--- This is the global variables section for all jobs
   - echo "Waiting for MySQL service to start..."
   - | # <--- Add this pipe symbol here
     for i in $(seq 1 30); do
-      mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --ssl-mode=DISABLED  -e "select 1" >/dev/null 2>&1 && break;
+      mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD"  -e "select 1" >/dev/null 2>&1 && break;
       echo "Waiting for MySQL... ($i/30)"
       sleep 1;
     done
 
   # Create the database 'toolkit'
-  - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --ssl-mode=DISABLED -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
+  - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
 
   # Import the SQL schema
   - echo "Importing SQL schema from 'app/Database/schema.sql'..."
   # - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" < app/Database/schema.sql
-  - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --ssl-mode=DISABLED "$MYSQL_DATABASE" < app/Database/schema.sql
+  - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" < app/Database/schema.sql
   - echo "SQL schema imported successfully."
 
 
