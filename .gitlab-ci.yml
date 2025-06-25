@@ -18,6 +18,10 @@ include:
       deploy_tooling: 'terraform'
       terraform_dir: 'terraform'
       unit_tests_script: 
+        - apt-get update -yqq
+        - apt-get install -yqq git libicu-dev 
+        - docker-php-ext-install intl
+        - php -m | grep intl # Verify intl is enabled
         - composer --version
         - composer require --ignore-platform-req=ext-intl --dev phpunit/phpunit
         - composer update
