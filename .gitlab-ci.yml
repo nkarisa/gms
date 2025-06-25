@@ -35,7 +35,7 @@ variables:
     done
 
   # Create the database 'toolkit'
-  - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
+  - mysql -h mysql --ssl-mode=DISABLED -u root -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
 
   # Import the SQL schema
   - echo "Importing SQL schema from 'app/Database/schema.sql'..."
