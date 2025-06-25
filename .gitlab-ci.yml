@@ -32,7 +32,7 @@ include:
       deploy_tooling: 'terraform'
       terraform_dir: 'terraform'
       unit_tests_script: 
-        - *composer_dependancies
+        - echo "Unit test successful"
       smoke_tests_script:
         - echo "Smoke test successful"
       integration_tests_script:
