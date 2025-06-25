@@ -12,6 +12,20 @@ services:
   - name: mysql:8.0
     command: ["sh", "-c", "apk add --no-cache curl && while ! curl http://mysql:3306/ 2>&1 | grep 'Got a packet bigger than' ; do sleep 1; done;"]
 
+default:
+  artifacts:
+    # The 'reports' keyword tells GitLab to parse these files as test reports.
+    reports:
+      # JUnit XML test reports. GitLab uses these to display test summaries
+      # in the merge request widget and pipeline overview.
+      junit: build/junit.xml
+    # Optionally, specify paths to other artifacts you want to keep.
+    # For example, if you generate code coverage reports.
+    paths:
+      - build/
+    # When to expire the artifacts. Here, they expire after 1 week.
+    expire_in: 1 week
+    
 # Define operations to run before each job in the pipeline.
 .test_deps: &test_dep_script
   - apk add --no-cache git unzip mysql-client
@@ -54,6 +68,7 @@ include:
       terraform_dir: 'terraform'
       unit_tests_script: 
         - *test_dep_script
+        - vendor/bin/phpunit --log-junit build/junit.xml
         - echo "Unit testing successful"
       smoke_tests_script:
         - echo "Smoke test successful"
