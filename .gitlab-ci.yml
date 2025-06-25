@@ -71,7 +71,6 @@ variables: # <--- This is the global variables section for all jobs
     fi
 
 
-
 include:
   - component: &core-yaml-tpl $CI_SERVER_FQDN/ciorg/community/cmf/pipeline/core-yaml/include@2.4
     inputs: &core-yaml-input
