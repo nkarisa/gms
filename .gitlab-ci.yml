@@ -20,6 +20,7 @@ include:
       unit_tests_script: 
         - composer --version
         - composer require --ignore-platform-req=ext-intl --dev phpunit/phpunit
+        - vendor/bin/composer update
         - vendor/bin/phpunit --version
         - vendor/bin/phpunit --configuration phpunit.xml
       smoke_tests_script:
