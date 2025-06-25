@@ -21,6 +21,7 @@ include:
         - composer --version
         - composer require --ignore-platform-req=ext-intl --dev phpunit/phpunit
         - vendor/bin/phpunit --version
+        - vendor/bin/phpunit --configuration phpunit.xml
       smoke_tests_script:
         - echo "Smoke test successful"
       integration_tests_script:
