@@ -1,3 +1,14 @@
+services:
+  - name: mysql:latest
+    alias: mysql
+    variables:
+      MYSQL_SERVER_SSL: "0"
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+
+variables:
+  MYSQL_DATABASE: toolkit
+
 .dependancy_scripts: &testing_dep_script
     ## --- PHP Extension Installations ---
   - apk add --no-cache --update icu-dev
