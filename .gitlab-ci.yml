@@ -27,21 +27,21 @@
     done
 
   # Create/Import logic (using the pseudo-caching example)
-  - if [ -f "./.cache/schema.sql" ]; then
-      echo "Found cached MySQL dump. Restoring..."
-      mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
-      mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl "$MYSQL_DATABASE" < ./.cache/schema.sql
-      echo "Cached SQL dump restored."
-    else
-      echo "No cached MySQL dump found. Setting up from scratch..."
-      mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
-      echo "Importing SQL schema from 'database/schema.sql'..."
-      mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl "$MYSQL_DATABASE" < app/Database/schema.sql
-      echo "SQL schema imported successfully."
-      echo "Dumping database for cache..."
-      mysqldump -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl "$MYSQL_DATABASE" > ./.cache/schema.sql
-      echo "Database dumped to ./.cache/schema.sql"
-    fi
+  # - if [ -f "./.cache/schema.sql" ]; then
+  #     echo "Found cached MySQL dump. Restoring..."
+  #     mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
+  #     mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl "$MYSQL_DATABASE" < ./.cache/schema.sql
+  #     echo "Cached SQL dump restored."
+  #   else
+  #     echo "No cached MySQL dump found. Setting up from scratch..."
+  #     mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
+  #     echo "Importing SQL schema from 'database/schema.sql'..."
+  #     mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl "$MYSQL_DATABASE" < app/Database/schema.sql
+  #     echo "SQL schema imported successfully."
+  #     echo "Dumping database for cache..."
+  #     mysqldump -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl "$MYSQL_DATABASE" > ./.cache/schema.sql
+  #     echo "Database dumped to ./.cache/schema.sql"
+  #   fi
 
 
 include:
