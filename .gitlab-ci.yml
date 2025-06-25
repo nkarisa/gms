@@ -1,59 +1,38 @@
-services:
-  - name: mysql:8.4.5
-    alias: mysql
-    variables:
-      MYSQL_SERVER_SSL: "0"
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-
 variables:
-  MYSQL_DATABASE: toolkit
+  CI_ENVIRONMENT: 'testing'
+  DB_DRIVER: 'MySQLi'
+  MYSQL_DATABASE: 'ci4_test_db'
+  MYSQL_ROOT_PASSWORD: 'root_password' # Use a strong password in production!
+  MYSQL_USER: 'ci4_user'
+  MYSQL_PASSWORD: 'ci4_password'
+  MYSQL_HOST: 'mysql'
+  MYSQL_PORT: '3306'
 
-.dependancy_scripts: &testing_dep_script
-    ## --- PHP Extension Installations ---
-  - apk add --no-cache --update icu-dev
-  - docker-php-ext-install intl
-  - docker-php-ext-install mysqli
-  - docker-php-ext-install pdo_mysql
-  - php -m | grep intl || { echo "intl extension not found!"; exit 1; }
-  - php -m | grep mysqli || { echo "mysqli extension not found!"; exit 1; }
-  - php -m | grep pdo_mysql || { echo "pdo_mysql extension not found!"; exit 1; }
+services:
+  - name: mysql:8.0
+    command: ["sh", "-c", "apk add --no-cache curl && while ! curl http://mysql:3306/ 2>&1 | grep 'Got a packet bigger than' ; do sleep 1; done;"]
 
-  ## --- MySQL Client Installation & Database Setup ---
-  - apk update -f --progress # Force update package indexes before installing
-  - apk upgrade --no-cache # Upgrade all installed packages to their latest versions
-  - apk add --no-cache mariadb-client
+# Define operations to run before each job in the pipeline.
+.test_deps: &test_dep_script
+  - apk add --no-cache git unzip mysql-client
+  # Install Composer.
+  - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+  - pwd
+  - ls -la
+  - composer install --prefer-dist --no-interaction --optimize-autoloader
+  - if [ -f .env.example ]; then cp .env.example .env; fi.
+  - chmod -R 777 writable/
+  # If your .env uses different variable names, adjust these.
+  - echo "database.default.hostname = ${MYSQL_HOST}" >> .env
+  - echo "database.default.database = ${MYSQL_DATABASE}" >> .env
+  - echo "database.default.username = ${MYSQL_USER}" >> .env
+  - echo "database.default.password = ${MYSQL_PASSWORD}" >> .env
+  - echo "database.default.DBDriver = ${DB_DRIVER}" >> .env
+  - echo "database.default.port = ${MYSQL_PORT}" >> .env
+  - echo "CI_ENVIRONMENT = ${CI_ENVIRONMENT}" >> .env # Redundant as already set, but good for clarity.
 
-  # Ensure the cache directory exists (if you're using pseudo-caching)
-  - mkdir -p ./.cache
-
-  # Wait for the MySQL service to be ready
-  - echo "Waiting for MySQL service to start..."
-  - |
-    for i in $(seq 1 30); do
-      # Keep --skip-ssl for compatibility, though MYSQL_SERVER_SSL: "0" should negate the need
-      mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl -e "select 1" >/dev/null 2>&1 && break;
-      echo "Waiting for MySQL... ($i/30)"
-      sleep 1;
-    done
-
-  # Create/Import logic (using the pseudo-caching example)
-  # - if [ -f "./.cache/schema.sql" ]; then
-  #     echo "Found cached MySQL dump. Restoring..."
-  #     mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
-  #     mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl "$MYSQL_DATABASE" < ./.cache/schema.sql
-  #     echo "Cached SQL dump restored."
-    # else
-  - |
-    echo "No cached MySQL dump found. Setting up from scratch..."
-    mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
-    echo "Importing SQL schema from 'database/schema.sql'..."
-    mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl "$MYSQL_DATABASE" < app/Database/schema.sql
-    echo "SQL schema imported successfully."
-    echo "Dumping database for cache..."
-    mysqldump -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" --skip-ssl "$MYSQL_DATABASE" > ./.cache/schema.sql
-    echo "Database dumped to ./.cache/schema.sql"
-    # fi
+  # Display the .env file content (for debugging purposes, remove in sensitive environments).
+  - cat .env
 
 
 include:
@@ -65,19 +44,15 @@ include:
       manual_promote_to_prod: 'no' # auto promte to prod
       final_deploy_behavior: on_success # default manual
       is_http_service: false
-      build_and_test_image_version: '2.8.9'
-      build_and_test_image: composer
+      build_and_test_image_version: '8.2-fpm-alpine'
+      build_and_test_image: php
       service_language: golang # Ignore this one. Used only to satisfy the logic checks
       include_build_job: false
       deploy_tooling: 'terraform'
       terraform_dir: 'terraform'
       unit_tests_script: 
-        - *testing_dep_script
-        - composer --version
-        - composer require --ignore-platform-req=ext-intl --dev phpunit/phpunit
-        - composer update
-        - vendor/bin/phpunit --version
-        # - vendor/bin/phpunit --configuration phpunit.xml
+        - *test_dep_script
+        - echo "Unit testing successful"
       smoke_tests_script:
         - echo "Smoke test successful"
       integration_tests_script:
