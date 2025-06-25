@@ -2,14 +2,29 @@ cache:
     paths:
       - vendor/
 
-services:
-  - name: mysql:latest # Use a recent MySQL image
-    alias: mysql        # This makes the MySQL service accessible at 'mysql' hostname
+# services:
+#   - name: mysql:latest # Use a recent MySQL image
+#     alias: mysql        # This makes the MySQL service accessible at 'mysql' hostname
 
-variables:
-  MYSQL_DATABASE: toolkit         # The name of your database
-  MYSQL_ROOT_PASSWORD: root       # Root password for the MySQL service (for CI only, keep it simple)
-  MYSQL_ALLOW_EMPTY_PASSWORD: "yes" # Allows root login without password initially
+# variables:
+#   MYSQL_DATABASE: toolkit         # The name of your database
+#   MYSQL_ROOT_PASSWORD: root       # Root password for the MySQL service (for CI only, keep it simple)
+#   MYSQL_ALLOW_EMPTY_PASSWORD: "yes" # Allows root login without password initially
+
+services:
+  - name: mysql:latest
+    alias: mysql
+    # The correct way to pass environment variables to a service
+    variables: # <--- CHANGE 'environment' TO 'variables' HERE
+      MYSQL_SERVER_SSL: "0"
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+
+variables: # <--- This is the global variables section for all jobs
+  MYSQL_DATABASE: toolkit
+  # MYSQL_ROOT_PASSWORD: root # This can be removed if defined in service variables
+  # MYSQL_ALLOW_EMPTY_PASSWORD: "yes" # This can be removed if defined in service variables
+
 
 .dependancy_scripts: &testing_dep_script
   ## --- PHP Extension Installations ---
