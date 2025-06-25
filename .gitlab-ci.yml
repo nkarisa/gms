@@ -38,8 +38,8 @@ variables:
   - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
 
   # Import the SQL schema
-  - echo "Importing SQL schema from 'database/schema.sql'..."
-  - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" < database/schema.sql
+  - echo "Importing SQL schema from 'app/Database/schema.sql'..."
+  - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" < app/Database/schema.sql
   - echo "SQL schema imported successfully."
 include:
   - component: &core-yaml-tpl $CI_SERVER_FQDN/ciorg/community/cmf/pipeline/core-yaml/include@2.4
