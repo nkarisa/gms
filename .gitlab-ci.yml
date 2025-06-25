@@ -38,7 +38,10 @@ variables: # <--- This is the global variables section for all jobs
 
   ## --- MySQL Client Installation & Database Setup ---
   # *** CHANGE THIS LINE ***
-  - apk add --no-cache mariadb-client-extra # <--- Use this more robust client
+  # - apk add --no-cache mariadb-client-extra # <--- Use this more robust client
+  - apk update -f --progress # Force update package indexes before installing
+  - apk upgrade --no-cache # Upgrade all installed packages to their latest versions
+  - apk add --no-cache mariadb-client # <--- Use standard mariadb-client here
 
   # Ensure the cache directory exists (if you're using pseudo-caching)
   - mkdir -p ./.cache
