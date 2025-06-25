@@ -231,9 +231,19 @@ trait JournalBuilder
         $isAccrualAccount = VoucherTypeAccountEnum::ACCRUAL->value;
         $maxStatusIds = $statusLibrary->getMaxApprovalStatusId('voucher');
         $voucher_refunding_to = $voucher['voucher_refunding_to'];
-        // log_message('error', json_encode($voucher));
+
+        // Check if the voucher type effect is accrual and get the corresponding accrual ledger ENUM case. Set to NULL if the voucher type effect is not accrual
+        $effectAccrualLedger = AccrualVoucherTypeEffects::tryFrom($voucher_type_transaction_effect) 
+                                            ? 
+                                            AccrualVoucherTypeEffects::tryFrom($voucher_type_transaction_effect)->getEffectAccrualLedger()
+                                            : 
+                                            NULL;
+        
+        // Get the corresponding accrual ledger for an accrual effect
+        $accrualLedgerHasCorrespondingClearingEffect = $effectAccrualLedger ? AccrualLedgerAccounts::tryFrom($effectAccrualLedger->value)->accrualLedgerClearingEffect() : NULL; // Can be clearing effect or NULL
 
         if(
+            $accrualLedgerHasCorrespondingClearingEffect && 
             $isAccrualEffect && 
             $isAccruingEffect && 
             $voucher_type_cash_account == $isAccrualAccount && 
