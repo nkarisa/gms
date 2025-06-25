@@ -2,9 +2,9 @@ cache:
     paths:
       - vendor/
       
-image: php:8.3.0
+# image: php:8.3.0
 
-before_script:
+.test_dependancies: &composer_dependancies
   # Install dependencies
   - bash ci/docker_install.sh > /dev/null
   # Install composer dependencies
@@ -33,8 +33,8 @@ include:
       include_build_job: false
       deploy_tooling: 'terraform'
       terraform_dir: 'terraform'
-      unit_tests_script:
-        - echo "Unit test successful"
+      unit_tests_script: 
+        - *composer_dependancies
       smoke_tests_script:
         - echo "Smoke test successful"
       integration_tests_script:
