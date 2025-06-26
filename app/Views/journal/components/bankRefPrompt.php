@@ -9,16 +9,6 @@
         $.post(url, data, function (modalBodyContents) {
             jQuery('#myCenteredModal .modal-body #form').html(modalBodyContents.view);
         })
-        
-        // $.ajax({
-        //     url: url,
-        //     type: 'POST',
-        //     data: data,
-        //     async: false,
-        //     success: function (modalBodyContents) {
-        //         Query('#myCenteredModal .modal-body #form').html(modalBodyContents.view);
-        //      }
-        // })
     }
 
 </script>
@@ -77,7 +67,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Action</button>
+                <button type="button" class="btn btn-primary"><?=get_phrase('post_entry');?></button>
             </div>
         </div>
 
