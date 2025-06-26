@@ -1,27 +1,27 @@
 <script>
     function getUserInput(message, data) {
-        jQuery('#modal_ajax').modal('show', {
-            backdrop: 'false'
+        jQuery('#myCenteredModal').modal({
+            backdrop: false
         });
 
-        const url = "<?=base_url();?>ajax/journal/getBankAndRefViews"
-        
-       $.post(url, data, function(modalBodyContents) {
-         jQuery('#modal_ajax .modal-body #form').html(modalBodyContents.view);
-       })
+        const url = "<?= base_url(); ?>ajax/journal/getBankAndRefViews"
+
+        $.post(url, data, function (modalBodyContents) {
+            jQuery('#myCenteredModal .modal-body #form').html(modalBodyContents.view);
+        })
     }
-    
+
 </script>
 
 <style>
-    /* Custom CSS for Centering Bootstrap 3 Modal */
+    /* Custom CSS for centering the modal */
     .modal {
         text-align: center;
+        /* Horizontally center inline-block elements */
         padding: 0 !important;
-        /* Override Bootstrap's default padding */
+        /* Remove default padding that might affect centering */
     }
 
-    /* This pseudo-element creates a full-height invisible inline-block element */
     .modal:before {
         content: '';
         display: inline-block;
@@ -34,50 +34,90 @@
     .modal-dialog {
         display: inline-block;
         text-align: left;
-        /* Reset text-align for modal content */
+        /* Reset text alignment for modal content */
         vertical-align: middle;
-        /* Optional: You can adjust max-width if needed for smaller modals */
-        /* max-width: 500px; */
     }
 
-    /* Responsive adjustment (optional but recommended) */
-    @media screen and (max-width: 767px) {
-        .modal:before {
-            display: none;
-            /* Disable vertical centering on small screens for better UX */
-        }
-
-        .modal-dialog {
-            display: block;
-            /* Revert to block display */
-            margin: 30px auto;
-            /* Bootstrap's default for horizontal centering */
-        }
-    }
-
-    /* Optional: Some styling for the page to better visualize the modal */
+    /* Optional: Add some content to make the page scrollable for testing */
     body {
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: #f8f9fa;
+        min-height: 150vh;
+        background-color: #f0f0f0;
     }
 </style>
 
+<div id="myCenteredModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title"><?= get_phrase('banking_details'); ?></h4>
+            </div>
+            <div class="modal-body">
+                <?php
+                echo form_open("", array(
+                    'id' => 'form',
+                    'class' => 'form-horizontal form-groups-bordered validate',
+                    'enctype' => 'multipart/form-data'
+                ));
+                ?>
+                Loading ...
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Action</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        // Function to center the modal
+        function centerModal() {
+            $(this).find('.modal-dialog').css({
+                'margin-top': function () {
+                    var modalHeight = $(this).outerHeight();
+                    var windowHeight = $(window).height();
+                    // Use Math.max to ensure margin-top is not negative
+                    return Math.max(0, (windowHeight - modalHeight) / 2);
+                },
+                'margin-left': function () {
+                    var modalWidth = $(this).outerWidth();
+                    var windowWidth = $(window).width();
+                    // Use Math.max to ensure margin-left is not negative
+                    return Math.max(0, (windowWidth - modalWidth) / 2);
+                }
+            });
+        }
+
+        // Apply the centering function when the modal is shown
+        $('.modal').on('show.bs.modal', centerModal);
+
+        // Re-center on window resize if modal is already open
+        $(window).on('resize', function () {
+            $('.modal:visible').each(centerModal);
+        });
+    });
+</script>
+<!-- 
 <div class="modal fade" id="modal_ajax" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
     aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel"><?=get_phrase('banking_details');?></h5>
+                <h5 class="modal-title" id="exampleModalLabel"><?= get_phrase('banking_details'); ?></h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <?php 
-                    echo form_open("", array(
+                <?php
+                echo form_open("", array(
                     'id' => 'form',
                     'class' => 'form-horizontal form-groups-bordered validate',
                     'enctype' => 'multipart/form-data'
@@ -89,25 +129,6 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary">Save changes</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="myPromptModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="myPromptModalLabel">Please Enter Your Input</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p id="promptMessage">Enter your text here:</p>
-                <input type="text" class="form-control" id="promptInput">
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="promptOkButton">OK</button>
             </div>
         </div>
     </div>
