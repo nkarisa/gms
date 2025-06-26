@@ -191,12 +191,40 @@ class Journal extends WebController
 
         ['voucherId' => $voucherId, 'accrualClearingEffect' => $accrualClearingEffect] = $post;
 
+
+        $activeOfficeBanks = [
+            [
+              'office_bank_id' => 1,
+              'office_bank_name' => 'Bank Of Africa'
+            ],
+            [
+
+              'office_bank_id' => 2,
+              'office_bank_name' => 'Equity Bank'
+            ]
+          ];
+
+        
+        $disbursementVoucherTypeIsBankReferenced = true;
+
+        $validChequeNumbers = [];// range(1,100);
+
         if($accrualClearingEffect == AccrualVoucherTypeEffects::RECEIVABLES_PAYMENTS->value){
-            $modalBodyContents = view('journal/components/officeBanksList');
+            $modalBodyContents = view('journal/components/officeBanksList', compact('activeOfficeBanks'));
         }elseif($accrualClearingEffect == AccrualVoucherTypeEffects::PAYABLE_DISBURSEMENTS->value){
-            $modalBodyContents = view('journal/components/officeBanksList').view('journal/components/officeBankReference');
+            $modalBodyContents = view('journal/components/officeBanksList', compact('activeOfficeBanks')).view('journal/components/officeBankReference', compact('validChequeNumbers','disbursementVoucherTypeIsBankReferenced'));
         }
 
-        return $this->response->setJSON(['view' => $modalBodyContents]);
+        return $this->response->setJSON(['view' => $modalBodyContents, ...$post]);
+      }
+
+      function getOfficeBankRefByOfficeBank(){
+        $post = $this->request->getPost();
+        $office_bank_id = $post['office_bank_id'];
+
+        $options = range(1,100);
+        $isBankReferenced = true;
+
+        return $this->response->setJSON(compact('isBankReferenced','options'));
       }
 }

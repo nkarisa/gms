@@ -1,13 +1,15 @@
 <script>
     function getUserInput(message, data) {
-        jQuery('#myCenteredModal').modal({
+        jQuery('#bankDetails').modal({
             backdrop: false
         });
 
         const url = "<?= base_url(); ?>ajax/journal/getBankAndRefViews"
 
         $.post(url, data, function (modalBodyContents) {
-            jQuery('#myCenteredModal .modal-body #form').html(modalBodyContents.view);
+            const voucherIdInput = "<input class = 'hidden' id = 'voucherId' value = '" + modalBodyContents.voucherId + "'  />"
+            const accrualClearingEffect = "<input class = 'hidden' id = 'accrualClearingEffect' value = '" + modalBodyContents.accrualClearingEffect + "'  />" 
+            jQuery('#bankDetails .modal-body #form').html(voucherIdInput + accrualClearingEffect + modalBodyContents.view);
         })
     }
 
@@ -45,7 +47,7 @@
     }
 </style>
 
-<div id="myCenteredModal" class="modal fade" role="dialog">
+<div id="bankDetails" class="modal fade" role="dialog">
     <div class="modal-dialog">
 
         <div class="modal-content">
@@ -67,7 +69,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary"><?=get_phrase('post_entry');?></button>
+                <button id = "post_entry" type="button" class="btn btn-primary" disabled><?=get_phrase('post_entry');?></button>
             </div>
         </div>
 
@@ -103,33 +105,46 @@
             $('.modal:visible').each(centerModal);
         });
     });
+
+    $('#post_entry').on('click', function(){
+        const data = {
+            voucherId: $("#voucherId").val(),
+            accrualClearingEffect: $("#accrualClearingEffect").val(),
+            office_bank_id: $("#office_bank_id").val(),
+            bankRef: $('#bankRef').val()
+        }
+
+        console.log(data)
+
+        $('#bankDetails').modal('hide');
+    })
+
+    $(document).on('change',"#office_bank_id", function(){
+        const post_entry = $("#post_entry")
+        const office_bank_id = $("#office_bank_id")
+        const bankRef = $("#bankRef")
+        const url = "<?=base_url();?>ajax/journal/getOfficeBankRefByOfficeBank"
+        const data = {
+            office_bank_id
+        }
+
+        if(office_bank_id.val() > 0){
+            $.post(url, data, function(response){
+                post_entry.removeAttr('disabled')
+                bankRef.removeAttr('disabled')
+                bankRef.children().remove();
+                if(response.isBankReferenced){
+                    let opts = '<option value = ""><?=get_phrase('select_bank_reference');?></option>';
+                    response.options.each(function(i, el){
+                        opts += '<option value = "' + el + '">' + el + '</option>'
+                    })
+
+                    bankRef.append(opts)
+                }
+            })
+        }else{
+            post_entry.prop('disabled', true)
+            bankRef.prop('disabled', true)
+        }
+    })
 </script>
-<!-- 
-<div class="modal fade" id="modal_ajax" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel"><?= get_phrase('banking_details'); ?></h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <?php
-                echo form_open("", array(
-                    'id' => 'form',
-                    'class' => 'form-horizontal form-groups-bordered validate',
-                    'enctype' => 'multipart/form-data'
-                ));
-                ?>
-                    Loading ... 
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
-            </div>
-        </div>
-    </div>
-</div> -->
