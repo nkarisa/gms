@@ -128,12 +128,13 @@ trait JournalBuilder
         );
     }
 
-    public function journalAccrualClearAction($voucherId){
+    public function journalAccrualClearAction($voucherId, $accrualClearingEffect){
         $userLibrary = new \App\Libraries\Core\UserLibrary();
         $hasVoucherCreatePermission = $userLibrary->checkRoleHasPermissions('voucher', 'create');
+        
         return view(
             'journal/components/journalAccrualClearAction',
-            compact('voucherId', 'hasVoucherCreatePermission')
+            compact('voucherId', 'hasVoucherCreatePermission', 'accrualClearingEffect')
         );
     }
 
@@ -253,7 +254,7 @@ trait JournalBuilder
             // $voucher_transaction_cleared_date == NULL &&
             in_array($status_id, $maxStatusIds)
         ){
-            $return_string .= $this->journalAccrualClearAction($voucher_id);
+            $return_string .= $this->journalAccrualClearAction($voucher_id, $accrualLedgerHasCorrespondingClearingEffect);
         }
 
         if ($voucher_is_reversed && ($voucher_reversal_from || $voucher_reversal_to)) {

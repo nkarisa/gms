@@ -184,4 +184,19 @@ class Journal extends WebController
 
         return $checkIf;
       }
+      
+      public function getBankAndRefViews(){
+        $post = $this->request->getPost();
+        $modalBodyContents = '';
+
+        ['voucherId' => $voucherId, 'accrualClearingEffect' => $accrualClearingEffect] = $post;
+
+        if($accrualClearingEffect == AccrualVoucherTypeEffects::RECEIVABLES_PAYMENTS->value){
+            $modalBodyContents = view('journal/components/officeBanksList');
+        }elseif($accrualClearingEffect == AccrualVoucherTypeEffects::PAYABLE_DISBURSEMENTS->value){
+            $modalBodyContents = view('journal/components/officeBanksList').view('journal/components/officeBankReference');
+        }
+
+        return $this->response->setJSON(['view' => $modalBodyContents]);
+      }
 }

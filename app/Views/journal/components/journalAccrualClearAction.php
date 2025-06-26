@@ -1,8 +1,24 @@
-<?php if($hasVoucherCreatePermission) {?>
+<?php 
+    use App\Enums\AccrualVoucherTypeEffects;
+
+    // echo $bankAccountsView;
+    // echo $bankRefView;
+
+    if($hasVoucherCreatePermission) {
+        $showBankAccounts = false;
+        $showBankReferences = false;
+
+        if($accrualClearingEffect == AccrualVoucherTypeEffects::RECEIVABLES_PAYMENTS->value){
+            $showBankAccounts = true;
+        }elseif($accrualClearingEffect == AccrualVoucherTypeEffects::PAYABLE_DISBURSEMENTS->value){
+            $showBankAccounts = true;
+            $showBankReferences = true;
+        }
+?>
     <div 
         data-voucher_id = "<?=$voucherId;?>" 
         class = "btn btn-success clear_accrual"
-        data-toggle="modal" data-target="#exampleModal"
+        data-toggle="modal"
     >
         <?=get_phrase('clear_accrual');?>
     </div>
@@ -13,7 +29,15 @@
 <?php }?>
 
 <script>
+    $(".clear_accrual").on('click', function(){
 
+        const data = {
+            voucherId: '<?=$voucherId?>',
+            accrualClearingEffect: '<?=$accrualClearingEffect;?>'
+        }
+        
+        getUserInput('<?=get_phrase('verify_user_action','Are you sure you want to peform this action?');?>', data);
+    })
     // $(".clear_accrual").on('click', function(ev){
     //     const voucherId = $(this).data('voucher_id')
     //     const url = "<?=base_url();?>ajax/journal/clearAccrualTransaction";
