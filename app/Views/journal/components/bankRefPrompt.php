@@ -9,6 +9,16 @@
         $.post(url, data, function (modalBodyContents) {
             jQuery('#myCenteredModal .modal-body #form').html(modalBodyContents.view);
         })
+        
+        // $.ajax({
+        //     url: url,
+        //     type: 'POST',
+        //     data: data,
+        //     async: false,
+        //     success: function (modalBodyContents) {
+        //         Query('#myCenteredModal .modal-body #form').html(modalBodyContents.view);
+        //      }
+        // })
     }
 
 </script>
