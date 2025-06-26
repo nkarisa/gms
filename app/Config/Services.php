@@ -64,14 +64,23 @@ class Services extends BaseService
      
         $logFile = WRITEPATH.'logs/log-'.date('Y-m-d').'.log';
         $stream = ENVIRONMENT == 'production' ? 'php://stdout' : $logFile;
-
+        
+        // Logging domain
         $logger = new Logger('safina');
-        $stdoutHandler = new StreamHandler($stream, Level::Info);
+        
+        // Logger handlers
         $logtailHandler = LogtailHandlerBuilder::withSourceToken(env('LOGTAIL_TOKEN'))
-        ->withEndpoint("https://s1353094.eu-nbg-2.betterstackdata.com")
-        ->build();
+          ->withEndpoint("https://s1353094.eu-nbg-2.betterstackdata.com")
+          ->build();
+        
+        $stdoutHandler = new StreamHandler($stream, Level::Info);
+
+        // Push logger handlers
+        if(ENVIRONMENT == 'production'){          
+          $logger->pushHandler($logtailHandler);
+        }
+
         $logger->pushHandler($stdoutHandler);
-        $logger->pushHandler($logtailHandler);
         
         return $logger;
       }
