@@ -187,33 +187,18 @@ class Journal extends WebController
       
       public function getBankAndRefViews(){
         $post = $this->request->getPost();
-        $modalBodyContents = '';
-
         ['voucherId' => $voucherId, 'accrualClearingEffect' => $accrualClearingEffect] = $post;
-
-
-        $activeOfficeBanks = [
-            [
-              'office_bank_id' => 1,
-              'office_bank_name' => 'Bank Of Africa'
-            ],
-            [
-
-              'office_bank_id' => 2,
-              'office_bank_name' => 'Equity Bank'
-            ]
-          ];
-
-        
+        $activeOfficeBanks = [['office_bank_id' => 1, 'office_bank_name' => 'Bank Of Africa'],['office_bank_id' => 2,'office_bank_name' => 'Equity Bank']];
         $disbursementVoucherTypeIsBankReferenced = true;
+        $validChequeNumbers = [];
 
-        $validChequeNumbers = [];// range(1,100);
+        // if($accrualClearingEffect == AccrualVoucherTypeEffects::RECEIVABLES_PAYMENTS->value){
+        //     $modalBodyContents = view('journal/components/officeBanksList', compact('activeOfficeBanks'));
+        // }elseif($accrualClearingEffect == AccrualVoucherTypeEffects::PAYABLE_DISBURSEMENTS->value){
+        //     $modalBodyContents = view('journal/components/officeBanksList', compact('activeOfficeBanks')).view('journal/components/officeBankReference', compact('validChequeNumbers','disbursementVoucherTypeIsBankReferenced'));
+        // }
 
-        if($accrualClearingEffect == AccrualVoucherTypeEffects::RECEIVABLES_PAYMENTS->value){
-            $modalBodyContents = view('journal/components/officeBanksList', compact('activeOfficeBanks'));
-        }elseif($accrualClearingEffect == AccrualVoucherTypeEffects::PAYABLE_DISBURSEMENTS->value){
-            $modalBodyContents = view('journal/components/officeBanksList', compact('activeOfficeBanks')).view('journal/components/officeBankReference', compact('validChequeNumbers','disbursementVoucherTypeIsBankReferenced'));
-        }
+        $modalBodyContents = view('journal/components/accrualClearanceView', compact('accrualClearingEffect','activeOfficeBanks','validChequeNumbers','disbursementVoucherTypeIsBankReferenced'));
 
         return $this->response->setJSON(['view' => $modalBodyContents, ...$post]);
       }

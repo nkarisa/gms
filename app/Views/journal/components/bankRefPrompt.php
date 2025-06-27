@@ -128,7 +128,7 @@
         const data = {
             office_bank_id
         }
-        
+
         if(office_bank_id > 0){
             $.post(url, data, function(response){
                 post_entry.removeAttr('disabled')
