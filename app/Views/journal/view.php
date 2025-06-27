@@ -2,6 +2,7 @@
 
 use \App\Libraries\System\Widgets\WidgetBase;
 $userLibrary = new \App\Libraries\Core\UserLibrary();
+
 extract($result['vouchers']);
 
 if (empty($transacting_month)) {

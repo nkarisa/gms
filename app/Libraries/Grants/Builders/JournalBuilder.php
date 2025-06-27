@@ -128,13 +128,13 @@ trait JournalBuilder
         );
     }
 
-    public function journalAccrualClearAction($voucherId, $accrualClearingEffect){
+    public function journalAccrualClearAction($voucherId, $officeId, $accrualClearingEffect){
         $userLibrary = new \App\Libraries\Core\UserLibrary();
         $hasVoucherCreatePermission = $userLibrary->checkRoleHasPermissions('voucher', 'create');
         
         return view(
             'journal/components/journalAccrualClearAction',
-            compact('voucherId', 'hasVoucherCreatePermission', 'accrualClearingEffect')
+            compact('voucherId', 'officeId', 'hasVoucherCreatePermission', 'accrualClearingEffect')
         );
     }
 
@@ -232,6 +232,7 @@ trait JournalBuilder
         $isAccrualAccount = VoucherTypeAccountEnum::ACCRUAL->value;
         $maxStatusIds = $statusLibrary->getMaxApprovalStatusId('voucher');
         $voucher_refunding_to = $voucher['voucher_refunding_to'];
+        $officeId = $voucher['office_id'];
 
         // Check if the voucher type effect is accrual and get the corresponding accrual ledger ENUM case. Set to NULL if the voucher type effect is not accrual
         $effectAccrualLedger = AccrualVoucherTypeEffects::tryFrom($voucher_type_transaction_effect) 
@@ -254,7 +255,7 @@ trait JournalBuilder
             // $voucher_transaction_cleared_date == NULL &&
             in_array($status_id, $maxStatusIds)
         ){
-            $return_string .= $this->journalAccrualClearAction($voucher_id, $accrualLedgerHasCorrespondingClearingEffect);
+            $return_string .= $this->journalAccrualClearAction($voucher_id, $officeId, $accrualLedgerHasCorrespondingClearingEffect);
         }
 
         if ($voucher_is_reversed && ($voucher_reversal_from || $voucher_reversal_to)) {

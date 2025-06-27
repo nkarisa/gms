@@ -30,7 +30,8 @@ if ($hasVoucherCreatePermission) {
         const voucherId = $(this).data('voucher_id')
         const data = {
             voucherId: '<?= $voucherId ?>',
-            accrualClearingEffect: '<?= $accrualClearingEffect; ?>'
+            accrualClearingEffect: '<?= $accrualClearingEffect; ?>',
+            officeId: '<?=$officeId;?>', 
         }
         const showBankAccounts = '<?= $showBankAccounts; ?>';
         const showBankReferences = '<?= $showBankReferences; ?>';
@@ -51,56 +52,159 @@ if ($hasVoucherCreatePermission) {
             })
         }
     })
+</script>
 
-    // $(".clear_accrual").on('click', function(ev){
-    //     const voucherId = $(this).data('voucher_id')
-    //     const url = "<?= base_url(); ?>ajax/journal/clearAccrualTransaction";
-    //     let data = {
-    //         voucherId,
-    //         bankRef: ''
-    //     }
 
-    //     if(voucherId == '<?= $voucherId; ?>'){
+<script>
+    function getUserInput(message, data) {
+        jQuery('#bankDetails').modal({
+            backdrop: false
+        });
 
-    //         let cnf = confirm('<?= get_phrase('verify_user_action', 'Are you sure you want to peform this action?'); ?>')
+        const url = "<?= base_url(); ?>ajax/journal/getBankAndRefViews"
 
-    //         if(!cnf){
-    //             alert('<?= get_phrase('action_aborted'); ?>')
-    //             return false;
-    //         }
+        $.post(url, data, function (modalBodyContents) {
+            const voucherIdInput = "<input class = 'hidden' id = 'voucherId' value = '" + modalBodyContents.voucherId + "'  />"
+            const accrualClearingEffect = "<input class = 'hidden' id = 'accrualClearingEffect' value = '" + modalBodyContents.accrualClearingEffect + "'  />" 
+            const officeId = "<input class = 'hidden' id = 'officeId' value = '" + modalBodyContents.officeId + "'  />" 
+            jQuery('#bankDetails .modal-body #form').html(voucherIdInput + accrualClearingEffect + officeId + modalBodyContents.view);
+        })
+    }
 
-    //         $.post(url, data, function(response){
-    //             if(response.requireBankRef){
-    //                 let bankRef = prompt('<?= get_phrase('bank_reference_required'); ?>') 
-    //                 // getUserInput('<?= get_phrase('bank_reference_required'); ?>') // A more advanced interface is required here
-                    
-    //                 data = {
-    //                     voucherId,
-    //                     bankRef: bankRef
-    //                 }
-    //                 $.post(url, data, function(response){
-    //                     if(response.message == ""){
-    //                         alert('Please provide all transaction requirements')
-    //                         return false;
-    //                     }
-    //                     if(response.success){
-    //                         alert(response.message)
-    //                         window.location.replace('<?= base_url('voucher/list'); ?>');
-    //                     }else{
-    //                         alert(response.message)
-    //                     }
-    //                 })
+</script>
 
-    //             }else{
-    //                 if(response.success){
-    //                     alert(response.message)
-    //                     window.location.replace('<?= base_url('voucher/list'); ?>');
-    //                 }else{
-    //                     alert(response.message)
-    //                 }
-    //             }
-    //         })
-    //     }
-    //     ev.preventDefault()
-    // })
+<style>
+    /* Custom CSS for centering the modal */
+    .modal {
+        text-align: center;
+        /* Horizontally center inline-block elements */
+        padding: 0 !important;
+        /* Remove default padding that might affect centering */
+    }
+
+    .modal:before {
+        content: '';
+        display: inline-block;
+        height: 100%;
+        vertical-align: middle;
+        margin-right: -4px;
+        /* Adjust for spacing issues with inline-block */
+    }
+
+    .modal-dialog {
+        display: inline-block;
+        text-align: left;
+        /* Reset text alignment for modal content */
+        vertical-align: middle;
+    }
+
+    /* Optional: Add some content to make the page scrollable for testing */
+    body {
+        min-height: 150vh;
+        background-color: #f0f0f0;
+    }
+</style>
+
+<div id="bankDetails" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title"><?= get_phrase('banking_details'); ?></h4>
+            </div>
+            <div class="modal-body">
+                <?php
+                echo form_open("", array(
+                    'id' => 'form',
+                    'class' => 'form-horizontal form-groups-bordered validate',
+                    'enctype' => 'multipart/form-data'
+                ));
+                ?>
+                Loading ...
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button id = "post_entry" type="button" class="btn btn-primary" disabled><?=get_phrase('post_entry');?></button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        // Function to center the modal
+        function centerModal() {
+            $(this).find('.modal-dialog').css({
+                'margin-top': function () {
+                    var modalHeight = $(this).outerHeight();
+                    var windowHeight = $(window).height();
+                    // Use Math.max to ensure margin-top is not negative
+                    return Math.max(0, (windowHeight - modalHeight) / 2);
+                },
+                'margin-left': function () {
+                    var modalWidth = $(this).outerWidth();
+                    var windowWidth = $(window).width();
+                    // Use Math.max to ensure margin-left is not negative
+                    return Math.max(0, (windowWidth - modalWidth) / 2);
+                }
+            });
+        }
+
+        // Apply the centering function when the modal is shown
+        $('.modal').on('show.bs.modal', centerModal);
+
+        // Re-center on window resize if modal is already open
+        $(window).on('resize', function () {
+            $('.modal:visible').each(centerModal);
+        });
+    });
+
+    $('#post_entry').on('click', function(){
+        const data = {
+            voucherId: $("#voucherId").val(),
+            accrualClearingEffect: $("#accrualClearingEffect").val(),
+            office_bank_id: $("#office_bank_id").val(),
+            bankRef: $('#bankRef').val()
+        }
+
+        console.log(data)
+
+        $('#bankDetails').modal('hide');
+    })
+
+    $(document).on('change',"#office_bank_id", function(){
+        const post_entry = $("#post_entry")
+        const office_bank_id_input = $("#office_bank_id")
+        const office_bank_id = office_bank_id_input.val()
+        const bankRef = $("#bankRef")
+        const url = "<?=base_url();?>ajax/journal/getOfficeBankRefByOfficeBank"
+        const data = {
+            office_bank_id
+        }
+
+        if(office_bank_id > 0){
+            $.post(url, data, function(response){
+                post_entry.removeAttr('disabled')
+                bankRef.removeAttr('disabled')
+                bankRef.children().remove();
+                if(response.isBankReferenced){
+                    console.log(response)
+                    let opts = '<option value = ""><?=get_phrase('select_bank_reference');?></option>';
+                     $.each(response.options, function(i, el){
+                         opts += '<option value = "' + el + '">' + el + '</option>'
+                     })
+
+                    bankRef.append(opts)
+                }
+            })
+        }else{
+            post_entry.prop('disabled', true)
+            bankRef.prop('disabled', true)
+        }
+    })
 </script>

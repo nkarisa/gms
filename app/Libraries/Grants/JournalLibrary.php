@@ -94,6 +94,7 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             $voucher_record[$voucher_id] = [
                 'date'                              => $voucher_date,
                 'payee'                             => $voucher_vendor,
+                'office_id'                         => $fk_office_id,
                 'voucher_type_abbrev'               => $voucher_type_abbrev,
                 'voucher_type_name'                 => $voucher_type_name,
                 'voucher_type_cash_account'         => $voucher_type_account_code,
@@ -199,6 +200,7 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
             $builder->select([
                 'voucher_id',
+                'fk_office_id',
                 'voucher_number',
                 'voucher_date',
                 'voucher_vendor',

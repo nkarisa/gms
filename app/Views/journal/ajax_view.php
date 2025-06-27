@@ -28,12 +28,12 @@ $journal = new \App\Libraries\Grants\Builders\Journal($result);
     'role_has_journal_update_permission' => $role_has_journal_update_permission,
     'check_if_financial_report_is_submitted' => $check_if_financial_report_is_submitted,
     'mfr_submited_status' => $mfr_submited_status,
+    // 'office_id' => $office_id,
 
 ] = $result;
 
-$vouchers = $result['vouchers']['vouchers'];
 
-// echo json_encode($vouchers);
+$vouchers = $result['vouchers']['vouchers'];
 
 // Create array of office_cash and office_bank ids keys with zero values
 $bank_accounts = array_map(function ($elem) {

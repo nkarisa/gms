@@ -2,7 +2,10 @@
 
 namespace App\Libraries\Grants;
 
+use App\Controllers\Web\Grants\VoucherTypeAccount;
 use App\Enums\AccountSystemSettingEnum;
+use App\Enums\VoucherTypeAccountEnum;
+use App\Enums\AccrualVoucherTypeEffects;
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\VoucherTypeModel;
 class VoucherTypeLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
@@ -471,5 +474,45 @@ class VoucherTypeLibrary extends GrantsLibrary implements \App\Interfaces\Librar
         }
     }
 
-     
+    public function checkIfPayableDisbursementVoucherTypeIsBankReferencedByOfficeId($officeId){
+      $officeAccrualVoucherTypes = $this->officeAccrualVoucherTypes($officeId);
+      $isBankReferenced = false;
+
+      foreach($officeAccrualVoucherTypes as $officeAccrualVoucherType){
+        if($officeAccrualVoucherType['voucher_type_effect_code'] == AccrualVoucherTypeEffects::PAYABLE_DISBURSEMENTS->value){
+          $isBankReferenced = $officeAccrualVoucherType['voucher_type_is_cheque_referenced'] == 1 ? true : false;
+          break;
+        }
+      }
+      return $isBankReferenced;
+    }
+    private function officeAccrualVoucherTypes($officeId){
+      
+      $voucherTypeReadBuilder = $this->read_db->table('voucher_type');
+      $officeReadBuilder = $this->read_db->table('office');
+      $officeAccrualVoucherTypes = [];
+      $office = [];
+
+      $officeReadBuilder->select(['office_id','fk_account_system_id']);
+      $officeReadBuilder->where(['office_id' => $officeId]);
+      $officeObj = $officeReadBuilder->get();
+
+
+      if($officeObj->getNumRows() > 0){
+        $office = $officeObj->getRowArray();
+      
+        $voucherTypeReadBuilder->select(['voucher_type_name','voucher_type_is_hidden','voucher_type_effect_code','voucher_type_account_code','voucher_type_is_cheque_referenced']);
+        $voucherTypeReadBuilder->where(['fk_account_system_id' => $office['fk_account_system_id'], 'voucher_type_account_code' => VoucherTypeAccountEnum::ACCRUAL->value]);
+        $voucherTypeReadBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+        $voucherTypeReadBuilder->join('voucher_type_account','voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
+        $officeAccrualVoucherTypesObj = $voucherTypeReadBuilder->get();
+    
+        if($officeAccrualVoucherTypesObj->getNumRows() > 0){
+          $officeAccrualVoucherTypes = $officeAccrualVoucherTypesObj->getResultArray();
+        }
+      
+      }
+
+      return $officeAccrualVoucherTypes;
+    }
 }

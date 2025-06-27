@@ -188,11 +188,17 @@ class Journal extends WebController
       public function getBankAndRefViews(){
         $post = $this->request->getPost();
        
-        ['voucherId' => $voucherId, 'accrualClearingEffect' => $accrualClearingEffect] = $post;
+        ['voucherId' => $voucherId, 'accrualClearingEffect' => $accrualClearingEffect, 'officeId' => $officeId] = $post;
        
         $activeOfficeBanks = [['office_bank_id' => 1, 'office_bank_name' => 'Bank Of Africa'],['office_bank_id' => 2,'office_bank_name' => 'Equity Bank']];
         $isBankReferenced = false;
         $validChequeNumbers = [];
+        
+        if($accrualClearingEffect == AccrualVoucherTypeEffects::PAYABLE_DISBURSEMENTS->value){
+          $voucherTypeLibrary = new \App\Libraries\Grants\VoucherTypeLibrary();
+          $isBankReferenced = $voucherTypeLibrary->checkIfPayableDisbursementVoucherTypeIsBankReferencedByOfficeId($officeId);
+        }
+
         $modalBodyContents = view('journal/components/accrualClearanceView', compact('accrualClearingEffect','activeOfficeBanks','validChequeNumbers','isBankReferenced'));
 
         return $this->response->setJSON(['view' => $modalBodyContents, ...$post]);
