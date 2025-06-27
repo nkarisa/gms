@@ -207,4 +207,17 @@ if ($hasVoucherCreatePermission) {
             bankRef.prop('disabled', true)
         }
     })
+
+    $(document).on('change','#partial_clearance', function(){
+        const voucherId = $("#voucherId").val()
+        const partial_fields = $("#partial_fields")
+        const partial_clearance_option = $(this).val()
+        
+        if(voucherId == '<?= $voucherId; ?>'){
+            partial_fields.addClass('hidden')
+            if(partial_clearance_option > 0){
+                partial_fields.removeClass('hidden')
+            }
+        }
+    })
 </script>
