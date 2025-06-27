@@ -121,23 +121,25 @@
 
     $(document).on('change',"#office_bank_id", function(){
         const post_entry = $("#post_entry")
-        const office_bank_id = $("#office_bank_id")
+        const office_bank_id_input = $("#office_bank_id")
+        const office_bank_id = office_bank_id_input.val()
         const bankRef = $("#bankRef")
         const url = "<?=base_url();?>ajax/journal/getOfficeBankRefByOfficeBank"
         const data = {
             office_bank_id
         }
-
-        if(office_bank_id.val() > 0){
+        
+        if(office_bank_id > 0){
             $.post(url, data, function(response){
                 post_entry.removeAttr('disabled')
                 bankRef.removeAttr('disabled')
                 bankRef.children().remove();
                 if(response.isBankReferenced){
+                    console.log(response)
                     let opts = '<option value = ""><?=get_phrase('select_bank_reference');?></option>';
-                    response.options.each(function(i, el){
-                        opts += '<option value = "' + el + '">' + el + '</option>'
-                    })
+                     $.each(response.options, function(i, el){
+                         opts += '<option value = "' + el + '">' + el + '</option>'
+                     })
 
                     bankRef.append(opts)
                 }
