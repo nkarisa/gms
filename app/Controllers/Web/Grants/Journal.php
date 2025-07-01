@@ -208,9 +208,11 @@ class Journal extends WebController
         }
 
         // Compute voucher uncleared amount
-        // $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+        $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary(); // 1739942
+        $clearedAmount = $voucherLibrary->getClearedAccrualAmountByAccount('1739942', AccrualVoucherTypeEffects::RECEIVABLES_PAYMENTS->value);
+
         // $unclearedAmount = $voucherLibrary = $voucherLibrary->validateRefundFromVoucher($officeId, $voucher['header']['voucher_type_id'], $voucher['header']['voucher_number']);
-        // log_message('error', json_encode($unclearedAmount));
+        log_message('error', json_encode($clearedAmount));
 
         $modalBodyContents = view('journal/components/accrualClearanceView', compact('accrualClearingEffect','activeOfficeBanks','validChequeNumbers','isBankReferenced', 'voucher'));
 

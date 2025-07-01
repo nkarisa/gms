@@ -143,6 +143,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
         $count = 0;
         foreach ($raw_result as $row) {
+            $body[$count]['detail_id'] = $row['voucher_detail_id'];
             $body[$count]['quantity'] = $row['voucher_detail_quantity'];
             $body[$count]['description'] = $row['voucher_detail_description'];
             $body[$count]['unitcost'] = $row['voucher_detail_unit_cost'];
@@ -281,6 +282,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         ));
 
         $builder->select(array(
+            'voucher_detail_id',
             'voucher_detail_quantity',
             'voucher_detail_description',
             'voucher_detail_unit_cost',
@@ -3603,5 +3605,34 @@ public function checkChequeValidity($office_bank_id, $edit_chq_number = 0): arra
     $output = compact('message', 'voucher_cost', 'voucher_number', 'voucher_id','settlementType');
 
     return  $output; //$this->response->setJSON($output);
+  }
+
+  function getClearedAccrualAmountByAccount($accrualVoucherId, $accrualClearingEffect){
+    $voucherReadBuilder = $this->read_db->table('voucher');
+
+    // Get the ids of clearing vouchers
+    $voucherReadBuilder->selectSum('voucher_detail_total_cost');    
+    $voucherReadBuilder->join('voucher_detail','voucher_detail.fk_voucher_id=voucher.voucher_id');
+    
+    if($accrualClearingEffect == AccrualVoucherTypeEffects::RECEIVABLES_PAYMENTS->value){
+        $voucherReadBuilder->select('income_account_code as account_code');
+        $voucherReadBuilder->join('income_account','income_account.income_account_id=voucher_detail.fk_income_account_id');
+        $voucherReadBuilder->groupBy('income_account_code');
+    }else{
+        $voucherReadBuilder->select('expense_account_code as account_code');
+        $voucherReadBuilder->join('expense_account','expense_account.expense_account_id=voucher_detail.fk_expense_account_id');
+        $voucherReadBuilder->groupBy('expense_account_code');
+    }
+    
+    $voucherReadBuilder->where(['voucher_cleared_from' => $accrualVoucherId]);
+    $voucherResultObj = $voucherReadBuilder->get();
+
+    $voucherResult = [];
+
+    if($voucherResultObj->getNumRows() > 0){
+        $voucherResult = $voucherResultObj->getResultArray();
+    }
+
+    return $voucherResult;
   }
 }
