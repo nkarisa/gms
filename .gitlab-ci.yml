@@ -29,8 +29,8 @@ cache:
       cat .env # Be cautious if not all variables are masked or are highly sensitive
       echo 
   - cat .env
-  - pecl install xdebug-3.0.0
-  - docker-php-ext-enable xdebug
+  # - pecl install xdebug-3.0.0
+  # - docker-php-ext-enable xdebug
 
 include:
   - component: &core-yaml-tpl $CI_SERVER_FQDN/ciorg/community/cmf/pipeline/core-yaml/include@2.4
