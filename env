@@ -19,8 +19,8 @@ CI_ENVIRONMENT = production
 #--------------------------------------------------------------------
 # APP
 #--------------------------------------------------------------------
-
-app.baseURL = 'http://localhost:8000/'
+HOSTPORT=8077
+app.baseURL = 'http://localhost:8077/'
 # If you have trouble with `.`, you could also use `_`.
 # app_baseURL = ''
 # app.forceGlobalSecureRequests = false
@@ -30,7 +30,7 @@ app.baseURL = 'http://localhost:8000/'
 # DATABASE
 #--------------------------------------------------------------------
 
-database.default.hostname = localhost
+database.default.hostname = 
 database.default.database = toolkit
 database.default.username = admin
 database.default.password = 
@@ -38,7 +38,7 @@ database.default.DBDriver = MySQLi
 database.default.DBPrefix =
 database.default.port = 3306
 
-database.read.hostname = localhost
+database.read.hostname = 
 database.read.database = toolkit
 database.read.username = admin
 database.read.password = 
@@ -46,7 +46,7 @@ database.read.DBDriver = MySQLi
 database.read.DBPrefix = 
 database.read.port = 3306
 
-database.write.hostname = localhost
+database.write.hostname = 
 database.write.database = toolkit
 database.write.username = admin
 database.write.password = 

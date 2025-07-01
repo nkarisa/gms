@@ -1,59 +1,36 @@
+
 variables:
-  CI_ENVIRONMENT: 'testing'
-  DB_DRIVER: 'MySQLi'
-  MYSQL_DATABASE: 'ci4_test_db'
-  MYSQL_ROOT_PASSWORD: 'root_password' # Use a strong password in production!
-  MYSQL_USER: 'ci4_user'
-  MYSQL_PASSWORD: 'ci4_password'
-  MYSQL_HOST: 'localhost'
-  MYSQL_PORT: '3306'
+    XDEBUG_MODE: "coverage"
 
-services:
-  - name: mysql:8.0
-    command: ["sh", "-c", "apk add --no-cache curl && while ! curl http://mysql:3306/ 2>&1 | grep 'Got a packet bigger than' ; do sleep 1; done;"]
+cache:
+  key: "${CI_JOB_NAME}-build"
+  paths:
+      - vendor
 
-# default:
-#   artifacts:
-#     reports:
-#       junit: build/junit.xml
-#     paths:
-#       - build/
-#     expire_in: 1 week
-
-# Define operations to run before each job in the pipeline.
 .test_deps: &test_dep_script
   - apk add --no-cache git unzip mysql-client
   - apk add --no-cache --update icu-dev
   - docker-php-ext-install intl
   - docker-php-ext-install mysqli
   - docker-php-ext-install pdo_mysql
-  # Install Composer.
   - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
   - pwd
   - ls -la
   - composer install --prefer-dist --no-interaction --optimize-autoloader
-  - if [ -f .env.example ]; then cp .env.example .env; fi
+  - if [ -f env ]; then cp env .env; fi
   - chmod -R 777 writable/
-  # If your .env uses different variable names, adjust these.
-  - echo "database.default.hostname = ${MYSQL_HOST}" >> .env
-  - echo "database.default.database = ${MYSQL_DATABASE}" >> .env
-  - echo "database.default.username = ${MYSQL_USER}" >> .env
-  - echo "database.default.password = ${MYSQL_PASSWORD}" >> .env
-  - echo "database.default.DBDriver = ${DB_DRIVER}" >> .env
-  - echo "database.default.port = ${MYSQL_PORT}" >> .env
-  - echo "CI_ENVIRONMENT = ${CI_ENVIRONMENT}" >> .env # Redundant as already set, but good for clarity.
-
-  # Display the .env file content (for debugging purposes, remove in sensitive environments).
+  -  - | # Use a multi-line script for clarity
+      # Replace DB_HOST
+      sed -i "s|^database.write.hostname=.*|database.write.hostname=${DB_HOST}|g" .env
+      # Replace DB_PASS (masking will hide the actual value in logs)
+      sed -i "s|^database.write.password=.*|database.write.password=${DB_PASS}|g" .env
+      
+      echo "--- .env file content (for verification - be careful with sensitive data) ---"
+      cat .env # Be cautious if not all variables are masked or are highly sensitive
+      echo 
   - cat .env
-
-    # --- Database Setup for Tests ---
-  - echo "Creating database ${MYSQL_DATABASE}..."
-  - mysql -h${MYSQL_HOST} -uroot -p"${MYSQL_ROOT_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};"
-
-  - echo "Importing schema from app/Database/schema.sql into ${MYSQL_DATABASE}..."
-  - mysql -h${MYSQL_HOST} -u${MYSQL_USER} -p"${MYSQL_PASSWORD}" ${MYSQL_DATABASE} < app/Database/schema.sql
-
-
+  - pecl install xdebug-3.0.0
+  - docker-php-ext-enable xdebug
 
 include:
   - component: &core-yaml-tpl $CI_SERVER_FQDN/ciorg/community/cmf/pipeline/core-yaml/include@2.4
@@ -71,9 +48,15 @@ include:
       deploy_tooling: 'terraform'
       terraform_dir: 'terraform'
       unit_tests_script: 
-        # - *test_dep_script
+        - *test_dep_script
         # - vendor/bin/phpunit --log-junit build/junit.xml
-        - hostname
+        - |
+          ./vendor/bin/phpunit \
+            --coverage-text \
+            --log-junit build/phpunit.xml \
+            --whitelist src \
+            --colors=never \
+              tests
         - echo "Unit testing successful"
       smoke_tests_script:
         - echo "Smoke test successful"
