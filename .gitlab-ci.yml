@@ -14,7 +14,7 @@ cache:
   - docker-php-ext-install mysqli
   - docker-php-ext-install pdo_mysql
   - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-  - pwd
+  - pwd 
   - ls -la
   - composer install --prefer-dist --no-interaction --optimize-autoloader
   - if [ -f env ]; then cp env .env; fi
