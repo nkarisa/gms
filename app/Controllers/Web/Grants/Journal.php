@@ -190,8 +190,12 @@ class Journal extends WebController
        
         ['voucherId' => $voucherId, 'accrualClearingEffect' => $accrualClearingEffect, 'officeId' => $officeId] = $post;
        
-        $activeOfficeBanks = [['office_bank_id' => 1, 'office_bank_name' => 'Bank Of Africa'],['office_bank_id' => 2,'office_bank_name' => 'Equity Bank']];
+        // Get active office bank details
+        $officeBankLibrary = new \App\Libraries\Grants\OfficeBankLibrary();
+        $activeOfficeBanks  = $officeBankLibrary->getActiveOfficeBank($officeId);
+
         $isBankReferenced = false;
+        // Initialized as empty but obtain data in getOfficeBankRefByOfficeBank method
         $validChequeNumbers = [];
         
         if($accrualClearingEffect == AccrualVoucherTypeEffects::PAYABLE_DISBURSEMENTS->value){
