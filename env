@@ -14,13 +14,13 @@
 # ENVIRONMENT
 #--------------------------------------------------------------------
 
-CI_ENVIRONMENT = production
+CI_ENVIRONMENT=production
 
 #--------------------------------------------------------------------
 # APP
 #--------------------------------------------------------------------
 HOSTPORT=8077
-app.baseURL = 'http://localhost:8077/'
+app.baseURL='http://localhost:8077/'
 # If you have trouble with `.`, you could also use `_`.
 # app_baseURL = ''
 # app.forceGlobalSecureRequests = false
@@ -88,11 +88,11 @@ database.write.port = 3306
 # Password salting 
 #--------------------------------------------------------------------
 
-SHA256-PASSWORD-SALT=<<YOUR PASSWORD SALT>>
+SHA256-PASSWORD-SALT=salt
 
 #----------------------------------------------------------------
 # AWS CREDENTIALS 
 #--------------------------------------------------------------------
 
-aws.credentials_profile = <<YOUR AWS PROFILE>>
-aws.region = <<YOUR AWS REGION>>
+aws.credentials_profile=profile
+aws.region=region
