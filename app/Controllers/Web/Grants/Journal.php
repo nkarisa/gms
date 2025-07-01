@@ -190,10 +190,9 @@ class Journal extends WebController
        
         ['voucherId' => $voucherId, 'accrualClearingEffect' => $accrualClearingEffect, 'officeId' => $officeId] = $post;
         
-        // Voucher details
-        $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
-        $voucher = $voucherLibrary->getTransactionVoucher(hash_id($voucherId, 'encode'));
-
+        // Sum all accounts into one row in the voucher details
+       $voucher = $this->voucherTransactionWithSumDetailPerAccount($voucherId, $accrualClearingEffect);
+        
         // Get active office bank details
         $officeBankLibrary = new \App\Libraries\Grants\OfficeBankLibrary();
         $activeOfficeBanks  = $officeBankLibrary->getActiveOfficeBank($officeId);
@@ -207,16 +206,48 @@ class Journal extends WebController
           $isBankReferenced = $voucherTypeLibrary->checkIfPayableDisbursementVoucherTypeIsBankReferencedByOfficeId($officeId);
         }
 
-        // Compute voucher uncleared amount
-        $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary(); // 1739942
-        $clearedAmount = $voucherLibrary->getClearedAccrualAmountByAccount('1739942', AccrualVoucherTypeEffects::RECEIVABLES_PAYMENTS->value);
-
-        // $unclearedAmount = $voucherLibrary = $voucherLibrary->validateRefundFromVoucher($officeId, $voucher['header']['voucher_type_id'], $voucher['header']['voucher_number']);
-        log_message('error', json_encode($clearedAmount));
-
         $modalBodyContents = view('journal/components/accrualClearanceView', compact('accrualClearingEffect','activeOfficeBanks','validChequeNumbers','isBankReferenced', 'voucher'));
 
         return $this->response->setJSON(['view' => $modalBodyContents, ...$post]);
+      }
+
+      private function voucherTransactionWithSumDetailPerAccount($voucherId, $accrualClearingEffect){
+        // Voucher details
+        $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+        $voucher = $voucherLibrary->getTransactionVoucher(hash_id($voucherId, 'encode'));
+        
+        // Compute voucher uncleared amount
+        $clearedAmount = $voucherLibrary->getClearedAccrualAmountByAccount($voucherId, $accrualClearingEffect);
+        
+        $body = $voucher['body'];
+        $account_codes = array_unique(array_column($body, 'account_code'));
+        $newBody = [];
+        
+        foreach($body as $detail){
+          $newBody[$detail['account_code']]['account_code'] = $detail['account_code'];
+          if(!isset($newBody[$detail['account_code']]['totalcost'])){
+            $newBody[$detail['account_code']]['totalcost'] = 0;          }
+
+          if(!isset($newBody[$detail['account_code']]['cleared_amount'])){
+            $newBody[$detail['account_code']]['cleared_amount'] = 0;
+          }
+
+          foreach($account_codes as $account_code){
+            if($account_code == $detail['account_code']){
+              $newBody[$detail['account_code']]['totalcost'] +=  $detail['totalcost'];
+            }
+          }
+
+          foreach($clearedAmount as $detailAmount){
+            if($account_code == $detailAmount['account_code']){
+              $newBody[$detail['account_code']]['cleared_amount'] +=  $detailAmount['voucher_detail_total_cost'];
+            }
+          }
+        }
+
+        $voucher['body'] = $newBody;
+
+        return $voucher;
       }
 
       function getOfficeBankRefByOfficeBank(){

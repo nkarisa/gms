@@ -83,7 +83,7 @@ if ($accrualClearingEffect == AccrualVoucherTypeEffects::PAYABLE_DISBURSEMENTS->
                 <tr>
                     <td><?=$voucherDetail['account_code'];?></td>
                     <td><?=number_format($voucherDetail['totalcost'],2);?></td>
-                    <td><?=number_format($voucherDetail['totalcost'],2);?></td>
+                    <td><?=number_format(($voucherDetail['totalcost'] - $voucherDetail['cleared_amount']),2);?></td>
                     <td><input type = "text" value = "0" class = "form-control" /></td>
                 </tr>
             <?php } ?>
