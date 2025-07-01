@@ -19,15 +19,14 @@ cache:
   - composer install --prefer-dist --no-interaction --optimize-autoloader
   - if [ -f env ]; then cp env .env; fi
   - chmod -R 777 writable/
-  -  - | # Use a multi-line script for clarity
-      # Replace DB_HOST
-      sed -i "s|^database.write.hostname=.*|database.write.hostname=${DB_HOST}|g" .env
-      # Replace DB_PASS (masking will hide the actual value in logs)
-      sed -i "s|^database.write.password=.*|database.write.password=${DB_PASS}|g" .env
-      
-      echo "--- .env file content (for verification - be careful with sensitive data) ---"
-      cat .env # Be cautious if not all variables are masked or are highly sensitive
-      echo 
+  - sed -i "s|database.default.hostname = \${DB_HOST}|database.default.hostname = $DB_HOST|g" .env
+  - sed -i "s|database.read.hostname = \${DB_HOST}|database.read.hostname = $DB_HOST|g" .env
+  - sed -i "s|database.write.hostname = \${DB_HOST}|database.write.hostname = $DB_HOST|g" .env
+    # Replace password
+  - sed -i "s|database.default.password = \${DB_PASS}|database.default.password = $DB_PASS|g" .env
+  - sed -i "s|database.read.password = \${DB_PASS}|database.read.password = $DB_PASS|g" .env
+  - sed -i "s|database.write.password = \${DB_PASS}|database.write.password = $DB_PASS|g" .env
+    # Add any other build steps here
   - cat .env
   # - pecl install xdebug-3.0.0
   # - docker-php-ext-enable xdebug
