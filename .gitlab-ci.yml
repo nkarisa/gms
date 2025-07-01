@@ -19,8 +19,6 @@ cache:
   - composer install --prefer-dist --no-interaction --optimize-autoloader
   - if [ -f env ]; then cp env .env; fi
   - chmod -R 777 writable/
-  - echo $DB_HOST
-  - echo $DB_PASS
   - sed -i "s|database.default.hostname = \${DB_HOST}|database.default.hostname = $DB_HOST|g" .env
   - sed -i "s|database.read.hostname = \${DB_HOST}|database.read.hostname = $DB_HOST|g" .env
   - sed -i "s|database.write.hostname = \${DB_HOST}|database.write.hostname = $DB_HOST|g" .env
