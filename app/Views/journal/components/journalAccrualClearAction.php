@@ -220,4 +220,23 @@ if ($hasVoucherCreatePermission) {
             }
         }
     })
+
+    $(document).on('keyup',".clearing_amount", function(){
+        const voucherId = $(".clear_accrual").data('voucher_id')
+        const amountToClear = $(this).val()
+        const unclearedAmount = removeCurrencySeparator($(this).closest('td').siblings('.uncleared_amount').html())
+        if(voucherId == '<?= $voucherId; ?>'){
+
+            const balanceAfterClear = parseFloat(unclearedAmount) - parseFloat(amountToClear);
+            if(balanceAfterClear < 0){
+                alert('<?=get_phrase('acrual_clearing_limit_error','You have exceeded the amount that is allowed to be cleared');?>');
+                $(this).val(0)
+            }
+        }
+        
+    })
+
+    function removeCurrencySeparator(numberString) {
+        return numberString.replace(/,/g, '');
+    }
 </script>
