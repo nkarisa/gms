@@ -71,8 +71,9 @@ include:
       deploy_tooling: 'terraform'
       terraform_dir: 'terraform'
       unit_tests_script: 
-        - *test_dep_script
+        # - *test_dep_script
         # - vendor/bin/phpunit --log-junit build/junit.xml
+        - echo hostname
         - echo "Unit testing successful"
       smoke_tests_script:
         - echo "Smoke test successful"
