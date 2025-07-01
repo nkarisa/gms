@@ -212,7 +212,10 @@ class Journal extends WebController
         $post = $this->request->getPost();
         $office_bank_id = $post['office_bank_id'];
 
-        $options = range(1,100);
+        $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+        $options = $voucherLibrary->checkChequeValidity($office_bank_id);
+        
+        // Always true when in this method
         $isBankReferenced = true;
 
         return $this->response->setJSON(compact('isBankReferenced','options'));

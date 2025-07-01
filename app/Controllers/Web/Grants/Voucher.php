@@ -347,20 +347,11 @@ class Voucher extends WebController
    */
   public function checkChequeValidity(): ResponseInterface
   {
-
-    $cancelChequeLibrary = new Grants\CancelChequeLibrary();
-
     $post = $this->request->getPost();
     $office_bank_id = $post['bank_id'];
     $edit_chq_number = $post['cheque_number'];
-    $leaves = $cancelChequeLibrary->getValidCheques($office_bank_id);
-    $chq_to_edit_arr = [];
-
-    if ($edit_chq_number > 0 && $edit_chq_number != '') {
-      $chq_to_edit_arr['cheque_id'] = (int)$edit_chq_number;
-      $chq_to_edit_arr['cheque_number'] = (int)$edit_chq_number;
-      array_unshift($leaves, $chq_to_edit_arr);
-    }
+    $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+    $leaves = $voucherLibrary->checkChequeValidity($ $office_bank_id, $edit_chq_number);
 
     return $this->response->setJSON(compact('leaves'));
   }

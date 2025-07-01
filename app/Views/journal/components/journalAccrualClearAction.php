@@ -196,7 +196,7 @@ if ($hasVoucherCreatePermission) {
                     console.log(response)
                     let opts = '<option value = ""><?=get_phrase('select_bank_reference');?></option>';
                      $.each(response.options, function(i, el){
-                         opts += '<option value = "' + el + '">' + el + '</option>'
+                         opts += '<option value = "' + el.cheque_id + '">' + el.cheque_number + '</option>'
                      })
 
                     bankRef.append(opts)

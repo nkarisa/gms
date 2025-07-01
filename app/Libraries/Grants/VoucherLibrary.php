@@ -3491,4 +3491,20 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
         return $accrualLedgers;
     }
+
+public function checkChequeValidity($office_bank_id, $edit_chq_number = 0): array
+  {
+
+    $cancelChequeLibrary = new \App\Libraries\Grants\CancelChequeLibrary();
+    $leaves = $cancelChequeLibrary->getValidCheques($office_bank_id);
+    $chq_to_edit_arr = [];
+
+    if ($edit_chq_number > 0 && $edit_chq_number != '') {
+      $chq_to_edit_arr['cheque_id'] = (int)$edit_chq_number;
+      $chq_to_edit_arr['cheque_number'] = (int)$edit_chq_number;
+      array_unshift($leaves, $chq_to_edit_arr);
+    }
+
+    return $leaves;
+  }
 }
