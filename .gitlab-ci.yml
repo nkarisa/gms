@@ -54,7 +54,6 @@ include:
           ./vendor/bin/phpunit \
             --coverage-text \
             --log-junit build/phpunit.xml \
-            --whitelist src \
             --colors=never \
               tests
         - echo "Unit testing successful"
