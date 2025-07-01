@@ -194,8 +194,6 @@ class Journal extends WebController
         $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
         $voucher = $voucherLibrary->getTransactionVoucher(hash_id($voucherId, 'encode'));
 
-        // log_message('error', json_encode($voucher));
-
         // Get active office bank details
         $officeBankLibrary = new \App\Libraries\Grants\OfficeBankLibrary();
         $activeOfficeBanks  = $officeBankLibrary->getActiveOfficeBank($officeId);
@@ -208,6 +206,11 @@ class Journal extends WebController
           $voucherTypeLibrary = new \App\Libraries\Grants\VoucherTypeLibrary();
           $isBankReferenced = $voucherTypeLibrary->checkIfPayableDisbursementVoucherTypeIsBankReferencedByOfficeId($officeId);
         }
+
+        // Compute voucher uncleared amount
+        // $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+        // $unclearedAmount = $voucherLibrary = $voucherLibrary->validateRefundFromVoucher($officeId, $voucher['header']['voucher_type_id'], $voucher['header']['voucher_number']);
+        // log_message('error', json_encode($unclearedAmount));
 
         $modalBodyContents = view('journal/components/accrualClearanceView', compact('accrualClearingEffect','activeOfficeBanks','validChequeNumbers','isBankReferenced', 'voucher'));
 

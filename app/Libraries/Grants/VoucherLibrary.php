@@ -74,6 +74,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $header['voucher_approvers'] = isset($raw_result[0]) && $raw_result[0]['voucher_approvers'] != null ? json_decode($raw_result[0]['voucher_approvers']) : [];
 
         $header['voucher_type_name'] = $voucher_type->voucher_type_name;
+        $header['voucher_type_id'] = $raw_result[0]['fk_voucher_type_id'];
 
         $header['source_account'] = '';
         $header['destination_account'] = '';
