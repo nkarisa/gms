@@ -74,11 +74,20 @@ if ($accrualClearingEffect == AccrualVoucherTypeEffects::PAYABLE_DISBURSEMENTS->
             <tr>
                 <th><?=get_phrase('account');?></th>
                 <th><?=get_phrase('original_amount');?></th>
+                <th><?=get_phrase('uncleared_amount');?></th>
                 <th><?=get_phrase('clear_amount');?></th>
             </tr>
         </thead>
         <tbody>
-            <tr>
+            <?php foreach($voucher['body'] as $voucherDetail){?>
+                <tr>
+                    <td><?=$voucherDetail['account_code'];?></td>
+                    <td><?=number_format($voucherDetail['totalcost'],2);?></td>
+                    <td><?=number_format($voucherDetail['totalcost'],2);?></td>
+                    <td><input type = "text" value = "0" class = "form-control" /></td>
+                </tr>
+            <?php } ?>
+            <!-- <tr>
                 <td>E40</td>
                 <td>120,000</td>
                 <td><input type = "text" value = "0" class = "form-control" /></td>
@@ -87,7 +96,7 @@ if ($accrualClearingEffect == AccrualVoucherTypeEffects::PAYABLE_DISBURSEMENTS->
                 <td>E25</td>
                 <td>240,000</td>
                 <td><input type = "text" value = "0" class = "form-control" /></td>
-            </tr>
+            </tr> -->
         </tbody>
     </table>
 </div>

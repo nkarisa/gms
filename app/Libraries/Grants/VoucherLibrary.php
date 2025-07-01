@@ -10,6 +10,8 @@ use App\Enums\VoucherTypeEffectEnum;
 use App\Enums\AccrualLedgerAccounts;
 use Exception;
 
+use function PHPSTORM_META\map;
+
 class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
     protected $table;
@@ -3507,4 +3509,27 @@ public function checkChequeValidity($office_bank_id, $edit_chq_number = 0): arra
 
     return $leaves;
   }
+
+// function getSingleVoucherById($voucherId){
+//     $voucherReadBuilder = $this->read_db->table('voucher');
+
+//     $voucherReadBuilder->select([
+//         'voucher_id',
+//         'voucher_description',
+//         'voucher_cheque_number',
+//         'fk_voucher_type_id',
+//         'voucher_detail_quantity',
+//         'voucher_detail_unit_cost',
+//         'voucher_detail_total_cost',
+//         'fk_expense_account_id',
+//         'fk_income_account_id',
+//         'fk_contra_account_id',
+//         'fk_project_allocation_id',
+//         'voucher.fk_tatus_id',
+//     ]);
+//     $voucherReadBuilder->where(['voucher_id' => $voucherId]);
+//     $voucherReadBuilder->join('voucher_detail','voucher_detail.fk_voucher_id=voucher.voucher_id');
+//     $voucherReadBuilder->get();
+
+//   }
 }

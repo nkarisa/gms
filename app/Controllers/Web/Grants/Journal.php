@@ -189,7 +189,13 @@ class Journal extends WebController
         $post = $this->request->getPost();
        
         ['voucherId' => $voucherId, 'accrualClearingEffect' => $accrualClearingEffect, 'officeId' => $officeId] = $post;
-       
+        
+        // Voucher details
+        $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+        $voucher = $voucherLibrary->getTransactionVoucher(hash_id($voucherId, 'encode'));
+
+        // log_message('error', json_encode($voucher));
+
         // Get active office bank details
         $officeBankLibrary = new \App\Libraries\Grants\OfficeBankLibrary();
         $activeOfficeBanks  = $officeBankLibrary->getActiveOfficeBank($officeId);
@@ -203,7 +209,7 @@ class Journal extends WebController
           $isBankReferenced = $voucherTypeLibrary->checkIfPayableDisbursementVoucherTypeIsBankReferencedByOfficeId($officeId);
         }
 
-        $modalBodyContents = view('journal/components/accrualClearanceView', compact('accrualClearingEffect','activeOfficeBanks','validChequeNumbers','isBankReferenced'));
+        $modalBodyContents = view('journal/components/accrualClearanceView', compact('accrualClearingEffect','activeOfficeBanks','validChequeNumbers','isBankReferenced', 'voucher'));
 
         return $this->response->setJSON(['view' => $modalBodyContents, ...$post]);
       }
