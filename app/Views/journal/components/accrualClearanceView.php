@@ -87,16 +87,6 @@ if ($accrualClearingEffect == AccrualVoucherTypeEffects::PAYABLE_DISBURSEMENTS->
                     <td><input type = "text" value = "0" class = "form-control" /></td>
                 </tr>
             <?php } ?>
-            <!-- <tr>
-                <td>E40</td>
-                <td>120,000</td>
-                <td><input type = "text" value = "0" class = "form-control" /></td>
-            </tr>
-            <tr>
-                <td>E25</td>
-                <td>240,000</td>
-                <td><input type = "text" value = "0" class = "form-control" /></td>
-            </tr> -->
         </tbody>
     </table>
 </div>
