@@ -18,5 +18,5 @@ COPY --chown=www-data:www-data composer.json .
 RUN composer update
 
 COPY --chown=www-data:www-data . .
-RUN mv .env.docker .env
+RUN mv env .env
 
