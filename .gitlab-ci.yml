@@ -73,7 +73,7 @@ include:
       unit_tests_script: 
         # - *test_dep_script
         # - vendor/bin/phpunit --log-junit build/junit.xml
-        - echo hostname
+        - hostname
         - echo "Unit testing successful"
       smoke_tests_script:
         - echo "Smoke test successful"
