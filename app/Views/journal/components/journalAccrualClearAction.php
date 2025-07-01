@@ -164,19 +164,6 @@ if ($hasVoucherCreatePermission) {
         });
     });
 
-    $('#post_entry').on('click', function(){
-        const data = {
-            voucherId: $("#voucherId").val(),
-            accrualClearingEffect: $("#accrualClearingEffect").val(),
-            office_bank_id: $("#office_bank_id").val(),
-            bankRef: $('#bankRef').val()
-        }
-
-        console.log(data)
-
-        $('#bankDetails').modal('hide');
-    })
-
     $(document).on('change',"#office_bank_id", function(){
         const post_entry = $("#post_entry")
         const office_bank_id_input = $("#office_bank_id")
@@ -225,8 +212,8 @@ if ($hasVoucherCreatePermission) {
         const voucherId = $(".clear_accrual").data('voucher_id')
         const amountToClear = $(this).val()
         const unclearedAmount = removeCurrencySeparator($(this).closest('td').siblings('.uncleared_amount').html())
-        if(voucherId == '<?= $voucherId; ?>'){
 
+        if(voucherId == '<?= $voucherId; ?>'){
             const balanceAfterClear = parseFloat(unclearedAmount) - parseFloat(amountToClear);
             if(balanceAfterClear < 0){
                 alert('<?=get_phrase('acrual_clearing_limit_error','You have exceeded the amount that is allowed to be cleared');?>');
@@ -239,4 +226,24 @@ if ($hasVoucherCreatePermission) {
     function removeCurrencySeparator(numberString) {
         return numberString.replace(/,/g, '');
     }
+
+   $('#post_entry').on('click', function(){
+        const voucherId = $(".clear_accrual").data('voucher_id')
+        const data = {
+            voucherId: $("#voucherId").val(),
+            accrualClearingEffect: $("#accrualClearingEffect").val(),
+            office_bank_id: $("#office_bank_id").val(),
+            bankRef: $('#bankRef').val()
+        }
+        const url = "<?=base_url();?>ajax/journal/clearAccrualTransaction"
+
+        if(voucherId == '<?= $voucherId; ?>'){
+            $.post(url, data, function (){
+                alert('Posted successful')
+            })
+        }
+        
+        
+        $('#bankDetails').modal('hide');
+    })
 </script>
