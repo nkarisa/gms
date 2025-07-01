@@ -13,7 +13,7 @@ RUN install-php-extensions bcmath intl mysqli
 USER www-data
 
 COPY --chown=www-data:www-data composer.json .
-COPY --chown=www-data:www-data composer.lock .
+# COPY --chown=www-data:www-data composer.lock .
 # Run composer update as www-data user
 RUN composer update
 
