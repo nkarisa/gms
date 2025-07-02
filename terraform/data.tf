@@ -120,9 +120,9 @@ locals {
         }
       }
      
-      repositoryCredentials = {
-        credentialsParameter = var.gitlab_secret_arn # Reference the variable you'll define for the Secret ARN
-      }
+      # repositoryCredentials = {
+      #   credentialsParameter = var.gitlab_secret_arn # Reference the variable you'll define for the Secret ARN
+      # }
     }
   ]
 }
