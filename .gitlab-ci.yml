@@ -9,6 +9,9 @@ cache:
   paths:
       - vendor
 
+before_script:
+  - envsubst < env > .env
+
 .test_deps: &test_dep_script
   - apk add --no-cache git unzip mysql-client gettext
   - apk add --no-cache --update icu-dev
@@ -20,7 +23,7 @@ cache:
   - composer install --prefer-dist --no-interaction --optimize-autoloader
   # - if [ -f env ]; then cp env .env; fi
   - chmod -R 777 writable/
-  - envsubst < env > .env
+  # - envsubst < env > .env
   # - chmod 775 .env 
    # Replace base URL, LOGTAIL_TOKEN and CI_ENVIRONMENT
   # - sed -i "s|app.baseURL = \${BASE_URL}|app.baseURL = $BASE_URL|g" .env
