@@ -48,7 +48,7 @@ cache:
 
 build_image:
   before_script:
-    - apk add --no-cache gettext
+    - apt-get install gettext
     - envsubst < env > .env
 
 include:
