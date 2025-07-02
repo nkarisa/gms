@@ -13,20 +13,6 @@ data "aws_ecs_service" "ecs_service" {
   cluster_arn  = data.aws_ecs_cluster.safina_app_cluster.arn
 }
 
-# data "aws_ecs_task_definition" "task_definition" {
-#   task_definition = var.task_definition_family
-# }
-
-# data "aws_ecs_task_execution" "ecs_task_execution_role" {
-#   cluster         = aws_ecs_cluster.safina_app_cluster.id
-#   task_definition = aws_ecs_task_definition.task_definition.arn
-# }
-
-
-# data "aws_ecs_task_definition" "mongo" {
-#   task_definition = aws_ecs_task_definition.mongo.family
-# }
-
 # Data source for the VPC
 data "aws_vpc" "selected_vpc" {
   id = var.vpc_id # Replace with your actual VPC ID
@@ -70,13 +56,41 @@ data "aws_lb_target_group" "safina_ecs_tg" {
 }
 
 # Define local values for dynamic configurations
+# locals {
+#   aws_region = var.aws_region
+
+#   container_definitions = [
+#     {
+#       name        = var.container_name
+#       image       = var.image_name # This is now valid!
+#       cpu         = 256
+#       memory      = 512
+#       essential   = true
+#       portMappings = [
+#         {
+#           containerPort = 80
+#           hostPort      = 80
+#         }
+#       ]
+#       logConfiguration = {
+#         logDriver = "awslogs"
+#         options = {
+#           "awslogs-group"         = aws_cloudwatch_log_group.safina_ecs_log_group.name
+#           "awslogs-region"        = var.aws_region # This is now valid!
+#           "awslogs-stream-prefix" = "ecs"
+#         }
+#       }
+#     }
+#   ]
+# }
+
 locals {
   aws_region = var.aws_region
 
   container_definitions = [
     {
       name        = var.container_name
-      image       = var.image_name # This is now valid!
+      image       = var.image_name # This should be your full GitLab image path, e.g., "registry.gitlab.com/ciorg/regional/africa-developers/safinav3:latest"
       cpu         = 256
       memory      = 512
       essential   = true
@@ -90,9 +104,13 @@ locals {
         logDriver = "awslogs"
         options = {
           "awslogs-group"         = aws_cloudwatch_log_group.safina_ecs_log_group.name
-          "awslogs-region"        = var.aws_region # This is now valid!
+          "awslogs-region"        = var.aws_region
           "awslogs-stream-prefix" = "ecs"
         }
+      }
+     
+      repositoryCredentials = {
+        credentialsParameter = var.gitlab_secret_arn # Reference the variable you'll define for the Secret ARN
       }
     }
   ]

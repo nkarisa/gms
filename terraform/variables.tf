@@ -63,3 +63,8 @@ variable "aws_region" {
   type        = string
   default     = "eu-west-1"
 }
+
+variable "gitlab_secret_arn" {
+  description = "AWS Secret ARN"
+  type        = string
+}
