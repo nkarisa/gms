@@ -36,8 +36,6 @@ cache:
   - sed -i "s|database.write.password = \${DB_PASS}|database.write.password = $DB_PASS|g" .env
     # Add any other build steps here
   - cat .env
-  - echo $DB_HOST
-  - echo $TF_VAR_container_name
   # - pecl install xdebug-3.0.0
   # - docker-php-ext-enable xdebug
 
