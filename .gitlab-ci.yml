@@ -10,7 +10,7 @@ cache:
       - vendor
 
 .test_deps: &test_dep_script
-  - apk add --no-cache git unzip mysql-client
+  - apk add --no-cache git unzip mysql-client gettext
   - apk add --no-cache --update icu-dev
   - docker-php-ext-install intl
   - docker-php-ext-install mysqli
