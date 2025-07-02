@@ -37,10 +37,10 @@ cache:
   # - sed -i "s|database.read.password = \${DB_PASS}|database.read.password = $DB_PASS|g" .env
   # - sed -i "s|database.write.password = \${DB_PASS}|database.write.password = $DB_PASS|g" .env
     # Add any other build steps here
-  - cat .env
+  # - cat .env
   # - pecl install xdebug-3.0.0
   # - docker-php-ext-enable xdebug
-  - echo $TF_VAR_image_name
+  # - echo $TF_VAR_image_name
 
 include:
   - component: &core-yaml-tpl $CI_SERVER_FQDN/ciorg/community/cmf/pipeline/core-yaml/include@2.4
@@ -75,6 +75,9 @@ include:
       feature_deploy_env: devint
       state_type: "s3_bypath"
       container_build_destination: "234204504144.dkr.ecr.eu-west-1.amazonaws.com/safinav3"
+      build_script:
+        - envsubst < env > .env
+
   #   rules: 
   #     - if: >-
   #         $CI_COMMIT_TAG !~ /.*-prod/i
