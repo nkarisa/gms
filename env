@@ -14,9 +14,9 @@
 # ENVIRONMENT
 #--------------------------------------------------------------------
 
-CI_ENVIRONMENT = ${CI_ENVIRONMENT} 
+CI_ENVIRONMENT = production
 
-LOGTAIL_TOKEN = ${LOGTAIL_TOKEN} 
+LOGTAIL_TOKEN = token
 
 #--------------------------------------------------------------------
 # APP
@@ -32,26 +32,26 @@ app.baseURL = ${BASE_URL}
 # DATABASE
 #--------------------------------------------------------------------
 
-database.default.hostname = ${DB_HOST}
+database.default.hostname = localhost
 database.default.database = toolkit
 database.default.username = admin
-database.default.password = ${DB_PASS}
+database.default.password = password
 database.default.DBDriver = MySQLi
 database.default.DBPrefix =
 database.default.port = 3306
 
-database.read.hostname = ${DB_HOST}
+database.read.hostname = localhost
 database.read.database = toolkit
 database.read.username = admin
-database.read.password = ${DB_PASS}
+database.read.password = password
 database.read.DBDriver = MySQLi
 database.read.DBPrefix = 
 database.read.port = 3306
 
-database.write.hostname = ${DB_HOST}
+database.write.hostname = localhost
 database.write.database = toolkit
 database.write.username = admin
-database.write.password = ${DB_PASS}
+database.write.password = password
 database.write.DBDriver = MySQLi
 database.write.DBPrefix =
 database.write.port = 3306
@@ -90,7 +90,7 @@ database.write.port = 3306
 # Password salting 
 #--------------------------------------------------------------------
 
-SHA256-PASSWORD-SALT = ${SHA256_PASSWORD_SALT}
+SHA256-PASSWORD-SALT = 
 
 #----------------------------------------------------------------
 # AWS CREDENTIALS 

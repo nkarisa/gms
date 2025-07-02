@@ -51,21 +51,21 @@ build_image:
     # - yum install gettext
     # - envsubst < env > .env
     - if [ -f env ]; then cp env .env; fi
-    - chmod 775 .env 
+    # - chmod 775 .env 
       # Replace base URL, LOGTAIL_TOKEN and CI_ENVIRONMENT
-    - sed -i "s|app.baseURL = \${BASE_URL}|app.baseURL = $BASE_URL|g" .env
-    - sed -i "s|LOGTAIL_TOKEN = \${LOGTAIL_TOKEN}|LOGTAIL_TOKEN = $LOGTAIL_TOKEN|g" .env
-    - sed -i "s|CI_ENVIRONMENT = \${CI_ENVIRONMENT}|CI_ENVIRONMENT = $CI_ENVIRONMENT|g" .env
-    - sed -i "s|SHA256-PASSWORD-SALT = \${SHA256_PASSWORD_SALT}|SHA256-PASSWORD-SALT = $SHA256_PASSWORD_SALT|g" .env
+    # - sed -i "s|app.baseURL = \${BASE_URL}|app.baseURL = $BASE_URL|g" .env
+    # - sed -i "s|LOGTAIL_TOKEN = \${LOGTAIL_TOKEN}|LOGTAIL_TOKEN = $LOGTAIL_TOKEN|g" .env
+    # - sed -i "s|CI_ENVIRONMENT = \${CI_ENVIRONMENT}|CI_ENVIRONMENT = $CI_ENVIRONMENT|g" .env
+    # - sed -i "s|SHA256-PASSWORD-SALT = \${SHA256_PASSWORD_SALT}|SHA256-PASSWORD-SALT = $SHA256_PASSWORD_SALT|g" .env
     
      # Replace database host
-    - sed -i "s|database.default.hostname = \${DB_HOST}|database.default.hostname = $DB_HOST|g" .env
-    - sed -i "s|database.read.hostname = \${DB_HOST}|database.read.hostname = $DB_HOST|g" .env
-    - sed -i "s|database.write.hostname = \${DB_HOST}|database.write.hostname = $DB_HOST|g" .env
+    # - sed -i "s|database.default.hostname = \${DB_HOST}|database.default.hostname = $DB_HOST|g" .env
+    # - sed -i "s|database.read.hostname = \${DB_HOST}|database.read.hostname = $DB_HOST|g" .env
+    # - sed -i "s|database.write.hostname = \${DB_HOST}|database.write.hostname = $DB_HOST|g" .env
       # Replace password
-    - sed -i "s|database.default.password = \${DB_PASS}|database.default.password = $DB_PASS|g" .env
-    - sed -i "s|database.read.password = \${DB_PASS}|database.read.password = $DB_PASS|g" .env
-    - sed -i "s|database.write.password = \${DB_PASS}|database.write.password = $DB_PASS|g" .env
+    # - sed -i "s|database.default.password = \${DB_PASS}|database.default.password = $DB_PASS|g" .env
+    # - sed -i "s|database.read.password = \${DB_PASS}|database.read.password = $DB_PASS|g" .env
+    # - sed -i "s|database.write.password = \${DB_PASS}|database.write.password = $DB_PASS|g" .env
     
 
 include:

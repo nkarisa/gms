@@ -59,34 +59,6 @@ data "aws_lb_target_group" "safina_ecs_tg" {
 }
 
 # Define local values for dynamic configurations
-# locals {
-#   aws_region = var.aws_region
-
-#   container_definitions = [
-#     {
-#       name        = var.container_name
-#       image       = var.image_name # This is now valid!
-#       cpu         = 256
-#       memory      = 512
-#       essential   = true
-#       portMappings = [
-#         {
-#           containerPort = 80
-#           hostPort      = 80
-#         }
-#       ]
-#       logConfiguration = {
-#         logDriver = "awslogs"
-#         options = {
-#           "awslogs-group"         = aws_cloudwatch_log_group.safina_ecs_log_group.name
-#           "awslogs-region"        = var.aws_region # This is now valid!
-#           "awslogs-stream-prefix" = "ecs"
-#         }
-#       }
-#     }
-#   ]
-# }
-
 locals {
   aws_region = var.aws_region
 
@@ -104,12 +76,36 @@ locals {
         }
       ]
 
-    # environment = [
-    #     {
-    #       name  = "ENV_VAR_NAME"
-    #       value = "ENV_VAR_VALUE"
-    #     }
-    #   ]
+    environment = [
+        {
+          name  = "database.default.hostname"
+          value = var.database_host
+        },
+        {
+          name  = "database.default.password"
+          value = var.database_password
+        },
+        {
+          name  = "database.read.hostname"
+          value = var.database_host
+        },
+        {
+          name  = "database.read.password"
+          value = var.database_password
+        },
+        {
+          name  = "database.write.hostname"
+          value = var.database_host
+        },
+        {
+          name  = "database.write.password"
+          value = var.database_password
+        },
+        {
+          name = "LOGTAIL_TOKEN",
+          value = var.logtail_token
+        }
+      ]
 
       logConfiguration = {
         logDriver = "awslogs"
