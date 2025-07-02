@@ -58,7 +58,7 @@ include:
       unit_tests_script: 
         - *test_dep_script
         - echo $TF_VAR_image_name
-        # - vendor/bin/phpunit --log-junit build/junit.xml
+        # - vendor/bin/phpunit --log-junit build/junit.xml 
         # - |
         #   ./vendor/bin/phpunit \
         #     --coverage-text \
