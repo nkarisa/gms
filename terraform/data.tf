@@ -52,7 +52,7 @@ data "aws_lb_listener" "safina_listener_https_443" {
   port              = 443
   # protocol          = "HTTPS" # Assuming 443 implies HTTPS
 }
-
+ 
 # Data source for the existing Target Group 
 data "aws_lb_target_group" "safina_ecs_tg" {
   name = var.target_group_name # Replace with your actual Target Group name
