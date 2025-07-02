@@ -75,9 +75,6 @@ include:
       feature_deploy_env: devint
       state_type: "s3_bypath"
       container_build_destination: "234204504144.dkr.ecr.eu-west-1.amazonaws.com/safinav3"
-      build_script:
-        - TF_VAR_image_name="234204504144.dkr.ecr.eu-west-1.amazonaws.com/safinav3:${CI_COMMIT_SHA}"
-        - echo $TF_VAR_image_name
   #   rules: 
   #     - if: >-
   #         $CI_COMMIT_TAG !~ /.*-prod/i
