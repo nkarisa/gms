@@ -40,7 +40,7 @@ resource "aws_ecs_service" "new_ecs_service" {
   desired_count   = var.desired_count
   launch_type     = "FARGATE"
   deployment_minimum_healthy_percent = 50
-  deployment_maximum_percent = 75
+  deployment_maximum_percent = 100
 
 
   network_configuration {
