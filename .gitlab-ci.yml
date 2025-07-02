@@ -36,7 +36,7 @@ cache:
   - sed -i "s|database.read.password = \${DB_PASS}|database.read.password = $DB_PASS|g" .env
   - sed -i "s|database.write.password = \${DB_PASS}|database.write.password = $DB_PASS|g" .env
     # Add any other build steps here
-  - cat .env
+  # - cat .env
   # - pecl install xdebug-3.0.0
   # - docker-php-ext-enable xdebug
 
@@ -57,7 +57,6 @@ include:
       terraform_dir: 'terraform'
       unit_tests_script: 
         - *test_dep_script
-        - echo $TF_VAR_image_name
         # - vendor/bin/phpunit --log-junit build/junit.xml 
         # - |
         #   ./vendor/bin/phpunit \
@@ -73,6 +72,7 @@ include:
       container_build_dockerfile_path: "./Dockerfile"
       feature_deploy_env: devint
       state_type: "s3_bypath"
+      container_build_destination: "234204504144.dkr.ecr.eu-west-1.amazonaws.com/safinav3"
 
   #   rules: 
   #     - if: >-
