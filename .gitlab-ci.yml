@@ -73,7 +73,7 @@ include:
       feature_deploy_env: devint
       state_type: "s3_bypath"
 
-  #   rules:
+  #   rules: 
   #     - if: >-
   #         $CI_COMMIT_TAG !~ /.*-prod/i
 
