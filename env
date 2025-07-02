@@ -14,13 +14,15 @@
 # ENVIRONMENT
 #--------------------------------------------------------------------
 
-CI_ENVIRONMENT=production
+CI_ENVIRONMENT = ${CI_ENVIRONMENT} # production
+
+LOGTAIL_TOKEN = ${LOGTAIL_TOKEN} # yExJneTaHgWUvP9FejxxQJNa
 
 #--------------------------------------------------------------------
 # APP
 #--------------------------------------------------------------------
-HOSTPORT=8077
-app.baseURL='http://localhost:8077/'
+
+app.baseURL = ${BASE_URL} # 'http://localhost:8077/'
 # If you have trouble with `.`, you could also use `_`.
 # app_baseURL = ''
 # app.forceGlobalSecureRequests = false
