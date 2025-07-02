@@ -57,7 +57,7 @@ include:
       terraform_dir: 'terraform'
       unit_tests_script: 
         - *test_dep_script
-        - echo $CI_REGISTRY
+        - echo $TF_VAR_image_name
         # - vendor/bin/phpunit --log-junit build/junit.xml
         # - |
         #   ./vendor/bin/phpunit \
