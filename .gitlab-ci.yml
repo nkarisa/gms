@@ -9,9 +9,9 @@ cache:
   paths:
       - vendor
 
-before_script:
-  - apk add --no-cache gettext
-  - envsubst < env > .env
+# before_script:
+#   - apk add --no-cache gettext
+#   - envsubst < env > .env
 
 .test_deps: &test_dep_script
   - apk add --no-cache git unzip mysql-client gettext
@@ -45,6 +45,11 @@ before_script:
   # - pecl install xdebug-3.0.0
   # - docker-php-ext-enable xdebug
   # - echo $TF_VAR_image_name
+
+build_image:
+  before_script:
+    - apk add --no-cache gettext
+    - envsubst < env > .env
 
 include:
   - component: &core-yaml-tpl $CI_SERVER_FQDN/ciorg/community/cmf/pipeline/core-yaml/include@2.4
