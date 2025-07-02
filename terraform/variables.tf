@@ -7,7 +7,7 @@ variable "security_group_ids" {
 variable "desired_count" {
   description = "Desired task count"
   type        = number
-  default     = 2
+  default     = 4
 }
 
 variable "service_name" {
