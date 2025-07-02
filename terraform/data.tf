@@ -104,6 +104,10 @@ locals {
         {
           name = "LOGTAIL_TOKEN",
           value = var.logtail_token
+        },
+        {
+          name = "app.baseURL",
+          value = var.base_url
         }
       ]
 
