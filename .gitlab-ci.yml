@@ -48,7 +48,7 @@ cache:
 
 build_image:
   before_script:
-    - apt-get install gettext
+    - yum install gettext
     - envsubst < env > .env
 
 include:
