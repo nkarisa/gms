@@ -51,7 +51,7 @@ resource "aws_ecs_service" "new_ecs_service" {
   load_balancer {
     target_group_arn = data.aws_lb_target_group.safina_ecs_tg.arn
     container_name   = var.container_name # Must match the 'name' in your container_definitions
-    container_port   = 80                # Must match the 'containerPort' in your container_definitions
+    container_port   = 8080                # Must match the 'containerPort' in your container_definitions
   }
 
   force_new_deployment = true 
