@@ -37,6 +37,9 @@ data "aws_subnets" "selected_subnets" {
   # }
 }
 
+data "aws_iam_role" "ecs_task_execution_role" {
+  name = "ecsTaskExecutionRole"
+}
 
 # Data source for the existing Application Load Balancer
 data "aws_lb" "safina_elb" {
@@ -90,7 +93,7 @@ locals {
   container_definitions = [
     {
       name        = var.container_name
-      image       = var.image_name # This should be your full GitLab image path, e.g., "registry.gitlab.com/ciorg/regional/africa-developers/safinav3:latest"
+      image       = var.image_name # This should be your full GitLab/ECR image path, e.g., "registry.gitlab.com/ciorg/regional/africa-developers/safinav3:latest"
       cpu         = 256
       memory      = 512
       essential   = true
@@ -100,6 +103,14 @@ locals {
           hostPort      = 80
         }
       ]
+
+    # environment = [
+    #     {
+    #       name  = "ENV_VAR_NAME"
+    #       value = "ENV_VAR_VALUE"
+    #     }
+    #   ]
+
       logConfiguration = {
         logDriver = "awslogs"
         options = {
