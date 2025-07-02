@@ -39,6 +39,7 @@ cache:
   # - cat .env
   # - pecl install xdebug-3.0.0
   # - docker-php-ext-enable xdebug
+  - echo $TF_VAR_image_name
 
 include:
   - component: &core-yaml-tpl $CI_SERVER_FQDN/ciorg/community/cmf/pipeline/core-yaml/include@2.4
