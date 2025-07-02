@@ -1,6 +1,7 @@
 
 variables:
     XDEBUG_MODE: "coverage" 
+    # TF_VAR_image_name: "${CI_REGISTRY_IMAGE}:latest"
 
 cache:
   key: "${CI_JOB_NAME}-build"
@@ -72,6 +73,7 @@ include:
       container_build_dockerfile_path: "./Dockerfile"
       feature_deploy_env: devint
       state_type: "s3_bypath"
+      container_build_destination: "safinav3:latest"
 
   #   rules: 
   #     - if: >-
