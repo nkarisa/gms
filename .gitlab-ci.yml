@@ -1,8 +1,7 @@
 
 variables:
     XDEBUG_MODE: "coverage" 
-    # DB_HOST: "safina-prod-db-write-node.cnakaijj18qt.eu-west-1.rds.amazonaws.com"
-
+    
 cache:
   key: "${CI_JOB_NAME}-build"
   paths:
