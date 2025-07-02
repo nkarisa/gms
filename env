@@ -14,15 +14,15 @@
 # ENVIRONMENT
 #--------------------------------------------------------------------
 
-CI_ENVIRONMENT = ${CI_ENVIRONMENT} # production
+CI_ENVIRONMENT = ${CI_ENVIRONMENT} 
 
-LOGTAIL_TOKEN = ${LOGTAIL_TOKEN} # yExJneTaHgWUvP9FejxxQJNa
+LOGTAIL_TOKEN = ${LOGTAIL_TOKEN} 
 
 #--------------------------------------------------------------------
 # APP
 #--------------------------------------------------------------------
 
-app.baseURL = ${BASE_URL} # 'http://localhost:8077/'
+app.baseURL = ${BASE_URL} 
 # If you have trouble with `.`, you could also use `_`.
 # app_baseURL = ''
 # app.forceGlobalSecureRequests = false
@@ -90,11 +90,11 @@ database.write.port = 3306
 # Password salting 
 #--------------------------------------------------------------------
 
-SHA256-PASSWORD-SALT=salt
+SHA256-PASSWORD-SALT = ${SHA256_PASSWORD_SALT}
 
 #----------------------------------------------------------------
 # AWS CREDENTIALS 
 #--------------------------------------------------------------------
 
-aws.credentials_profile=profile
-aws.region=region
+aws.credentials_profile = profile
+aws.region = eu-west-1

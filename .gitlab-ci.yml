@@ -19,11 +19,12 @@ cache:
   - if [ -f env ]; then cp env .env; fi
   - chmod -R 777 writable/
   - chmod 775 .env
-  
+
    # Replace base URL, LOGTAIL_TOKEN and CI_ENVIRONMENT
   - sed -i "s|app.baseURL = \${BASE_URL}|app.baseURL = $BASE_URL|g" .env
   - sed -i "s|LOGTAIL_TOKEN = \${LOGTAIL_TOKEN}|LOGTAIL_TOKEN = $LOGTAIL_TOKEN|g" .env
   - sed -i "s|CI_ENVIRONMENT = \${CI_ENVIRONMENT}|CI_ENVIRONMENT = $CI_ENVIRONMENT|g" .env
+  - sed -i "s|SHA256-PASSWORD-SALT = \${SHA256_PASSWORD_SALT}|SHA256-PASSWORD-SALT = $SHA256_PASSWORD_SALT|g" .env
   
    # Replace database host
   - sed -i "s|database.default.hostname = \${DB_HOST}|database.default.hostname = $DB_HOST|g" .env
