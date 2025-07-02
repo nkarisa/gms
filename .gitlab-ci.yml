@@ -49,7 +49,7 @@ include:
       final_deploy_behavior: on_success # default manual
       is_http_service: false
       build_and_test_image_version: '8.2-fpm-alpine'
-      build_and_test_image: php
+      build_and_test_image: php 
       service_language: golang # Ignore this one. Used only to satisfy the logic checks
       include_build_job: false
       deploy_tooling: 'terraform'
