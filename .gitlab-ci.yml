@@ -37,7 +37,7 @@ cache:
   - sed -i "s|database.read.password = \${DB_PASS}|database.read.password = $DB_PASS|g" .env
   - sed -i "s|database.write.password = \${DB_PASS}|database.write.password = $DB_PASS|g" .env
     # Add any other build steps here
-  # - cat .env
+  - cat .env
   # - pecl install xdebug-3.0.0
   # - docker-php-ext-enable xdebug
   - echo $TF_VAR_image_name
