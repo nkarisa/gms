@@ -73,7 +73,7 @@ include:
       container_build_dockerfile_path: "./Dockerfile"
       feature_deploy_env: devint
       state_type: "s3_bypath"
-      container_build_destination: "safinav3:latest"
+      container_build_destination: "safinav3:devint"
 
   #   rules: 
   #     - if: >-
