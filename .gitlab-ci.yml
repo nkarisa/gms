@@ -48,9 +48,11 @@ cache:
 
 build_image:
   before_script:
+    - chmod +x generate_env.sh
+    - ./generate_env.sh
     # - yum install gettext
     # - envsubst < env > .env
-    - if [ -f env ]; then cp env .env; fi
+    # - if [ -f env ]; then cp env .env; fi
     # - chmod 775 .env 
       # Replace base URL, LOGTAIL_TOKEN and CI_ENVIRONMENT
     # - sed -i "s|app.baseURL = \${BASE_URL}|app.baseURL = $BASE_URL|g" .env
