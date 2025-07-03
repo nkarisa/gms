@@ -42,6 +42,7 @@ resource "aws_ecs_service" "new_ecs_service" {
   deployment_minimum_healthy_percent = 50
   deployment_maximum_percent = 100
 
+  enable_execute_command = true
 
   network_configuration {
     subnets         = data.aws_subnets.selected_subnets.ids
