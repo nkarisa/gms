@@ -69,6 +69,18 @@ variable "gitlab_secret_arn" {
   type        = string
 }
 
+variable "task_cpu" {
+  description = "The number of CPU units reserved for the task."
+  type        = number
+  default     = var.task_cpu # Increased to accommodate two containers (0.5 vCPU)
+}
+
+variable "task_memory" {
+  description = "The amount of memory (in MiB) reserved for the task."
+  type        = number
+  default     = var.tas # Increased to accommodate two containers (1 GB)
+}
+
 # variable "database_host" {
 #   type        = string
 # }
