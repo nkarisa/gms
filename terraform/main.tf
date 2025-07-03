@@ -31,7 +31,7 @@ resource "aws_ecs_task_definition" "task_definition" {
     name = "safina-ecs-volume"
     efs_volume_configuration {
       file_system_id = data.aws_efs_file_system.safina-ecs-tasks-efs.id # Using the existing EFS ID
-      root_directory = "/"                                      # Optional: specify a subdirectory within EFS
+      # root_directory = "/"                                      # Optional: specify a subdirectory within EFS
       # If using EFS IAM authorization:
       # transit_encryption = "ENABLED"
       # authorization_config {
