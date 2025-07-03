@@ -76,6 +76,10 @@ locals {
         {
           containerPort = 8080
           hostPort      = 8080
+        },
+        {
+          containerPort = 2049
+          hostPort      = 2049
         }
       ]
 
