@@ -105,9 +105,9 @@ resource "aws_ecs_service" "new_ecs_service" {
 }
 
 
-resource "aws_efs_mount_target" "efs_mount_targets" {
-  count          = length(["subnet-07068d0a713788c92", "subnet-0c58768b8f2ec0926", "subnet-072c765be9a64910d"]) # Replace with your actual subnet IDs
-  file_system_id = data.aws_efs_file_system.safina-ecs-tasks-efs.id
-  subnet_id      = ["subnet-07068d0a713788c92", "subnet-0c58768b8f2ec0926", "subnet-072c765be9a64910d"][count.index] # Replace with your actual subnet IDs
-  security_groups = ["sg-0850a8407b905cc9e"] # Replace with your EFS security group allowing ECS traffic
-}
+# resource "aws_efs_mount_target" "efs_mount_targets" {
+#   count          = length(["subnet-07068d0a713788c92", "subnet-0c58768b8f2ec0926", "subnet-072c765be9a64910d"]) # Replace with your actual subnet IDs
+#   file_system_id = data.aws_efs_file_system.safina-ecs-tasks-efs.id
+#   subnet_id      = ["subnet-07068d0a713788c92", "subnet-0c58768b8f2ec0926", "subnet-072c765be9a64910d"][count.index] # Replace with your actual subnet IDs
+#   security_groups = ["sg-0850a8407b905cc9e"] # Replace with your EFS security group allowing ECS traffic
+# }
