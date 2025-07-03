@@ -95,7 +95,7 @@ locals {
       mountPoints = [
         {
           sourceVolume  = "safina-ecs-volume",
-          containerPath = "/var/www/html", # The path inside your container where EFS will be mounted
+          containerPath = "/var/www", # The path inside your container where EFS will be mounted
           readOnly      = false
         }
       ]
@@ -115,7 +115,7 @@ locals {
       mountPoints = [
         {
           sourceVolume  = "safina-ecs-volume", # Mount the same EFS volume
-          containerPath = "/var/www", # A different path for the supervisor container
+          containerPath = "/var/www/html", # A different path for the supervisor container
           readOnly      = false
         }
       ],
