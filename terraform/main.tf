@@ -27,6 +27,20 @@ resource "aws_ecs_task_definition" "task_definition" {
   # Container definitions in JSON format
   container_definitions = jsonencode(local.container_definitions)
 
+  volume {
+    name = "safina-ecs-volume"
+    efs_volume_configuration {
+      file_system_id = data.aws_efs_file_system.safina-ecs-tasks-efs.id # Using the existing EFS ID
+      root_directory = "/"                                      # Optional: specify a subdirectory within EFS
+      # If using EFS IAM authorization:
+      # transit_encryption = "ENABLED"
+      # authorization_config {
+      #   access_point_id = "fsap-abcdef1234567890b" # Optional: if using EFS Access Points
+      #   iam             = "ENABLED"
+      # }
+    }
+  }
+
   tags = {
     Name = "${var.task_definition_family}"
   }
@@ -90,3 +104,10 @@ resource "aws_ecs_service" "new_ecs_service" {
   ]
 }
 
+
+resource "aws_efs_mount_target" "efs_mount_targets" {
+  count          = length(["subnet-07068d0a713788c92", "subnet-0c58768b8f2ec0926", "subnet-072c765be9a64910d"]) # Replace with your actual subnet IDs
+  file_system_id = aws_efs_file_system.my_efs.id
+  subnet_id      = ["subnet-07068d0a713788c92", "subnet-0c58768b8f2ec0926", "subnet-072c765be9a64910d"][count.index] # Replace with your actual subnet IDs
+  security_groups = ["sg-0850a8407b905cc9e"] # Replace with your EFS security group allowing ECS traffic
+}

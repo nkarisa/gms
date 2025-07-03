@@ -69,18 +69,18 @@ variable "gitlab_secret_arn" {
   type        = string
 }
 
-variable "database_host" {
-  type        = string
-}
+# variable "database_host" {
+#   type        = string
+# }
 
-variable "database_password" {
-  type        = string
-}
+# variable "database_password" {
+#   type        = string
+# }
 
-variable "logtail_token" {
-  type        = string
-}
+# variable "logtail_token" {
+#   type        = string
+# }
 
-variable "base_url" {
-  type        = string
-}
+# variable "base_url" {
+#   type        = string
+# }

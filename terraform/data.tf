@@ -1,3 +1,6 @@
+data "aws_efs_file_system" "safina-ecs-tasks-efs" {
+  file_system_id = "fs-0093c43d73ea36291" # Replace with your EXISTING EFS File System ID
+}
 
 data "aws_ecs_cluster" "safina_app_cluster" {
   cluster_name = "safina-cluster"
@@ -76,40 +79,40 @@ locals {
         }
       ]
 
-    environment = [
-        {
-          name  = "database.default.hostname"
-          value = var.database_host
-        },
-        {
-          name  = "database.default.password"
-          value = var.database_password
-        },
-        {
-          name  = "database.read.hostname"
-          value = var.database_host
-        },
-        {
-          name  = "database.read.password"
-          value = var.database_password
-        },
-        {
-          name  = "database.write.hostname"
-          value = var.database_host
-        },
-        {
-          name  = "database.write.password"
-          value = var.database_password
-        },
-        {
-          name = "LOGTAIL_TOKEN",
-          value = var.logtail_token
-        },
-        {
-          name = "app.baseURL",
-          value = var.base_url
-        }
-      ]
+    # environment = [
+    #     {
+    #       name  = "database.default.hostname"
+    #       value = var.database_host
+    #     },
+    #     {
+    #       name  = "database.default.password"
+    #       value = var.database_password
+    #     },
+    #     {
+    #       name  = "database.read.hostname"
+    #       value = var.database_host
+    #     },
+    #     {
+    #       name  = "database.read.password"
+    #       value = var.database_password
+    #     },
+    #     {
+    #       name  = "database.write.hostname"
+    #       value = var.database_host
+    #     },
+    #     {
+    #       name  = "database.write.password"
+    #       value = var.database_password
+    #     },
+    #     {
+    #       name = "LOGTAIL_TOKEN",
+    #       value = var.logtail_token
+    #     },
+    #     {
+    #       name = "app.baseURL",
+    #       value = var.base_url
+    #     }
+    #   ]
 
       logConfiguration = {
         logDriver = "awslogs"
@@ -119,6 +122,14 @@ locals {
           "awslogs-stream-prefix" = "ecs"
         }
       }
+
+      mountPoints = [
+        {
+          sourceVolume  = "safina-ecs-volume",
+          containerPath = "/var/www/html", # The path inside your container where EFS will be mounted
+          readOnly      = false
+        }
+      ]
      
       # repositoryCredentials = {
       #   credentialsParameter = var.gitlab_secret_arn # Reference the variable you'll define for the Secret ARN

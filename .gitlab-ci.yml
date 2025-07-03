@@ -118,14 +118,14 @@ include:
       container_build_destination: "234204504144.dkr.ecr.eu-west-1.amazonaws.com/safinav3"
       build_script:
       #   - envsubst < env > .env
-        - sed -i "s|app.baseURL = 'http://localhost/'|app.baseURL = $BASE_URL|g" .env
-        - sed -i "s|database.default.hostname = 'localhost'|database.default.hostname = $DB_HOST|g" .env
-        - sed -i "s|database.read.hostname = 'localhost'|database.read.hostname = $DB_HOST|g" .env
-        - sed -i "s|database.write.hostname = 'localhost'|database.write.hostname = $DB_HOST|g" .env
+        # - sed -i "s|app.baseURL = 'http://localhost/'|app.baseURL = $BASE_URL|g" .env
+        # - sed -i "s|database.default.hostname = localhost|database.default.hostname = $DB_HOST|g" .env
+        # - sed -i "s|database.read.hostname = localhost|database.read.hostname = $DB_HOST|g" .env
+        # - sed -i "s|database.write.hostname = localhost|database.write.hostname = $DB_HOST|g" .env
 
-        - sed -i "s|database.default.password = password|database.default.password = $DB_PASS|g" .env
-        - sed -i "s|database.read.password = password|database.read.password = $DB_PASS|g" .env
-        - sed -i "s|database.write.password = password|database.write.password = $DB_PASS|g" .env
+        # - sed -i "s|database.default.password = password|database.default.password = $DB_PASS|g" .env
+        # - sed -i "s|database.read.password = password|database.read.password = $DB_PASS|g" .env
+        # - sed -i "s|database.write.password = password|database.write.password = $DB_PASS|g" .env
   
   #   rules: 
   #     - if: >-
