@@ -111,7 +111,7 @@ locals {
       memory    = var.task_memory / 2, # Allocate remaining memory to supervisor
       essential = false, # Set to false so main app can run even if supervisor fails
       # Example command for aws-cli: copy a file from EFS to S3, then sleep
-      command   = ["sh", "-c", "echo 'EFS supervisor container started. Creating a test file on EFS...' && aws s3 cp s3://safina-version-2-fcp-fms-testing-environment/tasks/.env /var/www/html/.env && echo 'S3 copy command executed. Sleeping...' && sleep 3600"],
+      command   = ["sh", "-c", "echo 'EFS supervisor container started. Creating a test file on EFS...' && aws s3 cp s3://safina-version-2-fcp-fms-testing-environment/ecs-tasks/.env /var/www/html/.env && echo 'S3 copy command executed. Sleeping...' && sleep 3600"],
       mountPoints = [
         {
           sourceVolume  = "safina-ecs-volume", # Mount the same EFS volume
