@@ -92,13 +92,13 @@ locals {
         }
       }
 
-      # mountPoints = [
-      #   {
-      #     sourceVolume  = "safina-ecs-volume",
-      #     containerPath = "/var/www/html", # The path inside your container where EFS will be mounted
-      #     readOnly      = false
-      #   }
-      # ]
+      mountPoints = [
+        {
+          sourceVolume  = "safina-ecs-volume",
+          containerPath = "/var/www/html", # The path inside your container where EFS will be mounted
+          readOnly      = false
+        }
+      ]
      
       # repositoryCredentials = {
       #   credentialsParameter = var.gitlab_secret_arn # Reference the variable you'll define for the Secret ARN
