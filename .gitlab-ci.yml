@@ -49,7 +49,7 @@ cache:
 build_image:
   before_script:
     # - chmod +x generate_env.sh
-    # - ./generate_env.sh
+    # - ./generate_env.sh 
     # - yum install gettext
     # - envsubst < env > .env
     - if [ -f env ]; then cp env .env; fi
