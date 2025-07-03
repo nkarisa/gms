@@ -12,8 +12,8 @@ resource "aws_cloudwatch_log_group" "safina_ecs_log_group" {
 # Define the AWS ECS Task Definition for Nginx
 resource "aws_ecs_task_definition" "task_definition" {
   family                   = var.task_definition_family # A logical name for your task definition
-  cpu                      = "256"       # CPU units (e.g., 256 for 0.25 vCPU)
-  memory                   = "512"       # Memory in MiB
+  cpu                      = var.task_cpu       # CPU units (e.g., 256 for 0.25 vCPU)
+  memory                   = var.task_memory       # Memory in MiB
   network_mode             = "awsvpc"    # Recommended network mode for Fargate
   requires_compatibilities = ["FARGATE"] # Or ["EC2"] if you're using EC2 launch type
   execution_role_arn       =   data.aws_iam_role.ecs_task_execution_role.arn # Reference the new execution role # "arn:aws:iam::234204504144:role/ecsTaskExecutionRole"
