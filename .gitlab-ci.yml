@@ -54,17 +54,18 @@ build_image:
     # - envsubst < env > .env
     - if [ -f env ]; then cp env .env; fi
     
-    - echo "app.baseURL=${BASE_URL}" >> .env
-    - echo "LOGTAIL_TOKEN = ${LOGTAIL_TOKEN}" >> .env
+    # - echo "app.baseURL=${BASE_URL}" >> .env
+    # - echo "LOGTAIL_TOKEN = ${LOGTAIL_TOKEN}" >> .env
     
-    - echo "database.default.hostname = ${DB_HOST}" >> .env
-    - echo "database.default.password = ${DB_PASS}" >> .env
+    # - echo "database.default.hostname = ${DB_HOST}" >> .env
+    # - echo "database.default.password = ${DB_PASS}" >> .env
     
-    - echo "database.read.hostname = ${DB_HOST}" >> .env
-    - echo "database.read.password = ${DB_PASS}" >> .env
+    # - echo "database.read.hostname = ${DB_HOST}" >> .env
+    # - echo "database.read.password = ${DB_PASS}" >> .env
     
-    - echo "database.write.hostname = ${DB_HOST}" >> .env
-    - echo "database.write.password = ${DB_PASS}" >> .env
+    # - echo "database.write.hostname = ${DB_HOST}" >> .env
+    # - echo "database.write.password = ${DB_PASS}" >> .env
+
     # - chmod 775 .env 
       # Replace base URL, LOGTAIL_TOKEN and CI_ENVIRONMENT
     # - sed -i "s|app.baseURL = \${BASE_URL}|app.baseURL = $BASE_URL|g" .env
@@ -118,7 +119,14 @@ include:
       build_script:
       #   - envsubst < env > .env
         - sed -i "s|app.baseURL = 'http://localhost/'|app.baseURL = $BASE_URL|g" .env
+        - sed -i "s|database.default.hostname = 'localhost'|database.default.hostname = $DB_HOST|g" .env
+        - sed -i "s|database.read.hostname = 'localhost'|database.read.hostname = $DB_HOST|g" .env
+        - sed -i "s|database.write.hostname = 'localhost'|database.write.hostname = $DB_HOST|g" .env
 
+        - sed -i "s|database.default.password = password|database.default.password = $DB_PASS|g" .env
+        - sed -i "s|database.read.password = password|database.read.password = $DB_PASS|g" .env
+        - sed -i "s|database.write.password = password|database.write.password = $DB_PASS|g" .env
+  
   #   rules: 
   #     - if: >-
   #         $CI_COMMIT_TAG !~ /.*-prod/i
