@@ -48,11 +48,23 @@ cache:
 
 build_image:
   before_script:
-    - chmod +x generate_env.sh
-    - ./generate_env.sh
+    # - chmod +x generate_env.sh
+    # - ./generate_env.sh
     # - yum install gettext
     # - envsubst < env > .env
-    # - if [ -f env ]; then cp env .env; fi
+    - if [ -f env ]; then cp env .env; fi
+    
+    - echo "app.baseURL=${BASE_URL}" >> .env
+    - echo "LOGTAIL_TOKEN = ${LOGTAIL_TOKEN}" >> .env
+    
+    - echo "database.default.hostname = ${DB_HOST}" >> .env
+    - echo "database.default.password = ${DB_PASS}" >> .env
+    
+    - echo "database.read.hostname = ${DB_HOST}" >> .env
+    - echo "database.read.password = ${DB_PASS}" >> .env
+    
+    - echo "database.write.hostname = ${DB_HOST}" >> .env
+    - echo "database.write.password = ${DB_PASS}" >> .env
     # - chmod 775 .env 
       # Replace base URL, LOGTAIL_TOKEN and CI_ENVIRONMENT
     # - sed -i "s|app.baseURL = \${BASE_URL}|app.baseURL = $BASE_URL|g" .env
