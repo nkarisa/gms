@@ -79,41 +79,6 @@ locals {
         }
       ]
 
-    # environment = [
-    #     {
-    #       name  = "database.default.hostname"
-    #       value = var.database_host
-    #     },
-    #     {
-    #       name  = "database.default.password"
-    #       value = var.database_password
-    #     },
-    #     {
-    #       name  = "database.read.hostname"
-    #       value = var.database_host
-    #     },
-    #     {
-    #       name  = "database.read.password"
-    #       value = var.database_password
-    #     },
-    #     {
-    #       name  = "database.write.hostname"
-    #       value = var.database_host
-    #     },
-    #     {
-    #       name  = "database.write.password"
-    #       value = var.database_password
-    #     },
-    #     {
-    #       name = "LOGTAIL_TOKEN",
-    #       value = var.logtail_token
-    #     },
-    #     {
-    #       name = "app.baseURL",
-    #       value = var.base_url
-    #     }
-    #   ]
-
       logConfiguration = {
         logDriver = "awslogs"
         options = {
