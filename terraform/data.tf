@@ -2,7 +2,7 @@ data "aws_efs_file_system" "safina-ecs-tasks-efs" {
   file_system_id = "fs-0093c43d73ea36291" # Replace with your EXISTING EFS File System ID
 }
 
-data "aws_ecs_cluster" "safina_app_cluster" {
+data "aws_ecs_cluster" "safina_app_cluster" { 
   cluster_name = "safina-cluster"
   # arn = "arn:aws:ecs:eu-west-1:234204504144:cluster/safina-cluster"
 }
