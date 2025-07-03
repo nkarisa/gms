@@ -69,8 +69,8 @@ locals {
     {
       name        = var.container_name
       image       = var.image_name # This should be your full GitLab/ECR image path, e.g., "registry.gitlab.com/ciorg/regional/africa-developers/safinav3:latest"
-      cpu         = var.task_cpu
-      memory      = var.task_memory
+      cpu         = var.task_cpu / 2
+      memory      = var.task_memory / 2
       essential   = true
       portMappings = [
         {
