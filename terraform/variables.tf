@@ -1,3 +1,12 @@
+data "aws_ecs_cluster" "safina-cluster" {
+  cluster_name = "safina-cluster"
+}
+
+data "aws_ecs_service" "safina-app-service" {
+  service_name = "example"
+  cluster_arn  = data.aws_ecs_cluster.safina-cluster.arn
+}
+
 variable "security_group_ids" {
   description = "Desired task count"
   type        = list(string)

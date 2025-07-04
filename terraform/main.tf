@@ -119,7 +119,7 @@ resource "aws_ecs_service" "new_ecs_service" {
 resource "aws_appautoscaling_target" "ecs_target" {
   max_capacity       = 5 # Maximum number of tasks
   min_capacity       = 2  # Minimum number of tasks
-  resource_id        = "service/${aws_ecs_cluster.new_ecs_service.name}/${aws_ecs_service.new_ecs_service.name}"
+  resource_id        = "service/${data.aws_ecs_cluster.safina-app-service.name}/${data.aws_ecs_service.safina-app-service.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
 }
@@ -127,7 +127,7 @@ resource "aws_appautoscaling_target" "ecs_target" {
 # 2. Define the Scaling Policy (Target Tracking)
 # This policy scales based on CPU utilization
 resource "aws_appautoscaling_policy" "ecs_cpu_scaling_policy" {
-  name                   = "${aws_ecs_service.new_ecs_service.name}-cpu-scaling-policy"
+  name                   = "${data.aws_ecs_service.safina-app-service.name}-cpu-scaling-policy"
   policy_type            = "TargetTrackingScaling"
   resource_id            = aws_appautoscaling_target.ecs_target.resource_id
   scalable_dimension     = aws_appautoscaling_target.ecs_target.scalable_dimension
@@ -145,7 +145,7 @@ resource "aws_appautoscaling_policy" "ecs_cpu_scaling_policy" {
 
 # You can add another policy for memory utilization if needed
 resource "aws_appautoscaling_policy" "ecs_memory_scaling_policy" {
-  name                   = "${aws_ecs_service.new_ecs_service.name}-memory-scaling-policy"
+  name                   = "${data.aws_ecs_service.safina-app-service.name}-memory-scaling-policy"
   policy_type            = "TargetTrackingScaling"
   resource_id            = aws_appautoscaling_target.ecs_target.resource_id
   scalable_dimension     = aws_appautoscaling_target.ecs_target.scalable_dimension
