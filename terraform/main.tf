@@ -133,13 +133,23 @@ resource "aws_appautoscaling_policy" "ecs_cpu_scaling_policy" {
   scalable_dimension     = aws_appautoscaling_target.ecs_target.scalable_dimension
   service_namespace      = aws_appautoscaling_target.ecs_target.service_namespace
 
-  target_tracking_configuration {
-    predefined_metric_specification {
-      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+  # target_tracking_configuration {
+  #   predefined_metric_specification {
+  #     predefined_metric_type = "ECSServiceAverageCPUUtilization"
+  #   }
+  #   target_value = 70.0 # Target 70% CPU utilization
+  #   scale_in_cooldown  = 300 # Cooldown period for scale-in in seconds
+  #   scale_out_cooldown = 300 # Cooldown period for scale-out in seconds
+  # }
+  step_scaling_policy_configuration {
+    adjustment_type         = "ChangeInCapacity"
+    cooldown                = 300
+    metric_aggregation_type = "Maximum"
+
+    step_adjustment {
+      metric_interval_upper_bound = 0
+      scaling_adjustment          = -1
     }
-    target_value = 70.0 # Target 70% CPU utilization
-    scale_in_cooldown  = 300 # Cooldown period for scale-in in seconds
-    scale_out_cooldown = 300 # Cooldown period for scale-out in seconds
   }
 }
 
