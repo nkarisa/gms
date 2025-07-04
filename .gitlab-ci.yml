@@ -18,9 +18,9 @@ cache:
   - composer install --prefer-dist --no-interaction --optimize-autoloader
   - chmod -R 777 writable/
 
-.container-build:
-  before_script:
-   - cp /build/.env .env
+# .container-build:
+#   before_script:
+#    - cp /build/.env .env
 
 
 .update_env:
@@ -113,7 +113,8 @@ include:
       container_build_dependencies:
         - .update_env
 
-      # build_script:
+      build_script:
+        - cp /build/.env .env
       #   # - apk add install gettext
       #   # - envsubst < env > .env
 
