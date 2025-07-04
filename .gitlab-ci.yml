@@ -92,6 +92,7 @@ include:
       include_build_job: false
       deploy_tooling: 'terraform'
       terraform_dir: 'terraform'
+      include_container_build_job: true
       unit_tests_script: 
         - *test_dep_script
         # - vendor/bin/phpunit --log-junit build/junit.xml 

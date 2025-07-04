@@ -103,7 +103,7 @@ _modules/*
 
 # Netbeans
 nbproject/
-build/
+build/*
 nbbuild/
 nbdist/
 nbactions.xml
