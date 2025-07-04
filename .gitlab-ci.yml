@@ -20,8 +20,13 @@ cache:
 
 .container-build:
   before_script:
+   - cp build/.env .env
+
+
+.update_env:
+  script:
     # - if [ -f env ]; then cp env .env; fi
-    - cp ./env .env
+    - cp env .env
     - chmod 775 .env 
     
     # Replace base URL, LOGTAIL_TOKEN and CI_ENVIRONMENT
@@ -39,7 +44,13 @@ cache:
     - sed -i "s|database.default.password = password|database.default.password = $DB_PASS|g" .env
     - sed -i "s|database.read.password = password|database.read.password = $DB_PASS|g" .env
     - sed -i "s|database.write.password = password|database.write.password = $DB_PASS|g" .env
-    - cat .env   
+    - mkdir -p build
+    - mv .env build/.env  
+
+  artifacts:
+    paths:
+      - build/ 
+  
 
 
 # build_image:
@@ -99,6 +110,9 @@ include:
       feature_deploy_env: devint
       state_type: "s3_bypath"
       container_build_destination: "234204504144.dkr.ecr.eu-west-1.amazonaws.com/safinav3"
+      container_build_dependencies:
+        - .update_env
+
       # build_script:
       #   # - apk add install gettext
       #   # - envsubst < env > .env
