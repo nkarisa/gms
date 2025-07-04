@@ -18,6 +18,29 @@ cache:
   - composer install --prefer-dist --no-interaction --optimize-autoloader
   - chmod -R 777 writable/
 
+.container-build:
+  script:
+    - if [ -f env ]; then cp env .env; fi
+    - chmod 775 .env 
+    
+    # Replace base URL, LOGTAIL_TOKEN and CI_ENVIRONMENT
+    - sed -i "s|app.baseURL = 'http://localhost/'|app.baseURL = $BASE_URL|g" .env
+    - sed -i "s|LOGTAIL_TOKEN = token|LOGTAIL_TOKEN = $LOGTAIL_TOKEN|g" .env
+    # - sed -i "s|CI_ENVIRONMENT = \${CI_ENVIRONMENT}|CI_ENVIRONMENT = $CI_ENVIRONMENT|g" .env
+    - sed -i "s|SHA256-PASSWORD-SALT = salt|SHA256-PASSWORD-SALT = $SHA256_PASSWORD_SALT|g" .env
+        
+    # Replace database host
+    - sed -i "s|database.default.hostname = localhost|database.default.hostname = $DB_HOST|g" .env
+    - sed -i "s|database.read.hostname = localhost|database.read.hostname = $DB_HOST|g" .env
+    - sed -i "s|database.write.hostname = localhost|database.write.hostname = $DB_HOST|g" .env
+    
+    # Replace password
+    - sed -i "s|database.default.password = password|database.default.password = $DB_PASS|g" .env
+    - sed -i "s|database.read.password = password|database.read.password = $DB_PASS|g" .env
+    - sed -i "s|database.write.password = password|database.write.password = $DB_PASS|g" .env
+    - cat .env   
+
+
 # build_image:
 #   before_script:
 #     # - apk add install gettext
@@ -75,28 +98,28 @@ include:
       feature_deploy_env: devint
       state_type: "s3_bypath"
       container_build_destination: "234204504144.dkr.ecr.eu-west-1.amazonaws.com/safinav3"
-      build_script:
-        # - apk add install gettext
-        # - envsubst < env > .env
+      # build_script:
+      #   # - apk add install gettext
+      #   # - envsubst < env > .env
 
-        - if [ -f env ]; then cp env .env; fi
-        - chmod 775 .env 
+      #   - if [ -f env ]; then cp env .env; fi
+      #   - chmod 775 .env 
     
-          # Replace base URL, LOGTAIL_TOKEN and CI_ENVIRONMENT
-        - sed -i "s|app.baseURL = 'http://localhost/'|app.baseURL = $BASE_URL|g" .env
-        - sed -i "s|LOGTAIL_TOKEN = token|LOGTAIL_TOKEN = $LOGTAIL_TOKEN|g" .env
-        # - sed -i "s|CI_ENVIRONMENT = \${CI_ENVIRONMENT}|CI_ENVIRONMENT = $CI_ENVIRONMENT|g" .env
-        - sed -i "s|SHA256-PASSWORD-SALT = salt|SHA256-PASSWORD-SALT = $SHA256_PASSWORD_SALT|g" .env
+      #     # Replace base URL, LOGTAIL_TOKEN and CI_ENVIRONMENT
+      #   - sed -i "s|app.baseURL = 'http://localhost/'|app.baseURL = $BASE_URL|g" .env
+      #   - sed -i "s|LOGTAIL_TOKEN = token|LOGTAIL_TOKEN = $LOGTAIL_TOKEN|g" .env
+      #   # - sed -i "s|CI_ENVIRONMENT = \${CI_ENVIRONMENT}|CI_ENVIRONMENT = $CI_ENVIRONMENT|g" .env
+      #   - sed -i "s|SHA256-PASSWORD-SALT = salt|SHA256-PASSWORD-SALT = $SHA256_PASSWORD_SALT|g" .env
         
-        # Replace database host
-        - sed -i "s|database.default.hostname = localhost|database.default.hostname = $DB_HOST|g" .env
-        - sed -i "s|database.read.hostname = localhost|database.read.hostname = $DB_HOST|g" .env
-        - sed -i "s|database.write.hostname = localhost|database.write.hostname = $DB_HOST|g" .env
-          # Replace password
-        - sed -i "s|database.default.password = password|database.default.password = $DB_PASS|g" .env
-        - sed -i "s|database.read.password = password|database.read.password = $DB_PASS|g" .env
-        - sed -i "s|database.write.password = password|database.write.password = $DB_PASS|g" .env
-        - cat .env    
+      #   # Replace database host
+      #   - sed -i "s|database.default.hostname = localhost|database.default.hostname = $DB_HOST|g" .env
+      #   - sed -i "s|database.read.hostname = localhost|database.read.hostname = $DB_HOST|g" .env
+      #   - sed -i "s|database.write.hostname = localhost|database.write.hostname = $DB_HOST|g" .env
+      #     # Replace password
+      #   - sed -i "s|database.default.password = password|database.default.password = $DB_PASS|g" .env
+      #   - sed -i "s|database.read.password = password|database.read.password = $DB_PASS|g" .env
+      #   - sed -i "s|database.write.password = password|database.write.password = $DB_PASS|g" .env
+      #   - cat .env    
   #   rules: 
   #     - if: >-
   #         $CI_COMMIT_TAG !~ /.*-prod/i
