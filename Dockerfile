@@ -39,8 +39,7 @@ COPY --chown=www-data:www-data . .
 
 # Move env file into place and substitute variables using envsubst
 # This assumes your .env file template uses ${VAR} syntax for envsubst
-RUN mv env .env && \
-    envsubst \
+RUN envsubst \
     '$$BASE_URL $$LOGTAIL_TOKEN $$CI_ENVIRONMENT $$SHA256_PASSWORD_SALT $$DB_HOST $$DB_PASS' \
     < env > .env.tmp && \
     mv .env.tmp .env
