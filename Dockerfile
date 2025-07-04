@@ -28,7 +28,8 @@ RUN apt-get update && \
 USER www-data
 
 # --- Application Setup (www-data User) ---
-COPY --chown=www-data:www-data composer.json /var/www/html/
+
+COPY --chown=www-data:www-data composer.json composer.lock /var/www/html/
 
 WORKDIR /var/www/html
 
