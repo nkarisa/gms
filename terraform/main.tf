@@ -127,7 +127,7 @@ resource "aws_appautoscaling_target" "ecs_target" {
 # 2. Define the Scaling Policy (Target Tracking)
 # This policy scales based on CPU utilization
 resource "aws_appautoscaling_policy" "ecs_cpu_scaling_policy" {
-  name                   = "${data.aws_ecs_service.safina-app-service.name}-cpu-scaling-policy"
+  name                   = "${data.aws_ecs_service.safina-app-service.service_name}-cpu-scaling-policy"
   policy_type            = "TargetTrackingScaling"
   resource_id            = aws_appautoscaling_target.ecs_target.resource_id
   scalable_dimension     = aws_appautoscaling_target.ecs_target.scalable_dimension
@@ -145,7 +145,7 @@ resource "aws_appautoscaling_policy" "ecs_cpu_scaling_policy" {
 
 # You can add another policy for memory utilization if needed
 resource "aws_appautoscaling_policy" "ecs_memory_scaling_policy" {
-  name                   = "${data.aws_ecs_service.safina-app-service.name}-memory-scaling-policy"
+  name                   = "${data.aws_ecs_service.safina-app-service.service_name}-memory-scaling-policy"
   policy_type            = "TargetTrackingScaling"
   resource_id            = aws_appautoscaling_target.ecs_target.resource_id
   scalable_dimension     = aws_appautoscaling_target.ecs_target.scalable_dimension
