@@ -27,19 +27,19 @@ resource "aws_ecs_task_definition" "task_definition" {
   # Container definitions in JSON format
   container_definitions = jsonencode(local.container_definitions)
 
-  volume {
-    name = "safina-ecs-volume"
-    efs_volume_configuration {
-      file_system_id = data.aws_efs_file_system.safina-ecs-tasks-efs.id # Using the existing EFS ID
-      root_directory = "/"                                      # Optional: specify a subdirectory within EFS
-      # If using EFS IAM authorization:
-      # transit_encryption = "ENABLED"
-      # authorization_config {
-      #   access_point_id = "fsap-abcdef1234567890b" # Optional: if using EFS Access Points
-      #   iam             = "ENABLED"
-      # }
-    }
-  }
+  # volume {
+  #   name = "safina-ecs-volume"
+  #   efs_volume_configuration {
+  #     file_system_id = data.aws_efs_file_system.safina-ecs-tasks-efs.id # Using the existing EFS ID
+  #     root_directory = "/"                                      # Optional: specify a subdirectory within EFS
+  #     # If using EFS IAM authorization:
+  #     # transit_encryption = "ENABLED"
+  #     # authorization_config {
+  #     #   access_point_id = "fsap-abcdef1234567890b" # Optional: if using EFS Access Points
+  #     #   iam             = "ENABLED"
+  #     # }
+  #   }
+  # }
 
   tags = {
     Name = "${var.task_definition_family}"
