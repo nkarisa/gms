@@ -45,11 +45,11 @@ cache:
     - sed -i "s|database.read.password = password|database.read.password = $DB_PASS|g" .env
     - sed -i "s|database.write.password = password|database.write.password = $DB_PASS|g" .env
     - mkdir -p build
-    - mv .env build/.env  
+    - mv .env bin/.env  
 
-  artifacts:
-    paths:
-      - build/ 
+  # artifacts:
+  #   paths:
+  #     - build/ 
   
 
 
@@ -115,7 +115,7 @@ include:
         - .update_env
 
       build_script:
-        - cp /build/.env .env
+        - cp /bin/.env .env
       #   # - apk add install gettext
       #   # - envsubst < env > .env
 
