@@ -38,6 +38,6 @@ RUN sed -i "s|database.default.hostname = localhost|database.default.hostname = 
 RUN sed -i "s|database.read.hostname = localhost|database.read.hostname = ${DB_HOST}|g" .env
 RUN sed -i "s|database.write.hostname = localhost|database.write.hostname = ${DB_HOST}|g" .env
 
-RUN sed -i "s|database.default.password = localhost|database.default.password = ${DB_PASS}|g" .env
-RUN sed -i "s|database.read.password = localhost|database.read.password = ${DB_PASS}|g" .env
-RUN sed -i "s|database.write.password = localhost|database.write.password = ${DB_PASS}|g" .env
+RUN sed -i "s|database.default.password = password|database.default.password = ${DB_PASS}|g" .env
+RUN sed -i "s|database.read.password = password|database.read.password = ${DB_PASS}|g" .env
+RUN sed -i "s|database.write.password = password|database.write.password = ${DB_PASS}|g" .env
