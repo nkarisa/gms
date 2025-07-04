@@ -5,7 +5,7 @@ ARG BASE_URL=""
 ARG LOGTAIL_TOKEN=""
 ARG DB_HOST=""
 ARG DB_PASS=""
-ARG CI_ENVIRONMENT="development"
+ARG CI_ENVIRONMENT="production"
 ARG SHA256_PASSWORD_SALT=""
 
 # Add the NGINX_WEBROOT environment variable
