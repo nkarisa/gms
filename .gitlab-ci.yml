@@ -20,7 +20,7 @@ cache:
 
 .container-build:
   before_script:
-   - cp build/.env .env
+   - cp /build/.env .env
 
 
 .update_env:
