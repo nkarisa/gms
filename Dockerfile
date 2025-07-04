@@ -18,7 +18,7 @@ USER root
 
 # Install necessary PHP extensions AND gettext for envsubst
 RUN apt-get update && \
-    apt-get install -y gettext-base && \
+    apt-get install -y gettext-base git && \
     install-php-extensions bcmath intl mysqli && \
     mkdir -p ${NGINX_WEBROOT} && \
     chown -R www-data:www-data /var/www/html && \
