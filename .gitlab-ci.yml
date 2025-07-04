@@ -19,7 +19,7 @@ cache:
   - chmod -R 777 writable/
 
 .container-build:
-  script:
+  before_script:
     - if [ -f env ]; then cp env .env; fi
     - chmod 775 .env 
     
