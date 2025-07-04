@@ -113,71 +113,71 @@ resource "aws_ecs_service" "new_ecs_service" {
 # }
 
 
-# --- Autoscaling Resources ---
+# # --- Autoscaling Resources ---
 
-# 1. Define the Scalable Target
-resource "aws_appautoscaling_target" "ecs_target" {
-  max_capacity       = 5 # Maximum number of tasks
-  min_capacity       = 2  # Minimum number of tasks
-  resource_id        = "service/${data.aws_ecs_cluster.safina-cluster.cluster_name}/${data.aws_ecs_service.safina-app-service.service_name}"
-  scalable_dimension = "ecs:service:DesiredCount"
-  service_namespace  = "ecs"
-}
+# # 1. Define the Scalable Target
+# resource "aws_appautoscaling_target" "ecs_target" {
+#   max_capacity       = 5 # Maximum number of tasks
+#   min_capacity       = 2  # Minimum number of tasks
+#   resource_id        = "service/${data.aws_ecs_cluster.safina-cluster.cluster_name}/${data.aws_ecs_service.safina-app-service.service_name}"
+#   scalable_dimension = "ecs:service:DesiredCount"
+#   service_namespace  = "ecs"
+# }
 
-# 2. Define the Scaling Policy (Target Tracking)
-# This policy scales based on CPU utilization
-resource "aws_appautoscaling_policy" "ecs_cpu_scaling_policy" {
-  name                   = "${data.aws_ecs_service.safina-app-service.service_name}-cpu-scaling-policy"
-  policy_type            = "TargetTrackingScaling"
-  resource_id            = aws_appautoscaling_target.ecs_target.resource_id
-  scalable_dimension     = aws_appautoscaling_target.ecs_target.scalable_dimension
-  service_namespace      = aws_appautoscaling_target.ecs_target.service_namespace
+# # 2. Define the Scaling Policy (Target Tracking)
+# # This policy scales based on CPU utilization
+# resource "aws_appautoscaling_policy" "ecs_cpu_scaling_policy" {
+#   name                   = "${data.aws_ecs_service.safina-app-service.service_name}-cpu-scaling-policy"
+#   policy_type            = "TargetTrackingScaling"
+#   resource_id            = aws_appautoscaling_target.ecs_target.resource_id
+#   scalable_dimension     = aws_appautoscaling_target.ecs_target.scalable_dimension
+#   service_namespace      = aws_appautoscaling_target.ecs_target.service_namespace
 
-  # target_tracking_configuration {
-  #   predefined_metric_specification {
-  #     predefined_metric_type = "ECSServiceAverageCPUUtilization"
-  #   }
-  #   target_value = 70.0 # Target 70% CPU utilization
-  #   scale_in_cooldown  = 300 # Cooldown period for scale-in in seconds
-  #   scale_out_cooldown = 300 # Cooldown period for scale-out in seconds
-  # }
-  step_scaling_policy_configuration {
-    adjustment_type         = "ChangeInCapacity"
-    cooldown                = 300
-    metric_aggregation_type = "Maximum"
+#   # target_tracking_configuration {
+#   #   predefined_metric_specification {
+#   #     predefined_metric_type = "ECSServiceAverageCPUUtilization"
+#   #   }
+#   #   target_value = 70.0 # Target 70% CPU utilization
+#   #   scale_in_cooldown  = 300 # Cooldown period for scale-in in seconds
+#   #   scale_out_cooldown = 300 # Cooldown period for scale-out in seconds
+#   # }
+#   step_scaling_policy_configuration {
+#     adjustment_type         = "ChangeInCapacity"
+#     cooldown                = 300
+#     metric_aggregation_type = "Maximum"
 
-    step_adjustment {
-      metric_interval_upper_bound = 0
-      scaling_adjustment          = -1
-    }
-  }
-}
+#     step_adjustment {
+#       metric_interval_upper_bound = 0
+#       scaling_adjustment          = -1
+#     }
+#   }
+# }
 
-# You can add another policy for memory utilization if needed
-resource "aws_appautoscaling_policy" "ecs_memory_scaling_policy" {
-  name                   = "${data.aws_ecs_service.safina-app-service.service_name}-memory-scaling-policy"
-  policy_type            = "TargetTrackingScaling"
-  resource_id            = aws_appautoscaling_target.ecs_target.resource_id
-  scalable_dimension     = aws_appautoscaling_target.ecs_target.scalable_dimension
-  service_namespace      = aws_appautoscaling_target.ecs_target.service_namespace
+# # You can add another policy for memory utilization if needed
+# resource "aws_appautoscaling_policy" "ecs_memory_scaling_policy" {
+#   name                   = "${data.aws_ecs_service.safina-app-service.service_name}-memory-scaling-policy"
+#   policy_type            = "TargetTrackingScaling"
+#   resource_id            = aws_appautoscaling_target.ecs_target.resource_id
+#   scalable_dimension     = aws_appautoscaling_target.ecs_target.scalable_dimension
+#   service_namespace      = aws_appautoscaling_target.ecs_target.service_namespace
 
-  # target_tracking_configuration {
-  #   predefined_metric_specification {
-  #     predefined_metric_type = "ECSServiceAverageMemoryUtilization"
-  #   }
-  #   target_value = 75.0 # Target 75% Memory utilization
-  #   scale_in_cooldown  = 300
-  #   scale_out_cooldown = 300
-  # }
+#   # target_tracking_configuration {
+#   #   predefined_metric_specification {
+#   #     predefined_metric_type = "ECSServiceAverageMemoryUtilization"
+#   #   }
+#   #   target_value = 75.0 # Target 75% Memory utilization
+#   #   scale_in_cooldown  = 300
+#   #   scale_out_cooldown = 300
+#   # }
 
-  step_scaling_policy_configuration {
-    adjustment_type         = "ChangeInCapacity"
-    cooldown                = 300
-    metric_aggregation_type = "Maximum"
+#   step_scaling_policy_configuration {
+#     adjustment_type         = "ChangeInCapacity"
+#     cooldown                = 300
+#     metric_aggregation_type = "Maximum"
 
-    step_adjustment {
-      metric_interval_upper_bound = 0
-      scaling_adjustment          = -1
-    }
-  }
-}
+#     step_adjustment {
+#       metric_interval_upper_bound = 0
+#       scaling_adjustment          = -1
+#     }
+#   }
+# }
