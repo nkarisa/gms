@@ -9,7 +9,7 @@ resource "aws_cloudwatch_log_group" "safina_ecs_log_group" {
   }
 }
 
-# Define the AWS ECS Task Definition for Nginx
+# Define the AWS ECS Task Definition for Safina
 resource "aws_ecs_task_definition" "task_definition" {
   family                   = var.task_definition_family # A logical name for your task definition
   cpu                      = var.task_cpu       # CPU units (e.g., 256 for 0.25 vCPU)
