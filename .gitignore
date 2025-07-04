@@ -136,7 +136,7 @@ docker-compose.yaml
 app/Config/Feature.php
 app/Config/Kint.php
 
-composer.lock
+# composer.lock
 
 .terraform/
 .terraform.lock.hcl
