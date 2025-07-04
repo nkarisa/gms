@@ -119,7 +119,7 @@ resource "aws_ecs_service" "new_ecs_service" {
 resource "aws_appautoscaling_target" "ecs_target" {
   max_capacity       = 5 # Maximum number of tasks
   min_capacity       = 2  # Minimum number of tasks
-  resource_id        = "service/${data.aws_ecs_cluster.safina-app-service.name}/${data.aws_ecs_service.safina-app-service.name}"
+  resource_id        = "service/${data.aws_ecs_cluster.safina-cluster.name}/${data.aws_ecs_service.safina-app-service.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
 }
