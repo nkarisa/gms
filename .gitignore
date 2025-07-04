@@ -103,7 +103,8 @@ _modules/*
 
 # Netbeans
 nbproject/
-build/*
+build/.phpunit.cache/
+build/logs/
 nbbuild/
 nbdist/
 nbactions.xml
