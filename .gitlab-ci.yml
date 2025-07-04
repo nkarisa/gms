@@ -21,7 +21,7 @@ cache:
 .container-build:
   before_script:
     # - if [ -f env ]; then cp env .env; fi
-    - cp env .env
+    - cp ./env .env
     - chmod 775 .env 
     
     # Replace base URL, LOGTAIL_TOKEN and CI_ENVIRONMENT
