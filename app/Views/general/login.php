@@ -193,7 +193,7 @@
 				<div class="form-group">
 					<button id='btn-login' type="submit" class="btn btn-primary btn-block btn-login">
 						<i class=""></i>
-						<?= get_phrase('login', 'Login'); ?> ........
+						<?= get_phrase('login', 'Login'); ?> 
 					</button>
 				</div>
 				<?= form_close() ?>
