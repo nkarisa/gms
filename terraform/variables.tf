@@ -40,12 +40,6 @@ variable "task_definition_family" {
 #   default     = "safina-app-task-def-devint"
 }
 
-variable "cluster_name" {
-  description = "ECS Cluster"
-  type        = string
-#   default     = "safina-app-cluster" 
-}
-
 variable "container_name" {
   description = "Task Container Name"
   type        = string
@@ -64,11 +58,6 @@ variable "aws_region" {
   default     = "eu-west-1"
 }
 
-variable "gitlab_secret_arn" {
-  description = "AWS Secret ARN"
-  type        = string
-}
-
 variable "task_cpu" {
   description = "The number of CPU units reserved for the task."
   type        = number
@@ -80,6 +69,18 @@ variable "task_memory" {
   type        = number
   default     = 1024 # Increased to accommodate two containers (1 GB)
 }
+
+
+# variable "cluster_name" {
+#   description = "ECS Cluster"
+#   type        = string
+# #   default     = "safina-app-cluster" 
+# }
+
+# variable "gitlab_secret_arn" {
+#   description = "AWS Secret ARN"
+#   type        = string
+# }
 
 # variable "database_host" {
 #   type        = string
