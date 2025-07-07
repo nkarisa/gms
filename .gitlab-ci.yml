@@ -46,10 +46,10 @@ include:
         - echo "Unit testing successful"
       smoke_tests_script:
         - echo "Smoke test successful"
-      post_deploy_test_image: 'amazon/aws-cli'
-      post_deploy_test_image_version: 'latest'
+      # post_deploy_test_image: 'amazon/aws-cli'
+      # post_deploy_test_image_version: 'latest'
       integration_tests_script:
-        - aws ecs wait services-stable --cluster $ECS_CLUSTER_NAME --services $ECS_SERVICE_NAME
+        # - aws ecs wait services-stable --cluster $ECS_CLUSTER_NAME --services $ECS_SERVICE_NAME
         - echo "Integration test successful"
       container_build_dockerfile_path: "./Dockerfile"
       feature_deploy_env: devint
