@@ -1,6 +1,7 @@
 
 variables:
     XDEBUG_MODE: "coverage" 
+    CONTAINER_SCANNING_DISABLED: "true"
 
 cache:
   key: "${CI_JOB_NAME}-build"
