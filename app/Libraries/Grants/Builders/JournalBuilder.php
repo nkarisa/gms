@@ -131,10 +131,21 @@ trait JournalBuilder
     public function journalAccrualClearAction($voucherId, $officeId, $accrualClearingEffect){
         $userLibrary = new \App\Libraries\Core\UserLibrary();
         $hasVoucherCreatePermission = $userLibrary->checkRoleHasPermissions('voucher', 'create');
-        
+        $showBankAccounts = false;
+        $showBankReferences = false;
+
+        if ($accrualClearingEffect == AccrualVoucherTypeEffects::RECEIVABLES_PAYMENTS->value) {
+            $showBankAccounts = true;
+        } elseif ($accrualClearingEffect == AccrualVoucherTypeEffects::PAYABLE_DISBURSEMENTS->value) {
+            $showBankAccounts = true;
+            $showBankReferences = true;
+        }
+
+        $accrualClearButton = view('journal/components/accrualClearButton', compact('hasVoucherCreatePermission','voucherId'));
+
         return view(
             'journal/components/journalAccrualClearAction',
-            compact('voucherId', 'officeId', 'hasVoucherCreatePermission', 'accrualClearingEffect')
+            compact('voucherId', 'officeId', 'hasVoucherCreatePermission', 'accrualClearingEffect', 'showBankAccounts','showBankReferences','accrualClearButton')
         );
     }
 

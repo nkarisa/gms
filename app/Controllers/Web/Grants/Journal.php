@@ -150,17 +150,22 @@ class Journal extends WebController
 
       function clearAccrualTransaction(){
         $post = $this->request->getPost();
-        ['voucherId' => $voucherId, 'bankRef' => $bankRef] = $post;
+        // ['voucherId' => $voucherId, 'bankRef' => $bankRef, 'formData' => $formData] = $post;
 
         // Check if a voucher type effect clearance require a bank reference. In the meantime only Payable Disbursements requires a bank reference
-        $checkIfRefRequired = $this->checkIfAccrualLedgerClearanceRequiresBankRefByVoucherId($voucherId);
+        // $checkIfRefRequired = $this->checkIfAccrualLedgerClearanceRequiresBankRefByVoucherId($voucherId);
 
-        if($checkIfRefRequired && $bankRef == ""){
-          return $this->response->setJSON(['success' => true ,'message' => '', 'requireBankRef' => true]);
-        }
+        // if($checkIfRefRequired && $bankRef == ""){
+        //   return $this->response->setJSON(['success' => true ,'message' => '', 'requireBankRef' => true]);
+        // }
         
+        log_message('error', json_encode($post));
+
         $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
-        $response = $voucherLibrary->clearAccrualTransaction($voucherId, $bankRef);
+        $response = [
+          'flag' => 'success',
+          'message' => 'Success'
+        ];// $voucherLibrary->clearAccrualTransaction($voucherId, $bankRef);
 
         return $this->response->setJSON(['success' => $response['flag'] ,'message' => $response['message'], 'requireBankRef' => false]);
       }
@@ -206,7 +211,7 @@ class Journal extends WebController
           $isBankReferenced = $voucherTypeLibrary->checkIfPayableDisbursementVoucherTypeIsBankReferencedByOfficeId($officeId);
         }
 
-        $modalBodyContents = view('journal/components/accrualClearanceView', compact('accrualClearingEffect','activeOfficeBanks','validChequeNumbers','isBankReferenced', 'voucher'));
+        $modalBodyContents = view('journal/components/accrualClearanceView', compact('accrualClearingEffect','activeOfficeBanks','validChequeNumbers','isBankReferenced', 'voucher','voucherId'));
 
         return $this->response->setJSON(['view' => $modalBodyContents, ...$post]);
       }

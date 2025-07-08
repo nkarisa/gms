@@ -1,78 +1,3 @@
-<?php
-use App\Enums\AccrualVoucherTypeEffects;
-
-if ($hasVoucherCreatePermission) {
-    $showBankAccounts = false;
-    $showBankReferences = false;
-
-    if ($accrualClearingEffect == AccrualVoucherTypeEffects::RECEIVABLES_PAYMENTS->value) {
-        $showBankAccounts = true;
-    } elseif ($accrualClearingEffect == AccrualVoucherTypeEffects::PAYABLE_DISBURSEMENTS->value) {
-        $showBankAccounts = true;
-        $showBankReferences = true;
-    }
-    ?>
-        <div 
-            data-voucher_id = "<?= $voucherId; ?>" 
-            class = "btn btn-success clear_accrual"
-            data-toggle="modal"
-        >
-            <?= get_phrase('clear_accrual'); ?>
-        </div>
-<?php } else { ?>
-        <div class = "btn btn-info disabled">
-            <?= get_phrase('clear_accrual'); ?>
-        </div>
-<?php } ?>
-
-<script>
-    $(".clear_accrual").on('click', function(){
-        const voucherId = $(this).data('voucher_id')
-        const data = {
-            voucherId: '<?= $voucherId ?>',
-            accrualClearingEffect: '<?= $accrualClearingEffect; ?>',
-            officeId: '<?=$officeId;?>', 
-        }
-        const showBankAccounts = '<?= $showBankAccounts; ?>';
-        const showBankReferences = '<?= $showBankReferences; ?>';
-        
-        if(voucherId == '<?= $voucherId; ?>' && (showBankAccounts || showBankReferences)){
-            getUserInput('<?= get_phrase('verify_user_action', 'Are you sure you want to peform this action?'); ?>', data);
-        }else if(voucherId == '<?= $voucherId; ?>' && showBankAccounts == "" && showBankReferences == ""){
-            $.post(url, data, function(response){
-                if(response.message == ""){
-                    alert('Please provide all transaction requirements')
-                    return false;
-                }
-                    if(response.success){
-                        alert(response.message)
-                    }else{
-                        alert(response.message)
-                    }
-            })
-        }
-    })
-</script>
-
-
-<script>
-    function getUserInput(message, data) {
-        jQuery('#bankDetails').modal({
-            backdrop: false
-        });
-
-        const url = "<?= base_url(); ?>ajax/journal/getBankAndRefViews"
-
-        $.post(url, data, function (modalBodyContents) {
-            const voucherIdInput = "<input class = 'hidden' id = 'voucherId' value = '" + modalBodyContents.voucherId + "'  />"
-            const accrualClearingEffect = "<input class = 'hidden' id = 'accrualClearingEffect' value = '" + modalBodyContents.accrualClearingEffect + "'  />" 
-            const officeId = "<input class = 'hidden' id = 'officeId' value = '" + modalBodyContents.officeId + "'  />" 
-            jQuery('#bankDetails .modal-body #form').html(voucherIdInput + accrualClearingEffect + officeId + modalBodyContents.view);
-        })
-    }
-
-</script>
-
 <style>
     /* Custom CSS for centering the modal */
     .modal {
@@ -105,9 +30,10 @@ if ($hasVoucherCreatePermission) {
     }
 </style>
 
+<?=$accrualClearButton;?>
+
 <div id="bankDetails" class="modal fade" role="dialog">
     <div class="modal-dialog">
-
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -136,6 +62,48 @@ if ($hasVoucherCreatePermission) {
 
 
 <script>
+    $(".clear_accrual").on('click', function(){
+        const voucherId = $(this).data('voucher_id')
+        const data = {
+            voucherId: '<?= $voucherId ?>',
+            accrualClearingEffect: '<?= $accrualClearingEffect; ?>',
+            officeId: '<?=$officeId;?>', 
+        }
+        const showBankAccounts = '<?= $showBankAccounts; ?>';
+        const showBankReferences = '<?= $showBankReferences; ?>';
+        
+        if(voucherId == '<?= $voucherId; ?>' && (showBankAccounts || showBankReferences)){
+            getUserInput('<?= get_phrase('verify_user_action', 'Are you sure you want to peform this action?'); ?>', data);
+        }else if(voucherId == '<?= $voucherId; ?>' && showBankAccounts == "" && showBankReferences == ""){
+            $.post(url, data, function(response){
+                if(response.message == ""){
+                    alert('Please provide all transaction requirements')
+                    return false;
+                }
+                    if(response.success){
+                        alert(response.message)
+                    }else{
+                        alert(response.message)
+                    }
+            })
+        }
+    })
+
+    function getUserInput(message, data) {
+        jQuery('#bankDetails').modal({
+            backdrop: false
+        });
+
+        const url = "<?= base_url(); ?>ajax/journal/getBankAndRefViews"
+
+        $.post(url, data, function (modalBodyContents) {
+            const voucherIdInput = "<input class = 'hidden' id = 'voucherId' value = '" + modalBodyContents.voucherId + "'  />"
+            const accrualClearingEffect = "<input class = 'hidden' id = 'accrualClearingEffect' value = '" + modalBodyContents.accrualClearingEffect + "'  />" 
+            const officeId = "<input class = 'hidden' id = 'officeId' value = '" + modalBodyContents.officeId + "'  />" 
+            jQuery('#bankDetails .modal-body #form').html(voucherIdInput + accrualClearingEffect + officeId + modalBodyContents.view);
+        })
+    }
+
     $(document).ready(function () {
         // Function to center the modal
         function centerModal() {
@@ -227,23 +195,5 @@ if ($hasVoucherCreatePermission) {
         return numberString.replace(/,/g, '');
     }
 
-   $('#post_entry').on('click', function(){
-        const voucherId = $(".clear_accrual").data('voucher_id')
-        const data = {
-            voucherId: $("#voucherId").val(),
-            accrualClearingEffect: $("#accrualClearingEffect").val(),
-            office_bank_id: $("#office_bank_id").val(),
-            bankRef: $('#bankRef').val()
-        }
-        const url = "<?=base_url();?>ajax/journal/clearAccrualTransaction"
-
-        if(voucherId == '<?= $voucherId; ?>'){
-            $.post(url, data, function (){
-                alert('Posted successful')
-            })
-        }
-        
-        
-        $('#bankDetails').modal('hide');
-    })
+   
 </script>
