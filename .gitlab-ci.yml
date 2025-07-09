@@ -9,15 +9,16 @@ cache:
       - vendor
 
 .test_deps: &test_dep_script
-  - apk add --no-cache git unzip mysql-client gettext
-  - apk add --no-cache --update icu-dev
-  - docker-php-ext-install intl
-  - docker-php-ext-install mysqli
-  - docker-php-ext-install pdo_mysql
-  - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-  - ls -la
-  - composer install --prefer-dist --no-interaction --optimize-autoloader
-  - chmod -R 777 writable/
+  - echo "Command holder"
+  # - apk add --no-cache git unzip mysql-client gettext
+  # - apk add --no-cache --update icu-dev
+  # - docker-php-ext-install intl
+  # - docker-php-ext-install mysqli
+  # - docker-php-ext-install pdo_mysql
+  # - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+  # - ls -la
+  # - composer install --prefer-dist --no-interaction --optimize-autoloader
+  # - chmod -R 777 writable/
 
 include:
   - component: &core-yaml-tpl $CI_SERVER_FQDN/ciorg/community/cmf/pipeline/core-yaml/include@2.4
@@ -44,20 +45,19 @@ include:
         #     --log-junit build/phpunit.xml \
         #     --colors=never \
         #       tests 
-        - cat $DEFAULT_ADMIN_AWS_CONFIG
         - echo "Unit testing successful"
       smoke_tests_script:
         - echo "Smoke test successful"
-      # post_deploy_test_image: 'amazon/aws-cli'
-      # post_deploy_test_image_version: 'latest'
       integration_tests_script:
-        # - aws ecs wait services-stable --cluster $ECS_CLUSTER_NAME --services $ECS_SERVICE_NAME
         - echo "Integration test successful"
       container_build_dockerfile_path: "./Dockerfile"
       feature_deploy_env: devint
       state_type: "s3_bypath"
       container_build_destination: "234204504144.dkr.ecr.eu-west-1.amazonaws.com/safinav3"
       container_build_args: "BASE_URL=$BASE_URL LOGTAIL_TOKEN=$LOGTAIL_TOKEN DB_HOST=$DB_HOST DB_PASS=$DB_PASS SHA256_PASSWORD_SALT=$SHA256_PASSWORD_SALT"
+      build_script:
+        - aws cli version
+
     rules:
       - if: >-
           $CI_COMMIT_TAG !~ /.*-prod/i
