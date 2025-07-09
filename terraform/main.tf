@@ -48,12 +48,12 @@ resource "aws_ecs_service" "new_ecs_service" {
   # This is the key argument for waiting for stability
   # wait_for_steady_state = true 
 
-  network_configuration {
-    subnets         = data.aws_subnets.selected_subnets.ids
-    security_groups = var.security_group_ids
-    # This should typically be set to true for services running in awsvpc mode
-    assign_public_ip = false # Or false, depending on your network design (e.g., if you have a NAT Gateway)
-  }
+  # network_configuration {
+  #   subnets         = data.aws_subnets.selected_subnets.ids
+  #   security_groups = var.security_group_ids
+  #   # This should typically be set to true for services running in awsvpc mode
+  #   assign_public_ip = false # Or false, depending on your network design (e.g., if you have a NAT Gateway)
+  # }
 
   # load_balancer {
   #   target_group_arn = data.aws_lb_target_group.safina_ecs_tg.arn
