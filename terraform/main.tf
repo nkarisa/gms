@@ -61,10 +61,10 @@ resource "aws_ecs_service" "new_ecs_service" {
     container_port   = 8080                # Must match the 'containerPort' in your container_definitions
   }  
 
-  # force_new_deployment = false 
+  force_new_deployment = false 
   
   deployment_controller {
-    type = "CODE_DEPLOY"
+    type = "EXTERNAL"
   }
 
   # lifecycle {
