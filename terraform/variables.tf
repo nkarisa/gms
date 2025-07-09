@@ -1,3 +1,9 @@
+variable "app_environment" {
+  description = "Application environment"
+  type        = string 
+  default     = "devint" 
+}
+
 variable "security_group_ids" {
   description = "Desired task count"
   type        = list(string)
