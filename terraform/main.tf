@@ -60,7 +60,7 @@ resource "aws_ecs_service" "new_ecs_service" {
   enable_execute_command = true
 
   # This is the key argument for waiting for stability
-  wait_for_steady_state = true 
+  # wait_for_steady_state = true 
 
   network_configuration {
     subnets         = data.aws_subnets.selected_subnets.ids
