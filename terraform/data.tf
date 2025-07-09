@@ -97,43 +97,9 @@ locals {
           "awslogs-stream-prefix" = "ecs"
         }
       }
-
-      # mountPoints = [
-      #   {
-      #     sourceVolume  = "safina-ecs-volume",
-      #     containerPath = "/var/www", # The path inside your container where EFS will be mounted
-      #     readOnly      = false
-      #   }
-      # ]
-     
       # repositoryCredentials = {
       #   credentialsParameter = var.gitlab_secret_arn # Reference the variable you'll define for the Secret ARN
       # }
     }
-    # ,
-    # {
-    #   name      = "efs-supervisor-container",
-    #   image     = "amazon/aws-cli:latest", # Using aws-cli image as the supervisor
-    #   cpu       = var.task_cpu / 2, # Allocate remaining CPU to supervisor
-    #   memory    = var.task_memory / 2, # Allocate remaining memory to supervisor
-    #   essential = false, # Set to false so main app can run even if supervisor fails
-    #   # Example command for aws-cli: copy a file from EFS to S3, then sleep
-    #   command   = ["sh", "-c", "echo 'EFS supervisor container started. Creating a test file on EFS...' && aws s3 cp s3://safina-version-2-fcp-fms-testing-environment/ecs-tasks/.env /var/www/html/.env && echo 'S3 copy command executed. Sleeping...' && sleep 3600"],
-    #   mountPoints = [
-    #     {
-    #       sourceVolume  = "safina-ecs-volume", # Mount the same EFS volume
-    #       containerPath = "/var/www/html", # A different path for the supervisor container
-    #       readOnly      = false
-    #     }
-    #   ],
-    #   logConfiguration = {
-    #     logDriver = "awslogs"
-    #     options = {
-    #       "awslogs-group"         = aws_cloudwatch_log_group.safina_ecs_log_group.name
-    #       "awslogs-region"        = var.aws_region
-    #       "awslogs-stream-prefix" = "ecs"
-    #     }
-    #   }
-    # }
   ]
 }

@@ -27,20 +27,6 @@ resource "aws_ecs_task_definition" "task_definition" {
   # Container definitions in JSON format
   container_definitions = jsonencode(local.container_definitions)
 
-  # volume {
-  #   name = "safina-ecs-volume"
-  #   efs_volume_configuration {
-  #     file_system_id = data.aws_efs_file_system.safina-ecs-tasks-efs.id # Using the existing EFS ID
-  #     root_directory = "/"                                      # Optional: specify a subdirectory within EFS
-  #     # If using EFS IAM authorization:
-  #     # transit_encryption = "ENABLED"
-  #     # authorization_config {
-  #     #   access_point_id = "fsap-abcdef1234567890b" # Optional: if using EFS Access Points
-  #     #   iam             = "ENABLED"
-  #     # }
-  #   }
-  # }
-
   tags = {
     Name = "${var.task_definition_family}"
   }
@@ -111,81 +97,3 @@ resource "aws_ecs_service" "new_ecs_service" {
     aws_cloudwatch_log_group.safina_ecs_log_group 
   ]
 }
-
-
-# resource "aws_efs_mount_target" "efs_mount_targets" {
-#   count          = length(["subnet-07068d0a713788c92", "subnet-0c58768b8f2ec0926", "subnet-072c765be9a64910d"]) # Replace with your actual subnet IDs
-#   file_system_id = data.aws_efs_file_system.safina-ecs-tasks-efs.id
-#   subnet_id      = ["subnet-07068d0a713788c92", "subnet-0c58768b8f2ec0926", "subnet-072c765be9a64910d"][count.index] # Replace with your actual subnet IDs
-#   security_groups = ["sg-0850a8407b905cc9e"] # Replace with your EFS security group allowing ECS traffic
-# }
-
-
-# # --- Autoscaling Resources ---
-
-# # 1. Define the Scalable Target
-# resource "aws_appautoscaling_target" "ecs_target" {
-#   max_capacity       = 5 # Maximum number of tasks
-#   min_capacity       = 2  # Minimum number of tasks
-#   resource_id        = "service/${data.aws_ecs_cluster.safina-cluster.cluster_name}/${data.aws_ecs_service.safina-app-service.service_name}"
-#   scalable_dimension = "ecs:service:DesiredCount"
-#   service_namespace  = "ecs"
-# }
-
-# # 2. Define the Scaling Policy (Target Tracking)
-# # This policy scales based on CPU utilization
-# resource "aws_appautoscaling_policy" "ecs_cpu_scaling_policy" {
-#   name                   = "${data.aws_ecs_service.safina-app-service.service_name}-cpu-scaling-policy"
-#   policy_type            = "TargetTrackingScaling"
-#   resource_id            = aws_appautoscaling_target.ecs_target.resource_id
-#   scalable_dimension     = aws_appautoscaling_target.ecs_target.scalable_dimension
-#   service_namespace      = aws_appautoscaling_target.ecs_target.service_namespace
-
-#   # target_tracking_configuration {
-#   #   predefined_metric_specification {
-#   #     predefined_metric_type = "ECSServiceAverageCPUUtilization"
-#   #   }
-#   #   target_value = 70.0 # Target 70% CPU utilization
-#   #   scale_in_cooldown  = 300 # Cooldown period for scale-in in seconds
-#   #   scale_out_cooldown = 300 # Cooldown period for scale-out in seconds
-#   # }
-#   step_scaling_policy_configuration {
-#     adjustment_type         = "ChangeInCapacity"
-#     cooldown                = 300
-#     metric_aggregation_type = "Maximum"
-
-#     step_adjustment {
-#       metric_interval_upper_bound = 0
-#       scaling_adjustment          = -1
-#     }
-#   }
-# }
-
-# # You can add another policy for memory utilization if needed
-# resource "aws_appautoscaling_policy" "ecs_memory_scaling_policy" {
-#   name                   = "${data.aws_ecs_service.safina-app-service.service_name}-memory-scaling-policy"
-#   policy_type            = "TargetTrackingScaling"
-#   resource_id            = aws_appautoscaling_target.ecs_target.resource_id
-#   scalable_dimension     = aws_appautoscaling_target.ecs_target.scalable_dimension
-#   service_namespace      = aws_appautoscaling_target.ecs_target.service_namespace
-
-#   # target_tracking_configuration {
-#   #   predefined_metric_specification {
-#   #     predefined_metric_type = "ECSServiceAverageMemoryUtilization"
-#   #   }
-#   #   target_value = 75.0 # Target 75% Memory utilization
-#   #   scale_in_cooldown  = 300
-#   #   scale_out_cooldown = 300
-#   # }
-
-#   step_scaling_policy_configuration {
-#     adjustment_type         = "ChangeInCapacity"
-#     cooldown                = 300
-#     metric_aggregation_type = "Maximum"
-
-#     step_adjustment {
-#       metric_interval_upper_bound = 0
-#       scaling_adjustment          = -1
-#     }
-#   }
-# }

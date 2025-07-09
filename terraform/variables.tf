@@ -75,31 +75,3 @@ variable "task_memory" {
   type        = number
   default     = 1024 # Increased to accommodate two containers (1 GB)
 }
-
-
-# variable "cluster_name" {
-#   description = "ECS Cluster"
-#   type        = string
-# #   default     = "safina-app-cluster" 
-# }
-
-# variable "gitlab_secret_arn" {
-#   description = "AWS Secret ARN"
-#   type        = string
-# }
-
-# variable "database_host" {
-#   type        = string
-# }
-
-# variable "database_password" {
-#   type        = string
-# }
-
-# variable "logtail_token" {
-#   type        = string
-# }
-
-# variable "base_url" {
-#   type        = string
-# }
