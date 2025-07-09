@@ -44,6 +44,7 @@ include:
         #     --log-junit build/phpunit.xml \
         #     --colors=never \
         #       tests
+        - echo $AWS_ACCESS_KEY_ID
         - echo "Unit testing successful"
       smoke_tests_script:
         - echo "Smoke test successful"
