@@ -43,8 +43,8 @@ include:
         #     --coverage-text \
         #     --log-junit build/phpunit.xml \
         #     --colors=never \
-        #       tests
-        - echo $DEFAULT_ADMIN_AWS_CONFIG
+        #       tests 
+        - cat $DEFAULT_ADMIN_AWS_CONFIG
         - echo "Unit testing successful"
       smoke_tests_script:
         - echo "Smoke test successful"
