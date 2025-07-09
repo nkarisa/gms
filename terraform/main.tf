@@ -76,6 +76,10 @@ resource "aws_ecs_service" "new_ecs_service" {
   }  
 
   force_new_deployment = true 
+  
+  deployment_controller {
+    type = "CODE_DEPLOY"
+  }
 
   # lifecycle {
   #   # This prevents Terraform from trying to recreate the service
