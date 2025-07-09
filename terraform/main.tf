@@ -55,11 +55,11 @@ resource "aws_ecs_service" "new_ecs_service" {
     assign_public_ip = false # Or false, depending on your network design (e.g., if you have a NAT Gateway)
   }
 
-  load_balancer {
-    target_group_arn = data.aws_lb_target_group.safina_ecs_tg.arn
-    container_name   = var.container_name # Must match the 'name' in your container_definitions
-    container_port   = 8080                # Must match the 'containerPort' in your container_definitions
-  }  
+  # load_balancer {
+  #   target_group_arn = data.aws_lb_target_group.safina_ecs_tg.arn
+  #   container_name   = var.container_name # Must match the 'name' in your container_definitions
+  #   container_port   = 8080                # Must match the 'containerPort' in your container_definitions
+  # }  
 
   force_new_deployment = false 
   
