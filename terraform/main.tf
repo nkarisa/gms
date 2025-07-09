@@ -36,7 +36,7 @@ resource "aws_ecs_task_definition" "task_definition" {
 resource "aws_ecs_service" "new_ecs_service" {
   name            = var.service_name
   cluster         = data.aws_ecs_cluster.safina_app_cluster.id
-  task_definition = aws_ecs_task_definition.task_definition.arn
+  # task_definition = aws_ecs_task_definition.task_definition.arn
   desired_count   = var.desired_count
   launch_type     = "FARGATE"
   deployment_minimum_healthy_percent = 50
