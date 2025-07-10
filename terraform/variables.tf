@@ -1,3 +1,8 @@
+variable "tag" {
+  description = "Gitlab commit SHA"
+  type        = string 
+}
+
 variable "app_environment" {
   description = "Application environment"
   type        = string 

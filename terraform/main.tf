@@ -5,7 +5,7 @@ resource "random_integer" "priority" {
 
 # --- CloudWatch Log Group for ECS Service ---
 resource "aws_cloudwatch_log_group" "safina_ecs_log_group" {
-  name              = "/ecs/safina-app-${var.app_environment}" # This must match awslogs-group in task definition
+  name              = "/ecs/safina-app-${var.app_environment}-${var.tag}" # This must match awslogs-group in task definition
   retention_in_days = 7                # Retain logs for 7 days (adjust as needed)
 
   tags = {
@@ -51,7 +51,7 @@ resource "aws_ecs_service" "new_ecs_service" {
   enable_execute_command = true
 
   # This is the key argument for waiting for stability
-  # wait_for_steady_state = true 
+  wait_for_steady_state = true 
 
   network_configuration {
     subnets         = data.aws_subnets.selected_subnets.ids
