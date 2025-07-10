@@ -33,7 +33,7 @@ include:
       build_and_test_image: php 
       service_language: golang # Ignore this one. Used only to satisfy the logic checks
       include_build_job: false
-      deploy_tooling: 'terraform'
+      deploy_tooling: 'terraform' 
       terraform_dir: 'terraform/devint'
       include_container_build_job: true
       unit_tests_script: 
