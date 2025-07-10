@@ -1,11 +1,9 @@
-resource "random_integer" "priority" {
-  min = 1
-  max = 50000
+resource "random_uuid" "uuid" {
 }
 
 # --- CloudWatch Log Group for ECS Service ---
 resource "aws_cloudwatch_log_group" "safina_ecs_log_group" {
-  name              = "/ecs/safina-app-${var.app_environment}-${random_integer.priority.result}" # This must match awslogs-group in task definition
+  name              = "/ecs/safina-app-${var.app_environment}-${random_uuid.uuid.result}" # This must match awslogs-group in task definition
   retention_in_days = 7                # Retain logs for 7 days (adjust as needed)
 
   tags = {
