@@ -1,10 +1,6 @@
-# data "aws_efs_file_system" "safina-ecs-tasks-efs" {
-#   file_system_id = "fs-0093c43d73ea36291" # Replace with your EXISTING EFS File System ID
+# data "aws_iam_role" "safina-codedeploy-role" {
+#   name = "safina-code-deploy-role"
 # }
-
-data "aws_iam_role" "safina-codedeploy-role" {
-  name = "safina-code-deploy-role"
-}
 
 data "aws_ecs_cluster" "safina-cluster" {
   cluster_name = "safina-cluster"
