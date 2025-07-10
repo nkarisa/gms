@@ -80,10 +80,10 @@ resource "aws_ecs_service" "new_ecs_service" {
   #   ]
   # }
 
-  triggers = {
-    # This ensures a deployment on every `terraform apply`
-    redeploy_timestamp = timestamp()
-  }
+  # triggers = {
+  #   # This ensures a deployment on every `terraform apply`
+  #   redeploy_timestamp = timestamp()
+  # }
 
   # Optional: Enable service discovery, auto scaling, etc.
   tags = {
