@@ -20,6 +20,7 @@ cache:
   # - composer install --prefer-dist --no-interaction --optimize-autoloader
   # - chmod -R 777 writable/
 
+
 include:
   - component: &core-yaml-tpl $CI_SERVER_FQDN/ciorg/community/cmf/pipeline/core-yaml/include@2.4
     inputs: &core-yaml-input
