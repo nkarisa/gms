@@ -5,7 +5,7 @@ terraform {
       version = "~> 5.0" # Use a compatible AWS provider version
     }
   }
-  required_version = ">= 1.0.0"
+  required_version = ">= 1.0.0" 
 
   backend "s3" {
     bucket         = "" # "runner-cache-africanonprod" # runner-cache-africanonprod # Replace with your S3 bucket name
