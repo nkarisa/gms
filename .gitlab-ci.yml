@@ -34,7 +34,7 @@ include:
       service_language: golang # Ignore this one. Used only to satisfy the logic checks
       include_build_job: false
       deploy_tooling: 'terraform' 
-      terraform_dir: 'terraform/devint'
+      terraform_dir: 'terraform'
       include_container_build_job: true
       unit_tests_script: 
         - *test_dep_script
