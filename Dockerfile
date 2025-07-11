@@ -29,9 +29,9 @@ RUN apt-get update && \
 USER www-data
 
 # --- Application Setup (www-data User) ---
-RUN mkdir -p /var/www/$IMAGE_APP_PATH
+RUN mkdir -p /var/www/${IMAGE_APP_PATH}
 
-WORKDIR /var/www/$IMAGE_APP_PATH
+WORKDIR /var/www/${IMAGE_APP_PATH}
 
 COPY --chown=www-data:www-data composer.json composer.lock ./
 
@@ -48,7 +48,7 @@ RUN envsubst \
     mv .env.tmp .env
 
 # RUN ln -s $IMAGE_APP_PATH /var/www/$IMAGE_APP_PATH
-RUN ln -s /var/www/$IMAGE_APP_PATH /var/www/html/$IMAGE_APP_PATH
+RUN ln -s /var/www/${IMAGE_APP_PATH} /var/www/html/${IMAGE_APP_PATH}
 
 # If your .env file template doesn't directly use ${VAR} for all values,
 # and you need specific string replacements, you would still use sed
