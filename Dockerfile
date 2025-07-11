@@ -7,6 +7,7 @@ ARG DB_HOST=""
 ARG DB_PASS=""
 ARG CI_ENVIRONMENT="production"
 ARG SHA256_PASSWORD_SALT=""
+ARG IMAGE_APP_PATH="prod"
 
 # --- Environment Variables ---
 ENV NGINX_WEBROOT=/var/www/html/public
@@ -29,9 +30,9 @@ USER www-data
 
 # --- Application Setup (www-data User) ---
 
-COPY --chown=www-data:www-data composer.json composer.lock /var/www/html/
+WORKDIR /var/www/html/$IMAGE_APP_PATH
 
-WORKDIR /var/www/html
+COPY --chown=www-data:www-data composer.json composer.lock ./
 
 RUN composer install --no-dev --optimize-autoloader
 
@@ -39,6 +40,7 @@ COPY --chown=www-data:www-data . .
 
 # Move env file into place and substitute variables using envsubst
 # This assumes your .env file template uses ${VAR} syntax for envsubst
+
 RUN envsubst \
     '$$BASE_URL $$LOGTAIL_TOKEN $$CI_ENVIRONMENT $$SHA256_PASSWORD_SALT $$DB_HOST $$DB_PASS' \
     < env > .env.tmp && \

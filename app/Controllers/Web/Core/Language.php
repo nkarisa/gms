@@ -90,12 +90,13 @@ class Language extends WebController
             $path = APPPATH . "language" . DIRECTORY_SEPARATOR . $language_code . DIRECTORY_SEPARATOR . 'global' . DIRECTORY_SEPARATOR . "App.php";
         }
 
-        $file_contents = file_get_contents($path);
+        // $file_contents = file_get_contents($path);
         // Extract the array from the file contents
-        $dBLanguagePhrases = $this->extract_lang_array($file_contents);
+        // $dBLanguagePhrases = $this->extract_lang_array($file_contents);
+        include $path;
 
         // Convert the $lang array to a CSV string
-        $csv_string = $this->array_to_csv($dBLanguagePhrases);
+        $csv_string = $this->array_to_csv($lang);
 
         // Load the helper and set headers for download
         helper('download');
@@ -105,12 +106,12 @@ class Language extends WebController
             ->send();
     }
 
-    private function extract_lang_array($file_contents)
-    {
-        $lang = [];
-        eval ('?>' . $file_contents);
-        return $lang;
-    }
+    // private function extract_lang_array($file_contents)
+    // {
+    //     $lang = [];
+    //     eval ('' . $file_contents);
+    //     return $lang;
+    // }
 
     private function array_to_csv($array)
     {
