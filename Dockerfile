@@ -30,7 +30,9 @@ USER www-data
 
 # --- Application Setup (www-data User) ---
 
-WORKDIR /var/www/html/$IMAGE_APP_PATH
+WORKDIR /var/www/$IMAGE_APP_PATH
+
+RUN ln -s /var/www/$IMAGE_APP_PATH /var/www/html/$IMAGE_APP_PATH
 
 COPY --chown=www-data:www-data composer.json composer.lock ./
 
