@@ -7,6 +7,7 @@ ARG DB_HOST=""
 ARG DB_PASS=""
 ARG CI_ENVIRONMENT="production"
 ARG SHA256_PASSWORD_SALT=""
+ARG IMAGE_APP_PATH="prod"
 
 # --- Environment Variables ---
 ENV NGINX_WEBROOT=/var/www/html/public
@@ -29,56 +30,21 @@ USER www-data
 
 # --- Application Setup (www-data User) ---
 
-COPY --chown=www-data:www-data composer.json composer.lock /var/www/html/
+WORKDIR /var/www/html/$IMAGE_APP_PATH
 
-WORKDIR /var/www/html
+COPY --chown=www-data:www-data composer.json composer.lock ./
 
 RUN composer install --no-dev --optimize-autoloader
 
-# COPY --chown=www-data:www-data . .
+COPY --chown=www-data:www-data . .
 
-RUN if [ "$ENVIRONMENT" = "production" ]; then \
-        echo "Copying to production root..."; \
-        cp -R . .; \
-        chown -R www-data:www-data .; \
+# Move env file into place and substitute variables using envsubst
+# This assumes your .env file template uses ${VAR} syntax for envsubst
 
-        envsubst \
-        '$$BASE_URL $$LOGTAIL_TOKEN $$CI_ENVIRONMENT $$SHA256_PASSWORD_SALT $$DB_HOST $$DB_PASS' \
-        < env > .env.tmp && \
-        mv .env.tmp .env \
-
-    elif [ "$ENVIRONMENT" = "development" ]; then \
-        echo "Copying to development subdirectory (./devint)..."; \
-        mkdir -p ./devint; \
-        cp -R . ./devint; \
-        chown -R www-data:www-data ./devint; \
-
-        envsubst \
-        '$$BASE_URL $$LOGTAIL_TOKEN $$CI_ENVIRONMENT $$SHA256_PASSWORD_SALT $$DB_HOST $$DB_PASS' \
-        < ./devint/env > ./devint/.env.tmp && \
-        mv ./devint/.env.tmp ./devint/.env \
-
-    elif [ "$ENVIRONMENT" = "stage" ]; then \
-        echo "Copying to staging subdirectory (./stage)..."; \
-        mkdir -p ./stage; \
-        cp -R . ./stage; \
-        chown -R www-data:www-data ./stage; \
-
-        envsubst \
-        '$$BASE_URL $$LOGTAIL_TOKEN $$CI_ENVIRONMENT $$SHA256_PASSWORD_SALT $$DB_HOST $$DB_PASS' \
-        < ./stage/env > ./stage/.env.tmp && \
-        mv ./stage/.env.tmp ./stage/.env \
-    else \
-        echo "Error: Unknown ENVIRONMENT '$ENVIRONMENT'. Exiting."; \
-        exit 1; \
-    fi && \
-
-    # Move env file into place and substitute variables using envsubst
-    # This assumes your .env file template uses ${VAR} syntax for envsubst
-    # RUN envsubst \
-    # '$$BASE_URL $$LOGTAIL_TOKEN $$CI_ENVIRONMENT $$SHA256_PASSWORD_SALT $$DB_HOST $$DB_PASS' \
-    # < env > .env.tmp && \
-    # mv .env.tmp .env
+RUN envsubst \
+    '$$BASE_URL $$LOGTAIL_TOKEN $$CI_ENVIRONMENT $$SHA256_PASSWORD_SALT $$DB_HOST $$DB_PASS' \
+    < env > .env.tmp && \
+    mv .env.tmp .env
 
 # If your .env file template doesn't directly use ${VAR} for all values,
 # and you need specific string replacements, you would still use sed
