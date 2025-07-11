@@ -13,6 +13,7 @@ ARG IMAGE_APP_PATH="prod"
 ENV NGINX_WEBROOT=/var/www/html/public
 ENV SSL_MODE=off
 ENV PHP_DISPLAY_ERRORS=1
+ENV APP_DIR="devint"
 
 # --- System Setup (Root User) ---
 USER root
@@ -29,9 +30,9 @@ RUN apt-get update && \
 USER www-data
 
 # --- Application Setup (www-data User) ---
-RUN mkdir -p /var/www/${IMAGE_APP_PATH}
+RUN mkdir -p /var/www/${APP_DIR}
 
-WORKDIR /var/www/${IMAGE_APP_PATH}
+WORKDIR /var/www/${APP_DIR}
 
 COPY --chown=www-data:www-data composer.json composer.lock ./
 
@@ -48,7 +49,7 @@ RUN envsubst \
     mv .env.tmp .env
 
 # RUN ln -s $IMAGE_APP_PATH /var/www/$IMAGE_APP_PATH
-RUN ln -s /var/www/${IMAGE_APP_PATH} /var/www/html/${IMAGE_APP_PATH}
+RUN ln -s /var/www/${APP_DIR} /var/www/html/${APP_DIR}
 
 # If your .env file template doesn't directly use ${VAR} for all values,
 # and you need specific string replacements, you would still use sed
