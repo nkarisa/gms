@@ -49,7 +49,7 @@ RUN envsubst \
     mv .env.tmp .env
 
 # RUN ln -s $IMAGE_APP_PATH /var/www/$IMAGE_APP_PATH
-RUN ln -s /var/www/${APP_DIR} /var/www/html/${APP_DIR}/public
+RUN ln -s /var/www/${APP_DIR}/public /var/www/html/${APP_DIR}
 
 # If your .env file template doesn't directly use ${VAR} for all values,
 # and you need specific string replacements, you would still use sed
