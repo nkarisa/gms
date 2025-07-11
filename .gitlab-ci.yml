@@ -38,7 +38,7 @@ include:
       terraform_dir: 'terraform'
       include_container_build_job: true
       unit_tests_script: 
-        - *test_dep_script
+        - *test_dep_script 
         # - vendor/bin/phpunit --log-junit build/junit.xml 
         # - |
         #   ./vendor/bin/phpunit \
