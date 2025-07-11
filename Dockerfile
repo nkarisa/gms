@@ -25,7 +25,7 @@ RUN apt-get update && \
     chown -R www-data:www-data /var/www/html && \
     rm -rf /var/lib/apt/lists/* # Clean up apt cache to keep image small
 
-# Switch back to the non-root user for subsequent operations
+# Switch back to the non-root user for subsequent operations 
 USER www-data
 
 # --- Application Setup (www-data User) ---
