@@ -10,7 +10,7 @@ ARG SHA256_PASSWORD_SALT=""
 ARG IMAGE_APP_PATH="prod"
 
 # --- Environment Variables ---
-ENV NGINX_WEBROOT=/var/www/html/public
+ENV NGINX_WEBROOT=/var/www/${IMAGE_APP_PATH}
 ENV SSL_MODE=off
 ENV PHP_DISPLAY_ERRORS=1
 ENV APP_DIR="devint"
@@ -32,11 +32,13 @@ USER www-data
 # --- Application Setup (www-data User) ---
 # RUN mkdir -p /var/www/${APP_DIR}
 
-WORKDIR /var/www/html
+WORKDIR /var/www/${IMAGE_APP_PATH}
 
 COPY --chown=www-data:www-data composer.json composer.lock ./
 
 RUN composer install --no-dev --optimize-autoloader
+
+COPY ./conf/${IMAGE_APP_PATH} /etc/nginx/sites-available/
 
 COPY --chown=www-data:www-data . .
 
@@ -50,12 +52,15 @@ RUN envsubst \
 
 # RUN ln -s $IMAGE_APP_PATH /var/www/$IMAGE_APP_PATH
 # RUN ln -s /var/www/${APP_DIR}/public /var/www/html/${APP_DIR}
+RUN ln -s /etc/nginx/sites-available/${$IMAGE_APP_PATH} /etc/nginx/sites-enabled/
+
 
 # If your .env file template doesn't directly use ${VAR} for all values,
 # and you need specific string replacements, you would still use sed
 # after envsubst or instead of it for those specific cases.
 # Example if your .env was exactly like the original and you didn't convert it to envsubst syntax:
 # RUN mv env .env && \
+
 #     sed -i "s|app.baseURL = 'http://localhost/'|app.baseURL = ${BASE_URL}|g" .env && \
 #     sed -i "s|LOGTAIL_TOKEN = token|LOGTAIL_TOKEN = ${LOGTAIL_TOKEN}|g" .env && \
 #     sed -i "s|CI_ENVIRONMENT = development|CI_ENVIRONMENT = ${CI_ENVIRONMENT}|g" .env && \
