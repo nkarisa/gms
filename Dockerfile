@@ -23,7 +23,7 @@ RUN apt-get update && \
     apt-get install -y gettext-base git && \
     install-php-extensions bcmath intl mysqli && \
     mkdir -p ${NGINX_WEBROOT} && \
-    chown -R www-data:www-data /var/www/html && \
+    chown -R www-data:www-data /var/www/${IMAGE_APP_PATH} && \
     rm -rf /var/lib/apt/lists/* # Clean up apt cache to keep image small
 
 # Switch back to the non-root user for subsequent operations 
@@ -34,21 +34,21 @@ USER www-data
 
 WORKDIR /var/www/${IMAGE_APP_PATH}
 
-COPY --chown=www-data:www-data composer.json composer.lock ./
+COPY --chown=www-data:www-data composer.json composer.lock /var/www/${IMAGE_APP_PATH}
 
 RUN composer install --no-dev --optimize-autoloader
 
 COPY ./conf/${IMAGE_APP_PATH}.conf /etc/nginx/sites-available/
 
-COPY --chown=www-data:www-data . .
+COPY --chown=www-data:www-data . /var/www/${IMAGE_APP_PATH}
 
 # Move env file into place and substitute variables using envsubst
 # This assumes your .env file template uses ${VAR} syntax for envsubst
 
 RUN envsubst \
     '$$BASE_URL $$LOGTAIL_TOKEN $$CI_ENVIRONMENT $$SHA256_PASSWORD_SALT $$DB_HOST $$DB_PASS' \
-    < env > .env.tmp && \
-    mv .env.tmp .env
+    < /var/www/${IMAGE_APP_PATH}/env > /var/www/${IMAGE_APP_PATH}/.env.tmp && \
+    mv /var/www/${IMAGE_APP_PATH}/.env.tmp /var/www/${IMAGE_APP_PATH}/.env
 
 # RUN ln -s $IMAGE_APP_PATH /var/www/$IMAGE_APP_PATH
 # RUN ln -s /var/www/${APP_DIR}/public /var/www/html/${APP_DIR}
