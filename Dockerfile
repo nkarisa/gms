@@ -34,7 +34,7 @@ USER www-data
 
 WORKDIR /var/www/${IMAGE_APP_PATH}
 
-COPY --chown=www-data:www-data composer.json composer.lock /var/www/${IMAGE_APP_PATH}
+COPY --chown=www-data:www-data composer.json composer.lock /var/www/${IMAGE_APP_PATH}/
 
 RUN composer install --no-dev --optimize-autoloader
 
