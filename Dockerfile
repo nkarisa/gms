@@ -38,7 +38,7 @@ COPY --chown=www-data:www-data composer.json composer.lock ./
 
 RUN composer install --no-dev --optimize-autoloader
 
-COPY ./conf/${IMAGE_APP_PATH} /etc/nginx/sites-available/
+COPY ./conf/${IMAGE_APP_PATH}.conf /etc/nginx/sites-available/
 
 COPY --chown=www-data:www-data . .
 
