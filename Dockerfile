@@ -38,7 +38,7 @@ COPY --chown=www-data:www-data composer.json composer.lock /var/www/${IMAGE_APP_
 
 RUN composer install --no-dev --optimize-autoloader
 
-COPY ./conf/${IMAGE_APP_PATH}.conf /etc/nginx/sites-available/
+# COPY ./conf/${IMAGE_APP_PATH}.conf /etc/nginx/sites-available/
 
 COPY --chown=www-data:www-data . /var/www/${IMAGE_APP_PATH}
 
@@ -52,7 +52,7 @@ RUN envsubst \
 
 # RUN ln -s $IMAGE_APP_PATH /var/www/$IMAGE_APP_PATH
 # RUN ln -s /var/www/${APP_DIR}/public /var/www/html/${APP_DIR}
-RUN ln -s /etc/nginx/sites-available/${IMAGE_APP_PATH} /etc/nginx/sites-enabled/
+# RUN ln -s /etc/nginx/sites-available/${IMAGE_APP_PATH} /etc/nginx/sites-enabled/
 
 
 # If your .env file template doesn't directly use ${VAR} for all values,
