@@ -39,6 +39,7 @@ COPY --chown=www-data:www-data composer.json composer.lock /var/www/${IMAGE_APP_
 RUN composer install --no-dev --optimize-autoloader
 
 # COPY ./conf/${IMAGE_APP_PATH}.conf /etc/nginx/sites-available/
+COPY http.conf /etc/nginx/site-opts.d/
 
 COPY --chown=www-data:www-data . /var/www/${IMAGE_APP_PATH}
 
