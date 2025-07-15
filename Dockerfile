@@ -27,18 +27,16 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* # Clean up apt cache to keep image small
 
 # Switch back to the non-root user for subsequent operations 
-USER www-data
-
 # --- Application Setup (www-data User) ---
-# RUN mkdir -p /var/www/${APP_DIR}
+USER www-data
 
 WORKDIR /var/www/${IMAGE_APP_PATH}
 
 COPY --chown=www-data:www-data composer.json composer.lock /var/www/${IMAGE_APP_PATH}/
 
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install 
+# composer install --no-dev --optimize-autoloader
 
-# COPY ./conf/${IMAGE_APP_PATH}.conf /etc/nginx/sites-available/
 COPY http.conf /etc/nginx/site-opts.d/
 
 COPY --chown=www-data:www-data . /var/www/${IMAGE_APP_PATH}
@@ -50,11 +48,6 @@ RUN envsubst \
     '$$BASE_URL $$LOGTAIL_TOKEN $$CI_ENVIRONMENT $$SHA256_PASSWORD_SALT $$DB_HOST $$DB_PASS' \
     < /var/www/${IMAGE_APP_PATH}/env > /var/www/${IMAGE_APP_PATH}/.env.tmp && \
     mv /var/www/${IMAGE_APP_PATH}/.env.tmp /var/www/${IMAGE_APP_PATH}/.env
-
-# RUN ln -s $IMAGE_APP_PATH /var/www/$IMAGE_APP_PATH
-# RUN ln -s /var/www/${APP_DIR}/public /var/www/html/${APP_DIR}
-# RUN ln -s /etc/nginx/sites-available/${IMAGE_APP_PATH} /etc/nginx/sites-enabled/
-
 
 # If your .env file template doesn't directly use ${VAR} for all values,
 # and you need specific string replacements, you would still use sed
