@@ -20,25 +20,25 @@ USER root
 
 # Install necessary PHP extensions AND gettext for envsubst
 RUN apt-get update && \
-    apt-get install -y gettext-base git && \
+    apt-get install -y gettext-base git dos2unix && \
     install-php-extensions bcmath intl mysqli && \
     mkdir -p ${NGINX_WEBROOT} && \
     chown -R www-data:www-data ${NGINX_WEBROOT} && \
     rm -rf /var/lib/apt/lists/* # Clean up apt cache to keep image small
 
-COPY entrypoint.sh /var/www/html/entrypoint.sh
+COPY  --chown=root:root ./entrypoint.d/envsubst.sh /etc/entrypoint.d/
 
-RUN chmod +x /var/www/html/entrypoint.sh
+# RUN chmod +x /var/www/html/entrypoint.sh
+RUN dos2unix /etc/entrypoint.d/envsubst.sh && \ 
+    chmod +x /etc/entrypoint.d/envsubst.sh
 
-# Switch back to the non-root user for subsequent operations 
-# --- Application Setup (www-data User) ---
 USER www-data
 
 WORKDIR ${NGINX_WEBROOT}
 
 COPY --chown=www-data:www-data composer.json composer.lock ./
 
-# COPY --chown=www-data:www-data default.conf /etc/nginx/conf.d/
+COPY --chown=www-data:www-data default.conf /etc/nginx/conf.d/
 
 RUN composer install --no-dev --optimize-autoloader
 
@@ -47,9 +47,7 @@ COPY --chown=www-data:www-data . .
 RUN ln -s /var/www/html/public  /var/www/html/devint
 RUN ln -s /var/www/html/public /var/www/html/stage
 
-# RUN chmod +x /var/www/html/entrypoint.sh
-
-ENTRYPOINT ["/var/www/html/entrypoint.sh"]
+# ENTRYPOINT ["/var/www/html/entrypoint.sh"]
 
 # Move env file into place and substitute variables using envsubst
 # This assumes your .env file template uses ${VAR} syntax for envsubst
