@@ -92,12 +92,6 @@ locals {
         }
       ]
 
-      command = [
-        "/bin/sh",
-        "-c",
-        ""
-      ]
-
       portMappings = [
         {
           containerPort = 8080
