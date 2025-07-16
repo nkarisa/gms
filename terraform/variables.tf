@@ -1,3 +1,23 @@
+variable "logtail_token" {
+  description = "Logtail Token"
+  type        = string 
+}
+
+variable "base_url" {
+  description = "Base URL"
+  type        = string 
+}
+
+variable "db_host" {
+  description = "Database Host"
+  type        = string 
+}
+
+variable "db_pass" {
+  description = "Database Password"
+  type        = string 
+}
+
 variable "tag" {
   description = "Gitlab commit SHA"
   type        = string 

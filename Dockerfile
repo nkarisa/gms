@@ -1,13 +1,13 @@
 FROM serversideup/php:8.3-fpm-nginx
 
 # --- Build Arguments ---
-ARG BASE_URL="http://localhost:8090/"
-ARG LOGTAIL_TOKEN="your-logtail-token"
-ARG DB_HOST="host.docker.internal"
-ARG DB_PASS="Compassion123"
-ARG CI_ENVIRONMENT="devint"
-ARG SHA256_PASSWORD_SALT="salt-string"
-ARG IMAGE_APP_PATH="prod"
+# ARG BASE_URL="http://localhost:8090/"
+# ARG LOGTAIL_TOKEN="your-logtail-token"
+# ARG DB_HOST="host.docker.internal"
+# ARG DB_PASS="Compassion123"
+# ARG CI_ENVIRONMENT="devint"
+# ARG SHA256_PASSWORD_SALT="salt-string"
+# ARG IMAGE_APP_PATH="prod"
 
 # --- Environment Variables ---
 ENV NGINX_WEBROOT=/var/www/html
@@ -43,13 +43,15 @@ COPY --chown=www-data:www-data . .
 RUN ln -s /var/www/html/public  /var/www/html/devint
 RUN ln -s /var/www/html/public /var/www/html/stage
 
+ENTRYPOINT ["/var/www/html/entrypoint.sh"]
+
 # Move env file into place and substitute variables using envsubst
 # This assumes your .env file template uses ${VAR} syntax for envsubst
 
-RUN envsubst \
-    '$$BASE_URL $$LOGTAIL_TOKEN $$CI_ENVIRONMENT $$SHA256_PASSWORD_SALT $$DB_HOST $$DB_PASS' \
-    < env > .env.tmp && \
-    mv .env.tmp .env
+# RUN envsubst \
+#     '$$BASE_URL $$LOGTAIL_TOKEN $$CI_ENVIRONMENT $$SHA256_PASSWORD_SALT $$DB_HOST $$DB_PASS' \
+#     < env > .env.tmp && \
+#     mv .env.tmp .env
 
 # If your .env file template doesn't directly use ${VAR} for all values,
 # and you need specific string replacements, you would still use sed

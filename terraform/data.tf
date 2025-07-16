@@ -82,11 +82,21 @@ locals {
       memory      = var.task_memory / 2
       essential   = true
 
-      # command = [
-      #   "/bin/sh",
-      #   "-c",
-      #   "aws s3 cp s3://${data.aws_s3_bucket.nginx_config_bucket.bucket}/http.conf /etc/nginx/conf.d/http.conf"
-      # ]
+      environment = [
+        {
+          "CI_ENVIRONMENT"  : var.app_environment,
+          "LOGTAIL_TOKEN"   : var.logtail_token,
+          "BASE_URL"        : var.base_url,
+          "DB_HOST"         : var.db_host,
+          "DB_PASS"         : var.db_pass
+        }
+      ]
+
+      command = [
+        "/bin/sh",
+        "-c",
+        ""
+      ]
 
       portMappings = [
         {

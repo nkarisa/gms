@@ -54,4 +54,4 @@ include:
       container_build_dockerfile_path: "./Dockerfile"
       state_type: "s3_bypath"
       container_build_destination: "234204504144.dkr.ecr.eu-west-1.amazonaws.com/safinav3"
-      container_build_args: "IMAGE_APP_PATH=$IMAGE_APP_PATH BASE_URL=$BASE_URL LOGTAIL_TOKEN=$LOGTAIL_TOKEN DB_HOST=$DB_HOST DB_PASS=$DB_PASS SHA256_PASSWORD_SALT=$SHA256_PASSWORD_SALT"
+      # container_build_args: "IMAGE_APP_PATH=$IMAGE_APP_PATH BASE_URL=$BASE_URL LOGTAIL_TOKEN=$LOGTAIL_TOKEN DB_HOST=$DB_HOST DB_PASS=$DB_PASS SHA256_PASSWORD_SALT=$SHA256_PASSWORD_SALT"
