@@ -32,9 +32,11 @@ USER www-data
 
 WORKDIR ${NGINX_WEBROOT}
 
-# COPY --chown=www-data:www-data composer.json composer.lock ./
+COPY --chown=www-data:www-data composer.json composer.lock ./
 
-# RUN composer install --no-dev --optimize-autoloader
+COPY --chown=www-data:www-data http.conf /etc/nginx/conf.d/
+
+RUN composer install --no-dev --optimize-autoloader
 
 COPY --chown=www-data:www-data . .
 
