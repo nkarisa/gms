@@ -81,6 +81,13 @@ locals {
       cpu         = var.task_cpu / 2
       memory      = var.task_memory / 2
       essential   = true
+
+      command = [
+        "/bin/sh",
+        "-c",
+        "aws s3 cp s3://${data.aws_s3_bucket.nginx_config_bucket.bucket}/http.conf /etc/nginx/conf.d/http.conf"
+      ]
+
       portMappings = [
         {
           containerPort = 8080
