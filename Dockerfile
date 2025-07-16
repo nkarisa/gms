@@ -1,16 +1,16 @@
 FROM serversideup/php:8.3-fpm-nginx
 
 # --- Build Arguments ---
-ARG BASE_URL=""
-ARG LOGTAIL_TOKEN=""
-ARG DB_HOST=""
-ARG DB_PASS=""
-ARG CI_ENVIRONMENT="production"
-ARG SHA256_PASSWORD_SALT=""
+ARG BASE_URL="http://localhost:8090/"
+ARG LOGTAIL_TOKEN="your-logtail-token"
+ARG DB_HOST="host.docker.internal"
+ARG DB_PASS="Compassion123"
+ARG CI_ENVIRONMENT="devint"
+ARG SHA256_PASSWORD_SALT="salt-string"
 ARG IMAGE_APP_PATH="prod"
 
 # --- Environment Variables ---
-ENV NGINX_WEBROOT=/var/www/${IMAGE_APP_PATH}
+ENV NGINX_WEBROOT=/var/www/html
 ENV SSL_MODE=off
 ENV PHP_DISPLAY_ERRORS=1
 ENV APP_DIR="devint"
@@ -23,31 +23,28 @@ RUN apt-get update && \
     apt-get install -y gettext-base git && \
     install-php-extensions bcmath intl mysqli && \
     mkdir -p ${NGINX_WEBROOT} && \
-    chown -R www-data:www-data /var/www/${IMAGE_APP_PATH} && \
+    chown -R www-data:www-data /var/www/html && \
     rm -rf /var/lib/apt/lists/* # Clean up apt cache to keep image small
 
 # Switch back to the non-root user for subsequent operations 
 # --- Application Setup (www-data User) ---
 USER www-data
 
-WORKDIR /var/www/${IMAGE_APP_PATH}
+WORKDIR /var/www/html
 
 COPY --chown=www-data:www-data composer.json composer.lock /var/www/${IMAGE_APP_PATH}/
 
-RUN composer install 
-# composer install --no-dev --optimize-autoloader
+RUN composer install --no-dev --optimize-autoloader
 
-COPY http.conf /etc/nginx/site-opts.d/
-
-COPY --chown=www-data:www-data . /var/www/${IMAGE_APP_PATH}
+COPY --chown=www-data:www-data . .
 
 # Move env file into place and substitute variables using envsubst
 # This assumes your .env file template uses ${VAR} syntax for envsubst
 
 RUN envsubst \
     '$$BASE_URL $$LOGTAIL_TOKEN $$CI_ENVIRONMENT $$SHA256_PASSWORD_SALT $$DB_HOST $$DB_PASS' \
-    < /var/www/${IMAGE_APP_PATH}/env > /var/www/${IMAGE_APP_PATH}/.env.tmp && \
-    mv /var/www/${IMAGE_APP_PATH}/.env.tmp /var/www/${IMAGE_APP_PATH}/.env
+    < env > .env.tmp && \
+    mv .env.tmp .env
 
 # If your .env file template doesn't directly use ${VAR} for all values,
 # and you need specific string replacements, you would still use sed
