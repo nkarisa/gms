@@ -34,7 +34,7 @@ WORKDIR ${NGINX_WEBROOT}
 
 COPY --chown=www-data:www-data composer.json composer.lock ./
 
-COPY --chown=www-data:www-data default.conf /etc/nginx/conf.d/
+# COPY --chown=www-data:www-data default.conf /etc/nginx/conf.d/
 
 RUN composer install --no-dev --optimize-autoloader
 
