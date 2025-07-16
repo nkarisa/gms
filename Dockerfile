@@ -26,6 +26,10 @@ RUN apt-get update && \
     chown -R www-data:www-data ${NGINX_WEBROOT} && \
     rm -rf /var/lib/apt/lists/* # Clean up apt cache to keep image small
 
+COPY entrypoint.sh /var/www/html/entrypoint.sh
+
+RUN chmod +x /var/www/html/entrypoint.sh
+
 # Switch back to the non-root user for subsequent operations 
 # --- Application Setup (www-data User) ---
 USER www-data
@@ -43,7 +47,7 @@ COPY --chown=www-data:www-data . .
 RUN ln -s /var/www/html/public  /var/www/html/devint
 RUN ln -s /var/www/html/public /var/www/html/stage
 
-RUN chmod +x /var/www/html/entrypoint.sh
+# RUN chmod +x /var/www/html/entrypoint.sh
 
 ENTRYPOINT ["/var/www/html/entrypoint.sh"]
 
