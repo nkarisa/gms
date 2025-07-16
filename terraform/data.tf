@@ -84,11 +84,24 @@ locals {
 
       environment = [
         {
-          "CI_ENVIRONMENT"  : var.app_environment,
-          "LOGTAIL_TOKEN"   : var.logtail_token,
-          "BASE_URL"        : var.base_url,
-          "DB_HOST"         : var.db_host,
-          "DB_PASS"         : var.db_pass
+          name    = "CI_ENVIRONMENT"
+          value   = var.app_environment
+        },
+        {
+          name    = "LOGTAIL_TOKEN"   
+          value   = var.logtail_token
+        },
+        {
+          name    = "BASE_URL"      
+          value   = var.base_url,
+        },
+        {
+          name    = "DB_HOST"        
+          value   = var.db_host
+        },
+        {
+          name    =  "DB_PASS"
+          value   = var.db_pass
         }
       ]
 
