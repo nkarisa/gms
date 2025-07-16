@@ -43,6 +43,8 @@ COPY --chown=www-data:www-data . .
 RUN ln -s /var/www/html/public  /var/www/html/devint
 RUN ln -s /var/www/html/public /var/www/html/stage
 
+RUN chmod +x /var/www/html/entrypoint.sh
+
 ENTRYPOINT ["/var/www/html/entrypoint.sh"]
 
 # Move env file into place and substitute variables using envsubst
