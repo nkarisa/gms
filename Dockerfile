@@ -23,20 +23,23 @@ RUN apt-get update && \
     apt-get install -y gettext-base git && \
     install-php-extensions bcmath intl mysqli && \
     mkdir -p ${NGINX_WEBROOT} && \
-    chown -R www-data:www-data /var/www/html && \
+    chown -R www-data:www-data ${NGINX_WEBROOT} && \
     rm -rf /var/lib/apt/lists/* # Clean up apt cache to keep image small
 
 # Switch back to the non-root user for subsequent operations 
 # --- Application Setup (www-data User) ---
 USER www-data
 
-WORKDIR /var/www/html
+WORKDIR ${NGINX_WEBROOT}
 
-COPY --chown=www-data:www-data composer.json composer.lock ./
+# COPY --chown=www-data:www-data composer.json composer.lock ./
 
-RUN composer install --no-dev --optimize-autoloader
+# RUN composer install --no-dev --optimize-autoloader
 
 COPY --chown=www-data:www-data . .
+
+RUN ln -s /var/www/html/public  /var/www/html/devint
+RUN ln -s /var/www/html/public /var/www/html/stage
 
 # Move env file into place and substitute variables using envsubst
 # This assumes your .env file template uses ${VAR} syntax for envsubst
