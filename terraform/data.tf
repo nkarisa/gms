@@ -1,3 +1,7 @@
+data "aws_cloudwatch_log_group" "safina_ecs_log_group" {
+  name = "safina-app-log-group"
+}
+
 data "aws_ecs_cluster" "safina-cluster" {
   cluster_name = "safina-cluster"
 }
@@ -112,9 +116,9 @@ locals {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          "awslogs-group"         = aws_cloudwatch_log_group.safina_ecs_log_group.name
+          "awslogs-group"         = data.aws_cloudwatch_log_group.safina_ecs_log_group.name
           "awslogs-region"        = var.aws_region
-          "awslogs-stream-prefix" = "ecs"
+          "awslogs-stream-prefix" = var.app_environment
         }
       }
       # repositoryCredentials = {
