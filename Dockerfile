@@ -1,19 +1,9 @@
-FROM serversideup/php:8.3-fpm-nginx
-
-# --- Build Arguments ---
-# ARG BASE_URL="http://localhost:8090/"
-# ARG LOGTAIL_TOKEN="your-logtail-token"
-# ARG DB_HOST="host.docker.internal"
-# ARG DB_PASS="Compassion123"
-# ARG CI_ENVIRONMENT="devint"
-# ARG SHA256_PASSWORD_SALT="salt-string"
-# ARG IMAGE_APP_PATH="prod"
+FROM serversideup/php:8.3-fpm-apache
 
 # --- Environment Variables ---
-ENV NGINX_WEBROOT=/var/www/html
+ENV APACHE_DOCUMENT_ROOT=/var/www/html
 ENV SSL_MODE=off
 ENV PHP_DISPLAY_ERRORS=1
-ENV APP_DIR="devint"
 
 # --- System Setup (Root User) ---
 USER root
@@ -22,23 +12,18 @@ USER root
 RUN apt-get update && \
     apt-get install -y gettext-base git dos2unix && \
     install-php-extensions bcmath intl mysqli && \
-    mkdir -p ${NGINX_WEBROOT} && \
-    chown -R www-data:www-data ${NGINX_WEBROOT} && \
+    mkdir -p ${APACHE_DOCUMENT_ROOT} && \
+    chown -R www-data:www-data ${APACHE_DOCUMENT_ROOT} && \
     rm -rf /var/lib/apt/lists/* # Clean up apt cache to keep image small
 
 COPY  --chown=root:root ./entrypoint.d/envsubst.sh /etc/entrypoint.d/
 
-# RUN chmod +x /var/www/html/entrypoint.sh
 RUN dos2unix /etc/entrypoint.d/envsubst.sh && \ 
     chmod +x /etc/entrypoint.d/envsubst.sh
 
 USER www-data
-
-WORKDIR ${NGINX_WEBROOT}
-
+WORKDIR ${APACHE_DOCUMENT_ROOT}
 COPY --chown=www-data:www-data composer.json composer.lock ./
-
-COPY --chown=www-data:www-data default.conf /etc/nginx/conf.d/
 
 RUN composer install --no-dev --optimize-autoloader
 

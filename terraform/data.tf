@@ -1,7 +1,3 @@
-data "aws_s3_bucket" "nginx_config_bucket" {
-  bucket = "safina-terraform-state"
-}
-
 data "aws_ecs_cluster" "safina-cluster" {
   cluster_name = "safina-cluster"
 }
@@ -125,37 +121,5 @@ locals {
       #   credentialsParameter = var.gitlab_secret_arn # Reference the variable you'll define for the Secret ARN
       # }
     }
-    # ,
-    # {
-    #   name      = "router"
-    #   image     = "nginx:1.29"
-    #   cpu       = 64
-    #   memory    = 128
-    #   essential = true 
-
-    #   portMappings = [
-    #     {
-    #       containerPort = 80
-    #       hostPort      = 80
-    #       protocol      = "tcp"
-    #     }
-    #   ]
-
-    #   command = [
-    #     "/bin/sh",
-    #     "-c",
-    #     "aws s3 cp s3://${data.aws_s3_bucket.nginx_config_bucket.bucket}/default.conf /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
-    #   ]
-
-    #   logConfiguration = {
-    #     logDriver = "awslogs"
-    #     options = {
-    #       awslogs-group         = aws_cloudwatch_log_group.safina_ecs_log_group.name
-    #       awslogs-region        = var.aws_region
-    #       awslogs-stream-prefix = "router-logger"
-    #     }
-    #   }
-      
-    # }
   ]
 }
