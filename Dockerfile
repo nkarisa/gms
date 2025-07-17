@@ -1,7 +1,7 @@
 FROM serversideup/php:8.3-fpm-apache
 
 # --- Environment Variables ---
-ENV APACHE_DOCUMENT_ROOT=/var/www/html
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 ENV SSL_MODE=off
 ENV PHP_DISPLAY_ERRORS=1
 
@@ -12,8 +12,8 @@ USER root
 RUN apt-get update && \
     apt-get install -y gettext-base git dos2unix && \
     install-php-extensions bcmath intl mysqli && \
-    mkdir -p ${APACHE_DOCUMENT_ROOT} && \
-    chown -R www-data:www-data ${APACHE_DOCUMENT_ROOT} && \
+    mkdir -p /var/www/html/ && \
+    chown -R www-data:www-data /var/www/html/ && \
     rm -rf /var/lib/apt/lists/* # Clean up apt cache to keep image small
 
 COPY  --chown=root:root ./entrypoint.d/envsubst.sh /etc/entrypoint.d/
@@ -22,17 +22,12 @@ RUN dos2unix /etc/entrypoint.d/envsubst.sh && \
     chmod +x /etc/entrypoint.d/envsubst.sh
 
 USER www-data
-WORKDIR ${APACHE_DOCUMENT_ROOT}
+WORKDIR /var/www/html/
 COPY --chown=www-data:www-data composer.json composer.lock ./
-
 RUN composer install --no-dev --optimize-autoloader
-
 COPY --chown=www-data:www-data . .
-
-RUN ln -s /var/www/html/public  /var/www/html/devint
-RUN ln -s /var/www/html/public /var/www/html/stage
-
-# ENTRYPOINT ["/var/www/html/entrypoint.sh"]
+RUN ln -s /var/www/html/public  /var/www/html/public/devint
+RUN ln -s /var/www/html/public /var/www/html/public/stage
 
 # Move env file into place and substitute variables using envsubst
 # This assumes your .env file template uses ${VAR} syntax for envsubst
