@@ -97,6 +97,6 @@ resource "aws_ecs_service" "new_ecs_service" {
     data.aws_ecs_service.ecs_service,
     data.aws_lb_listener.safina_listener_https_443,
     data.aws_lb_target_group.safina_ecs_tg,
-    aws_cloudwatch_log_group.safina_ecs_log_group 
+    # data.aws_cloudwatch_log_group.safina_ecs_log_group 
   ]
 }
