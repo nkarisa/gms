@@ -4,15 +4,15 @@ resource "random_integer" "priority" {
 }
 
 # --- CloudWatch Log Group for ECS Service ---
-resource "aws_cloudwatch_log_group" "safina_ecs_log_group" {
-  name              = "/ecs/safina-app-${var.app_environment}" # This must match awslogs-group in task definition
-  retention_in_days = 7                # Retain logs for 7 days (adjust as needed)
+# resource "aws_cloudwatch_log_group" "safina_ecs_log_group" {
+#   name              = "/ecs/safina-app-${var.app_environment}" # This must match awslogs-group in task definition
+#   retention_in_days = 7                # Retain logs for 7 days (adjust as needed)
 
-  tags = {
-    Environment = "Development"
-    Service     = "Safina App"
-  }
-}
+#   tags = {
+#     Environment = "Development"
+#     Service     = "Safina App"
+#   }
+# }
 
 # Define the AWS ECS Task Definition for Safina
 resource "aws_ecs_task_definition" "task_definition" {
@@ -97,6 +97,6 @@ resource "aws_ecs_service" "new_ecs_service" {
     data.aws_ecs_service.ecs_service,
     data.aws_lb_listener.safina_listener_https_443,
     data.aws_lb_target_group.safina_ecs_tg,
-    aws_cloudwatch_log_group.safina_ecs_log_group 
+    # data.aws_cloudwatch_log_group.safina_ecs_log_group 
   ]
 }
