@@ -63,7 +63,7 @@ class Services extends BaseService
           }
      
         $logFile = WRITEPATH.'logs/log-'.date('Y-m-d').'.log';
-        $stream = ENVIRONMENT == 'production' ? 'php://stdout' : $logFile;
+        $stream = ENVIRONMENT == 'production' || ENVIRONMENT == 'prod' || ENVIRONMENT == 'stage' ? 'php://stdout' : $logFile;
         
         // Logging domain
         $logger = new Logger('safina');
