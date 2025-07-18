@@ -102,6 +102,22 @@ locals {
         {
           name    =  "DB_PASS"
           value   = var.db_pass
+        },
+        {
+          name    = "SESSION_DYNAMODB_TABLE"
+          value   = var.SESSION_DYNAMODB_TABLE
+        },
+        {
+          name    = "SESSION_HANDLER"
+          value   = var.SESSION_HANDLER
+        },
+        {
+          name    = "REDIS_SERVER"
+          value   = var.REDIS_SERVER
+        },
+        {
+          name    = "REDIS_PORT"
+          value   = var.REDIS_PORT
         }
       ]
 
