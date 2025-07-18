@@ -16,6 +16,7 @@
 
 CI_ENVIRONMENT = ${CI_ENVIRONMENT}
 LOGTAIL_TOKEN = ${LOGTAIL_TOKEN}
+SESSION_USE_DYNAMODB = ${SESSION_USE_DYNAMODB}
 
 #--------------------------------------------------------------------
 # APP

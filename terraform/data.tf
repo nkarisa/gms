@@ -102,6 +102,10 @@ locals {
         {
           name    =  "DB_PASS"
           value   = var.db_pass
+        },
+        {
+          name    = "SESSION_USE_DYNAMODB"
+          value   = "1"
         }
       ]
 

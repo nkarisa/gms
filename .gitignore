@@ -142,3 +142,5 @@ app/Config/Kint.php
 .terraform.lock.hcl
 terraform.tfstate
 *.tfvars
+.aws
+.aws

@@ -21,7 +21,7 @@ class Session extends BaseConfig
      * - `\App\Libraries\Session\Handlers\DynamoDbSessionHandler`
      * @var class-string<BaseHandler>
      */
-    public string $driver = \App\Libraries\Session\Handlers\DynamoDbSessionHandler::class; // 'CodeIgniter\Session\Handlers\RedisHandler'; // FileHandler::class;
+    public string $driver = 'CodeIgniter\Session\Handlers\RedisHandler'; // \App\Libraries\Session\Handlers\DynamoDbSessionHandler::class; // 'CodeIgniter\Session\Handlers\RedisHandler'; // FileHandler::class;
 
     /**
      * --------------------------------------------------------------------------
@@ -57,7 +57,7 @@ class Session extends BaseConfig
      *
      * IMPORTANT: You are REQUIRED to set a valid save path!
      */
-    public string $savePath = 'safina-app-session'; // 'test_ci4_user_session_logging'; // 'safina-app-session'; // 'tcp://redis-session-cache:6379'; // WRITEPATH . 'session';
+    public string $savePath = 'tcp://10.244.132.147:6379'; // 'safina-app-session'; // 'safina-app-session'; // 'tcp://redis-session-cache:6379'; // WRITEPATH . 'session';
 
 
     /**
@@ -134,4 +134,9 @@ class Session extends BaseConfig
      * seconds.
      */
     public int $lockMaxRetries = 300;
+
+    // public function __construct(){
+    //     $this->driver = env('SESSION_USE_DYNAMODB') == 0 ? FileHandler::class :  $this->driver;
+    //     $this->savePath = env('SESSION_USE_DYNAMODB') == 0 ? WRITEPATH . 'session' : 'safina-app-session'; 
+    // }
 }
