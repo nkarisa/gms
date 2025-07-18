@@ -21,7 +21,7 @@ class Session extends BaseConfig
      * - `\App\Libraries\Session\Handlers\DynamoDbSessionHandler`
      * @var class-string<BaseHandler>
      */
-    public string $driver = 'CodeIgniter\Session\Handlers\RedisHandler'; // \App\Libraries\Session\Handlers\DynamoDbSessionHandler::class; // 'CodeIgniter\Session\Handlers\RedisHandler'; // FileHandler::class;
+    public string $driver = FileHandler::class; // 'CodeIgniter\Session\Handlers\RedisHandler'; // \App\Libraries\Session\Handlers\DynamoDbSessionHandler::class; // 'CodeIgniter\Session\Handlers\RedisHandler'; 
 
     /**
      * --------------------------------------------------------------------------
@@ -57,7 +57,7 @@ class Session extends BaseConfig
      *
      * IMPORTANT: You are REQUIRED to set a valid save path!
      */
-    public string $savePath = 'tcp://10.244.132.147:6379'; // 'safina-app-session'; // 'safina-app-session'; // 'tcp://redis-session-cache:6379'; // WRITEPATH . 'session';
+    public string $savePath = WRITEPATH . 'session'; // 'tcp://10.244.132.147:6379'; // 'safina-app-session'; // 'safina-app-session'; // 'tcp://redis-session-cache:6379'; 
 
 
     /**
@@ -135,8 +135,25 @@ class Session extends BaseConfig
      */
     public int $lockMaxRetries = 300;
 
-    // public function __construct(){
-    //     $this->driver = env('SESSION_USE_DYNAMODB') == 0 ? FileHandler::class :  $this->driver;
-    //     $this->savePath = env('SESSION_USE_DYNAMODB') == 0 ? WRITEPATH . 'session' : 'safina-app-session'; 
-    // }
+    public function __construct(){
+
+        if(env('DOCKER_COMPOSE_USAGE') == "0"){
+            if(env('SESSION_HANDLER') == 'DynamoDb'){
+                $this->driver = \App\Libraries\Session\Handlers\DynamoDbSessionHandler::class;
+                $this->savePath = env('SESSION_DYNAMODB_TABLE');
+            }elseif(env('SESSION_HANDLER') == 'Redis'){
+                $this->driver = 'CodeIgniter\Session\Handlers\RedisHandler';
+                $this->savePath = 'tcp://'.env('REDIS_SERVER').':'.env('REDIS_PORT');
+            }
+        }else{
+            if(env('SESSION_HANDLER') == 'Redis'){
+                $this->driver = 'CodeIgniter\Session\Handlers\RedisHandler';
+                $this->savePath = 'tcp://'.env('REDIS_SERVER').':'.env('REDIS_PORT');
+            }
+        }
+
+        //     $this->driver = env('SESSION_USE_DYNAMODB') == 0 ? FileHandler::class :  $this->driver;
+        //     $this->savePath = env('SESSION_USE_DYNAMODB') == 0 ? WRITEPATH . 'session' : 'safina-app-session'; 
+
+    }
 }

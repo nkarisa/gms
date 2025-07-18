@@ -5,7 +5,7 @@ ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 ENV SSL_MODE=off
 ENV PHP_DISPLAY_ERRORS=1
 # Overwritten in Docker Compose file
-ENV SESSION_USE_DYNAMODB=1 
+ENV DOCKER_COMPOSE_USAGE=0 
 # --- System Setup (Root User) ---
 USER root
 

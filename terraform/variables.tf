@@ -1,3 +1,24 @@
+variable "SESSION_HANDLER" {
+  description = "CI session handler" # Redis, DynamoDb
+  type        = string
+}
+
+variable "SESSION_DYNAMODB_TABLE" {
+  description = "Session DynamoDb Table"
+  type        = string
+}
+
+variable "REDIS_SERVER" {
+  description = "Redis Server"
+  type        = string 
+}
+
+variable "REDIS_PORT" {
+  description = "Redis Server Port" 
+  type        = string
+  default     = "6379"
+}
+
 variable "logtail_token" {
   description = "Logtail Token"
   type        = string 

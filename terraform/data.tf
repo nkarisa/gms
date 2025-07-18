@@ -104,8 +104,20 @@ locals {
           value   = var.db_pass
         },
         {
-          name    = "SESSION_USE_DYNAMODB"
-          value   = "1"
+          name    = "DOCKER_COMPOSE_USAGE"
+          value   = "0"
+        },
+        {
+          name    = "SESSION_HANDLER"
+          value   = "Redis"
+        },
+        {
+          name    = "REDIS_SERVER"
+          value   = "Redis"
+        },
+        {
+          name    = "REDIS_PORT"
+          value   = "Redis"
         }
       ]
 
