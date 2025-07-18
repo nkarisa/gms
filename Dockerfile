@@ -22,9 +22,12 @@ RUN dos2unix /etc/entrypoint.d/envsubst.sh && \
     chmod +x /etc/entrypoint.d/envsubst.sh
 
 USER www-data
+
 WORKDIR /var/www/html/
+
 COPY --chown=www-data:www-data composer.json composer.lock ./
 RUN composer install --no-dev --optimize-autoloader
+
 COPY --chown=www-data:www-data . .
 RUN ln -s /var/www/html/public  /var/www/html/public/devint
 RUN ln -s /var/www/html/public /var/www/html/public/stage
