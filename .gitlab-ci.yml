@@ -35,4 +35,4 @@ include:
         - echo "Integration test successful"
       container_build_dockerfile_path: "./Dockerfile"
       state_type: "s3_bypath"
-      container_build_destination: "234204504144.dkr.ecr.eu-west-1.amazonaws.com/$ECR_REGISTRY"
+      container_build_destination: "234204504144.dkr.ecr.eu-west-1.amazonaws.com/safinav3"
