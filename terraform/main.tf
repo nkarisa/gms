@@ -3,17 +3,6 @@ resource "random_integer" "priority" {
   max = 50000
 }
 
-# --- CloudWatch Log Group for ECS Service ---
-# resource "aws_cloudwatch_log_group" "safina_ecs_log_group" {
-#   name              = "/ecs/safina-app-${var.app_environment}" # This must match awslogs-group in task definition
-#   retention_in_days = 7                # Retain logs for 7 days (adjust as needed)
-
-#   tags = {
-#     Environment = "Development"
-#     Service     = "Safina App"
-#   }
-# }
-
 # Define the AWS ECS Task Definition for Safina
 resource "aws_ecs_task_definition" "task_definition" {
   family                   = var.task_definition_family # A logical name for your task definition
