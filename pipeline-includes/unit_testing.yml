@@ -20,7 +20,7 @@ unit_tests:
         echo "Waiting for MySQL to be ready..."
         sleep 1
       done
-    - mysql -h mysql -h db -u root -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
+    - mysql -h mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
 
 .unit_test:
   script:
