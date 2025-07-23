@@ -4,6 +4,7 @@
     # - apt-get install git unzip -yqq # Install git and unzip, often needed for composer
     # - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer # Install Composer
     # - composer install --prefer-dist --no-ansi --no-interaction # Install project dependencies
+    - add-apt-repository ppa:ondrej/php
     - apt-get update -yqq
     - apt-get install php8.2-intl git unzip -yqq # Install git and unzip, often needed for composer
     - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer # Install Composer
