@@ -1,7 +1,8 @@
 unit_tests:
   services:
-    - mysql:8.0
-    
+    - name: mysql:8.0
+      alias: mysql
+
 .installs:
   script:
     - apt-get update -yqq
@@ -15,11 +16,11 @@ unit_tests:
 
     - |
       for i in $(seq 1 30); do
-        mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "status" > /dev/null 2>&1 && break
+        mysql -h mysql -mysql root -p"$MYSQL_ROOT_PASSWORD" -e "status" > /dev/null 2>&1 && break
         echo "Waiting for MySQL to be ready..."
         sleep 1
       done
-    - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
+    - mysql -h mysql -h db -u root -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
 
 .unit_test:
   script:
