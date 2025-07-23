@@ -5,6 +5,9 @@ unit_tests:
   artifacts:
     reports:
       junit: "$CI_PROJECT_DIR/phpunit-report.xml"
+  environment:
+    name: test
+  
 
 .installs:
   script:
