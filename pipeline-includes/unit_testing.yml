@@ -29,7 +29,8 @@ unit_tests:
     - echo "Importing database schema from database_schema.sql into $MYSQL_DATABASE..."
     - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" < app/Database/schema.sql
     - echo "Database schema imported successfully."
-    - mysql -h mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "USE $MYSQL_DATABASE; SHOW TABLES"
+    - mysql -h mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "USE $MYSQL_DATABASE TABLES;"
+    - mysql -h mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "SELECT COUNT(*) AS total_tables FROM information_schema.TABLES WHERE TABLE_SCHEMA = '$MYSQL_DATABASE' AND TABLE_TYPE = 'BASE TABLE';"
 
 .unit_test:
   script:
