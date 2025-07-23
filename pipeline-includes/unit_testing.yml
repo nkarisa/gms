@@ -1,0 +1,3 @@
+.unit_test: &unit_test
+  - echo "Command holder"
+  - echo "Unit testing successful"

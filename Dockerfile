@@ -17,6 +17,7 @@ RUN apt-get update && \
     chown -R www-data:www-data /var/www/html/ && \
     rm -rf /var/lib/apt/lists/* # Clean up apt cache to keep image small
 
+# This container ENTRYPOINT as per serversiderup/php
 COPY  --chown=root:root ./entrypoint.d/envsubst.sh /etc/entrypoint.d/
 
 RUN dos2unix /etc/entrypoint.d/envsubst.sh && \ 

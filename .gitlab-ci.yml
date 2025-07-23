@@ -7,10 +7,11 @@ cache:
   paths:
       - vendor
 
-.test_deps: &test_dep_script
-  - echo "Command holder"
   
 include:
+  - local: "./pipeline-includes/unit_testing.yml"
+  - local: "./pipeline-includes//integration_testing.yml"
+  - local: "./pipeline-includes/smoke_testing.yml"
   - component: &core-yaml-tpl $CI_SERVER_FQDN/ciorg/community/cmf/pipeline/core-yaml/include@2.4
     inputs: &core-yaml-input
       deploy_stages: ''
@@ -27,12 +28,11 @@ include:
       terraform_dir: 'terraform'
       include_container_build_job: true
       unit_tests_script: 
-        - *test_dep_script 
-        - echo "Unit testing successful"
+        - *unit_test 
       smoke_tests_script:
-        - echo "Smoke test successful"
+        - *smoke_test 
       integration_tests_script: 
-        - echo "Integration test successful"
+        - *integration_test
       container_build_dockerfile_path: "./Dockerfile"
       state_type: "s3_bypath"
       container_build_destination: "234204504144.dkr.ecr.eu-west-1.amazonaws.com/safinav3"
