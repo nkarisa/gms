@@ -1,3 +1,7 @@
+unit_tests:
+  services:
+    - mysql:8.0
+    
 .installs:
   script:
     - apt-get update -yqq
