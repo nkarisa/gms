@@ -1,3 +1,7 @@
+variables:
+  VARS_TO_SUBST: 'BASE_URL LOGTAIL_TOKEN CI_ENVIRONMENT SHA256_PASSWORD_SALT DB_HOST DB_PASS'
+
+
 unit_tests:
   services:
     - name: mysql:8.0
@@ -21,8 +25,7 @@ unit_tests:
         sleep 1
       done
     - mysql -h mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
-    - chmod +x entrypoint.d/envsubst.sh
-    - ./entrypoint.d/envsubst.sh
+    - envsubst "$VARS_TO_SUBST" < env > .env.tmp && mv .env.tmp .env
 
 .unit_test:
   script:
