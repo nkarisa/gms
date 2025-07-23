@@ -25,7 +25,7 @@ include:
       manual_promote_to_prod: 'no' # auto promte to prod
       final_deploy_behavior: on_success # default manual
       is_http_service: false
-      build_and_test_image_version: '8.2-fpm-alpine' 
+      build_and_test_image_version: '8.2.29' 
       build_and_test_image: php 
       service_language: golang # Ignore this one. Used only to satisfy the logic checks
       include_build_job: false
