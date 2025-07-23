@@ -18,11 +18,11 @@ class SetUpSeeder extends Seeder
 
         $schemaTables = [
             'approve_item',
-            'setting',
-            'settings',
-            'language',
-            'item_reason',
-            'account_system',
+            // 'setting',
+            // 'settings',
+            // 'language',
+            // 'item_reason',
+            // 'account_system',
             // 'account_system_setting',
             // 'account_system_language',
             // 'context_definition',
