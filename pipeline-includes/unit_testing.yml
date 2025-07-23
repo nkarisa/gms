@@ -27,10 +27,9 @@ unit_tests:
     # - BASE_URL='http://localhost/'
     # - VARS_TO_SUBST='BASE_URL LOGTAIL_TOKEN CI_ENVIRONMENT SHA256_PASSWORD_SALT DB_HOST DB_PASS'
     # - envsubst "$VARS_TO_SUBST" < env > .env.tmp && mv .env.tmp .env
-    - vendor/bin/phpunit --colors --testdox --log-junit phpunit-report.xml
 
 .unit_test:
   script:
     - !reference [.installs, script]
-    # - vendor/bin/phpunit --colors --testdox --log-junit phpunit-report.xml
+    - vendor/bin/phpunit --colors --testdox --log-junit phpunit-report.xml
     - echo "Unit Testing Successful"
