@@ -58,6 +58,12 @@
         <env name="database.tests.password" value="Compassion123"/>
         <env name="database.tests.DBDriver" value="MySQLi"/>
         <env name="database.tests.DBPrefix" value=""/>
-           
+    
+        <ini name="display_errors" value="1" />
+        <ini name="error_reporting" value="-1" />
+        <ini name="xdebug.mode" value="coverage" />
+        <!-- <env name="APP_ENV" value="testing" />
+        <env name="DB_CONNECTION" value="sqlite" />
+        <env name="DB_DATABASE" value=":memory:" /> -->
     </php>
 </phpunit>
