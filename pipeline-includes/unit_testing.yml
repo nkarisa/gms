@@ -4,7 +4,7 @@ unit_tests:
       alias: mysql
   artifacts:
     paths:
-      - build
+      - phpunit-report.xml
     reports:
       junit: phpunit-report.xml
 
