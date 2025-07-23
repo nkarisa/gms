@@ -1,5 +1,6 @@
 variables:
   VARS_TO_SUBST: 'BASE_URL LOGTAIL_TOKEN CI_ENVIRONMENT SHA256_PASSWORD_SALT DB_HOST DB_PASS'
+  BASE_URL: 'http://localhost/'
 
 
 unit_tests:
