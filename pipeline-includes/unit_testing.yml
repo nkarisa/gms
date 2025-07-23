@@ -35,5 +35,5 @@ unit_tests:
 .unit_test:
   script:
     - !reference [.installs, script]
-    - vendor/bin/phpunit --colors --testdox --log-junit phpunit-report.xml
+    - vendor/bin/phpunit --configuration phpunit.dist.xml --colors --testdox --log-junit phpunit-report.xml
     - echo "Unit Testing Successful"

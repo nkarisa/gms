@@ -143,4 +143,4 @@ app/Config/Kint.php
 terraform.tfstate
 *.tfvars
 .aws
-.aws
+phpunit.xml
