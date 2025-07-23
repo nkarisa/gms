@@ -7,6 +7,8 @@ unit_tests:
       junit: "$CI_PROJECT_DIR/phpunit-report.xml"
   environment:
     name: test
+  script:
+    - echo "Start Unit Testing ....."
   
 
 .installs:
