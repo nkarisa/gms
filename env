@@ -16,17 +16,16 @@
 
 CI_ENVIRONMENT = ${CI_ENVIRONMENT}
 LOGTAIL_TOKEN = ${LOGTAIL_TOKEN}
-# SESSION_USE_DYNAMODB = ${SESSION_USE_DYNAMODB}
-REDIS_SERVER = ${REDIS_SERVER} # 10.244.132.147
-REDIS_PORT = ${REDIS_PORT} # 6379
-DOCKER_COMPOSE_USAGE = ${DOCKER_COMPOSE_USAGE} # 0
+REDIS_SERVER = ${REDIS_SERVER}
+REDIS_PORT = ${REDIS_PORT} 
+DOCKER_COMPOSE_USAGE = ${DOCKER_COMPOSE_USAGE} 
 SESSION_DYNAMODB_TABLE = ${SESSION_DYNAMODB_TABLE}
 
 #--------------------------------------------------------------------
 # APP
 #--------------------------------------------------------------------
 
-app.baseURL = 'http://localhost/' # ${BASE_URL}
+app.baseURL = ${BASE_URL}
 # If you have trouble with `.`, you could also use `_`.
 # app_baseURL = ''
 # app.forceGlobalSecureRequests = false
