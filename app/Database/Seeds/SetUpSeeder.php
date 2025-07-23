@@ -15,7 +15,7 @@ class SetUpSeeder extends Seeder
     {
         helper('seeder');
         helper('inflector');
-
+        
         $schemaTables = [
             'approve_item',
             'setting',
