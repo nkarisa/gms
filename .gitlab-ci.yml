@@ -9,9 +9,9 @@ cache:
 
   
 include:
-  - local: "./pipeline-includes/unit_testing.yml"
-  - local: "./pipeline-includes//integration_testing.yml"
-  - local: "./pipeline-includes/smoke_testing.yml"
+  - local: "pipeline-includes/unit_testing.yml"
+  - local: "pipeline-includes//integration_testing.yml"
+  - local: "pipeline-includes/smoke_testing.yml"
   - component: &core-yaml-tpl $CI_SERVER_FQDN/ciorg/community/cmf/pipeline/core-yaml/include@2.4
     inputs: &core-yaml-input
       deploy_stages: ''
