@@ -21,6 +21,7 @@ unit_tests:
         sleep 1
       done
     - mysql -h mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
+    - cp env .env
 
 .unit_test:
   script:
