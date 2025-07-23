@@ -5,7 +5,7 @@
     # - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer # Install Composer
     # - composer install --prefer-dist --no-ansi --no-interaction # Install project dependencies
     - apt-get update -yqq
-    - apt-get install git mysql-client unzip zlib1g-dev libicu-dev -yqq # Install git and unzip, often needed for composer
+    - apt-get install git unzip zlib1g-dev libicu-dev -yqq # Install git and unzip, often needed for composer
     - docker-php-ext-configure intl
     - docker-php-ext-install intl
     - docker-php-ext-install mysqli
