@@ -2,6 +2,11 @@ unit_tests:
   services:
     - name: mysql:8.0
       alias: mysql
+  artifacts:
+    paths:
+      - phpunit-report.xml
+    reports:
+      junit: phpunit-report.xml
 
 .installs:
   script:
