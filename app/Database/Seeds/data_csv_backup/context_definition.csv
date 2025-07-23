@@ -1,0 +1,7 @@
+﻿context_definition_id,context_definition_track_number,context_definition_name,context_definition_level,context_definition_is_implementing,context_definition_is_active,context_definition_created_date,context_definition_last_modified_date,context_definition_created_by,context_definition_last_modified_by,context_definition_deleted_at,fk_approval_id,fk_status_id
+1,COON-85304,center,1,1,1,2020-08-20,2020-08-20 12:01:49,1,1,,,
+2,COON-24098,cluster,2,1,1,2020-08-20,2020-08-20 12:01:49,1,1,,,
+3,COON-36220,cohort,3,1,1,2020-08-20,2020-08-20 12:01:49,1,1,,,
+4,COON-42271,country,4,1,1,2020-08-20,2020-08-20 12:01:49,1,1,,,
+5,COON-11285,region,5,1,1,2020-08-20,2020-08-20 12:01:49,1,1,,,
+6,COON-4637,global,6,1,1,2020-08-20,2020-08-20 12:01:49,1,1,,,

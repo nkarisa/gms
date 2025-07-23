@@ -1,0 +1,10 @@
+﻿context_country_id,context_country_track_number,context_country_name,context_country_description,fk_office_id,fk_context_definition_id,fk_context_region_id,context_country_created_date,context_country_created_by,context_country_last_modified_date,context_country_last_modified_by,fk_approval_id,fk_status_id
+1,CORY-56553,Context for office Tanzania National Office,Context for office Tanzania National Office,3,4,1,2020-08-21,1,"0000-00-00 00:00:00",1,304,14
+2,CORY-30150,Context for office Kenya National Office,Context for office Kenya National Office,4,4,1,2020-08-21,1,"0000-00-00 00:00:00",1,307,14
+3,CORY-48193,Context for office UG - Uganda National Office,Context for office UG - Uganda National Office,30,4,1,2021-02-25,1,"0000-00-00 00:00:00",1,20133,"0"
+4,CORY-15902,Context for office Malawi National Office,Context for office Malawi National Office,784,4,1,2022-04-29,1,"0000-00-00 00:00:00",1,3305567,1751
+6,CORY-76235,Context for office GH - National Office,Context for office GH - National Office,1844,4,1,2023-07-26,1,"0000-00-00 00:00:00",,19843774,1751
+7,CORY-88889,Context for office Zambia National Office,Context for office Zambia National Office,2330,4,1,2024-01-29,2801,2024-01-29 10:50:41,2801,27846404,1751
+9,CORY-24263,Context for office Rwanda National Office,Context for office Rwanda National Office,2435,4,1,2024-06-20,2801,"0000-00-00 00:00:00",,31953283,1751
+10,CORY-74660,Context for office Cambodia,Context for office Cambodia,2979,4,2,2024-09-25,4008,"0000-00-00 00:00:00",,35712506,1751
+11,CORY-13527,Context for office TG - Togo National Office,Context for office TG - Togo National Office,3069,4,1,2025-03-16,1,"0000-00-00 00:00:00",,43344712,1751

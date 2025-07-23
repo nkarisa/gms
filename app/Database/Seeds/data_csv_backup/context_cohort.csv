@@ -1,0 +1,39 @@
+﻿context_cohort_id,context_cohort_track_number,context_cohort_name,context_cohort_description,fk_office_id,fk_context_definition_id,fk_context_country_id,context_cohort_created_date,context_cohort_created_by,context_cohort_last_modified_date,context_cohort_last_modified_by,fk_approval_id,fk_status_id
+2,CORT-21258,Context for office Central Base,Context for office Central Base,6,3,1,2020-08-21,1,2024-06-13 04:39:11,23,313,12
+4,CORT-70831,Context for office Central Rift and Upper Eastern,Context for office Central Rift and Upper Eastern,12,3,2,2020-11-03,1,"0000-00-00 00:00:00",1,496,12
+5,CORT-19273,Context for office Mount Kilimanjaro Base,Context for office Mount Kilimanjaro Base,15,3,1,2020-12-09,1,"0000-00-00 00:00:00",1,681,"0"
+6,CORT-72600,Context for office Ngorongoro Base,Context for office Ngorongoro Base,16,3,1,2020-12-09,1,2024-05-21 07:33:11,31,684,"0"
+7,CORT-34122,Context for office CITAM HQ,Context for office CITAM HQ,29,3,2,2021-02-03,1,"0000-00-00 00:00:00",1,9633,"0"
+8,CORT-63981,Context for office UG-NORTH Region,Context for office UG-NORTH Region,31,3,3,2021-02-25,1,"0000-00-00 00:00:00",1,20136,"0"
+9,CORT-21655,Context for office UG-CENTRAL Region,Context for office UG-CENTRAL Region,32,3,3,2021-02-25,1,"0000-00-00 00:00:00",1,20139,"0"
+10,CORT-48727,Context for office UG-MIDWEST Region,Context for office UG-MIDWEST Region,33,3,3,2021-02-25,1,"0000-00-00 00:00:00",1,20142,"0"
+11,CORT-51832,Context for office UG-SOUTHWEST Region,Context for office UG-SOUTHWEST Region,34,3,3,2021-02-25,1,"0000-00-00 00:00:00",1,20145,"0"
+12,CORT-8330,Context for office UG-EASTERN Region,Context for office UG-EASTERN Region,35,3,3,2021-02-25,1,"0000-00-00 00:00:00",1,20148,"0"
+15,CORT-4042,Context for office Lake Victoria Base,Context for office Lake Victoria Base,65,3,1,2021-07-29,31,"0000-00-00 00:00:00",31,65497,967
+16,CORT-10158,Context for office Western Base,Context for office Western Base,68,3,1,2021-08-24,1,"0000-00-00 00:00:00",1,76487,955
+17,CORT-61354,Context for office Eastern Base,Context for office Eastern Base,69,3,1,2021-08-24,1,"0000-00-00 00:00:00",1,76492,955
+19,CORT-56563,Context for office UG-NorthEast Region,Context for office UG-NorthEast Region,164,3,3,2021-10-01,1,"0000-00-00 00:00:00",1,193983,955
+20,CORT-8289,Context for office COSER ,Context for office COSER ,777,3,2,2022-03-30,39,"0000-00-00 00:00:00",39,2744953,963
+21,CORT-63289,Context for office Nairobi Region,Context for office Nairobi Region,780,3,2,2022-03-31,39,2025-01-16 09:07:31,2761,2747492,963
+22,CORT-88893,Context for office MWBR - Blantyre Region,Context for office MWBR - Blantyre Region,796,3,4,2022-05-12,1598,"0000-00-00 00:00:00",1598,3465154,"0"
+23,CORT-75561,Context for office Western ,Context for office Western ,868,3,2,2022-05-16,40,2023-03-06 09:20:14,44,3482611,963
+24,CORT-71495,Context for office GH-Northern Territory,Context for office GH-Northern Territory,1845,3,6,2023-07-28,4984,"0000-00-00 00:00:00",,19927204,"0"
+26,CORT-79007,Context for office GH-Eastern Territory,Context for office GH-Eastern Territory,1847,3,6,2023-07-28,4984,"0000-00-00 00:00:00",,19927312,"0"
+27,CORT-2895,Context for office GH-Southern Territory,Context for office GH-Southern Territory,1848,3,6,2023-07-28,4984,"0000-00-00 00:00:00",,19927331,"0"
+28,CORT-23786,Context for office GH-CentWest,Context for office GH-CentWest,1849,3,6,2023-07-28,4984,"0000-00-00 00:00:00",,19927425,"0"
+29,CORT-38732,Context for office ZM-Eastern Region,Context for office ZM-Eastern Region,2331,3,7,2024-01-29,2801,2024-01-29 10:50:05,2801,27846588,955
+30,CORT-59964,Context for office ZM-Lusaka Region ,Context for office ZM-Lusaka Region ,2419,3,7,2024-06-14,7073,"0000-00-00 00:00:00",,31817045,"0"
+31,CORT-19018,Context for office RWNU - Northern Unit,Context for office RWNU - Northern Unit,2437,3,9,2024-06-21,8396,"0000-00-00 00:00:00",,31973848,"0"
+32,CORT-76411,Context for office RWSAU - Southern A Unit ,Context for office RWSAU - Southern A Unit ,2438,3,9,2024-06-21,8397,"0000-00-00 00:00:00",,31973900,"0"
+33,CORT-70543,Context for office RWEU - Eastern Unit,Context for office RWEU - Eastern Unit,2439,3,9,2024-06-21,8396,"0000-00-00 00:00:00",,31973903,"0"
+34,CORT-58477,Context for office RWSBU - Southern B Unit,Context for office RWSBU - Southern B Unit,2440,3,9,2024-06-21,8395,"0000-00-00 00:00:00",,31973924,"0"
+35,CORT-36115,Context for office RWWU - Western Unit,Context for office Western Unit,2441,3,9,2024-06-21,8394,2024-06-21 08:31:22,8394,31974046,"0"
+36,CORT-41465,Context for office GH,Context for office GH,2702,3,6,2024-06-26,4982,2024-06-26 08:02:37,4982,32132381,"0"
+37,CORT-46646,Context for office UG-North-Western Region,Context for office UG-North-Western Region,2961,3,3,2024-08-28,1445,"0000-00-00 00:00:00",,34714005,971
+38,CORT-66540,Context for office Southern Base,Context for office Southern Base,2982,3,1,2024-10-27,231,"0000-00-00 00:00:00",,38096533,967
+39,CORT-65379,Context for office KH-Central Plain Cohort,"Context for office The Central Plains, which make up most of the land area",3025,3,10,2025-01-27,11166,2025-01-27 04:43:33,11165,42034488,"0"
+44,CORT-26697,Context for office KH-Tonle Sap Cohort,Context for office The great lake,3030,3,10,2025-01-27,11166,2025-01-27 04:45:28,11166,42034547,"0"
+45,CORT-69877,Context for office KH-Coastal and Sea Cohort,Context for office The coastal areas of Cambodia,3031,3,10,2025-01-27,11166,2025-01-27 04:44:09,11165,42034553,"0"
+46,CORT-9033,Context for office KH-Plateau and Mountain Cohort,Context for office The plateaus and mountains of Cambodia,3032,3,10,2025-01-27,11166,2025-01-27 04:46:17,11166,42034559,"0"
+47,CORT-86440,Context for office KH-Phnom Penh Cohort,Context for office The Capital of Cambodia,3033,3,10,2025-01-27,11166,2025-01-27 04:45:46,11166,42034575,"0"
+48,CORT-29698,Context for office  TGC1-Cohort 1,Context for office  TGC1-Cohort 1,3070,3,11,2025-03-17,11469,2025-03-17 11:56:27,11469,43344812,"0"

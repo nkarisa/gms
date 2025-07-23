@@ -1,0 +1,572 @@
+﻿expense_account_id,expense_account_track_number,expense_account_name,expense_account_description,expense_account_code,expense_account_is_admin,fk_expense_vote_heads_category_id,expense_account_is_medical_rembursable,expense_account_is_active,expense_account_is_budgeted,fk_income_account_id,fk_approval_id,fk_status_id,expense_account_created_date,expense_account_last_modified_date,expense_account_created_by,expense_account_last_modified_by
+1,EXNT-10330,E10 - Education Supplies and Fees,Education Supplies and Fees,E10,"0",5,"0",1,1,1,352,29,2020-08-21,,3,3
+2,EXNT-12048,E20 - Office Supplies,Office Supplies,E20,"0",5,"0",1,1,1,353,29,2020-08-21,,3,3
+3,EXNT-62318,E15 - School Uniforms and Clothes,School Uniforms and Clothes,E15,"0",5,"0",1,1,1,556,29,2020-11-03,,5,5
+4,EXNT-15341,E25 - Teaching aids and reference materials,Teaching aids and reference materials,E25,"0",5,"0",1,1,1,557,29,2020-11-03,,5,5
+5,EXNT-59349,"E30 - Health Provision, GOBIFFF and Food Supplements","Health Provision, GOBIFFF and Food Supplements",E30,"0",5,"0",1,1,1,558,29,2020-11-03,,5,5
+6,EXNT-50100,E35 - Personal Hygiene,Personal Hygiene,E35,"0",5,"0",1,1,1,559,29,2020-11-03,,5,5
+7,EXNT-22305,"E40 - Food, Nutrition and cooking utensils","Food, Nutrition and cooking utensils",E40,"0",5,"0",1,1,1,560,29,2020-11-03,,5,5
+8,EXNT-44905,E45 - Domestic Assistance,Domestic Assistance,E45,"0",5,"0",1,1,1,561,29,2020-11-03,,5,5
+9,EXNT-87220,E50 - Livelihood and Skills Training,Livelihood and Skills Training,E50,"0",5,"0",1,1,1,562,29,2020-11-03,,5,5
+10,EXNT-83132,E55 - Social Development,Social Development,E55,"0",5,"0",1,1,1,563,29,2020-11-03,,5,5
+11,EXNT-88204,E60 - Spiritual Development,Spiritual Development,E60,"0",5,"0",1,1,1,564,29,2020-11-03,,5,5
+12,EXNT-14103,E65 - Staff salaries and wages,Staff salaries and wages,E65,1,5,"0",1,1,1,565,29,2020-11-03,,5,5
+13,EXNT-24518,E70 - Administration,Administration,E70,1,5,"0",1,1,1,566,29,2020-11-03,,5,5
+14,EXNT-20223,E74 - Project Safety ,Project Safety,E74,"0",5,"0",1,1,1,567,29,2020-11-03,,5,5
+15,EXNT-51505,E75 - Transportation,Transportation,E75,1,5,"0",1,1,1,568,29,2020-11-03,,5,5
+16,EXNT-65075,E200 - Gifts,Gifts,E200,"0",6,"0",1,"0",2,569,29,2020-11-03,,5,5
+17,EXNT-12237,E320 - Medical Refund and Grant,Medical Refund and Grant,E320,"0",5,1,1,"0",12,570,29,2020-11-03,,5,5
+18,EXNT-18138,E330 - HVC,Highly Vulnerable Children,E330,"0",5,1,1,"0",4,571,29,2020-11-03,,5,5
+19,EXNT-52873,E352 - Survival Launch Fund,Survival Launch Fund,E352,"0",5,"0",1,1,13,572,29,2020-11-03,,5,5
+20,EXNT-7238,E360 - Inter Partner Funds Transfer,Inter Partner Funds Transfer,E360,"0",5,"0",1,"0",15,573,29,2020-11-03,,5,5
+21,EXNT-20637,E370 - Sponsorship Launch Fund,Sponsorship Launch Fund,E370,"0",5,"0",1,1,14,574,29,2020-11-03,,5,5
+22,EXNT-85257,E410 - HIV/AIDS ARV Support,HIV/AIDS ARV Support,E410,"0",5,"0",1,1,6,575,29,2020-11-03,,5,5
+23,EXNT-43565,E415 - HIV/AIDS Caregivers and siblings,HIV/AIDS Caregivers and siblings,E415,"0",5,"0",1,1,7,576,29,2020-11-03,,5,5
+24,EXNT-35768,E425 - HIV/AIDS Education,HIV/AIDS Education,E425,"0",5,"0",1,1,8,580,29,2020-11-03,,5,5
+25,EXNT-58201,E510 - Parents Contribution,Parents Contribution,E510,"0",5,"0",1,1,9,581,29,2020-11-03,,5,5
+26,EXNT-60765,E515 - CDC IGA,CDC IGA,E515,"0",5,"0",1,1,10,582,29,2020-11-03,,5,5
+27,EXNT-63956,E520 - Local Donations and Church Contributions,Local Donations and Church Contributions,E520,"0",5,"0",1,1,11,583,29,2020-11-03,,5,5
+28,EXNT-71971,E013 - Educational Supplies & Fees,E013 - Educational Supplies & Fees,E013,"0",5,"0",1,1,3,447,288,2020-12-09,,11,11
+29,EXNT-87590,E015 - School Uniforms &Clothes,E015 - School Uniforms &Clothes,E015,"0",5,"0",1,1,3,447,288,2020-12-09,,11,11
+30,EXNT-84417,E022 - Centre Supplies & equipment,E022 - Centre Supplies & equipment,E022,"0",5,"0",1,1,3,447,288,2020-12-09,,11,11
+31,EXNT-24182,E025 - Teaching Aids & Refer Materials,E025 - Teaching Aids & Refer Materials,E025,"0",5,"0",1,1,3,447,288,2020-12-10,,11,11
+32,EXNT-88791,E032 - Physical Dev. & Health Provision,E032 - Physical Dev. & Health Provision,E032,"0",5,"0",1,1,3,447,288,2020-12-10,,11,11
+33,EXNT-69976,E035 - Personal Hygiene,E035 - Personal Hygiene,E035,"0",5,"0",1,1,3,447,288,2020-12-10,,11,11
+34,EXNT-52819,"E042 - Food, Nutrition & Cooking Utensils","E042 - Food, Nutrition & Cooking Utensils",E042,"0",5,"0",1,1,3,447,288,2020-12-10,,11,11
+35,EXNT-11785,E045 - Domestic Assistance,E045 - Domestic Assistance,E045,"0",5,"0",1,1,3,447,288,2020-12-10,,11,11
+36,EXNT-3915,E052 - Livelihood & Skills Training,E052 - Livelihood & Skills Training,E052,"0",5,"0",1,1,3,447,288,2020-12-10,,11,11
+37,EXNT-70616,E055 - Social Development,E055 - Social Development,E055,"0",5,"0",1,1,3,447,288,2020-12-10,,11,11
+38,EXNT-78651,E062 - Spiritual Development,E062 - Spiritual Development,E062,"0",5,"0",1,1,3,447,288,2020-12-10,,11,11
+39,EXNT-54139,E065 - Staff Salaries & Wages,E065 - Staff Salaries & Wages,E065,1,5,"0",1,1,3,447,288,2020-12-10,,11,11
+40,EXNT-74795,E066 - Staff Training & Development,E066 - Staff Training & Development,E066,1,5,"0",1,1,3,447,288,2020-12-10,,11,11
+41,EXNT-87305,E069 - Administration,E069 - Administration,E069,1,5,"0",1,1,3,447,288,2020-12-10,,11,11
+42,EXNT-14644,E071 - Telephone Expenses,E071 - Telephone Expenses,E071,1,5,"0",1,1,3,447,288,2020-12-10,,11,11
+43,EXNT-67110,E072 - Meals & Refreshments,E072 - Meals & Refreshments,E072,1,5,"0",1,1,3,447,288,2020-12-10,,11,11
+44,EXNT-47930,E075 - Transportation,E075 - Transportation,E075,1,5,"0",1,1,3,447,288,2020-12-10,,11,11
+45,EXNT-38246,E079 - CSP Medical & Health screening,E079 - CSP Medical & Health screening,E079,"0",5,"0",1,1,16,728,288,2020-12-10,,11,11
+46,EXNT-59149,E081 - CSP Training on GOBI FFF,E081 - CSP Training on GOBI FFF,E081,"0",5,"0",1,1,16,728,288,2020-12-10,,11,11
+47,EXNT-41255,E082 - CSP Food Supplements,E082 - CSP Food Supplements,E082,"0",5,"0",1,1,16,728,288,2020-12-10,,11,11
+48,EXNT-43781,E083 - CSP Spiritual development,E083 - CSP Spiritual development,E083,"0",5,"0",1,1,16,728,288,2020-12-10,,11,11
+49,EXNT-58145,E084 - CSP Social Emotional Dev.,E084 - CSP Social Emotional Dev.,E084,"0",5,"0",1,1,16,728,288,2020-12-10,,11,11
+50,EXNT-64023,E085 - CSP Livelihood skills training,E085 - CSP Livelihood skills training,E085,"0",5,"0",1,1,16,728,288,2020-12-10,,11,11
+51,EXNT-14368,E086 - CSP Salaries & wages,E086 - CSP Salaries & wages,E086,1,5,"0",1,1,16,728,288,2020-12-10,,11,11
+52,EXNT-3387,E087 - CSP Administration,E087 - CSP Administration,E087,1,5,"0",1,1,16,728,288,2020-12-10,,11,11
+53,EXNT-5872,E088 - CSP Transportation,E088 - CSP Transportation,E088,1,5,"0",1,1,16,728,288,2020-12-10,,11,11
+54,EXNT-86701,E089 - CSP Supplies & Equipment,E089 - CSP Supplies & Equipment,E089,"0",5,"0",1,1,16,728,288,2020-12-10,,11,11
+55,EXNT-22409,E090 - Support transfer to other CDCs/Survival,E090 - Support transfer to other CDCs/Survival,E090,"0",5,"0",1,"0",16,728,288,2020-12-10,,11,11
+56,EXNT-38744,E031 - Beneficiary Gifts,E031 - Beneficiary Gifts,E031,"0",5,"0",1,"0",18,730,288,2020-12-10,,11,11
+57,EXNT-9830,E033 - Project Gifts,E033 - Project Gifts,E033,"0",5,"0",1,"0",25,740,288,2020-12-10,,11,11
+58,EXNT-4465,E032 - Beneficiary Christmas Gifts,E032 - Beneficiary Christmas Gifts,E032 ,"0",5,"0",1,"0",50,792,288,2020-12-10,,11,11
+59,EXNT-13935,E101 - AIDS Medical (HIV-MED),E101 - AIDS Medical (HIV-MED),E101,"0",5,"0",1,1,21,733,288,2020-12-10,,11,11
+60,EXNT-46889,E102 - Disaster-Reimbursable (DAP),E102 - Disaster-Reimbursable (DAP),E102 ,"0",5,"0",1,"0",19,731,288,2020-12-10,,11,11
+61,EXNT-57929,E103 - Education-Ongoing (EDU),E103 - Education-Ongoing (EDU),E103,"0",5,"0",1,"0",20,732,288,2020-12-10,,11,11
+62,EXNT-16011,E104 - Highly Vulnerable Children- Child Protection (HVC-CPR),E104 - Highly Vulnerable Children- Child Protection (HVC-CPR),E104,"0",5,"0",1,1,26,741,288,2020-12-10,,11,11
+63,EXNT-55230,E105 - Highly Vulnerable Children-Ongoing Support ( HVC-CDI),E105 - Highly Vulnerable Children-Ongoing Support ( HVC-CDI),E105 ,"0",5,"0",1,1,27,742,288,2020-12-10,,11,11
+64,EXNT-65458,E106 - Medical-Ongoing (MED),E106 - Medical-Ongoing (MED),E106,"0",5,"0",1,"0",28,743,288,2020-12-10,,11,11
+65,EXNT-85042,E107 - Medical-Therapeutic Feeding Intervention (MED-TFI),E107 - Medical-Therapeutic Feeding Intervention (MED-TFI),E107,"0",5,"0",1,"0",29,744,288,2020-12-10,,11,11
+66,EXNT-17223,E201 - Income generation / Household Security (IGP),E201 - Income generation / Household Security (IGP),E201,"0",5,"0",1,1,30,745,288,2020-12-10,,11,11
+67,EXNT-85751,E202 - Formal Education (EDU),E202 - Formal Education (EDU),E202 ,"0",5,"0",1,"0",31,746,288,2020-12-10,,11,11
+68,EXNT-59536,E203 - Health (HH),E203 - Health (HH),E203,"0",5,"0",1,"0",32,747,288,2020-12-10,,11,11
+69,EXNT-41488,E204 - HIV Education (HIV-EDU),E204 - HIV Education (HIV-EDU),E204 ,"0",5,"0",1,1,33,748,288,2020-12-10,,11,11
+70,EXNT-71935,E205 - Infrastructure (IFP),E205 - Infrastructure (IFP),E205,1,5,"0",1,"0",34,749,288,2020-12-10,,11,11
+71,EXNT-17596,E206 - Learning Materials (LMT),E206 - Learning Materials (LMT),E206,"0",5,"0",1,"0",35,750,288,2020-12-10,,11,11
+72,EXNT-31362,E207 - Major Medical (MED),E207 - Major Medical (MED),E207,"0",5,"0",1,"0",36,751,288,2020-12-10,,11,11
+73,EXNT-71085,E208 - Non-formal education (NFE) ,E208 - Non-formal education (NFE) ,E208,"0",5,"0",1,"0",37,752,288,2020-12-10,,11,11
+74,EXNT-40054,E209 - Parent Education (PED),E209 - Parent Education (PED),E209,"0",5,"0",1,"0",38,753,288,2020-12-10,,11,11
+75,EXNT-68256,E210 - Vector Borne Diseases (MIV) ,E210 - Vector Borne Diseases (MIV) ,E210,"0",5,"0",1,"0",39,754,288,2020-12-10,,11,11
+76,EXNT-2109,E211 - WaSH (WTP),E211 - WaSH (WTP),E211,"0",5,"0",1,"0",40,755,288,2020-12-10,,11,11
+77,EXNT-53651,E212 - Church Planting (CPT),E212 - Church Planting (CPT),E212,"0",5,"0",1,"0",41,756,288,2020-12-10,,11,11
+78,EXNT-17507,E213 - Disaster Response (DRF),E213 - Disaster Response (DRF),E213,"0",5,"0",1,1,42,757,288,2020-12-10,,11,11
+79,EXNT-72089,E091 - Church Contribution,E091 - Church Contribution,E091,1,5,"0",1,1,43,758,288,2020-12-10,,11,11
+80,EXNT-75527,E092 - Parents Contribution,E092 - Parents Contribution,E092,"0",5,"0",1,1,44,759,288,2020-12-10,,11,11
+81,EXNT-57132,E093 - Youth accounts,E093 - Youth accounts,E093,"0",5,"0",1,1,45,760,288,2020-12-10,,11,11
+82,EXNT-44376,E094 – Government,E094 – Government,E094,"0",5,"0",1,1,46,761,288,2020-12-10,,11,11
+83,EXNT-3426,E095 – NGOs,E095 – NGOs,E095,"0",5,"0",1,1,47,762,288,2020-12-10,,11,11
+84,EXNT-85444,E096 - Project generated income (Child support /CIV),E096 - Project generated income (Child support /CIV),E096,"0",5,"0",1,1,48,763,288,2020-12-10,,11,11
+85,EXNT-22615,E099 - non compassion fund,Non compassion fund,E099,1,5,"0",1,1,24,764,288,2020-12-10,,11,11
+86,EXNT-59068,E310-School grants fees Expenses,School grants fees Expenses,E310,"0",5,"0",1,"0",51,9643,287,2021-02-03,,40,40
+87,EXNT-42028,T310-School grants fees Expenses,Cash Transfer,T310,"0",5,"0",1,"0",51,9643,287,2021-02-03,,40,40
+88,EXNT-6729,T100-Child support fund transfer,Child support fund transfer,T100,"0",5,"0",1,"0",1,348,287,2021-02-03,,40,40
+89,EXNT-57515,R365 Health (HH),Health (HH),R365,"0",5,"0","0","0",57,10804,287,2021-02-04,,39,39
+90,EXNT-8678,E350 Short Term Missions Grants,Short Term Missions Grants,E350,"0",5,"0",1,"0",56,10803,287,2021-02-04,,39,39
+91,EXNT-82004,T350 Short Term Missions Grants,Short Term Missions Grants,T350,"0",5,"0",1,"0",56,10803,287,2021-02-04,,39,39
+92,EXNT-26985,T345 Infrastructure Grants,Infrastructure Grants,T345,"0",5,"0",1,"0",55,10802,287,2021-02-04,,39,39
+93,EXNT-50524,T340 IGA Grants,IGA Grants,T340,"0",5,"0",1,"0",54,10801,287,2021-02-04,,39,39
+94,EXNT-19147,T315 Environment And Conservation Grants,Environment And Conservation Grants,T315,"0",5,"0",1,"0",53,10800,287,2021-02-04,,39,39
+95,EXNT-19344,T325-Water And Sanitation Grants,Water And Sanitation Grants,T325,"0",5,"0",1,"0",52,9649,287,2021-02-04,,39,39
+96,EXNT-36503,T370 - Sponsorship Launch Fund,Sponsorship Launch Fund,T370,"0",5,"0",1,"0",14,554,287,2021-02-04,,39,39
+97,EXNT-59767,T352 - Survival Launch Fund,Survival Launch Fund,T352,"0",5,"0",1,"0",13,553,287,2021-02-04,,39,39
+98,EXNT-82263,T320 - Medical Refund And Grant,Medical Refund And Grant,T320,"0",5,"0",1,"0",12,552,287,2021-02-04,,39,39
+99,EXNT-62172,T520 - Local Donations And Church Contributions,Local Donations And Church Contributions,T520,"0",5,"0",1,"0",11,551,287,2021-02-04,,39,39
+100,EXNT-57744,T425 - HIV/AIDS Education,HIV/AIDS Education,T425,"0",5,"0",1,"0",8,548,287,2021-02-04,,39,39
+101,EXNT-48931,T415 - HIV/AIDS Caregivers And Siblings (CGS),HIV/AIDS Caregivers And Siblings (CGS),T415,"0",5,"0",1,"0",7,547,287,2021-02-04,,39,39
+102,EXNT-89047,T410 - HIV/AIDS ARV Support,HIV/AIDS ARV Support,T410,"0",5,"0",1,"0",6,546,287,2021-02-04,,39,39
+103,EXNT-18578,T351 - Survival Intervention,Survival Intervention,T351,"0",5,"0",1,"0",5,545,287,2021-02-04,,39,39
+104,EXNT-58797,T330 - HVC,HVC,T330 ,"0",5,"0",1,"0",4,544,287,2021-02-04,,39,39
+105,EXNT-27508,T200 - Gifts,Gifts,T200 ,"0",5,"0",1,"0",2,350,287,2021-02-04,,39,39
+106,EXNT-72543,E340 IGA Grants,IGA Grants,E340 ,"0",5,"0",1,"0",54,10801,287,2021-02-04,,39,39
+107,EXNT-17862,E325 - Water And Sanitation Grants,Water And Sanitation Grants,E325,"0",5,"0",1,"0",52,9649,287,2021-02-05,,39,39
+108,EXNT-63817,E300 Other Compassion Funds,Other Compassion Funds,E300,"0",5,"0",1,"0",59,11234,287,2021-02-05,,39,39
+109,EXNT-17908,DRF109 Financial Support to FCP Church Leaders during Covid19,Financial Support to FCP Church Leaders during Covid19,DRF-109,"0",5,"0","0","0",59,11234,287,2021-02-09,,39,39
+110,EXNT-80041,T010 - Support Funds Transfers,T010 - Support Funds Transfers,T010 ,"0",5,"0","0","0",3,447,288,2021-02-16,,23,23
+111,EXNT-57657,T031 - CDSP Beneficiary Gifts Transfers,T031 - CDSP Beneficiary Gifts Transfers,T031,"0",5,"0","0","0",18,730,288,2021-02-16,,23,23
+112,EXNT-19454,T101 - AIDS Medical (HIV-MED),T101 - AIDS Medical (HIV-MED),T101,"0",5,"0","0","0",21,733,288,2021-02-16,,23,23
+113,EXNT-29735,T105 - Highly Vulnerable Children-Ongoing Support (HVC-CDI),T105 - Highly Vulnerable Children-Ongoing Support (HVC-CDI),T105,"0",5,"0","0","0",27,742,288,2021-02-16,,23,23
+114,EXNT-18284,T201 - Income generation / Household Security (IGP),T201 - Income generation / Household Security (IGP),T201,"0",5,"0","0","0",30,745,288,2021-02-16,,23,23
+115,EXNT-24031,T213 - Disaster Response (DRF),T213 - Disaster Response (DRF),T213,"0",5,"0","0","0",42,757,288,2021-02-16,,23,23
+116,EXNT-57269,E101 - Education & Vocational & Skills Development expenses,E101 - Education & Vocational & Skills Development expenses,E101,"0",5,"0",1,1,60,21150,743,2021-03-09,,66,66
+117,EXNT-36221,E102 - Health & Hygiene expenses,E102 - Health & Hygiene expenses,E102,"0",5,"0",1,1,60,21150,743,2021-03-09,,66,66
+118,EXNT-58515,E103 - Food Nutrition and Cooking,E103 - Food Nutrition and Cooking,E103,"0",5,"0",1,1,60,21150,743,2021-03-09,,66,66
+119,EXNT-2870,E104 - Social-Emotional Development expenses,E104 - Social-Emotional Development expenses,E104,"0",5,"0",1,1,60,21150,743,2021-03-09,,66,66
+120,EXNT-20746,E105 - Spiritual Development expenses,E105 - Spiritual Development expenses,E105,"0",5,"0",1,1,60,21150,743,2021-03-09,,66,66
+121,EXNT-27615,E106 -  Sponsor Donor Relations expenses,E106 - Sponsor Donor Relations expenses,E106,"0",5,"0",1,1,60,21150,743,2021-03-09,,66,66
+122,EXNT-70245,E107 - Staff & Volunteer Salaries & Wages & other staff retention expenses,E107 - Staff & Volunteer Salaries & Wages & other staff retention expenses,E107,"0",5,"0",1,1,60,21150,743,2021-03-09,,66,66
+123,EXNT-30559,E108 - Staff and support staff training and equipping expenses,E108 - Staff and support staff training and equipping expenses,E108,"0",5,"0",1,1,60,21150,743,2021-03-09,,66,66
+124,EXNT-19402,E109 - Administration & Office Supplies expenses,E109 - Administration & Office Supplies expenses,E109,"0",5,"0",1,1,60,21150,743,2021-03-09,,66,66
+125,EXNT-4967,E110 - Projects and Events expenses,E110 - Projects and Events expenses,E110,"0",5,"0",1,1,60,21150,743,2021-03-09,,66,66
+126,EXNT-83825,E201 - Education & Vocational,E201 - Education & Vocational,E201,"0",5,"0",1,1,61,21161,743,2021-03-09,,66,66
+127,EXNT-60162,E202 - Health & Hygiene,E202 - Health & Hygiene,E202,"0",5,"0",1,1,61,21161,743,2021-03-09,,66,66
+128,EXNT-73006,E203 - Food Nutrition and Cooking,E203 - Food Nutrition and Cooking,E203,"0",5,"0",1,1,61,21161,743,2021-03-09,,66,66
+129,EXNT-23031,E204 - Social-Emotional Development,E204 - Social-Emotional Development,E204,"0",5,"0",1,1,61,21161,743,2021-03-09,,66,66
+130,EXNT-8886,E205 - Spiritual Development,E205 - Spiritual Development,E205,"0",5,"0",1,1,61,21161,743,2021-03-09,,66,66
+131,EXNT-43528,E206 - Sponsor Donor Relations,E206 - Sponsor Donor Relations,E206,"0",5,"0",1,1,61,21161,743,2021-03-09,,66,66
+132,EXNT-54247,"E207 - Staff, Volunteer & other labor","E207 - Staff, Volunteer & other labor",E207,"0",5,"0",1,1,61,21161,743,2021-03-09,,66,66
+133,EXNT-54201,E208 - Staff and support staff training and equipping expenses,E208 - Staff and support staff training and equipping expenses,E208,"0",5,"0",1,1,61,21161,743,2021-03-09,,66,66
+134,EXNT-47374,E209 - Administration & Office,E209 - Administration & Office,E209,"0",5,"0",1,1,61,21161,743,2021-03-09,,66,66
+135,EXNT-11531,E210 - Projects and Events,E210 - Projects and Events,E210,"0",5,"0",1,1,61,21161,743,2021-03-09,,66,66
+136,EXNT-10462,"E300 - Beneficiary, Family, Projects, and Christmas Gifts","E300 - Beneficiary, Family, Projects, and Christmas Gifts",E300,"0",5,"0",1,1,62,21172,743,2021-03-09,,66,66
+137,EXNT-58816,E4001 - Disaster Relief on going. (Re-reimbursable),E4001 - Disaster Relief on going. (Re-reimbursable),E4001,"0",5,"0",1,"0",63,21174,743,2021-03-09,,66,66
+138,EXNT-31277,E4003 - Education-Ongoing,E4003 - Education-Ongoing,E4003,"0",5,"0",1,"0",64,21176,743,2021-03-09,,66,66
+139,EXNT-25693,E4005 - HIV AIDS – Ongoing (Re-reimbursable),E4005 - HIV AIDS – Ongoing (Re-reimbursable),E4005,"0",5,"0",1,"0",65,21178,743,2021-03-09,,66,66
+140,EXNT-56500, E4007 - HVC-CPR-CDI (Highly Vulnerable Children- (Re-reimbursable), E4007 - HVC-CPR-CDI (Highly Vulnerable Children- (Re-reimbursable),E4006,"0",5,"0",1,"0",66,21180,743,2021-03-09,,66,66
+141,EXNT-69317,E4009 - Medical- Ongoing (Re-reimbursable),E4009 - Medical- Ongoing (Re-reimbursable),E4009,"0",5,"0",1,"0",67,21182,743,2021-03-09,,66,66
+142,EXNT-20628,E4011- Income Generation/ Micro-Enterprise (IGP) Expenses,E4011- Income Generation/ Micro-Enterprise (IGP) Expenses,E4011,"0",5,"0",1,"0",68,21184,743,2021-03-09,,66,66
+143,EXNT-22896,E4012 - Infrastructure (IFP),E4012 - Infrastructure (IFP),E4012,"0",5,"0",1,"0",69,21186,743,2021-03-09,,66,66
+144,EXNT-55794,E4013 - Church Planting (CFT),E4013 - Church Planting (CFT),E4013,"0",5,"0",1,"0",70,21188,743,2021-03-09,,66,66
+145,EXNT-64402,E4014- Learning Materials (LMT) ,E4009 - E4014- Learning Materials (LMT) Materials (LMT),E4014,"0",5,"0",1,"0",71,21190,743,2021-03-09,,66,66
+146,EXNT-12603,E4015 - Non-Formal Education (NFE),E4015 - Non-Formal Education (NFE),E4015,"0",5,"0",1,"0",72,21192,743,2021-03-09,,66,66
+147,EXNT-34380,E4016 - Parent Education (PED) ,E4016 - Parent Education (PED) ,E4016,"0",5,"0",1,"0",73,21194,743,2021-03-09,,66,66
+148,EXNT-86289,"E4017 - Water, Sanitation and Hygiene Projects (WTP)","E4017 - Water, Sanitation and Hygiene Projects (WTP)",E4017,"0",5,"0",1,"0",74,21196,743,2021-03-09,,66,66
+149,EXNT-63290,E4018 - Sponsorship Launch Funds,E4018 - Sponsorship Launch Funds,E4018,"0",5,"0",1,1,75,21198,743,2021-03-09,,66,66
+150,EXNT-42921,E4019 - Survival Launch Funds,E4019 - Survival Launch Funds,E4019,"0",5,"0",1,"0",76,21200,743,2021-03-09,,66,66
+151,EXNT-73665,E500 - Local Resources Mobilization,E500 - Local Resources Mobilization,E500,"0",5,"0",1,1,77,21415,743,2021-03-11,,66,66
+152,EXNT-48039,E400 - Funds from other Agents,E400 - Funds from other Agents,E400,"0",5,"0",1,"0",78,21417,743,2021-03-11,,66,66
+153,EXNT-66774,E600 - FCP Generated Income,E600 - FCP Generated Income,E600,"0",5,"0",1,1,79,21419,743,2021-03-11,,66,66
+154,EXNT-66729,E111 - COVID19 Expenses on Support Funds,E111 - COVID19 Expenses on Support Funds,E111,"0",5,"0",1,1,60,21150,743,2021-03-25,,69,69
+155,EXNT-3623,E4002 - Disaster Relief Individual. (Proposal based),E4002 - Disaster Relief Individual. (Proposal based),E4002,"0",5,"0",1,"0",82,29730,743,2021-03-29,,69,69
+156,EXNT-66192,E4004 - Education – Individual (Proposal Based),E4004 - Education – Individual (Proposal Based)- Education Individual Expenses,E4004 ,"0",5,"0",1,"0",80,29301,743,2021-03-29,,69,69
+157,EXNT-76155,E4010 - Major Medical- (Proposal Based),E4010 - Major Medical- (Proposal Based),E4010,"0",5,"0",1,"0",81,29315,743,2021-03-29,,69,69
+158,EXNT-23488,E365 Health (HH),E365 Health (HH),E365,"0",5,"0",1,"0",57,10804,285,2021-04-01,,1,1
+159,EXNT-43311, E205-Improved and adequate shelter for 14  beneficiaries, E205-Improved and adequate shelter for 14  beneficiaries,E205,"0",5,"0",1,"0",34,749,288,2021-04-13,,30,30
+160,EXNT-43219,E098-Expenses For Local Sponsored Beneficiaries,EXPENSES FOR LOCAL SPONSORED BENEFICIARIES,E098,"0",5,"0",1,1,83,94338,288,2021-09-09,,30,30
+162,EXNT-72347,E97-Sponsorship Launch,Sponsorship Launch,E97,"0",5,"0",1,1,87,146320,288,2021-09-10,,27,27
+163,EXNT-83138,E205 - Infrastructure (IFP),E205 - Infrastructure (IFP),E205,"0",5,"0","0",1,34,749,288,2021-09-10,,30,30
+164,EXNT-76418,CIV L4L JETHRO,CIV L4L JETHRO,L4L JETHRO,"0",5,"0","0","0",45,760,288,2021-10-06,,31,31
+165,EXNT-74658,E5001 - Administration,Administration Cost,E5001,1,5,"0",1,1,90,212754,743,2021-10-09,,69,69
+166,EXNT-71190,E5002 - Education,Education,E5002,"0",5,"0",1,1,90,212754,743,2021-10-09,,69,69
+167,EXNT-55932,E5003 - Psychosocial,Psychosocial,E5003,"0",5,"0",1,1,90,212754,743,2021-10-09,,69,69
+168,EXNT-80826,E5004 - WASH,WASH,E5004,"0",5,"0",1,1,90,212754,743,2021-10-09,,69,69
+169,EXNT-67469,E5005 - Food Relief,Food Relief,E5005,"0",5,"0",1,1,90,212754,743,2021-10-09,,69,69
+170,EXNT-40680,E5006 - Livelihood,Livelihood,E5006,"0",5,"0",1,1,90,212754,743,2021-10-09,,69,69
+171,EXNT-23221,E5007 - Monitoring and Evaluation,Monitoring and Evaluation,E5007,"0",5,"0",1,1,90,212754,743,2021-10-11,,582,582
+172,EXNT-21680,E5008 - Training, Training,E5008,"0",5,"0",1,1,90,212754,743,2021-10-11,,582,582
+173,EXNT-10515,E000 - Withholding Tax/ PAYE/ Local service tax,Withholding Tax/ PAYE/ Local service tax,E000,"0",5,"0",1,"0",96,225888,743,2021-10-14,,69,69
+174,EXNT-83662,E-IGP-181 CIV Animal Husbandry Expense,E-IGP-181 CIV Animal Husbandry Expense,E-IGP-181,"0",5,"0",1,1,98,228859,743,2021-10-14,,69,69
+175,EXNT-68780,E4020 – Covid19 Funds- CIV funded expense,E4020 – Covid19 Funds- CIV funded expense,E4020 ,"0",5,"0",1,1,91,213252,743,2021-10-15,,69,69
+176,EXNT-35807,IFP 151 VOCATIONAL SKILLS ,IFP 151 VOCATIONAL SKILLS ,CIV-IFP 15,"0",5,"0",1,"0",34,749,288,2021-10-22,,31,31
+177,EXNT-5736,IGP231 Borehole drillings,IGP231 Borehole drillings,IGP231,"0",5,"0",1,"0",40,755,288,2021-10-22,,31,31
+178,EXNT-72329,"Withholding Tax/ PAYE/ Local service tax	",Withholding Tax/ PAYE/ Local service tax,E5009,1,5,"0",1,"0",90,212754,743,2021-10-22,,582,582
+179,EXNT-54269,Beekeeping IGA for 235 caregivers of four FCPs,Beekeeping IGA for 235 caregivers of four FCPs,IGP166BEE,"0",5,"0",1,"0",30,745,288,2021-10-27,,31,31
+180,EXNT-7863,IGA for caregiver economic development for Monduli and Gongale,IGA for caregiver economic development for Monduli and Gongale,IGAmonduli,"0",5,"0","0","0",48,763,288,2021-10-27,,31,31
+181,EXNT-76979,Green house farming for 27 caregivers at TZ0275,Green house farming for 27 caregivers at TZ0275,IGP164 ,"0",5,"0",1,"0",30,745,288,2021-10-27,,225,225
+182,EXNT-13397,E0970 Other,Other Non Compassion Expenses,E970,"0",5,"0",1,1,49,764,288,2021-10-28,,30,30
+183,EXNT-1150,EHHOO2- CIV Food Security Account,CIV HH002 Food Security Expense Account,EHH002,"0",5,"0",1,"0",97,228013,743,2021-10-29,,67,67
+184,EXNT-60778,WTP230 rainwater harvest,WTP230 rainwater harvest,WTP230 ,1,5,"0",1,1,40,755,288,2021-10-29,,24,24
+185,EXNT-22701,EHHOO2- Food Security Account, HH002 Food Security Expense Account,EHH002,"0",5,"0",1,"0",97,228013,743,2021-11-01,,67,67
+186,EXNT-68151,Northern Base Aquaculture and Horticulture for sustainable,Northern Base Aquaculture and Horticulture for sustainable,IGP132,"0",5,"0",1,"0",30,745,288,2021-11-03,,31,31
+187,EXNT-5865,WT0 234 - Toilet Contraction ,WT0 234 - Toilet Contraction ,WTP 234,"0",5,"0",1,1,40,755,288,2021-11-06,,24,24
+188,EXNT-43387,E031 - Beneficiary Gifts,E031 - Beneficiary Gifts,E031,"0",5,"0","0","0",18,730,288,2021-11-08,,98,98
+189,EXNT-5245,E091 Church Contribution,Non Compassion ,E099,"0",5,"0",1,1,101,1027053,288,2021-11-10,,98,98
+190,EXNT-46935,Economic Empowerment For 110 Caregivers Of Morogoro,Economic Empowerment For 110 Caregivers Of Morogoro,IGP 161,"0",5,"0","0","0",48,763,288,2021-11-11,,31,31
+191,EXNT-18969, Improved Sanitation Facilities For 10 Beneficiaries TZ0672, Improved Sanitation Facilities For 10 Beneficiaries TZ0672,CIE340,"0",5,"0",1,1,100,921876,288,2021-11-12,,98,98
+192,EXNT-24901,WTP209 Construction Of Toilets At Kiomboi Cluster,WTP209 Construction Of Toilets At Kiomboi Cluster,WTP209 ,"0",5,"0",1,"0",40,755,288,2021-11-30,,24,24
+193,EXNT-40467,R098 Local Sponsorships Fund ,R098 Local Sponsorships Fund ,R098,"0",5,"0","0",1,43,758,288,2022-01-05,,24,24
+194,EXNT-81791,Caregivers and Youth empowerment Bukoba and Misenyi clusters,Caregivers and Youth empowerment Bukoba and Misenyi clusters,IGP 165,"0",5,"0",1,"0",30,745,288,2022-03-08,,31,31
+195,EXNT-5605,WTP 244 TOILET CONSTRUCTION 6 FCPs Misenyi and Bukoba  cluster,WTP 244 TOILET CONSTRUCTION,WTP 244,"0",5,"0",1,"0",40,755,288,2022-04-08,,31,31
+196,EXNT-53199,Play material for early childhood,Play Material,105,"0",5,"0",1,"0",35,750,288,2022-04-08,,31,31
+197,EXNT-78310,Local Sponsorship Launch,local sponsorship,E98,"0",5,"0",1,1,83,94338,288,2022-04-14,,31,31
+198,EXNT-70730,IGA 172,"IGA for TZ0682, TZ0354 and TZ0834 Caregivers",IGA 172,"0",5,"0",1,"0",30,745,288,2022-05-06,,31,31
+199,EXNT-33289,Finishing of Classrooms in 11 FCPs of Songea Cluster,Finishing of Classrooms in 11 FCPs of Songea Cluster,172,"0",5,"0",1,"0",34,749,288,2022-05-11,,31,31
+200,EXNT-87016,E10 - Education Supplies and Fees,Education Supplies and Fees,E10 ,"0",5,"0",1,1,105,3464845,2155,2022-05-12,,1598,1598
+201,EXNT-59864,E20 – Office and Center Supplies,Office and Center Supplies,E20,"0",5,"0",1,1,105,3464845,2155,2022-05-12,,1598,1598
+202,EXNT-68237,E15 - School Uniforms and Clothes,School Uniforms and Clothes,E15,"0",5,"0",1,1,105,3464845,2155,2022-05-12,,1598,1598
+203,EXNT-26669,E25 - Teaching aids and reference materials,Teaching aids and reference materials,E25,"0",5,"0",1,1,105,3464845,2155,2022-05-12,,1598,1598
+204,EXNT-87612,"E30 - Health Provision, GOBI-FFF and Food Supplements","Health Provision, GOBI-FFF and Food Supplements",E30,"0",5,"0",1,1,105,3464845,2155,2022-05-12,,1598,1598
+205,EXNT-71720,E35 - Personal Hygiene,Personal Hygiene,E35,"0",5,"0",1,1,105,3464845,2155,2022-05-12,,1598,1598
+206,EXNT-12673,"E40 - Food, Nutrition and cooking utensils","Food, Nutrition and cooking utensils",E40,"0",5,"0",1,1,105,3464845,2155,2022-05-12,,1598,1598
+207,EXNT-49852,E45 - Domestic Assistance,Domestic Assistance,E45,"0",5,"0",1,1,105,3464845,2155,2022-05-12,,1598,1598
+208,EXNT-12238,E50 - Livelihood and Skills Training,Livelihood and Skills Training,E50,"0",5,"0",1,1,105,3464845,2155,2022-05-12,,1598,1598
+209,EXNT-14384,E55 - Social Development,Social Development,E55,"0",5,"0",1,1,105,3464845,2155,2022-05-12,,1598,1598
+210,EXNT-37284,E60 - Spiritual Development,Spiritual Development,E60,"0",5,"0",1,1,105,3464845,2155,2022-05-12,,1598,1598
+211,EXNT-54971,E65 - Staff salaries and wages,Staff salaries and wages,E65,1,5,"0",1,1,105,3464845,2155,2022-05-12,,1598,1598
+212,EXNT-67036,E70 – Office Operations Administration,Office Operations Administration,E70,1,5,"0",1,1,105,3464845,2155,2022-05-12,,1598,1598
+213,EXNT-35755,E74 - Project Safety,Project Safety,E74,"0",5,"0",1,1,105,3464845,2155,2022-05-12,,1598,1598
+214,EXNT-84614,E75 – Program Transportation,Program Transportation,E75,"0",5,"0",1,1,105,3464845,2155,2022-05-12,,1598,1598
+215,EXNT-60567,E80 - Survival Medical and Health Screening,Survival Medical and Health Screening,E80,"0",5,"0",1,1,129,3464872,2155,2022-05-12,,1598,1598
+216,EXNT-11741,E81 - Survival Training on GOBI FFF,Survival Training on GOBI FFF,E81,"0",5,"0",1,1,129,3464872,2155,2022-05-12,,1598,1598
+217,EXNT-66481,E82 - Survival Food Supplements,Survival Food Supplements,E82,"0",5,"0",1,1,129,3464872,2155,2022-05-12,,1598,1598
+218,EXNT-29055,E83 - Survival Spiritual Development,Survival Spiritual Development,E83,"0",5,"0",1,1,129,3464872,2155,2022-05-12,,1598,1598
+219,EXNT-34402,E84 - Survival Socio Emotional Dev.,Survival Socio Emotional Dev.,E84,"0",5,"0",1,1,129,3464872,2155,2022-05-12,,1598,1598
+220,EXNT-21486,E85 - Survival Livelihood skills training,Survival Livelihood skills training,E85,"0",5,"0",1,1,129,3464872,2155,2022-05-12,,1598,1598
+221,EXNT-89494,E86  - Survival Visits Transportation,Survival Visits Transportation,E86,"0",5,"0",1,1,129,3464872,2155,2022-05-12,,1598,1598
+222,EXNT-23873,"E200 – Beneficiary, Family And Church Gifts Expenses","Beneficiary, Family And Church Gifts",E200,"0",5,"0",1,"0",107,3464889,2155,2022-05-12,,1598,1598
+223,EXNT-30657,E330 – HVC OVC Grants Expenses,HVC OVC Grants Expenses,E330,"0",5,"0",1,"0",108,3464897,2155,2022-05-12,,1598,1598
+224,EXNT-37849,E410 - HIV/AIDS ARV Support Expenses,HIV/AIDS ARV Support Expenses,E410,"0",5,"0",1,"0",109,3464906,2155,2022-05-12,,1598,1598
+225,EXNT-22760,E415 - HIV/AIDS Caregivers and siblings (CGS) Expenes,HIV/AIDS Caregivers and siblings (CGS) Expenes,E415,"0",5,"0",1,"0",110,3464910,2155,2022-05-12,,1598,1598
+226,EXNT-7431,E425 - HIV/AIDS Education Expenses,HIV/AIDS Education,R425,"0",5,"0",1,"0",111,3464913,2155,2022-05-12,,1598,1598
+227,EXNT-5001,E510 - Caregivers Contribution Expenses,Caregivers Contribution Expenses,E510,"0",5,"0",1,"0",112,3464916,2155,2022-05-12,,1598,1598
+228,EXNT-51558,E515 - FCP Income Generation Activities Expenses,FCP Income Generation Activities Expenses,E515,"0",5,"0",1,"0",113,3464917,2155,2022-05-12,,1598,1598
+229,EXNT-51344,E520 - Local Donations and Church contributions Expenses,Local Donations and Church contributions Expenses,E520,"0",5,"0",1,"0",114,3464918,2155,2022-05-12,,1598,1598
+230,EXNT-16775,E320 - Medical Refund and Grant Expenses,Medical Refund and Grant Expenses,E320,"0",5,1,1,"0",115,3464919,2155,2022-05-12,,1598,1598
+231,EXNT-33021,E352 - Survival Launch Fund Expenses,Survival Launch Fund Expenses,E352,"0",5,"0",1,1,116,3464920,2155,2022-05-12,,1598,1598
+232,EXNT-44255,E370 - Sponsorship Launch Fund Expenses,Sponsorship Launch Fund Expenses,E370,"0",5,"0",1,1,117,3464925,2155,2022-05-12,,1598,1598
+233,EXNT-42804,E360 - Inter Partner Funds Transfer Expenses,Inter Partner Funds Transfer Expenses,E360,"0",5,"0",1,"0",118,3464926,2155,2022-05-12,,1598,1598
+234,EXNT-69227,E310 - School Fees Grant Expenses,School Fees Grant Expenses,E310,"0",5,"0",1,"0",119,3464929,2155,2022-05-12,,1598,1598
+235,EXNT-32170,E325 - Water and Sanitation Grants Expenses,Water and Sanitation Grants Expenses,E325,"0",5,"0",1,"0",120,3464930,2155,2022-05-12,,1598,1598
+236,EXNT-23765,E315 - Environment and Conservation Grants Expenses,Environment and Conservation Grants Expenses,E315,"0",5,"0",1,"0",121,3464931,2155,2022-05-12,,1598,1598
+237,EXNT-66557,E335 - Disaster Relief Grant Expenses,Disaster Relief Grant Expenses,E335,"0",5,"0",1,"0",122,3464934,2155,2022-05-12,,1598,1598
+238,EXNT-44180,E340 - Economic Empowerment,E340 - Economic Empowerment,E340,"0",5,"0",1,"0",123,3464935,2155,2022-05-12,,1598,1598
+239,EXNT-72920,E345 - Existing FCP Expansion,E345 - Existing FCP Expansion,E345,"0",5,"0",1,"0",124,3464936,2155,2022-05-12,,1598,1598
+240,EXNT-13926,E355 - Group and Individual Sponsor(s) Expenses,Group and Individual Sponsor(s) Expenses,E355,"0",5,"0",1,"0",125,3464940,2155,2022-05-12,,1598,1598
+241,EXNT-40947,E365 - Major Medical Expenses,Major Medical Expenses,E365,"0",5,"0",1,"0",126,3464941,2155,2022-05-12,,1598,1598
+242,EXNT-37634,E375 - Education – Ongoing Expenses,Education – Ongoing Expenses,E375,"0",5,"0",1,"0",127,3464942,2155,2022-05-12,,1598,1598
+243,EXNT-67592,E300 - Other Compassion Funds Expenses,Other Compassion Funds Expenses,E300,"0",5,"0",1,"0",128,3464943,2155,2022-05-12,,1598,1598
+244,EXNT-55042,E87- Survival Administrations,E87- Survival Administrations,E87,"0",5,"0",1,1,129,3487260,2155,2022-05-18,,1598,1598
+245,EXNT-47548,Skills training and resource centre,skills implementation,190 nfe,1,5,"0",1,"0",131,3623058,743,2022-06-10,,74,74
+246,EXNT-18871,E2000-Test-Medical Reimbursement,E2000-Test-Medical Reimbursement,E2000,"0",5,"0","0","0",1,348,287,2022-06-19,,39,39
+247,EXNT-30698,Completion of 73 classrooms in 9 FCPs of Ifakara Cluster.,The intervention focuses on improving learning environment in 9 FCPs of Ifakara cluster,171,"0",5,"0",1,"0",34,749,288,2022-07-08,,98,98
+248,EXNT-55500,E345- Infrastructure Grants Expenses,E345-Infrastructure Grants Expenses,E345,"0",5,"0",1,"0",55,10802,285,2022-11-10,,1,1
+249,EXNT-5079,E355 - Group and Individual Sponsor(s) Expenses,E355 - Group and Individual Sponsor(s) Expenses,E355,"0",5,"0",1,"0",134,9079112,285,2022-11-10,,1,1
+250,EXNT-32824,E335 - Disaster Relief Grant,Disaster Relief Grant,E335,"0",5,"0",1,"0",135,9083952,287,2022-11-10,,39,39
+251,EXNT-6756,E375 -Ongoing Education,E375 -Ongoing Education,E375,"0",1,"0",1,"0",136,554,287,2023-02-01,,40,40
+252,EXNT-33140,E4021 - Health- HH (Education and other preventative interventions (Proposal based),E4021 - Health- HH (Education and other preventative interventions (Proposal based),E4021,"0",5,"0",1,"0",137,12347192,285,2023-02-08,,2805,2805
+253,EXNT-57265,E80-Survival Medical and health Screening,Survival Medical and health Screening,E80,"0",4,"0",1,1,5,545,287,2023-03-13,,40,40
+254,EXNT-74258,E81 - Survival Training on Gobi-FFF,Survival Training on Gobi-FFF,E81,"0",4,"0",1,1,5,545,287,2023-03-13,,40,40
+255,EXNT-45560,E82- Survival food supplement,Survival food supplement,E82,"0",4,"0",1,1,5,545,287,2023-03-13,,40,40
+256,EXNT-64564,E83- Survival spiritual development,Survival spiritual development,E83,"0",2,"0",1,1,5,545,287,2023-03-13,,40,40
+257,EXNT-29739,E84 Survival Socio Emotional Development, Survival Socio Emotional Development,E84,"0",3,"0",1,1,5,545,287,2023-03-13,,40,40
+258,EXNT-74574,E85-Survival Livelihood skills training,Survival Livelihood skills training,E85,"0",1,"0",1,1,5,545,287,2023-03-13,,40,40
+259,EXNT-76007,E89- Survival Supplies and Equipments, Survival Supplies and Equipment's,E89,"0",3,"0",1,1,5,545,287,2023-03-13,,40,40
+260,EXNT-8917,R331 HVC-CPR,HVC One Time Protection,E331,"0",8,1,1,"0",138,13134657,287,2023-03-28,,39,39
+388,EXNT-51080,GH-E130  Collation Officer Salary and other Benefits,Collation Officer Salary and other Benefits,GHE130,"0",3,"0",1,1,166,20346938,3672,2023-08-08,,4984,4984
+389,EXNT-35483,GH-E140 Youth Coordinators Salary and other Benefits,Youth Coordinators Salary and other Benefits,GHE140,"0",3,"0",1,1,166,20346938,3672,2023-08-08,,4984,4984
+390,EXNT-10742,"GH-E150 Cluster events, sports and others","Cluster events, sports and others",GHE150,"0",3,"0",1,1,166,20346938,3672,2023-08-08,,4984,4984
+391,EXNT-48035,GH-E620 Church contributions,Payment from church contribution fund,GHE620,"0",7,"0",1,1,167,20347013,3672,2023-08-08,,4984,4984
+392,EXNT-25756,GH-E410 Disaster Interventions, Disaster Interventions,GHE410,"0",8,1,1,1,168,20347014,3672,2023-08-08,,4985,4985
+393,EXNT-56121,GH-E420 HVC CDI,HVC CDI,GHE420,"0",8,"0",1,1,170,20347018,3672,2023-08-08,,4985,4985
+394,EXNT-43726,GH - E630 Income Generation Activities (IGA),Payment from Income Generation Activities (IGA) Funds,GHE630,"0",7,"0",1,1,171,20347019,3672,2023-08-08,,4984,4984
+395,EXNT-43465,GH-E430 HVC CPR,HVC CPR,GHE430,"0",8,1,1,1,172,20347021,3672,2023-08-08,,4985,4985
+397,EXNT-15965,GH-E310-Beneficiary & Family Gift,Beneficiary & Family Gift,GHE310,"0",6,"0",1,"0",169,20347017,3672,2023-08-08,,5003,5003
+399,EXNT-23204,GH-E440 Edu Ongoing,Edu Ongoing,GHE440,"0",8,1,1,1,173,20347038,3672,2023-08-08,,4985,4985
+400,EXNT-71908,GH-E320-Project Gift,Payment of Project Gift,GHE320,"0",6,"0",1,"0",174,20347047,3672,2023-08-08,,5003,5003
+401,EXNT-60708,GH-E640 Bank Interest,Payment from Bank Interest ,GHE640,"0",7,"0",1,1,175,20347048,3672,2023-08-08,,4984,4984
+402,EXNT-49842,GH-E450 HIV CGS,HIV CGS,GHE450,"0",8,1,1,1,176,20347049,3672,2023-08-08,,4985,4985
+403,EXNT-85880,GH-E460 HIV MED,HIV MED,GHE460,"0",8,1,1,1,178,20347076,3672,2023-08-08,,4985,4985
+404,EXNT-69077,GH-E330 Christmas Gift,Christmas Gift,GHE330,"0",6,"0",1,"0",179,20347077,3672,2023-08-08,,5003,5003
+405,EXNT-35433,GH-E470 MED TFI,MED TFI,GHE470,"0",8,1,1,1,181,20347102,3672,2023-08-08,,4985,4985
+407,EXNT-14896,GH-E610 Local Contributions,Payment from Local contributions Funds,GHE610,"0",7,"0",1,1,180,20347080,3672,2023-08-08,,4984,4984
+408,EXNT-52849,GH-E101 Tuition and school fees ,Tuition and school fees ,E101,1,1,"0",1,1,177,20347075,3672,2023-08-08,,4983,4983
+409,EXNT-80099,GH-E480 Medical Ongoing,Medical Ongoing,GHE480,"0",8,1,1,1,182,20347139,3672,2023-08-08,,4985,4985
+410,EXNT-76051,GH-E102 Teaching and Learning Materials and Printing of Gifts  Photos and other materials,E102 Teaching and Learning Materials and Printing of Gift Photos and other materials,E102,"0",1,"0",1,1,177,20347075,3672,2023-08-08,,4983,4983
+411,EXNT-67364,GH-E111Service & Extracurricular Activities,E111Service & Extracurricular Activities,E111,"0",3,"0",1,1,177,20347075,3672,2023-08-08,,5004,5004
+412,EXNT-88394,GH-E103 Uniforms and Clothing,E103 Uniforms and Clothing,E103,1,1,"0",1,1,177,20347075,3672,2023-08-08,,4983,4983
+413,EXNT-25765,"GH-E112 Mental Health, Counselling and Child Protection","E112 Mental Health, Counselling and Child Protection",E112,"0",3,"0",1,1,177,20347075,3672,2023-08-08,,5004,5004
+414,EXNT-15859,GH-E113 Leadership and Youth Development,E113 Leadership and Youth Development and Cluster Youth Coordinator benefits and other expenses,E113,"0",1,"0",1,1,177,20347075,3672,2023-08-08,,5004,5004
+415,EXNT-84425,GH-E510 IFP, Infrastructure,GHE510,"0",9,"0",1,1,183,20347184,3672,2023-08-08,,5005,5005
+416,EXNT-55915," GH-E114 T&T for programming (Cognitive, socio-emotional, spiritual and physical)",E114 T&T for programming,E114,"0",3,"0",1,1,177,20347075,3672,2023-08-08,,5004,5004
+417,EXNT-18151,"GH-E115 Spiritual Development (Materials, Spiritual Camps, Events and Programs)",E115 Spiritual Development,E115,"0",2,"0",1,1,177,20347075,3672,2023-08-08,,5004,5004
+418,EXNT-26733,"GH-E104 Vocational /Technical Training and Materials, School supplies","E104 Vocational /Technical Training and Materials, School supplies",E104,"0",1,"0",1,1,177,20347075,3672,2023-08-08,,4983,4983
+419,EXNT-78866,GH-E105 Health Prevention and Medical Expenses,E105 Health Prevention and Medical Expenses,E105,"0",4,1,1,1,177,20347075,3672,2023-08-08,,4983,4983
+420,EXNT-76584,GH-E116 Sponsor Visits,E116 Sponsor Visits,E116,"0",3,"0",1,1,177,20347075,3672,2023-08-08,,5004,5004
+421,EXNT-68678,GH-E106 Hygiene Supplies and Sanitation ,E106 Hygiene Supplies and Sanitation,E106,"0",4,"0",1,1,177,20347075,3672,2023-08-08,,4983,4983
+422,EXNT-16114,GH-E117 T&T Associated with SDR,E117 T&T Associated with SDR and Collation Office Expenses. Printing of Gifts photos,E117,"0",3,"0",1,1,177,20347075,3672,2023-08-08,,5004,5004
+423,EXNT-7061,GH-E118 Staff Salaries and Other Benefits,"E118 Staff Salaries & Other Benefits, CPC other benefit.",E118,1,5,"0",1,1,177,20347075,3672,2023-08-08,,5004,5004
+424,EXNT-66872,"GH-E119 Staff Learning & Development, Partner Training and Development,Resch,Monitoring & Evaluation","E119 Staff Learning & Development, Partner Training and Development, Resrch,Monitoring & Evaluation",E119,1,5,"0",1,1,177,20347075,3672,2023-08-08,,5004,5004
+425,EXNT-17315,GH-E120 Office Supplies, Office Supplies,E120,1,5,"0",1,1,177,20347075,3672,2023-08-08,,5004,5004
+426,EXNT-79810,"GH-E121 Utilities, Administrative Charges and Telecom, T&T for CPCs &Pastors and Appreciation","Utilities, Administrative Charges and Telecom, T&T for CPCs & Pastors and their Appreciation",E121,1,5,"0",1,1,177,20347075,3672,2023-08-08,,5004,5004
+428,EXNT-40650,GH-E515 Edu Individual,Edu Individual,GHE515,"0",9,"0",1,1,184,20347314,3672,2023-08-08,,5005,5005
+430,EXNT-89455,"GH-E107 Caregiver Engagement (Health, Socio-emotional, cognitive), Domestic Assistance","E107 Caregiver Engagement (Health, Socio-emotional, cognitive, Domestic Assistance)",E107,"0",1,"0",1,1,177,20347075,3672,2023-08-08,,4983,4983
+431,EXNT-49923,"GH-E123 Maintenance and Repair, Project Safety and Security"," GHE123-Maintenance and Repair, Project Safety and Security",E123,1,5,"0",1,1,177,20347075,3672,2023-08-08,,5004,5004
+432,EXNT-85616,GH-E108 Food,E108 Food,E108,"0",4,"0",1,1,177,20347075,3672,2023-08-08,,4983,4983
+433,EXNT-62056,"GH-E124 Travel and Transportation, Lodging and meals","E124 Travel and Transportation, Lodging and meals",E124,1,5,"0",1,1,177,20347075,3672,2023-08-08,,5004,5004
+434,EXNT-45038,"GH-E109 Cooking Equipment, Utensils and Fuel","E109 Cooking Equipment, Utensils and Fuel",E109,"0",4,"0",1,1,177,20347075,3672,2023-08-08,,4983,4983
+436,EXNT-17772,"GH-E110 Sports Equipment and Clothing, Cluster Events and Activities","E110 Sports Equips & Clothing, Cluster Events and activities.",E110,"0",4,"0",1,1,177,20347075,3672,2023-08-08,,4983,4983
+437,EXNT-65049,GH-E122 Furniture and Office Equipment, Furniture and Office Equipment,E122,1,5,"0",1,1,177,20347075,3672,2023-08-08,,5004,5004
+438,EXNT-51018,GH-E490 Sponsorship Launch, Sponsorship Launch,GHE490,"0",8,"0",1,1,185,20347419,3672,2023-08-08,,4986,4986
+439,EXNT-48081,GH-E520 EHH Individual,HH Individual,GHE520,"0",9,"0",1,1,186,20347435,3672,2023-08-08,,5005,5005
+440,EXNT-26377,GH-E525 Wash,Payment for Wash Intervention,GHE525,"0",9,"0",1,1,187,20347560,3672,2023-08-08,,5005,5005
+441,EXNT-85231,GH-R535 IGA,Payment for IGA,GHR535,"0",9,"0","0","0",188,20347718,3672,2023-08-09,,4986,4986
+442,EXNT-48751,GH-E540 MIV,Payment for MIV Intervention,GHE540,"0",9,"0",1,1,189,20351033,3672,2023-08-09,,5005,5005
+443,EXNT-82554,GH-E545 NFE, Payment for NFE Intervention,GHR545,"0",9,"0",1,1,192,20352370,3672,2023-08-09,,4986,4986
+444,EXNT-73104,GH-E570 Disaster,Disaster,GHE570,"0",9,"0",1,1,193,20352524,3672,2023-08-09,,4985,4985
+445,EXNT-84531,GH-E550 PED,Payment for PED Intervention,GHR550,"0",9,1,1,1,194,20352781,3672,2023-08-09,,4986,4986
+446,EXNT-52699,GH-E555 Major Medical,Payment for Major Medical,GHE555,"0",9,"0",1,1,195,20353065,3672,2023-08-09,,4986,4986
+447,EXNT-65675,GH-E560 Survival Launch,Payment for Survival Launch,GH-E560,"0",9,"0",1,1,196,20354187,3672,2023-08-09,,4986,4986
+448,EXNT-3306,GH-E565 Disaster,Payment for Disaster,GHE565,"0",9,"0",1,1,197,20355409,3672,2023-08-09,,4986,4986
+449,EXNT-85281,GH-E495 Tours And Visit,Tours And Visit,GHE495,"0",8,"0",1,1,198,20356580,3672,2023-08-09,,4986,4986
+450,EXNT-84255,GH-E530 IGA,Payment for IGA intervention activities,GHE530,"0",9,"0",1,1,199,20405882,3672,2023-08-12,,4984,4984
+451,EXNT-22348,GH-E535 LMT,Payment for LMT intervention activities,GHE535,"0",9,"0",1,1,188,20347718,3672,2023-08-12,,4984,4984
+452,EXNT-56167,"GH-E201 Teaching and Learning Materials, Vocational /Technical Training and Materials","Teaching and Learning Materials, Vocational /Technical Training and Material ",GHE201,"0",8,"0",1,1,200,20418470,3672,2023-08-15,,4984,4984
+453,EXNT-48152,GH-E202 Survival Implementer's Salary and Benefits, Survival Implementer's Salary and Benefits,GHE202,"0",8,"0",1,1,200,20418470,3672,2023-08-15,,4984,4984
+454,EXNT-80480,GH-E203 Clothing,Clothing,GHE203,"0",8,"0",1,1,200,20418470,3672,2023-08-15,,4984,4984
+455,EXNT-68362,GH-E204 Medical Bills, Medical Bills,GHE204,"0",8,"0",1,1,200,20418470,3672,2023-08-17,,4984,4984
+456,EXNT-32176,GH-E205 Supplementary Food,Supplementary Food,GHE205,"0",8,"0",1,1,200,20418470,3672,2023-08-17,,4984,4984
+457,EXNT-16749,GH-E206 Sanitation and Hygiene Items,Sanitation and Hygiene Items,GHE206,"0",8,"0",1,1,200,20418470,3672,2023-08-17,,4984,4984
+458,EXNT-75937,GH-E207 Survival Launch,Survival Launch,GHE207,"0",8,"0",1,1,200,20418470,3672,2023-08-18,,4984,4984
+459,EXNT-61992,GH-E208 Group Activities and programing (health screening) for MCU,Group Activities and programing for MCU,GHE208,"0",4,"0",1,1,200,20418470,3672,2023-10-25,,4984,4984
+460,EXNT-76448,GH-E209 Education and Campaign activities of MCU,Education and Campaign activities of MCU,GHE209,"0",1,"0",1,1,200,20418470,3672,2023-11-21,,4984,4984
+461,EXNT-33327,GH-E210 Livelihood support for survival caregivers,Livelihood support for survival caregivers,GHE210,"0",4,"0","0",1,200,20418470,3672,2023-11-21,,4984,4984
+462,EXNT-23672,GH-E211 Implementer's Training and Development,Implementer's Training and Development,GHE211,"0",1,"0",1,1,200,20418470,3672,2023-11-21,,4984,4984
+463,EXNT-24208,E380 - Learning Materials Expenses,E380 - Learning Materials Expenses,E380,"0",5,"0",1,"0",201,25683412,2155,2023-12-05,,1598,1598
+464,EXNT-6217,E328 - Vector Borne Intervention,E328 - Vector Borne Intervention,E328,"0",5,"0",1,"0",203,25696834,2155,2023-12-05,,1598,1598
+465,EXNT-83857,E390 - Parent Education,E390 - Parent Education,E390,"0",5,"0",1,"0",202,25683633,2155,2023-12-05,,1598,1598
+466,EXNT-28034,GH-E212 Gifts for MCU,GHE212 Gifts items and it related activities for MCU,GHE212,"0",3,"0",1,1,200,20418470,3672,2023-12-20,,4984,4984
+467,EXNT-9209,GH-E340 Survival Gift,Survival Gifts ,GHE340,"0",6,"0",1,"0",204,26035106,3672,2023-12-20,,4984,4984
+468,EXNT-10330M90,E10 - Education Supplies and Fees,Education Supplies and Fees,E10,"0",5,"0",1,1,205,352,29,2020-08-21,,3,3
+469,EXNT-12048M90,E20 - Office Supplies,Office Supplies,E20,"0",5,"0",1,1,205,353,29,2020-08-21,,3,3
+470,EXNT-62318M90,E15 - School Uniforms and Clothes,School Uniforms and Clothes,E15,"0",5,"0",1,1,205,556,29,2020-11-03,,5,5
+471,EXNT-15341M90,E25 - Teaching aids and reference materials,Teaching aids and reference materials,E25,"0",5,"0",1,1,205,557,29,2020-11-03,,5,5
+472,EXNT-59349M90,"E30 - Health Provision, GOBIFFF and Food Supplements","Health Provision, GOBIFFF and Food Supplements",E30,"0",5,"0",1,1,205,558,29,2020-11-03,,5,5
+473,EXNT-50100M90,E35 - Personal Hygiene,Personal Hygiene,E35,"0",5,"0",1,1,205,559,29,2020-11-03,,5,5
+474,EXNT-22305M90,"E40 - Food, Nutrition and cooking utensils","Food, Nutrition and cooking utensils",E40,"0",5,"0",1,1,205,560,29,2020-11-03,,5,5
+475,EXNT-44905M90,E45 - Domestic Assistance,Domestic Assistance,E45,"0",5,"0",1,1,205,561,29,2020-11-03,,5,5
+476,EXNT-87220M90,E50 - Livelihood and Skills Training,Livelihood and Skills Training,E50,"0",5,"0",1,1,205,562,29,2020-11-03,,5,5
+477,EXNT-83132M90,E55 - Social Development,Social Development,E55,"0",5,"0",1,1,205,563,29,2020-11-03,,5,5
+478,EXNT-88204M90,E60 - Spiritual Development,Spiritual Development,E60,"0",5,"0",1,1,205,564,29,2020-11-03,,5,5
+479,EXNT-14103M90,E65 - Staff salaries and wages,Staff salaries and wages,E65,1,5,"0",1,1,205,565,29,2020-11-03,,5,5
+480,EXNT-24518M90,E70 - Administration,Administration,E70,1,5,"0",1,1,205,566,29,2020-11-03,,5,5
+481,EXNT-20223M90,E74 - Project Safety ,Project Safety,E74,"0",5,"0",1,1,205,567,29,2020-11-03,,5,5
+482,EXNT-51505M90,E75 - Transportation,Transportation,E75,1,5,"0",1,1,205,568,29,2020-11-03,,5,5
+483,EXNT-52873T93,E352 - Survival Launch Fund,Survival Launch Fund,E352,"0",5,"0",1,1,210,572,29,2020-11-03,,5,5
+484,EXNT-76415,E4022- PCA Data Collection and FCP Support,PCA Data Collection and FCP Support Expenses,E4022,"0",8,"0",1,"0",212,28285538,285,2024-02-09,,1,1
+485,EXNT-8536,E80-Survival Medical and Health Screening,Survival Medical and Health Screening,E80,"0",4,"0",1,1,208,545,3668,2024-02-29,,6999,6999
+486,EXNT-64302,E81-Survival Training on GOBI FFF,Survival Training on GOBI FFF,E81,"0",4,"0",1,1,208,545,3668,2024-02-29,,6999,6999
+487,EXNT-85901,E82-Survival Food Supplements,Survival Food Supplements,E82,"0",4,"0",1,1,208,545,3668,2024-02-29,,6999,6999
+488,EXNT-67619,E83-Survival Spiritual Development,Survival Spiritual Development,E83,"0",2,"0",1,1,208,545,3668,2024-02-29,,6999,6999
+489,EXNT-3125,E84-Survival Socio Emotional Development,Survival Socio Emotional Development,E84,"0",3,"0",1,1,208,545,3668,2024-02-29,,6999,6999
+490,EXNT-42203,E85-Survival Livelihood skills training,Survival Livelihood skills training,E85,"0",1,"0",1,1,208,545,3668,2024-02-29,,6999,6999
+491,EXNT-89746,E86-Survival Transportation,Survival Transportation,E86,1,5,"0",1,1,208,545,3668,2024-02-29,,6999,6999
+492,EXNT-64487,ZM-E200 Gifts Expenses,ZM-E200 Gifts Expenses,E200,"0",6,"0",1,"0",214,28686802,285,2024-03-04,,1,1
+493,EXNT-15582,E201 - Survival Gifts Expense,Survival Gifts Expense,E201,"0",6,"0",1,"0",215,28936410,285,2024-03-18,,2805,2805
+494,EXNT-51308,E525 - Survival Non-Compassion Funds,E525 - Survival Non-Compassion Funds,E525,"0",7,"0",1,1,216,28941647,285,2024-03-18,,2805,2805
+495,EXNT-19675,"IGA for 265 caregivers from TZ0501, TZ0640, TZ0835, TZ1808",Income Generation/Household Security,R201,"0",9,"0","0","0",30,745,288,2024-03-27,,424,424
+496,EXNT-29408,E380-Program Cycle Adoption,E380-Program Cycle Adoption,E380,"0",9,1,1,"0",217,30132522,287,2024-04-09,,39,39
+497,EXNT-25292,E330-HVC OVC Grants,E330-HVC OVC Grants,E330,"0",6,"0",1,1,218,30515374,3668,2024-04-22,,6999,6999
+498,EXNT-24258,E430 - Health and Nutrition,E430 - Health and Nutrition,E430,"0",9,"0",1,"0",223,31307380,2155,2024-05-20,,1598,1598
+499,EXNT-62297,E325-Water and Sanitation Grants Expenses,E325-Water and Sanitation Grants Expenses,E325,"0",9,"0",1,1,222,30516627,3668,2024-06-28,,6999,6999
+500,EXNT-45614,E335 - Disaster Relief Grant,E335 - Disaster Relief Grant,E335,"0",9,"0",1,1,221,30516622,3668,2024-07-02,,6999,6999
+501,EXNT-31105,E520 - Local Donations and Church Contributions,E520 - Local Donations and Church Contributions,E520,"0",7,"0",1,1,224,32595627,3668,2024-07-02,,6999,6999
+502,EXNT-57228,E365 - Health (HH),E365 - Health (HH),E365,"0",9,1,1,1,225,32596052,3668,2024-07-02,,6999,6999
+503,EXNT-21450,E10 - School Fees,School Fees,E10,"0",1,"0",1,1,226,33744005,4854,2024-07-22,,8396,8396
+504,EXNT-35968,E15 - Scholastic materials & School Uniforms,Scholastic materials & School Uniforms,E15,"0",1,"0",1,1,226,33744005,4854,2024-07-22,,8396,8396
+505,EXNT-66123,"E16 - Clothes, Shoes & Sportswear","Clothes, Shoes & Sportswear",E16,"0",3,"0",1,1,226,33744005,4854,2024-07-22,,8396,8396
+506,EXNT-24751,E20 - Office Supplies,Office Supplies,E20,1,5,"0",1,1,226,33744005,4854,2024-07-22,,8396,8396
+507,EXNT-78791,E25 - Teaching Aids and Reference Materials,Teaching Aids and Reference Materials,E25,"0",1,"0",1,1,226,33744005,4854,2024-07-22,,8396,8396
+508,EXNT-26781,E30 - Health & Medical - Prevention & Promotion,Health & Medical - Prevention & Promotion,E30,"0",4,"0",1,1,226,33744005,4854,2024-07-22,,8396,8396
+509,EXNT-39526,E31 - Health & Medical - Treatment,Health & Medical - Treatment,E31,"0",4,"0",1,1,226,33744005,4854,2024-07-22,,8396,8396
+510,EXNT-59978,E35 - Hygiene Supplies,Hygiene Supplies,E35,"0",4,"0",1,1,226,33744005,4854,2024-07-22,,8396,8396
+511,EXNT-23498,"E40 - Food, Nutrition support and Cooking utensils","Food, Nutrition support and Cooking utensils",E40,"0",4,"0",1,1,226,33744005,4854,2024-07-22,,8396,8396
+512,EXNT-57514,E45 - Family Assistance,Family Assistance,E45,"0",3,"0",1,1,226,33744005,4854,2024-07-22,,8396,8396
+513,EXNT-25112,E50 - Livelihood and Skills Training,Livelihood and Skills Training,E50,"0",1,"0",1,1,226,33744005,4854,2024-07-22,,8396,8396
+514,EXNT-13016,E55 - Social Development,Social Development,E55,"0",3,"0",1,1,226,33744005,4854,2024-07-22,,8396,8396
+515,EXNT-36437,E60 - Spiritual Development,Spiritual Development,E60,"0",2,"0",1,1,226,33744005,4854,2024-07-22,,8396,8396
+516,EXNT-41870,E61 - Sponsor Donor Relations,Sponsor Donor Relations ,E61,"0",3,"0",1,1,226,33744005,4854,2024-07-22,,8396,8396
+517,EXNT-46751,E65 - Staff salaries and wages,Staff salaries and wages,E65,1,5,"0",1,1,226,33744005,4854,2024-07-22,,8396,8396
+518,EXNT-7977,E66 - Staff Training & Development,Staff Training & Development,E66,1,5,"0",1,1,226,33744005,4854,2024-07-22,,8396,8396
+519,EXNT-84088,E70 - Administrative Costs,Administrative Costs,E70,1,5,"0",1,1,226,33744005,4854,2024-07-22,,8396,8396
+520,EXNT-83694,E71 - Government Fees,Government Fees,E71,"0",3,"0",1,1,226,33744005,4854,2024-07-22,,8396,8396
+521,EXNT-70736,E74 - Project Safety,Project Safety,E74,"0",4,"0",1,1,226,33744005,4854,2024-07-22,,8396,8396
+522,EXNT-26110,"E75 - Meals, Transportation & Accommodation","Meals, Transportation & Accommodation",E75,1,5,"0",1,1,226,33744005,4854,2024-07-22,,8396,8396
+523,EXNT-51668,E200 - Individual Gifts,Individual Gifts,E200,"0",6,"0",1,"0",227,33750945,4854,2024-07-22,,8396,8396
+524,EXNT-19916,E201 - Family Gifts,Family Gifts,E201,"0",6,"0",1,"0",227,33750945,4854,2024-07-22,,8396,8396
+525,EXNT-36699,E202 - Christmas Gifts,Christmas Gifts,E202,"0",6,"0",1,"0",227,33750945,4854,2024-07-22,,8396,8396
+526,EXNT-2023,E203 - Other Gifts,Other Gifts,E203,"0",6,"0",1,"0",227,33750945,4854,2024-07-22,,8396,8396
+527,EXNT-81438,E209 - Project Gift expenses,Project Gift expenses,E209,"0",6,"0",1,"0",228,33751036,4854,2024-07-22,,8396,8396
+528,EXNT-5923,E210 - Survival Gift expenses,Survival Gift expenses,E210,"0",6,"0",1,"0",229,33751041,4854,2024-07-22,,8396,8396
+529,EXNT-68128,E310 - School fees top up - Vocational,School fees top up - Vocational,E310,"0",1,"0",1,"0",230,33751061,4854,2024-07-22,,8396,8396
+530,EXNT-56539,E311 -  Entrepreneurship skills and Youth IGAs,Entrepreneurship skills and Youth IGAs,E311,"0",1,"0",1,"0",230,33751061,4854,2024-07-22,,8396,8396
+531,EXNT-33176,E312 - Mentorship and Discipleship,Mentorship and Discipleship,E312,"0",1,"0",1,"0",230,33751061,4854,2024-07-22,,8396,8396
+532,EXNT-48885,E313 - Youth Psychosocial Trainings,Youth Psychosocial Trainings,E313,"0",1,"0",1,"0",230,33751061,4854,2024-07-22,,8396,8396
+533,EXNT-9468,E314 - Swings and Playgrounds,Swings and Playgrounds,E314,"0",1,"0",1,"0",230,33751061,4854,2024-07-22,,8396,8396
+534,EXNT-69126,E315 - Computer lab and Library,Computer lab and Library,E315,"0",1,"0",1,"0",230,33751061,4854,2024-07-22,,8396,8396
+535,EXNT-42408,E80 - Survival Medical treatment and  Health Screening,Survival Medical treatment and  Health Screening,E80,"0",4,"0",1,1,231,33751096,4854,2024-07-22,,8396,8396
+536,EXNT-71258,E81 - Curriculum implementation expenses,Curriculum implementation expenses,E81,"0",4,"0",1,1,231,33751096,4854,2024-07-22,,8396,8396
+537,EXNT-45711,E82 - Survival food supplements,Survival food supplements,E82,"0",4,"0",1,1,231,33751096,4854,2024-07-22,,8396,8396
+538,EXNT-59989,E83 - Survival Spiritual development,Survival Spiritual development,E83,"0",2,"0",1,1,231,33751096,4854,2024-07-22,,8396,8396
+539,EXNT-88155,E84 - Survival Socioemotional Development,Survival Socioemotional Development,E84,"0",3,"0",1,1,231,33751096,4854,2024-07-23,,8396,8396
+540,EXNT-64657,E85 - Survival Livelihood and skills development,Survival Livelihood and skills development ,E85,"0",1,"0",1,1,231,33751096,4854,2024-07-23,,8396,8396
+541,EXNT-67913,E86 - Hygiene Materials,Hygiene Materials,E86,"0",4,"0",1,1,231,33751096,4854,2024-07-23,,8396,8396
+542,EXNT-88667,E89 -  Survival Supplies and Equipment,Survival Supplies and Equipment,E89,1,5,"0",1,1,231,33751096,4854,2024-07-23,,8396,8396
+543,EXNT-88735,E90 - Staff salaries and wages,Staff salaries and wages,E90,1,5,"0",1,1,231,33751096,4854,2024-07-23,,8396,8396
+544,EXNT-16093,E320 - Medical Reimbursable expenses,Medical Reimbursable expenses,E320,"0",4,1,1,"0",232,33752683,4854,2024-07-23,,8396,8396
+545,EXNT-62501,E321 - Medical Therapeutic Feeding Intervention (MED-TFI),Medical Therapeutic Feeding Intervention (MED-TFI),E321,"0",4,1,1,"0",232,33752683,4854,2024-07-23,,8396,8396
+546,EXNT-45867,E322 - Major Medical expenses,Major Medical expenses,E322,"0",4,"0",1,"0",233,33897903,4854,2024-07-27,,8396,8396
+547,EXNT-36880,E325 - WaSH-related expenses,WaSH-related expenses,E325,"0",4,"0",1,"0",234,33898261,4854,2024-07-27,,8396,8396
+548,EXNT-39486,E330 - HVC-CDI,HVC-CDI,E330,"0",3,"0",1,"0",235,33898448,4854,2024-07-27,,8396,8396
+549,EXNT-74658,E331 - HVC-CPR,HVC-CPR,E331,"0",3,"0",1,"0",235,33898448,4854,2024-07-27,,8396,8396
+550,EXNT-52482,E335 - Disaster Relief-related expenses,Disaster Relief-related expenses,E335,"0",3,"0",1,"0",236,33898587,4854,2024-07-27,,8396,8396
+551,EXNT-38179,E336 - Disaster Response expenses,Disaster Response expenses,E336,"0",3,"0",1,"0",237,33898636,4854,2024-07-27,,8396,8396
+552,EXNT-44353,E340 - Income Generation-related expenses,Income Generation-related expenses,E340,"0",3,"0",1,"0",238,33898670,4854,2024-07-27,,8396,8396
+553,EXNT-47309,E345 - Infrastructure-related expenses,Infrastructure-related expenses,E345,"0",3,"0",1,"0",239,33898770,4854,2024-07-27,,8396,8396
+554,EXNT-64294,E352 - Survival Launch-related expenses,Survival Launch-related expenses,E352,"0",3,"0",1,"0",240,33898836,4854,2024-07-27,,8396,8396
+555,EXNT-34078,E355 - Group and Individual Sponsor(s) expenses,Group and Individual Sponsor(s) expenses,E355,"0",3,1,1,"0",241,33898922,4854,2024-07-27,,8396,8396
+556,EXNT-58969,E365 - Health promotion related expenses,Health promotion related expenses,E365,"0",4,"0",1,"0",242,33899180,4854,2024-07-27,,8396,8396
+557,EXNT-18850,E370 - Sponsorship Launch-related expenses,Sponsorship Launch-related expenses,E370,"0",3,"0",1,"0",243,33899257,4854,2024-07-27,,8396,8396
+558,EXNT-85631,E380 - Program Cycle Adoption expenses,Program Cycle Adoption expenses,E380,"0",3,1,1,"0",244,33899316,4854,2024-07-27,,8396,8396
+559,EXNT-73824,E410 - HIV/AIDS Nutritional support/food supplements,HIV/AIDS Nutritional support/food supplements,E410,"0",4,"0",1,"0",245,33899425,4854,2024-07-27,,8396,8396
+560,EXNT-66048,E415 - HIV/AIDS Voluntary Counseling and Testing (VCT),HIV/AIDS Voluntary Counseling and Testing (VCT),E415,"0",4,"0",1,"0",245,33899425,4854,2024-07-27,,8396,8396
+561,EXNT-42252,E416 - HIV/AIDS Psychological support,HIV/AIDS Psychological support,E416,"0",4,"0",1,"0",245,33899425,4854,2024-07-27,,8396,8396
+562,EXNT-25454,E425 - HIV/AIDS Education,HIV/AIDS Education,E425,"0",4,"0",1,"0",246,33899654,4854,2024-07-27,,8396,8396
+563,EXNT-78195,E510 - Parents Contribution,Parents Contribution,E510,"0",3,"0",1,"0",247,33899715,4854,2024-07-27,,8396,8396
+564,EXNT-38063,E515 - FCP Income Generating Activity,FCP Income Generating Activity,E515,"0",3,"0",1,"0",247,33899715,4854,2024-07-27,,8396,8396
+565,EXNT-69224,E520 - Local Donations and Church Contributions,Local Donations and Church Contributions,E520,"0",3,"0",1,"0",247,33899715,4854,2024-07-27,,8396,8396
+566,EXNT-4769,E530 - Parental Education-related expenses,Parental Education-related expenses,E530,"0",3,"0",1,"0",248,33900238,4854,2024-07-27,,8396,8396
+567,EXNT-33224,E535 - MIV-related expenses,MIV-related expenses,E535,"0",4,"0",1,"0",249,33900305,4854,2024-07-27,,8396,8396
+568,EXNT-85607,E540 - School fees top up - General Education,School fees top up - General Education,E540,"0",1,"0",1,"0",250,33900376,4854,2024-07-27,,8396,8396
+569,EXNT-54844,E550 - Other Expenses,Other Expenses,E550,1,5,"0",1,"0",251,33900442,4854,2024-07-27,,8396,8396
+570,EXNT-88547,E551 - Other Reimbursables,Other Reimbursables,E551,"0",3,1,1,"0",252,33900541,4854,2024-07-27,,8396,8396
+571,EXNT-31320,E552 - Inter-FCP Funds Transfer,Inter-FCP Funds Transfer,E552,"0",3,"0",1,"0",253,33900656,4854,2024-07-27,,8396,8396
+572,EXNT-37497,E372 - Child & Youth Education,E372 - Child & Youth Education,E372,"0",9,"0",1,"0",254,35108552,2155,2024-09-11,,1598,1598
+573,EXNT-67476,E310-School fees grants-NEET,E310-School fees grants-NEET,E310,"0",9,"0",1,1,255,35146582,3668,2024-09-12,,7073,7073
+574,EXNT-10330,E10 - Education Supplies and Fees,Education Supplies and Fees,E10,"0",5,"0",1,1,256,352,29,2020-08-21,,3,3
+575,EXNT-12048,E20 - Office Supplies,Office Supplies,E20,"0",5,"0",1,1,256,353,29,2020-08-21,,3,3
+576,EXNT-62318,E15 - School Uniforms and Clothes,School Uniforms and Clothes,E15,"0",5,"0",1,1,256,556,29,2020-11-03,,5,5
+577,EXNT-15341,E25 - Teaching aids and reference materials,Teaching aids and reference materials,E25,"0",5,"0",1,1,256,557,29,2020-11-03,,5,5
+578,EXNT-59349,"E30 - Health Provision, GOBIFFF and Food Supplements","Health Provision, GOBIFFF and Food Supplements",E30,"0",5,"0",1,1,256,558,29,2020-11-03,,5,5
+579,EXNT-50100,E35 - Personal Hygiene,Personal Hygiene,E35,"0",5,"0",1,1,256,559,29,2020-11-03,,5,5
+580,EXNT-22305,"E40 - Food, Nutrition and cooking utensils","Food, Nutrition and cooking utensils",E40,"0",5,"0",1,1,256,560,29,2020-11-03,,5,5
+581,EXNT-44905,E45 - Domestic Assistance,Domestic Assistance,E45,"0",5,"0",1,1,256,561,29,2020-11-03,,5,5
+582,EXNT-87220,E50 - Livelihood and Skills Training,Livelihood and Skills Training,E50,"0",5,"0",1,1,256,562,29,2020-11-03,,5,5
+583,EXNT-83132,E55 - Social Development,Social Development,E55,"0",5,"0",1,1,256,563,29,2020-11-03,,5,5
+584,EXNT-88204,E60 - Spiritual Development,Spiritual Development,E60,"0",5,"0",1,1,256,564,29,2020-11-03,,5,5
+585,EXNT-14103,E65 - Staff salaries and wages,Staff salaries and wages,E65,1,5,"0",1,1,256,565,29,2020-11-03,,5,5
+586,EXNT-24518,E70 - Administration,Administration,E70,1,5,"0",1,1,256,566,29,2020-11-03,,5,5
+587,EXNT-20223,E74 - Project Safety ,Project Safety,E74,"0",5,"0",1,1,256,567,29,2020-11-03,,5,5
+588,EXNT-51505,E75 - Transportation,Transportation,E75,1,5,"0",1,1,256,568,29,2020-11-03,,5,5
+589,EXNT-6729,T100-Child support fund transfer,Child support fund transfer,T100,"0",5,"0",1,"0",256,348,287,2021-02-03,,40,40
+590,EXNT-18871,E2000-Test-Medical Reimbursement,E2000-Test-Medical Reimbursement,E2000,"0",5,"0","0","0",256,348,287,2022-06-19,,39,39
+605,EXNT-65075,E200 - Gifts,Gifts,E200,"0",6,"0",1,"0",257,569,29,2020-11-03,,5,5
+606,EXNT-18138,E330 - HVC,Highly Vulnerable Children,E330,"0",5,1,1,"0",262,571,29,2020-11-03,,5,5
+607,EXNT-57265,E80-Survival Medical and health Screening,Survival Medical and health Screening,E80,"0",4,"0",1,1,268,545,287,2023-03-13,,40,40
+608,EXNT-74258,E81 - Survival Training on Gobi-FFF,Survival Training on Gobi-FFF,E81,"0",4,"0",1,1,268,545,287,2023-03-13,,40,40
+609,EXNT-45560,E82- Survival food supplement,Survival food supplement,E82,"0",4,"0",1,1,268,545,287,2023-03-13,,40,40
+610,EXNT-64564,E83- Survival spiritual development,Survival spiritual development,E83,"0",2,"0",1,1,268,545,287,2023-03-13,,40,40
+611,EXNT-29739,E84 Survival Socio Emotional Development, Survival Socio Emotional Development,E84,"0",3,"0",1,1,268,545,287,2023-03-13,,40,40
+612,EXNT-74574,E85-Survival Livelihood skills training,Survival Livelihood skills training,E85,"0",1,"0",1,1,268,545,287,2023-03-13,,40,40
+613,EXNT-76007,E89- Survival Supplies and Equipments, Survival Supplies and Equipment's,E89,"0",3,"0",1,1,268,545,287,2023-03-13,,40,40
+614,EXNT-85257,E410 - HIV/AIDS ARV Support,HIV/AIDS ARV Support,E410,"0",5,"0",1,1,260,575,29,2020-11-03,,5,5
+615,EXNT-43565,E415 - HIV/AIDS Caregivers and siblings,HIV/AIDS Caregivers and siblings,E415,"0",5,"0",1,1,261,576,29,2020-11-03,,5,5
+616,EXNT-35768,E425 - HIV/AIDS Education,HIV/AIDS Education,E425,"0",5,"0",1,1,282,580,29,2020-11-03,,5,5
+617,EXNT-58201,E510 - Parents Contribution,Parents Contribution,E510,"0",5,"0","0",1,282,581,29,2020-11-03,,5,5
+618,EXNT-72543,E340 IGA Grants,IGA Grants,E340 ,"0",5,"0",1,"0",266,10801,287,2021-02-04,,39,39
+619,EXNT-32824,E335 - Disaster Relief Grant,Disaster Relief Grant,E335,"0",5,"0",1,"0",265,9083952,287,2022-11-10,,39,39
+620,EXNT-55500,E345- Infrastructure Grants Expenses,E345-Infrastructure Grants Expenses,E345,"0",5,"0",1,"0",267,10802,285,2022-11-10,,1,1
+621,EXNT-59068,E6202-Youth Capacity Training,E6202-Youth Capacity Training,E6202,"0",1,"0",1,1,259,9643,287,2021-02-03,,40,40
+622,EXNT-8348,E01 - Child Protection,Child Protection Interventions,E01,"0",3,"0",1,1,1,348,287,2024-10-20,,39,39
+623,EXNT-38113,R365-Health (HH),R365 Health (HH),R365,"0",9,"0","0",1,225,32596052,3668,2024-11-13,,7073,7073
+624,EXNT-77485,E345-Infrastructure Grants,E345-Infrastructure Grants,E345,"0",9,"0",1,1,220,30515461,3668,2024-11-13,,7073,7073
+625,EXNT-80873,E51140- Disaster Resilience ,E51140- Disaster Resilience ,E51140,"0",9,"0",1,1,285,38871511,3668,2024-11-27,,7073,7073
+626,EXNT-79351,E320 - Medical Refund and Grant Expenses,E320 - Medical Refund and Grant Expenses,E320,"0",4,1,1,"0",219,30515418,3668,2025-01-22,,6999,6999
+627,EXNT-72363,GH-E270 Survival Lunch,Survival Lunch,GHE270,"0",8,"0",1,"0",213,28634472,3672,2025-01-31,,4982,4982
+628,EXNT-10052,E1004- Survival - Existing ,E1004- Survival - Existing ,E1004,1,4,"0","0",1,286,42692349,285,2025-02-10,,2801,2801
+629,EXNT-60918,E2022-Parental Education - PED ,Parent Education-PED,E2022,"0",1,"0",1,"0",284,36554570,285,2025-02-11,,4008,4008
+630,EXNT-6379,E515 - CDC IGA,E515 - CDC IGA,E515,"0",7,"0",1,1,280,36548161,285,2025-02-11,,4008,4008
+631,EXNT-61925,E510 - Parents Contribution,E510 - Parents Contribution,E510,"0",7,"0",1,1,279,36546990,285,2025-02-11,,4008,4008
+632,EXNT-11121,E3037 New FCP Expansion - CPL,E3037 New FCP Expansion - CPL,E3037,"0",9,"0",1,1,278,36546635,285,2025-02-11,,4008,4008
+633,EXNT-19455,E2003 Disaster - DAP,E2003 Disaster - DAP,E2003,"0",8,1,1,"0",277,36546577,285,2025-02-11,,4008,4008
+634,EXNT-67386,E3036 New FCP Expansion - Child Survival Launch,E3036 New FCP Expansion - Child Survival Launch,E3036,"0",9,"0",1,1,269,36535774,285,2025-02-11,,4008,4008
+635,EXNT-25275,E2011 Health & Nutrition - MIV,E2011 Health & Nutrition - MIV,E2011,"0",9,"0",1,"0",283,36552548,5674,2025-02-12,,11165,11165
+636,EXNT-56283,R520 - Local Donations And Church Contributions,R520 - Local Donations And Church Contributions,R520,"0",7,"0",1,1,281,36548321,5674,2025-02-12,,11165,11165
+637,EXNT-30775,E3007 Ongoing Medical - MED TFI,E3007 Ongoing Medical - MED TFI,E3007,"0",8,1,1,"0",276,36545358,5674,2025-02-12,,11165,11165
+638,EXNT-57265,E80-Survival Medical and health Screening,Survival Medical and health Screening,E80,"0",4,"0",1,1,286,545,287,2023-03-13,,40,40
+639,EXNT-74258,E81 - Survival Training on Gobi-FFF,Survival Training on Gobi-FFF,E81,"0",4,"0",1,1,286,545,287,2023-03-13,,40,40
+640,EXNT-45560,E82- Survival food supplement,Survival food supplement,E82,"0",4,"0",1,1,286,545,287,2023-03-13,,40,40
+641,EXNT-64564,E83- Survival spiritual development,Survival spiritual development,E83,"0",2,"0",1,1,286,545,287,2023-03-13,,40,40
+642,EXNT-29739,E84 Survival Socio Emotional Development, Survival Socio Emotional Development,E84,"0",3,"0",1,1,286,545,287,2023-03-13,,40,40
+643,EXNT-74574,E85-Survival Livelihood skills training,Survival Livelihood skills training,E85,"0",1,"0",1,1,286,545,287,2023-03-13,,40,40
+644,EXNT-76007,E89- Survival Supplies and Equipments, Survival Supplies and Equipment's,E89,"0",3,"0",1,1,286,545,287,2023-03-13,,40,40
+645,EXNT-78263,E6201-Home Visit,E6201-Home Visit,E6201,"0",3,"0",1,1,259,36492218,5674,2025-02-12,,11165,11165
+646,EXNT-16981,E6203-Parents meeting,E6203-Parents meeting,E6203,"0",3,"0",1,1,259,36492218,5674,2025-02-12,,11165,11165
+647,EXNT-80054,E6204-Group Activity,E6204-Group Activity,E6204,"0",3,"0",1,1,259,36492218,5674,2025-02-12,,11165,11165
+648,EXNT-62725,E6205-Salary and Staff Cost,E6205-Salary and Staff Cost,E6205,1,5,"0",1,1,259,36492218,5674,2025-02-12,,11165,11165
+649,EXNT-31509,E6206-Administration Cost,E6206-Administration Cost,E6206,1,5,"0",1,1,259,36492218,5674,2025-02-12,,11165,11165
+650,EXNT-56791,E6207-Community Awareness,E6207-Community Awareness,E6207,"0",3,"0",1,1,259,36492218,5674,2025-02-12,,11165,11165
+651,EXNT-3621,E6208-Food Supply,E6208-Food Supply,E6208,"0",4,"0",1,1,259,36492218,5674,2025-02-12,,11165,11165
+652,EXNT-79517,E6209-Health Screening,E6209-Health Screening,E6209,"0",4,"0",1,1,259,36492218,5674,2025-02-12,,11165,11165
+654,EXNT-45226,"E1004 - Salaries & Operation [Transport, Administration, Safety]","Salaries & Operation [Transport, Administration, Safety]",E1004E,1,5,"0",1,1,286,42692349,5674,2025-02-12,,11165,11165
+655,EXNT-43158,E49164 Solar Power Installation,INT49164Solar Power Installation,E49164,"0",9,"0",1,1,287,43027465,3668,2025-02-27,,7073,7073
+656,EXNT-86649,E320 - Medical Refund and Grant Expenses,E320 - Medical Refund and Grant Expenses,E320,"0",8,1,1,1,289,43031532,3668,2025-02-27,,7073,7073
+657,EXNT-34235,E410-HIV/AIDS ARV Support,E410-HIV/AIDS ARV Support,E410,"0",8,1,1,1,290,43032330,3668,2025-02-27,,7073,7073
+658,EXNT-70786,E415-HIV/AIDs Caregivers and Siblings,E415-HIV/AIDs Caregivers and Siblings,E415,"0",8,1,1,1,290,43032330,3668,2025-02-27,,7073,7073
+659,EXNT-88765,TGE510-Infrastructure (IFP) Expenses ,Payment for Infrastructure (Project) intervention,TGE510,"0",3,"0",1,"0",292,43345076,6103,2025-03-11,,1,1
+660,EXNT-27920,TGE525-Water and Sanitation (WASH) Expenses,Payment for Washing of Hands and Sanitation intervention,TGE525,"0",9,"0",1,"0",297,43345081,6103,2025-03-11,,1,1
+661,EXNT-40559,TGE310-Beneficiary and Family gifts Expenses,Payment for Beneficiary and Family Gifts,TGE310,"0",6,"0",1,"0",300,43345084,6103,2025-03-11,,1,1
+662,EXNT-53847,TGE420-HVC–CDI Expenses ,Payment for HVC-CDI activities,TGE420,1,8,1,1,"0",291,43345075,6103,2025-03-11,,1,1
+663,EXNT-63910,TGE440-Education Ongoing Expenses,Payment for Edu. ongoing,TGE440,"0",8,"0",1,"0",296,43345080,6103,2025-03-11,,1,1
+664,EXNT-59303,TGE330-Christmas gifts Expenses ,Payment for Christmas Gifts,TGE330,"0",6,"0",1,"0",299,43345083,6103,2025-03-11,,1,1
+665,EXNT-86762,TGE101-Tuition and school fees Expenses,Payment of tuition and school fees for participants,TGE101,"0",1,"0",1,1,303,43345087,6103,2025-03-11,,1,1
+666,EXNT-88413,TGE520-Health (HH) Expenses,Payment for Hole Heart intervention,TGE520,"0",9,1,1,"0",293,43345077,6103,2025-03-11,,1,1
+667,EXNT-65462,TGE410-Disaster ongoing Expenses,Payment for disaster activities FCP,TGE410,"0",8,1,1,1,295,43345079,6103,2025-03-11,,1,1
+668,EXNT-88576,TGE320-Project gifts Expenses,Payment for Project Gifts,TGE320,"0",6,"0",1,"0",294,43345078,6103,2025-03-11,,1,1
+669,EXNT-80990,TGE495-Tours and Visits Expenses,Payment for Tours and Visits activities,TGE495,"0",3,"0",1,"0",298,43345082,6103,2025-03-11,,1,1
+670,EXNT-54943,TGE460-HIV MED ongoing Expenses,Payment for HIV MED (Participants),TGE460,1,4,1,1,1,308,43345092,6103,2025-03-11,,1,1
+671,EXNT-57137,TGE201-Teaching and Learning Materials Vocational/Technical Training and Materials Expenses,Payment for teaching and learning materials for MCU. Payment for Vocational/Technical Training and M,TGE201,"0",1,"0",1,1,305,43345089,6103,2025-03-11,,1,1
+672,EXNT-37038,TGE470-Medical Therapeutic Feeding Intervention (MED TFI) Expenses,Payment for MED TFI ,TGE470,"0",4,1,1,1,309,43345093,6103,2025-03-11,,1,1
+673,EXNT-83006,TGE490-Sponsorship Lunch Expenses,Payment for Sponsorship Lunch,TGE490,"0",5,"0",1,"0",310,43345094,6103,2025-03-11,,1,1
+674,EXNT-38286,TGE450-HIV Caregiver & Siblings (CGS) Expenses,Payment for HIV CGS (Caregiver & Siblings),TGE450,"0",8,"0",1,"0",304,43345088,6103,2025-03-11,,1,1
+675,EXNT-84669,TGE430 HVC Child Protection (CPR) Expenses,Payment for HVC-CPR activities (Feeding),TGE430,"0",8,1,1,"0",302,43345086,6103,2025-03-11,,1,1
+676,EXNT-68826,TGE130-Collation officer Expenses,Payment for collation officers’ salary and other benefits,TGE130,1,5,"0",1,"0",301,43345085,6103,2025-03-11,,1,1
+677,EXNT-52538,TGE140-Youth Coordinator Expenses,Payment for youth coordinators salary and other benefits,TGE140,1,5,"0",1,"0",301,43345085,6103,2025-03-11,,1,1
+678,EXNT-59946,"TGE150-Cluster events, Sports Expenses","Payment for cluster events (sports, other activities)",TGE150,"0",4,"0",1,"0",301,43345085,6103,2025-03-11,,1,1
+679,EXNT-6840,TGE480-Medical ongoing Expenses,Payment for Health Ongoing (Reimbursement),TGE480,"0",4,1,1,"0",306,43345090,6103,2025-03-11,,1,1
+680,EXNT-9088,TGE565-Disaster Relief (DRF) Expenses,Payment for Disaster Intervention,TGE565,"0",4,"0",1,"0",311,43345114,6103,2025-03-11,,1,1
+681,EXNT-46896,TGE515-Education (EDU) Expenses,Payment for Education – Tertiary intervention - Support,TGE515,"0",1,"0",1,"0",307,43345091,6103,2025-03-11,,1,1
+682,EXNT-21055,TGE102-Teaching and Learning Materials (LMT) Expenses,Payment for teaching and learning materials for the centre,TGE102,"0",1,"0",1,1,303,43345087,6103,2025-03-12,,1,1
+683,EXNT-81403,TGE103-Uniforms and Clothing Expenses,Payment for uniforms and clothing for participants,TGE103,"0",3,"0",1,1,303,43345087,6103,2025-03-12,,1,1
+684,EXNT-83058,"TGE104-Vocational /Technical Training and Materials, School supplies",Payment for Vocational/Technical and training materials. Payment for school supplies for participant,TGE104,"0",1,"0",1,1,303,43345087,6103,2025-03-12,,1,1
+685,EXNT-61113,TGE105-Health Prevention and Medical Expenses,Payment for health prevention activities and medical treatment for participants,TGE105,"0",4,"0",1,1,303,43345087,6103,2025-03-12,,1,1
+686,EXNT-4590,TGEE106-Hygiene Supplies and Sanitation Expenses,Payment for hygiene supplies and sanitation activities,TGEE106,"0",4,"0",1,1,303,43345087,6103,2025-03-12,,1,1
+687,EXNT-27940,"TGE107-Caregiver Engagement (Health, Socio-emotional, cognitive, spiritual) Domestic Assistance","Payment for activities for caregiver engagement -health, socio-emotional, cognitive and spiritual",TGE107,"0",3,"0",1,1,303,43345087,6103,2025-03-12,,1,1
+688,EXNT-3632,TGE108-Food Expenses,Payment for food for participants,TGE108,"0",4,"0",1,1,303,43345087,6103,2025-03-12,,1,1
+689,EXNT-43251,"TGE109-Cooking Equipment, Utensils and Fuel Expenses","Payment for cooking equipment, utensils, and fuel",TGE109,"0",4,"0",1,1,303,43345087,6103,2025-03-12,,1,1
+690,EXNT-4466,"TGE110-Sports Equipment & Sports, and Social & Cluster Activities and Events Expenses",Payment for sports equipment and clothing. Payment for sports and social & cluster activities.,TGE110,"0",3,"0",1,1,303,43345087,6103,2025-03-12,,1,1
+691,EXNT-5763,TGE111-Service & Extracurricular Activities Expenses,Payment for service and extracurricular activities,TGE111,"0",3,"0",1,1,303,43345087,6103,2025-03-12,,1,1
+692,EXNT-59756,"TGE112-Mental Health and Counselling, Child Protection Expenses",Payment for mental health and counselling services. Payment for child protection activities,TGE112,"0",4,"0",1,1,303,43345087,6103,2025-03-12,,1,1
+693,EXNT-38994,TGE113-Leadership and Youth Development. Cluster Youth Coordinator benefits and related activities Expenses,Payment for leadership and youth development activities. Payment for Youth Coordinator and other exp,TGE113,"0",3,"0",1,1,303,43345087,6103,2025-03-12,,1,1
+694,EXNT-78947,"TGE114- T&T for programming (Cognitive, socio-emotional, spiritual, and physical) Expenses","Payment for T&T for programming (cognitive, socio-emotional, spiritual, and physical)",TGE114,1,5,"0",1,1,303,43345087,6103,2025-03-12,,1,1
+695,EXNT-67588,"TGE115-Spiritual Development Materials, Spiritual Camps, Events and Programs Expenses","Payment for Spiritual development materials, Spiritual Camps and Events and Programs",TGE115,"0",2,"0",1,"0",303,43345087,6103,2025-03-12,,1,1
+696,EXNT-3989,TGE116-Sponsor Visits Expenses,Payment for sponsor visits,TGE116,"0",3,"0",1,1,303,43345087,6103,2025-03-12,,1,1
+697,EXNT-64675,TGE117-T&T Associated with SDR Expenses,Payment for T&T related to sponsor donor activities. Payment for Collation Officer and other benefit,TGE117,1,5,"0",1,1,303,43345087,6103,2025-03-12,,1,1
+698,EXNT-59123,TGE118-Staff Salaries and Other Benefits Expenses,Payment of staff salaries and other benefits,TGE118,1,5,"0",1,1,303,43345087,6103,2025-03-12,,1,1
+699,EXNT-26781,"TGE119-Staff Learning & Development, Partner Training and Development Expenses",Payment for staff learning and development. Payment for partner training and development,TGE119,1,5,"0",1,1,303,43345087,6103,2025-03-12,,1,1
+700,EXNT-70081,TGE120-Office Supplies Expenses,Payment for office supplies,TGE120,1,5,"0",1,1,303,43345087,6103,2025-03-12,,1,1
+701,EXNT-16606,"TGE121-Utilities, Administrative Charges, Telecommunications, T&T for Pastor & CPC  and Appreciation Expenses","Payment for utilities, administrative charges, and telecommunications",TGE121,1,5,"0",1,1,303,43345087,6103,2025-03-12,,1,1
+702,EXNT-7159,TGE122-Furniture and Office Equipment Expenses,Payment for furniture and office equipment,TGE122,1,3,"0",1,1,303,43345087,6103,2025-03-12,,1,1
+703,EXNT-9548,"TGE123-Maintenance and Repair, Project Safety and Security Expenses",Payment for maintenance and repair. Payment for project safety and security,TGE123,1,5,"0",1,1,303,43345087,6103,2025-03-12,,1,1
+704,EXNT-26427,"TGE124-Travel and Transportation, Lodging and meals Expenses",Payment for travel and transport. Payment for lodging. Payment for meals,TGE124,1,5,"0",1,1,303,43345087,6103,2025-03-12,,1,1
+705,EXNT-26802,TGE202-Survival Implementer Salary and Benefits Expenses,Payment for Survival Implementer Salary and other Benefits.,TGE202,1,5,"0",1,1,305,43345089,6103,2025-03-12,,1,1
+706,EXNT-15052,TGE203-Clothing Expenses,Payment for Clothing,TGE203,"0",3,"0",1,1,305,43345089,6103,2025-03-12,,1,1
+707,EXNT-57825,TGE204-Medical Bills Expenses,Payment for medical bills for MCU,TGE204,"0",4,"0",1,1,305,43345089,6103,2025-03-12,,1,1
+708,EXNT-59259,TGE205-Supplementary Food Expenses,Payment for supplementary food for MCU,TGE205,"0",4,"0",1,1,305,43345089,6103,2025-03-12,,1,1
+709,EXNT-77121,TGE206-Sanitation and Hygiene items Expenses,Payment for sanitation and hygiene items for MCU,TGE206,"0",4,"0",1,1,305,43345089,6103,2025-03-12,,1,1
+710,EXNT-55272,TGE530-Income Generation Activities (IGA) Expenses,Income Generation Activities (IGA) Expenses,TGE530,"0",3,"0",1,"0",313,43345282,6103,2025-03-12,,1,1
+711,EXNT-43642,TGE640-Interest From Banks Expenses,Interest From Banks Expenses,TGE640,"0",3,"0",1,"0",324,43345293,6103,2025-03-12,,1,1
+712,EXNT-86061,TGE630-Income Generation Activities (IGA) Expenses,Income Generation Activities (IGA) Expenses,TGE630,"0",3,"0",1,"0",323,43345292,6103,2025-03-12,,1,1
+713,EXNT-68894,TGE620-Church Contribution Expenses,Church Contribution Expenses,TGE620,"0",3,"0",1,1,322,43345291,6103,2025-03-12,,1,1
+714,EXNT-73064,TGE610-Local Contribution Expenses,Local Contribution Expenses,TGE610,"0",3,"0",1,1,321,43345290,6103,2025-03-12,,1,1
+715,EXNT-81840,TGE560-Survival Launch Expenses,Survival Launch Expenses,TGE560,"0",3,"0",1,"0",319,43345288,6103,2025-03-12,,1,1
+716,EXNT-84879,TGE555-Major Medical (MAJOR MED) Expenses,Major Medical (MAJOR MED) Expenses,TGE555,"0",4,"0",1,"0",318,43345287,6103,2025-03-12,,1,1
+717,EXNT-39867,TGE550-Parental Education (PED) Expenses,Parental Education (PED) Expenses,TGE550,"0",3,"0",1,"0",317,43345286,6103,2025-03-12,,1,1
+718,EXNT-50252,TGE545-Non-Formal Education (NFE) Expenses,Non-Formal Education (NFE) Expenses,TGE545,"0",1,"0",1,"0",316,43345285,6103,2025-03-12,,1,1
+719,EXNT-86474,TGE540-MIV Expenses,MIV Expenses,TGE540,"0",4,"0",1,"0",315,43345284,6103,2025-03-12,,1,1
+720,EXNT-59876,TGE535-Learning Materials (LMT) Expenses,Learning Materials (LMT) Expenses,TGE535,"0",1,"0",1,"0",314,43345283,6103,2025-03-12,,1,1

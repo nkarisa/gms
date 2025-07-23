@@ -1,0 +1,4 @@
+﻿language_id,language_track_number,language_name,language_code,language_is_default,language_created_date,language_last_modified_date,language_deleted_at,language_created_by,language_last_modified_by,fk_approval_id,fk_status_id
+1,LAGE-42234,English,en,1,2020-08-20,2020-08-20 12:01:49,,1,1,10,"0"
+2,LAGE-71217,French,fr,"0",2024-07-05,2024-07-05 07:54:57,,4880,4880,32871388,1566
+3,LAGE-75112,Khmer,km,"0",2024-09-25,2024-09-25 12:33:05,,4008,4008,35711362,1566
