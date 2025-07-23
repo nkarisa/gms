@@ -40,6 +40,7 @@ if(!function_exists('csvToJson')){
         }
     
         $jsonData = [];
+        $rowCount = 0;
         while ($row = fgetcsv($csvFile)) {
             if ($row !== false) {
                 $rowData = [];
@@ -53,6 +54,7 @@ if(!function_exists('csvToJson')){
                 }
                 $jsonData[] = $rowData;
             }
+            $rowCount++;
         }
     
         fclose($csvFile);

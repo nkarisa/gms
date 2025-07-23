@@ -1,6 +1,0 @@
-﻿funding_stream_id,funding_stream_name,funding_stream_track_number,funding_stream_code,funding_stream_created_date,funding_stream_created_by,funding_stream_last_modified_by,funding_stream_last_modified_date,fk_status_id,fk_approval_id
-1,Support Stream,FUAM-64118,support,2022-12-08,1,1,2022-12-08 01:55:49,2749,9736076
-2,Gift Stream,FUAM-87945,gift,2022-12-08,1,1,2022-12-08 01:56:18,2749,9736077
-3,Individual Intervention Stream,FUAM-33434,individual,2022-12-08,1,1,2022-12-08 01:56:45,2749,9736078
-4,Ongoing Intervention Stream,FUAM-6034,ongoing,2022-12-08,1,1,2022-12-08 01:57:11,2749,9736079
-5,Local Resource Mobilisation Stream,FUAM-16320,local,2022-12-08,1,1,2022-12-08 01:57:38,2749,9736080

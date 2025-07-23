@@ -1,3 +1,0 @@
-﻿context_region_id,context_region_track_number,context_region_name,context_region_description,fk_office_id,fk_context_definition_id,fk_context_global_id,context_region_created_date,context_region_created_by,context_region_last_modified_date,context_region_last_modified_by,fk_approval_id,fk_status_id
-1,COON-67908,Context for office Africa Region Office,Context for office Africa Region Office,2,5,1,2020-08-21,1,"0000-00-00 00:00:00",1,288,19
-2,COON-31584,Context for office Asia Region,Context for office Asia Region,2978,5,1,2024-09-25,4008,"0000-00-00 00:00:00",,35712331,1789

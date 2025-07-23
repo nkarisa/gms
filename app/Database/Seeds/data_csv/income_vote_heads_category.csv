@@ -1,6 +1,0 @@
-﻿income_vote_heads_category_id,income_vote_heads_category_track_number,income_vote_heads_category_name,income_vote_heads_category_description,fk_funding_stream_id,income_vote_heads_category_is_active,income_vote_heads_category_created_date,income_vote_heads_category_created_by,income_vote_heads_category_last_modified_date,income_vote_heads_category_last_modified_by,fk_approval_id,fk_status_id
-1,INRY-16664,Support funds,Support funds,1,1,2022-12-08,1,2022-12-08 01:58:41,1,9736081,2797
-2,INRY-47151,Gift Funds,Gift Funds,2,1,2022-12-08,1,2022-12-08 01:59:10,1,9736084,2797
-3,INRY-12866,Non Compassion Funds,Non Compassion Funds,5,1,2022-12-08,1,2022-12-08 01:59:39,1,9736085,2797
-4,INRY-51973,Ongoing Interventions,Ongoing Interventions,4,1,2022-12-08,1,2022-12-08 02:00:13,1,9736086,2797
-5,INRY-17139,Individual Interventions,Individual Interventions,3,1,2022-12-08,1,2022-12-08 02:00:41,1,9736087,2797

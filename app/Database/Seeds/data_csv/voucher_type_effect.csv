@@ -1,8 +1,0 @@
-﻿voucher_type_effect_id,voucher_type_effect_track_number,voucher_type_effect_name,voucher_type_effect_code,voucher_type_effect_created_date,voucher_type_effect_created_by,voucher_type_effect_last_modified_by,voucher_type_effect_last_modified_date,fk_approval_id,fk_status_id
-1,VOCT-75305,Income,income,2020-08-20,1,1,,17,"0"
-2,VOCT-66371,Expense,expense,2020-08-20,1,1,,18,"0"
-3,VOCT-70428,Bank_contra,bank_contra,2020-08-20,1,1,,19,"0"
-4,VOCT-63159,Cash_contra,cash_contra,2020-08-20,1,1,,20,"0"
-5,VOCT-80222,Bank to Bank contra,bank_to_bank_contra,2020-12-10,1,1,,978,320
-6,VOCT-14013,"Cash to Cash contra	",cash_to_cash_contra,2020-12-10,1,1,,979,320
-7,VOCT-140131,Bank Refund,bank_refund,2024-07-31,1,1,,979,320

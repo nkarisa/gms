@@ -1,5 +1,0 @@
-﻿permission_label_id,permission_label_track_number,permission_label_name,permission_label_description,permission_label_depth,fk_approval_id,fk_status_id,permission_label_created_date,permission_label_created_by,permission_label_last_modified_date,permission_label_last_modified_by
-1,PEEL-66291,create,Label for create permissions,2,"0","0",2020-08-20,1,2020-08-19 23:01:49,1
-2,PEEL-20970,read,Label for read permissions,1,"0","0",2020-08-20,1,2020-08-19 23:01:49,1
-3,PEEL-53428,update,Label for update permissions,3,"0","0",2020-08-20,1,2020-08-19 23:01:49,1
-4,PEEL-63230,delete,Label for delete permissions,4,"0","0",2020-08-20,1,2020-08-19 23:01:49,1

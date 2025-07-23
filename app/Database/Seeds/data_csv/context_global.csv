@@ -1,2 +1,0 @@
-﻿context_global_id,context_global_track_number,context_global_name,context_global_description,fk_office_id,fk_context_definition_id,context_global_created_date,context_global_created_by,context_global_last_modified_date,context_global_last_modified_by,fk_approval_id,fk_status_id
-1,COAL-63427,Head Office Context,Head Office Context,1,6,2020-08-20,1,2020-08-20 12:01:49,1,9,"0"
