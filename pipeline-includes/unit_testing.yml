@@ -6,7 +6,7 @@ unit_tests:
 .installs:
   script:
     - apt-get update -yqq
-    - apt-get install git unzip zlib1g-dev default-mysql-client libicu-dev -yqq # Install git and unzip, often needed for composer
+    - apt-get install git unzip gettext-base zlib1g-dev default-mysql-client libicu-dev -yqq # Install git and unzip, often needed for composer
     - docker-php-ext-configure intl
     - docker-php-ext-install intl
     - docker-php-ext-install mysqli
@@ -21,7 +21,8 @@ unit_tests:
         sleep 1
       done
     - mysql -h mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
-    - cp env .env
+    - chmod +x entrypoint.d/envsubst.sh
+    - ./entrypoint.d/envsubst.sh
 
 .unit_test:
   script:
