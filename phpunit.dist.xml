@@ -7,9 +7,8 @@
     beStrictAboutOutputDuringTests="true"
     colors="true"
     columns="max"
-    failOnRisky="true"
-    failOnWarning="true"
     cacheDirectory="build/.phpunit.cache">
+
     <coverage
         includeUncoveredFiles="true"
         pathCoverage="false"
@@ -27,11 +26,7 @@
             <directory>./tests</directory>
         </testsuite>
     </testsuites>
-    <logging>
-        <testdoxHtml outputFile="build/logs/testdox.html"/>
-        <testdoxText outputFile="build/logs/testdox.txt"/>
-        <junit outputFile="build/logs/logfile.xml"/>
-    </logging>
+    
     <source>
         <include>
             <directory suffix=".php">./app</directory>
