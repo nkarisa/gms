@@ -1,8 +1,8 @@
 variables:
-    # XDEBUG_MODE: "coverage" 
+    XDEBUG_MODE: "coverage" 
     CONTAINER_SCANNING_DISABLED: "true"
     COMPOSER_CACHE_DIR: "$CI_PROJECT_DIR/vendor"
-    # MYSQL_ROOT_PASSWORD: "$MYSQL_ROOT_PASSWORD"
+    MYSQL_ROOT_PASSWORD: "$MYSQL_ROOT_PASSWORD"
 
 # cache:
 #   key: "${CI_JOB_NAME}-build"
