@@ -10,7 +10,7 @@ cache:
   
 include:
   - "pipeline-includes/unit_testing.yml"
-  - "pipeline-includes//integration_testing.yml"
+  - "pipeline-includes/integration_testing.yml"
   - "pipeline-includes/smoke_testing.yml"
   - component: &core-yaml-tpl $CI_SERVER_FQDN/ciorg/community/cmf/pipeline/core-yaml/include@2.4
     inputs: &core-yaml-input
