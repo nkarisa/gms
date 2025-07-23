@@ -1,10 +1,13 @@
 .installs:
   script:
+    # - apt-get update -yqq
+    # - apt-get install git unzip -yqq # Install git and unzip, often needed for composer
+    # - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer # Install Composer
+    # - composer install --prefer-dist --no-ansi --no-interaction # Install project dependencies
     - apt-get update -yqq
     - apt-get install git unzip -yqq # Install git and unzip, often needed for composer
     - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer # Install Composer
-    - composer install --prefer-dist --no-ansi --no-interaction # Install project dependencies
-
+    - composer update --prefer-dist --no-ansi --no-interaction 
 
 .unit_test:
   script:
