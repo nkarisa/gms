@@ -1,0 +1,32 @@
+﻿role_group_id,role_group_name,role_group_track_number,role_group_description,role_group_is_active,fk_account_system_id,role_group_created_date,role_group_created_by,role_group_last_modified_date,role_group_last_modified_by,fk_status_id,fk_approval_id
+1,"FCP Budgeting, Vouching and Reporting",ROUP-37672,"This allows FCP users to create budget items, raise vouchers and reconcile and submit the monthly financial report",1,1,2020-12-21,1,2020-12-21 08:41:00,1,236,1002
+2,FCP Administrator,ROUP-70989,"This allows an FCP user to create a budget record, reverse voucher, edit journal and create a cheque book",1,1,2020-12-21,1,2020-12-21 08:42:04,1,236,1003
+3,Country Admin Role Group,ROUP-5057,"Update Income and expenses accounts, Update Funder, Update Project and Project Allocation, Update Project income account, Update Voucher type, Update Bank and Office Bank, Read Cheque book, Read Journal, Read Financial Report, Update office, Update User, Read Budget, Read Budget Item, Update Role, Update Role group, Update Role Group Association, Update permission template, Update Office Cash, Read System Opening Balances, Read Approval flow, Update Budget Tag",1,1,2020-12-21,1,2020-12-21 09:55:54,1,236,1110
+4,FCP Managers,ROUP-21471,This is a read-only role group ,1,4,2020-12-21,23,2020-12-21 10:32:46,23,242,1133
+5,Partnership Facilitators,ROUP-88764,"Can view Journals, Financial reports and Budgets. This roles allows approval of budget items.",1,5,2021-02-26,1,2021-02-26 05:03:58,1,236,20293
+6,NLT Role Group,ROUP-18768,View FCP Financial Report and Budgets,1,5,2021-03-09,1,2021-03-09 12:02:06,1,236,21115
+7,Partnership Facilitator Role Group,ROUP-4124,Partnership Facilitator Role Group,1,4,2021-09-09,100,2021-09-09 13:32:51,100,242,84131
+8,TZ Country Admin Role Group,ROUP-51695,TZ Country Admin Role Group,1,4,2021-09-09,220,2021-09-09 21:50:48,220,242,121088
+9,UG Partnership Facilitator Role Group,ROUP-38623,UG Partnership Facilitator Role Group,1,5,2021-10-09,69,2021-10-09 07:34:50,69,855,212073
+10,UG FCP Staff Role Group,ROUP-2955,UG FCP Staff Role Group,1,5,2021-10-09,69,2021-10-09 07:44:05,69,855,212095
+11,UG Child Development/ Field Officer Role Group,ROUP-54244,UG Child Development/ Field Officer Role Group,1,5,2021-10-09,69,2021-10-09 13:06:54,69,855,213025
+12,UG Project Diretor/Coordinator,ROUP-16695,UG Project Diretor/Coordinator,1,5,2021-10-10,69,2021-10-10 21:28:28,69,855,217774
+13,UG Country Administrator Role Group,ROUP-35637,UG Country Administrator Role Group,1,5,2021-10-14,69,2021-10-14 09:26:40,69,855,224754
+14,KE FCP Staff Role Group,ROUP-2702,KE FCP Staff,1,3,2021-11-03,39,2021-11-03 07:53:56,39,240,811019
+15,TZ Auditors Role Group,ROUP-11158,TZ Auditors Role Group,1,4,2022-02-10,31,2022-02-10 10:17:33,31,242,2216734
+16,MW Country Admin Role Group,ROUP-69866,MW Country Admin Role Group,1,6,2022-04-29,1,2022-04-29 09:02:21,1,236,3305052
+17,MW PF Role Group,ROUP-18968,MW PF Role Group,1,6,2022-04-29,1,2022-04-29 09:02:46,1,236,3305055
+18,MW FCP Staff Role Group,ROUP-24032,MW FCP Staff Role Group,1,6,2022-04-29,1,2022-04-29 09:03:15,1,236,3305059
+19,MW ASM Role Group,ROUP-26605,MW ASM Role Group,1,6,2022-04-29,1,2022-04-29 09:32:40,1,236,3305422
+20,KE FCP Accountant Role Group,ROUP-59891,KE FCP Accountant Role Group,1,3,2022-06-19,39,2022-06-19 18:17:56,39,240,3815320
+21,KE Health Specialist Role,ROUP-85856,KE Health Specialist Role,1,3,2022-06-19,1,2022-06-19 18:23:08,1,236,3815329
+22,KE Project Director Role Group,ROUP-16862,KE Project Director Role Group,1,3,2022-06-20,1,2022-06-20 04:09:09,1,236,3816083
+23,KE National Office Accountant Role Group,ROUP-71212,KE National Office Accountant Role Group,1,3,2022-06-20,1,2022-06-20 04:44:39,1,236,3816176
+24,TZ Project Director Role Group,ROUP-35188,TZ Project Director Role Group,1,4,2022-07-22,31,2022-07-22 07:12:16,31,242,5174491
+25,TZ Project Accountant Role Group,ROUP-20306,TZ Project Accountant Role Group,1,4,2022-07-22,31,2022-07-22 07:12:55,31,242,5174496
+26,Global Audit Team,ROUP-23475,Global Audit Team,1,1,2022-12-05,1,2022-12-05 12:51:40,1,236,9571203
+27,MW CIV Specialist Role Group,ROUP-57262,CIV Specialist Roles,1,6,2023-06-05,1598,2023-06-05 13:20:55,1598,2071,16606063
+28,MW Health Specialist Role Group,ROUP-44455,Health specialist,1,6,2023-06-05,1598,2023-06-05 17:19:56,1598,2071,16614006
+29,TZ CIVA ,ROUP-27575,TZ CIVA ,1,4,2023-09-05,31,2023-09-05 08:22:28,31,242,20786888
+30,Food Security and Livelihood Specialist,ROUP-3040,Food Security and Livelihood Specialist,1,4,2023-09-05,31,2023-09-05 08:37:33,31,242,20788676
+31,RW Accountant Roles,ROUP-66154,RW Accountant Roles,1,1,2024-08-02,1,2024-08-02 11:26:39,1,236,34129174

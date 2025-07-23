@@ -1,0 +1,11 @@
+﻿country_currency_id,country_currency_name,country_currency_track_number,country_currency_code,fk_account_system_id,country_currency_created_by,country_currency_created_date,country_currency_last_modified_by,country_currency_last_modified_date,fk_approval_id,fk_status_id
+1,USD,COCY-69810,USD,1,1,2020-08-20,1,2020-08-20 12:01:49,33,"0"
+2,Tanzania Shillings,COCY-2535,Tsh,4,1,2020-08-21,1,2020-08-21 07:27:16,286,22
+3,Kenya Shillings,COCY-24449,KES,3,1,2020-08-21,1,2020-08-21 08:34:48,302,22
+4,Uganda Shilling,COCY-70010,UGx,5,1,2021-02-25,1,2021-02-25 13:56:32,20131,694
+5,Malawian Kwacha,COCY-75055,MWK,6,1,2022-04-29,1,2022-04-29 09:45:27,3305553,694
+9,Ghana Cedis,COCY-75065,GHS,10,1,2022-04-29,1,2022-04-29 09:45:27,3305553,694
+11,Zambian Kwacha,COCY-75065987,ZMW,9,1,2024-01-29,1,2024-01-29 09:45:27,3305553,694
+14,Rwandan Francs,COCY-75065987,RWF,12,1,2024-06-19,1,2024-06-19 10:14:38,3305553,694
+15,Cambodian Riel,COCY-57516,KHR,14,4008,2024-09-25,4008,2024-09-25 11:11:11,35707670,694
+16,West African CFA Franc,COCY-23177,XOF,15,1,2025-03-16,1,2025-03-16 20:11:33,43344710,694

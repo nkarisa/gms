@@ -1,0 +1,14 @@
+﻿funding_status_id,funding_status_track_number,funding_status_name,funding_status_is_active,fk_account_system_id,funding_status_created_date,funding_status_created_by,funding_status_last_modified_by,funding_status_last_modified_date,funding_status_is_available,fk_approval_id,fk_status_id
+1,FUUS-47846,Fully Funded,1,3,2020-08-21,3,3,,1,357,32
+2,FUUS-25835,Fully Funded,1,4,2020-08-25,4,4,,1,365,32
+3,FUUS-49100,Fully Funded,1,5,2021-02-25,1,1,,1,20125,"0"
+4,FUUS-72118,Fully Funded,1,6,2022-04-29,1,1,,1,3304994,1821
+5,FUUS-25861,Fully Funded,1,7,2022-07-26,1,1,,1,5328313,1821
+6,FUUS-51185,Fully Funded,1,8,2022-07-26,1,1,,1,5329646,1821
+7,FUUS-18807,Fully Funded,1,9,2023-07-18,2801,,,1,19589574,1821
+8,FUUS-43194,Fully Funded,1,10,2023-07-21,1,,,1,19696527,1821
+9,FUUS-29425,Fully Funded,1,11,2024-06-19,4008,,,1,31903038,1821
+10,FUUS-294250,Fully Funded,1,12,2024-06-19,1,,,1,31903038,1821
+11,FUUS-77372,Fully Funded,1,13,2024-09-25,4008,,,1,35707545,1821
+12,FUUS-46229,Fully Funded,1,14,2024-09-25,4008,,,1,35707581,1821
+13,FUUS-42611,Fully Funded,1,15,2025-03-16,1,,,1,43344707,1821

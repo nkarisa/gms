@@ -1,0 +1,12 @@
+﻿department_id,department_track_number,department_name,department_description,fk_context_definition_id,department_is_active,department_created_date,department_last_modified_date,department_created_by,department_last_modified_by,fk_approval_id,fk_status_id
+1,DENT-17501,Country System Administrators,Country System Administrators,4,1,2020-08-21,2020-08-21 07:33:34,1,1,292,26
+2,DENT-41885,Program Support,Program Support,4,1,2020-08-21,2020-08-21 09:13:15,1,1,326,26
+3,DENT-34874,Church Partner,Church Partner,1,1,2020-11-05,2020-11-05 12:47:24,1,1,641,26
+4,DENT-10049,Partnership,Partnership Facilitator,2,1,2021-02-26,2021-02-26 05:02:38,1,1,20292,834
+5,DENT-59870,National Leadership Team,National Leadership Team,4,1,2021-03-09,2021-03-09 12:05:37,1,1,21121,834
+6,DENT-31972,Risk Management,Risk Management,4,1,2022-02-10,2022-02-10 10:21:45,1,1,2216769,834
+7,DENT-319726,Super System Admin,Super System Admin,6,1,2022-11-07,2022-11-10 10:21:45,1,1,2216769,834
+8,DENT-74873,Regional Risk Management,Regional Risk Management,5,1,2023-01-13,2023-01-13 09:32:21,1,1,10736405,834
+9,DENT-70966,Regional Partnership Leadership,Regional Partnership Leadership,3,1,2023-05-08,2023-05-08 18:52:57,1,1,15990232,834
+10,DENT-23321,Business Administrators,Business Administrators,4,1,2023-05-16,2023-05-16 13:04:32,2801,2801,16157727,834
+11,DENT-4049,Finance ,Finance,4,1,2024-02-09,2024-02-09 11:25:40,2801,2801,28290899,834

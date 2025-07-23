@@ -1,0 +1,10 @@
+﻿funder_id,funder_track_number,funder_name,funder_description,fk_account_system_id,funder_created_date,funder_last_modified_date,funder_created_by,funder_last_modified_by,funder_deleted_at,fk_approval_id,fk_status_id
+1,FUER-42346,Compassion International - Kenya,Compassion International - Kenya,3,2020-08-21,,3,3,,354,31
+2,FUER-75334,Compassion International - Tanzania,Compassion International - Tanzania,4,2020-08-25,,4,4,,364,31
+5,FUER-13844,Compassion International - Uganda,Compassion International - Uganda,5,2021-03-09,,66,66,,21202,899
+7,FUER-14758,Compassion International - Malawi,Compassion International - Malawi,6,2022-05-12,,1,1,,3465069,463
+8,FUER-5968,Compassion International - Ghana,Compassion International - Ghana,10,2023-08-15,,1,1,,20428534,463
+9,FUER-81527,Compassion International - Zambia,Compassion International - Zambia,9,2024-01-29,,2801,2801,,27845169,463
+10,FUER-68368,Compassion International - Rwanda,Compassion International - Rwanda,12,2024-07-22,,1,1,,33714290,463
+11,FUER-35589,Compassion International - Cambodia,Compassion International - Cambodia,14,2024-10-05,,2801,2801,,36558350,463
+12,FUER-75482,Compassion International -Togo,Compassion International -Togo,15,2025-03-16,,1,1,,43344709,463

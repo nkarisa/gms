@@ -27,11 +27,12 @@ unit_tests:
       done
     - mysql -h mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
     - echo "Importing database schema from database_schema.sql into $MYSQL_DATABASE..."
-    - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" < app/Database/schema.sql
+    - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" < app/Database/Sql/schema.sql
     - echo "Database schema imported successfully."
     - mysql -h mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "USE $MYSQL_DATABASE TABLES;"
     - mysql -h mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "SELECT COUNT(*) AS total_tables FROM information_schema.TABLES WHERE TABLE_SCHEMA = '$MYSQL_DATABASE' AND TABLE_TYPE = 'BASE TABLE';"
-
+    - php spark db:seed SetUpSeeder
+    
 .unit_test:
   script:
     - !reference [.installs, script]

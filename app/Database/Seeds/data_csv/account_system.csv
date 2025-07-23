@@ -1,0 +1,14 @@
+﻿account_system_id,account_system_track_number,account_system_name,account_system_code,account_system_is_allocation_linked_to_account,account_system_is_active,account_system_created_date,account_system_created_by,account_system_last_modified_by,account_system_last_modified_date,fk_approval_id,fk_status_id
+1,ACEM-14749,Global Account System,global,"0",1,2020-08-20,1,1,,1,"0"
+2,ACEM-70881,Africa Region Accounting system,africa,1,1,2020-08-21,1,1,,285,1
+3,ACEM-63241,Kenya Accounting System,KE,1,1,2020-08-21,1,1,,300,1
+4,ACEM-74580,Tanzania Accounting System,TZ,1,1,2020-08-21,1,1,,301,1
+5,ACEM-66078,Uganda Accounting System,UG,"0",1,2021-02-25,1,1,,20124,669
+6,ACEM-74090,Malawi Accounting System,MW,"0",1,2022-04-29,1,1,,3304993,669
+9,ACEM-46862,Zambia Accounting System,zm,"0",1,2023-07-18,2801,2801,,19589573,669
+10,ACEM-84287,Ghana Account System,gh,"0",1,2023-07-21,1,1,,19696526,669
+11,ACEM-11535,Rwanda Accounting System-OLD,rw-old,"0","0",2024-06-19,4008,4008,,31903037,669
+12,ACEM-1153545,Rwanda Accounting System,RW,"0",1,2024-06-20,1,1,2024-06-20,31903037,669
+13,ACEM-50680,ASIA Region Accounting system,asia,,1,2024-09-25,4008,4008,,35707544,669
+14,ACEM-43569,Cambodia Accounting System,KH,,1,2024-09-25,4008,4008,,35707580,669
+15,ACEM-44165,Togo Accounting System,tg,,1,2025-03-16,1,1,,43344706,669

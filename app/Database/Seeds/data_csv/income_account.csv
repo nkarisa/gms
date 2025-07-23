@@ -1,0 +1,275 @@
+﻿income_account_id,income_account_track_number,income_account_name,income_account_description,income_account_code,income_account_reconciliation_is_required,income_account_is_active,fk_income_vote_heads_category_id,income_account_is_budgeted,income_account_is_donor_funded,fk_account_system_id,income_account_created_date,income_account_last_modified_date,income_account_created_by,income_account_last_modified_by,fk_approval_id,fk_status_id
+1,INNT-59040,R100 - Child Support ,Child Support ,R100,,1,1,1,"0",3,2020-08-21,,3,3,348,34
+2,INNT-9723,R200 - Gifts,Gifts,R200,,1,1,"0","0",3,2020-08-21,,3,3,350,34
+3,INNT-71290,R010 - Child Support Funds,Support Fund Income,R010,,1,1,1,"0",4,2020-09-01,,4,4,447,34
+4,INNT-63752,R330 - HVC,Highly Vulnerable Children,R330,,1,1,"0","0",3,2020-11-03,,5,5,544,34
+5,INNT-17165,R351 - Survival Intervention,Survival Intervention,R351,,1,1,1,"0",3,2020-11-03,,5,5,545,34
+6,INNT-50930,R410 - HIV/AIDS ARV Support,HIV/AIDS ARV Support,R410,,1,1,1,"0",3,2020-11-03,,5,5,546,34
+7,INNT-16228,R415 - HIV/AIDS Caregivers and siblings (CGS),HIV/AIDS Caregivers and siblings (CGS),R415,,1,1,1,"0",3,2020-11-03,,5,5,547,34
+8,INNT-23810,R425 - HIV/AIDS Education,HIV/AIDS Education,R425,,1,1,1,"0",3,2020-11-03,,5,5,548,34
+9,INNT-53296,R510 - Parents Contribution,Parents Contribution,R510,,1,1,1,"0",3,2020-11-03,,5,5,549,34
+10,INNT-53658,R515 - CDC IGA,CDC IGA,R515,,1,1,1,"0",3,2020-11-03,,5,5,550,34
+11,INNT-64435,R520 - Local Donations and Church contributions,Local Donations and Church contributions,R520,,1,1,1,"0",3,2020-11-03,,5,5,551,34
+12,INNT-46382,R320 - Medical Refund and Grant,Medical Refund and Grant,R320,,1,1,"0","0",3,2020-11-03,,5,5,552,34
+13,INNT-58524,R352 - Survival Launch Fund,Survival Launch Fund,R352,,1,1,1,"0",3,2020-11-03,,5,5,553,34
+14,INNT-23810,R370 - Sponsorship Launch Fund,Sponsorship Launch Fund,R370,,1,1,1,"0",3,2020-11-03,,5,5,554,34
+15,INNT-41633,R360 - Inter Partner Funds Transfer,Inter Partner Funds Transfer,R360,,1,1,"0","0",3,2020-11-03,,5,5,555,34
+16,INNT-66329,R020 - Survival Support,R020 - Survival Support,R020,,1,1,1,"0",4,2020-12-09,,11,11,728,284
+18,INNT-23586,R031 - Beneficiary Gifts,R031 - Beneficiary Gifts,R031,,1,1,"0","0",4,2020-12-09,,11,11,730,284
+19,INNT-72943,R102 - Disaster - Reimbursable (DAP),R102 - Disaster-Reimbursable (DAP),R102,,1,1,"0","0",4,2020-12-09,,11,11,731,284
+20,INNT-81394,R103 - Education-Ongoing (EDU),R103 - Education-Ongoing (EDU),R103,,1,1,"0","0",4,2020-12-09,,11,11,732,284
+21,INNT-88388,R101 - HIV Ongoing Support Fund,R101 - HIV Ongoing Support Fund,R101,,1,1,1,"0",4,2020-12-09,,11,11,733,284
+22,INNT-27408,R070 - Highly Vulnerable Children (HVC),R070 - Highly Vulnerable Children (HVC),R070,,"0",1,1,1,4,2020-12-09,,11,11,734,284
+23,INNT-7833,R080 - Medical (HH),R080 - Medical (HH),R080,,"0",1,1,1,4,2020-12-09,,11,11,735,284
+24,INNT-25031,R099- Non- Compassion Funds,R099 - Non- Compassion Funds,R099,,"0",1,"0","0",4,2020-12-09,,11,11,736,284
+25,INNT-78091,R033 - Project Gifts,R033 - Project Gifts,R033,,1,1,"0","0",4,2020-12-10,,11,11,740,284
+26,INNT-46263,R104 - Highly Vulnerable Children- Child Protection (HVC-CPR),R104 - Highly Vulnerable Children- Child Protection (HVC-CPR),R104,,1,1,"0","0",4,2020-12-10,,11,11,741,284
+27,INNT-22844,R105 - Highly Vulnerable Children-Ongoing Support (HVC-CDI),R105 - Highly Vulnerable Children-Ongoing Support (HVC-CDI),R105,,1,1,1,"0",4,2020-12-10,,11,11,742,284
+28,INNT-75501,R106 - Medical Reimbursable,R106 - Medical Reimbursable,R106,,1,1,1,"0",4,2020-12-10,,11,11,743,284
+29,INNT-14540,R107 - Medical-Therapeutic Feeding Intervention (MED-TFI),R107 - Medical-Therapeutic Feeding Intervention (MED-TFI),R107,,1,1,"0","0",4,2020-12-10,,11,11,744,284
+30,INNT-66623,R201 - Income generation / Household Security (IGP),R201 - Income generation / Household Security (IGP),R201,,1,1,"0","0",4,2020-12-10,,11,11,745,284
+31,INNT-40418,R202 - Formal Education (EDU),R202 - Formal Education (EDU),R202,,1,1,"0","0",4,2020-12-10,,11,11,746,284
+32,INNT-12771,R203 - Health (HH),R203 - Health (HH),R203,,"0",1,"0","0",4,2020-12-10,,11,11,747,284
+33,INNT-51370,R204 - HIV Education (HIV-EDU),R204 - HIV Education (HIV-EDU),R204,,1,1,1,"0",4,2020-12-10,,11,11,748,284
+34,INNT-19847,R205 - Infrastructure (IFP),R205 - Infrastructure (IFP),R205,,1,1,1,"0",4,2020-12-10,,11,11,749,284
+35,INNT-17048,R206 - Learning Materials (LMT),R206 - Learning Materials (LMT),R206,,1,1,"0","0",4,2020-12-10,,11,11,750,284
+36,INNT-5790,R207 - Major Medical (MED),R207 - Major Medical (MED),R207,,1,1,"0","0",4,2020-12-10,,11,11,751,284
+37,INNT-83501,R208 - Non-formal education (NFE) ,R208 - Non-formal education (NFE) ,R208,,1,1,"0","0",4,2020-12-10,,11,11,752,284
+38,INNT-46475,R209 - Parent Education (PED),R209 - Parent Education (PED),R209,,1,1,"0","0",4,2020-12-10,,11,11,753,284
+39,INNT-23106,R210 - Vector Borne Diseases (MIV) ,R210 - Vector Borne Diseases (MIV) ,R210,,1,1,"0","0",4,2020-12-10,,11,11,754,284
+40,INNT-9665,R211 - WaSH (WTP),R211 - WaSH (WTP),R211,,1,1,"0","0",4,2020-12-10,,11,11,755,284
+41,INNT-87110,R212 - Church Planting (CPT),R212 - Church Planting (CPT),R212,,1,1,"0","0",4,2020-12-10,,11,11,756,284
+42,INNT-35945,R213 - Disaster Response (DRF),R213 - Disaster Response (DRF),R213,,1,1,1,"0",4,2020-12-10,,11,11,757,284
+43,INNT-19096,R91 - Church contribution ,R91 - Church contribution ,R91,,1,1,1,"0",4,2020-12-10,,11,11,758,284
+44,INNT-58912,R92 - Caregivers contribution ,R92 - Caregivers contribution ,R92,,1,1,1,"0",4,2020-12-10,,11,11,759,284
+45,INNT-82888,R93 - Youth accounts,R93 - Youth accounts,R93,,1,1,1,"0",4,2020-12-10,,11,11,760,284
+46,INNT-65005,R94 – Government,R94 – Government,R94,,1,1,1,"0",4,2020-12-10,,11,11,761,284
+47,INNT-14571,R95 – NGOs,R95 – NGOs,R95,,1,1,1,"0",4,2020-12-10,,11,11,762,284
+48,INNT-88989,R96 - Project generated income (Child support /CIV),R96 - Project generated income (Child support /CIV),R96,,1,1,1,"0",4,2020-12-10,,11,11,763,284
+49,INNT-73767,R970 - Others ,R970 - Others ,R970,,1,1,1,"0",4,2020-12-10,,11,11,764,284
+50,INNT-53609,R032 -  Beneficiary Christmas  Gift,R032 -  Beneficiary Christmas  Gift,R032,,1,1,"0","0",4,2020-12-10,,11,11,792,284
+51,INNT-73706,R310 - School Fees Grant,School fees grant,R310,,1,1,"0","0",3,2021-02-03,,40,40,9643,283
+52,INNT-13962,R325 - Water and Sanitation Grants,Water and Sanitation Grants,R325,,1,1,"0","0",3,2021-02-03,,40,40,9649,283
+53,INNT-29985,R315  - Environment and Conservation Grants,Environment and Conservation Grants,R315,,1,1,"0","0",3,2021-02-04,,39,39,10800,283
+54,INNT-67528,R340 - IGA Grants,IGA Grants,R340,,1,1,"0","0",3,2021-02-04,,39,39,10801,283
+55,INNT-65129,R345 - Infrastructure Grants,Infrastructure Grants,R345,,1,1,"0","0",3,2021-02-04,,39,39,10802,283
+56,INNT-53382,R350 - Short Term Missions Grants,Short Term Missions Grants,R350,,1,1,"0","0",3,2021-02-04,,39,39,10803,283
+57,INNT-18071,R365 - Health (HH),Health (HH),R365,,1,1,"0","0",3,2021-02-04,,39,39,10804,283
+58,INNT-2218,R420 - CSP HIV/AIDS Fund,CSP HIV/AIDS Fund,R420,,"0",1,"0","0",3,2021-02-04,,39,39,10805,283
+59,INNT-83514,R300 - Other Compassion Funds,Other Compassion Funds,R300,,1,1,"0","0",3,2021-02-05,,39,39,11234,283
+60,INNT-41323,R100 - Child Support,R100 -Child Support,R100,,1,1,1,"0",5,2021-03-09,,66,66,21150,891
+61,INNT-52926,R200 - Survival Intervention,R200 - Survival Intervention,R200,,1,1,1,"0",5,2021-03-09,,66,66,21161,891
+62,INNT-65577,"R300 - Beneficiary, Family, Projects, and Christmas Gifts","E300 - Beneficiary, Family, Projects, and Christmas Gifts",R300,,1,1,"0",1,5,2021-03-09,,66,66,21172,891
+63,INNT-33057,R4001 - Disaster Relief Ongoing. (Re-reimbursable),R4001 - Disaster Relief Ongoing. (Re-reimbursable),R4001,,1,1,"0","0",5,2021-03-09,,66,66,21174,891
+64,INNT-47350,R4003 - Education-Ongoing,R4003 - Education-Ongoing,R4003,,1,1,"0","0",5,2021-03-09,,66,66,21176,891
+65,INNT-43366,R4005 - HIV AIDS – Ongoing (Re-reimbursable),R4005 - HIV AIDS – Ongoing (Re-reimbursable),R4005,,1,1,"0","0",5,2021-03-09,,66,66,21178,891
+66,INNT-25496,R4007 - HVC-CPR-CDI (Highly Vulnerable Children- (Re-reimbursable),R4007 - HVC-CPR-CDI (Highly Vulnerable Children- (Re-reimbursable),R4007,,1,1,"0","0",5,2021-03-09,,66,66,21180,891
+67,INNT-37704,R4009 - Medical- Ongoing (Re-reimbursable),R4009 - Medical- Ongoing (Re-reimbursable),R4009,,1,1,"0","0",5,2021-03-09,,66,66,21182,891
+68,INNT-39547,R4011 - Income Generation/ Micro-Enterprise (IGP),R4011 - Income Generation/ Micro-Enterprise (IGP),R4011,,1,1,"0","0",5,2021-03-09,,66,66,21184,891
+69,INNT-60055,R4012 - Infrastructure (IFP),R4012 - Infrastructure (IFP),R4012,,1,1,"0","0",5,2021-03-09,,66,66,21186,891
+70,INNT-86025,"R4013 - CFT, Church Planting (CFT)","R4013 - CFT, Church Planting (CFT)",R4013,,1,1,"0","0",5,2021-03-09,,66,66,21188,891
+71,INNT-2720,R4014 - Learning Materials (LMT),R4014 - Learning Materials (LMT),R4014,,1,1,"0","0",5,2021-03-09,,66,66,21190,891
+72,INNT-85890,R4015 - Non-Formal Education (NFE),R4015 - Non-Formal Education (NFE),R4015,,1,1,"0","0",5,2021-03-09,,66,66,21192,891
+73,INNT-30654,R4016 - Parent Education (PED),R4016 - Parent Education (PED),R4016,,1,1,"0","0",5,2021-03-09,,66,66,21194,891
+74,INNT-16286,"R4017 - Water, Sanitation and Hygiene Projects (WTP)","R4017 - Water, Sanitation and Hygiene Projects (WTP)",R4017,,1,1,"0","0",5,2021-03-09,,66,66,21196,891
+75,INNT-38855,R4018 - Sponsorship Launch Funds,R4018 - Sponsorship Launch Funds,R4018,,1,1,"0","0",5,2021-03-09,,66,66,21198,891
+76,INNT-76725,R4019 - Survival Launch Funds,R4019 - Survival Launch Funds,R4019,,1,1,"0","0",5,2021-03-09,,66,66,21200,891
+77,INNT-3109,R500 - Non-Compassion Funds,R500 Non-Compassion Funds ,R500,,1,1,1,"0",5,2021-03-11,,66,66,21415,891
+78,INNT-82444,R400 - Funds from other Agents,R400 Funds from other Agents,R400,,1,1,"0","0",5,2021-03-11,,66,66,21417,891
+79,INNT-1713,R600 - FCP Generated Activities Income,R600- FCP Generated Activities Income,R600,,1,1,1,"0",5,2021-03-11,,66,66,21419,891
+80,INNT-69867,R4004 - Education – Individual (Proposal Based),R4004 - Education – Individual (Proposal Based),R4004,,1,1,"0","0",5,2021-03-26,,69,69,29301,891
+81,INNT-72197,R4010 - Major Medical- (Proposal Based) ,R4010 - Major Medical- (Proposal Based),R4010,,1,1,"0","0",5,2021-03-26,,69,69,29315,891
+82,INNT-44371,R4002 - Disaster Relief Individual. (Proposal based),R4002 - Disaster Relief Individual. (Proposal based),R4002,,1,1,"0","0",5,2021-03-29,,69,69,29730,891
+83,INNT-84544,R098 - Local Sponsorship Funds,Funds for Local sponsored Beneficiaries,R098,,1,1,1,"0",4,2020-01-01,,30,30,94338,284
+87,INNT-74791,R97 - Sponsorship Launch,R97-Sponsorship Launch,R97,,1,1,1,1,4,2021-09-10,,27,27,146320,284
+90,INNT-75111,R5000 - Refugee Assistance,R5000 - Refugee Assistance,R5000,,1,1,1,"0",5,2021-10-09,,69,69,212754,891
+91,INNT-31595,R4020 – Covid19 Funds,R4020 – Covid19 Funds,R4020,,1,1,"0","0",5,2021-10-09,,74,74,213252,891
+92,INNT-22087,IGP 185 CIV Animal husbandary,Animal husbandry,185,,1,1,1,1,5,2021-10-10,,74,74,215740,891
+96,INNT-28138,R000 – Withholding Tax/ PAYE/ Local service tax,Withholding Tax/ PAYE/ Local service tax,R000,,1,1,"0","0",5,2021-10-14,,69,69,225888,891
+97,INNT-46818,CIV Food Security,CIV Food Security for Vulnerable Beneficiries,R101,,1,1,"0","0",5,2021-10-14,,67,67,228013,891
+98,INNT-66200,IGP 181 CIV Animal husbandry,Goat rearing,IGP181,,1,1,"0","0",5,2021-10-14,,74,74,228859,891
+99,INNT-4336645,R4006 - HIV AIDS – Education,R4005 - HIV AIDS – Education,R4006,,1,1,"0","0",5,2021-03-09,,66,66,21178,891
+100,INNT-84743,Improved Sanitation Facilities for 10 beneficiaries TZ0672,The intervention is aimed to provide 10 beneficiaries an access to improved sanitation facilities.,R340,,1,1,1,"0",4,2021-11-07,,23,23,921876,284
+101,INNT-36125,R099- Non Compassion Fund ,Non Compassion ,R099,,1,1,1,"0",4,2021-11-10,,98,98,1027053,284
+102,INNT-70678,P101-AIDS Medical (HIV-MED),AIDS Medical (HIV-MED),P101,,"0",1,"0","0",4,2021-11-11,,98,98,1067772,284
+103,INNT-74873,IFR- 205 Classroom Construction at TZ0338,Classroom Construction at TZ0338,IFR 205 ,,1,1,1,"0",4,2021-11-12,,98,98,1101641,284
+104,INNT-62846,R315 - Environmental & Conservation,R315 - Environmental & Conservation,R315,,1,1,"0",1,4,2021-11-13,,24,24,1110904,284
+105,INNT-57532,R100 - Beneficiary Support Funds,Beneficiary Support Funds,R100,,1,1,1,"0",6,2022-05-12,,1598,1598,3464845,2119
+107,INNT-77953,"R200 – Beneficiary, Family and Church Gifts","Beneficiary, Family and Church Gifts",R200,,1,1,"0","0",6,2022-05-12,,1598,1598,3464889,2119
+108,INNT-43135,R330 – HVC OVC Grants,HVC OVC Grants,R330,,1,1,"0","0",6,2022-05-12,,1598,1598,3464897,2119
+109,INNT-10470,R410 - HIV/AIDS ARV Support,HIV/AIDS ARV Support,R410,,1,1,"0","0",6,2022-05-12,,1598,1598,3464906,2119
+110,INNT-41814,R415 - HIV/AIDS Caregivers and siblings (CGS),HIV/AIDS Caregivers and siblings (CGS),R415,,1,1,"0","0",6,2022-05-12,,1598,1598,3464910,2119
+111,INNT-53299,R425 - HIV/AIDS Education,HIV/AIDS Education,R425,,1,1,"0","0",6,2022-05-12,,1598,1598,3464913,2119
+112,INNT-1727,R510 - Caregivers Contribution,Caregivers Contribution,R510,,1,1,"0","0",6,2022-05-12,,1598,1598,3464916,2119
+113,INNT-55158,R515 - FCP Income Generation Activities,FCP Income Generation Activities,R515,,1,1,"0","0",6,2022-05-12,,1598,1598,3464917,2119
+114,INNT-55377,R520 - Local Donations and Church contributions,Local Donations and Church contributions,R520,,1,1,"0","0",6,2022-05-12,,1598,1598,3464918,2119
+115,INNT-42698,R320 - Medical Refund and Grant,Medical Refund and Grant,R320,,1,1,"0","0",6,2022-05-12,,1598,1598,3464919,2119
+116,INNT-70033,R352 - Survival Launch Fund,Survival Launch Fund,R352,,1,1,1,1,6,2022-05-12,,1598,1598,3464920,2119
+117,INNT-88815,R370 - Sponsorship Launch Fund,Sponsorship Launch Fund,R370,,1,1,1,"0",6,2022-05-12,,1598,1598,3464925,2119
+118,INNT-11029,R360 - Inter Partner Funds Transfer,Inter Partner Funds Transfer,R360,,1,1,"0","0",6,2022-05-12,,1598,1598,3464926,2119
+119,INNT-2740,R310 - School Fees Grant,School Fees Grant,R310,,1,1,"0","0",6,2022-05-12,,1598,1598,3464929,2119
+120,INNT-2874,R325 - Water and Sanitation Grants,Water and Sanitation Grants,R325,,1,1,"0","0",6,2022-05-12,,1598,1598,3464930,2119
+121,INNT-72280,R315 - Environment and Conservation Grants,Environment and Conservation Grants,R315,,1,1,"0","0",6,2022-05-12,,1598,1598,3464931,2119
+122,INNT-41087,R335 - Disaster Relief Grant,Disaster Relief Grant,R335,,1,1,"0","0",6,2022-05-12,,1598,1598,3464934,2119
+123,INNT-59581,R340 - Economic Empowerment,R340 - Economic Empowerment,R340,,1,1,"0","0",6,2022-05-12,,1598,1598,3464935,2119
+124,INNT-22480,R345 - Existing FCP Expansion,R345 - Existing FCP Expansion,R345,,1,1,"0","0",6,2022-05-12,,1598,1598,3464936,2119
+125,INNT-26155,R355 - Group and Individual Sponsor(s) Refund,Group and Individual Sponsor(s) Refund,R355,,1,1,"0","0",6,2022-05-12,,1598,1598,3464940,2119
+126,INNT-34109,R365 -  Major Medical ,Major Medical,R365,,1,1,"0","0",6,2022-05-12,,1598,1598,3464941,2119
+127,INNT-77378,R375 - Education – Ongoing,Education – Ongoing,R375,,1,1,"0","0",6,2022-05-12,,1598,1598,3464942,2119
+128,INNT-40659,R300 - Other Compassion Funds,Other Compassion Funds,R300 ,,1,1,"0","0",6,2022-05-12,,1598,1598,3464943,2119
+129,INNT-40062,R351 - Survival Intervention Funds,R351 - Survival Intervention Funds,R351,,1,1,1,1,6,2022-05-18,,1598,1598,3487260,2119
+130,INNT-4456,Skills and resource centre,Skills and resource centre for UG0532,NFE190,,1,1,1,1,5,2022-05-20,,1526,1526,3623003,891
+131,INNT-46770,NFE190 Skills and resource centre,Skills and resource centre for UG0532,NFE190,,1,1,1,1,5,2022-05-20,,1526,1526,3623058,891
+132,INNT-82201,R4015 NFE,Parental Education,R4015 NFE,,1,1,1,"0",5,2022-07-05,,74,74,4131783,891
+133,INNT-25511,Dental health,oral health,HH-II,,1,1,1,1,5,2022-07-14,,2149,2149,4743207,891
+134,INNT-16743,R355 - Group and Individual Sponsor(s) Refund,R355 - Group and Individual Sponsor(s) Refund,R355,,1,1,"0",1,3,2022-11-10,,1,1,9079112,281
+135,INNT-32016,R335-Disaster Relief Grant,Disaster Relief Grant,R335,,1,1,"0","0",3,2022-11-10,,39,39,9083952,"0"
+136,INNT-23810R,R375 - Education - Ongoing,Education - Ongoing,R375,,1,1,"0","0",3,2020-01-27,,1,1,554,34
+137,INNT-9732,R4021 - Health- HH (Education and other preventative interventions (Proposal based),R4021 - Health- HH (Education and other preventative interventions (Proposal based),R4021,,1,1,"0","0",5,2023-02-08,,2805,2805,12347192,281
+138,INNT-11924,R331-HVC-CPR,HVC One Time Protection,R331,,1,4,"0","0",3,2023-03-28,,39,39,13134657,283
+166,INNT-6445,GH-R110 Cluster Activities & Events,Cluster Activities & Events,GHR110,,1,1,1,1,10,2023-08-08,,4984,4984,20346938,3764
+167,INNT-3528,GH-R620 Church Contributions,Church contribution to non-compassion fund,GHR620,,1,3,1,"0",10,2023-08-08,,4984,4984,20347013,3764
+168,INNT-50226,GH-R410  Disaster ,Ongoing Disaster interventions,GHR410,,1,4,1,1,10,2023-08-08,,4985,4985,20347014,3764
+169,INNT-25902,GH-R310 Beneficiary & Family Gift,Beneficiary & Family Gift,GHR310,,1,2,"0","0",10,2023-08-08,,5003,5003,20347017,3764
+170,INNT-83625,GH-R420 HVC CDI,HVC CDI,GHR420,,1,4,1,1,10,2023-08-08,,4985,4985,20347018,3764
+171,INNT-77489,GH-R630 Income Generation Activities (IGA),Income Generation Activities (IGA) for Non-Compassion Funds,GHR630,,1,3,1,"0",10,2023-08-08,,4984,4984,20347019,3764
+172,INNT-82257,GH-R430 HVC CPR,HVC CPR,GHR430,,1,4,1,1,10,2023-08-08,,4985,4985,20347021,3764
+173,INNT-3975,GH-R440 Edu Ongoing,Edu Ongoing,GHR440,,1,4,1,1,10,2023-08-08,,4985,4985,20347038,3764
+174,INNT-41970,GH-R320 Project Gift,Project Gift,GHR320,,1,2,"0",1,10,2023-08-08,,5003,5003,20347047,3764
+175,INNT-43292,GH-R640 Bank Interest,Bank Interest on saved funds,GHR640,,1,3,1,"0",10,2023-08-08,,4984,4984,20347048,3764
+176,INNT-44703,GH-R450 HIV CGS,HIV CGS,GHR450,,1,4,1,1,10,2023-08-08,,4985,4985,20347049,3764
+177,INNT-15280,GH-R100 Support Fund, Support Fund,GHR100,,1,1,1,1,10,2023-08-08,,4983,4983,20347075,3764
+178,INNT-25615,GH-R460 HIV MED,HIV MED,GHR460,,1,4,1,1,10,2023-08-08,,4985,4985,20347076,3764
+179,INNT-80341,GH-R330 Christmas Gift,Christmas Gift,GHR330,,1,2,"0",1,10,2023-08-08,,5003,5003,20347077,3764
+180,INNT-35082,GH-R610 Local contributions,Local contributions towards Non-compassion Funds,GHR610,,1,3,1,"0",10,2023-08-08,,4984,4984,20347080,3764
+181,INNT-37557,GH-R470 MED TFI,MED TFI,GHR470,,1,4,1,1,10,2023-08-08,,4985,4985,20347102,3764
+182,INNT-68363,GH-R480 Medical Ongoing,Medical Ongoing,GHR480,,1,4,1,1,10,2023-08-08,,4985,4985,20347139,3764
+183,INNT-45256,GH-R510 IFP,IFP,GHR510,,1,5,1,1,10,2023-08-08,,5005,5005,20347184,3764
+184,INNT-35699,GH-R515 Edu Individual ,Edu individual,GHR515,,1,5,1,1,10,2023-08-08,,5005,5005,20347314,3764
+185,INNT-69185,GH-R490 Sponsorship Launch,Sponsorship Launch,GHR490,,1,4,1,1,10,2023-08-08,,4986,4986,20347419,3764
+186,INNT-6388,GH-R520 HH Individual,HH individual,GHR520,,1,5,1,1,10,2023-08-08,,5005,5005,20347435,3764
+187,INNT-20907,GH-R525 Wash,Wash,GHR525,,1,5,1,1,10,2023-08-08,,5005,5005,20347560,3764
+188,INNT-55886,GH-R535 LMT,LMT,GHR535,,1,5,1,1,10,2023-08-08,,5005,5005,20347718,3764
+189,INNT-10034,GH-R540 MIV,MIV,GHR540,,1,5,1,"0",10,2023-08-09,,5005,5005,20351033,3764
+192,INNT-75738,GH-R545 NFE,NFE,R545,,1,5,1,1,10,2023-08-09,,4986,4986,20352370,3764
+193,INNT-7205,GH-R570 Disaster -Old,Disaster,GHR570,,"0",5,1,1,10,2023-08-09,,4985,4985,20352524,3764
+194,INNT-72972,GH-R550 PED, PED,GHR550,,1,5,1,1,10,2023-08-09,,4986,4986,20352781,3764
+195,INNT-28873,GH-R555 Major Medical,Major Medical,GHR555,,1,5,1,1,10,2023-08-09,,4986,4986,20353065,3764
+196,INNT-9382,GH-R560 Survival Launch,Survival Launch,GHR560,,1,5,1,1,10,2023-08-09,,4986,4986,20354187,3764
+197,INNT-23963,GH-R565 Disaster,Disaster (DAP),GHR565,,1,5,1,1,10,2023-08-09,,4986,4986,20355409,3764
+198,INNT-35465,GH-R495 Tours and Visit,Tours and Visit,GHR495,,1,4,1,1,10,2023-08-09,,4986,4986,20356580,3764
+199,INNT-39003,GH-R530 IGA,IGA,GHR530,,1,5,1,1,10,2023-08-12,,4984,4984,20405882,3764
+200,INNT-58126,GH-R200 Survival,Survival,GHR200,,1,4,1,1,10,2023-08-15,,4984,4984,20418470,3764
+201,INNT-17357,R380 - Learning Materials,R380 - Learning Materials,R380,,1,5,"0","0",6,2023-12-04,,1598,1598,25683412,2119
+202,INNT-32412,R390 - Parent Education,R390 - Parent Education,R390,,1,5,"0","0",6,2023-12-04,,1598,1598,25683633,2119
+203,INNT-26270,R328 - Vector Borne Intervention,R328 - Vector Borne Intervention,R328,,1,5,"0","0",6,2023-12-04,,1598,1598,25696834,2119
+204,INNT-36289,GH-R340 Survival Gift,Survival Gifts,GHR340,,1,2,"0","0",10,2023-12-20,,4984,4984,26035106,3764
+205,INNT-590409000,R100 - Child Support ,Child Support ,R100,,1,1,1,"0",9,2020-08-21,,3,3,348,34
+208,INNT-171659000,R351 - Survival Intervention,Survival Intervention,R351,,1,1,1,"0",9,2020-11-03,,5,5,545,34
+210,INNT-5852409899,R352 - Survival Launch Fund,Survival Launch Fund,R352,,1,1,1,"0",9,2020-11-03,,5,5,553,34
+211,INNT-2381090876,R370 - Sponsorship Launch Fund,Sponsorship Launch Fund,R370,,1,1,1,"0",9,2020-11-03,,5,5,554,34
+212,INNT-45542,R4022- PCA Data Collection and FCP Support,PCA Data Collection and FCP Support,R4022,,1,1,"0","0",5,2024-02-09,,1,1,28285538,281
+213,INNT-32202,GH-R270-Survival Launch,Survival Launch,GH-R270,,1,4,"0",1,10,2024-03-01,,4984,4984,28634472,3764
+214,INNT-32414,ZM-R200 Gifts,ZM-R200 Gifts,R200,,1,2,"0","0",9,2024-03-04,,1,1,28686802,281
+215,INNT-30298,R201 - Survival Gifts Income,Survival Gifts Income,R201,,1,2,"0","0",3,2024-03-18,,2805,2805,28936410,281
+216,INNT-35785,R525 - Survival Non-Compassion Funds,R525 - Survival Non-Compassion Funds,R525,,1,3,1,"0",3,2024-03-18,,2805,2805,28941647,281
+217,INNT-77843,R380-Program Cycle Adoption,R380-Program Cycle Adoption,R380,,1,5,"0",1,3,2024-04-09,,39,39,30132522,283
+218,INNT-40534,R330 – HVC OVC Grants,R330 – HVC OVC Grants,R330,,1,2,1,"0",9,2024-04-15,,6999,6999,30515374,3760
+219,INNT-28278,R320 - Medical Refund and Grant,R320 - Medical Refund and Grant,R320,,1,1,"0","0",9,2024-04-15,,6999,6999,30515418,3760
+220,INNT-61324,R345 - Infrastructure Grants,R345 - Infrastructure Grants,R345,,1,5,1,1,9,2024-04-15,,6999,6999,30515461,3760
+221,INNT-53397,R335 - Disaster Relief Grant,R335 - Disaster Relief Grant,R335,,1,5,1,"0",9,2024-04-15,,6999,6999,30516622,3760
+222,INNT-41439,R325-Water and Sanitation Grants,R325-Water and Sanitation Grants,R325,,1,5,1,1,9,2024-04-15,,6999,6999,30516627,3760
+223,INNT-12345,R430 - Health and Nutrition,R430 - Health and Nutrition,R430,,1,5,"0",1,6,2024-05-20,,1598,1598,31307380,2119
+224,INNT-77233,R520 - Local Donations and Church Contributions,R520 - Local Donations and Church Contributions,R520,,1,3,1,"0",9,2024-07-02,,6999,6999,32595627,3760
+225,INNT-8857,R365 - Health (HH),R365 - Health (HH),R365,,1,5,1,1,9,2024-07-02,,6999,6999,32596052,3760
+226,INNT-75756,R100 - Child Support,Child Support,R100,,1,1,1,,12,2024-07-22,,8396,8396,33744005,4870
+227,INNT-75222,R200 - Gifts,Gifts,R200,,1,2,"0",,12,2024-07-22,,8396,8396,33750945,4870
+228,INNT-15718,R209 - Project Gift,Project Gift,R209,,1,2,"0",,12,2024-07-22,,8396,8396,33751036,4870
+229,INNT-46462,R210 - Survival Gifts Income,Survival Gifts Income,R210,,1,2,"0","0",12,2024-07-22,,8396,8396,33751041,4870
+230,INNT-84817,R310 - Non Formal Education - NFE,Non Formal Education - NFE,R310,,1,5,"0",,12,2024-07-22,,8396,8396,33751061,4870
+231,INNT-42157,R351 - Survival Intervention,Survival Intervention,R351,,1,1,1,,12,2024-07-22,,8396,8396,33751096,4870
+232,INNT-29106,R320 - Medical Ongoing,Medical Ongoing,R320,,1,4,"0",,12,2024-07-23,,8396,8396,33752683,4870
+233,INNT-30452,R322 - Major Medical,Major Medical,R322,,1,5,"0",,12,2024-07-27,,8396,8396,33897903,4870
+234,INNT-25162,"R325 - Water,  Sanitation & Hygiene - WTP ","Water,  Sanitation & Hygiene - WTP ",R325,,1,5,"0",,12,2024-07-27,,8396,8396,33898261,4870
+235,INNT-39883,R330 - HVC Support,HVC Support,R330,,1,4,"0",,12,2024-07-27,,8396,8396,33898448,4870
+236,INNT-84199,R335 - Disaster Relief Grant - DRF,Disaster Relief Grant - DRF,R335,,1,5,"0",,12,2024-07-27,,8396,8396,33898587,4870
+237,INNT-39248,R336 - Disaster Response - DAP,Disaster Response - DAP,R336,,1,4,"0",,12,2024-07-27,,8396,8396,33898636,4870
+238,INNT-13225,R340 - Income Generation Activities - IGP,Income Generation Activities - IGP,R340,,1,5,"0",,12,2024-07-27,,8396,8396,33898670,4870
+239,INNT-74115,R345 - Infrastructure - IFP,Infrastructure - IFP,R345,,1,5,"0",,12,2024-07-27,,8396,8396,33898770,4870
+240,INNT-40453,R352 - Survival Launch Fund,Survival Launch Fund,R352,,1,5,"0",,12,2024-07-27,,8396,8396,33898836,4870
+241,INNT-27093,R355 - Group and Individual Sponsor(s) Refund,Group and Individual Sponsor(s) Refund,R355,,1,4,"0",,12,2024-07-27,,8396,8396,33898922,4870
+242,INNT-30589,R365 - Health - HH,Health - HH,R365,,1,5,"0",,12,2024-07-27,,8396,8396,33899180,4870
+243,INNT-6715,R370 - Sponsorship Launch Fund,Sponsorship Launch Fund,R370,,1,5,"0",,12,2024-07-27,,8396,8396,33899257,4870
+244,INNT-8335,R380 - Program Cycle Adoption,Program Cycle Adoption,R380,,1,4,"0","0",12,2024-07-27,,8396,8396,33899316,4870
+245,INNT-58586,R410 - HIV/AIDS Ongoing,HIV/AIDS Ongoing,R410,,1,4,"0",,12,2024-07-27,,8396,8396,33899425,4870
+246,INNT-7977,R425 - HIV/AIDS Education - HIVEDU,HIV/AIDS Education - HIVEDU,R425,,1,5,"0",,12,2024-07-27,,8396,8396,33899654,4870
+247,INNT-61982,R510 - Non Compassion Funds,Non Compassion Funds,R510,,1,3,"0",,12,2024-07-27,,8396,8396,33899715,4870
+248,INNT-10888,R530 - Parental Education - PED,Parental Education - PED,R530,,1,5,"0",,12,2024-07-27,,8396,8396,33900238,4870
+249,INNT-33593,R535 - Vector-Borne Interventions - MIV,Vector-Borne Interventions - MIV,R535,,1,5,"0",,12,2024-07-27,,8396,8396,33900305,4870
+250,INNT-20777,R540 - Education - EDU,Education - EDU,R540,,1,5,"0",,12,2024-07-27,,8396,8396,33900376,4870
+251,INNT-18686,R550 - Other Revenue,Other Revenue,R550,,1,1,"0",,12,2024-07-27,,8396,8396,33900442,4870
+252,INNT-60076,R551 - Other Reimbursables,Other Reimbursables,R551,,1,1,"0",,12,2024-07-27,,8396,8396,33900541,4870
+253,INNT-83601,R552 - Inter-FCP Funds Transfer,Inter-FCP Funds Transfer,R552,,1,1,"0",,12,2024-07-27,,8396,8396,33900656,4870
+254,INNT-23330,R372 - Child & Youth Education,R372 - Child & Youth Education,R372,,1,5,"0","0",6,2024-09-11,,1598,1598,35108552,2119
+255,INNT-78186,R310-School fees grants-NEET,R310-School fees grants-NEET,R310,,1,5,1,,9,2024-09-12,,7073,7073,35146582,3760
+256,INNT-60269,FND001012 Child Support,FND001012 Child Support,FND001012,,1,1,1,,14,2024-10-05,,2801,2801,36492195,281
+257,INNT-52576,FND003009 Gifts,FND003009 Gifts,FND003009,,1,2,"0",,14,2024-10-05,,2801,2801,36492196,281
+259,INNT-86985,FND002039 Child & Youth Education-NFE,FND002039 Child & Youth Education-NFE,FND002039,,1,5,1,"0",14,2024-10-05,,2801,2801,36492218,281
+260,INNT-55925,FND002007 Ongoing Medical - Medical,FND002007 Ongoing Medical - Medical,FND002007,,1,4,1,1,14,2024-10-05,,2801,2801,36525893,281
+261,INNT-46907,FND002023 WaSH - WTP,FND002023 WaSH - WTP,FND002023,,1,5,"0",1,14,2024-10-05,,2801,2801,36526026,281
+262,INNT-82865,FND003038 Highly Vulnerable Children - HVC CDI,FND003038 Highly Vulnerable Children - HVC CDI,FND003038,,1,4,"0","0",14,2024-10-05,,2801,2801,36526136,281
+264,INNT-72896,FND002005 Highly Vulnerable Children - HVC CPR,FND002005 Highly Vulnerable Children - HVC CPR,FND002005,,1,4,1,1,14,2024-10-05,,2801,2801,36528593,281
+265,INNT-42438,FND002002 Disaster - DRF,FND002002 Disaster - DRF,FND002002,,1,4,1,1,14,2024-10-05,,2801,2801,36528786,281
+266,INNT-45126,FND002018 Economic Empowerment - IGP,FND002018 Economic Empowerment - IGP,FND002018,,1,5,"0",,14,2024-10-05,,2801,2801,36531367,281
+267,INNT-76553,FND003035 Existing FCP Expansion  - IFP,FND003035 Existing FCP Expansion  - IFP,FND003035,,1,5,"0",1,14,2024-10-05,,2801,2801,36531854,281
+268,INNT-36261,FND001004 Child Survival - Existing,FND001004 Child Survival - Existing,FND001004,,1,5,"0",1,14,2024-10-05,,2801,2801,36534428,281
+269,INNT-20685,FND003036 New FCP Expansion - Child Survival Launch,FND003036 New FCP Expansion - Child Survival Launch,FND003036,,1,5,1,"0",14,2024-10-05,,2801,2801,36535774,281
+271,INNT-28197,FND002006 Health & Nutrition - HH,FND002006 Health & Nutrition - HH,FND002006,,1,5,"0",,14,2024-10-05,,2801,2801,36535935,281
+274,INNT-80780,FND002021 Major Medical - MED,FND002021 Major Medical - MED,FND002021,,1,4,1,,14,2024-10-05,,2801,2801,36537003,281
+275,INNT-26764,FND002007 Ongoing Medical - HIV AIDS,FND002007 Ongoing Medical - HIV AIDS,FND002007,,1,4,1,,14,2024-10-05,,2801,2801,36543568,281
+276,INNT-34705,FND003007 Ongoing Medical - MED TFI,FND003007 Ongoing Medical - MED TFI,FND003007,,1,4,"0","0",14,2024-10-05,,2801,2801,36545358,281
+277,INNT-29124,FND002003 Disaster - DAP,FND002003 Disaster - DAP,FND002003,,1,4,"0","0",14,2024-10-05,,2801,2801,36546577,281
+278,INNT-43569,FND003037 New FCP Expansion - CPL,FND003037 New FCP Expansion - CPL,FND003037,,1,5,1,"0",14,2024-10-05,,2801,2801,36546635,281
+279,INNT-13485,R510 - Parents Contribution,R510 - Parents Contribution,R510,,1,3,1,"0",14,2024-10-05,,2801,2801,36546990,281
+280,INNT-50584,R515 - CDC IGA,R515 - CDC IGA,R515,,1,3,1,"0",14,2024-10-05,,2801,2801,36548161,281
+281,INNT-18551,R520 - Local Donations and Church contributions,R520 - Local Donations and Church contributions,R520,,1,3,1,"0",14,2024-10-05,,2801,2801,36548321,281
+282,INNT-55986,FND002009 Health & Nutrition - HIV EDU,FND002009 Health & Nutrition - HIV EDU,FND002009,,1,5,"0",,14,2024-10-05,,2801,2801,36548438,281
+283,INNT-57225,FND002011 Health & Nutrition - MIV,FND002011 Health & Nutrition - MIV,FND002011,,1,5,"0",,14,2024-10-05,,2801,2801,36552548,281
+284,INNT-20976,FND002022 Parental Education - PED,FND002022 Parental Education - PED,FND002022,,1,5,"0",,14,2024-10-05,,2801,2801,36554570,281
+285,INNT-60178,R51140- Disaster Resilience ,R51140- Disaster Resilience ,R51140,,1,5,1,1,9,2024-11-27,,7073,7073,38871511,3760
+286,INNT-28909,FDN001004 - Survival - Existing,FDN001004 - Survival - Existing,FDN001004,,1,1,1,,14,2025-02-10,,2801,2801,42692349,281
+287,INNT-86639,R49164 Solar Power,Installation of Solar Power System,INT49164,,1,5,1,1,9,2025-02-27,,7073,7073,43027465,3760
+289,INNT-49330,R42132 NHIMA,R42132 NHIMA,R42132,,1,4,1,,9,2025-02-27,,7073,7073,43031532,3760
+290,INNT-5347,R410-HIV/AIDS ARV Support,R410-HIV/AIDS ARV Support,R410,,1,4,1,,9,2025-02-27,,7073,7073,43032330,3760
+291,INNT-24210,TGR420 HVC CDI,Income bucket that holds Highly Vulnerable Children-Ongoing Support funds,BFR420,,1,4,"0","0",15,2025-03-11,,1,1,43345075,6039
+292,INNT-87629,TGR510-Infrastructure (IFP),Income bucket that holds Infrastructural Development Project funds,BFR510,,1,5,"0",,15,2025-03-11,,1,1,43345076,6039
+293,INNT-72856,TGR520-Health (HH),Income bucket that holds Individual Health Interventions funds,BFR520,,1,5,"0",,15,2025-03-11,,1,1,43345077,6039
+294,INNT-26295,TGR320-Project Gifts,Income bucket that holds project gifts funds,BFR320,,1,2,"0",,15,2025-03-11,,1,1,43345078,6039
+295,INNT-61581,TGR400-Disaster,Income bucket that holds disaster relief,BFR410,,1,4,"0",,15,2025-03-11,,1,1,43345079,6039
+296,INNT-52865,TGR440-Edu Ong.,Income bucket that holds Admission fees Support Fund,BFR440,,1,4,"0",,15,2025-03-11,,1,1,43345080,6039
+297,INNT-6353,TGR525-Water and Sanitation (WASH),"Income bucket that holds Water, Sanitation and Hygiene Intervention funds ",BFR525,,1,5,"0",,15,2025-03-11,,1,1,43345081,6039
+298,INNT-28192,TGR495-Tours and Visits,Income bucket that holds Tours and Visit funds,BFE495,,1,1,"0","0",15,2025-03-11,,1,1,43345082,6039
+299,INNT-67003,TGR330-Christmas Gifts,Income buckets that hold Christmas gifts funds,BFR330,,1,2,"0",,15,2025-03-11,,1,1,43345083,6039
+300,INNT-63541,TGR310-Beneficiary and Family Gifts,Income bucket that holds beneficiary (Birthday & General Child) and family gifts funds,BFR310,,1,2,"0",,15,2025-03-11,,1,1,43345084,6039
+301,INNT-8132,TGR110-Cluster activities and events,Income bucket that holds cluster activities and events funds,BFR110,,1,1,"0",,15,2025-03-11,,1,1,43345085,6039
+302,INNT-31201,TGR430-HVC Child Protection (CPR),Income bucket that holds Highly Vulnerable Children-Child Protection,BFR430,,1,4,"0","0",15,2025-03-11,,1,1,43345086,6039
+303,INNT-35426,TGR100-Child Support (Sponsored and Unsponsored Funds),Income bucket that holds child support funds,BFR100,,1,1,1,,15,2025-03-11,,1,1,43345087,6039
+304,INNT-79484,TGR450-HIV Caregiver & Siblings(CGS),Income bucket for HIV CGS (Caregiver & Siblings),BFR450,,1,4,"0","0",15,2025-03-11,,1,1,43345088,6039
+305,INNT-61695,TGR200-Survival,Income bucket that holds Survival funds,BFR200,,1,4,1,"0",15,2025-03-11,,1,1,43345089,6039
+306,INNT-28468,TGR480-Medical Ongoing,Income bucket for Health ongoing (Reimbursement),BFR480,,1,4,"0","0",15,2025-03-11,,1,1,43345090,6039
+307,INNT-12015,TGR515- Education (EDU),Income bucket that holds Tertiary Education Support funds,BFR515,,1,5,"0",,15,2025-03-11,,1,1,43345091,6039
+308,INNT-79498,TGR460-HIV Medical (MED),Income bucket for HIV MED (Participant),BFR460,,1,4,"0",,15,2025-03-11,,1,1,43345092,6039
+309,INNT-66944,TGR470-Medical Therapeutic Feeding Intervention (MED TFI),Income bucket for Medical Therapeutic Feeding,BFR470,,1,4,"0",,15,2025-03-11,,1,1,43345093,6039
+310,INNT-24517,TGR490-Sponsorship  Launch,Income bucket for Sponsorship Lunch,E490,,1,4,"0","0",15,2025-03-11,,1,1,43345094,6039
+311,INNT-9825,TGR565-DRF,Income bucket that holds Individual Disaster Relief Funds,BFR565,,1,5,"0","0",15,2025-03-11,,1,1,43345114,6039
+313,INNT-63933,TGR530-Income Generation Activities (IGA),Income bucket that holds Income Generating Activities funds,BFR530,,1,5,"0",,15,2025-03-12,,1,1,43345282,6039
+314,INNT-78974,TGR535-Learning Materials (LMT),Income bucket that holds Learning Materials funds,BFR535,,1,5,"0",,15,2025-03-12,,1,1,43345283,6039
+315,INNT-23415,TGR540-MIV,Income bucket that holds Vector Borne Interventions funds,BFR540,,1,5,"0",,15,2025-03-12,,1,1,43345284,6039
+316,INNT-87771,TGR545-Non-Formal Education (NFE),Income buckets that hold Non-Formal Education funds,BFR545,,1,5,"0",,15,2025-03-12,,1,1,43345285,6039
+317,INNT-30279,TGR550-Parental Education (PED),Income buckets that hold Parental Education funds,BFR550,,1,5,"0",,15,2025-03-12,,1,1,43345286,6039
+318,INNT-66209,TGR555-Major Medical (MAJOR MED),Income buckets that hold Major Medical Interventions funds,BFR555,,1,5,"0",,15,2025-03-12,,1,1,43345287,6039
+319,INNT-65388,TGR560-Survival Launch,Income bucket that holds Survival Launch funds,BFR560,,1,5,"0",,15,2025-03-12,,1,1,43345288,6039
+321,INNT-77710,TGR610-Local contribution,Income bucket that holds Local contribution funds,BFR610,,1,3,1,,15,2025-03-12,,1,1,43345290,6039
+322,INNT-61943,TGR620-Church contribution,Income bucket that holds church contributions funds,BFR620,,1,3,1,,15,2025-03-12,,1,1,43345291,6039
+323,INNT-80906,TGR630-Income Generation Activities (IGA),Income bucket that holds IGA funds,BFR630,,1,3,1,,15,2025-03-12,,1,1,43345292,6039
+324,INNT-42177,TGR640-Interest from banks,Income bucket that holds Interests from Bank funds,BFR640,,1,3,"0",,15,2025-03-12,,1,1,43345293,6039
