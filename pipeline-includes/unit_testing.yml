@@ -29,9 +29,7 @@ unit_tests:
     - echo "Importing database schema from database_schema.sql into $MYSQL_DATABASE..."
     - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" < app/Database/schema.sql
     - echo "Database schema imported successfully."
-    # - BASE_URL='http://localhost/'
-    # - VARS_TO_SUBST='BASE_URL LOGTAIL_TOKEN CI_ENVIRONMENT SHA256_PASSWORD_SALT DB_HOST DB_PASS'
-    # - envsubst "$VARS_TO_SUBST" < env > .env.tmp && mv .env.tmp .env
+    - mysql -h mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "USE $MYSQL_DATABASE; SHOW TABLES"
 
 .unit_test:
   script:
