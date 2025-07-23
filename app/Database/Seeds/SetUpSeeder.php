@@ -76,6 +76,7 @@ class SetUpSeeder extends Seeder
         $databaseLibrary->truncateTables($schemaTables);
 
         foreach ($schemaTables as $table) {
+            if(!file_exists(APPPATH. DS . 'Database' . DS. 'Seeds'. DS . 'data_csv'. DS . $table.'csv')) continue;
             $builder = $this->db->table($table);
             $jsonData = csvToJsonLiteral($table);
 
