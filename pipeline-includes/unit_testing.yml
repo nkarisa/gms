@@ -1,17 +1,21 @@
 .installs:
   script:
-    # - apt-get update -yqq
-    # - apt-get install git unzip -yqq # Install git and unzip, often needed for composer
-    # - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer # Install Composer
-    # - composer install --prefer-dist --no-ansi --no-interaction # Install project dependencies
     - apt-get update -yqq
-    - apt-get install git unzip zlib1g-dev libicu-dev -yqq # Install git and unzip, often needed for composer
+    - apt-get install git unzip zlib1g-dev default-mysql-client libicu-dev -yqq # Install git and unzip, often needed for composer
     - docker-php-ext-configure intl
     - docker-php-ext-install intl
     - docker-php-ext-install mysqli
     - docker-php-ext-install pdo_mysql
     - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer # Install Composer
     - composer update --prefer-dist --no-ansi --no-interaction 
+
+    - |
+      for i in $(seq 1 30); do
+        mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "status" > /dev/null 2>&1 && break
+        echo "Waiting for MySQL to be ready..."
+        sleep 1
+      done
+    - mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
 
 .unit_test:
   script:
