@@ -32,10 +32,9 @@ unit_tests:
     - echo "Database schema imported successfully."
     - mysql -h mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "USE $MYSQL_DATABASE TABLES;"
     - mysql -h mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "SELECT COUNT(*) AS total_tables FROM information_schema.TABLES WHERE TABLE_SCHEMA = '$MYSQL_DATABASE' AND TABLE_TYPE = 'BASE TABLE';"
-    # - env
     - envsubst < env > .env
-    # - cat .env
     - php spark db:seed SetUpSeeder
+    - mysql -h mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "USE $MYSQL_DATABASE TABLES; SELECT * FROM account_system;"
     
 .unit_test:
   script:
