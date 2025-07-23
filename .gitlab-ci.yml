@@ -28,11 +28,11 @@ include:
       terraform_dir: 'terraform'
       include_container_build_job: true
       unit_tests_script: 
-        - *unit_test 
+        - !reference [.unit_test]
       smoke_tests_script:
-        - *smoke_test 
+        - !reference [.integration_test]
       integration_tests_script: 
-        - *integration_test
+        - !reference [.smoke_test]
       container_build_dockerfile_path: "./Dockerfile"
       state_type: "s3_bypath"
       container_build_destination: "234204504144.dkr.ecr.eu-west-1.amazonaws.com/safinav3"
