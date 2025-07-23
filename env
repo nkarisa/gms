@@ -37,24 +37,24 @@ app.baseURL = ${BASE_URL}
 #--------------------------------------------------------------------
 
 database.default.hostname = ${DB_HOST}
-database.default.database = toolkit
-database.default.username = admin
+database.default.database = ${DB_NAME}
+database.default.username = ${DB_USER}
 database.default.password = ${DB_PASS}
 database.default.DBDriver = MySQLi
 database.default.DBPrefix =
 database.default.port = 3306
 
 database.read.hostname = ${DB_HOST}
-database.read.database = toolkit
-database.read.username = admin
+database.read.database = ${DB_NAME}
+database.read.username = ${DB_USER}
 database.read.password = ${DB_PASS}
 database.read.DBDriver = MySQLi
 database.read.DBPrefix = 
 database.read.port = 3306
 
 database.write.hostname = ${DB_HOST}
-database.write.database = toolkit
-database.write.username = admin
+database.write.database = ${DB_NAME}
+database.write.username = ${DB_USER}
 database.write.password = ${DB_PASS}
 database.write.DBDriver = MySQLi
 database.write.DBPrefix =
