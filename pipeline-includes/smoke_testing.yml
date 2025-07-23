@@ -1,3 +1,4 @@
 .smoke_test:
-  - echo "Command holder"
-  - echo "Smoke testing successful"
+  script:
+    - echo "Command holder"
+    - echo "Smoke testing successful"

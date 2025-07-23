@@ -1,11 +1,16 @@
 variables:
     XDEBUG_MODE: "coverage" 
     CONTAINER_SCANNING_DISABLED: "true"
+    COMPOSER_CACHE_DIR: "$CI_PROJECT_DIR/vendor"
+
+# cache:
+#   key: "${CI_JOB_NAME}-build"
+#   paths:
+#       - vendor
 
 cache:
-  key: "${CI_JOB_NAME}-build"
   paths:
-      - vendor
+    - vendor/
 
   
 include:
@@ -28,11 +33,11 @@ include:
       terraform_dir: 'terraform'
       include_container_build_job: true
       unit_tests_script: 
-        - !reference [.unit_test]
+        - !reference [.unit_test, script]
       smoke_tests_script:
-        - !reference [.integration_test]
+        - !reference [.integration_test, script]
       integration_tests_script: 
-        - !reference [.smoke_test]
+        - !reference [.smoke_test, script]
       container_build_dockerfile_path: "./Dockerfile"
       state_type: "s3_bypath"
       container_build_destination: "234204504144.dkr.ecr.eu-west-1.amazonaws.com/safinav3"

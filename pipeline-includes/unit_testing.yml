@@ -1,3 +1,13 @@
+.installs:
+  script:
+    - apt-get update -yqq
+    - apt-get install git unzip -yqq # Install git and unzip, often needed for composer
+    - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer # Install Composer
+    - composer install --prefer-dist --no-ansi --no-interaction # Install project dependencies
+
+
 .unit_test:
-  - echo "Command holder"
-  - echo "Unit testing successful"
+  script:
+    - !reference [.installs, script]
+    - vendor/bin/phpunit --colors --testdox --log-junit phpunit-report.xml
+    - echo "Unit Testing Successful"

@@ -1,3 +1,4 @@
 .integration_test:
-  - echo "Command holder"
-  - echo "Integration testing successful"
+  script:
+    - echo "Command holder"
+    - echo "Integration testing successful"
