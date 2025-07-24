@@ -39,6 +39,16 @@ variable "db_pass" {
   type        = string 
 }
 
+variable "db_user" {
+  description = "Database User name"
+  type        = string 
+}
+
+variable "db_name" {
+  description = "Database Name"
+  type        = string 
+}
+
 variable "tag" {
   description = "Gitlab commit SHA"
   type        = string 

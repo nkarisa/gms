@@ -104,6 +104,14 @@ locals {
           value   = var.db_pass
         },
         {
+          name    =  "DB_USER"
+          value   = var.db_user
+        },
+        {
+          name    =  "DB_NAME"
+          value   = var.db_name
+        },
+        {
           name    = "SESSION_DYNAMODB_TABLE"
           value   = var.SESSION_DYNAMODB_TABLE
         },

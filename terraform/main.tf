@@ -1,8 +1,3 @@
-resource "random_integer" "priority" {
-  min = 1
-  max = 50000
-}
-
 # Define the AWS ECS Task Definition for Safina
 resource "aws_ecs_task_definition" "task_definition" {
   family                   = var.task_definition_family # A logical name for your task definition
