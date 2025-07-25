@@ -129,7 +129,7 @@ resource "aws_codedeploy_deployment_group" "safina-app-deploy-group" {
   }
   auto_rollback_configuration {
     enabled = true
-    events  = ["DEPLOYMENT_FAILURE"]
+    events  = ["DEPLOYMENT_FAILURE"] 
   }
 
   load_balancer_info {
