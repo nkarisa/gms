@@ -135,7 +135,7 @@ resource "aws_codedeploy_deployment_group" "safina-app-deploy-group" {
   load_balancer_info {
     target_group_pair_info {
       prod_traffic_route {
-        listener_arns = [aws_alb_listener.safina_listener_https_443.arn]
+        listener_arns = [data.aws_alb_listener.safina_listener_https_443.arn]
       }
 
       target_group {
