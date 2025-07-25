@@ -59,14 +59,13 @@ data "aws_iam_role" "ecs_task_execution_role" {
 
 # Data source for the existing Application Load Balancer
 data "aws_lb" "safina_elb" {
-  name = var.elb_name # Replace with your actual ALB name
+  name = var.elb_name 
 }
 
 # Data source for the existing Listener (HTTP:443 on the ALB)
 data "aws_lb_listener" "safina_listener_https_443" {
   load_balancer_arn = data.aws_lb.safina_elb.arn
   port              = 443
-  # protocol          = "HTTPS" # Assuming 443 implies HTTPS
 }
  
 # Data source for the existing Target Group 
