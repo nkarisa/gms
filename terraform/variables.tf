@@ -1,14 +1,14 @@
-# variable "codedeploy_application_name" {
-#   description = "Code Deploy Application Name",
-#   type        = string
-#   default     = "safina-deployment-app"
-# }
+variable "codedeploy_application_name" {
+  description = "Code Deploy Application Name",
+  type        = string
+  default     = "safina-app-deploy"
+}
 
-# variable "deployment_group_name" {
-#   description = "Code Deploy Deployment Group Name",
-#   type        = string
-#   default     = "ssafina-app-deployment-group"
-# }
+variable "deployment_group_name" {
+  description = "Code Deploy Deployment Group Name",
+  type        = string
+  default     = "safina-app-deploy-group"
+}
 
 variable "app_name" {
   description = "Application Name"

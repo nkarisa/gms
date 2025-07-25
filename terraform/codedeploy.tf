@@ -26,7 +26,7 @@ locals {
 
     echo "creating deployment ..."
     ID=$(aws deploy create-deployment \
-        --application-name ${aws_codedeploy_app.safina-app-deploy.name} \
+        --application-name ${var.codedeploy_application_name} \
         --deployment-group-name ${aws_codedeploy_deployment_group.safina-app-deploy-group.name} \
         --revision '{"revisionType": "AppSpecContent", "appSpecContent": {"content": "${local.appspec_content}", "sha256": "${local.appspec_sha256}"}}' \
         --output text \
@@ -98,12 +98,12 @@ resource "null_resource" "start_deploy" {
 
 resource "aws_codedeploy_app" "safina-app-deploy" {
   compute_platform = "ECS"
-  name             = "safina-app-deploy"
+  name             = var.codedeploy_application_name
 }
 
 resource "aws_codedeploy_deployment_group" "safina-app-deploy-group" {
-  app_name               = aws_codedeploy_app.safina-app-deploy.name
-  deployment_group_name  = "safina-app-deploy-group"
+  app_name               = var.codedeploy_application_name
+  deployment_group_name  = var.deployment_group_name
   deployment_config_name = "CodeDeployDefault.ECSAllAtOnce"
   service_role_arn       = data.aws_iam_role.safina-code-deploy-role.arn
 
