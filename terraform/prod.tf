@@ -80,7 +80,7 @@ resource "aws_lb_listener_rule" "blue_green_https_forward_rule" {
 
   condition {
     path_pattern {
-      values = ["/"] # This rule applies to all paths. Adjust as needed.
+      values = ["/"] # This rule applies to all paths. Adjust as needed. 
     }
   }
 }
