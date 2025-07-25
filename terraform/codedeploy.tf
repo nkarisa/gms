@@ -64,6 +64,8 @@ EOF
 }
 
 resource "local_file" "deploy_script" {
+  count = var.app_environment == "prod" ? 1 : 0
+  
   filename             = "${path.module}/deploy_script.txt"
   directory_permission = "0755"
   file_permission      = "0644"
@@ -76,6 +78,8 @@ resource "local_file" "deploy_script" {
 }
 
 resource "null_resource" "start_deploy" {
+  count = var.app_environment == "prod" ? 1 : 0
+
   triggers = {
     appspec_sha256 = local.appspec_sha256 # run only if appspec file changed
   }
@@ -93,11 +97,15 @@ resource "null_resource" "start_deploy" {
 
 
 resource "aws_codedeploy_app" "safina-app-deploy" {
+  count = var.app_environment == "prod" ? 1 : 0
+
   compute_platform = "ECS"
   name             = "safina-app-deploy"
 }
 
 resource "aws_codedeploy_deployment_group" "safina-app-deploy-group" {
+  count = var.app_environment == "prod" ? 1 : 0
+
   app_name               = aws_codedeploy_app.safina-app-deploy.name
   deployment_group_name  = "safina-app-deploy-group"
   deployment_config_name = "CodeDeployDefault.ECSAllAtOnce"
