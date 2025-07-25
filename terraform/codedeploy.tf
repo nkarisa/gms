@@ -90,8 +90,8 @@ resource "null_resource" "start_deploy" {
   }
 
   depends_on = [ 
-    aws_codedeploy_app.safina-app-deploy
-    aws_codedeploy_deployment_group.safina-app-deploy-group
+    aws_codedeploy_app.safina-app-deploy,
+    aws_codedeploy_deployment_group.safina-app-deploy-group,
   ]
 }
 
