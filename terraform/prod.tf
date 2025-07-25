@@ -27,35 +27,55 @@ resource "aws_lb_target_group" "tg" {
 }
 
 # Create a listener rule to associate the target group with the 443 listener
-resource "aws_lb_listener_rule" "green_https_forward_rule" {
+# resource "aws_lb_listener_rule" "green_https_forward_rule" {
+
+#   count = var.app_environment == "prod" ? 1 : 0
+
+#   listener_arn = data.aws_lb_listener.safina_listener_https_443.arn
+#   priority     = 10 # Choose a unique priority for your rule
+
+#   action {
+#     type             = "forward"
+#     target_group_arn = aws_lb_target_group.tg[0].arn
+#   }
+
+#   condition {
+#     path_pattern {
+#       values = ["/"] # This rule applies to all paths. Adjust as needed.
+#     }
+#   }
+
+#     stickiness {
+#         enabled  = true
+#         duration = 600
+#       }
+# }
+
+resource "aws_lb_listener_rule" "blue_green_https_forward_rule" {
 
   count = var.app_environment == "prod" ? 1 : 0
 
   listener_arn = data.aws_lb_listener.safina_listener_https_443.arn
-  priority     = 0 # Choose a unique priority for your rule
+  priority     = 10 # Choose a unique priority for your rule
 
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.tg[0].arn
-  }
+    action {
+    type = "forward"
+    forward {
+      target_group {
+        arn    = aws_lb_target_group.tg[1].arn
+        weight = 100
+      }
 
-  condition {
-    path_pattern {
-      values = ["/"] # This rule applies to all paths. Adjust as needed.
+      target_group {
+        arn    = aws_lb_target_group.tg[0].arn
+        weight = 0
+      }
+
+      stickiness {
+        enabled  = true
+        duration = 600
+      }
     }
-  }
-}
-
-resource "aws_lb_listener_rule" "blue_https_forward_rule" {
-
-  count = var.app_environment == "prod" ? 1 : 0
-
-  listener_arn = data.aws_lb_listener.safina_listener_https_443.arn
-  priority     = 100 # Choose a unique priority for your rule
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.tg[1].arn
   }
 
   condition {
