@@ -27,7 +27,7 @@ locals {
     echo "creating deployment ..."
     ID=$(aws deploy create-deployment \
         --application-name ${var.codedeploy_application_name} \
-        --deployment-group-name ${aws_codedeploy_deployment_group.safina-app-deploy-group.name} \
+        --deployment-group-name ${var.deployment_group_name} \
         --revision '{"revisionType": "AppSpecContent", "appSpecContent": {"content": "${local.appspec_content}", "sha256": "${local.appspec_sha256}"}}' \
         --output text \
         --query '[deploymentId]')
