@@ -65,7 +65,7 @@ EOF
 
 resource "local_file" "deploy_script" {
   count = var.app_environment == "prod" ? 1 : 0
-  
+
   filename             = "${path.module}/deploy_script.txt"
   directory_permission = "0755"
   file_permission      = "0644"
@@ -104,7 +104,7 @@ resource "aws_codedeploy_app" "safina-app-deploy" {
 }
 
 resource "aws_codedeploy_deployment_group" "safina-app-deploy-group" {
-  count = var.app_environment == "prod" ? 1 : 0
+#   count = var.app_environment == "prod" ? 1 : 0
 
   app_name               = aws_codedeploy_app.safina-app-deploy.name
   deployment_group_name  = "safina-app-deploy-group"
@@ -151,6 +151,10 @@ resource "aws_codedeploy_deployment_group" "safina-app-deploy-group" {
       }
     }
   }
+
+  depends_on = [
+    aws_codedeploy_app.safina-app-deploy
+  ]
 }
 
 
