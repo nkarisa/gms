@@ -14,7 +14,7 @@ resource "aws_lb_target_group" "tg" {
 
   count = var.app_environment == "prod" ? length(local.target_groups) : 0
 
-  name        = "${var.lb_target_group_443_name}-${element(local.target_groups, count.index)}"
+  name        = "${data.aws_lb_listener.safina_listener_https_443.name}-${element(local.target_groups, count.index)}"
   port        = 443
   protocol    = "HTTP"
   target_type = "instance"
