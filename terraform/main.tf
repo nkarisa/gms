@@ -53,21 +53,18 @@ resource "aws_ecs_service" "new_ecs_service" {
   force_new_deployment = true 
   
   deployment_controller {
-    type = "ECS"
+    # type = "ECS"
+    type = var.app_environment == "prod" ? "CODE_DEPLOY" : "ECS"
   }
 
-  # lifecycle {
-  #   # This prevents Terraform from trying to recreate the service
-  #   # if only 'triggers' changes. It just forces an update.
-  #   ignore_changes = [
-  #     triggers,
-  #   ]
-  # }
+  deployment_configuration {
+    strategy =  var.app_environment == "prod" ? "BLUE_GREEN" : "ROLLING"
+  }
 
-  # triggers = {
-  #   # This ensures a deployment on every `terraform apply`
-  #   redeploy_timestamp = timestamp()
-  # }
+  lifecycle {
+    # because CodeDeploy will handle task definition and alb changes outside of terraform
+    ignore_changes = [load_balancer, task_definition, desired_count]
+  }
 
   # Optional: Enable service discovery, auto scaling, etc.
   tags = {
