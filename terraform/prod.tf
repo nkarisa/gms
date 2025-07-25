@@ -12,7 +12,7 @@ locals {
 
 resource "aws_lb_target_group" "tg" {
 
-  count = var.app_environment == "prod" ? length(local.target_groups) : 0
+#   count = var.app_environment == "prod" ? length(local.target_groups) : 0
 
   name        = "${var.app_name}-${element(local.target_groups, count.index)}"
   port        = 443
@@ -29,7 +29,7 @@ resource "aws_lb_target_group" "tg" {
 
 resource "aws_lb_listener_rule" "blue_green_https_forward_rule" {
 
-  count = var.app_environment == "prod" ? 1 : 0
+#   count = var.app_environment == "prod" ? 1 : 0
 
   listener_arn = data.aws_lb_listener.safina_listener_https_443.arn
   priority     = 10 # Choose a unique priority for your rule
