@@ -2,9 +2,9 @@ unit_tests:
   services:
     - name: mysql:8.0
       alias: mysql
-  artifacts:
-    reports:
-      junit: "$CI_PROJECT_DIR/phpunit-report.xml"
+  # artifacts:
+  #   reports:
+  #     junit: "$CI_PROJECT_DIR/phpunit-report.xml"
   environment:
     name: test
   script:

@@ -4,11 +4,6 @@ variables:
     COMPOSER_CACHE_DIR: "$CI_PROJECT_DIR/vendor"
     MYSQL_ROOT_PASSWORD: "$MYSQL_ROOT_PASSWORD"
 
-# cache:
-#   key: "${CI_JOB_NAME}-build"
-#   paths:
-#       - vendor
-
 cache:
   paths:
     - vendor/
@@ -18,7 +13,7 @@ include:
   - "pipeline-includes/unit_testing.yml"
   - "pipeline-includes/integration_testing.yml"
   - "pipeline-includes/smoke_testing.yml"
-  - component: &core-yaml-tpl $CI_SERVER_FQDN/ciorg/community/cmf/pipeline/core-yaml/include@2.4
+  - component: &core-yaml-tpl $CI_SERVER_FQDN/ciorg/community/cmf/pipeline/core-yaml/include@US136278/php_unit_tests_support #2.4
     inputs: &core-yaml-input
       deploy_stages: ''
       feature_deploy_stages: ''
@@ -28,7 +23,7 @@ include:
       is_http_service: false
       build_and_test_image_version: '8.2.29' 
       build_and_test_image: php 
-      service_language: golang # Ignore this one. Used only to satisfy the logic checks
+      service_language: php 
       include_build_job: false
       deploy_tooling: 'terraform' 
       terraform_dir: 'terraform'
