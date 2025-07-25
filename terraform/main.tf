@@ -63,7 +63,7 @@ resource "aws_ecs_service" "new_ecs_service" {
 
   lifecycle {
     # because CodeDeploy will handle task definition and alb changes outside of terraform
-    ignore_changes = [load_balancer, task_definition, desired_count]
+    ignore_changes = var.app_environment == "prod" ? [load_balancer, task_definition, desired_count] : []
   }
 
   # Optional: Enable service discovery, auto scaling, etc.
