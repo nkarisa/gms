@@ -72,8 +72,8 @@ resource "local_file" "deploy_script" {
   content              = local.script
 
   depends_on = [ 
-    aws_codedeploy_app.this,
-    aws_codedeploy_deployment_group.this,
+    aws_codedeploy_app.safina-app-deploy,
+    aws_codedeploy_deployment_group.safina-app-deploy-group,
   ]
 }
 
