@@ -10,6 +10,12 @@
 #   default     = "ssafina-app-deployment-group"
 # }
 
+variable "app_name" {
+  description = "Application Name"
+  type        = string
+  default     = "ssafina-app"
+}
+
 variable "SESSION_HANDLER" {
   description = "CI session handler" # Redis, DynamoDb
   type        = string
