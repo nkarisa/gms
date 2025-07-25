@@ -12,7 +12,7 @@ locals {
 
 resource "aws_lb_target_group" "tg" {
 
-#   count = var.app_environment == "prod" ? length(local.target_groups) : 0
+  count = length(local.target_groups)
 
   name        = "${var.app_name}-${element(local.target_groups, count.index)}"
   port        = 443
