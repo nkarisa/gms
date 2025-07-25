@@ -1,3 +1,15 @@
+variable "codedeploy_application_name" {
+  description = "Code Deploy Application Name",
+  type        = string
+  default     = "safina-deployment-app"
+}
+
+variable "deployment_group_name" {
+  description = "Code Deploy Deployment Group Name",
+  type        = string
+  default     = "ssafina-app-deployment-group"
+}
+
 variable "SESSION_HANDLER" {
   description = "CI session handler" # Redis, DynamoDb
   type        = string
@@ -108,6 +120,12 @@ variable "container_name" {
 #   default     = "safina-app" 
 }
 
+variable "container_port" {
+  description = "Task Container Port"
+  type        = string
+  default     = "8080" 
+}
+
 variable "image_name" {
   description = "Task Image"
   type        = string
@@ -118,6 +136,11 @@ variable "aws_region" {
   description = "AWS Region"
   type        = string
   default     = "eu-west-1"
+}
+
+variable "aws_account_id" {
+  description = "AWS Account Id"
+  type        = string
 }
 
 variable "task_cpu" {
