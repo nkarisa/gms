@@ -57,9 +57,9 @@ resource "aws_ecs_service" "new_ecs_service" {
     type = var.app_environment == "prod" ? "CODE_DEPLOY" : "ECS"
   }
 
-  deployment_configuration {
-    strategy =  var.app_environment == "prod" ? "BLUE_GREEN" : "ROLLING"
-  }
+  # deployment_configuration {
+  #   strategy =  var.app_environment == "prod" ? "BLUE_GREEN" : "ROLLING"
+  # }
 
   lifecycle {
     # because CodeDeploy will handle task definition and alb changes outside of terraform
