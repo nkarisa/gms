@@ -17,7 +17,7 @@ resource "aws_lb_target_group" "tg" {
   name        = "${var.app_name}-${element(local.target_groups, count.index)}"
   port        = 443
   protocol    = "HTTP"
-  target_type = "instance"
+  target_type = "ip"
   vpc_id      = var.vpc_id
   health_check {
     matcher = "200,301,302,404"
