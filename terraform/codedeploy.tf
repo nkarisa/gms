@@ -120,7 +120,7 @@ resource "aws_codedeploy_deployment_group" "safina-app-deploy-group" {
 
   ecs_service {
     cluster_name = data.aws_ecs_cluster.safina_app_cluster.cluster_name
-    service_name = data.aws_ecs_service.ecs_service.service_name
+    service_name = aws_ecs_service.new_ecs_service_prod.service_name
   }
 
   deployment_style {
@@ -150,6 +150,7 @@ resource "aws_codedeploy_deployment_group" "safina-app-deploy-group" {
 
   depends_on = [
     aws_codedeploy_app.safina-app-deploy
+    aws_ecs_service.new_ecs_service_prod
   ]
 }
 
