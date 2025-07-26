@@ -13,7 +13,7 @@ variable "deployment_group_name" {
 variable "app_name" {
   description = "Application Name"
   type        = string
-  default     = "ssafina-app"
+  default     = "safina-app"
 }
 
 variable "SESSION_HANDLER" {
