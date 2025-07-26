@@ -72,8 +72,8 @@ resource "local_file" "deploy_script" {
   content              = local.script
 
   depends_on = [ 
-    aws_codedeploy_app.safina-app-deploy,
-    aws_codedeploy_deployment_group.safina-app-deploy-group,
+    aws_codedeploy_app.safina-app-deploy[0],
+    aws_codedeploy_deployment_group.safina-app-deploy-group[0],
   ]
 }
 
@@ -90,18 +90,20 @@ resource "null_resource" "start_deploy" {
   }
 
   depends_on = [ 
-    aws_codedeploy_app.safina-app-deploy,
-    aws_codedeploy_deployment_group.safina-app-deploy-group,
+    aws_codedeploy_app.safina-app-deploy[0],
+    aws_codedeploy_deployment_group.safina-app-deploy-group[0],
   ]
 }
 
 
 resource "aws_codedeploy_app" "safina-app-deploy" {
+  count = var.app_environment == "prod" ? 1 : 0
   compute_platform = "ECS"
   name             = var.codedeploy_application_name
 }
 
 resource "aws_codedeploy_deployment_group" "safina-app-deploy-group" {
+  count = var.app_environment == "prod" ? 1 : 0
   app_name               = var.codedeploy_application_name
   deployment_group_name  = var.deployment_group_name
   deployment_config_name = "CodeDeployDefault.ECSAllAtOnce"
@@ -120,7 +122,7 @@ resource "aws_codedeploy_deployment_group" "safina-app-deploy-group" {
 
   ecs_service {
     cluster_name = data.aws_ecs_cluster.safina_app_cluster.cluster_name
-    service_name = aws_ecs_service.new_ecs_service_prod.service_name
+    service_name = var.service_name
   }
 
   deployment_style {
@@ -149,85 +151,7 @@ resource "aws_codedeploy_deployment_group" "safina-app-deploy-group" {
   }
 
   depends_on = [
-    aws_codedeploy_app.safina-app-deploy,
-    aws_ecs_service.new_ecs_service_prod,
+    aws_codedeploy_app.safina-app-deploy[0],
+    aws_ecs_service.new_ecs_service_prod[0],
   ]
 }
-
-
-# data "aws_iam_policy_document" "assume_by_codedeploy" {
-#   statement {
-#     sid     = ""
-#     effect  = "Allow"
-#     actions = ["sts:AssumeRole"]
-
-#     principals {
-#       type        = "Service"
-#       identifiers = ["codedeploy.amazonaws.com"]
-#     }
-#   }
-# }
-
-# resource "aws_iam_role" "codedeploy" {
-#   name               = "codedeploy"
-#   assume_role_policy = data.aws_iam_policy_document.assume_by_codedeploy.json
-# }
-
-
-# data "aws_iam_policy_document" "codedeploy" {
-#   statement {
-#     sid    = "AllowLoadBalancingAndECSModifications"
-#     effect = "Allow"
-
-#     actions = [
-#       "ecs:CreateTaskSet",
-#       "ecs:DeleteTaskSet",
-#       "ecs:DescribeServices",
-#       "ecs:UpdateServicePrimaryTaskSet",
-#       "elasticloadbalancing:DescribeListeners",
-#       "elasticloadbalancing:DescribeRules",
-#       "elasticloadbalancing:DescribeTargetGroups",
-#       "elasticloadbalancing:ModifyListener",
-#       "elasticloadbalancing:ModifyRule",
-#       "s3:GetObject"
-#     ]
-
-#     resources = ["*"]
-#   }
-#   statement {
-#     sid    = "AllowPassRole"
-#     effect = "Allow"
-
-#     actions = ["iam:PassRole"]
-
-#     resources = [
-#       aws_iam_role.app_task_role.arn
-#     ]
-#   }
-
-#   statement {
-#     sid    = "DeployService"
-#     effect = "Allow"
-
-#     actions = ["ecs:DescribeServices",
-#       "codedeploy:GetDeploymentGroup",
-#       "codedeploy:CreateDeployment",
-#       "codedeploy:GetDeployment",
-#       "codedeploy:GetDeploymentConfig",
-#     "codedeploy:RegisterApplicationRevision"]
-
-#     resources = [
-#       aws_ecs_service.new_ecs_service_prod.id,
-#       aws_codedeploy_deployment_group.safina-app-deploy-group.arn,
-#       "arn:aws:codedeploy:${var.aws_region}:${var.aws_account_id}:deploymentconfig:*}",
-#       aws_codedeploy_app.safina-app-deploy.arn
-#     ]
-#   }
-
-
-# }
-# resource "aws_iam_role_policy" "codedeploy" {
-#   role   = aws_iam_role.codedeploy.name
-#   policy = data.aws_iam_policy_document.codedeploy.json
-# }
-
