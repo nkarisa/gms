@@ -150,8 +150,8 @@ resource "aws_codedeploy_deployment_group" "safina-app-deploy-group" {
     }
   }
 
-  depends_on = [
-    aws_codedeploy_app.safina-app-deploy[0],
-    aws_ecs_service.new_ecs_service_prod[0],
-  ]
+  # depends_on = [
+  #   aws_codedeploy_app.safina-app-deploy[0],
+  #   aws_ecs_service.new_ecs_service_prod[0],
+  # ]
 }
