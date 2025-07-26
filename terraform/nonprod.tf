@@ -1,5 +1,8 @@
 # # Create the AWS ECS Service 
 resource "aws_ecs_service" "new_ecs_service" {
+
+  count = var.app_environment == "prod" ? 0 : 1
+  
   name            = var.service_name
   cluster         = data.aws_ecs_cluster.safina_app_cluster.id
   task_definition = aws_ecs_task_definition.task_definition.arn
