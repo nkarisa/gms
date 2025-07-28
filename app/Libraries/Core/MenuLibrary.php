@@ -283,6 +283,12 @@ class MenuLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
         }
     }
 
+    /**
+     * All menu items are derived from the Schema Manifest file but removing those that are not required in the menu based on 
+     * the configuration item "tablesNotRequiredInMenu"
+     *
+     * @return array[]
+     */
     public function getMenuItems(): array
     {
 
@@ -301,6 +307,10 @@ class MenuLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
         return $menuItems;
     }
 
+    /**
+     * Get new menu items that are not currently registered in the database menu based on the Schema Manifest file.
+     * @return array
+     */
     public function newMenuItems()
     {
         $conditionArray = ['menu_is_active' => 1];
@@ -334,9 +344,18 @@ class MenuLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
 
     public function setMenuSessions()
     {
+        // Schema Manifest registered menus
         $menus = $this->getMenuItems(); 
+
+        // New menu items that are not currently registered in the database
+        // based on the Schema Manifest file.
         $newMenuItems = $this->newMenuItems();
 
+        // If there are new menu items, upsert them into the database
+        // This will add new menu items and update existing ones.
+        // If the menu items are already in the database, they will not be added again.
+        // If the menu items are not in the database, they will be added.
+        // If the menu items are in the database, they will be updated.
         if (!empty($newMenuItems)) {
             $this->upsertMenu($menus);
         }
@@ -344,6 +363,11 @@ class MenuLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
         $sizeOfMenuItemsByController = count($menus);
         $sizeOfMenuItemsByDatabase = $this->getCountOfMenuItems();
 
+        // If the number of menu items by controller does not match the number of menu items in the database,
+        // remove the user menu sessions to force a refresh of the menu items.
+        // This ensures that the user menu is always up to date with the latest menu items.
+        // This is necessary because the menu items are derived from the Schema Manifest file,
+        // and the Schema Manifest file may change over time.
         if ($sizeOfMenuItemsByController !== $sizeOfMenuItemsByDatabase) {
             session()->remove(['user_menu', 'user_priority_menu', 'user_more_menu']);
         }
