@@ -1,3 +1,0 @@
-﻿account_system_setting_id,account_system_setting_name,account_system_setting_track_number,fk_approve_item_id,fk_account_system_id,account_system_setting_value,account_system_setting_description,account_system_setting_accounts,account_system_setting_created_by,account_system_setting_created_date,account_system_setting_last_modified_by,account_system_setting_last_modified_date,fk_status_id,fk_approval_id
-1,use_pca_objectives,ACNG-46834,,1,"","",null,1,2024-03-08,1,2024-03-08 11:35:40,549,28820687
-2,voucher_attachments_required,ACNG-7762234,,,1,When set to 1 means country requires voucher attachments. Add account system ids into array in account_system_setting_accounts,"[6, 10, 12, 14, 15]",1,2024-03-08,1,2024-03-08 11:35:40,,

@@ -15,20 +15,20 @@ if(!function_exists('constructSeederData')){
 
 
 if(!function_exists('csvToJson')){
-    function csvToJsonLiteral(string $dataFile): ?string {
-        $csvFilePath = APPPATH.'Database/Seeds/data_csv/'.$dataFile.'.csv';
+    function csvRowsGenerator(string $dataFile): ?\Generator {
+        $csvFilePath = APPPATH . 'Database/Seeds/data_csv/' . $dataFile . '.csv';
 
         if (!file_exists($csvFilePath) || !is_readable($csvFilePath)) {
             error_log("Error: CSV file not found or not readable at '$csvFilePath'.");
             return null;
         }
-    
+
         $csvFile = fopen($csvFilePath, 'r');
         if ($csvFile === false) {
             error_log("Error: Could not open CSV file '$csvFilePath'.");
             return null;
         }
-    
+
         // Read the first line (headers) and remove the BOM if present
         $firstLine = fgets($csvFile);
         if ($firstLine !== false) {
@@ -38,34 +38,23 @@ if(!function_exists('csvToJson')){
             error_log("Error: Could not read headers from CSV file '$csvFilePath'.");
             return null;
         }
-    
-        $jsonData = [];
-        $rowCount = 0;
+
         while ($row = fgetcsv($csvFile)) {
             if ($row !== false) {
                 $rowData = [];
                 $numHeaders = count($headers);
                 $numValues = count($row);
                 $count = min($numHeaders, $numValues);
-    
+
                 for ($i = 0; $i < $count; $i++) {
                     // Trim whitespace and newlines from the values
                     $rowData[$headers[$i]] = trim(str_replace(["\r\n", "\r", "\n"], ' ', $row[$i]));
                 }
-                $jsonData[] = $rowData;
+                yield $rowData; // Yield each row immediately
             }
-            $rowCount++;
         }
-    
+
         fclose($csvFile);
-    
-        $jsonOutput = json_encode($jsonData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-        if ($jsonOutput === false) {
-            error_log("Error: Could not encode data to JSON. Error: " . json_last_error_msg());
-            return null;
-        }
-    
-        return $jsonOutput;
     }
 }
 

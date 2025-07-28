@@ -1,5 +1,7 @@
 <?php
 
+
+
 namespace App\Database\Seeds;
 
 use CodeIgniter\Database\Seeder;
@@ -76,42 +78,36 @@ class SetUpSeeder extends Seeder
         $databaseLibrary->truncateTables($schemaTables);
 
         foreach ($schemaTables as $table) {
-            if(!file_exists(APPPATH. DS . 'Database' . DS. 'Seeds'. DS . 'data_csv'. DS . $table.'.csv')) continue;
+            if (!file_exists(APPPATH . DS . 'Database' . DS . 'Seeds' . DS . 'data_csv' . DS . $table . '.csv')) {
+                continue;
+            }
+
             $builder = $this->db->table($table);
-            $jsonData = csvToJsonLiteral($table);
+            $rowsGenerator = csvRowsGenerator($table); // Get the generator
 
-            // Use a generator to process data in batches
-            foreach ($this->processSeederDataInBatches($jsonData, self::BATCH_SIZE) as $batch) {
-                if (!empty($batch)) {
-                    $builder->insertBatch($batch);
+            if ($rowsGenerator === null) {
+                // Handle error if the generator couldn't be created (e.g., file not found)
+                continue;
+            }
+
+            $batch = [];
+            $count = 0;
+            foreach ($rowsGenerator as $row) {
+                $batch[] = $row;
+                $count++;
+
+                if ($count === self::BATCH_SIZE) {
+                    if (!empty($batch)) {
+                        $builder->insertBatch($batch);
+                    }
+                    $batch = []; // Reset batch
+                    $count = 0;  // Reset count
                 }
             }
-        }
-    }
 
-    /**
-     * Processes JSON data in batches using a generator.
-     *
-     * @param string $jsonData The JSON data string.
-     * @param int $batchSize The number of rows per batch.
-     * @return \Generator
-     */
-    private function processSeederDataInBatches(string $jsonData, int $batchSize): \Generator
-    {
-        $data = json_decode($jsonData, true);
-
-        if (is_array($data)) {
-            $currentBatch = [];
-            foreach ($data as $row) {
-                $currentBatch[] = $row;
-                if (count($currentBatch) === $batchSize) {
-                    yield $currentBatch;
-                    $currentBatch = [];
-                }
-            }
-            // Yield any remaining rows
-            if (!empty($currentBatch)) {
-                yield $currentBatch;
+            // Insert any remaining rows in the last batch
+            if (!empty($batch)) {
+                $builder->insertBatch($batch);
             }
         }
     }

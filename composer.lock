@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.351.4",
+            "version": "3.351.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "19dfd2db0f6ce35e1947e8bff4d956614b4aaaaf"
+                "reference": "9506d7fdb3cb84f8d7b175c594db9993264814be"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/19dfd2db0f6ce35e1947e8bff4d956614b4aaaaf",
-                "reference": "19dfd2db0f6ce35e1947e8bff4d956614b4aaaaf",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/9506d7fdb3cb84f8d7b175c594db9993264814be",
+                "reference": "9506d7fdb3cb84f8d7b175c594db9993264814be",
                 "shasum": ""
             },
             "require": {
@@ -153,28 +153,28 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.351.4"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.351.7"
             },
-            "time": "2025-07-22T18:12:04+00:00"
+            "time": "2025-07-25T18:06:34+00:00"
         },
         {
             "name": "codeigniter4/framework",
-            "version": "v4.6.1",
+            "version": "v4.6.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/codeigniter4/framework.git",
-                "reference": "d021b04fdf23afc85d8a8b9b541be9a0a9ccdb5f"
+                "reference": "dbc07dc8cb260b5abe5e15d3ed316941183e7385"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/codeigniter4/framework/zipball/d021b04fdf23afc85d8a8b9b541be9a0a9ccdb5f",
-                "reference": "d021b04fdf23afc85d8a8b9b541be9a0a9ccdb5f",
+                "url": "https://api.github.com/repos/codeigniter4/framework/zipball/dbc07dc8cb260b5abe5e15d3ed316941183e7385",
+                "reference": "dbc07dc8cb260b5abe5e15d3ed316941183e7385",
                 "shasum": ""
             },
             "require": {
                 "ext-intl": "*",
                 "ext-mbstring": "*",
-                "laminas/laminas-escaper": "^2.14",
+                "laminas/laminas-escaper": "^2.17",
                 "php": "^8.1",
                 "psr/log": "^3.0"
             },
@@ -186,7 +186,7 @@
                 "mikey179/vfsstream": "^1.6.12",
                 "nexusphp/cs-config": "^3.6",
                 "phpunit/phpunit": "^10.5.16 || ^11.2",
-                "predis/predis": "^1.1 || ^2.3"
+                "predis/predis": "^3.0"
             },
             "suggest": {
                 "ext-curl": "If you use CURLRequest class",
@@ -229,7 +229,7 @@
                 "slack": "https://codeigniterchat.slack.com",
                 "source": "https://github.com/codeigniter4/CodeIgniter4"
             },
-            "time": "2025-05-02T16:00:55+00:00"
+            "time": "2025-07-26T15:39:12+00:00"
         },
         {
             "name": "codeigniter4/settings",
@@ -288,16 +288,16 @@
         },
         {
             "name": "codeigniter4/translations",
-            "version": "v4.6.1",
+            "version": "v4.6.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/codeigniter4/translations.git",
-                "reference": "08ec6c93e4645fc24ce56ddec353439e44f2aa0a"
+                "reference": "da98a8bfd4b068087b0b51d41fbf76dc76f16599"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/codeigniter4/translations/zipball/08ec6c93e4645fc24ce56ddec353439e44f2aa0a",
-                "reference": "08ec6c93e4645fc24ce56ddec353439e44f2aa0a",
+                "url": "https://api.github.com/repos/codeigniter4/translations/zipball/da98a8bfd4b068087b0b51d41fbf76dc76f16599",
+                "reference": "da98a8bfd4b068087b0b51d41fbf76dc76f16599",
                 "shasum": ""
             },
             "require": {
@@ -306,7 +306,7 @@
             },
             "require-dev": {
                 "codeigniter/coding-standard": "^1.7",
-                "codeigniter4/codeigniter4": "4.x-dev",
+                "codeigniter4/codeigniter4": "dev-develop",
                 "ext-tokenizer": "*",
                 "friendsofphp/php-cs-fixer": "^3.53",
                 "nexusphp/cs-config": "^3.22",
@@ -335,7 +335,7 @@
                 "slack": "https://codeigniterchat.slack.com",
                 "source": "https://github.com/codeigniter4/translations"
             },
-            "time": "2025-05-02T16:37:42+00:00"
+            "time": "2025-07-26T16:19:49+00:00"
         },
         {
             "name": "graham-campbell/result-type",
@@ -2285,16 +2285,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.1.19",
+            "version": "2.1.20",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "473a8c30e450d87099f76313edcbb90852f9afdf"
+                "reference": "a9ccfef95210f92ba6feea6e8d1eef42b5605499"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/473a8c30e450d87099f76313edcbb90852f9afdf",
-                "reference": "473a8c30e450d87099f76313edcbb90852f9afdf",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/a9ccfef95210f92ba6feea6e8d1eef42b5605499",
+                "reference": "a9ccfef95210f92ba6feea6e8d1eef42b5605499",
                 "shasum": ""
             },
             "require": {
@@ -2339,7 +2339,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-07-21T19:58:24+00:00"
+            "time": "2025-07-26T20:45:26+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
