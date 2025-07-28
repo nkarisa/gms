@@ -33,8 +33,8 @@ resource "aws_ecs_service" "new_ecs_service" {
   force_new_deployment = true 
   
   deployment_controller {
-    # type = "ECS"
-    type = var.app_environment == "prod" ? "CODE_DEPLOY" : "ECS"
+    type = "ECS"
+    # type = var.app_environment == "prod" ? "CODE_DEPLOY" : "ECS"
   }
 
   # deployment_configuration {
