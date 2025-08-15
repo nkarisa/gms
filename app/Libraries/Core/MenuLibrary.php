@@ -193,7 +193,7 @@ class MenuLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
 
                 // If the user menu item does not exist, insert it into the database
                 if ($existing_menu_item->getNumRows() == 0) {
-                    $this->read_db->table('menu_user_order')->insert($user_menu_data);
+                    $this->write_db->table('menu_user_order')->insert($user_menu_data);
                 }
             }
         }
