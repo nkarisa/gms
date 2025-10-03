@@ -29,8 +29,8 @@ include:
       terraform_dir: 'terraform'
       include_container_build_job: true
       unit_tests_script: 
-        # - !reference [.unit_test, script]
-        - echo 'Test Passed'
+        # - !reference [.unit_test, script] 
+        - echo 'Test Passed!!'
       smoke_tests_script:
         - !reference [.integration_test, script]
       integration_tests_script: 
