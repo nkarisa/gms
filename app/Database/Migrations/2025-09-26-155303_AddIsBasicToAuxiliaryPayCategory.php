@@ -8,7 +8,7 @@ class AddIsBasicToAuxiliaryPayCategory extends Migration
     {
         // Define the column structure
         $fields = [
-            'eearning_category_is_basic' => [
+            'earning_category_is_basic' => [
                 'type'       => 'ENUM',
                 'constraint' => ['0', '1'],
                 'default'    => '0', // It's good practice to provide a default for NOT NULL columns
@@ -18,7 +18,7 @@ class AddIsBasicToAuxiliaryPayCategory extends Migration
         ];
 
         // Add the column to the table
-        $this->forge->addColumn('eearning_category', $fields);
+        $this->forge->addColumn('earning_category', $fields);
     }
 
     //--------------------------------------------------------------------
@@ -26,6 +26,6 @@ class AddIsBasicToAuxiliaryPayCategory extends Migration
     public function down()
     {
         // Remove the column when rolling back the migration
-        $this->forge->dropColumn('eearning_category', 'eearning_category_is_basic');
+        $this->forge->dropColumn('earning_category', 'earning_category_is_basic');
     }
 }

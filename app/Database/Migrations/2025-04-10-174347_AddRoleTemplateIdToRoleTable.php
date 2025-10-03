@@ -8,7 +8,7 @@ class AddRoleTemplateIdToRoleTable extends Migration
 {
     public function up()
     {
-        $this->forge->addColumn('role', [
+        $fields = [
             'role_template_id' => [
                 'type'       => 'INT',
                 'constraint' => 100,
@@ -16,7 +16,15 @@ class AddRoleTemplateIdToRoleTable extends Migration
                 'null'       => true,
                 'default'    => null,
             ],
-        ]);
+        ];
+        
+
+        $db = \Config\Database::connect();
+        
+        if (!$db->fieldExists('role_template_id', 'role')) {
+            // 3. Use the Forge class to add the column
+            $this->forge->addColumn('role', $fields);
+        }
     }
 
     public function down()

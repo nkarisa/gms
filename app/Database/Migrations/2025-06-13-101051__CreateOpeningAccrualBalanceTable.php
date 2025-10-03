@@ -105,7 +105,7 @@ class CreateOpeningAccrualBalanceTable extends Migration
         // Add the foreign key constraint.
         // The second parameter ('system_opening_balance') is the table name,
         // and the third parameter ('system_opening_balance_id') is the column in that table.
-        $this->forge->addForeignKey('fk_system_opening_balance_id', 'system_opening_balance', 'system_opening_balance_id');
+        // $this->forge->addForeignKey('fk_system_opening_balance_id', 'system_opening_balance', 'system_opening_balance_id');
 
         // Create the table.
         $this->forge->createTable('opening_accrual_balance', true);

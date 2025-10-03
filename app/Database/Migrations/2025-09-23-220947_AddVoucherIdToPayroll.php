@@ -19,8 +19,8 @@ class AddVoucherIdToPayroll extends Migration
         ]);
 
         // Add the foreign key constraint
-        $this->forge->addForeignKey('fk_voucher_id', 'voucher', 'voucher_id');
-        $this->forge->processIndexes('payroll');
+        // $this->forge->addForeignKey('fk_voucher_id', 'voucher', 'voucher_id');
+        // $this->forge->processIndexes('payroll');
     }
 
     //--------------------------------------------------------------------
@@ -28,7 +28,7 @@ class AddVoucherIdToPayroll extends Migration
     public function down()
     {
         // Drop the foreign key constraint
-        $this->forge->dropForeignKey('payroll', 'fk_voucher_id');
+        // $this->forge->dropForeignKey('payroll', 'fk_voucher_id');
 
         // Drop the column
         $this->forge->dropColumn('payroll', 'fk_voucher_id');

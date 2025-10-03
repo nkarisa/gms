@@ -76,8 +76,8 @@ class PayrollDeduction extends Migration
         ]);
 
         $this->forge->addPrimaryKey('payroll_deduction_id');
-        $this->forge->addForeignKey('fk_payroll_deduction_category_id', 'payroll_deduction_category', 'payroll_deduction_category_id');
-        $this->forge->addForeignKey('fk_payslip_id', 'payslip', 'payslip_id');
+        // $this->forge->addForeignKey('fk_payroll_deduction_category_id', 'payroll_deduction_category', 'payroll_deduction_category_id');
+        // $this->forge->addForeignKey('fk_payslip_id', 'payslip', 'payslip_id');
         $this->forge->createTable('payroll_deduction');
     }
 

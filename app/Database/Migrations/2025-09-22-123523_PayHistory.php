@@ -79,8 +79,8 @@ class PayHistory extends Migration
         ]);
 
         $this->forge->addPrimaryKey('pay_history_id');
-        $this->forge->addForeignKey('fk_office_id', 'office', 'office_id');
-        $this->forge->addForeignKey('fk_user_id', 'user', 'user_id');
+        // $this->forge->addForeignKey('fk_office_id', 'office', 'office_id');
+        // $this->forge->addForeignKey('fk_user_id', 'user', 'user_id');
         $this->forge->createTable('pay_history');
     }
 

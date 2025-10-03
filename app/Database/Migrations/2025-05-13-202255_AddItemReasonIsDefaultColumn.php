@@ -17,7 +17,12 @@ class AddItemReasonIsDefaultColumn extends Migration
             ],
         ];
 
-        $this->forge->addColumn('item_reason', $fields);
+        $db = \Config\Database::connect();
+        
+        if (!$db->fieldExists('item_reason_is_default', 'item_reason')) {
+            // 3. Use the Forge class to add the column
+            $this->forge->addColumn('item_reason', $fields);
+        }
     }
 
     public function down()

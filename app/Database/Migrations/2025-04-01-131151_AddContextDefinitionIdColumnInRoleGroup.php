@@ -17,7 +17,12 @@ class AddContextDefinitionIdColumnInRoleGroup extends Migration
             ],
         ];
 
-        $this->forge->addColumn('role_group', $fields);
+        $db = \Config\Database::connect();
+        
+        if (!$db->fieldExists('fk_context_definition_id', 'role_group')) {
+            // 3. Use the Forge class to add the column
+            $this->forge->addColumn('role_group', $fields);
+        }
     }
 
     public function down()

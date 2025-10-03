@@ -69,7 +69,7 @@ class Payroll extends Migration
         ]);
 
         $this->forge->addPrimaryKey('payroll_id');
-        $this->forge->addForeignKey('fk_office_id', 'office', 'office_id');
+        // $this->forge->addForeignKey('fk_office_id', 'office', 'office_id');
         $this->forge->createTable('payroll');
     }
 

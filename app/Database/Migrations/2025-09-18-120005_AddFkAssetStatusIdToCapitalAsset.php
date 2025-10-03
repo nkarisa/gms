@@ -17,12 +17,12 @@ class AddFkAssetStatusIdToCapitalAsset extends Migration
             ],
         ]);
 
-        $this->forge->addForeignKey('fk_asset_state_id', 'asset_state', 'asset_state_id', 'CASCADE', 'RESTRICT');
+        // $this->forge->addForeignKey('fk_asset_state_id', 'asset_state', 'asset_state_id', 'CASCADE', 'RESTRICT');
     }
 
     public function down()
     {
-        $this->forge->dropForeignKey('capital_asset', 'capital_asset_fk_asset_state_id_foreign');
+        // $this->forge->dropForeignKey('capital_asset', 'capital_asset_fk_asset_state_id_foreign');
         $this->forge->dropColumn('capital_asset', 'fk_asset_state_id');
     }
 }

@@ -18,13 +18,13 @@ class AddFkAccountSystemToPayslipAuxiliaryPayCategory extends Migration
 
         $this->forge->addColumn('earning_category', $fields);
 
-        $this->forge->addForeignKey('fk_account_system_id', 'account_system', 'account_system_id');
-        $this->forge->processIndexes('earning_category');
+        // $this->forge->addForeignKey('fk_account_system_id', 'account_system', 'account_system_id');
+        // $this->forge->processIndexes('earning_category');
     }
 
     public function down()
     {
-        $this->forge->dropForeignKey('earning_category', 'earning_category_fk_account_system_id_foreign');
+        // $this->forge->dropForeignKey('earning_category', 'earning_category_fk_account_system_id_foreign');
         $this->forge->dropColumn('earning_category', 'fk_account_system_id');
     }
 }

@@ -95,8 +95,8 @@ class CreateAssetDepreciationTable extends Migration
         $this->forge->addPrimaryKey('asset_depreciation_id');
         $this->forge->addKey('fk_capital_asset_id');
         $this->forge->addKey('fk_voucher_id');
-        $this->forge->addForeignKey('fk_capital_asset_id', 'capital_asset', 'capital_asset_id');
-        $this->forge->addForeignKey('fk_voucher_id', 'voucher', 'voucher_id');
+        // $this->forge->addForeignKey('fk_capital_asset_id', 'capital_asset', 'capital_asset_id');
+        // $this->forge->addForeignKey('fk_voucher_id', 'voucher', 'voucher_id');
         $this->forge->createTable('asset_depreciation');
     }
 

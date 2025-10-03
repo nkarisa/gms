@@ -24,7 +24,14 @@ class AddVoucherClearedFromToVoucherTable extends Migration
                 'after'      => 'voucher_cleared_from', // This places it after the specified column
             ],
         ];
-        $this->forge->addColumn('voucher', $fields);
+
+        $db = \Config\Database::connect();
+        
+        if (!$db->fieldExists('voucher_cleared_from', 'voucher') && !$db->fieldExists('voucher_cleared_to', 'voucher')) {
+            // 3. Use the Forge class to add the column
+            $this->forge->addColumn('voucher', $fields);
+        }
+        
     }
 
     public function down()

@@ -17,7 +17,13 @@ class AddAccountSystemLevelToAccountSystem extends Migration
             ],
         ];
 
-        $this->forge->addColumn('account_system', $fields);
+        
+        $db = \Config\Database::connect();
+        
+        if (!$db->fieldExists('account_system_level', 'account_system')) {
+            // 3. Use the Forge class to add the column
+            $this->forge->addColumn('account_system', $fields);
+        }
     }
 
     public function down()

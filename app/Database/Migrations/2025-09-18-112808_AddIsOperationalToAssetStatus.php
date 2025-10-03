@@ -22,6 +22,9 @@ class AddIsOperationalToAssetStatus extends Migration
 
     public function down()
     {
-        $this->forge->dropColumn('asset_state', 'asset_state_is_operational');
+        $db = \Config\Database::connect();
+        if($db->fieldExists('asset_state_is_operational', 'asset_state')){
+            $this->forge->dropColumn('asset_state', 'asset_state_is_operational');
+        }
     }
 }

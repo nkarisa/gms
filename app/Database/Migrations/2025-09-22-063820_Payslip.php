@@ -100,8 +100,8 @@ class Payslip extends Migration
         $this->forge->addKey('payslip_id', true);
 
         // Define foreign keys
-        $this->forge->addForeignKey('fk_user_id', 'user', 'user_id');
-        $this->forge->addForeignKey('fk_payroll_id', 'payroll', 'payroll_id');
+        // $this->forge->addForeignKey('fk_user_id', 'user', 'user_id');
+        // $this->forge->addForeignKey('fk_payroll_id', 'payroll', 'payroll_id');
 
         // Create the table
         $this->forge->createTable('payslip');

@@ -29,6 +29,11 @@ class AddDepreciationFieldsToAssetCategory extends Migration
 
     public function down()
     {
-        $this->forge->dropColumn('asset_category', ['asset_category_annual_depreciation_rate', 'asset_category_depreciation_method']);
+        $db = \Config\Database::connect();
+        
+        if ($db->fieldExists('asset_category_annual_depreciation_rate', 'asset_category') && $db->fieldExists('asset_category_depreciation_method', 'asset_category')) {
+            $this->forge->dropColumn('asset_category', ['asset_category_annual_depreciation_rate', 'asset_category_depreciation_method']);    
+        }
+        
     }
 }

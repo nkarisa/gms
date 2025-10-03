@@ -70,7 +70,7 @@ class PayrollDeductionCategory extends Migration
         ]);
 
         $this->forge->addPrimaryKey('payroll_deduction_category_id');
-        $this->forge->addForeignKey('fk_account_system_id', 'account_system', 'account_system_id');
+        // $this->forge->addForeignKey('fk_account_system_id', 'account_system', 'account_system_id');
         $this->forge->createTable('payroll_deduction_category');
     }
 

@@ -8,7 +8,7 @@ class AddExpenseVoteHeadsCategoryCode extends Migration
 {
     public function up()
     {
-        $this->forge->addColumn('expense_vote_heads_category', [
+        $fields = [
             'expense_vote_heads_category_code' => [
                 'type' => 'ENUM',
                 'constraint' => [
@@ -29,7 +29,14 @@ class AddExpenseVoteHeadsCategoryCode extends Migration
                 'null' => true,
                 'after' => 'fk_funding_stream_id',
             ],
-        ]);
+        ];
+
+        $db = \Config\Database::connect();
+
+        if (!$db->fieldExists('expense_vote_heads_category_code', 'expense_vote_heads_category')) {
+            // 3. If it does NOT exist, add the column
+            $this->forge->addColumn('expense_vote_heads_category', $fields);
+        }
     }
 
     public function down()

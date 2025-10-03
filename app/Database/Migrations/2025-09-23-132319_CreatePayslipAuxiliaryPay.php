@@ -68,8 +68,8 @@ class CreatePayslipAuxiliaryPay extends Migration
         ]);
 
         $this->forge->addPrimaryKey('earning_id');
-        $this->forge->addForeignKey('fk_pay_history_id', 'pay_history', 'pay_history_id');
-        $this->forge->addForeignKey('fk_earning_category_id', 'earning_category', 'earning_category_id');
+        // $this->forge->addForeignKey('fk_pay_history_id', 'pay_history', 'pay_history_id');
+        // $this->forge->addForeignKey('fk_earning_category_id', 'earning_category', 'earning_category_id');
         $this->forge->createTable('earning');
     }
 
