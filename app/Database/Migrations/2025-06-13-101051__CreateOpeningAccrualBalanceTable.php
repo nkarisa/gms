@@ -52,8 +52,8 @@ class CreateOpeningAccrualBalanceTable extends Migration
                 'comment'     => 'The actual amount of the opening accrual.',
             ],
             'opening_accrual_balance_effect' => [
-                'type'       => 'VARCHAR',
-                'constraint' => "'debit', 'credit'",
+                'type'       => 'ENUM',
+                'constraint' => ['debit', 'credit'],
                 'null'       => false,
                 'comment'    => 'Type of the accrual effect.',
             ],
