@@ -14,6 +14,10 @@
 
     <?php include 'includes_top.php'; ?>
 
+    <script>
+        const baseURL = "<?=base_url();?>";
+    </script>
+
 </head>
 
 <body class="page-body <?php if ($skin_colour != '')
@@ -48,9 +52,9 @@
 
                     <div class = "col-xs-2">
                         <div class="btn-group pull-right">
-                            <button class="btn btn-default" title="<?= get_phrase('back'); ?>"
+                            <button class="btn btn-default no-print" title="<?= get_phrase('back'); ?>"
                                 onclick="javascript:go_back();"><i class="fa fa-backward"></i></button>
-                            <button class="btn btn-default" title="<?= get_phrase('forward'); ?>"
+                            <button class="btn btn-default no-print" title="<?= get_phrase('forward'); ?>"
                                 onclick="javascript:go_forward();"><i class="fa fa-forward"></i></button>
                         </div>
                     </div>

@@ -56,10 +56,10 @@ class VarianceCommentLibrary extends GrantsLibrary implements \App\Interfaces\Li
         return $variance_comments_array;
   }
 
-  function add(){
+  function add($post, $parentTable = null, $parentId = null){
 
     // $post = $this->input->post();
-    $post = $this->request->getPost();
+    // $post = $this->request->getPost();
 
     $expense_account_id = $post['expense_account_id'];
     $variance_comment_text = $post['variance_comment_text'];

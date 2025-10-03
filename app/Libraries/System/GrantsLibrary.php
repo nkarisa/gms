@@ -2,7 +2,7 @@
 
 namespace App\Libraries\System;
 
-use App\Libraries\Core\StatusLibrary;
+// use App\Libraries\Core\StatusLibrary;
 use App\Traits\System;
 use Config\GrantsConfig;
 use BadMethodCallException;
@@ -43,6 +43,8 @@ class GrantsLibrary
   public $dbSchema;
   private $uri;
   public array $lookUpTablesForeignKeyMappings = [];
+  protected array $postArray;
+  protected string $tableName;
 
   function __construct()
   {
@@ -158,6 +160,7 @@ class GrantsLibrary
       if (class_exists("App\\Models\\" . ucfirst($module) . "\\" . $table_model_name)) {
         // Instantiate the library class
         $table_model = new ("App\\Models\\" . ucfirst($module) . "\\" . $table_model_name)();
+        break;
       }
     }
 
@@ -227,6 +230,13 @@ class GrantsLibrary
       $namespace_items['feature'] = 'grants';
     }
 
+    // Remove null values in args and reset the keys after filter
+    $args = array_filter($args, function($value) {
+        return !is_null($value);
+    });
+    
+    $args = array_values($args);
+
     // Extract the namespace segments
     extract($namespace_items);
 
@@ -243,10 +253,13 @@ class GrantsLibrary
         $newObj = new $class();
 
         if (method_exists($newObj, $method)) {
+          
           if (in_array($method, ['listOutput', 'viewOutput', 'editOutput', 'singleFormAddOutput', 'multiFormAddOutput'])) {
             return $newObj->$method($module, ...$args);
           }
+          // log_message('error', json_encode($args));
           return $newObj->$method(...$args);
+
         } else {
           throw new BadMethodCallException("Method '" . $method . "' not found in class '" . $class . "'");
         }
@@ -456,7 +469,7 @@ class GrantsLibrary
     
     if (
       is_array($all_detail_tables)
-      && !empty(is_array($all_detail_tables))
+      && !empty($all_detail_tables)
       && $dependantTable != ""
       ) {
         $has_detail_table = true;
@@ -468,6 +481,7 @@ class GrantsLibrary
 
   function checkIfTableHasDetailTable(string $table_name = ""): bool
   {
+
     $table = isEmpty($table_name) ? $this->controller : $table_name;
 
     $all_detail_tables = $this->checkDetailTables($table);
@@ -936,9 +950,10 @@ class GrantsLibrary
 
     // Get the list of visible columns and lookup tables
     $editVisibleColumns = $library->editVisibleColumns();
-    $lookupTables = $this->checklookupTables($table);
+    $lookupTables = $this->checkLookupTables($table);
 
     $getAllTableFields = $this->getAllTableFields();
+
 
     // Filter out foreign key and certain columns
     foreach ($getAllTableFields as $key => $getAllTableField) {
@@ -951,6 +966,7 @@ class GrantsLibrary
     }
 
     $visibleColumns = $getAllTableFields;
+
 
     if (is_array($editVisibleColumns) && count($editVisibleColumns) > 0) {
       $columns = [];
@@ -976,6 +992,8 @@ class GrantsLibrary
       }
     }
 
+    // log_message('error', json_encode(compact('editVisibleColumns','lookupTables','getAllTableFields','visibleColumns')));
+
     // Add joins for lookup tables
     $builder = $this->read_db->table($table);
     if (is_array($lookupTables) && count($lookupTables) > 0) {
@@ -983,7 +1001,7 @@ class GrantsLibrary
         $lookupTableId = $lookupTable . '_id';
         $builder->join(
           $lookupTable,
-          "$lookupTable.$lookupTableId = $table.fk_$lookupTableId"
+          "$lookupTable.$lookupTableId = $table.fk_$lookupTableId", "LEFT"
         );
       }
     }
@@ -1083,7 +1101,7 @@ class GrantsLibrary
     return $list_table_visible_columns;
   }
 
-  public function getListColumns(string $parentTable = null)
+  public function getListColumns(string|null $parentTable = null)
   {
     $selectedColumns = $this->toggleListSelectColumns($parentTable);
     $library = $this->loadLibrary($this->controller);

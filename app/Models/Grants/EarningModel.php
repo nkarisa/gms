@@ -4,15 +4,24 @@ namespace App\Models\Grants;
 
 use CodeIgniter\Model;
 
-class AssetStatusModel extends Model
+class EarningModel extends Model
 {
-    protected $table            = 'assetstatus';
-    protected $primaryKey       = 'assetstatus_id';
+    protected $table            = 'earning';
+    protected $primaryKey       = 'earning_id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = [];
+    protected $allowedFields    = [
+        'earning_name',
+        'earning_track_number',
+        'fk_pay_history_id',
+        'fk_earning_category_id',
+        'earning_amount',
+        'earning_created_date',
+        'earning_created_by',
+        'earning_last_modified_by'
+    ];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -23,9 +32,9 @@ class AssetStatusModel extends Model
     // Dates
     protected $useTimestamps = false;
     protected $dateFormat    = 'datetime';
-    protected $createdField  = 'assetstatuscreated_date';
-    protected $updatedField  = 'assetstatus_last_modified_date';
-    protected $deletedField  = 'assetstatus_deleted_date';
+    protected $createdField  = 'earning_created_date';
+    protected $updatedField  = 'earning_last_modified_date';
+    protected $deletedField  = 'earning_deleted_date';
 
     // Validation
     protected $validationRules      = [];

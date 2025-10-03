@@ -21,13 +21,41 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
 
   function actionBeforeInsert($post_array): array{
 
+    $account_system_id = $this->session->user_account_system_id;
+    $accountSystemSettingLibrary = new \App\Libraries\Core\AccountSystemSettingLibrary();
+    $account_system_settings = $accountSystemSettingLibrary->getAccountSystemSettings($account_system_id);
+    $use_accrual_based_accounting =  $account_system_settings['use_accrual_based_accounting'] ?? 0;
+
     // Always make a new office bank active and default
     $post_array['header']['office_bank_is_default'] = 1;
     $post_array['header']['office_bank_is_active'] = 1;
     $office_id = $post_array['header']['fk_office_id'];
+    $office_bank_is_accrued = $post_array['header']['office_bank_is_accrued'];
 
-    // Disallow having 2 default banks per office
-    $this->makeExisitingOfficeDefaultAccountsNotDefault($office_id);
+    if($use_accrual_based_accounting == '1' && $office_bank_is_accrued == '1'){
+      // Prevent multiple liability bank accounts
+      return $this->checkMultipleAccrualBankAccounts($post_array);
+    }else{
+      // Disallow having 2 default banks per office
+      $this->makeExisitingOfficeDefaultAccountsNotDefault($office_id);      
+    }
+
+    return $post_array;
+  }
+
+  private function checkMultipleAccrualBankAccounts($post_array){
+    $result['message'] = get_phrase('cannot_have_multiple_accrued_bank_accounts');
+
+    $officeBankBuilder = $this->read_db->table('office_bank');
+    $officeBankBuilder->where('fk_office_id',$post_array['header']['fk_office_id']);
+    $officeBankBuilder->where('office_bank_is_accrued', '1');
+    $countAccruedOfficeBanks = $officeBankBuilder->countAllResults();
+
+    if($countAccruedOfficeBanks > 0){
+      return $result;
+    }
+    
+    $post_array['header']['office_bank_is_default'] = 1;
 
     return $post_array;
   }
@@ -60,12 +88,198 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
     $officeBankWriteBuilder->update($data);
   }
 
-  // function action_after_edit($post_array, $approval_id, $header_id){
-  //   return $this->create_office_bank_project_association($post_array, $approval_id, $header_id);
-  // }
-
   function actionAfterInsert($post_array, $approval_id, $header_id): bool {
-    return $this->createOfficeBankProjectAssociation($post_array, $approval_id, $header_id);
+    $account_system_id = $this->session->user_account_system_id;
+    $accountSystemSettingLibrary = new \App\Libraries\Core\AccountSystemSettingLibrary();
+    $account_system_settings = $accountSystemSettingLibrary->getAccountSystemSettings($account_system_id);
+    $use_accrual_based_accounting =  $account_system_settings['use_accrual_based_accounting'] ?? 0;
+
+    if($use_accrual_based_accounting == '1' && $post_array['office_bank_is_accrued'] == '1'){
+      return $this->createOfficeBankAssociationWithAccrualProject($post_array, $header_id);
+    }else{
+      return $this->createOfficeBankProjectAssociation($post_array, $approval_id, $header_id);
+    }
+  }
+
+  function createOfficeBankAssociationWithAccrualProject($post_array, $header_id){
+    $officeId = $post_array['fk_office_id'];
+    $officeLibrary = new \App\Libraries\Core\OfficeLibrary();
+    $accountSystem = $officeLibrary->getOfficeAccountSystem($officeId);
+    $accountSystemId = $accountSystem['account_system_id'];
+    $accountSystemCode = $accountSystem['account_system_code'];
+
+    // Check if liability vote head category is present
+    $incomeAccountVoteHeadsCategoryBuilder = $this->read_db->table('income_vote_heads_category');
+
+    $incomeAccountVoteHeadsCategoryBuilder->where('income_vote_heads_category_code','payroll_liability');
+    $incomeAccountVoteHeadsCategoryObj = $incomeAccountVoteHeadsCategoryBuilder->get();
+
+    $incomeVoteHeadsCategoryId = 0;
+
+    if($incomeAccountVoteHeadsCategoryObj->getNumRows() > 0){
+      $incomeVoteHeadsCategoryId = $incomeAccountVoteHeadsCategoryObj->getRowArray()['income_vote_heads_category_id'];
+    }else{
+      // Create if missing
+      // Get support funding stream
+      $fundingStreamBuilder = $this->read_db->table('funding_stream');
+      $fundingStreamBuilder->where('funding_stream_code',\App\Enums\FundingStream::SUPPORT->value);
+      $fundingStreamObj = $fundingStreamBuilder->get();
+
+      $fundingStreamId = 1;
+
+      if($fundingStreamObj->getNumRows() > 0){
+        $fundingStreamId = $fundingStreamObj->getRowArray()['funding_stream_id'];
+      }
+
+      $income_vote_heads_category['income_vote_heads_category_name'] = '';
+      $income_vote_heads_category['income_vote_heads_category_track_number'] = '';
+      $income_vote_heads_category['income_vote_heads_category_description'] = '';
+      $income_vote_heads_category['fk_funding_stream_id'] = $fundingStreamId;
+      $income_vote_heads_category['income_vote_heads_category_code'] = \App\Enums\IncomeAccountVoteHeadsCategory::PAYROLL_LIABILITY->value;
+      $income_vote_heads_category['income_vote_heads_category_is_active'] = 1;
+      $income_vote_heads_category['income_vote_heads_category_created_date'] = date('Y-m-d');
+      $income_vote_heads_category['income_vote_heads_category_created_by'] = 1;
+      $income_vote_heads_category['income_vote_heads_category_last_modified_date'] = date('Y-m-d');
+      $income_vote_heads_category['income_vote_heads_category_last_modified_by'] = 1;
+
+      $this->write_db->table('income_vote_heads_category')->insert($income_vote_heads_category);
+      $incomeVoteHeadsCategoryId = $this->write_db->insertID();
+    }
+    
+    // Check if the accounting system has liability income account
+    $incomeAccountBuilder = $this->read_db->table('income_account');
+    $incomeAccountBuilder->join('income_vote_heads_category','income_vote_heads_category.income_vote_heads_category_id=income_account.fk_income_vote_heads_category_id');
+    $incomeAccountBuilder->where('income_vote_heads_category_code','payroll_liability');
+    $incomeAccountBuilder->where('income_account.fk_account_system_id', $accountSystemId);
+    $incomeAccountBuilder->where('fk_income_vote_heads_category_id', $incomeVoteHeadsCategoryId);
+    $incomeAccountObj = $incomeAccountBuilder->get();
+
+    $incomeAccountId = 0;
+
+    if($incomeAccountObj->getNumRows() <= 0){
+      $incomeAccountId = $incomeAccountObj->getRowArray()['income_account_id'];
+    }else{
+      // Create the income account
+      $nameAndTrackNumber = $this->generateItemTrackNumberAndName('income_account');
+
+      $income_account['income_account_name'] = $accountSystemCode.'RA-'.get_phrase('accrued_income_account');
+      $income_account['income_account_track_number'] = $nameAndTrackNumber['income_account_track_number'];
+      $income_account['income_account_description	'] = get_phrase('accrued_income_account');
+      $income_account['income_account_code'] = $accountSystemCode.'RA';
+      $income_account['income_account_is_active'] = 1;
+      $income_account['fk_income_vote_heads_category_id'] = $incomeVoteHeadsCategoryId;
+      $income_account['income_account_is_budgeted'] = 0;
+      $income_account['income_account_is_donor_funded'] = 0;
+      $income_account['fk_account_system_id'] = $accountSystemId;
+      $income_account['income_account_created_date'] = date('Y-m-d');
+      $income_account['income_account_last_modified_date'] = date('Y-m-d');
+      $income_account['income_account_created_by'] = $this->session->user_id;
+      $income_account['income_account_last_modified_by'] = $this->session->user_id;
+
+      $this->write_db->table('income_account')->insert($income_account);
+
+      $incomeAccountId = $this->write_db->insertID();
+    }
+    
+
+    // Check if there is a project linked with accrued income account
+    $projectBuilder = $this->read_db->table('project');
+    $projectBuilder->join('project_income_account','project_income_account.fk_project_id=project.project_id');
+    $projectBuilder->where('project_income_account.fk_income_account_id',$incomeAccountId);
+    $projectObj = $projectBuilder->get();
+
+    $projectId = 0;
+
+    if($projectObj->getNumRows() > 0){
+      $projectId = $projectObj->getRowArray()['project_id'];
+    }else{
+      // Create an accrual project
+
+      // Get the funder
+      $funderBuilder = $this->read_db->table('funder');
+      $funderBuilder->where('fk_account_system_id', $accountSystemId);
+      $funderObj = $funderBuilder->get(); 
+
+      $funderId = 0;
+
+      if($funderObj->getNumRows() > 0){
+        $funderId = $funderObj->getRowArray()['funder_id'];
+      }
+
+
+      // Get National Office
+
+      $officeBuider = $this->read_db->table('office');
+      $officeBuider->where('office.fk_account_system_id', $accountSystemId);
+      $officeBuider->where('office.fk_context_definition_id', '4');
+      $nationalOfficeObj = $officeBuider->get();
+
+      $nationaOfficeStartDate = date('Y-m-01');
+
+      if($nationalOfficeObj->getNumRows() > 0){
+        $nationaOfficeStartDate = $nationalOfficeObj->getRowArray()['office_start_date'];
+      }
+
+      // Get funding status
+
+      $fundingStatusBuilder = $this->read_db->table('funding_status');
+
+      $fundingStatusBuilder->where('fk_account_system_id', $accountSystemId);
+      $fundingStatusObj = $fundingStatusBuilder->get();
+
+      $fundingStatusId = 0;
+
+      if($fundingStatusObj->getNumRows() > 0){
+        $fundingStatusId = $fundingStatusObj->getRowArray()['funding_status_id'];
+      }
+      
+      $nameAndTrackNumber = $this->generateItemTrackNumberAndName('project');
+
+      $project['project_name'] = $accountSystemCode.'PA-'.get_phrase('accrued_liability_project');
+      $project['project_track_number'] = $nameAndTrackNumber['project_track_number`'];
+      $project['project_code'] = $accountSystemCode.'PA';
+      $project['project_description'] = get_phrase('accrued_liability_project');
+      $project['project_start_date'] = $nationaOfficeStartDate;
+      $project['project_end_date'] = NULL;
+      $project['fk_funder_id'] = $funderId;
+      $project['fk_funding_status_id'] = $fundingStatusId;
+      $project['project_is_default'] = 1;
+      $project['project_created_by'] = $this->session->user_id;
+      $project['project_last_modified_by'] = $this->session->user_id;
+      $project['project_created_date'] = date('Y-m-d');
+      $project['project_last_modified_date'] = date('Y-m-d');
+
+      $this->write_db->table('project')->insert($project);
+      $projectId = $this->write_db->insertID();
+    }
+
+    // Check if the office is allocated to the project
+
+    $projectAllocationBuilder = $this->read_db->table('project_allocation');
+    $projectAllocationBuilder->where('project_allocation.fk_office_id', $officeId);
+    $projectAllocationBuilder->where('project_allocation.fk_project_id', $projectId);
+    $projectAllocationObj = $projectAllocationBuilder->get();
+
+    if($projectAllocationObj->getNumRows() > 0){
+      // Associate with office bank
+    }else{
+      // Create allocation for the office for the project and this office bank to its allocation
+      // $projectAllocation['project_allocation_name'] = '';
+      // $projectAllocation['project_allocation_track_number'] = '';
+      // $projectAllocation['fk_project_id'] = '';
+      // $projectAllocation['project_allocation_amount'] = '';
+      // $projectAllocation['project_allocation_is_active'] = '';
+      // $projectAllocation['fk_office_id'] = '';
+      // $projectAllocation['project_allocation_name'] = '';
+      // $projectAllocation['project_allocation_name'] = '';
+      // $projectAllocation['project_allocation_name'] = '';
+      // $projectAllocation['project_allocation_name'] = '';
+      // $projectAllocation['project_allocation_name'] = '';
+      // $projectAllocation['project_allocation_name'] = '';
+      // $projectAllocation['project_allocation_name'] = '';
+    }
+
+    return true;    
   }
 
   function createOfficeBankProjectAssociation($post_array, $approval_id, $header_id): bool {
@@ -295,13 +509,24 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
 
   public function singleFormAddVisibleColumns(): array
   {
-    return [
+    $account_system_id = $this->session->user_account_system_id;
+    $accountSystemSettingLibrary = new \App\Libraries\Core\AccountSystemSettingLibrary();
+    $account_system_settings = $accountSystemSettingLibrary->getAccountSystemSettings($account_system_id);
+    $use_accrual_based_accounting =  $account_system_settings['use_accrual_based_accounting'] ?? 0;
+
+    $columns = [
       'office_name',
       'office_bank_name',
       'bank_name',
       'office_bank_account_number',
       'office_bank_chequebook_size'
     ];
+
+    if($use_accrual_based_accounting){
+        array_push($columns,  'office_bank_is_accrued');
+    }
+
+    return $columns;
   }
 
   function editVisibleColumns(): array

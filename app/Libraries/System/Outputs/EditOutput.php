@@ -10,10 +10,10 @@ class EditOutput extends OutputTemplate{
 
     private function editQuery($table)
     {
-  
+
       $keys = $this->libs->checkEditVisibleColumns($table);
       $edit_query = array();
-  
+
       foreach ($keys as $column => $value) {
         // Remove approval and Status fields  
         if ($column == 'fk_approval_id' || $column == 'fk_status_id') continue;
@@ -42,8 +42,8 @@ class EditOutput extends OutputTemplate{
     public function getOutput($id): array|\CodeIgniter\HTTP\Response {
         $table = $this->controller;
 
-        if ($this->request->getPost()) {
-            return $this->currentLibrary->edit($id);
+        if ($post  = $this->request->getPost()) {
+            return $this->currentLibrary->edit($id, $post);
 
         } else {    
           $edit_query = $this->editQuery($table);

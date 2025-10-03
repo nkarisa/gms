@@ -500,16 +500,13 @@ class ViewOutput extends OutputTemplate
      */
     private function detailListOutput(string $table): array
     {
-
-        // Query result of the detail table
-        // $result = $this->toggleDetailListQuery($table);
-
         // Selected column of the detail table
         $keys = $this->toggleDetailListSelectColumns($table);
 
         // Check if the detail table has also other detail tables. 
         // It makes its track number a link in the view if true
         $has_details = $this->libs->checkIfTableHasDetailTable($table);
+        // log_message('error', json_encode(compact('table')));
 
         // It check if the detail table is approveable so as to show the approval links in the status action
         $approveItemLibrary = new \App\Libraries\Core\ApproveItemLibrary();
@@ -632,6 +629,7 @@ class ViewOutput extends OutputTemplate
         // Apply currency conversion
         $approveItemLibrary = new \App\Libraries\Core\ApproveItemLibrary();
         $has_details = $this->libs->checkIfTableHasDetailTable($table);
+        // log_message('error', json_encode(compact('has_details')));
         $is_approveable_item = $approveItemLibrary->approveableItem($table);
 
         $look_tables_name_fields = $this->libs->tablesNameFields(

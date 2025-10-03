@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editable Payslip</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        .payslip-container {
+            max-width: 800px;
+            margin: auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .payslip-header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 15px;
+        }
+        .payslip-header h2 {
+            margin-top: 0;
+            font-weight: bold;
+        }
+        .section-header {
+            background-color: #f2f2f2;
+            padding: 10px;
+            font-weight: bold;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        .table > tbody > tr > td,
+        .table > tbody > tr > th {
+            padding: 8px;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+        .edit-mode {
+            display: none;
+        }
+        .form-control-edit {
+            width: 100%;
+        }
+
+        /* --- Navigation Styles --- */
+        .payslip-navigation {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .payslip-navigation-left {
+            left: 20px;
+        }
+
+        .payslip-navigation-right {
+            right: 20px;
+        }
+
+        .nav-icon {
+            background-color: #337ab7;
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .nav-icon:hover {
+            background-color: #286090;
+        }
+
+        /* Hide buttons when printing */
+        @media print {
+            .no-print {
+                display: none;
+            }
+            .payslip-navigation {
+                display: none;
+            }
+
+            /* START: New styles to force single-page fit and reduce spacing */
+            html, body {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                overflow: hidden; /* Prevent unwanted scrollbars/extra space */
+            }
+            .payslip-container {
+                width: 100%;
+                max-width: 100%;
+                box-shadow: none; 
+                margin: 0;
+                padding: 10px; /* Reduced padding for the whole container */
+                /* Scale transform is the most reliable way to force single-page fit */
+                transform: scale(0.95); /* Adjust as needed, 0.95 reduces size by 5% */
+                transform-origin: top center;
+            }
+            .row {
+                margin-bottom: 5px !important; /* Reduce space between sections */
+            }
+            .payslip-header {
+                margin-bottom: 5px; /* Reduce header margin */
+            }
+            .section-header {
+                padding: 5px 10px; /* Compress section headers */
+                margin-bottom: 5px;
+            }
+            .table > tbody > tr > td,
+            .table > tbody > tr > th {
+                padding: 3px; /* Compress table rows */
+            }
+            .panel-body {
+                padding: 5px; /* Compress net pay panel */
+            }
+            .panel-heading {
+                padding: 5px 15px; /* Compress panel heading */
+            }
+            /* END: New styles */
+        }
+    </style>
+</head>
+<body>
+
+<div class="payslip-navigation payslip-navigation-left no-print">
+    <div class="nav-icon" id="prevPayslip">
+        <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+    </div>
+</div>
+
+<div class="payslip-navigation payslip-navigation-right no-print">
+    <div class="nav-icon" id="nextPayslip">
+        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+    </div>
+</div>
+<div class="container payslip-container">
+    <div class="row payslip-header">
+        <div class="col-xs-6">
+            <h2>Acme Corp.</h2>
+            <address>
+                123 Industrial Drive<br>
+                Tech City, 54321<br>
+                info@acmecorp.com<br>
+                (123) 456-7890
+            </address>
+        </div>
+        <div class="col-xs-6 text-right">
+            <h1 class="text-uppercase">Payslip</h1>
+            <p><strong>Pay Period:</strong> 01-Sep-2025 to 30-Sep-2025</p>
+            <p><strong>Pay Date:</strong> 05-Oct-2025</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="section-header">Employee Details</div>
+        </div>
+        <div class="col-xs-6">
+            <p><strong>Employee Name:</strong> <span id="employeeName">John Doe</span></p>
+            <p><strong>Job Title:</strong> <span id="jobTitle">Software Developer</span></p>
+        </div>
+        <div class="col-xs-6">
+            <p><strong>Employee ID:</strong> <span id="employeeId">EMP-001</span></p>
+            <p><strong>Department:</strong> <span id="department">Engineering</span></p>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="row" style="margin-bottom: 25px;">
+        <div class="col-xs-12">
+            <div class="section-header">Earnings</div>
+            <div class="panel panel-default">
+                <table class="table table-striped" id="earningsTable">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th class="text-right">Amount ($)</th>
+                            <th class="no-print edit-mode">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-id="1" class="earning-row">
+                            <td>
+                                <span class="display-mode">Basic Salary</span>
+                                <select class="form-control edit-mode">
+                                    <option>Basic Salary</option>
+                                    <option>Overtime Pay</option>
+                                    <option>Commission</option>
+                                    <option>Performance Bonus</option>
+                                </select>
+                            </td>
+                            <td class="text-right">
+                                <span class="display-mode">5,000.00</span>
+                                <input type="number" step="0.01" class="form-control text-right edit-mode" value="5000.00">
+                            </td>
+                            <td class="no-print edit-mode"><button class="btn btn-danger btn-sm remove-row">Remove</button></td>
+                        </tr>
+                        <tr data-id="2" class="earning-row">
+                            <td>
+                                <span class="display-mode">Performance Bonus</span>
+                                <select class="form-control edit-mode">
+                                    <option>Basic Salary</option>
+                                    <option>Overtime Pay</option>
+                                    <option>Commission</option>
+                                    <option>Performance Bonus</option>
+                                </select>
+                            </td>
+                            <td class="text-right">
+                                <span class="display-mode">500.00</span>
+                                <input type="number" step="0.01" class="form-control text-right edit-mode" value="500.00">
+                            </td>
+                            <td class="no-print edit-mode"><button class="btn btn-danger btn-sm remove-row">Remove</button></td>
+                        </tr>
+                        <tr class="total-row">
+                            <td><strong>Gross Earnings</strong></td>
+                            <td class="text-right"><strong><span id="grossEarnings">5,500.00</span></strong></td>
+                            <td class="no-print edit-mode"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <button class="btn btn-success btn-sm no-print" id="addEarningRow">Add Earning</button>
+        </div>
+    </div>
+
+    <div class="row" style="margin-bottom: 25px;">
+        <div class="col-xs-12">
+            <div class="section-header">Deductions</div>
+            <div class="panel panel-default">
+                <table class="table table-striped" id="deductionsTable">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th class="text-right">Amount ($)</th>
+                            <th class="no-print edit-mode">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-id="3" class="deduction-row">
+                            <td>
+                                <span class="display-mode">Federal Tax</span>
+                                <select class="form-control edit-mode">
+                                    <option>Federal Tax</option>
+                                    <option>State Tax</option>
+                                    <option>Medical Insurance</option>
+                                    <option>401(k) Contribution</option>
+                                </select>
+                            </td>
+                            <td class="text-right">
+                                <span class="display-mode">750.00</span>
+                                <input type="number" step="0.01" class="form-control text-right edit-mode" value="750.00">
+                            </td>
+                            <td class="no-print edit-mode"><button class="btn btn-danger btn-sm remove-row">Remove</button></td>
+                        </tr>
+                        <tr data-id="4" class="deduction-row">
+                            <td>
+                                <span class="display-mode">State Tax</span>
+                                <select class="form-control edit-mode">
+                                    <option>Federal Tax</option>
+                                    <option>State Tax</option>
+                                    <option>Medical Insurance</option>
+                                    <option>401(k) Contribution</option>
+                                </select>
+                            </td>
+                            <td class="text-right">
+                                <span class="display-mode">250.00</span>
+                                <input type="number" step="0.01" class="form-control text-right edit-mode" value="250.00">
+                            </td>
+                            <td class="no-print edit-mode"><button class="btn btn-danger btn-sm remove-row">Remove</button></td>
+                        </tr>
+                        <tr data-id="5" class="deduction-row">
+                            <td>
+                                <span class="display-mode">Medical Insurance</span>
+                                <select class="form-control edit-mode">
+                                    <option>Federal Tax</option>
+                                    <option>State Tax</option>
+                                    <option>Medical Insurance</option>
+                                    <option>401(k) Contribution</option>
+                                </select>
+                            </td>
+                            <td class="text-right">
+                                <span class="display-mode">100.00</span>
+                                <input type="number" step="0.01" class="form-control text-right edit-mode" value="100.00">
+                            </td>
+                            <td class="no-print edit-mode"><button class="btn btn-danger btn-sm remove-row">Remove</button></td>
+                        </tr>
+                        <tr class="total-row">
+                            <td><strong>Total Deductions</strong></td>
+                            <td class="text-right"><strong><span id="totalDeductions">1,100.00</span></strong></td>
+                            <td class="no-print edit-mode"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <button class="btn btn-success btn-sm no-print" id="addDeductionRow">Add Deduction</button>
+        </div>
+    </div>
+    
+    <div class="row" style="margin-bottom: 25px;">
+        <div class="col-xs-12">
+            <div class="section-header">Accrued Benefits (Not Paid Now)</div>
+            <div class="panel panel-default">
+                <table class="table table-striped" id="benefitsTable">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th class="text-right">Amount ($)</th>
+                            <th class="no-print edit-mode">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-id="6" class="benefit-row">
+                            <td>
+                                <span class="display-mode">Paid Time Off (PTO) Value</span>
+                                <select class="form-control edit-mode">
+                                    <option>Paid Time Off (PTO) Value</option>
+                                    <option>Sick Leave Accrual</option>
+                                    <option>Deferred Compensation</option>
+                                    <option>Health Savings Account (Employer Contribution)</option>
+                                </select>
+                            </td>
+                            <td class="text-right">
+                                <span class="display-mode">450.00</span>
+                                <input type="number" step="0.01" class="form-control text-right edit-mode" value="450.00">
+                            </td>
+                            <td class="no-print edit-mode"><button class="btn btn-danger btn-sm remove-row">Remove</button></td>
+                        </tr>
+                        <tr class="total-row">
+                            <td><strong>Total Accrued Benefits</strong></td>
+                            <td class="text-right"><strong><span id="totalBenefits">450.00</span></strong></td>
+                            <td class="no-print edit-mode"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <button class="btn btn-success btn-sm no-print" id="addBenefitRow">Add Accrued Benefit</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12 text-right">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Net Pay</h3>
+                </div>
+                <div class="panel-body">
+                    <h1 class="text-success" style="font-size: 3em;">$<span id="netPay">4,400.00</span></h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row no-print text-center" style="margin-top: 20px;">
+        <div class="col-xs-12">
+            <div id="display-controls">
+                <a href="#" class="btn btn-primary" onclick="window.print()">
+                    <span class="glyphicon glyphicon-print"></span> Print / Download
+                </a>
+                <button class="btn btn-warning" id="editButton">
+                    <span class="glyphicon glyphicon-edit"></span> Edit Payslip
+                </button>
+            </div>
+            <div id="edit-controls" class="edit-mode">
+                <button class="btn btn-success" id="saveButton">
+                    <span class="glyphicon glyphicon-floppy-disk"></span> Save
+                </button>
+                <button class="btn btn-danger" id="cancelButton">
+                    <span class="glyphicon glyphicon-remove-circle"></span> Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const editButton = document.getElementById('editButton');
+        const saveButton = document.getElementById('saveButton');
+        const cancelButton = document.getElementById('cancelButton');
+        const addEarningRowBtn = document.getElementById('addEarningRow');
+        const addDeductionRowBtn = document.getElementById('addDeductionRow');
+        const addBenefitRowBtn = document.getElementById('addBenefitRow'); 
+        const earningsTableBody = document.querySelector('#earningsTable tbody');
+        const deductionsTableBody = document.querySelector('#deductionsTable tbody');
+        const benefitsTableBody = document.querySelector('#benefitsTable tbody'); 
+        const displayControls = document.getElementById('display-controls');
+        const editControls = document.getElementById('edit-controls');
+        const prevPayslipBtn = document.getElementById('prevPayslip'); 
+        const nextPayslipBtn = document.getElementById('nextPayslip'); 
+
+        // Explicitly set the UI to display mode on page load to prevent initial rendering issues
+        toggleEditMode(false);
+        
+        // Function to calculate and update totals
+        function updateTotals() {
+            let grossEarnings = 0;
+            let totalDeductions = 0;
+            let totalBenefits = 0; 
+
+            // Calculate Gross Earnings
+            document.querySelectorAll('#earningsTable tbody tr.earning-row input[type="number"]').forEach(input => {
+                grossEarnings += parseFloat(input.value) || 0;
+            });
+            document.getElementById('grossEarnings').textContent = grossEarnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            // Calculate Total Deductions
+            document.querySelectorAll('#deductionsTable tbody tr.deduction-row input[type="number"]').forEach(input => {
+                totalDeductions += parseFloat(input.value) || 0;
+            });
+            document.getElementById('totalDeductions').textContent = totalDeductions.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            // Calculate Total Accrued Benefits (Does not affect Net Pay)
+            document.querySelectorAll('#benefitsTable tbody tr.benefit-row input[type="number"]').forEach(input => {
+                totalBenefits += parseFloat(input.value) || 0;
+            });
+            document.getElementById('totalBenefits').textContent = totalBenefits.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+
+            // Calculate Net Pay
+            const netPay = grossEarnings - totalDeductions;
+            document.getElementById('netPay').textContent = netPay.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+        
+        // NEW FUNCTION: Syncs the select dropdowns with the display values
+        function syncSelectElements() {
+            const allRows = document.querySelectorAll('.earning-row, .deduction-row, .benefit-row');
+            allRows.forEach(row => {
+                const displaySpan = row.querySelector('.display-mode');
+                const selectElement = row.querySelector('select.edit-mode');
+                if (displaySpan && selectElement) {
+                    const matchingOption = Array.from(selectElement.options).find(option => option.textContent.trim() === displaySpan.textContent.trim());
+                    if (matchingOption) {
+                        selectElement.value = matchingOption.value;
+                    } else {
+                        selectElement.value = displaySpan.textContent.trim();
+                    }
+                }
+            });
+        }
+
+        // Function to toggle between display and edit modes
+        function toggleEditMode(isEdit) {
+            // Toggle the visibility of the different modes
+            const displayElements = document.querySelectorAll('.display-mode');
+            const editElements = document.querySelectorAll('.edit-mode');
+
+            displayElements.forEach(el => el.style.display = isEdit ? 'none' : 'inline');
+            editElements.forEach(el => el.style.display = isEdit ? 'inline' : 'none');
+
+            // Toggle the button controls
+            displayControls.style.display = isEdit ? 'none' : 'block';
+            editControls.style.display = isEdit ? 'block' : 'none';
+
+            // Update the total calculations when switching to edit mode
+            if (isEdit) {
+                updateTotals();
+            }
+        }
+
+        // Event listener for the "Edit" button
+        editButton.addEventListener('click', () => {
+            syncSelectElements(); 
+            toggleEditMode(true);
+        });
+
+        // Event listener for the "Cancel" button
+        cancelButton.addEventListener('click', () => {
+            location.reload(); 
+        });
+
+        // Event listener for the "Save" button
+        saveButton.addEventListener('click', () => {
+            const payload = {
+                employeeDetails: {
+                    name: document.getElementById('employeeName').textContent,
+                    jobTitle: document.getElementById('jobTitle').textContent,
+                    employeeId: document.getElementById('employeeId').textContent,
+                    department: document.getElementById('department').textContent
+                },
+                earnings: [],
+                deductions: [],
+                benefits: [] 
+            };
+
+            // Collect earnings data
+            document.querySelectorAll('#earningsTable tbody tr.earning-row').forEach(row => {
+                const description = row.querySelector('select').value;
+                const amount = parseFloat(row.querySelector('input[type="number"]').value) || 0;
+                const id = row.dataset.id;
+                payload.earnings.push({ id, description, amount });
+            });
+
+            // Collect deductions data
+            document.querySelectorAll('#deductionsTable tbody tr.deduction-row').forEach(row => {
+                const description = row.querySelector('select').value;
+                const amount = parseFloat(row.querySelector('input[type="number"]').value) || 0;
+                const id = row.dataset.id;
+                payload.deductions.push({ id, description, amount });
+            });
+            
+            // Collect benefits data
+            document.querySelectorAll('#benefitsTable tbody tr.benefit-row').forEach(row => {
+                const description = row.querySelector('select').value;
+                const amount = parseFloat(row.querySelector('input[type="number"]').value) || 0;
+                const id = row.dataset.id;
+                payload.benefits.push({ id, description, amount });
+            });
+
+
+            // Proposed Fetch Request
+            console.log('Proposed payload:', payload); 
+
+            // --- START Simulated Save ---
+            setTimeout(() => {
+                console.log('Simulated Success: Data saved.');
+                updateDisplayFromInputs(); 
+                toggleEditMode(false);     
+            }, 500); 
+            // --- END Simulated Save ---
+        });
+
+        // Function to create a new editable row (Consolidated to handle all three types)
+        function createEditableRow(type) {
+            let typeClass;
+            let optionsHtml;
+            let defaultDescription;
+
+            if (type === 'earning') {
+                typeClass = 'earning-row';
+                defaultDescription = 'Basic Salary';
+                optionsHtml = `<option>Basic Salary</option><option>Overtime Pay</option><option>Commission</option><option>Performance Bonus</option>`;
+            } else if (type === 'deduction') {
+                typeClass = 'deduction-row';
+                defaultDescription = 'Federal Tax';
+                optionsHtml = `<option>Federal Tax</option><option>State Tax</option><option>Medical Insurance</option><option>401(k) Contribution</option>`;
+            } else if (type === 'benefit') { 
+                typeClass = 'benefit-row';
+                defaultDescription = 'Paid Time Off (PTO) Value';
+                optionsHtml = `<option>Paid Time Off (PTO) Value</option><option>Sick Leave Accrual</option><option>Deferred Compensation</option><option>Health Savings Account (Employer Contribution)</option>`;
+            } else {
+                return null;
+            }
+
+            const newRow = document.createElement('tr');
+            newRow.className = typeClass;
+            newRow.dataset.id = `${type}-${Date.now()}`; 
+            newRow.innerHTML = `
+                <td>
+                    <span class="display-mode" style="display: none;">${defaultDescription}</span>
+                    <select class="form-control edit-mode" style="display: inline;">${optionsHtml}</select>
+                </td>
+                <td class="text-right">
+                    <span class="display-mode" style="display: none;">0.00</span>
+                    <input type="number" step="0.01" class="form-control text-right edit-mode" value="0.00" style="display: inline;">
+                </td>
+                <td class="no-print edit-mode" style="display: inline;"><button class="btn btn-danger btn-sm remove-row">Remove</button></td>
+            `;
+
+            // Add event listener to the new row's input
+            newRow.querySelector('input[type="number"]').addEventListener('input', updateTotals);
+            newRow.querySelector('select').addEventListener('change', (event) => {
+                // Update display span immediately on change
+                const selectElement = event.target;
+                const displaySpan = selectElement.previousElementSibling;
+                displaySpan.textContent = selectElement.value;
+                updateTotals();
+            });
+
+            return newRow;
+        }
+
+        // Event listener for "Add Earning" button
+        addEarningRowBtn.addEventListener('click', () => {
+            const newRow = createEditableRow('earning');
+            const totalRow = earningsTableBody.querySelector('.total-row');
+            earningsTableBody.insertBefore(newRow, totalRow);
+        });
+
+        // Event listener for "Add Deduction" button
+        addDeductionRowBtn.addEventListener('click', () => {
+            const newRow = createEditableRow('deduction');
+            const totalRow = deductionsTableBody.querySelector('.total-row');
+            deductionsTableBody.insertBefore(newRow, totalRow);
+        });
+        
+        // Event listener for "Add Benefit" button
+        addBenefitRowBtn.addEventListener('click', () => {
+            const newRow = createEditableRow('benefit');
+            const totalRow = benefitsTableBody.querySelector('.total-row');
+            benefitsTableBody.insertBefore(newRow, totalRow);
+        });
+
+        // Event delegation for "Remove" buttons
+        document.body.addEventListener('click', (event) => {
+            if (event.target.classList.contains('remove-row')) {
+                const rowToRemove = event.target.closest('tr');
+                rowToRemove.remove();
+                updateTotals(); 
+            }
+        });
+
+        // Event listener for input and select changes to automatically update totals
+        document.querySelectorAll('#earningsTable, #deductionsTable, #benefitsTable').forEach(table => {
+            table.addEventListener('input', (event) => {
+                const target = event.target;
+                if (target.tagName === 'INPUT' && target.type === 'number' || target.tagName === 'SELECT') {
+                    updateTotals();
+                }
+            });
+        });
+
+        // Function to update the display mode text from the input/select values
+        function updateDisplayFromInputs() {
+            document.querySelectorAll('.earning-row, .deduction-row, .benefit-row').forEach(row => {
+                const selectElement = row.querySelector('select.edit-mode');
+                const inputElement = row.querySelector('input[type="number"].edit-mode');
+                const displaySpans = row.querySelectorAll('span.display-mode');
+
+                if (displaySpans.length === 2) {
+                    // Update description
+                    displaySpans[0].textContent = selectElement.value;
+                    // Update amount
+                    const formattedValue = parseFloat(inputElement.value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    displaySpans[1].textContent = formattedValue;
+                }
+            });
+            updateTotals();
+        }
+
+        /* --- Navigation Functionality --- */
+        function navigatePayslip(direction) {
+            alert(`Navigating to the ${direction} payslip. (Requires backend implementation to load data.)`);
+        }
+
+        prevPayslipBtn.addEventListener('click', () => navigatePayslip('previous'));
+        nextPayslipBtn.addEventListener('click', () => navigatePayslip('next'));
+    });
+</script>
+
+</body>
+</html>

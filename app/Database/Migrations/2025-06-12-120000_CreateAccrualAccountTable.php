@@ -3,6 +3,7 @@
 namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
+use CodeIgniter\Database\RawSql;
 
 class CreateAccrualAccountTable extends Migration
 {
@@ -27,22 +28,22 @@ class CreateAccrualAccountTable extends Migration
                 'null'           => false,
             ],
             'accrual_account_code' => [
-                'type'           => 'VARCHAR', // ENUM is handled as VARCHAR with constraint
+                'type'           => 'ENUM', // ENUM is handled as VARCHAR with constraint
                 'constraint'     => ['receivables', 'payables', 'prepayments', 'depreciation', 'payroll_liability'],
                 'null'           => false,
             ],
             'accrual_account_effect' => [
-                'type'           => 'VARCHAR', // ENUM is handled as VARCHAR with constraint
+                'type'           => 'ENUM', // ENUM is handled as VARCHAR with constraint
                 'constraint'     => ['debit', 'credit'],
                 'null'           => false,
             ],
             'accrual_account_debit_effect' => [
-                'type'           => 'VARCHAR', // ENUM is handled as VARCHAR with constraint
+                'type'           => 'ENUM', // ENUM is handled as VARCHAR with constraint
                 'constraint'     => ['receivables', 'payments', 'payables', 'disbursements', 'prepayments', 'settlements', 'depreciation', 'payroll_liability'],
                 'null'           => true, // DEFAULT NULL in SQL
             ],
             'accrual_account_credit_effect' => [
-                'type'           => 'VARCHAR', // ENUM is handled as VARCHAR with constraint
+                'type'           => 'ENUM', // ENUM is handled as VARCHAR with constraint
                 'constraint'     => ['receivables', 'payments', 'payables', 'disbursements', 'prepayments', 'settlements', 'depreciation', 'payroll_liability'],
                 'null'           => true, // DEFAULT NULL in SQL
             ],
@@ -59,7 +60,7 @@ class CreateAccrualAccountTable extends Migration
             'accrual_account_last_modified_date' => [
                 'type'           => 'TIMESTAMP',
                 'null'           => false,
-                'default'        => 'CURRENT_TIMESTAMP',
+                'default'        => new RawSql('CURRENT_TIMESTAMP')
             ],
             'accrual_account_last_modified_by' => [
                 'type'           => 'INT',

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Create New Pay History Record</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <style>
+        /* Custom styles for spacing and table readability */
+        body {
+            padding: 20px;
+        }
+
+        .earnings-table-container {
+            margin-top: 30px;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+
+        .table>tbody>tr>td {
+            vertical-align: middle;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Create New Pay History Record</h1>
+        <hr>
+
+        <div id="submissionSuccess" class="alert alert-success" style="display:none;">
+            <strong>Success!</strong> Pay History Record created successfully. Total Earnings recorded: <strong
+                id="successTotal"></strong>.
+        </div>
+        <div id="addMode">
+
+            <form id="payHistoryAddForm">
+
+                <div id="dateValidationError" class="alert alert-danger" style="display:none;">
+                    <strong>Error:</strong> The **Pay Period End Date** cannot be earlier than or the same as the **Pay
+                    Period Start Date**. Please select a valid end date.
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="addStartDate">Pay Period Start Date <span class="text-danger">*</span></label>
+                            <input type="date" id="addStartDate" name="startDate" value="" class="form-control" required
+                                onchange="validateDates()">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="addEndDate">Pay Period End Date <span class="text-danger">*</span></label>
+                            <input type="date" id="addEndDate" name="endDate" value="" class="form-control" required
+                                onchange="validateDates()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="addOfficeName">Office Name <span class="text-danger">*</span></label>
+                            <select id="addOfficeName" name="officeName" class="form-control"
+                                onchange="updateStaffList()" required>
+                                <option value="" selected>-- Select Office --</option>
+                                <option value="KE0334">KE0334-PEFA Church Mwele</option>
+                                <option value="UG0012">UG0012-Gulu Operations</option>
+                                <option value="TZ0055">TZ0055-Mwanza Hub</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="addStaffName">Staff Name <span class="text-danger">*</span></label>
+                            <select id="addStaffName" name="staffName" class="form-control" required disabled>
+                                <option value="" selected>-- Select an Office first --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="addTotalEarnings">Total Earning Amount</label>
+                            <input type="text" id="addTotalEarnings" name="totalEarnings" value="0.00"
+                                class="form-control" disabled>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="earnings-table-container panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Earning Entries</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="addDuplicateAlert" class="alert alert-danger" style="display:none;">
+                            <strong>Error:</strong> Cannot add duplicate earning categories. Please remove the existing
+                            entry first.
+                        </div>
+
+                        <table class="table table-bordered table-condensed" id="addEarningsTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50%;">Earning Category Name <span class="text-danger">*</span>
+                                    </th>
+                                    <th style="width: 40%;">Earning Amount <span class="text-danger">*</span></th>
+                                    <th style="width: 10%;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="addEarningsTableBody">
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-success btn-sm" onclick="addNewRowAdd()">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Earning Row
+                        </button>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="text-right">
+                    <button type="submit" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> **Create Record**
+                    </button>
+                    <button type="button" class="btn btn-default"
+                        onclick="alert('Form Cancelled! This would typically redirect you.')">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> **Cancel**
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+
+        // ==============================================
+        // Data and Dependent Select Logic
+        // ==============================================
+
+        const officeStaffMap = {
+            'KE0334': [
+                { value: 'leonard@pefa.com', text: 'Leonard Gube (KE0334)' },
+                { value: 'alice@pefa.com', text: 'Alice Johnson (KE0334)' }
+            ],
+            'UG0012': [
+                { value: 'bernard@gulu.com', text: 'Bernard Kibet (UG0012)' },
+                { value: 'mary@gulu.com', text: 'Mary Oloo (UG0012)' }
+            ],
+            'TZ0055': [
+                { value: 'john@mwanza.com', text: 'John Doe (TZ0055)' }
+            ]
+        };
+
+        function updateStaffList() {
+            const officeSelect = document.getElementById('addOfficeName');
+            const staffSelect = document.getElementById('addStaffName');
+            const selectedOffice = officeSelect.value;
+
+            // Clear existing options
+            staffSelect.innerHTML = '';
+
+            // Add the default "Select Staff Member" option
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = '-- Select Staff Member --';
+            staffSelect.appendChild(defaultOption);
+
+            if (selectedOffice && officeStaffMap[selectedOffice]) {
+                officeStaffMap[selectedOffice].forEach(staff => {
+                    const option = document.createElement('option');
+                    option.value = staff.value;
+                    option.textContent = staff.text;
+                    staffSelect.appendChild(option);
+                });
+                staffSelect.disabled = false;
+            } else {
+                staffSelect.disabled = true;
+                defaultOption.textContent = '-- Select an Office first --';
+            }
+        }
+
+
+        // ==============================================
+        // Earning Entries Table Logic
+        // ==============================================
+
+        const initialNewRowHtml = `
+    <tr class="earning-row">
+        <td>
+            <select name="earningCategoryName[]" required class="form-control input-sm" onchange="checkDuplicateAdd(this)">
+                <option value="">Select Category</option>
+                <option value="Basic Salary">Basic Salary</option>
+                <option value="Pension contributions">Pension contributions</option>
+                <option value="Commuter Allowance">Commuter Allowance</option>
+                <option value="House Allowance">House Allowance</option>
+                <option value="Medical Allowance">Medical Allowance</option>
+            </select>
+        </td>
+        <td><input type="number" name="earningAmount[]" value="0.00" step="0.01" required class="form-control input-sm" oninput="calculateTotalAdd()"></td>
+        <td><button type="button" class="btn btn-danger btn-sm btn-block" onclick="removeRowAdd(this)"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Remove</button></td>
+    </tr>
+`;
+
+        function addNewRowAdd() {
+            const tableBody = document.getElementById('addEarningsTableBody');
+            // Use insertAdjacentHTML for slightly better performance than innerHTML +=
+            tableBody.insertAdjacentHTML('beforeend', initialNewRowHtml);
+            calculateTotalAdd();
+        }
+
+        function removeRowAdd(button) {
+            const row = button.closest('tr');
+            const tableBody = document.getElementById('addEarningsTableBody');
+
+            if (tableBody.children.length > 1) {
+                row.remove();
+                calculateTotalAdd();
+                checkAllDuplicatesAdd();
+            } else {
+                alert("You must have at least one Earning Entry.");
+            }
+        }
+
+        function calculateTotalAdd() {
+            let total = 0;
+            const amountInputs = document.querySelectorAll('#payHistoryAddForm input[name="earningAmount[]"]');
+
+            amountInputs.forEach(input => {
+                // Use the input's value as a string and parse it
+                const value = parseFloat(input.value) || 0;
+                total += value;
+            });
+
+            document.getElementById('addTotalEarnings').value = total.toFixed(2);
+        }
+
+        function checkDuplicateAdd(selectElement) {
+            const selectedValue = selectElement.value;
+            if (!selectedValue) return;
+
+            let count = 0;
+            const categorySelects = document.querySelectorAll('#addEarningsTableBody select[name="earningCategoryName[]"]');
+
+            categorySelects.forEach(select => {
+                if (select.value === selectedValue) {
+                    count++;
+                }
+            });
+
+            const alertElement = document.getElementById('addDuplicateAlert');
+
+            if (count > 1) {
+                alertElement.style.display = 'block';
+                // Clear the value of the select that caused the duplicate
+                selectElement.value = '';
+            } else {
+                if (alertElement.style.display === 'block') {
+                    // Only check all if the alert is currently visible
+                    checkAllDuplicatesAdd();
+                }
+            }
+        }
+
+        function checkAllDuplicatesAdd() {
+            const selectedValues = [];
+            const categorySelects = document.querySelectorAll('#addEarningsTableBody select[name="earningCategoryName[]"]');
+
+            categorySelects.forEach(select => {
+                const value = select.value;
+                if (value) selectedValues.push(value);
+            });
+
+            // Check for duplicates in the array
+            const hasDuplicates = selectedValues.some((val, i) => selectedValues.indexOf(val) !== i);
+            const alertElement = document.getElementById('addDuplicateAlert');
+
+            if (hasDuplicates) {
+                alertElement.style.display = 'block';
+            } else {
+                alertElement.style.display = 'none';
+            }
+        }
+
+        // ==============================================
+        // Date Validation Logic (Ensures Start < End)
+        // ==============================================
+
+        function validateDates() {
+            const startDateInput = document.getElementById('addStartDate');
+            const endDateInput = document.getElementById('addEndDate');
+            const dateAlert = document.getElementById('dateValidationError');
+
+            const startDate = startDateInput.value;
+            const endDate = endDateInput.value;
+
+            // Only validate if both dates are filled
+            if (startDate && endDate) {
+                if (new Date(startDate) >= new Date(endDate)) {
+                    dateAlert.style.display = 'block';
+                    // Clear the invalid End Date field
+                    endDateInput.value = '';
+                    return false;
+                } else {
+                    dateAlert.style.display = 'none';
+                    return true;
+                }
+            }
+            dateAlert.style.display = 'none';
+            return true;
+        }
+
+        // ==============================================
+        // Form Reset Logic
+        // ==============================================
+
+        /**
+         * Resets the entire form to its initial state (or a state ready for new input).
+         * Calls the native form.reset() and then handles dynamic elements.
+         */
+        function resetForm() {
+            const form = document.getElementById('payHistoryAddForm');
+            // 1. Use the native reset method to clear most standard inputs
+            form.reset();
+
+            // 2. Clear dynamic table rows and re-add the mandatory one
+            const tableBody = document.getElementById('addEarningsTableBody');
+            tableBody.innerHTML = ''; // Clears all rows
+            addNewRowAdd(); // Re-adds the single mandatory row
+
+            // 3. Reset dependent dropdowns and alerts
+            updateStaffList(); // Resets the Staff Name dropdown
+            document.getElementById('dateValidationError').style.display = 'none';
+            document.getElementById('addDuplicateAlert').style.display = 'none';
+            document.getElementById('addTotalEarnings').value = '0.00'; // Ensure this is explicitly set if form.reset() doesn't cover disabled inputs
+
+            // Optional: If you want to reset the dropdowns:
+            document.getElementById('addOfficeName').value = '';
+
+            // NOTE: The lines to hide the form and show/hide the success message are
+            // now handled by the form submission logic for more granular control.
+        }
+
+        // ==============================================
+        // Initialization and Event Listeners
+        // ==============================================
+
+        function initializeForm() {
+            // Initialize the form with one empty earning row. This will also run on reset.
+            const tableBody = document.getElementById('addEarningsTableBody');
+            if (tableBody.children.length === 0) {
+                addNewRowAdd();
+            }
+
+
+            const form = document.getElementById('payHistoryAddForm');
+
+            // Primary Form Submission Logic
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                // 1. Validate Dates
+                if (!validateDates()) {
+                    document.getElementById('addEndDate').focus();
+                    return;
+                }
+
+                // 2. Validate Earnings Duplicates
+                checkAllDuplicatesAdd();
+                const duplicateAlert = document.getElementById('addDuplicateAlert');
+                if (duplicateAlert.style.display === 'block') {
+                    alert('Please resolve duplicate earning categories before submitting.');
+                    return;
+                }
+
+                // If all validations pass (simulating successful submission)
+                const totalEarnings = document.getElementById('addTotalEarnings').value;
+                const successMessage = document.getElementById('submissionSuccess');
+
+                // 1. Reset the form's fields to prepare for the next submission
+                resetForm();
+
+                // 2. Update the success message with the calculated total from the *just completed* submission
+                document.getElementById('successTotal').textContent = totalEarnings;
+
+                // 3. Show the success message (the form stays visible)
+                successMessage.style.display = 'block';
+
+                // 4. Hide the success message after 3 seconds (3000 milliseconds)
+                setTimeout(function () {
+                    successMessage.style.display = 'none';
+                }, 3000);
+            });
+        }
+
+        // Run initialization function once the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', initializeForm);
+
+    </script>
+
+</body>
+
+</html>

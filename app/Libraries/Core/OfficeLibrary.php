@@ -179,7 +179,7 @@ class OfficeLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
   function getOfficeAccountSystem($office_id)
   {
     $builder = $this->read_db->table('office');
-    $builder->select(array('office_id', 'office_name', 'account_system_id', 'account_system_name'));
+    $builder->select(array('office_id', 'office_name', 'account_system_id', 'account_system_name','account_system_code'));
     $builder->join('account_system', 'account_system.account_system_id=office.fk_account_system_id');
     $builder->where(array('office_id' => $office_id));
     $office_account_system = $builder->get()->getRowArray();
@@ -506,7 +506,7 @@ class OfficeLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
     return $combined_ids_and_names;
   }
 
-  function add()
+  function add($post, $parentTable = null, $parentId = null)
   {
     $flag = false;
     $message = 'Office creation failed';
@@ -514,7 +514,7 @@ class OfficeLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
 
     $this->write_db->transBegin();
 
-    $post = $this->request->getPost()['header'];
+    // $post = $this->request->getPost()['header'];
 
     $office['office_name'] = $post['office_name'];
     $office['office_description'] = $post['office_description'];

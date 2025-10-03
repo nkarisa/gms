@@ -3,6 +3,7 @@
 namespace App\Libraries\Core;
 
 use App\Libraries\System\GrantsLibrary;
+use App\Libraries\System\Types\PostData;
 use App\Models\Core\StatusModel;
 use CodeIgniter\HTTP\RedirectResponse;
 
@@ -875,9 +876,10 @@ class StatusLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
   }
 
 
-  function add()
+  function add($post, $parentTable = null, $parentId = null)
   {
-    $post = $this->request->getPost()['header'];
+    $post = $post->header;
+    // log_message('error', json_encode($post));
 
     $jumps = [1, 0, -1]; // 1 = Submitted new Item, 0 = Submitted Reinstated Item, -1 = Declined Item
 
@@ -887,7 +889,7 @@ class StatusLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
     $insert_array = [];
 
     $this->write_db->transStart();
-
+    // log_message('error', json_encode($post->header));
     $status_approval_sequence = $post['status_approval_sequence'];
     $approval_flow_id = $post['fk_approval_flow_id'];
 

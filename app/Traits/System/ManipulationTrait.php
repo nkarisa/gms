@@ -2,10 +2,15 @@
 
 namespace App\Traits\System;
 
+use App\Libraries\System\Types\PostData;
+
 trait ManipulationTrait {
-    function add()
+    function add(PostData $postArray, $parentTable = null, $parentId = null)
     {
-  
+
+      $this->postArray = $post_array = (array) $postArray;
+      $this->tableName = !empty($postArray->tableName) ? $postArray->tableName : $this->controller;
+      
       // There are 3 insert scenarios
       // Scenario 1: Master detail insert without a primary relationship and master requires approval
       // Scenario 2: Master detail insert without a primary relationship and master doesn't require approval
@@ -15,7 +20,7 @@ trait ManipulationTrait {
       // Scenario 6: Single record insert that doesn't require approval
   
       // Asign the post input to $post_array
-      $post_array = $this->request->getPost();
+  
       // Check if there is a before insert method set in the feature model wrapped via grants model
       $post_array = $this->actionBeforeInsert($post_array);
   
@@ -30,12 +35,6 @@ trait ManipulationTrait {
       // Determine if the input post has details or not by checking if the detail variable is set
       $post_has_detail = isset($detail) ? true : false;
       $detail = $post_has_detail ? $detail : [];
-  
-      // Check if the creation of the of the header and detail records requires an approval ticket
-      // $approveItemLibrary = new \App\Libraries\Core\ApproveItemLibrary();
-      // $header_record_requires_approval = $approveItemLibrary->approveableItem($this->controller);
-      //$detail_records_require_approval = $this->approveable_item($this->controller.'_detail');
-      // $detail_records_require_approval = $approveItemLibrary->approveableItem($this->dependantTable($this->controller));
   
       // Get the table name of multi select field
       $multi_select_field_name = 'fk_' . $this->multiSelectField() . '_id';
@@ -74,7 +73,7 @@ trait ManipulationTrait {
             }
           }
   
-          $returned_validation_message = $this->addInserts($post_has_detail, $header, $detail);
+          $returned_validation_message = $this->addInserts($post_has_detail, $header, $detail, $parentTable, $parentId);
           if ($returned_validation_message['flag'] == true) {
             $success++;
           } else {
@@ -82,16 +81,16 @@ trait ManipulationTrait {
           }
         }
   
-        $message .= $success . ' ' . str_replace('_', ' ', $this->controller) . ' inserted and ' . $failed . ' failed';
+        $message .= $success . ' ' . str_replace('_', ' ', $this->tableName) . ' inserted and ' . $failed . ' failed';
   
         $message = ['flag' => true, 'message' => $message];
   
       } else {
-  
-        $message = $this->addInserts($post_has_detail, $header, $detail);
+        // log_message('error', json_encode(compact('parentTable', 'parentId')));
+        $message = $this->addInserts($post_has_detail, $header, $detail, $parentTable, $parentId);
       }
   
-      return $this->response->setJSON($message);
+      return $postArray->returnAsJsonResponseInterface ? $this->response->setJSON($message) : $message;
     }
   
     public function insertApprovalRecord($approveableItem)
@@ -124,14 +123,15 @@ trait ManipulationTrait {
     }
   
   
-    public function addInserts($postHasDetail, $header, $detail = []): array
+    public function addInserts($postHasDetail, $header, $detail = [], $parentTable = null, $parentId = null): array
     {
-      $initialStatus = $this->initialItemStatus($this->controller);
+
+      $initialStatus = isset($header['fk_status_id']) &&  $header['fk_status_id'] > 0 ? $header['fk_status_id'] : $this->initialItemStatus($this->tableName);
   
       $this->write_db->transBegin();
   
       // Create the approval ticket if required by the header record
-      $approvalId = $this->insertApprovalRecord(strtolower($this->controller));
+      $approvalId = $this->insertApprovalRecord(strtolower($this->tableName));
   
       if ($this->id) {
         $decodedHashId = hash_id($this->id, 'decode');
@@ -143,15 +143,17 @@ trait ManipulationTrait {
       }
   
       // Prepare the header columns for insertion
+      // log_message('error', json_encode([$this->postArray, $parentTable, $parentId]));
       $headerColumns = [];
       $additionalHeaderColumns = [];
-      $headerRandom = record_prefix($this->controller) . '-' . rand(1000, 90000);
-      $headerColumns[strtolower($this->controller) . '_track_number'] = $headerRandom;
-      $headerColumns[strtolower($this->controller) . '_name'] = $this->request->getPost($this->controller . '_name') != ""
-        ? $this->request->getPost($this->controller . '_name')
-        : ucfirst($this->controller) . ' # ' . $headerRandom;
+      $headerRandom = record_prefix($this->tableName) . '-' . rand(1000, 90000);
+      $headerColumns[strtolower($this->tableName) . '_track_number'] = $headerRandom;
+      $headerColumns[strtolower($this->tableName) . '_name'] = isset($this->postArray['header'][$this->tableName . '_name']) && $this->postArray['header'][$this->tableName . '_name'] != "" 
+        ? $this->postArray['header'][$this->tableName . '_name']
+        : ucfirst($this->tableName) . ' # ' . $headerRandom;
   
-      $allFieldName = array_column($this->tableFieldsMetadata($this->controller),'name');  
+      $allFieldName = array_column($this->tableFieldsMetadata($this->tableName),'name');
+
       foreach ($header as $key => $value) {
         // Unset columns that are not part of the table columns
         if (!in_array($key, $allFieldName)) {
@@ -164,18 +166,21 @@ trait ManipulationTrait {
         }, $value));
       }
   
-      if (session()->has('masterTable')) {
-        $headerColumns['fk_' . strtolower(session()->get('masterTable')) . '_id'] = hash_id($this->id, 'decode');
+      if ((session()->has('masterTable') && !empty(session()->has('masterTable'))) || $parentTable != null) {
+        $masterTable = !$parentTable != null ? $parentTable : session()->get('masterTable');
+        $masterTableId = !$parentTable != null ? $parentId : $this->id; 
+        // log_message('error', json_encode($masterTable));
+        $headerColumns['fk_' . strtolower($masterTable) . '_id'] = hash_id($masterTableId, 'decode');
       }
   
-      $headerColumns['fk_status_id'] = $this->controller != 'status' ? $initialStatus : NULL;
-      $headerColumns['fk_approval_id'] = $this->controller != 'status' ? $approvalId : NULL;
-      $headerColumns[strtolower($this->controller) . '_created_date'] = date('Y-m-d');
-      $headerColumns[strtolower($this->controller) . '_created_by'] = session()->get('user_id');
-      $headerColumns[strtolower($this->controller) . '_last_modified_by'] = session()->get('user_id');
+      $headerColumns['fk_status_id'] = $this->tableName != 'status' ? $initialStatus : NULL;
+      $headerColumns['fk_approval_id'] = $this->tableName != 'status' ? $approvalId : NULL;
+      $headerColumns[strtolower($this->tableName) . '_created_date'] = date('Y-m-d');
+      $headerColumns[strtolower($this->tableName) . '_created_by'] = session()->get('user_id');
+      $headerColumns[strtolower($this->tableName) . '_last_modified_by'] = session()->get('user_id');
   
       // Insert the header record
-      $this->write_db->table(strtolower($this->controller))->insert($headerColumns);
+      $this->write_db->table(strtolower($this->tableName))->insert($headerColumns);
   
       // Get the inserted header record ID
       $headerId = $this->write_db->insertID();
@@ -189,7 +194,7 @@ trait ManipulationTrait {
         // Construct an insert batch array for details
         for ($i = 0; $i < sizeof($shiftedElement); $i++) {
           foreach ($detailArray as $column => $values) {
-            if (strpos($column, '_name') === true && $column !== $this->dependantTable($this->controller) . '_name') {
+            if (strpos($column, '_name') === true && $column !== $this->dependantTable($this->tableName) . '_name') {
               $column = 'fk_' . substr($column, 0, -5) . '_id';
             }
             
@@ -199,31 +204,31 @@ trait ManipulationTrait {
               return (int) $item;
             }, $value));
   
-            $detailRandom = record_prefix($this->dependantTable($this->controller)) . '-' . rand(1000, 90000);
-            $detailColumns[$i][$this->dependantTable($this->controller) . '_track_number'] = $detailRandom;
-            $detailColumns[$i]['fk_' . $this->controller . '_id'] = $headerId;
+            $detailRandom = record_prefix($this->dependantTable($this->tableName)) . '-' . rand(1000, 90000);
+            $detailColumns[$i][$this->dependantTable($this->tableName) . '_track_number'] = $detailRandom;
+            $detailColumns[$i]['fk_' . $this->tableName . '_id'] = $headerId;
   
-            $detailColumns[$i]['fk_status_id'] = $this->initialItemStatus($this->dependantTable($this->controller));
+            $detailColumns[$i]['fk_status_id'] = $this->initialItemStatus($this->dependantTable($this->tableName));
             $detailColumns[$i]['fk_approval_id'] = $approvalId;
   
-            $detailColumns[$i][$this->dependantTable($this->controller) . '_created_date'] = date('Y-m-d');
-            $detailColumns[$i][$this->dependantTable($this->controller) . '_created_by'] = session()->get('user_id');
-            $detailColumns[$i][$this->dependantTable($this->controller) . '_modified_by'] = session()->get('user_id');
+            $detailColumns[$i][$this->dependantTable($this->tableName) . '_created_date'] = date('Y-m-d');
+            $detailColumns[$i][$this->dependantTable($this->tableName) . '_created_by'] = session()->get('user_id');
+            $detailColumns[$i][$this->dependantTable($this->tableName) . '_modified_by'] = session()->get('user_id');
           }
         }
         // $details = $detailColumns;
   
         // Insert the details using insert batch
-        $this->write_db->table($this->dependantTable($this->controller))->insertBatch($detailColumns);
+        $this->write_db->table($this->dependantTable($this->tableName))->insertBatch($detailColumns);
       }
   
-      $library = $this->loadLibrary($this->controller);
+      $library = $this->loadLibrary($this->tableName);
       $transactionValidateDuplicatesColumns = is_array($library->transactionValidateDuplicatesColumns())
         ? $library->transactionValidateDuplicatesColumns()
         : [];
   
-      $transactionValidateDuplicates = $this->transactionValidateDuplicates($this->controller, $header, $transactionValidateDuplicatesColumns);
-      $transactionValidateByComputation = $this->transactionValidateByComputation($this->controller, $header);
+      $transactionValidateDuplicates = $this->transactionValidateDuplicates($this->tableName, $header, $transactionValidateDuplicatesColumns);
+      $transactionValidateByComputation = $this->transactionValidateByComputation($this->tableName, $header);
   
       // Merge the $additionalHeaderColumns and $headerColumns
       if(count($additionalHeaderColumns) > 0){
@@ -296,7 +301,7 @@ trait ManipulationTrait {
       $message = '';
       $messageAndFlag = [];
       $messageAndFlag['flag'] = false;
-      $library = $this->loadLibrary($this->controller);
+      $library = $this->loadLibrary($this->tableName);
   
       // Extract flags from validation
       $validationFlags = array_column($validationFlagsAndFailureMessages, 'flag');
@@ -330,7 +335,7 @@ trait ManipulationTrait {
             $messageAndFlag['flag'] = true;
             $messageAndFlag['message'] = $message;
             $messageAndFlag['header_id'] = hash_id($headerId, 'encode');
-            $messageAndFlag['table'] = $this->controller;
+            $messageAndFlag['table'] = $this->tableName;
           } else {
             $this->write_db->transRollback();
             $message = get_phrase('insert_failed');
@@ -389,7 +394,7 @@ trait ManipulationTrait {
     {
       // Determine the table name
 
-      $table = empty($table) ? $this->controller : $table;
+      $table = empty($table) ? $this->tableName : $table;
   
       // Determine the item ID
       $itemId = $itemId == 0 ? $this->id : $itemId;
@@ -438,11 +443,12 @@ trait ManipulationTrait {
       $builder_arr->insert($update_data);
     }
   
-    public function edit(string $id): \CodeIgniter\HTTP\Response
+    public function edit(string $id, PostData $postArray): \CodeIgniter\HTTP\Response
     {
   
-      $library = $this->loadLibrary($this->controller);
-      $postArray = $this->request->getPost(); // Equivalent to $this->input->post() in CI3
+      $this->tableName = !empty($postArray->tableName) ? $postArray->tableName : $this->controller;
+      $library = $this->loadLibrary($this->tableName);
+      $this->postArray = $postArray = (array) $postArray;
 
       // Call action_before_edit from grants service
       $postArray = $library->actionBeforeEdit($postArray);  
@@ -473,7 +479,7 @@ trait ManipulationTrait {
           : [];
   
         $hasDuplicateRecord = $this->hasDuplicateRecord(
-          $this->controller,
+          $this->tableName,
           $id,
           $transactionValidateDuplicatesColumns,
           $data
@@ -481,8 +487,8 @@ trait ManipulationTrait {
   
         if (!$hasDuplicateRecord) {
           $this->write_db->transBegin(); // Begin transaction
-          $this->write_db->table($this->controller)
-            ->where([$this->primaryKeyField($this->controller) => hash_id($id, 'decode')])
+          $this->write_db->table($this->tableName)
+            ->where([$this->primaryKeyField($this->tableName) => hash_id($id, 'decode')])
             ->update($data); // Update the table
   
           $this->createChangeHistory($data); // Create change history

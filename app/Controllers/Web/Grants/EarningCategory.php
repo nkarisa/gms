@@ -7,7 +7,7 @@ use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
-class AssetStatus extends WebController
+class EarningCategory extends WebController
 {
 
     function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)

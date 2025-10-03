@@ -3,6 +3,7 @@
 namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
+use CodeIgniter\Database\RawSql;
 
 class CreateOpeningAccrualBalanceTable extends Migration
 {
@@ -51,8 +52,8 @@ class CreateOpeningAccrualBalanceTable extends Migration
                 'comment'     => 'The actual amount of the opening accrual.',
             ],
             'opening_accrual_balance_effect' => [
-                'type'       => 'ENUM',
-                'constraint' => ['debit', 'credit'],
+                'type'       => 'VARCHAR',
+                'constraint' => "'debit', 'credit'",
                 'null'       => false,
                 'comment'    => 'Type of the accrual effect.',
             ],
@@ -72,7 +73,7 @@ class CreateOpeningAccrualBalanceTable extends Migration
             'opening_accrual_balance_last_modified_date' => [
                 'type'       => 'TIMESTAMP',
                 'null'       => false,
-                'default'    => 'CURRENT_TIMESTAMP',
+                'default'    => new RawSql('CURRENT_TIMESTAMP'),
                 'comment'    => 'Timestamp of the last modification.',
             ],
             'opening_accrual_balance_last_modified_by' => [

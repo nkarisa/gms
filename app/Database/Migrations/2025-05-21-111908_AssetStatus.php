@@ -3,43 +3,46 @@
 namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
+use CodeIgniter\Database\RawSql;
 
 class AssetStatus extends Migration
 {
     public function up()
     {
         $this->forge->addField([
-            'asset_status_id' => [
+            'asset_state_id' => [
                 'type'           => 'INT',
                 'constraint'     => 11, // Assuming INT is 11 digits by default for AUTO_INCREMENT
                 'unsigned'       => true,
                 'auto_increment' => true,
             ],
-            'asset_status_track_number' => [
+            'asset_state_track_number' => [
                 'type'       => 'VARCHAR',
                 'constraint' => '100',
             ],
-            'asset_status_name' => [
+            'asset_state_name' => [
                 'type'       => 'VARCHAR',
                 'constraint' => '100',
             ],
-            'asset_status_is_default' => [
+            'asset_state_is_default' => [
                 'type'       => 'VARCHAR',
                 'constraint' => '100',
             ],
-            'asset_status_created_date' => [
+            'asset_state_created_date' => [
                 'type' => 'DATE',
             ],
-            'asset_status_created_by' => [
+            'asset_state_created_by' => [
                 'type'       => 'INT',
                 'constraint' => 11,
                 'null'       => true,
             ],
-            'asset_status_last_modified_date' => [
-                'type'    => 'TIMESTAMP',
-                'default' => 'CURRENT_TIMESTAMP',
+            'asset_state_last_modified_date' => [
+                'type'       => 'TIMESTAMP',
+                'null'       => false,
+                'default'    => new RawSql('CURRENT_TIMESTAMP'),
+                'comment'    => 'Timestamp of the last modification.',
             ],
-            'asset_status_last_modified_by' => [
+            'asset_state_last_modified_by' => [
                 'type'       => 'INT',
                 'constraint' => 11,
                 'null'       => true,
@@ -56,12 +59,12 @@ class AssetStatus extends Migration
             ],
         ]);
 
-        $this->forge->addPrimaryKey('asset_status_id');
-        $this->forge->createTable('asset_status');
+        $this->forge->addPrimaryKey('asset_state_id');
+        $this->forge->createTable('asset_state');
     }
 
     public function down()
     {
-        $this->forge->dropTable('asset_status');
+        $this->forge->dropTable('asset_state');
     }
 }

@@ -23,6 +23,8 @@ class AddExpenseVoteHeadsCategoryCode extends Migration
                     'individual_interventions',
                     'depreciation',
                     'payroll_liability',
+                    'suspense',
+                    'asset_acquisition'
                 ],
                 'null' => true,
                 'after' => 'fk_funding_stream_id',

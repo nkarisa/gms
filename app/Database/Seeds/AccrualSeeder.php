@@ -11,5 +11,7 @@ class AccrualSeeder extends Seeder
         $this->call('App\Database\Seeds\AccrualVoucherTypeAccountSeeder');
         $this->call('App\Database\Seeds\AccrualVoucherTypeEffectSeeder');
         $this->call('App\Database\Seeds\AccrualAccountSystemSettingSeeder');
+        // $this->call('App\Database\Seeds\AssetStatusSeeder');
+        // $this->call('App\Database\Seeds\AssetCategorySeeder');
     }
 }

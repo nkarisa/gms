@@ -3,6 +3,7 @@
 namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
+use CodeIgniter\Database\RawSql;
 
 class CreateAssetCategoryTable extends Migration
 {
@@ -33,8 +34,10 @@ class CreateAssetCategoryTable extends Migration
                 'null'       => true,
             ],
             'asset_category_last_modified_date' => [
-                'type'    => 'TIMESTAMP',
-                'default' => 'CURRENT_TIMESTAMP',
+                'type'       => 'TIMESTAMP',
+                'null'       => false,
+                'default'    => new RawSql('CURRENT_TIMESTAMP'),
+                'comment'    => 'Timestamp of the last modification.',
             ],
             'asset_category_last_modified_by' => [
                 'type'       => 'INT',

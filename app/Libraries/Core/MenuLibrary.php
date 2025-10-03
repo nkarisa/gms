@@ -227,11 +227,13 @@ class MenuLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
                     'menu_id' => $menuId,
                     'table_name' => $menu,
                 ];
-
-                $this->add('permission', $permissionData);
-
+                
+                
                 $approveItemLibrary = new ApproveItemLibrary();
                 $statusLibrary = new StatusLibrary();
+                $permissionLibrary = new PermissionLibrary();
+
+                $permissionLibrary->createPermission($permissionData);
 
                 $approveItemLibrary->insertMissingApproveableItem(strtolower($menu));
                 $this->mandatoryFields(strtolower($menu));

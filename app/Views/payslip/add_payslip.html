@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Payslip</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        .add-payslip-form-container {
+            max-width: 800px;
+            margin: auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .section-header {
+            background-color: #f2f2f2;
+            padding: 10px;
+            font-weight: bold;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            margin-top: 20px;
+        }
+        /* Style for the dynamic messages */
+        .message-area-section {
+            min-height: 40px;
+            margin-bottom: 20px;
+        }
+        .alert-custom {
+            padding: 10px;
+            border-radius: 4px;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        .alert-error {
+            background-color: #f2dede;
+            color: #a94442;
+            border: 1px solid #ebccd1;
+        }
+        .alert-success {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+        }
+        /* Style for the inline section errors */
+        .earning-message-area, .deduction-message-area {
+            min-height: 10px;
+            margin-bottom: 15px;
+        }
+        /* Class to highlight fields for the user */
+        .is-invalid-field {
+            border: 1px solid #a94442 !important;
+            box-shadow: 0 0 5px rgba(169, 68, 66, 0.5);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container add-payslip-form-container">
+    <h3 class="text-center">Create New Payslip Record</h3>
+    <hr>
+    
+    <div id="general-message-area" class="message-area-section"></div>
+
+    <form id="newPayslipForm">
+        
+        <div class="section-header">Payslip Period & Employee Details</div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="new_payPeriodStart">Pay Period Start Date</label>
+                    <input type="date" class="form-control" id="new_payPeriodStart" required>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="new_payPeriodEnd">Pay Period End Date</label>
+                    <input type="date" class="form-control" id="new_payPeriodEnd" readonly required>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="new_payDate">Pay Date</label>
+                    <input type="date" class="form-control" id="new_payDate" required>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="new_employeeId">Employee ID</label>
+                    <input type="text" class="form-control" id="new_employeeId" readonly placeholder="Auto-populated ID">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="new_employeeName">Employee Name</label>
+                    <select class="form-control" id="new_employeeName" required>
+                        <option value="" disabled selected>Select Employee</option>
+                        <option value="john_doe">John Doe</option>
+                        <option value="jane_smith">Jane Smith</option>
+                        <option value="peter_jones">Peter Jones</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="new_jobTitle">Job Title</label>
+                    <input type="text" class="form-control" id="new_jobTitle" readonly placeholder="Auto-populated Job Title">
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="new_department">Department</label>
+                    <input type="text" class="form-control" id="new_department" readonly placeholder="Auto-populated Department">
+                </div>
+            </div>
+        </div>
+        
+        <hr>
+
+        <div class="section-header">Earnings</div>
+        <div id="earning-message-area" class="earning-message-area"></div>
+        
+        <div id="newEarningsContainer">
+            </div>
+        <button type="button" class="btn btn-sm btn-primary" id="addNewEarningField">Add Another Earning</button>
+
+        <hr>
+
+        <div class="section-header">Deductions</div>
+        <div id="deduction-message-area" class="deduction-message-area"></div>
+
+        <div id="newDeductionsContainer">
+            </div>
+        <button type="button" class="btn btn-sm btn-primary" id="addNewDeductionField">Add Another Deduction</button>
+
+        <hr>
+
+        <div class="text-center" style="margin-top: 20px;">
+            <button type="submit" class="btn btn-success btn-lg">
+                <span class="glyphicon glyphicon-plus-sign"></span> Generate Payslip
+            </button>
+            <button type="reset" class="btn btn-default btn-lg">
+                <span class="glyphicon glyphicon-erase"></span> Clear Form
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const newPayslipForm = document.getElementById('newPayslipForm');
+        const employeeNameSelect = document.getElementById('new_employeeName');
+        const employeeIdInput = document.getElementById('new_employeeId');
+        const jobTitleInput = document.getElementById('new_jobTitle');
+        const departmentInput = document.getElementById('new_department');
+        const payPeriodStartInput = document.getElementById('new_payPeriodStart');
+        const payPeriodEndInput = document.getElementById('new_payPeriodEnd');
+        const addNewEarningFieldBtn = document.getElementById('addNewEarningField');
+        const addNewDeductionFieldBtn = document.getElementById('addNewDeductionField');
+        const newEarningsContainer = document.getElementById('newEarningsContainer');
+        const newDeductionsContainer = document.getElementById('newDeductionsContainer');
+        
+        const generalMessageArea = document.getElementById('general-message-area');
+        const earningMessageArea = document.getElementById('earning-message-area');
+        const deductionMessageArea = document.getElementById('deduction-message-area');
+
+        // --- Mock Data ---
+        const employeeData = {
+            'john_doe': { id: 'EMP-001', title: 'Software Developer', dept: 'Engineering' },
+            'jane_smith': { id: 'EMP-002', title: 'Project Manager', dept: 'Marketing' },
+            'peter_jones': { id: 'EMP-003', title: 'Financial Analyst', dept: 'Finance' },
+        };
+        
+        const EARNING_OPTIONS = ['Basic Salary', 'Overtime Pay', 'Commission', 'Performance Bonus'];
+        const DEDUCTION_OPTIONS = ['Federal Tax', 'State Tax', 'Medical Insurance', '401(k) Contribution'];
+
+        // --- Date Calculation Logic ---
+        function calculateMonthEndDate(startDateString) {
+            if (!startDateString) {
+                return '';
+            }
+            const startDate = new Date(startDateString);
+            const year = startDate.getFullYear();
+            const month = startDate.getMonth(); 
+
+            // Sets the date to the 0th day of the NEXT month (which is the last day of the current month)
+            const endDate = new Date(year, month + 1, 0);
+
+            // Format the date to 'YYYY-MM-DD'
+            const day = String(endDate.getDate()).padStart(2, '0');
+            const formattedMonth = String(endDate.getMonth() + 1).padStart(2, '0');
+            return `${year}-${formattedMonth}-${day}`;
+        }
+
+        // --- MOCK API CALL: Fetch Payslip Data ---
+        async function fetchEmployeePayslipData(employeeKey) {
+            await new Promise(resolve => setTimeout(resolve, 300));
+            const mockData = {
+                'john_doe': {
+                    earnings: [
+                        { description: 'Basic Salary', amount: 5000.00 },
+                        { description: 'Overtime Pay', amount: 250.00 }
+                    ],
+                    deductions: [
+                        { description: 'Federal Tax', amount: 800.00 },
+                        { description: '401(k) Contribution', amount: 150.00 }
+                    ]
+                },
+                'jane_smith': {
+                    earnings: [
+                        { description: 'Basic Salary', amount: 6500.00 },
+                        { description: 'Commission', amount: 1200.00 }
+                    ],
+                    deductions: [
+                        { description: 'Federal Tax', amount: 1100.00 },
+                        { description: 'Medical Insurance', amount: 200.00 }
+                    ]
+                }
+            };
+            return mockData[employeeKey] || { earnings: [], deductions: [] };
+        }
+        
+        // --- Dynamic Message Display Function ---
+        function displayMessage(type, message, targetArea) {
+            targetArea.innerHTML = '';
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `alert-custom alert-${type}`;
+            messageDiv.innerHTML = message;
+            targetArea.appendChild(messageDiv);
+
+            if (type === 'success') {
+                setTimeout(() => {
+                    messageDiv.style.opacity = '0';
+                    setTimeout(() => messageDiv.remove(), 500);
+                }, 5000);
+            }
+        }
+        
+        // --- Live Duplicate Validation Function ---
+        function validateLiveDuplicates(selector, sectionName, elementToReset) {
+            const isEarning = (selector === '.new-earning-desc');
+            const targetArea = isEarning ? earningMessageArea : deductionMessageArea;
+            
+            targetArea.innerHTML = '';
+            generalMessageArea.innerHTML = '';
+
+            const selectedItems = new Set();
+            let isDuplicate = false;
+            
+            document.querySelectorAll(selector).forEach(selectElement => {
+                const value = selectElement.value;
+                
+                if (value) {
+                    if (selectedItems.has(value)) {
+                        displayMessage('error', `❌ **Duplicate entry found:** "${value}" has already been selected as an ${isEarning ? 'earning' : 'deduction'}.`, targetArea);
+                        elementToReset.value = ""; 
+                        elementToReset.focus();
+                        isDuplicate = true;
+                    } else {
+                        selectedItems.add(value);
+                    }
+                }
+            });
+            return isDuplicate;
+        }
+
+        // --- Core Row Creation Function ---
+        function createNewFormRow(isEarning, initialData = {}) {
+            const containerClass = isEarning ? 'new-earning-item' : 'new-deduction-item';
+            const optionsList = isEarning ? EARNING_OPTIONS : DEDUCTION_OPTIONS;
+            const selectClass = isEarning ? 'new-earning-desc' : 'new-deduction-desc';
+            const amountClass = isEarning ? 'new-earning-amount' : 'new-deduction-amount';
+
+            const initialDescription = initialData.description || '';
+            const initialAmount = (initialData.amount !== undefined) ? initialData.amount.toFixed(2) : '0.00';
+
+            let optionsHTML = `<option value="" disabled ${initialDescription ? '' : 'selected'}>Select ${isEarning ? 'Earning' : 'Deduction'} Type</option>`;
+            optionsList.forEach(option => {
+                const selected = (option === initialDescription) ? 'selected' : '';
+                optionsHTML += `<option ${selected}>${option}</option>`;
+            });
+
+            const newRow = document.createElement('div');
+            newRow.className = `row ${containerClass}`
+            newRow.style.marginBottom = '10px';
+            newRow.innerHTML = `
+                <div class="col-sm-6">
+                    <select class="form-control ${selectClass}" required>
+                        ${optionsHTML}
+                    </select>
+                </div>
+                <div class="col-sm-4">
+                    <input type="number" step="0.01" class="form-control ${amountClass}" placeholder="Amount ($)" value="${initialAmount}" required>
+                </div>
+                <div class="col-sm-2">
+                    <button type="button" class="btn btn-danger btn-block remove-new-row">Remove</button>
+                </div>
+            `;
+            
+            const newSelect = newRow.querySelector('select');
+            newSelect.addEventListener('change', (e) => {
+                const selector = isEarning ? '.new-earning-desc' : '.new-deduction-desc';
+                const sectionName = isEarning ? 'Earnings' : 'Deductions';
+                validateLiveDuplicates(selector, sectionName, e.target); 
+            });
+
+            return newRow;
+        }
+
+        // --- Main Population Logic ---
+        async function populatePayslipData(employeeKey) {
+            newEarningsContainer.innerHTML = '';
+            newDeductionsContainer.innerHTML = '';
+            earningMessageArea.innerHTML = '';
+            deductionMessageArea.innerHTML = '';
+
+            if (!employeeKey) return; 
+
+            const data = await fetchEmployeePayslipData(employeeKey);
+
+            data.earnings.forEach(item => {
+                newEarningsContainer.appendChild(createNewFormRow(true, item));
+            });
+            data.deductions.forEach(item => {
+                newDeductionsContainer.appendChild(createNewFormRow(false, item));
+            });
+
+            validateLiveDuplicates('.new-earning-desc', 'Earnings', employeeNameSelect);
+            validateLiveDuplicates('.new-deduction-desc', 'Deductions', employeeNameSelect);
+        }
+
+        // --- Form Event Listeners ---
+
+        // Pay Period Start Date Listener
+        payPeriodStartInput.addEventListener('change', (event) => {
+            const startDate = event.target.value;
+            payPeriodEndInput.value = calculateMonthEndDate(startDate);
+        });
+
+        // Employee Selection Change Listener
+        employeeNameSelect.addEventListener('change', async (event) => {
+            const selectedEmployeeKey = event.target.value;
+            const data = employeeData[selectedEmployeeKey];
+
+            if (data) {
+                employeeIdInput.value = data.id;
+                jobTitleInput.value = data.title;
+                departmentInput.value = data.dept;
+                await populatePayslipData(selectedEmployeeKey);
+            } else {
+                employeeIdInput.value = '';
+                jobTitleInput.value = '';
+                departmentInput.value = '';
+                populatePayslipData(null); 
+            }
+        });
+        
+        // Dynamic Row Add/Remove Handlers (Unchanged)
+        addNewEarningFieldBtn.addEventListener('click', () => {
+            newEarningsContainer.appendChild(createNewFormRow(true));
+        });
+        addNewDeductionFieldBtn.addEventListener('click', () => {
+            newDeductionsContainer.appendChild(createNewFormRow(false));
+        });
+
+        document.body.addEventListener('click', (event) => {
+            if (event.target.classList.contains('remove-new-row')) {
+                const rowToRemove = event.target.closest('.row');
+                if (rowToRemove) {
+                    const isEarning = rowToRemove.classList.contains('new-earning-item');
+                    rowToRemove.remove();
+                    
+                    earningMessageArea.innerHTML = '';
+                    deductionMessageArea.innerHTML = '';
+                    if (isEarning) {
+                        validateLiveDuplicates('.new-earning-desc', 'Earnings', employeeNameSelect);
+                    } else {
+                        validateLiveDuplicates('.new-deduction-desc', 'Deductions', employeeNameSelect);
+                    }
+                }
+            }
+        });
+
+        // --- Custom Reset Logic (NEW/UPDATED) ---
+        newPayslipForm.addEventListener('reset', () => {
+            // Use setTimeout to allow the native form reset to complete first
+            setTimeout(() => {
+                // Clear dynamic content sections
+                newEarningsContainer.innerHTML = '';
+                newDeductionsContainer.innerHTML = '';
+
+                // Clear auto-populated readonly fields and messages
+                employeeIdInput.value = '';
+                jobTitleInput.value = '';
+                departmentInput.value = '';
+                generalMessageArea.innerHTML = '';
+                earningMessageArea.innerHTML = '';
+                deductionMessageArea.innerHTML = '';
+            }, 0);
+        });
+
+        // --- Empty Field Validation (Unchanged) ---
+        function validateEmptyFields() {
+            let isValid = true;
+            let firstInvalidField = null;
+
+            document.querySelectorAll('.is-invalid-field').forEach(el => el.classList.remove('is-invalid-field'));
+
+            const requiredFields = document.querySelectorAll('#newPayslipForm [required]:not([readonly])');
+
+            requiredFields.forEach(field => {
+                const isAmountField = field.classList.contains('new-earning-amount') || field.classList.contains('new-deduction-amount');
+                let isFieldEmpty = false;
+
+                if (isAmountField) {
+                    if (field.value === '' || isNaN(parseFloat(field.value))) {
+                        isFieldEmpty = true;
+                    }
+                } else if (field.value === '') {
+                    isFieldEmpty = true;
+                }
+
+                if (isFieldEmpty) {
+                    field.classList.add('is-invalid-field');
+                    isValid = false;
+                    if (!firstInvalidField) {
+                        firstInvalidField = field;
+                    }
+                }
+            });
+
+            if (!isValid) {
+                displayMessage('error', "❌ **Validation Error:** Please fill in all required fields (highlighted in red).", generalMessageArea);
+                if (firstInvalidField) {
+                    firstInvalidField.focus();
+                }
+            }
+            return isValid;
+        }
+
+        // --- FORM SUBMISSION HANDLER (Unchanged) ---
+        newPayslipForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            generalMessageArea.innerHTML = '';
+            earningMessageArea.innerHTML = '';
+            deductionMessageArea.innerHTML = ''; 
+
+            if (!validateEmptyFields()) {
+                return;
+            }
+
+            if (validateLiveDuplicates('.new-earning-desc', 'Earnings', employeeNameSelect) || 
+                validateLiveDuplicates('.new-deduction-desc', 'Deductions', employeeNameSelect)) {
+                return; 
+            }
+            
+            // 3. Collect and Process Data (If valid)
+            const newPayslipData = {
+                payPeriodStart: payPeriodStartInput.value,
+                payPeriodEnd: payPeriodEndInput.value,
+                payDate: document.getElementById('new_payDate').value,
+                employeeId: employeeIdInput.value,
+                employeeName: employeeNameSelect.options[employeeNameSelect.selectedIndex].text,
+                jobTitle: jobTitleInput.value,
+                department: departmentInput.value,
+                earnings: [],
+                deductions: []
+            };
+
+            document.querySelectorAll('.new-earning-item').forEach(row => {
+                newPayslipData.earnings.push({
+                    description: row.querySelector('.new-earning-desc').value,
+                    amount: parseFloat(row.querySelector('.new-earning-amount').value) || 0
+                });
+            });
+
+            document.querySelectorAll('.new-deduction-item').forEach(row => {
+                newPayslipData.deductions.push({
+                    description: row.querySelector('.new-deduction-desc').value,
+                    amount: parseFloat(row.querySelector('.new-deduction-amount').value) || 0
+                });
+            });
+            
+            // Calculate Totals for success message
+            const grossEarnings = newPayslipData.earnings.reduce((sum, item) => sum + item.amount, 0);
+            const totalDeductions = newPayslipData.deductions.reduce((sum, item) => sum + item.amount, 0);
+            const netPay = grossEarnings - totalDeductions;
+
+            const successMsg = `
+                ✅ **Payslip Generated for ${newPayslipData.employeeName}!**
+                <br>Pay Period: ${newPayslipData.payPeriodStart} to ${newPayslipData.payPeriodEnd}
+                <br>Net Pay: **$${netPay.toFixed(2)}**
+            `;
+            displayMessage('success', successMsg, generalMessageArea);
+            
+            // Final cleanup (triggers the 'reset' event)
+            newPayslipForm.reset(); 
+        });
+    });
+</script>
+
+</body>
+</html>

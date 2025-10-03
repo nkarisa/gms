@@ -166,7 +166,7 @@ $columns = array_chunk($keys,service("settings")->get("GrantsConfig.master_table
     </div>
     <?php
 
-    if( isset($result['detail']) && count($result['detail']) > 0){
+if( isset($result['detail']) && count($result['detail']) > 0){
       foreach ($result['detail'] as $detail_table_name => $details) {
         extract($details);
         ?>

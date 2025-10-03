@@ -57,10 +57,11 @@ class SingleFormAddOutput extends OutputTemplate{
       // Insert appove item, approval  flow and status record if either in not existing
       $this->libs->tableSetup(strtolower($table));
   
-      if ($this->request->getPost()) {
+      if ($post = $this->request->getPost()) {
           $library = $this->libs->loadLibrary($table);
+          $postData = new \App\Libraries\System\Types\PostData($post);
           // We use feature library since to allow overriding the grants library add method
-          $response = $library->add();
+          $response = $library->add($postData);
           return $response;
       } else {
         // Adds mandatory fields if not present in the current table

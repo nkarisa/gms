@@ -11,6 +11,7 @@ use Psr\Log\LoggerInterface;
 use Config\GrantsConfig;
 use App\Libraries\System\GrantsLibrary;
 use \App\Traits\System;
+use App\Libraries\System\Types\PostData;
 
 
 class WebController extends BaseController
@@ -63,6 +64,8 @@ class WebController extends BaseController
   protected $library;
   protected $settings;
   protected $awsAttachmentLibrary;
+  protected PostData $postArray;
+  protected string $tableName;
   
   /**
  * Initializes the controller with necessary configurations and dependencies.
@@ -204,10 +207,8 @@ class WebController extends BaseController
 
     if ($this->action == "list") {
       // List page data will only be loaded via ajax request and will be a datatable serverside loaded
-      if ($this->request->isAJAX()) {
-        
+      if ($this->request->isAJAX()) {        
         $output = $this->libs::call($this->controller . '.' . $this->action . 'Output', [$this->id == null ? $id : $this->id, $parentTable]);
-
       }
     } else {
       if ($this->id == null) {
@@ -447,8 +448,9 @@ class WebController extends BaseController
    */
   public function create($parentId = null, $parentTable = null)
   {
+    // log_message('error', json_encode(compact('parentId','parentTable')));
     $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'create');
-    return $this->libs::call("$this->controller.add", [$parentId, $parentTable]);
+    return $this->libs::call("$this->controller.add", [$this->request->getPost() ? new PostData($this->request->getPost(), $this->controller) : null, $parentTable, $parentId]);
   }
 
   /**
@@ -469,7 +471,7 @@ class WebController extends BaseController
   public function update($id)
   {
     $this->has_permission = $this->libs->loadLibrary('user')->checkRoleHasPermissions(ucfirst($this->controller), 'update');
-    return $this->libs::call("$this->controller.edit", [$this->id]);
+    return $this->libs::call("$this->controller.edit", [$this->id, $this->request->getPost() ? new PostData($this->request->getPost(), $this->controller) : null]);
   }
 
   /**

@@ -50,7 +50,7 @@ class ApproveItemLibrary extends GrantsLibrary implements \App\Interfaces\Librar
         // If no existing approveable item is found, insert a new one
         if ($approve_items->getNumRows() == 0) {
             // Generate a new item track number and name for the approveable item
-            $item_track_data = generate_item_track_number_and_name('approve_item');
+            $item_track_data = $this->generateItemTrackNumberAndName('approve_item');
 
             // Prepare the data for insertion
             $data = [

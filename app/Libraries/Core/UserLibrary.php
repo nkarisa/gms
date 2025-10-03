@@ -460,6 +460,25 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
         return $user;
     }
 
+    public function getActiveOfficeStaff($officeId, $officeAccountSystemId){
+        $statusLibrary = new StatusLibrary();
+        $userBuilder = $this->read_db->table('user');
+
+        $userBuilder->select(['user_id', 'CONCAT(user_firstname, " ", user_lastname) as user_name','user_firstname','user_lastname','user_email']);
+        $userBuilder->join('context_center_user','context_center_user.fk_user_id=user.user_id');
+        $userBuilder->join('context_center','context_center.context_center_id=context_center_user.fk_context_center_id');
+        $userBuilder->where('context_center.fk_office_id', $officeId);
+        $userBuilder->where('user_is_active','1');
+        $userBuilder->whereIn('user.fk_status_id', $statusLibrary->getMaxApprovalStatusId('user', [$officeId], $officeAccountSystemId)); // Does not work when using Tasks
+        $officeObj = $userBuilder->get();
+
+        if($officeObj->getNumRows() > 0){
+            return $officeObj->getResultArray();
+        }
+
+        return null;
+
+    }
 
     /**
      * Retrieves the context associations of a user.
@@ -1189,12 +1208,12 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
 
     }
 
-    function add()
+    function add($post, $parentTable = null, $parentId = null)
     {
         $response['flag'] = false;
         $response['message'] = get_phrase('user_creation_failed');
 
-        $post = $this->request->getPost()['header'];
+        // $post = $this->request->getPost()['header'];
 
         $uniqueIdentifierLibrary = new UniqueIdentifierLibrary();
         $officeLibrary = new OfficeLibrary();
@@ -1314,7 +1333,7 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
         return $active_status;
     }
 
-    function edit($id): \CodeIgniter\HTTP\Response
+    function edit($id, $post): \CodeIgniter\HTTP\Response
     {
         $flag = true;
         $flagMessage = '';

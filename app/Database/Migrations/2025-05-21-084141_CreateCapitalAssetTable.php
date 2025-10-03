@@ -3,6 +3,7 @@
 namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
+use CodeIgniter\Database\RawSql;
 
 class CreateCapitalAssetTable extends Migration
 {
@@ -59,11 +60,6 @@ class CreateCapitalAssetTable extends Migration
                 'constraint' => '50,2',
                 'null'       => false,
             ],
-            'capital_asset_total_depreciation' => [
-                'type'       => 'DECIMAL',
-                'constraint' => '50,2',
-                'null'       => false,
-            ],
             'capital_asset_created_date' => [
                 'type' => 'DATE',
                 'null' => true,
@@ -73,7 +69,12 @@ class CreateCapitalAssetTable extends Migration
                 'constraint' => 11,
                 'null'       => true,
             ],
-            'capital_asset_last_modified_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+            'capital_asset_last_modified_date' => [
+                'type'       => 'TIMESTAMP',
+                'null'       => false,
+                'default'    => new RawSql('CURRENT_TIMESTAMP'),
+                'comment'    => 'Timestamp of the last modification.',
+            ],
             'capital_asset_last_modified_by' => [
                 'type'       => 'INT',
                 'constraint' => 11,

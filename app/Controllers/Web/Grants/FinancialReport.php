@@ -341,7 +341,8 @@ class FinancialReport extends WebController
 
     function postExpenseAccountComment()
     {
-      echo $this->varianceCommentLibrary->add();
+      $postData = new \App\Libraries\System\Types\PostData($this->request->getPost());
+      echo $this->varianceCommentLibrary->add($postData );
     }
 
     //ask if this is needed and if I can add the new methods to the corrsponding library page

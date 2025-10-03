@@ -275,7 +275,7 @@ trait Extendable
    *  - 'results': An array of records to be displayed in the list table.
    */
 
-  public function list(\CodeIgniter\Database\BaseBuilder $datatableBuilder, array $listSelectColumns, string $parentId = null, string $parentTable = null): array
+  public function list(\CodeIgniter\Database\BaseBuilder $datatableBuilder, array $listSelectColumns, string|null $parentId = null, string|null $parentTable = null): array
   {
 
     return ['results' => [], 'total_records' => 10, 'final' => false];

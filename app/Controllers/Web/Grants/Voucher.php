@@ -351,7 +351,7 @@ class Voucher extends WebController
     $office_bank_id = $post['bank_id'];
     $edit_chq_number = $post['cheque_number'];
     $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
-    $leaves = $voucherLibrary->checkChequeValidity($ $office_bank_id, $edit_chq_number);
+    $leaves = $voucherLibrary->checkChequeValidity($office_bank_id, $edit_chq_number);
 
     return $this->response->setJSON(compact('leaves'));
   }
@@ -551,10 +551,10 @@ class Voucher extends WebController
 
       if($voucher_type_effect == VoucherTypeEffectEnum::DEPRECIATION->getCode()){
         $expenseAccountReadBuilder->join('expense_vote_heads_category','expense_vote_heads_category.expense_vote_heads_category_id=expense_account.fk_expense_vote_heads_category_id');
-        $expenseAccountReadBuilder->where(['expense_vote_heads_category.expense_vote_heads_category_name' => VoucherTypeEffectEnum::DEPRECIATION->getName()]);
+        $expenseAccountReadBuilder->where(['expense_vote_heads_category.expense_vote_heads_category_code' => VoucherTypeEffectEnum::DEPRECIATION->getName()]);
       }elseif($voucher_type_effect == VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode()){
         $expenseAccountReadBuilder->join('expense_vote_heads_category','expense_vote_heads_category.expense_vote_heads_category_id=expense_account.fk_expense_vote_heads_category_id');
-        $expenseAccountReadBuilder->where(['expense_vote_heads_category.expense_vote_heads_category_name' => VoucherTypeEffectEnum::PAYROLL_LIABILITY->getName()]);
+        $expenseAccountReadBuilder->where(['expense_vote_heads_category.expense_vote_heads_category_code' => VoucherTypeEffectEnum::PAYROLL_LIABILITY->getName()]);
       }
 
       $expenseAccountReadBuilder->select(array('expense_account_id as account_id', 'expense_account_name as account_name'));
