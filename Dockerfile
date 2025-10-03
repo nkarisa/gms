@@ -33,6 +33,7 @@ RUN composer install --no-dev --optimize-autoloader
 COPY --chown=www-data:www-data . .
 RUN ln -s /var/www/html/public  /var/www/html/public/devint
 RUN ln -s /var/www/html/public /var/www/html/public/stage
+RUN ln -s /var/www/html/public /var/www/html/public/etsandbox
 
 # Move env file into place and substitute variables using envsubst
 # This assumes your .env file template uses ${VAR} syntax for envsubst
