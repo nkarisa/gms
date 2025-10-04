@@ -23,6 +23,12 @@ COPY  --chown=root:root ./entrypoint.d/envsubst.sh /etc/entrypoint.d/
 RUN dos2unix /etc/entrypoint.d/envsubst.sh && \ 
     chmod +x /etc/entrypoint.d/envsubst.sh
 
+USER root
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+    && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
+    && php -r "unlink('composer-setup.php');" \
+    && composer update
+
 USER www-data
 
 WORKDIR /var/www/html/
@@ -35,11 +41,6 @@ RUN ln -s /var/www/html/public  /var/www/html/public/devint
 RUN ln -s /var/www/html/public /var/www/html/public/stage
 RUN ln -s /var/www/html/public /var/www/html/public/etsandbox
 
-# Composer Installation and cleanup in a RUN layer
-RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
-    && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
-    && php -r "unlink('composer-setup.php');" \
-    && composer update
 
 # Move env file into place and substitute variables using envsubst
 # This assumes your .env file template uses ${VAR} syntax for envsubst
