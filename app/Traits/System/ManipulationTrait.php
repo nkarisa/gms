@@ -222,12 +222,8 @@ trait ManipulationTrait {
         $this->write_db->table($this->dependantTable($this->tableName))->insertBatch($detailColumns);
       }
   
-      $library = $this->loadLibrary($this->tableName);
-      $transactionValidateDuplicatesColumns = is_array($library->transactionValidateDuplicatesColumns())
-        ? $library->transactionValidateDuplicatesColumns()
-        : [];
   
-      $transactionValidateDuplicates = $this->transactionValidateDuplicates($this->tableName, $header, $transactionValidateDuplicatesColumns);
+      $transactionValidateDuplicates = $this->transactionValidateDuplicates($this->tableName, $header);
       $transactionValidateByComputation = $this->transactionValidateByComputation($this->tableName, $header);
   
       // Merge the $additionalHeaderColumns and $headerColumns
@@ -238,18 +234,23 @@ trait ManipulationTrait {
       return $this->transactionValidate([$transactionValidateDuplicates, $transactionValidateByComputation], $headerColumns, $headerId, $approvalId);
     }
   
-    public function transactionValidateDuplicates(string $table_name, array $insert_array, array $validation_fields = [], int $allowable_records = 1): array
+    public function transactionValidateDuplicates(string $table_name, array $insert_array, int $allowable_records = 1): array
     {
   
+      $library = $this->loadLibrary($table_name);
+
+      $columns = $library->transactionValidateDuplicatesColumns();
+
+      $validate_duplicates_columns = is_array($columns)
+        ? $columns
+        : [];
+
       $validation_successful = true;
       $failure_message = get_phrase('no_duplicate_records');
-  
-      // $model = $table_name . "_model";
-      $library = $this->loadLibrary($table_name);
-  
-      if (method_exists($library, 'transactionValidateDuplicatesColumns') && is_array($validation_fields) && count($validation_fields) > 0) {
-  
-        $validate_duplicates_columns = $library->transactionValidateDuplicatesColumns();
+    
+      if (method_exists($library, 'transactionValidateDuplicatesColumns') && is_array($validate_duplicates_columns) && count($validate_duplicates_columns) > 0) {
+        
+        // $validate_duplicates_columns = $library->transactionValidateDuplicatesColumns();
   
         $insert_array_keys = array_unique(array_merge(array_keys($insert_array), $validate_duplicates_columns));
   
@@ -260,19 +261,19 @@ trait ManipulationTrait {
             $insert_array = array_merge($insert_array, $missing_field_in_insert_array);
           }
   
-          if (!in_array($insert_column, $validation_fields)) {
+          if (!in_array($insert_column, $validate_duplicates_columns)) {
             unset($insert_array[$insert_column]);
           }
         }
   
         $result = $this->write_db->table($table_name)
           ->where($insert_array)->get()->getNumRows();
-
+          
           if ($result > $allowable_records) {
-          $validation_successful = false; // Validation error flag
+            $validation_successful = false; // Validation error flag
   
-          $failure_message = get_phrase('duplicate_entries_not_allowed');
-        }
+            $failure_message = get_phrase('duplicate_entries_not_allowed');
+          }
       }
   
       return ['flag' => $validation_successful, 'error_message' => $failure_message];
@@ -305,7 +306,7 @@ trait ManipulationTrait {
   
       // Extract flags from validation
       $validationFlags = array_column($validationFlagsAndFailureMessages, 'flag');
-  
+      
       // Check if the transaction status is valid
       if ($this->write_db->transStatus() === false) {
         $messageAndFlag['message'] = get_phrase('insert_failed');
@@ -319,7 +320,7 @@ trait ManipulationTrait {
         // If any validation flag is false, rollback
         if (in_array(false, $validationFlags)) {
           $this->write_db->transRollback();
-  
+
           foreach ($validationFlagsAndFailureMessages as $validationCheck) {
             if (!$validationCheck['flag']) {
               $message .= $validationCheck['error_message'] . "\n";

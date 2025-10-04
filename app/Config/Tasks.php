@@ -51,7 +51,8 @@ class Tasks extends BaseTasks
             // Create payrolls for all offices
             $payrollLibrary = new PayrollLibrary();
             $response = $payrollLibrary->generatePayrollForAllTransactingOffices();
-            log_message('error', json_encode($response));
+            
+            log_message('info', json_encode($response));
 
         })->everyFiveMinutes()->named('autoCreate');
     }

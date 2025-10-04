@@ -462,7 +462,7 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
 
     public function getActiveOfficeStaff($officeId, $officeAccountSystemId){
         $statusLibrary = new StatusLibrary();
-        $userBuilder = $this->read_db->table('user');
+        $userBuilder = $this->write_db->table('user');
 
         $userBuilder->select(['user_id', 'CONCAT(user_firstname, " ", user_lastname) as user_name','user_firstname','user_lastname','user_email']);
         $userBuilder->join('context_center_user','context_center_user.fk_user_id=user.user_id');
