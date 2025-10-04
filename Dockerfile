@@ -32,6 +32,8 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
 
 USER www-data
 
+RUN chown -R www-data:www-data /var/www/html
+
 WORKDIR /var/www/html/
 
 RUN composer install --no-dev --optimize-autoloader
