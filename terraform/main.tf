@@ -8,6 +8,8 @@ resource "aws_ecs_task_definition" "task_definition" {
   execution_role_arn       =   data.aws_iam_role.ecs_task_execution_role.arn # Reference the new execution role # "arn:aws:iam::234204504144:role/ecsTaskExecutionRole"
   task_role_arn            = data.aws_iam_role.ecs_task_role_s3_admin.arn  # Reference the new task role with S3 access
 
+  skip_destroy = true
+
   runtime_platform {
     operating_system_family = "LINUX"
     cpu_architecture        = "X86_64"
