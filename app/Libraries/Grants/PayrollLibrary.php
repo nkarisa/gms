@@ -78,8 +78,6 @@ class PayrollLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
     }
 
     private function getActiveOfficeStaffWithoutPayrollPayslip($payrollId, $officeId, $officeAccountSystemId){
-        // $userLibrary = new \App\Libraries\Core\UserLibrary();
-        // $userLibrary->getActiveOfficeStaff($officeId, $officeAccountSystemId); 
 
         $allOfficeUsers = $this->getActiveOfficeStaffWithPayHistory($officeId, $officeAccountSystemId);
 
@@ -167,9 +165,7 @@ class PayrollLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         if (!empty($officeUsers) && $payrollId > 0) {
             
             $payslipData = $this->prepareUsersPayslipInfo($officeUsers, $payrollId);
-            
-            // log_message('error', json_encode(compact('payslipData')));
-            
+                        
             if (!empty($payslipData)) {
                 // Create empty payslips that will be updated later
                 $this->write_db->transStart();
