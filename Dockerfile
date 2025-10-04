@@ -24,15 +24,15 @@ RUN dos2unix /etc/entrypoint.d/envsubst.sh && \
     chmod +x /etc/entrypoint.d/envsubst.sh
 
 USER root
-COPY --chown=www-data:www-data composer.json composer.lock ./
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
-    && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
-    && php -r "unlink('composer-setup.php');" \
-    && composer update
+&& php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
+&& php -r "unlink('composer-setup.php');" 
 
 USER www-data
 
-RUN chown -R www-data:www-data /var/www/html
+COPY --chown=www-data:www-data composer.json composer.lock ./
+
+RUN composer update
 
 WORKDIR /var/www/html/
 
