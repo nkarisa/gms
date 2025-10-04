@@ -16,9 +16,9 @@ class MyDailyTask extends BaseCommand
     {
         
         $payrollLibrary = new PayrollLibrary();
-        $result = $payrollLibrary->generatePayroll('1621', '2025-08-01');
+        $response = $payrollLibrary->generatePayrollForAllTransactingOffices();
 
-        if($result['flag']){
+        if($response){
             CLI::write('Payroll created successfully!');
         }else{
             CLI::write('Payroll creating failed!');
