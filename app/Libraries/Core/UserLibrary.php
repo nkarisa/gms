@@ -1097,6 +1097,10 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
             $columnValue = array_key_exists($rowArray['user_id'], $userOffices) ? implode(', ',$userOffices[$rowArray['user_id']]) : '';
         }
 
+        if($column == 'user_email'){
+            $columnValue = strtolower($columnValue);
+        }
+
         return $columnValue;
     }
 
@@ -1217,7 +1221,7 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
 
         $post = $post->header;
 
-        // log_message('error', json_encode($post));
+        log_message('error', json_encode($post));
 
         $uniqueIdentifierLibrary = new UniqueIdentifierLibrary();
         $officeLibrary = new OfficeLibrary();
@@ -1238,12 +1242,17 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
         $user['md5_migrate'] = 1; //For migrating fro use of php MD5 to complex sha256 with salt
         $user['fk_role_id'] = $post['fk_role_id'];
         $user['user_is_switchable'] = $post['user_is_switchable'] ?? 1;
+
+        $accountSystemId = 0;
+
         if ($this->session->system_admin) {
+            $accountSystemId = $post['fk_account_system_id'];
             $user['fk_country_currency_id'] = $post['fk_country_currency_id'];
             $user['fk_account_system_id'] = $post['fk_account_system_id'];
         } else {
+            $accountSystemId = $officeLibrary->getOfficeAccountSystem($post['fk_user_context_office_id'])['account_system_id'];
             $user['fk_country_currency_id'] = $post['currency_id'];
-            $user['fk_account_system_id'] = $officeLibrary->getOfficeAccountSystem($post['fk_user_context_office_id'])['account_system_id']; //$post['account_system_id'];
+            $user['fk_account_system_id'] = $accountSystemId; //$post['account_system_id'];
         }
 
         $unique_identifier = $uniqueIdentifierLibrary->getAccountSystemUniqueIdentifier($user['fk_account_system_id']);
@@ -1256,9 +1265,8 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
         $user['user_last_modified_date'] = date('Y-m-d');
         $user['user_created_by'] = $this->session->user_id ? $this->session->user_id : 1;
         $user['user_last_modified_by'] = $this->session->user_id ? $this->session->user_id : 1;
-        $user['fk_status_id'] =  $statusLibary->initialItemStatus('user', $post['fk_account_system_id']);
+        $user['fk_status_id'] =  $statusLibary->initialItemStatus('user', $accountSystemId);
         $user['fk_approval_id'] = $approvalLibrary->insertApprovalRecord('user');
-        // $user_to_insert = $this->mergeWithHistoryFields($this->controller, $user, false);
 
         $this->write_db->table('user')->insert($user);
 
