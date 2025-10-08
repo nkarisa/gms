@@ -514,7 +514,7 @@ class OfficeLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
 
     $this->write_db->transBegin();
 
-    // $post = $this->request->getPost()['header'];
+    $post = $post->header;
 
     $office['office_name'] = $post['office_name'];
     $office['office_description'] = $post['office_description'];
@@ -661,7 +661,7 @@ class OfficeLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
   public function getOfficeById($office_id): array
   {
     $officeReadBuilder = $this->read_db->table('office');
-    $officeReadBuilder->select(['office_id', 'office_code', 'fk_account_system_id as account_system_id']);
+    $officeReadBuilder->select(['office_id', 'office_code','office_name', 'fk_account_system_id as account_system_id']);
     $officeReadBuilder->where(['office_id' => $office_id]);
     $office = $officeReadBuilder->get()->getRowArray();
 

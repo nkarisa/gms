@@ -5,7 +5,7 @@ namespace App\Libraries\Grants\Shreds;
 use CodeIgniter\Database\BaseConnection;
 use App\Libraries\Grants\AssetDepreciationLibrary;
 use App\Libraries\Core\StatusLibrary;
-use App\Enums\{VoucherTypeEffectEnum};
+use App\Enums\{VoucherTypeEffectEnum, AccountSystemSettingEnum};
 use App\Libraries\Grants\VoucherLibrary;
 
 /**
@@ -15,17 +15,17 @@ use App\Libraries\Grants\VoucherLibrary;
  * This library centralizes database interactions and business logic
  * for generating, managing, and verifying depreciation vouchers.
  */
-class DepreciationVoucherCreator
+class DepreciationVoucherCreator implements \App\Libraries\Grants\Shreds\SchedulerGenerator
 {
     /**
      * @var BaseConnection The database connection for read operations.
      */
-    protected BaseConnection $readDb;
+    protected BaseConnection $read_db;
 
     /**
      * @var BaseConnection The database connection for write operations.
      */
-    protected BaseConnection $writeDb;
+    protected BaseConnection $write_db;
 
     protected VoucherLibrary $voucherLibrary;
     protected VoucherCreator $voucherCreator;
@@ -34,17 +34,18 @@ class DepreciationVoucherCreator
     /**
      * Class constructor.
      *
-     * @param BaseConnection $readDb The database connection instance for read operations.
-     * @param BaseConnection $writeDb The database connection instance for write operations.
+     * @param BaseConnection $read_db The database connection instance for read operations.
+     * @param BaseConnection $write_db The database connection instance for write operations.
      */
-    public function __construct(BaseConnection $readDb, BaseConnection $writeDb)
+    
+    public function __construct()
     {
-        $this->readDb = $readDb;
-        $this->writeDb = $writeDb;
+        $this->read_db = \Config\Database::connect('read');
+        $this->write_db = \Config\Database::connect('write');
         $this->voucherLibrary = new VoucherLibrary();
         $this->assetDepreciationLibrary = new AssetDepreciationLibrary();
         $this->statusLibrary = new StatusLibrary();
-        $this->voucherCreator = new VoucherCreator($readDb, $writeDb);
+        $this->voucherCreator = new VoucherCreator();;
     }
 
     /**
@@ -56,7 +57,7 @@ class DepreciationVoucherCreator
      */
     private function getAccountSystemDepreciationVoucherTypeId(int $accountSystemId): int
     {
-        $builder = $this->readDb->table('voucher_type');
+        $builder = $this->read_db->table('voucher_type');
         $builder->select(['voucher_type_id', 'voucher_type_name']);
         $builder->join('voucher_type_effect', 'voucher_type_effect.voucher_type_effect_id = voucher_type.fk_voucher_type_effect_id');
         $builder->where([
@@ -85,8 +86,8 @@ class DepreciationVoucherCreator
                 'fk_voucher_type_account_id' => $this->getVoucherTypeAccountId('accrual'), // Assumed constant from VoucherTypeAccountEnum
             ];
             
-            $this->writeDb->table('voucher_type')->insert($depreciationVoucherTypeData);
-            return (int)$this->writeDb->insertID();
+            $this->write_db->table('voucher_type')->insert($depreciationVoucherTypeData);
+            return (int)$this->write_db->insertID();
         }
     }
 
@@ -98,7 +99,7 @@ class DepreciationVoucherCreator
      */
     private function getVoucherTypeEffectId(string $effectCode): ?int
     {
-        $builder = $this->readDb->table('voucher_type_effect');
+        $builder = $this->read_db->table('voucher_type_effect');
         $builder->select(['voucher_type_effect_id']);
         $builder->where(['voucher_type_effect_code' => $effectCode]);
         
@@ -119,7 +120,7 @@ class DepreciationVoucherCreator
      */
     private function getVoucherTypeAccountId(string $accountCode): ?int
     {
-        $builder = $this->readDb->table('voucher_type_account');
+        $builder = $this->read_db->table('voucher_type_account');
         $builder->select(['voucher_type_account_id']);
         $builder->where(['voucher_type_account_code' => $accountCode]);
         
@@ -140,7 +141,7 @@ class DepreciationVoucherCreator
      */
     private function getOfficeById(int $officeId): ?array
     {
-        $builder = $this->readDb->table('office');
+        $builder = $this->read_db->table('office');
         $builder->where('office_id', $officeId);
         $result = $builder->get();
 
@@ -160,7 +161,7 @@ class DepreciationVoucherCreator
      */
     private function getDepreciationProjectAllocationId(int $officeId): ?int
     {
-        $builder = $this->readDb->table('project_allocation');
+        $builder = $this->read_db->table('project_allocation');
         $builder->select('project_allocation_id');
         $builder->join('project','project.project_id=project_allocation.fk_project_id');
         $builder->join('project_income_account','project_income_account.fk_project_id=project.project_id');
@@ -188,7 +189,7 @@ class DepreciationVoucherCreator
      */
     private function getDepreciationExpenseAccountId(int $officeAccountSystemId): ?int
     {
-        $builder = $this->readDb->table('expense_account');
+        $builder = $this->read_db->table('expense_account');
         $builder->join('income_account','income_account.income_account_id=expense_account.fk_income_account_id');
         $builder->join('expense_vote_heads_category','expense_vote_heads_category.expense_vote_heads_category_id=expense_account.fk_expense_vote_heads_category_id');
         $builder->where('expense_vote_heads_category_code', 'depreciation'); // Assumed constant from VoucherTypeEffectEnum
@@ -212,12 +213,12 @@ class DepreciationVoucherCreator
      */
     private function updateAssetDepreciationScheduleWithVoucherIds(array $assetDepreciationIds, int $voucherId): bool
     {
-        $builder = $this->writeDb->table('asset_depreciation');
+        $builder = $this->write_db->table('asset_depreciation');
         $updateData['fk_voucher_id'] = $voucherId;
         $builder->whereIn('asset_depreciation_id', $assetDepreciationIds);
         $builder->update($updateData);
 
-        return $this->writeDb->affectedRows() > 0;
+        return $this->write_db->affectedRows() > 0;
     }
 
         /**
@@ -229,7 +230,7 @@ class DepreciationVoucherCreator
      */
     private function hasMonthDepreciationExpenseCreated(int $officeId, string $reportingMonth): bool
     {
-        $builder = $this->readDb->table('voucher');
+        $builder = $this->read_db->table('voucher');
 
         $startOfMonthDate = date('Y-m-01', strtotime($reportingMonth));
         $endOfMonthDate = date('Y-m-t', strtotime($reportingMonth));
@@ -246,6 +247,34 @@ class DepreciationVoucherCreator
         return $countMonthDepreciationVouchers > 0;
     } 
 
+    public function getActiveTransactingOffices(): array {
+        $accountSystemSettingLibrary = new \App\Libraries\Core\AccountSystemSettingLibrary();
+        $accountSystemIds = $accountSystemSettingLibrary->getAccountSystemSettingsIds(AccountSystemSettingEnum::ACCRUAL_SETTING_NAME);
+
+        $officeBuilder = $this->read_db->table('office');
+
+        $officeBuilder->select('DISTINCT(office_id) as office_id, financial_report_month,financial_report_is_submitted');
+        $officeBuilder->where('office_is_active', '1');
+        $officeBuilder->where('fk_context_definition_id', '1');
+        $officeBuilder->where('office_is_readonly', '0');
+        $officeBuilder->join('financial_report','financial_report.fk_office_id=office.office_id');
+        $officeBuilder->join('capital_asset','capital_asset.fk_office_id=office.office_id');
+
+        if(count($accountSystemIds) > 0){
+            $officeBuilder->whereIn('office.fk_account_system_id', $accountSystemIds);
+        }
+        
+        $officeObj = $officeBuilder->get();
+
+        $offices = [];
+
+        if($officeObj->getNumRows() > 0){
+            $offices = $officeObj->getResultArray();
+        }
+
+        return $offices;
+    }
+
     /**
      * Main method Generates a monthly depreciation voucher for a given office and reporting month.
      *
@@ -253,9 +282,8 @@ class DepreciationVoucherCreator
      * @param string $reportingMonth The reporting month in 'YYYY-MM-DD' format.
      * @return array An associative array with the flag, message, and voucher ID.
      */
-    public function generateMonthDepreciationVoucher(int $officeId, string $reportingMonth): array
-    {
-        
+    public function scheduledGenerator(int $officeId, string $reportingMonth): array
+    {        
         $office = $this->getOfficeById($officeId);
 
         if (!$office) {
@@ -264,7 +292,7 @@ class DepreciationVoucherCreator
 
         try {
             // We'll wrap all database actions in a single transaction.
-            $this->writeDb->transBegin();
+            $this->write_db->transBegin();
 
             $hasMonthDepreciationExpenseCreated = $this->hasMonthDepreciationExpenseCreated($officeId, $reportingMonth);
 
@@ -272,8 +300,6 @@ class DepreciationVoucherCreator
                  return ['flag' => false, 'message' => 'Depreciation voucher already created for this month.', 'voucherId' => 0];
             }
 
-            // The following methods would need to be implemented within your Voucher library
-            // For now, we'll assume they are available.
             $voucherNumber = $this->voucherLibrary->getVoucherNumber($officeId);
             $vouchingDate = $this->voucherLibrary->getVoucherDate($officeId);
             
@@ -283,7 +309,7 @@ class DepreciationVoucherCreator
             $monthDepreciationExpense = $this->assetDepreciationLibrary->calculateMonthsDepreciationExpense($officeId, $reportingMonth);
             
             if ($monthDepreciationExpense['totalDepreciationExpense'] == 0) {
-                return ['flag' => false, 'message' => 'Total depreciation expense is zero for the month.', 'voucherId' => 0];
+                return ['flag' => false, 'message' => "Total depreciation expense for the month $reportingMonth is zero.", 'voucherId' => 0];
             }
             
             $projectAllocationId = $this->getDepreciationProjectAllocationId($officeId);
@@ -306,7 +332,7 @@ class DepreciationVoucherCreator
                 'voucher_detail_account' => [$depreciationExpenseAccountId]
             ];
 
-            $fullyApprovedStatusId = $this->statusLibrary->getMaxApprovalStatusId('voucher',[],$officeAccountSystemId)[0];
+            $fullyApprovedStatusId = $this->statusLibrary->getMaxApprovalStatusId('voucher',[$officeId],$officeAccountSystemId)[0];
 
             $result = $this->voucherCreator->insertVoucher($voucherData, $fullyApprovedStatusId);
 
@@ -315,19 +341,19 @@ class DepreciationVoucherCreator
             
             $this->updateAssetDepreciationScheduleWithVoucherIds($assetDepreciationIds, $voucherId);
 
-            if ($this->writeDb->transStatus() === false || !$result['voucher_posting_condition']) {
-                $this->writeDb->transRollback();
+            if ($this->write_db->transStatus() === false || !$result['voucher_posting_condition']) {
+                $this->write_db->transRollback();
                 return ['flag' => false,'message' => get_phrase('voucher_creation_failed'), 'voucherId' => 0];
             } else {
-                $this->writeDb->transCommit();
+                $this->write_db->transCommit();
                 return ['flag' => true,'message' => get_phrase('voucher_creation_success'), 'voucherId' => $voucherId];
             }
         } catch (\Exception $e) {
-            $this->writeDb->transRollback();
+            $this->write_db->transRollback();
             log_message('error', 'Database error during voucher generation: ' . $e->getMessage());
             return ['flag' => false,'message' => 'Database error.', 'voucherId' => 0];
         } catch (\Exception $e) {
-            $this->writeDb->transRollback();
+            $this->write_db->transRollback();
             log_message('error', 'General error during voucher generation: ' . $e->getMessage());
             return ['flag' => false,'message' => 'An error occurred.', 'voucherId' => 0];
         }

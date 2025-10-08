@@ -15,14 +15,20 @@
         const url = "<?=base_url();?>ajax/account_system/getValidReportingAccountSystems"
         const data = {account_system_level: account_system_level_value}
 
-        $.post(url, data, function(response){
-            template_account_system.html("");
+        if(account_system_level_value > 0){
+            // alert(account_system_level_value)
+            $.post(url, data, function(response){
+                console.log(response)
+                template_account_system.html("");
 
-            $.each(response, function(){
-                template_account_system.append('<option value="' + this.account_system_id + '">' + this.account_system_name + '</option>')
+                $.each(response, function(){
+                    template_account_system.append('<option value="' + this.account_system_id + '">' + this.account_system_name + '</option>')
+                });
+
             });
+        }
 
-        });
+        
     })
 
     $("#account_system_level").on('change', function(){

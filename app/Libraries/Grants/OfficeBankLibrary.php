@@ -19,12 +19,13 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
     $this->table = 'office_bank';
   }
 
-  function actionBeforeInsert($post_array): array{
+  function actionBeforeInsert($post_array): array
+  {
 
     $account_system_id = $this->session->user_account_system_id;
     $accountSystemSettingLibrary = new \App\Libraries\Core\AccountSystemSettingLibrary();
     $account_system_settings = $accountSystemSettingLibrary->getAccountSystemSettings($account_system_id);
-    $use_accrual_based_accounting =  $account_system_settings['use_accrual_based_accounting'] ?? 0;
+    $use_accrual_based_accounting = $account_system_settings['use_accrual_based_accounting'] ?? 0;
 
     // Always make a new office bank active and default
     $post_array['header']['office_bank_is_default'] = 1;
@@ -32,76 +33,93 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
     $office_id = $post_array['header']['fk_office_id'];
     $office_bank_is_accrued = $post_array['header']['office_bank_is_accrued'];
 
-    if($use_accrual_based_accounting == '1' && $office_bank_is_accrued == '1'){
+    if ($use_accrual_based_accounting == '1' && $office_bank_is_accrued == '1') {
       // Prevent multiple liability bank accounts
       return $this->checkMultipleAccrualBankAccounts($post_array);
-    }else{
+    } else {
       // Disallow having 2 default banks per office
-      $this->makeExisitingOfficeDefaultAccountsNotDefault($office_id);      
+      $this->makeExisitingOfficeDefaultAccountsNotDefault($office_id);
     }
 
     return $post_array;
   }
 
-  private function checkMultipleAccrualBankAccounts($post_array){
+  private function checkMultipleAccrualBankAccounts($post_array)
+  {
     $result['message'] = get_phrase('cannot_have_multiple_accrued_bank_accounts');
 
     $officeBankBuilder = $this->read_db->table('office_bank');
-    $officeBankBuilder->where('fk_office_id',$post_array['header']['fk_office_id']);
+    $officeBankBuilder->where('fk_office_id', $post_array['header']['fk_office_id']);
     $officeBankBuilder->where('office_bank_is_accrued', '1');
     $countAccruedOfficeBanks = $officeBankBuilder->countAllResults();
 
-    if($countAccruedOfficeBanks > 0){
+    if ($countAccruedOfficeBanks > 0) {
       return $result;
     }
-    
-    $post_array['header']['office_bank_is_default'] = 1;
+
+    $post_array['header']['office_bank_is_default'] = 0; // Liability bank account is not default i.e. does not attach to its self the office project allocations
 
     return $post_array;
   }
 
-  public function lookupValues(): array {
+  public function lookupValues(): array
+  {
     $lookUpValues = parent::lookupValues();
 
     $officeReadBuilder = $this->read_db->table('office');
 
-    $officeReadBuilder->select(['office_name','office_id']);
+    $officeReadBuilder->select(['office_name', 'office_id']);
     $officeReadBuilder->where(['fk_context_definition_id' => 1, 'office_is_active' => 1]);
 
-    if(!$this->session->system_admin){
+    if (!$this->session->system_admin) {
       $officeReadBuilder->where(['fk_account_system_id' => $this->session->user_account_system_id]);
     }
 
     $officeObj = $officeReadBuilder->get();
 
-    if($officeObj->getNumRows() > 0){
+    if ($officeObj->getNumRows() > 0) {
       $lookUpValues['office'] = $officeObj->getResultArray();
     }
 
     return $lookUpValues;
   }
 
-  function makeExisitingOfficeDefaultAccountsNotDefault($office_id){
+  function makeExisitingOfficeDefaultAccountsNotDefault($office_id)
+  {
     $officeBankWriteBuilder = $this->write_db->table('office_bank');
     $data['office_bank_is_default'] = 0;
     $officeBankWriteBuilder->where(array('fk_office_id' => $office_id, 'office_bank_is_default' => 1));
     $officeBankWriteBuilder->update($data);
   }
 
-  function actionAfterInsert($post_array, $approval_id, $header_id): bool {
+  function actionAfterInsert($post_array, $approval_id, $header_id): bool
+  {
     $account_system_id = $this->session->user_account_system_id;
     $accountSystemSettingLibrary = new \App\Libraries\Core\AccountSystemSettingLibrary();
     $account_system_settings = $accountSystemSettingLibrary->getAccountSystemSettings($account_system_id);
-    $use_accrual_based_accounting =  $account_system_settings['use_accrual_based_accounting'] ?? 0;
+    $use_accrual_based_accounting = $account_system_settings['use_accrual_based_accounting'] ?? 0;
 
-    if($use_accrual_based_accounting == '1' && $post_array['office_bank_is_accrued'] == '1'){
+    if ($use_accrual_based_accounting == '1' && $post_array['office_bank_is_accrued'] == '1') {
       return $this->createOfficeBankAssociationWithAccrualProject($post_array, $header_id);
-    }else{
+    } else {
       return $this->createOfficeBankProjectAssociation($post_array, $approval_id, $header_id);
     }
   }
 
-  function createOfficeBankAssociationWithAccrualProject($post_array, $header_id){
+  public function officeHasLiabilityBankAccount($officeId)
+  {
+    $officeBankBuilder = $this->read_db->table('office_bank');
+
+    $officeBankBuilder->where('fk_office_id', $officeId);
+    $officeBankBuilder->where('office_bank_is_accrued', '1');
+    $officeBankBuilder->where('office_bank_is_active', '1');
+
+    return $officeBankBuilder->countAllResults() == 1 ? true : false;
+  }
+
+  function createOfficeBankAssociationWithAccrualProject($post_array, $header_id)
+  {
+    $response = 0;
     $officeId = $post_array['fk_office_id'];
     $officeLibrary = new \App\Libraries\Core\OfficeLibrary();
     $accountSystem = $officeLibrary->getOfficeAccountSystem($officeId);
@@ -111,23 +129,23 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
     // Check if liability vote head category is present
     $incomeAccountVoteHeadsCategoryBuilder = $this->read_db->table('income_vote_heads_category');
 
-    $incomeAccountVoteHeadsCategoryBuilder->where('income_vote_heads_category_code','payroll_liability');
+    $incomeAccountVoteHeadsCategoryBuilder->where('income_vote_heads_category_code', 'payroll_liability');
     $incomeAccountVoteHeadsCategoryObj = $incomeAccountVoteHeadsCategoryBuilder->get();
 
     $incomeVoteHeadsCategoryId = 0;
 
-    if($incomeAccountVoteHeadsCategoryObj->getNumRows() > 0){
+    if ($incomeAccountVoteHeadsCategoryObj->getNumRows() > 0) {
       $incomeVoteHeadsCategoryId = $incomeAccountVoteHeadsCategoryObj->getRowArray()['income_vote_heads_category_id'];
-    }else{
+    } else {
       // Create if missing
       // Get support funding stream
       $fundingStreamBuilder = $this->read_db->table('funding_stream');
-      $fundingStreamBuilder->where('funding_stream_code',\App\Enums\FundingStream::SUPPORT->value);
+      $fundingStreamBuilder->where('funding_stream_code', \App\Enums\FundingStream::SUPPORT->value);
       $fundingStreamObj = $fundingStreamBuilder->get();
 
       $fundingStreamId = 1;
 
-      if($fundingStreamObj->getNumRows() > 0){
+      if ($fundingStreamObj->getNumRows() > 0) {
         $fundingStreamId = $fundingStreamObj->getRowArray()['funding_stream_id'];
       }
 
@@ -145,27 +163,27 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
       $this->write_db->table('income_vote_heads_category')->insert($income_vote_heads_category);
       $incomeVoteHeadsCategoryId = $this->write_db->insertID();
     }
-    
+
     // Check if the accounting system has liability income account
     $incomeAccountBuilder = $this->read_db->table('income_account');
-    $incomeAccountBuilder->join('income_vote_heads_category','income_vote_heads_category.income_vote_heads_category_id=income_account.fk_income_vote_heads_category_id');
-    $incomeAccountBuilder->where('income_vote_heads_category_code','payroll_liability');
+    $incomeAccountBuilder->join('income_vote_heads_category', 'income_vote_heads_category.income_vote_heads_category_id=income_account.fk_income_vote_heads_category_id');
+    $incomeAccountBuilder->where('income_vote_heads_category_code', 'payroll_liability');
     $incomeAccountBuilder->where('income_account.fk_account_system_id', $accountSystemId);
     $incomeAccountBuilder->where('fk_income_vote_heads_category_id', $incomeVoteHeadsCategoryId);
     $incomeAccountObj = $incomeAccountBuilder->get();
 
     $incomeAccountId = 0;
 
-    if($incomeAccountObj->getNumRows() <= 0){
+    if ($incomeAccountObj->getNumRows() > 0) {
       $incomeAccountId = $incomeAccountObj->getRowArray()['income_account_id'];
-    }else{
+    } else {
       // Create the income account
       $nameAndTrackNumber = $this->generateItemTrackNumberAndName('income_account');
 
-      $income_account['income_account_name'] = $accountSystemCode.'RA-'.get_phrase('accrued_income_account');
+      $income_account['income_account_name'] = $accountSystemCode . 'RA-' . get_phrase('accrued_income_account');
       $income_account['income_account_track_number'] = $nameAndTrackNumber['income_account_track_number'];
       $income_account['income_account_description	'] = get_phrase('accrued_income_account');
-      $income_account['income_account_code'] = $accountSystemCode.'RA';
+      $income_account['income_account_code'] = $accountSystemCode . 'RA';
       $income_account['income_account_is_active'] = 1;
       $income_account['fk_income_vote_heads_category_id'] = $incomeVoteHeadsCategoryId;
       $income_account['income_account_is_budgeted'] = 0;
@@ -180,29 +198,29 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
 
       $incomeAccountId = $this->write_db->insertID();
     }
-    
+
 
     // Check if there is a project linked with accrued income account
     $projectBuilder = $this->read_db->table('project');
-    $projectBuilder->join('project_income_account','project_income_account.fk_project_id=project.project_id');
-    $projectBuilder->where('project_income_account.fk_income_account_id',$incomeAccountId);
+    $projectBuilder->join('project_income_account', 'project_income_account.fk_project_id=project.project_id');
+    $projectBuilder->where('project_income_account.fk_income_account_id', $incomeAccountId);
     $projectObj = $projectBuilder->get();
 
     $projectId = 0;
 
-    if($projectObj->getNumRows() > 0){
+    if ($projectObj->getNumRows() > 0) {
       $projectId = $projectObj->getRowArray()['project_id'];
-    }else{
+    } else {
       // Create an accrual project
 
       // Get the funder
       $funderBuilder = $this->read_db->table('funder');
       $funderBuilder->where('fk_account_system_id', $accountSystemId);
-      $funderObj = $funderBuilder->get(); 
+      $funderObj = $funderBuilder->get();
 
       $funderId = 0;
 
-      if($funderObj->getNumRows() > 0){
+      if ($funderObj->getNumRows() > 0) {
         $funderId = $funderObj->getRowArray()['funder_id'];
       }
 
@@ -216,7 +234,7 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
 
       $nationaOfficeStartDate = date('Y-m-01');
 
-      if($nationalOfficeObj->getNumRows() > 0){
+      if ($nationalOfficeObj->getNumRows() > 0) {
         $nationaOfficeStartDate = $nationalOfficeObj->getRowArray()['office_start_date'];
       }
 
@@ -229,15 +247,15 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
 
       $fundingStatusId = 0;
 
-      if($fundingStatusObj->getNumRows() > 0){
+      if ($fundingStatusObj->getNumRows() > 0) {
         $fundingStatusId = $fundingStatusObj->getRowArray()['funding_status_id'];
       }
-      
+
       $nameAndTrackNumber = $this->generateItemTrackNumberAndName('project');
 
-      $project['project_name'] = $accountSystemCode.'PA-'.get_phrase('accrued_liability_project');
-      $project['project_track_number'] = $nameAndTrackNumber['project_track_number`'];
-      $project['project_code'] = $accountSystemCode.'PA';
+      $project['project_name'] = $accountSystemCode . 'PA-' . get_phrase('accrued_liability_project');
+      $project['project_track_number'] = $nameAndTrackNumber['project_track_number'];
+      $project['project_code'] = $accountSystemCode . 'PA';
       $project['project_description'] = get_phrase('accrued_liability_project');
       $project['project_start_date'] = $nationaOfficeStartDate;
       $project['project_end_date'] = NULL;
@@ -260,30 +278,61 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
     $projectAllocationBuilder->where('project_allocation.fk_project_id', $projectId);
     $projectAllocationObj = $projectAllocationBuilder->get();
 
-    if($projectAllocationObj->getNumRows() > 0){
+    if ($projectAllocationObj->getNumRows() > 0) {
       // Associate with office bank
-    }else{
+    } else {
+      // Get Office
+      $officeLibrary = new \App\Libraries\Core\OfficeLibrary();
+      $office = $officeLibrary->getOfficeById($officeId);
       // Create allocation for the office for the project and this office bank to its allocation
-      // $projectAllocation['project_allocation_name'] = '';
-      // $projectAllocation['project_allocation_track_number'] = '';
-      // $projectAllocation['fk_project_id'] = '';
-      // $projectAllocation['project_allocation_amount'] = '';
-      // $projectAllocation['project_allocation_is_active'] = '';
-      // $projectAllocation['fk_office_id'] = '';
-      // $projectAllocation['project_allocation_name'] = '';
-      // $projectAllocation['project_allocation_name'] = '';
-      // $projectAllocation['project_allocation_name'] = '';
-      // $projectAllocation['project_allocation_name'] = '';
-      // $projectAllocation['project_allocation_name'] = '';
-      // $projectAllocation['project_allocation_name'] = '';
-      // $projectAllocation['project_allocation_name'] = '';
+      $nameAndTrackNumber = $this->generateItemTrackNumberAndName('project_allocation');
+
+      $projectAllocation['project_allocation_name'] = $accountSystemCode . 'PA-' . get_phrase('accrued_liability_project') . ' for ' . $office['office_code'] . '-' . $office['office_name'];
+      $projectAllocation['project_allocation_track_number'] = $nameAndTrackNumber['project_allocation_track_number'];
+      $projectAllocation['fk_project_id'] = $projectId;
+      $projectAllocation['project_allocation_amount'] = 0;
+      $projectAllocation['project_allocation_is_active'] = 1;
+      $projectAllocation['fk_office_id'] = $officeId;
+      $projectAllocation['project_allocation_created_date	'] = date('Y-m-d');
+      $projectAllocation['project_allocation_last_modified_date'] = date('Y-m-d');
+      $projectAllocation['project_allocation_created_by'] = $this->session->user_id;
+      $projectAllocation['project_allocation_last_modified_by'] = $this->session->user_id;
+
+      $this->write_db->table('project_allocation')->insert($projectAllocation);
+
+      $projectAllocationId = $this->write_db->insertID();
+
+      // Create Office Bank Contra Accounts
+      $this->createOfficeBankContraAccounts($header_id);
+      $response = $this->linkProjectToOfficeBank($header_id, $projectAllocationId);
+
     }
 
-    return true;    
+    return $response > 0 ? true : false;
   }
 
-  function createOfficeBankProjectAssociation($post_array, $approval_id, $header_id): bool {
-    
+  private function linkProjectToOfficeBank($officeBankId, $projectAllocationId)
+  {
+
+    $nameAndTrackNumber = $this->generateItemTrackNumberAndName('office_bank_project_allocation');
+
+    $office_bank_project_allocation['office_bank_project_allocation_name'] = $nameAndTrackNumber['office_bank_project_allocation_name'];
+    $office_bank_project_allocation['office_bank_project_allocation_track_number'] = $nameAndTrackNumber['office_bank_project_allocation_track_number'];
+    $office_bank_project_allocation['fk_office_bank_id'] = $officeBankId;
+    $office_bank_project_allocation['fk_project_allocation_id'] = $projectAllocationId;
+    $office_bank_project_allocation['office_bank_project_allocation_created_date'] = date('Y-m-d');
+    $office_bank_project_allocation['office_bank_project_allocation_created_by'] = $this->session->user_id;
+    $office_bank_project_allocation['office_bank_project_allocation_last_modified_date'] = date('Y-m-d');
+    $office_bank_project_allocation['office_bank_project_allocation_last_modified_by'] = $this->session->user_id;
+
+    $this->write_db->table('office_bank_project_allocation')->insert($office_bank_project_allocation);
+
+    return $this->write_db->insertID();
+  }
+
+  private function createOfficeBankContraAccounts($header_id)
+  {
+
     $voucherTypeEffectReadBuilder = $this->read_db->table('voucher_type_effect');
     $officeWriteBuilder = $this->write_db->table('office');
     $voucherTypeAccountReadBuilder = $this->read_db->table('voucher_type_account');
@@ -294,124 +343,132 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
 
     $bank_to_bank_contra_effects = $voucherTypeEffectReadBuilder->get()->getResultArray();
 
-    $officeWriteBuilder->select(array('office_name','fk_account_system_id'));
-    $officeWriteBuilder->join('office_bank','office_bank.fk_office_id=office.office_id');
-    $officeWriteBuilder->where(array('office_bank_id'=>$header_id));
+    $officeWriteBuilder->select(array('office_name', 'fk_account_system_id'));
+    $officeWriteBuilder->join('office_bank', 'office_bank.fk_office_id=office.office_id');
+    $officeWriteBuilder->where(array('office_bank_id' => $header_id));
     $office_info = $officeWriteBuilder->get()->getRow();
+
+    foreach ($bank_to_bank_contra_effects as $bank_to_bank_contra_effect) {
+
+      if (
+        $bank_to_bank_contra_effect['voucher_type_effect_code'] == 'bank_contra' ||
+        $bank_to_bank_contra_effect['voucher_type_effect_code'] == 'cash_contra' ||
+        $bank_to_bank_contra_effect['voucher_type_effect_code'] == 'bank_to_bank_contra' ||
+        $bank_to_bank_contra_effect['voucher_type_effect_code'] == 'cash_to_cash_contra'
+      ) {
+
+        $contra_account_name = '';
+        $contra_account_code = '';
+        $voucher_type_account_id = 0;
+        //$voucher_type_effect_id = 0;
+
+        if ($bank_to_bank_contra_effect['voucher_type_effect_code'] == 'bank_contra') {
+          $contra_account_name = $office_info->office_name . " Bank to Cash";
+          $contra_account_code = "B2C";
+          $voucher_type_account_id = $voucherTypeAccountReadBuilder->where(array('voucher_type_account_code' => 'bank'))
+            ->get()->getRow()->voucher_type_account_id;
+
+        } elseif ($bank_to_bank_contra_effect['voucher_type_effect_code'] == 'cash_contra') {
+          $contra_account_name = $office_info->office_name . " Cash to Bank";
+          $contra_account_code = "C2B";
+          $voucher_type_account_id = $voucherTypeAccountReadBuilder->where(array('voucher_type_account_code' => 'cash'))
+            ->get()->getRow()->voucher_type_account_id;
+
+        } elseif ($bank_to_bank_contra_effect['voucher_type_effect_code'] == 'bank_to_bank_contra') {
+          $contra_account_name = $office_info->office_name . " Bank to Bank";
+          $contra_account_code = "B2B";
+          $voucher_type_account_id = $voucherTypeAccountReadBuilder->where(array('voucher_type_account_code' => 'bank'))
+            ->get()->getRow()->voucher_type_account_id;
+
+        } elseif ($bank_to_bank_contra_effect['voucher_type_effect_code'] == 'cash_to_cash_contra') {
+          $contra_account_name = $office_info->office_name . " Cash to Cash";
+          $contra_account_code = "C2C";
+          $voucher_type_account_id = $voucherTypeAccountReadBuilder->where(array('voucher_type_account_code' => 'cash'))
+            ->get()->getRow()->voucher_type_account_id;
+
+        }
+
+
+        $contra_account_record['contra_account_track_number'] = $this->generateItemTrackNumberAndName('contra_account')['contra_account_track_number'];
+        $contra_account_record['contra_account_name'] = $contra_account_name;
+        $contra_account_record['contra_account_code'] = $contra_account_code;
+        $contra_account_record['contra_account_description'] = $contra_account_name;
+        ;
+        $contra_account_record['fk_voucher_type_account_id'] = $voucher_type_account_id;//$voucher_type_account['voucher_type_account_id'];
+        $contra_account_record['fk_voucher_type_effect_id'] = $bank_to_bank_contra_effect['voucher_type_effect_id'];
+        $contra_account_record['fk_office_bank_id'] = $header_id;
+        $contra_account_record['fk_account_system_id'] = $office_info->fk_account_system_id;
+
+        $contra_account_data_to_insert = $this->mergeWithHistoryFields('contra_account', $contra_account_record, false);
+
+        $contra_account_count = $contraAccountReadBuilder->where(array('fk_office_bank_id' => $header_id, 'contra_account_code' => $contra_account_code))
+          ->get()->getNumRows();
+
+        if ($contra_account_count == 0) {
+          $contraAccountWriteBuilder->insert($contra_account_data_to_insert);
+        }
+      }
+    }
+  }
+
+  function createOfficeBankProjectAssociation($post_array, $approval_id, $header_id): bool
+  {
+
+
 
     $this->write_db->transStart();
 
-    foreach($bank_to_bank_contra_effects as $bank_to_bank_contra_effect){
-
-      if(
-          $bank_to_bank_contra_effect['voucher_type_effect_code'] == 'bank_contra' ||
-          $bank_to_bank_contra_effect['voucher_type_effect_code'] == 'cash_contra' ||
-          $bank_to_bank_contra_effect['voucher_type_effect_code'] == 'bank_to_bank_contra' || 
-          $bank_to_bank_contra_effect['voucher_type_effect_code'] == 'cash_to_cash_contra' 
-        ){  
-
-            $contra_account_name = '';
-            $contra_account_code = '';
-            $voucher_type_account_id = 0;
-            //$voucher_type_effect_id = 0;
-
-            if($bank_to_bank_contra_effect['voucher_type_effect_code'] == 'bank_contra'){
-              $contra_account_name = $office_info->office_name." Bank to Cash";
-              $contra_account_code = "B2C"; 
-              $voucher_type_account_id = $voucherTypeAccountReadBuilder->where(array('voucher_type_account_code'=>'bank'))
-              ->get()->getRow()->voucher_type_account_id;
-
-            }elseif($bank_to_bank_contra_effect['voucher_type_effect_code'] == 'cash_contra'){
-              $contra_account_name = $office_info->office_name." Cash to Bank";
-              $contra_account_code = "C2B";
-              $voucher_type_account_id = $voucherTypeAccountReadBuilder->where(array('voucher_type_account_code'=>'cash'))
-              ->get()->getRow()->voucher_type_account_id;
-
-            }elseif($bank_to_bank_contra_effect['voucher_type_effect_code'] == 'bank_to_bank_contra'){
-              $contra_account_name = $office_info->office_name." Bank to Bank";
-              $contra_account_code = "B2B";
-              $voucher_type_account_id = $voucherTypeAccountReadBuilder->where(array('voucher_type_account_code'=>'bank'))
-              ->get()->getRow()->voucher_type_account_id;
-
-            }elseif($bank_to_bank_contra_effect['voucher_type_effect_code'] == 'cash_to_cash_contra'){
-              $contra_account_name = $office_info->office_name." Cash to Cash";
-              $contra_account_code = "C2C";
-              $voucher_type_account_id = $voucherTypeAccountReadBuilder->where(array('voucher_type_account_code'=>'cash'))
-              ->get()->getRow()->voucher_type_account_id;
-
-            }
-
-
-            $contra_account_record['contra_account_track_number'] = $this->generateItemTrackNumberAndName('contra_account')['contra_account_track_number'];
-            $contra_account_record['contra_account_name'] = $contra_account_name;
-            $contra_account_record['contra_account_code'] = $contra_account_code;
-            $contra_account_record['contra_account_description'] = $contra_account_name;;
-            $contra_account_record['fk_voucher_type_account_id'] = $voucher_type_account_id;//$voucher_type_account['voucher_type_account_id'];
-            $contra_account_record['fk_voucher_type_effect_id'] = $bank_to_bank_contra_effect['voucher_type_effect_id'];
-            $contra_account_record['fk_office_bank_id'] = $header_id;
-            $contra_account_record['fk_account_system_id'] = $office_info->fk_account_system_id;
-
-            $contra_account_data_to_insert = $this->mergeWithHistoryFields('contra_account',$contra_account_record,false);
-
-            $contra_account_count = $contraAccountReadBuilder->where(array('fk_office_bank_id' => $header_id, 'contra_account_code' => $contra_account_code))
-            ->get()->getNumRows();
-
-            if($contra_account_count == 0){
-              $contraAccountWriteBuilder->insert($contra_account_data_to_insert);
-            }
-      }
-    }
-
+    $this->createOfficeBankContraAccounts($header_id);
     $this->createDefaultProjectAllocationAndLinkToAccount($post_array, $approval_id, $header_id);
     $this->deactivateActiveChequeBooksForDeactivatedOfficeBank($header_id, $post_array);
 
     $this->write_db->transComplete();
 
-    if ($this->write_db->transStatus() === FALSE)
-      {
-        return false;
-      }else{
-        return true;
-      }
+    if ($this->write_db->transStatus() === FALSE) {
+      return false;
+    } else {
+      return true;
+    }
   }
 
   /**
-     * deactivate_active_cheque_books_for_deactivated_office_bank
-     * 
-     * @author Nicodemus Karisa Mwambire
-     * @reviewer None
-     * @reviewed_date None
-     * @bug - DE2376
-     * @access private
-     * 
-     * @param int $office_bank_id - Id of the office bank being edited
-     * @param array $post_array - Edit data
-     * 
-     * Deactive active cheque book and toggle the office bank to non default when deactivating an office bank
-     * 
-     * @return void
-     */
+   * deactivate_active_cheque_books_for_deactivated_office_bank
+   * 
+   * @author Nicodemus Karisa Mwambire
+   * @reviewer None
+   * @reviewed_date None
+   * @bug - DE2376
+   * @access private
+   * 
+   * @param int $office_bank_id - Id of the office bank being edited
+   * @param array $post_array - Edit data
+   * 
+   * Deactive active cheque book and toggle the office bank to non default when deactivating an office bank
+   * 
+   * @return void
+   */
 
-     private function deactivateActiveChequeBooksForDeactivatedOfficeBank(int $office_bank_id, array $post_array) : void
-     {
+  private function deactivateActiveChequeBooksForDeactivatedOfficeBank(int $office_bank_id, array $post_array): void
+  {
 
-      $chequeBookWriteBuilder = $this->write_db->table('cheque_book');
-      $officeBankWriteBuilder = $this->write_db->table('office_bank');
- 
-       if(isset($post_array['office_bank_is_active']) && $post_array['office_bank_is_active'] == 0){
- 
-         $cheque_book_data['cheque_book_is_active'] = 0;
-         $chequeBookWriteBuilder->where(array('fk_office_bank_id' => $office_bank_id));
-         $chequeBookWriteBuilder->update( $cheque_book_data);
- 
-         $office_bank_data['office_bank_is_default'] = 0;
-         $officeBankWriteBuilder->where(array('office_bank_id' => $office_bank_id));
-         $officeBankWriteBuilder->update( $office_bank_data);
- 
-       }
-     }
+    $chequeBookWriteBuilder = $this->write_db->table('cheque_book');
+    $officeBankWriteBuilder = $this->write_db->table('office_bank');
 
-  function createDefaultProjectAllocationAndLinkToAccount($post_array, $approval_id, $header_id){
+    if (isset($post_array['office_bank_is_active']) && $post_array['office_bank_is_active'] == 0) {
+
+      $cheque_book_data['cheque_book_is_active'] = 0;
+      $chequeBookWriteBuilder->where(array('fk_office_bank_id' => $office_bank_id));
+      $chequeBookWriteBuilder->update($cheque_book_data);
+
+      $office_bank_data['office_bank_is_default'] = 0;
+      $officeBankWriteBuilder->where(array('office_bank_id' => $office_bank_id));
+      $officeBankWriteBuilder->update($office_bank_data);
+
+    }
+  }
+
+  function createDefaultProjectAllocationAndLinkToAccount($post_array, $approval_id, $header_id)
+  {
     $officeBankProjectAllocationReadBuilder = $this->read_db->table('office_bank_project_allocation');
     $projectAllocationReadBuilder = $this->read_db->table('project_allocation');
     $officeBankProjectAllocationWriteBuilder = $this->write_db->table('office_bank_project_allocation');
@@ -424,71 +481,71 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
     $office_bank_is_default = $post_array['office_bank_is_default'];
     $office_id = $post_array['fk_office_id'];
 
-    if($office_bank_is_default){
+    if ($office_bank_is_default) {
 
       $officeBankProjectAllocationReadBuilder->where(array('fk_office_bank_id' => $header_id));
       $office_bank_allocations = $officeBankProjectAllocationReadBuilder->get()->getNumRows();
 
-      if($office_bank_allocations == 0){
+      if ($office_bank_allocations == 0) {
 
-         // Get all allocations for a give office
-        $projectAllocationReadBuilder->join('project','project.project_id=project_allocation.fk_project_id');
-        $projectAllocationReadBuilder->where(array('fk_office_id'=>$office_id));
+        // Get all allocations for a give office
+        $projectAllocationReadBuilder->join('project', 'project.project_id=project_allocation.fk_project_id');
+        $projectAllocationReadBuilder->where(array('fk_office_id' => $office_id));
         $office_project_allocation_object = $projectAllocationReadBuilder->get();
 
-          if($office_project_allocation_object->getNumRows() > 0){
-            // Link all the allocations for the default project to the bank account
-            foreach($office_project_allocation_object->getResultArray() as $project_allocation){
-              $itemTracking = $this->generateItemTrackNumberAndName('office_bank_project_allocation');
-              $office_bank_project_allocation['office_bank_project_allocation_name'] = $itemTracking['office_bank_project_allocation_name'];
-              $office_bank_project_allocation['office_bank_project_allocation_track_number'] = $itemTracking['office_bank_project_allocation_track_number'];
-              $office_bank_project_allocation['fk_office_bank_id'] = $header_id;
-              $office_bank_project_allocation['fk_project_allocation_id'] = $project_allocation['project_allocation_id'];
-              
-              $office_bank_project_allocation_data_to_insert = $this->mergeWithHistoryFields('office_bank_project_allocation',$office_bank_project_allocation,false);
-              $officeBankProjectAllocationWriteBuilder->insert($office_bank_project_allocation_data_to_insert);
-  
-            }
-          }else{
-            // If allocation are missing, create them and link
-            $account_system_id = $officeReadBuilder->where(array('office_id'=>$office_id))
-            ->get()->getRow()->fk_account_system_id;
-  
-            $projectReadBuilder->join('funder','funder.funder_id=project.fk_funder_id');
-            $projectReadBuilder->where(array('fk_account_system_id'=>$account_system_id,'project_is_default'=>1));
-            $default_project_obj = $projectReadBuilder->get();
-    
-            if($default_project_obj->getNumRows() > 0){
-              foreach($default_project_obj->getResultArray() as $project){
-                $itemTracking = $this->generateItemTrackNumberAndName('project_allocation');
-                $project_allocation['project_allocation_track_number'] = $itemTracking['project_allocation_track_number'];
-                $project_allocation['project_allocation_name'] = $itemTracking['project_allocation_name'];
-                $project_allocation['fk_project_id'] = $project['project_id'];
-                $project_allocation['project_allocation_amount'] = 0;
-                $project_allocation['project_allocation_is_active'] = 1;
-                $project_allocation['fk_office_id'] = $office_id;
-  
-                $project_allocation_data_to_insert = $this->mergeWithHistoryFields('project_allocation',$project_allocation,false);
-                $projectAllocationWriteBuilder->insert($project_allocation_data_to_insert);
-  
-                $project_allocation_id = $this->write_db->insertID();
-                
-                $trackingId = $this->generateItemTrackNumberAndName('office_bank_project_allocation');
-                $office_bank_project_allocation_inner['office_bank_project_allocation_name'] = $trackingId['office_bank_project_allocation_name'];
-                $office_bank_project_allocation_inner['office_bank_project_allocation_track_number'] = $trackingId['office_bank_project_allocation_track_number'];
-                $office_bank_project_allocation_inner['fk_office_bank_id'] = $header_id;
-                $office_bank_project_allocation_inner['fk_project_allocation_id'] = $project_allocation_id;
+        if ($office_project_allocation_object->getNumRows() > 0) {
+          // Link all the allocations for the default project to the bank account
+          foreach ($office_project_allocation_object->getResultArray() as $project_allocation) {
+            $itemTracking = $this->generateItemTrackNumberAndName('office_bank_project_allocation');
+            $office_bank_project_allocation['office_bank_project_allocation_name'] = $itemTracking['office_bank_project_allocation_name'];
+            $office_bank_project_allocation['office_bank_project_allocation_track_number'] = $itemTracking['office_bank_project_allocation_track_number'];
+            $office_bank_project_allocation['fk_office_bank_id'] = $header_id;
+            $office_bank_project_allocation['fk_project_allocation_id'] = $project_allocation['project_allocation_id'];
 
-                $office_bank_project_allocation_inner_data_to_insert = $this->mergeWithHistoryFields('office_bank_project_allocation',$office_bank_project_allocation_inner,false);
-                $officeBankProjectAllocationWriteBuilder->insert($office_bank_project_allocation_inner_data_to_insert);
-  
-              }
-            }
-  
+            $office_bank_project_allocation_data_to_insert = $this->mergeWithHistoryFields('office_bank_project_allocation', $office_bank_project_allocation, false);
+            $officeBankProjectAllocationWriteBuilder->insert($office_bank_project_allocation_data_to_insert);
+
           }
-  
+        } else {
+          // If allocation are missing, create them and link
+          $account_system_id = $officeReadBuilder->where(array('office_id' => $office_id))
+            ->get()->getRow()->fk_account_system_id;
+
+          $projectReadBuilder->join('funder', 'funder.funder_id=project.fk_funder_id');
+          $projectReadBuilder->where(array('fk_account_system_id' => $account_system_id, 'project_is_default' => 1));
+          $default_project_obj = $projectReadBuilder->get();
+
+          if ($default_project_obj->getNumRows() > 0) {
+            foreach ($default_project_obj->getResultArray() as $project) {
+              $itemTracking = $this->generateItemTrackNumberAndName('project_allocation');
+              $project_allocation['project_allocation_track_number'] = $itemTracking['project_allocation_track_number'];
+              $project_allocation['project_allocation_name'] = $itemTracking['project_allocation_name'];
+              $project_allocation['fk_project_id'] = $project['project_id'];
+              $project_allocation['project_allocation_amount'] = 0;
+              $project_allocation['project_allocation_is_active'] = 1;
+              $project_allocation['fk_office_id'] = $office_id;
+
+              $project_allocation_data_to_insert = $this->mergeWithHistoryFields('project_allocation', $project_allocation, false);
+              $projectAllocationWriteBuilder->insert($project_allocation_data_to_insert);
+
+              $project_allocation_id = $this->write_db->insertID();
+
+              $trackingId = $this->generateItemTrackNumberAndName('office_bank_project_allocation');
+              $office_bank_project_allocation_inner['office_bank_project_allocation_name'] = $trackingId['office_bank_project_allocation_name'];
+              $office_bank_project_allocation_inner['office_bank_project_allocation_track_number'] = $trackingId['office_bank_project_allocation_track_number'];
+              $office_bank_project_allocation_inner['fk_office_bank_id'] = $header_id;
+              $office_bank_project_allocation_inner['fk_project_allocation_id'] = $project_allocation_id;
+
+              $office_bank_project_allocation_inner_data_to_insert = $this->mergeWithHistoryFields('office_bank_project_allocation', $office_bank_project_allocation_inner, false);
+              $officeBankProjectAllocationWriteBuilder->insert($office_bank_project_allocation_inner_data_to_insert);
+
+            }
+          }
+
         }
+
       }
+    }
   }
 
   public function detailListTableVisibleColumns(): array
@@ -512,7 +569,7 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
     $account_system_id = $this->session->user_account_system_id;
     $accountSystemSettingLibrary = new \App\Libraries\Core\AccountSystemSettingLibrary();
     $account_system_settings = $accountSystemSettingLibrary->getAccountSystemSettings($account_system_id);
-    $use_accrual_based_accounting =  $account_system_settings['use_accrual_based_accounting'] ?? 0;
+    $use_accrual_based_accounting = $account_system_settings['use_accrual_based_accounting'] ?? 0;
 
     $columns = [
       'office_name',
@@ -522,8 +579,8 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
       'office_bank_chequebook_size'
     ];
 
-    if($use_accrual_based_accounting){
-        array_push($columns,  'office_bank_is_accrued');
+    if ($use_accrual_based_accounting) {
+      array_push($columns, 'office_bank_is_accrued');
     }
 
     return $columns;
@@ -560,6 +617,29 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
     }
 
     return $office_banks_array;
+  }
+
+  /**
+   * get_active_office_banks(): Returns an array of active banks
+   * @author  Livingstone Onduso
+   * @dated: 5/03/2024
+   * @access public
+   * @return array
+   * @param int $office_id
+   */
+  function getActiveOfficeBanks(int $office_id, $includeLiabilityAccount = false)
+  {
+    $builder = $this->read_db->table('office_bank');
+    $builder->select(array('office_bank_id', 'office_bank_name'));
+    $builder->where(['fk_office_id' => $office_id, 'office_bank_is_active' => 1]);
+
+    !$includeLiabilityAccount ?
+      $builder->where('office_bank_is_accrued', '0'):
+      '';
+
+    $office_banks = $builder->get()->getResultArray();
+
+    return $office_banks;
   }
 
   function getOfficeBanks(array $office_ids, array $project_ids = [], array $office_bank_ids = []): array
@@ -698,42 +778,45 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
   function officeHasMultipleBankAccounts($office_id)
   {
     $result = $this->read_db->table("office_bank")
-    ->getWhere(array('fk_office_id' => $office_id))->getNumRows();
+      ->getWhere(array('fk_office_id' => $office_id))->getNumRows();
     $office_has_multiple_bank_accounts = $result > 1 ? true : false;
     return $office_has_multiple_bank_accounts;
   }
 
 
-  function changeFieldType(): array{
+  function changeFieldType(): array
+  {
     $change_field_type = [];
-    $change_field_type['office_bank_chequebook_size']['field_type']='select';
-    $change_field_type['office_bank_chequebook_size']['options'] = [24=>24, 48=>48, 50 => 50,60=>60, 100 => 100, 150 => 150, 200 => 200];
+    $change_field_type['office_bank_chequebook_size']['field_type'] = 'select';
+    $change_field_type['office_bank_chequebook_size']['options'] = [24 => 24, 48 => 48, 50 => 50, 60 => 60, 100 => 100, 150 => 150, 200 => 200];
     return $change_field_type;
   }
 
-  private function activeChequeBookWarning($hash_office_bank_id){
+  private function activeChequeBookWarning($hash_office_bank_id)
+  {
     $message = '';
     $chequeBookLibrary = new \App\Libraries\Grants\ChequeBookLibrary();
-    $office_bank_id = hash_id($hash_office_bank_id,'decode');
+    $office_bank_id = hash_id($hash_office_bank_id, 'decode');
     $leaves = $chequeBookLibrary->getRemainingUnusedChequeLeaves($office_bank_id);
-    if(!empty($leaves)){
-      $message = "<br/>".get_phrase("cheque_book_use_expiry_edit_warning","Editing the cheque book use expiry date and cheque book size is not permitted for office banks with active cheque book.");
+    if (!empty($leaves)) {
+      $message = "<br/>" . get_phrase("cheque_book_use_expiry_edit_warning", "Editing the cheque book use expiry date and cheque book size is not permitted for office banks with active cheque book.");
     }
     return $message;
   }
 
-  function pagePosition(){
+  function pagePosition()
+  {
     $widget = [];
-    if($this->action == 'view' || $this->action == 'edit'){
+    if ($this->action == 'view' || $this->action == 'edit') {
       $message = $this->createAccountBalanceMessageForOfficeBankAccount();
       $message .= $this->activeChequeBookWarning($this->id);
-      if($message != ""){
-        $widget['position_1']['view'][] =  '<div class = "warning">'.$message.'</div><hr/>';
-        $widget['position_1']['edit'][] =  '<div class = "warning">'.$message.'</div><hr/>';
-      } 
+      if ($message != "") {
+        $widget['position_1']['view'][] = '<div class = "warning">' . $message . '</div><hr/>';
+        $widget['position_1']['edit'][] = '<div class = "warning">' . $message . '</div><hr/>';
+      }
     }
 
-    if($this->action == 'singleFormAdd'){
+    if ($this->action == 'singleFormAdd') {
       // Only show if this is not the first office bank account for the office
       $message = $this->checksWhenCreatingOfficeBank();
       $widget['position_1']['singleFormAdd'][] = $message;
@@ -742,37 +825,39 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
     return $widget;
   }
 
-  private function checksWhenCreatingOfficeBank(){
+  private function checksWhenCreatingOfficeBank()
+  {
     $message = '<div id = "office_bank_conditions" class = "hidden info">
-                  <b>'.get_phrase('actions_before_creating_a_new_office_bank','Before creating another office bank account for an office for an office to transition to, please make sure that you have done the following').':</b><br/><br/>
+                  <b>' . get_phrase('actions_before_creating_a_new_office_bank', 'Before creating another office bank account for an office for an office to transition to, please make sure that you have done the following') . ':</b><br/><br/>
                   
                   <div style = "text-align: left;position:relative; left: 250px;">
-                    <input type = "checkbox" class = "office_bank_checklist_items"/> '.get_phrase('committee_minutes_required','The FCP has discussed and minuted the matter with the FCP committee and have submitted the minutes to you').' <br/>
-                    <input type = "checkbox" class = "office_bank_checklist_items"/> '.get_phrase('submitted_bank_details_to_finance','The new bank account details have been sent to the National Office accountants and ready to receive funds in the next disbursement').' <br/>
-                    <input type = "checkbox" class = "office_bank_checklist_items"/> '.get_phrase('sent_copy_of_cheque_book_leaf','The FCP has sent you a screenshot of the first leaf of the cheque book given by the new bank').' <br/>
-                    <input type = "checkbox" class = "office_bank_checklist_items"/> '.get_phrase('noted_amount_to_transfer','You are aware of the total amount the FCP is going to transfer from the old office bank to the new office bank. You will be required to follow up on this in your next FCP visit').' <br/>
-                    <input type = "checkbox" class = "office_bank_checklist_items"/> '.get_phrase('noted_outstanding_cheques','You have checked if the FCP has outstanding cheques in the old office bank and adviced them not to request for the physical closure of the old account until all cheques are paid by the bank').' <br/>
-                    <input type = "checkbox" class = "office_bank_checklist_items"/> '.get_phrase('uploaded_minutes_and_cheque_leaf','Make sure that you upload the minutes, last bank statement of the previous bank and first leaf the new bank account cheque book in the comment section of this record after creation for future reference').' <br/><br/>
+                    <input type = "checkbox" class = "office_bank_checklist_items"/> ' . get_phrase('committee_minutes_required', 'The FCP has discussed and minuted the matter with the FCP committee and have submitted the minutes to you') . ' <br/>
+                    <input type = "checkbox" class = "office_bank_checklist_items"/> ' . get_phrase('submitted_bank_details_to_finance', 'The new bank account details have been sent to the National Office accountants and ready to receive funds in the next disbursement') . ' <br/>
+                    <input type = "checkbox" class = "office_bank_checklist_items"/> ' . get_phrase('sent_copy_of_cheque_book_leaf', 'The FCP has sent you a screenshot of the first leaf of the cheque book given by the new bank') . ' <br/>
+                    <input type = "checkbox" class = "office_bank_checklist_items"/> ' . get_phrase('noted_amount_to_transfer', 'You are aware of the total amount the FCP is going to transfer from the old office bank to the new office bank. You will be required to follow up on this in your next FCP visit') . ' <br/>
+                    <input type = "checkbox" class = "office_bank_checklist_items"/> ' . get_phrase('noted_outstanding_cheques', 'You have checked if the FCP has outstanding cheques in the old office bank and adviced them not to request for the physical closure of the old account until all cheques are paid by the bank') . ' <br/>
+                    <input type = "checkbox" class = "office_bank_checklist_items"/> ' . get_phrase('uploaded_minutes_and_cheque_leaf', 'Make sure that you upload the minutes, last bank statement of the previous bank and first leaf the new bank account cheque book in the comment section of this record after creation for future reference') . ' <br/><br/>
                   
                   
-                  '.get_phrase('funds_transfer_condition','Note: FCP can only transfer funds to the new office bank as per the book balance and not the whole amount in the old bank account unless they lack outstanding cheques').' <br/><br/>
+                  ' . get_phrase('funds_transfer_condition', 'Note: FCP can only transfer funds to the new office bank as per the book balance and not the whole amount in the old bank account unless they lack outstanding cheques') . ' <br/><br/>
 
-                  '.get_phrase('After creating the new office bank record, you will be requred to do the following follow up. Make sure you create a Connect Facilitation Plan Task for each of the items below').':<br/><br/>
+                  ' . get_phrase('After creating the new office bank record, you will be requred to do the following follow up. Make sure you create a Connect Facilitation Plan Task for each of the items below') . ':<br/><br/>
 
                 
-                    1. '.get_phrase('follow_up_on_transfered_funds','The FCP transferred the exact funds as agreed when creating the new office bank record').' <br/>
-                    2. '.get_phrase('follow_up_on_transfer_voucher','A Bank to Bank Transfer voucher has been created in the system for the funds tranfers done').' <br/>
-                    3. '.get_phrase('follow_up_on_cheques_clearance','All the outstanding cheques that were present in the old bank have been fully paid and the FCP has given instrusctions to close the account').' <br/>
+                    1. ' . get_phrase('follow_up_on_transfered_funds', 'The FCP transferred the exact funds as agreed when creating the new office bank record') . ' <br/>
+                    2. ' . get_phrase('follow_up_on_transfer_voucher', 'A Bank to Bank Transfer voucher has been created in the system for the funds tranfers done') . ' <br/>
+                    3. ' . get_phrase('follow_up_on_cheques_clearance', 'All the outstanding cheques that were present in the old bank have been fully paid and the FCP has given instrusctions to close the account') . ' <br/>
                   </div>
               </div>
               ';
-    
+
     return $message;
   }
 
-  function createAccountBalanceMessageForOfficeBankAccount(){
+  function createAccountBalanceMessageForOfficeBankAccount()
+  {
     // Office bank Id
-    $office_bank_id = hash_id($this->id,'decode');
+    $office_bank_id = hash_id($this->id, 'decode');
 
     // Office Id
     $builder = $this->read_db->table('office_bank');
@@ -781,7 +866,7 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
 
     // Account balance amount
     $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
-    $reporting_month = date('Y-m-01',strtotime($voucherLibrary->getVoucherDate($office_id)));
+    $reporting_month = date('Y-m-01', strtotime($voucherLibrary->getVoucherDate($office_id)));
     $account_balance = $this->officeBankAccountBalance($office_bank_id, $reporting_month);
 
     // Office Currency Code
@@ -790,17 +875,18 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
 
     $message = '';
 
-    if($account_balance > 0){
+    if ($account_balance > 0) {
       $message = get_phrase(
         'account_balance_deactivation_notification',
-        'Office bank account cannot be closed/deactivated if balance is not zero. The current book balance is {{currency_code}}. {{account_balance}}.', 
-        ['currency_code' => $currency_code, 'account_balance' => number_format(round($account_balance,2),2)]);
+        'Office bank account cannot be closed/deactivated if balance is not zero. The current book balance is {{currency_code}}. {{account_balance}}.',
+        ['currency_code' => $currency_code, 'account_balance' => number_format(round($account_balance, 2), 2)]
+      );
     }
 
     return $message;
   }
 
-    /**
+  /**
    * get_active_cash_accounts(): get json string of voucher types
    * @author  Livingstone Onduso
    * @dated: 5/06/2023
@@ -808,110 +894,102 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
    * @return array
    * @param int $account_system_id
    */
-  public function getActiveOfficeBank(int $office_id): array{
+  public function getActiveOfficeBank(int $office_id): array
+  {
 
     $builder = $this->read_db->table("office_bank");
-    $builder->select(['office_bank_id','office_bank_name']);
-    $builder->where(['office_bank_is_active'=>1,'fk_office_id'=>$office_id]);
+    $builder->select(['office_bank_id', 'office_bank_name']);
+    $builder->where(['office_bank_is_active' => 1, 'fk_office_id' => $office_id]);
     $office_bank = $builder->get()->getResultArray();
     return $office_bank;
 
   }
 
-      /**
-     * get_office_banks_for_office
-     * 
-     * @author Nicodemus Karisa Mwambire
-     * @reviewed_by None
-     * @reviewed_date None
-     * @access public
-     * 
-     * @param int $office_id - Office Id
-     * 
-     * @return array - List of office banks grouped in require_chequebook, is_active and is_default keys
-     * 
-     * @todo:
-     * Ready for Peer Review
-     */
+  /**
+   * get_office_banks_for_office
+   * 
+   * @author Nicodemus Karisa Mwambire
+   * @reviewed_by None
+   * @reviewed_date None
+   * @access public
+   * 
+   * @param int $office_id - Office Id
+   * 
+   * @return array - List of office banks grouped in require_chequebook, is_active and is_default keys
+   * 
+   * @todo:
+   * Ready for Peer Review
+   */
 
-     public function getOfficeBanksForOffice($office_id): array {
+  public function getOfficeBanksForOffice($office_id, $includeLiabilityAccount = false): array
+  {
 
-      // $office_banks = [];
+    // $office_banks = [];
 
-      $office_banks['chequebook_exemption_expiry_date'] = [];
-      $office_banks['is_active'] = [];
-      $office_banks['is_default'] = [];
+    $office_banks['chequebook_exemption_expiry_date'] = [];
+    $office_banks['is_active'] = [];
+    $office_banks['is_default'] = [];
 
-      // Check if the Office has atleast one bank that requires a cheque book
-      $builder = $this->read_db->table("office_bank");
-      $builder->where(array('fk_office_id' => $office_id));
-      $office_banks_obj = $builder->get();
+    // Check if the Office has atleast one bank that requires a cheque book
+    $builder = $this->read_db->table("office_bank");
+    $builder->where(array('fk_office_id' => $office_id));
 
-      if($office_banks_obj->getNumRows()){
-        $office_bank_raw = $office_banks_obj->getResultArray();
+    !$includeLiabilityAccount ?
+      $builder->where('office_bank_is_accrued', '0'):
+      '';
 
-        foreach($office_bank_raw as $office_bank){
-          $chequebook_exemption_expiry_date = isset($office_bank['office_bank_book_exemption_expiry_date']) ? $office_bank['office_bank_book_exemption_expiry_date']: NULL;
-          $is_active = $office_bank['office_bank_is_active'];
-          $is_default = $office_bank['office_bank_is_default'];
+    $office_banks_obj = $builder->get();
 
-          if($chequebook_exemption_expiry_date != NULL){
-            $office_banks['chequebook_exemption_expiry_date'][$office_bank['office_bank_id']] = $chequebook_exemption_expiry_date;
-          }
+    if ($office_banks_obj->getNumRows()) {
+      $office_bank_raw = $office_banks_obj->getResultArray();
 
-          if($is_active){
-            $office_banks['is_active'][$office_bank['office_bank_id']] = $is_active;
-          }
+      foreach ($office_bank_raw as $office_bank) {
+        $chequebook_exemption_expiry_date = isset($office_bank['office_bank_book_exemption_expiry_date']) ? $office_bank['office_bank_book_exemption_expiry_date'] : NULL;
+        $is_active = $office_bank['office_bank_is_active'];
+        $is_default = $office_bank['office_bank_is_default'];
 
-          if($is_default){
-            $office_banks['is_default'][$office_bank['office_bank_id']] = $is_default;
-          }
+        if ($chequebook_exemption_expiry_date != NULL) {
+          $office_banks['chequebook_exemption_expiry_date'][$office_bank['office_bank_id']] = $chequebook_exemption_expiry_date;
+        }
+
+        if ($is_active) {
+          $office_banks['is_active'][$office_bank['office_bank_id']] = $is_active;
+        }
+
+        if ($is_default) {
+          $office_banks['is_default'][$office_bank['office_bank_id']] = $is_default;
         }
       }
-
-      return $office_banks;
     }
-
-    /**
-   * get_active_office_banks(): Returns an array of active banks
-   * @author  Livingstone Onduso
-   * @dated: 5/03/2024
-   * @access public
-   * @return array
-   * @param int $office_id
-   */
-  function getActiveOfficeBanks(int $office_id){
-    $builder = $this->read_db->table('office_bank');
-    $builder->select(array('office_bank_id','office_bank_name'));
-    $builder->where(['fk_office_id'=>$office_id,'office_bank_is_active'=>1]);
-    $office_banks = $builder->get()->getResultArray();
 
     return $office_banks;
   }
 
-  function deactivateNonDefaultOfficeBankByOfficeId($office_id, $reporting_month){
+
+  function deactivateNonDefaultOfficeBankByOfficeId($office_id, $reporting_month)
+  {
 
     $office_bank_ids = [];
-    $builder= $this->read_db->table('office_bank');
+    $builder = $this->read_db->table('office_bank');
     $builder->select(array('office_bank_id'));
     $builder->where(array('fk_office_id' => $office_id, 'office_bank_is_default' => 0, 'office_bank_is_active' => 1));
     $office_bank_obj = $builder->get();
 
-    if($office_bank_obj->getNumRows() > 0){
-      $office_bank_ids = array_column($office_bank_obj->getResultArray(),'office_bank_id');
+    if ($office_bank_obj->getNumRows() > 0) {
+      $office_bank_ids = array_column($office_bank_obj->getResultArray(), 'office_bank_id');
 
-      for($i = 0; $i < count($office_bank_ids); $i++){
-        
+      for ($i = 0; $i < count($office_bank_ids); $i++) {
+
         $account_balance = $this->officeBankAccountBalance($office_bank_ids[$i], $reporting_month);
-        
-        if($account_balance != 0){
+
+        if ($account_balance != 0) {
           unset($office_bank_ids[$i]);
         }
       }
     }
   }
 
-    /**
+  /**
    * get_active_recipient_bank(): get json string of voucher types
    * @author  Livingstone Onduso
    * @dated: 5/06/2023
@@ -919,35 +997,38 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
    * @return array
    * @param int $fk_voucher_id
    */
-  public function getActiveRecipientBank(int $fk_voucher_id){
+  public function getActiveRecipientBank(int $fk_voucher_id)
+  {
 
     $officeBankReadBuilder = $this->read_db->table('office_bank');
-    
-    $officeBankReadBuilder->select(['office_bank_id','office_bank_name']);
-    $officeBankReadBuilder->join('cash_recipient_account','cash_recipient_account.fk_office_bank_id =office_bank.office_bank_id');
-    $officeBankReadBuilder->where(['office_bank_is_active'=>1,'fk_voucher_id'=>$fk_voucher_id]);
-    $recipient_bank=$officeBankReadBuilder->get()->getResultArray();
+
+    $officeBankReadBuilder->select(['office_bank_id', 'office_bank_name']);
+    $officeBankReadBuilder->join('cash_recipient_account', 'cash_recipient_account.fk_office_bank_id =office_bank.office_bank_id');
+    $officeBankReadBuilder->where(['office_bank_is_active' => 1, 'fk_voucher_id' => $fk_voucher_id]);
+    $recipient_bank = $officeBankReadBuilder->get()->getResultArray();
 
     return $recipient_bank;
 
   }
 
-  public function getDefaultOfficeBank($officeId){
+  public function getDefaultOfficeBank($officeId)
+  {
     $officeBankReadBuilder = $this->read_db->table('office_bank');
 
-    $officeBankReadBuilder->where(['fk_office_id' => $officeId,'office_bank_is_active' => 1, 'office_bank_is_default' => 1]);
+    $officeBankReadBuilder->where(['fk_office_id' => $officeId, 'office_bank_is_active' => 1, 'office_bank_is_default' => 1]);
     $officeBankObj = $officeBankReadBuilder->get();
 
     $officeBank = [];
 
-    if($officeBankObj->getNumRows() > 0){
+    if ($officeBankObj->getNumRows() > 0) {
       $officeBank = $officeBankObj->getRowArray();
     }
 
     return $officeBank;
   }
 
-  function getChequeBookSize($office_bank_id){
+  function getChequeBookSize($office_bank_id)
+  {
 
     $officeBankReadBuilder = $this->read_db->table('office_bank');
 
@@ -957,32 +1038,46 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
 
     $office_bank_chequebook_size = 100;
 
-    if($office_bank_chequebook_size_obj->getNumRows() > 0){
+    if ($office_bank_chequebook_size_obj->getNumRows() > 0) {
       $office_bank_chequebook_size = $office_bank_chequebook_size_obj->getRow()->office_bank_chequebook_size;
     }
 
     return $office_bank_chequebook_size;
   }
 
-  // public function accountSystemOfficeBanksIds(int $accountSystemId, $only_active = false) {
-  //   $bankReadBuilder = $this->read_db->table('bank');
+  public function getOfficeLiabilityOfficeBank($officeId)
+  {
 
-  //   // Get user Account System
-  //   $bankReadBuilder->select(['office_bank_id']);
-  //   $bankReadBuilder->where(['fk_account_system_id' => $accountSystemId]);
-  //   if($only_active){
-  //     $bankReadBuilder->where(['office_bank_is_active' => 1]);
-  //   }
-  //   $bankReadBuilder->join('office_bank','office_bank.fk_bank_id=bank.bank_id');
-  //   $officeBankObj = $bankReadBuilder->get();
+    $accountSystemSettingLibrary = new \App\Libraries\Core\AccountSystemSettingLibrary();
 
-  //   $officeBankIds = [];
+    $builder = $this->write_db->table("office");
+    $builder->select(array('office_name', 'fk_account_system_id', 'office_id'));
+    $builder->where('office_id', $officeId);
+    $office_info_obj = $builder->get();
 
-  //   if($officeBankObj->getNumRows() > 0){
-  //     $officeBanks = $officeBankObj->getResultArray();
-  //     $officeBankIds = array_column($officeBanks, 'office_bank_id');
-  //   }
-    
-  //   return $officeBankIds;
-  // }
+    $this->write_db->transStart();
+
+    if ($office_info_obj->getNumRows() > 0) {
+      $office_info = $office_info_obj->getRow();
+    }
+    $account_system_settings = $accountSystemSettingLibrary->getAccountSystemSettings($office_info->fk_account_system_id);
+    $use_accrual_based_accounting = array_key_exists(\App\Enums\AccountSystemSettingEnum::ACCRUAL_SETTING_NAME->value, $account_system_settings);
+
+
+    $officeBankBuilder = $this->read_db->table('office_bank');
+
+    $officeBankBuilder->select('office_bank_id as item_id, office_bank_name as item_name');
+    $officeBankBuilder->where('fk_office_id', $officeId);
+    $officeBankBuilder->where('office_bank_is_accrued', '1');
+    $officeBankBuilder->where('office_bank_is_active', '1');
+    $accruedOfficeBankObj = $officeBankBuilder->get();
+
+    $accruedOfficeBank = [];
+
+    if ($accruedOfficeBankObj->getNumRows() > 0 && $use_accrual_based_accounting) {
+      $accruedOfficeBank = $accruedOfficeBankObj->getRowArray();
+    }
+
+    return $accruedOfficeBank;
+  }
 }

@@ -131,6 +131,7 @@ class User extends WebController
     function retrieveDepartmentsByAjax($context_office){
       $departmentLibrary = new \App\Libraries\Core\DepartmentLibrary();
       $departments = $departmentLibrary->retrieveDepartments($context_office);
+      // log_message('error', json_encode($departments));
       return $this->response->setJSON($departments);
     }
 
@@ -149,7 +150,11 @@ class User extends WebController
     function getAccountSystemsByAjax(){
       $accountSystemLibrary = new \App\Libraries\Core\AccountSystemLibrary();
       $account_systems = $accountSystemLibrary->getAccountSystems();
-      return $this->response->setJSON($account_systems);
+      
+      $ids = array_column($account_systems, 'account_system_id');
+      $names = array_column($account_systems, 'account_system_name');
+
+      return $this->response->setJSON(array_combine($ids, $names));
     }
 
     function getCountryCurrencyByAjax(){

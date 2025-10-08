@@ -81,3 +81,17 @@ if(!function_exists('checkDateRangesOverlap')){
     return $start1 < $end2 && $start2 < $end1;
 }
 }
+
+if(!function_exists('isValidDate')){
+    function isValidDate(string $dateString, string $format = 'Y-m-d'): bool
+    {
+        // Attempt to create a DateTime object from the string using the specified format.
+        $dateTime = \DateTime::createFromFormat($format, $dateString);
+
+        // 1. Check if the object creation succeeded (it won't return false for '0000-00-00'
+        //    if the format is 'Y-m-d', so we need the second check).
+        // 2. Check if the format was strictly adhered to by reformatting the object
+        //    and comparing it to the original string. This catches dates like '2024-15-40'.
+        return $dateTime && $dateTime->format($format) === $dateString;
+    }
+}

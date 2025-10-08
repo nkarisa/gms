@@ -494,9 +494,9 @@ trait JournalBuilder
         }
 
         if ($bank_id == $office_bank_id) {
-            $bank_inc = $bank_income[$office_bank_id];
-            $bank_exp = $bank_expense[$office_bank_id];
-            $bank_bal = $running_bank_balance[$office_bank_id];
+            $bank_inc = $bank_income[$office_bank_id]?? 0;
+            $bank_exp = $bank_expense[$office_bank_id]??0;
+            $bank_bal = $running_bank_balance[$office_bank_id]??0;
         }else{
             $bank_bal = $running_bank_balance[$bank_id];
         }

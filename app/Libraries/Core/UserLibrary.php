@@ -9,6 +9,8 @@ use App\Libraries\Core\StatusLibrary;
 use App\Models\Core\UserModel;
 use CodeIgniter\Database\ResultInterface;
 
+use function GuzzleHttp\json_decode;
+
 class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterface
 {
     protected $table;
@@ -1213,10 +1215,14 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
         $response['flag'] = false;
         $response['message'] = get_phrase('user_creation_failed');
 
-        // $post = $this->request->getPost()['header'];
+        $post = $post->header;
+
+        // log_message('error', json_encode($post));
 
         $uniqueIdentifierLibrary = new UniqueIdentifierLibrary();
         $officeLibrary = new OfficeLibrary();
+        $approvalLibrary = new \App\Libraries\Core\ApprovalLibrary();
+        $statusLibary = new StatusLibrary();
 
         $this->write_db->transStart();
 
@@ -1244,21 +1250,37 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
         $hashed = $this->passwordSalt($post['user_password']);
         $user['user_password'] = $hashed;
 
-        $user_to_insert = $this->mergeWithHistoryFields($this->controller, $user, false);
+        $user['user_track_number'] = $this->generateItemTrackNumberAndName('user')['user_track_number'];
 
-        $this->write_db->table('user')->insert($user_to_insert);
+        $user['user_created_date'] = date('Y-m-d');
+        $user['user_last_modified_date'] = date('Y-m-d');
+        $user['user_created_by'] = $this->session->user_id ? $this->session->user_id : 1;
+        $user['user_last_modified_by'] = $this->session->user_id ? $this->session->user_id : 1;
+        $user['fk_status_id'] =  $statusLibary->initialItemStatus('user', $post['fk_account_system_id']);
+        $user['fk_approval_id'] = $approvalLibrary->insertApprovalRecord('user');
+        // $user_to_insert = $this->mergeWithHistoryFields($this->controller, $user, false);
+
+        $this->write_db->table('user')->insert($user);
 
         $user_id = $this->write_db->insertId();
+
 
         // Insert a user in a context table 
         $builder = $this->write_db->table('context_definition');
         $builder->where(array('context_definition_id' => $post['fk_context_definition_id']));
         $context_definition_name = $builder->get()->getRow()->context_definition_name;
+
+        $context_definition_office = 'context_' . $context_definition_name;
         $context_definition_user_table = 'context_' . $context_definition_name . '_user';
+
+        $contextOfficeBuilder = $this->read_db->table($context_definition_office);
+        $contextOfficeBuilder->where('fk_office_id', $post['fk_user_context_office_id']);
+        $contextOffice = $contextOfficeBuilder->get()->getRowArray();
+
 
         $context[$context_definition_user_table . '_name'] = "Office context for " . $post['user_firstname'] . " " . $post['user_lastname'];
         $context['fk_user_id'] = $user_id;
-        $context['fk_context_' . $context_definition_name . '_id'] = $post['fk_user_context_office_id'];
+        $context['fk_context_' . $context_definition_name . '_id'] = $contextOffice[$context_definition_office . '_id']; // $post['fk_user_context_office_id'];
         $context['fk_designation_id'] = $post['designation'];
         $context[$context_definition_user_table . '_is_active'] = 1;
 

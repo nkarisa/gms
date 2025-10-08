@@ -4,7 +4,7 @@ namespace App\Commands;
 
 use CodeIgniter\CLI\BaseCommand;
 use CodeIgniter\CLI\CLI;
-use App\Libraries\Grants\PayrollLibrary;
+use App\Libraries\System\ScheduledTasks;
 
 class MyDailyTask extends BaseCommand
 {
@@ -15,14 +15,14 @@ class MyDailyTask extends BaseCommand
     public function run(array $params)
     {
         
-        $payrollLibrary = new PayrollLibrary();
-        $response = $payrollLibrary->generatePayrollForAllTransactingOffices();
+        // $tasksLibrary = new ScheduledTasks();
+        // $response = $tasksLibrary->schedule();
 
-        if($response){
-            CLI::write('Payroll created successfully!');
-        }else{
-            CLI::write('Payroll creating failed!');
-        }
+        // if($response){
+        //     CLI::write('Payroll created successfully!');
+        // }else{
+        //     CLI::write('Payroll creating failed!');
+        // }
         
     }
 }

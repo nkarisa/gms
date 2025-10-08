@@ -525,7 +525,7 @@ trait ManipulationTrait {
 
     function mergeWithHistoryFields(string $approve_item_name, array $array_to_merge, bool $add_name_to_array = true, $is_a_new_record = true)
     {
-  
+      // log_message('error', json_encode($array_to_merge));
       $approvalLibrary = new \App\Libraries\Core\ApprovalLibrary();
       $statusLibary = new \App\Libraries\Core\StatusLibrary();
   

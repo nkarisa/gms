@@ -67,7 +67,7 @@ class Cache extends BaseConfig
      * hard-coded, but may be useful to projects and modules. This will replace
      * the hard-coded value in a future release.
      */
-    public int $ttl = 60;
+    public int $ttl = 300;
 
     /**
      * --------------------------------------------------------------------------
@@ -168,4 +168,12 @@ class Cache extends BaseConfig
      * @var bool|list<string>
      */
     public $cacheQueryString = false;
+
+    public function __construct(){
+
+        if(env('CACHE_HANDLER') == 'Redis'){
+            $this->handler = 'redis';
+        }
+
+    }
 }

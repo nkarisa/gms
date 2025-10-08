@@ -2,6 +2,32 @@
     $(document).ready(function () {
         const action = '<?=$action;?>'
 
+        if(action == 'singleFormAdd'){
+            const office_bank_is_accrued = document.getElementById('office_bank_is_accrued')
+            const office_bank_is_accrued_form_group = office_bank_is_accrued.closest('.form-group')
+            const office_id = document.getElementById('fk_office_id')
+            const office_id_form_group = office_id.closest('.form-group')
+            
+            office_bank_is_accrued_form_group.style.display = 'none'
+            
+            $(office_id).on('change', function() {
+                
+                const officeId = $(office_id).val()
+                const checkLiabilityOfficeBankURL = `${baseURL}ajax/office_bank/officeHasLiabilityOfficeBank/${officeId}`
+
+                fetch(checkLiabilityOfficeBankURL)
+                    .then(response => response.json())
+                    .then(data => {
+                        if(!data.hasLibilityBank){
+                            office_bank_is_accrued_form_group.style.display = 'inline'
+                        }
+                    }).catch(error => {
+                        console.log("Error", error)
+                    })
+            })
+
+        }   
+
         if (action == 'edit') {
             $('#fk_office_id').prop('readonly', 'readonly')
 

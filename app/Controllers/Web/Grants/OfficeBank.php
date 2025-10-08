@@ -94,4 +94,36 @@ class OfficeBank extends WebController
         }
         return $this->response->setJSON(compact('count'));
       }
+
+    public function officeHasLiabilityOfficeBank($officeId){
+      // $response = ['officeId' => $officeId];
+      $officeBankLibrary = new \App\Libraries\Grants\OfficeBankLibrary();
+
+      $officeLiabilityOfficeBank = $officeBankLibrary->getOfficeLiabilityOfficeBank($officeId);
+
+      $hasLibilityBank = true;
+
+      if(count($officeLiabilityOfficeBank) == 0){
+        $hasLibilityBank = false;
+      }
+
+      return $this->response->setJSON(compact('hasLibilityBank'));
+    }
+
+    function getOfficeBankAccountList($officeId, $voucherTypeId){
+      // Get Voucher Type Effect Code
+      $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+      $officeBankLibrary = new \App\Libraries\Grants\OfficeBankLibrary();
+      $voucherType = $voucherLibrary->getVoucherTypeEffect($voucherTypeId);
+
+      $office_banks = [];
+
+      if($voucherType['voucher_type_effect_code'] == \App\Enums\AccrualVoucherTypeEffects::PAYROLL_LIABILITY->value){
+        $office_banks =  [$officeBankLibrary->getOfficeLiabilityOfficeBank($officeId)];
+      }else{
+        $office_banks = $voucherLibrary->getOfficeBanks($officeId);
+      }
+
+      return $this->response->setJSON($office_banks);
+    }
 }

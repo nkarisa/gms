@@ -15,7 +15,7 @@ namespace Config;
 
 use CodeIgniter\Tasks\Config\Tasks as BaseTasks;
 use CodeIgniter\Tasks\Scheduler;
-use App\Libraries\Grants\PayrollLibrary;
+use App\Libraries\System\ScheduledTasks;
 
 class Tasks extends BaseTasks
 {
@@ -46,14 +46,37 @@ class Tasks extends BaseTasks
      */
     public function init(Scheduler $schedule)
     {
-        $schedule->call(static function () {
-           
-            // Create payrolls for all offices
-            $payrollLibrary = new PayrollLibrary();
-            $response = $payrollLibrary->generatePayrollForAllTransactingOffices();
-            
-            log_message('info', json_encode($response));
+        $tasksLibrary = new ScheduledTasks();
 
-        })->everyFiveMinutes()->named('autoCreate');
+        // Tasks to run schedulers - Run every 5 minutes
+
+        $schedule->call(static function () use($tasksLibrary) {
+            // Create payrolls for all offices
+            $payrollCreator = new \App\Libraries\Grants\Shreds\PayrollCreator(); // A type of SchedulerGenerator interface
+            $response = $tasksLibrary->scheduler($payrollCreator, 'payrollOfficeIds');
+            // log_message('info', json_encode($response));
+        })->everyFiveMinutes()->named('autoCreatePayrolls');
+
+        $schedule->call(static function () use($tasksLibrary) {
+            // Create Depreciation vouchers
+            $depreciationVoucherGenerator = new \App\Libraries\Grants\Shreds\DepreciationVoucherCreator(); // A type of SchedulerGenerator interface
+            $response = $tasksLibrary->scheduler($depreciationVoucherGenerator, 'depreciationOfficeIds');
+            // log_message('info', json_encode($response));
+        })->everyFiveMinutes()->named('autoCreateDepreciationVouchers');
+
+        // Tasks to dump Office Ids to Cache - Run every minute
+
+        $schedule->call(static function() use($tasksLibrary) {
+            $payrollCreator = new \App\Libraries\Grants\Shreds\PayrollCreator();
+            $response = $tasksLibrary->cacheOfficeIds($payrollCreator, 'payrollOfficeIds');
+            // log_message('info', json_encode($response));
+        })->everyMinute()->named('cachePayrollOfficeIds');
+
+        $schedule->call(static function() use($tasksLibrary) {
+            $depreciationVoucherGenerator = new \App\Libraries\Grants\Shreds\DepreciationVoucherCreator();
+            $response = $tasksLibrary->cacheOfficeIds($depreciationVoucherGenerator, 'depreciationOfficeIds');
+            // log_message('info', json_encode($response));
+        })->everyMinute()->named('cacheDepreciationOfficeIds');
+
     }
 }

@@ -181,4 +181,21 @@ class AccountSystemSettingLibrary extends GrantsLibrary implements \App\Interfac
         $voucherTypeLibrary->createAccountingSystemAccrualVoucherTypes($account_system_ids, $expenseAccounts);
         
     }
+
+    public function getAccountSystemSettingsIds(\App\Enums\AccountSystemSettingEnum $accountSystemSetting){
+        $accountSystemSettingbuilder = $this->read_db->table('account_system_setting');
+        $accountSystemSettingbuilder->select('account_system_setting_accounts');
+        $accountSystemSettingbuilder->where('account_system_setting_name', $accountSystemSetting->value);
+        $accountSystemSettingbuilder->where('account_system_setting_value', '1');
+        $accountSystemSettingObj = $accountSystemSettingbuilder->get();
+
+        $accountSystemIds = [];
+
+        if($accountSystemSettingObj->getNumRows() > 0){
+            $settings = $accountSystemSettingObj->getRowArray();
+            $accountSystemIds = json_decode($settings['account_system_setting_accounts']);
+        }
+
+        return $accountSystemIds;
+    }
 }

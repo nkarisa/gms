@@ -135,7 +135,7 @@ class CapitalAssetLibrary extends GrantsLibrary implements \App\Interfaces\Libra
 
         // Check the Depreciation method appropriate to create a schedule in the future
         // Use getAssetUsefulLifeInYearsAndMethod method key asset_category_depreciation_method
-        return $assetDepreciationLibrary->computeStraightLineDepreciationSchedule($assetOfficeId, $assetId, $costOfAsset, $salvageValue, $usefulLifeInYears, $purchasedDate);
+        return $assetDepreciationLibrary->computeDepreciationSchedule($assetOfficeId, $assetId, $costOfAsset, $salvageValue, $usefulLifeInYears, $purchasedDate);
     }
 
     function formatColumnsValues(string $columnName, mixed $columnValue, array $rowArray, array $dependancyData = []): mixed {

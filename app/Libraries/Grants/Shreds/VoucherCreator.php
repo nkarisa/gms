@@ -38,11 +38,10 @@ class VoucherCreator
     protected ChequeBookLibrary $chequeBookLibrary;
     protected VoucherLibrary $voucherLibrary;
     protected OfficeBankLibrary $officeBankLibrary;
-    public function __construct(BaseConnection $readDb, BaseConnection $writeDb)
+    public function __construct()
     {
-        $this->write_db = $readDb;
-        $this->read_db = $writeDb;
-
+        $this->read_db = \Config\Database::connect('read');
+        $this->write_db = \Config\Database::connect('write');
         // Instantiate dependent libraries
         $this->journalLibrary = new JournalLibrary();
         $this->financialReportLibrary = new FinancialReportLibrary();

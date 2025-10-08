@@ -9,7 +9,6 @@ use App\Enums\AccrualVoucherTypeEffects;
 use App\Enums\{VoucherTypeEffectEnum, VoucherTypeAccountEnum};
 use App\Enums\AccrualLedgerAccounts;
 use Exception;
-use App\Libraries\Grants\Shreds\DepreciationVoucherCreator;
 use App\Libraries\Grants\Shreds\VoucherCreator;
 
 use function PHPSTORM_META\map;
@@ -691,7 +690,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
                 } else {
                     //Get max voucher_id based on max financial_report_month
                     $financial_report_month_obj = $this->selectMaxFinancialReport($office_id, true);
-                    $financial_report_month = $financial_report_month_obj->getRow()->financial_report_month;
+                    $financial_report_month = $financial_report_month_obj->getRow()->financial_report_month??date('Y-m-01');
                     $last_voucher = $this->getMaxVoucher($office_id, $financial_report_month);
                 }
             }
@@ -1036,12 +1035,17 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return $voucher_type_effect_and_code;
     }
 
-    function getOfficeBanks($office_id)
+    function getOfficeBanks($office_id, $includeLiabilityAccount = false)
     {
         $builder = $this->read_db->table('office_bank');
         $builder->select(array('DISTINCT(office_bank_id) as item_id', 'bank_name', 'office_bank_name as item_name', 'office_bank_account_number '));
         $builder->join('bank', 'bank.bank_id=office_bank.fk_bank_id');
         $builder->join('office_bank_project_allocation', 'office_bank.office_bank_id=office_bank_project_allocation.fk_office_bank_id');
+
+        !$includeLiabilityAccount ?
+            $builder->where('office_bank_is_accrued', '0'):
+            '';
+
 
         $office_banks = $builder->getWhere(
             array('fk_office_id' => $office_id, 'office_bank_is_active' => 1)
@@ -1171,7 +1175,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
     }
 
  /**
-  * This method is to be decaprecated in favour od addVoucher
+  * This method is to be decaprecated in favour of addVoucher
   */
  public function createVoucher($data)
     {
@@ -1202,19 +1206,8 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
     }
 
     function add($post, $parentTable = null, $parentId = null){
-
-        $depreciationVoucherGenerator = new DepreciationVoucherCreator($this->read_db, $this->write_db);
-        $payrollLibrary = new \App\Libraries\Grants\PayrollLibrary();
-
-        $responseArr = $this->addVoucher($post->header);
-        $officeId = $post->header['fk_office_id'];
-        $reportingMonth = date('Y-m-01', strtotime($post->header['voucher_date']));
-
-        // Need place these two lines in a scheduled job rather than called every time a voucher is created
-        $depreciationVoucherGenerator->generateMonthDepreciationVoucher($officeId, $reportingMonth);
-        $payrollLibrary->generatePayroll($officeId, $reportingMonth);
-        // log_message('error', json_encode($result));
-        
+        // log_message('info', json_encode($post));
+        $responseArr = $this->addVoucher($post->header);        
         return $this->response->setJSON($responseArr);
     }   
 
@@ -1222,7 +1215,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
     {
         $this->write_db->transBegin();
 
-        $voucherGenerator = new VoucherCreator($this->read_db, $this->write_db);
+        $voucherGenerator = new VoucherCreator();
 
         $result = $voucherGenerator->insertVoucher($post, $fullyApprovedStatusId);
 

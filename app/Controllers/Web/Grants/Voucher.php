@@ -150,7 +150,13 @@ class Voucher extends WebController
         $voucher_type_effect == VoucherTypeEffectEnum::PAYABLE_DISBURSEMENTS->getCode() ||
         $voucher_type_effect == VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode()
         ) {
-      $response['office_banks'] = $this->library->getOfficeBanks($office_id);
+
+          if($voucher_type_effect == 'expense' && $voucher_type_account == 'bank'){
+            $response['office_banks'] = $this->library->getOfficeBanks($office_id, true);
+          }else{
+            $response['office_banks'] = $this->library->getOfficeBanks($office_id);
+          }
+    
     }
 
     if (
@@ -523,10 +529,6 @@ class Voucher extends WebController
         $voucher_type_effect == VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode()
         ) {
 
-      // if($voucher_type_effect == 'payables'){
-      //   $contraAccountLibrary->addContraAccount($office_bank_id);
-      // }
-
       // Check if the office is a lead in an office group
       $is_office_group_lead = $officeGroupLibrary->checkIfOfficeIsOfficeGroupLead($this->request->getPost('office_id'));
 
@@ -551,10 +553,10 @@ class Voucher extends WebController
 
       if($voucher_type_effect == VoucherTypeEffectEnum::DEPRECIATION->getCode()){
         $expenseAccountReadBuilder->join('expense_vote_heads_category','expense_vote_heads_category.expense_vote_heads_category_id=expense_account.fk_expense_vote_heads_category_id');
-        $expenseAccountReadBuilder->where(['expense_vote_heads_category.expense_vote_heads_category_code' => VoucherTypeEffectEnum::DEPRECIATION->getName()]);
+        $expenseAccountReadBuilder->where(['expense_vote_heads_category.expense_vote_heads_category_code' => VoucherTypeEffectEnum::DEPRECIATION->getCode()]);
       }elseif($voucher_type_effect == VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode()){
         $expenseAccountReadBuilder->join('expense_vote_heads_category','expense_vote_heads_category.expense_vote_heads_category_id=expense_account.fk_expense_vote_heads_category_id');
-        $expenseAccountReadBuilder->where(['expense_vote_heads_category.expense_vote_heads_category_code' => VoucherTypeEffectEnum::PAYROLL_LIABILITY->getName()]);
+        $expenseAccountReadBuilder->where(['expense_vote_heads_category.expense_vote_heads_category_code' => VoucherTypeEffectEnum::PAYROLL_LIABILITY->getCode()]);
       }
 
       $expenseAccountReadBuilder->select(array('expense_account_id as account_id', 'expense_account_name as account_name'));

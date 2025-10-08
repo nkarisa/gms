@@ -68,7 +68,13 @@ class PayHistory extends WebController
     }
 
     private function officeHasLiabilityBankAccount($officeId){
-        return false;
+        $hasLiabilityBankAccount = false;
+
+        $officeBankLibrary = new \App\Libraries\Grants\OfficeBankLibrary();
+
+        $hasLiabilityBankAccount = $officeBankLibrary->officeHasLiabilityBankAccount($officeId);
+
+        return $hasLiabilityBankAccount;
     }
 
     function getOfficeEarningCategories($officeId){
@@ -83,9 +89,9 @@ class PayHistory extends WebController
         $earningCategoryBuilder->where('fk_account_system_id', $officeAccountSystemId);
         $earningCategoryBuilder->where('earning_category_is_recurring', '1');
         
-        $officeHasLiabilityBankAccount ? 
-            $earningCategoryBuilder->where('earning_category_is_accrued', '1'):
-            $earningCategoryBuilder->where('earning_category_is_accrued', '0');
+        !$officeHasLiabilityBankAccount ? 
+            $earningCategoryBuilder->where('earning_category_is_accrued', '0'):
+            '';
 
         $earningCategoriesObj = $earningCategoryBuilder->get();
 

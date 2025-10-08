@@ -37,7 +37,7 @@ class AssetDepreciationLibrary extends GrantsLibrary implements \App\Interfaces\
         return $totalMonths;
     }
 
-    public function computeStraightLineDepreciationSchedule($assetOfficeId, $assetId, $costOfAsset, $salvageValue, $usefulLifeInYears, $purchasedDate): bool{
+    public function computeDepreciationSchedule($assetOfficeId, $assetId, $costOfAsset, $salvageValue, $usefulLifeInYears, $purchasedDate): bool{
 
         $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
         $currentReportingMonth = date('Y-m-01',strtotime($voucherLibrary->getVoucherDate($assetOfficeId)));
@@ -154,9 +154,10 @@ class AssetDepreciationLibrary extends GrantsLibrary implements \App\Interfaces\
         return $change_field_type;
     }
 
+
     function calculateMonthsDepreciationExpense(int $officeId, string $reportingMonth = ''){
         $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
-        $currentReportingMonth = !empty($reportingMonth) ? $reportingMonth : date('Y-m-01',strtotime($voucherLibrary->getVoucherDate($officeId)));
+        $currentReportingMonth = isValidDate($reportingMonth) ? $reportingMonth : date('Y-m-01',strtotime($voucherLibrary->getVoucherDate($officeId)));
         $totalDepreciationExpense = 0;
         $assetDepreciationIds = [];
         

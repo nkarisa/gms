@@ -436,6 +436,7 @@ extract($result);
         element_str = element_str + "<option value='0'><?= get_phrase('select_records'); ?></option>";
 
         $.each(data, function (index, value) {
+            // console.log(value)
 
             element_str = element_str + "<option value=" + index + ">" + value + "</option>";
         });
