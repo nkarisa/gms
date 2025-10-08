@@ -84,8 +84,8 @@ if ($session->system_admin) {
         <option value='0'><b><?= get_phrase('select_cluster'); ?></b></option>
 
         <?php
-        $cluster_ids = array_column($cluster_offices, 'office_id');
-        $cluster_names = array_column($cluster_offices, 'office_name');
+        $cluster_ids = array_column($cluster_offices??[], 'office_id');
+        $cluster_names = array_column($cluster_offices??[], 'office_name');
         $cluster_office_ids_and_cluster_names = array_combine($cluster_ids, $cluster_names);
 
         foreach ($cluster_office_ids_and_cluster_names as $key => $cluster_names) { ?>

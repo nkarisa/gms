@@ -13,17 +13,20 @@
             $(office_id).on('change', function() {
                 
                 const officeId = $(office_id).val()
-                const checkLiabilityOfficeBankURL = `${baseURL}ajax/office_bank/officeHasLiabilityOfficeBank/${officeId}`
 
-                fetch(checkLiabilityOfficeBankURL)
-                    .then(response => response.json())
-                    .then(data => {
-                        if(!data.hasLibilityBank){
-                            office_bank_is_accrued_form_group.style.display = 'inline'
-                        }
-                    }).catch(error => {
-                        console.log("Error", error)
-                    })
+                if(officeId > 0){
+                    const checkLiabilityOfficeBankURL = `${baseURL}ajax/office_bank/officeHasLiabilityOfficeBank/${officeId}`
+    
+                    fetch(checkLiabilityOfficeBankURL)
+                        .then(response => response.json())
+                        .then(data => {
+                            if(!data.hasLibilityBank){
+                                office_bank_is_accrued_form_group.style.display = 'inline'
+                            }
+                        }).catch(error => {
+                            console.log("Error", error)
+                        })
+                }
             })
 
         }   
