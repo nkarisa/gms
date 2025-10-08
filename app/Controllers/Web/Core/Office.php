@@ -149,5 +149,4 @@ class Office extends WebController
 
     return $this->response->setJSON(compact('flag','message'));
   }
-
 }

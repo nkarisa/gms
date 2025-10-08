@@ -162,4 +162,5 @@ class User extends WebController
       $country_currencies = $countryCurrencyLibrary->getCountryCurrency();
       return $this->response->setJSON($country_currencies);
     }
+
 }

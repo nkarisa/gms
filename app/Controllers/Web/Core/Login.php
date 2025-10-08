@@ -42,7 +42,7 @@ class Login extends WebController
         // Check if user is already authenticated
         if ($this->session->has('user_is_authenticated')) {
 
- $grantsLibrary = new \App\Libraries\System\GrantsLibrary();
+            $grantsLibrary = new \App\Libraries\System\GrantsLibrary();
 
             if (parse_url(base_url())['host'] == 'localhost' && $this->session->system_admin) {
                 $grantsLibrary = new \App\Libraries\System\GrantsLibrary();
@@ -345,16 +345,19 @@ class Login extends WebController
         return $this->response->setJSON($un_allowed_password);
     }
 
-    public function getOfficeData(): ResponseInterface{
+
+       public function getOfficeData(): ResponseInterface{
         $post = $this->request->getPost();
-        // log_message('error', json_encode($post));
+    
         $compassionCountryId = $post['compassion_country_id'];
         $contextDefinitionId = $post['context_definition_id'];
 
         $officeLibrary = new \App\Libraries\Core\OfficeLibrary();
 
         $officeIdsAndNames = $officeLibrary->getOfficesIdsAndNames($compassionCountryId, $contextDefinitionId);
-        // log_message('error', json_encode($officeIdsAndNames));
+        
         return $this->response->setJSON($officeIdsAndNames);
     }
+
+
 }

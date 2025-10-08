@@ -28,13 +28,14 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link rel="shortcut icon" href="<?php echo base_url(); ?>assets/images/favicon.ico">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css" />
+    
 </head>
 
 <body class="page-body login-page login-form-fall" data-url="http://neon.dev">
     </div>
     <!-- This is needed when you send requests via Ajax -->
     <script type="text/javascript">
-        var baseurl = '<?php echo base_url(); ?>';
+        const baseURL = '<?php echo base_url(); ?>';
     </script>
     <div class='col-xs-12' id="create_account_div">
         <div class="login-form">
@@ -261,7 +262,7 @@
 
 </html>
 <script type="text/javascript">
-    //Instialize the select2 and Load Countries/Account Systems
+   //Instialize the select2 and Load Countries/Account Systems
     $(document).ready(function () {
         $("select").select2();
     });
@@ -477,9 +478,12 @@
                         $.post(url, data, function (response) {
                             alert(response.message);
                             $('#overlay').addClass('hidden');
-                            //Redirect To Login Page
-                            let redirect_url = '<?= base_url(); ?>';
-                            window.location.replace(redirect_url);
+                            
+                            if(response.success){
+                                let redirect_url = '<?= base_url(); ?>';
+                                window.location.replace(redirect_url);
+                            }
+                            
                         });
                     }
                 });
@@ -530,21 +534,17 @@
         
         const compassion_country_id = $('#user_country').val();
         // Get offices that belong to country of $(this) context
-        const url = '<?= base_url() ?>ajax/login/getOfficeData';
-
-        
+        const url = `${baseURL}ajax/login/getOfficeData`;
 
         const data = {
                 compassion_country_id: compassion_country_id,
                 context_definition_id: context_definition_id
         }
 
-        
-                
         $.post(url, data, function(response){
             $('#overlay').removeClass('hidden');
             selectElement = $('#user_office');
-            console.log(response);
+            // console.log('response', response);
             populate_offices_departments_roles(selectElement, response);
             $('#overlay').addClass('hidden');
         })
@@ -554,9 +554,9 @@
     function get_user_departments_roles_and_designations(userTypeId, tableName, elementId, countryId) {
         var url = '<?= base_url() ?>ajax/login/getUserDepartmentsRolesAndDesignations/' + userTypeId + '/' + tableName + '/' + countryId;
         $.get(url, function (objResponse) {
-            // let objResponse = JSON.parse(response);
             // console.log(objResponse);
             selectElement = $('#' + elementId);
+            // console.log(objResponse)
             populate_offices_departments_roles(selectElement, objResponse);
         });
     }
@@ -621,7 +621,7 @@
 
     //Populate departments, roles, offices
     function populate_offices_departments_roles(selectElement, results) {
-        console.log(results)
+        // console.log(results)
         $('#overlay').removeClass('hidden');
         //Detach the 1st option
         let firstOption = selectElement.find('option:first-child').detach();
@@ -629,9 +629,10 @@
         selectElement.append(firstOption);
         //Populate the the user_office select2 dropdown with other options from database
         // let results = JSON.parse(response);
+        
         let otherOptions = '';
-        $.each(results, function (officeID, elTextName) {
-            otherOptions += "<option value='" + officeID + "'>" + elTextName + "</option>";
+        $.each(results, function (id, elText) {
+            otherOptions += "<option value='" + id + "'>" + elText + "</option>";
         });
         selectElement.append(otherOptions);
         //sleep(60);

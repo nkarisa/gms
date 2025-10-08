@@ -152,6 +152,38 @@ trait UserSelfCreation {
         return $this->response->setJSON($countryCurrencyLibrary->getCountryCurrencyByAccountSystemId($account_system_id));
     }
 
+    private function getAccountSystemLanguage($accountSystemId){
+        $accountSystemLanguageBuilder = $this->read_db->table('account_system_language');
+
+        $accountSystemLanguageBuilder->select('fk_language_id');
+        $accountSystemLanguageBuilder->where('fk_account_system_id', $accountSystemId);
+        $accountSystemLanguageObj = $accountSystemLanguageBuilder->get();
+
+        $accountSystemLanguageId = 0;
+
+        if($accountSystemLanguageObj->getNumRows() > 0){
+            $accountSystemLanguageId = $accountSystemLanguageObj->getRowArray()['fk_language_id'];
+        }
+
+        return $accountSystemLanguageId;
+    }
+
+    private function getCountryCurrencyId($officeId){
+        $officeBuilder = $this->read_db->table('office');
+
+        $officeBuilder->select('fk_country_currency_id');
+        $officeBuilder->where('office_id', $officeId);
+        $officeObj = $officeBuilder->get();
+
+        $countryCurrencyId = 0;
+
+        if($officeObj->getNumRows() > 0){
+            $countryCurrencyId = $officeObj->getRowArray()['fk_country_currency_id'];
+        }
+
+        return $countryCurrencyId;
+    }
+
     /**
      * save_create_account_data(): save form data to database 
      * @author Onduso 
@@ -162,8 +194,17 @@ trait UserSelfCreation {
     public function saveCreateAccountData(): ResponseInterface
     {
         $message = "Account Not Created contact the system administration";
+        $success = false;
 
         $this->write_db->transBegin();
+        $post  = $this->request->getPost();
+
+        // Get user country language
+        $languageId = $this->getAccountSystemLanguage($this->request->getPost('user_country')); 
+
+        // Get user country currency
+        $countryCurrencyId = $this->getCountryCurrencyId($this->request->getPost('user_office'));
+
         //Save in User Table
         $email = strtolower($this->request->getPost('email'));
         $user_name = explode('@', $email)[0];
@@ -176,7 +217,7 @@ trait UserSelfCreation {
         $hashed_password = $this->password_salt($plain_text_password);
         $user_type = $this->request->getPost('user_type');
 
-        $last_insert = $this->saveDataInUserTable($first_name, $surname, $email, $user_name, $user_type, $hashed_password);
+        $last_insert = $this->saveDataInUserTable($first_name, $surname, $email, $user_name, $user_type, $hashed_password, $languageId, $countryCurrencyId);
 
         //Save in Department user Table
         $department_name = 'Department for' . ' ' . $first_name . ' ' . $surname;
@@ -223,16 +264,19 @@ trait UserSelfCreation {
         if ($this->write_db->transStatus() == false) {
 
             $this->write_db->transRollback();
-
+            $success = false;
             $message = "Account Not Created contact the system administration";
         } else {
 
             $this->write_db->transCommit();
-
+            $success = true;
             $message = "Account Created System Administrator will activate soon";
         }
 
-        return $this->response->setJSON(['message' => $message]);
+        $response['message'] = $message;
+        $response['success'] = $success;
+
+        return $this->response->setJSON($response);
     }
 
      /**
@@ -313,7 +357,7 @@ trait UserSelfCreation {
      * @dated: 18/08/2023
      * @param string $first_name, string $surname, string $email, string $user_name, int $user_type, string $hashed_password
      */
-    private function saveDataInUserTable(string $first_name, string $surname, string $email, string $user_name, int $user_type, string $hashed_password): int
+    private function saveDataInUserTable(string $first_name, string $surname, string $email, string $user_name, int $user_type, string $hashed_password, int $languageId, int $countryCurrencyId): int
     {
         //5 = other national office staffs e.g health specialist
         //4 =contry admins
@@ -336,8 +380,8 @@ trait UserSelfCreation {
         $user_data['user_password'] = $hashed_password;
         $user_data['user_is_context_manager'] = $user_is_context_manager;
         $user_data['user_is_system_admin'] = 0;
-        $user_data['fk_language_id'] = $this->request->getPost('country_language');
-        $user_data['fk_country_currency_id'] = $this->request->getPost('country_currency');
+        $user_data['fk_language_id'] = $languageId;
+        $user_data['fk_country_currency_id'] = $countryCurrencyId;
         $user_data['user_is_active'] = 0;
         $user_data['fk_role_id'] = $this->request->getPost('user_role');
         $user_data['fk_account_system_id'] = $this->request->getPost('user_country');
