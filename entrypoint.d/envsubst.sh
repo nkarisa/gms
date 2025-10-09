@@ -62,15 +62,15 @@ echo "Substituting variables from environment into $TEMPLATE_FILE..."
 
 # Use envsubst to replace the listed variables from the template,
 # output to a temporary file in /tmp.
-envsubst "$NEWRELIC_VARS_TO_SUBST" < "$TEMPLATE_FILE" > /tmp/newrelic.ini.tmp
+envsubst "$NEWRELIC_VARS_TO_SUBST" < "$TEMPLATE_FILE" > $PROJECT_ROOT/newrelic.ini.tmp
 
 # 3. Check substitution success and move the file
 if [ $? -eq 0 ]; then
     # Move the substituted temporary file to the final PHP configuration path
-    mv /tmp/newrelic.ini.tmp "$OUTPUT_FILE" \
+    mv $PROJECT_ROOT/newrelic.ini.tmp "$OUTPUT_FILE" \
         && echo "Successfully created New Relic configuration at $OUTPUT_FILE"
 else
     echo "Error during envsubst operation for New Relic configuration."
-    rm -f /tmp/newrelic.ini.tmp
+    rm -f $PROJECT_ROOT/newrelic.ini.tmp
     exit 1
 fi

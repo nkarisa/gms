@@ -22,6 +22,8 @@ COPY --chown=root:root ./entrypoint.d/envsubst.sh /etc/entrypoint.d/
 
 RUN mkdir -p /usr/local/etc/php/conf.d/
 
+RUN chown -R www-data:root /usr/local/etc/php/conf.d/ 
+
 RUN dos2unix /etc/entrypoint.d/envsubst.sh && \
     chmod +x /etc/entrypoint.d/envsubst.sh
 
