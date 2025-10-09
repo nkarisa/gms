@@ -18,12 +18,12 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* # Clean up apt cache to keep image small
 
 # This container ENTRYPOINT as per serversiderup/php
-COPY --chown=root:root ./entrypoint.d/envsubst.sh ./entrypoint.d/newrelic.sh /etc/entrypoint.d/
+COPY --chown=root:root ./entrypoint.d/envsubst.sh /etc/entrypoint.d/
 
 RUN mkdir -p /usr/local/etc/php/conf.d/
 
-RUN dos2unix /etc/entrypoint.d/*.sh && \
-    chmod +x /etc/entrypoint.d/*.sh
+RUN dos2unix /etc/entrypoint.d/envsubst.sh && \
+    chmod +x /etc/entrypoint.d/envsubst.sh
 
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
 && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
@@ -48,15 +48,14 @@ RUN set -eux; \
 
 USER www-data
 
-COPY --chown=www-data:www-data composer.json composer.lock ./
-
-RUN composer update
-
 WORKDIR /var/www/html/
+
+COPY --chown=www-data:www-data composer.json composer.lock ./
 
 RUN composer install --no-dev --optimize-autoloader
 
 COPY --chown=www-data:www-data . .
+
 RUN ln -s /var/www/html/public  /var/www/html/public/devint
 RUN ln -s /var/www/html/public /var/www/html/public/stage
 RUN ln -s /var/www/html/public /var/www/html/public/etsandbox
