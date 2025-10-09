@@ -56,12 +56,13 @@ function is_field_required()
     $all_fields = $library->tableFieldsMetadata($this->table);
 
     $array_of_columns = array_column($all_fields, 'name');
-    $array_of_default = array_column($all_fields, 'default');
+    // $array_of_default = array_column($all_fields, 'default');
+    $nullable = array_column($all_fields, 'nullable');
 
-    $name_default = array_combine($array_of_columns, $array_of_default);
+    $name_nullable = array_combine($array_of_columns, $nullable);
 
-    $notRequiredFields = array_filter($name_default, function($default_value){
-      return $default_value != null;
+    $notRequiredFields = array_filter($name_nullable, function($nullable_value){
+      return $nullable_value;
     });
 
     if(sizeof($notRequiredFields) && in_array($this->column, array_keys($notRequiredFields))){
