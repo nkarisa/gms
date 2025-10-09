@@ -11,7 +11,7 @@ USER root
 
 # Install necessary PHP extensions AND gettext for envsubst
 RUN apt-get update && \
-    apt-get install -y gettext-base git dos2unix && \
+    apt-get install -y gettext-base git dos2unix curl tar ca-certificates gnupg && \
     install-php-extensions bcmath intl mysqli && \
     mkdir -p /var/www/html/ && \
     chown -R www-data:www-data /var/www/html/ && \
@@ -23,10 +23,38 @@ COPY  --chown=root:root ./entrypoint.d/envsubst.sh /etc/entrypoint.d/
 RUN dos2unix /etc/entrypoint.d/envsubst.sh && \ 
     chmod +x /etc/entrypoint.d/envsubst.sh
 
-USER root
+
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
 && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
 && php -r "unlink('composer-setup.php');" 
+
+# Install New Relic PHP Agent (Debian glibc build)
+
+RUN mkdir -p /var/log/newrelic && \
+    chown www-data:www-data /var/log/newrelic && \
+    chmod 755 /var/log/newrelic
+
+RUN set -eux; \
+    cd /tmp; \
+    NEW_RELIC_AGENT_VERSION=$(curl -s https://download.newrelic.com/php_agent/release/ \
+    | grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -n1); \
+    echo "Installing New Relic PHP Agent v${NEW_RELIC_AGENT_VERSION}"; \
+    curl -fsSL -o newrelic-php-agent.tar.gz \
+    "https://download.newrelic.com/php_agent/release/newrelic-php5-${NEW_RELIC_AGENT_VERSION}-linux.tar.gz"; \
+    tar xzf newrelic-php-agent.tar.gz; \
+    NR_INSTALL_USE_CP_NOT_LN=1 NR_INSTALL_SILENT=1 ./*/newrelic-install install;
+
+# Configure New Relic Agent (lean inline config)
+
+RUN { \
+    echo "extension=newrelic.so"; \
+    echo "newrelic.enabled=true"; \
+    echo "newrelic.license=${NEW_RELIC_LICENSE_KEY}"; \
+    echo "newrelic.appname=${NEW_RELIC_APP_NAME}"; \
+    echo "newrelic.loglevel=${NEW_RELIC_LOG_LEVEL}"; \
+    echo "newrelic.log=/dev/stdout"; \
+    echo "newrelic.distributed_tracing_enabled=true"; \
+    } > /usr/local/etc/php/conf.d/newrelic.ini
 
 USER www-data
 
@@ -42,6 +70,9 @@ COPY --chown=www-data:www-data . .
 RUN ln -s /var/www/html/public  /var/www/html/public/devint
 RUN ln -s /var/www/html/public /var/www/html/public/stage
 RUN ln -s /var/www/html/public /var/www/html/public/etsandbox
+
+
+
 
 
 # Move env file into place and substitute variables using envsubst

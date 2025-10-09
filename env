@@ -101,3 +101,8 @@ SHA256-PASSWORD-SALT = ${SHA256_PASSWORD_SALT}
 
 aws.credentials_profile = profile
 aws.region = eu-west-1
+
+# New Relic Variable
+NEW_RELIC_LICENSE_KEY = ${NEW_RELIC_LICENSE_KEY}
+NEW_RELIC_APP_NAME = ${NEW_RELIC_APP_NAME}
+NEW_RELIC_LOG_LEVEL = ${NEW_RELIC_LOG_LEVEL}
