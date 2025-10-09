@@ -46,6 +46,10 @@ RUN set -eux; \
 
 # Configure New Relic Agent (lean inline config)
 
+# Replace this path with the actual location of your newrelic.ini file
+# You can check this location by running 'php -i | grep "Scan this dir"' in your container
+ENV NEWRELIC_INI_PATH=/usr/local/etc/php/conf.d/newrelic.ini
+
 RUN { \
     echo "extension=newrelic.so"; \
     echo "newrelic.enabled=true"; \
@@ -54,7 +58,21 @@ RUN { \
     echo "newrelic.loglevel=${NEW_RELIC_LOG_LEVEL}"; \
     echo "newrelic.log=/dev/stdout"; \
     echo "newrelic.distributed_tracing_enabled=true"; \
-    } > /usr/local/etc/php/conf.d/newrelic.ini
+    } > $NEWRELIC_INI_PATH
+
+RUN sed -i \
+    -e "s/newrelic.license = .*/newrelic.license = \"\${NEW_RELIC_LICENSE_KEY}\"/g" \
+    -e "s/newrelic.appname = .*/newrelic.appname = \"\${NEW_RELIC_APP_NAME}\"/g" \
+    -e "s/newrelic.appname = .*/newrelic.appname = \"\${NEW_RELIC_APP_NAME}\"/g" \
+    $NEWRELIC_INI_PATH
+
+
+# This command appends the setting, or updates it if it already exists, ensuring 'true' is set.
+RUN sed -i -E 's/^;?\s*newrelic\.distributed_tracing_enabled\s*=.*/newrelic.distributed_tracing_enabled = true/' "$NEWRELIC_INI_PATH"
+
+# This command appends the setting, or updates it if it already exists, using the quotes for the string value.
+RUN sed -i -E 's/^;?\s*newrelic\.log\s*=.*/newrelic.log = "\/dev\/stdout"/' "$NEWRELIC_INI_PATH"
+
 
 USER www-data
 
