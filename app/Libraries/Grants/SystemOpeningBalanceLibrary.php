@@ -24,6 +24,7 @@ class SystemOpeningBalanceLibrary extends GrantsLibrary implements \App\Interfac
             'opening_bank_balance',
             'opening_cash_balance',
             'opening_fund_balance',
+            'opening_accrual_balance',
             'opening_outstanding_cheque',
             'opening_deposit_transit'
         ];

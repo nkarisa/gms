@@ -34,7 +34,6 @@ extract($result);
 
   const ACCRUAL_LEDGER_ACCOUNTS = ['receivables', 'payables', 'prepayments', 'depreciation', 'payroll_liability']
 
-
   $(document).ready(function () {
     bank_reconciliation_check()
     proof_of_cash_check()

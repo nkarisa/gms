@@ -61,7 +61,7 @@ class SystemOpeningBalance extends WebController
     {
         $officeLibrary = new \App\Libraries\Core\OfficeLibrary();
         $result = parent::result($id, $parentTable);
-
+        $result['fcpStartDate']  = date('Y-m-d');
         if ($this->action == 'edit') {
             $result['header'] = $this->masterTable();
 
