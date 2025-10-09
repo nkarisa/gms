@@ -129,6 +129,18 @@ locals {
         {
           name    = "REDIS_PORT"
           value   = var.REDIS_PORT
+        },
+        {
+          name    = "NEW_RELIC_APP_NAME"
+          value   = var.NEW_RELIC_APP_NAME
+        },
+        {
+          name    = "NEW_RELIC_LICENSE_KEY"
+          value   = var.NEW_RELIC_LICENSE_KEY
+        },
+        {
+          name    = "NEW_RELIC_LOG_LEVEL"
+          value   = var.NEW_RELIC_LOG_LEVEL
         }
       ]
 

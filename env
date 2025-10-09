@@ -21,6 +21,11 @@ REDIS_PORT = ${REDIS_PORT}
 DOCKER_COMPOSE_USAGE = ${DOCKER_COMPOSE_USAGE} 
 SESSION_DYNAMODB_TABLE = ${SESSION_DYNAMODB_TABLE}
 
+# New Relic Variable
+NEW_RELIC_LICENSE_KEY = ${NEW_RELIC_LICENSE_KEY}
+NEW_RELIC_APP_NAME = ${NEW_RELIC_APP_NAME}
+NEW_RELIC_LOG_LEVEL = ${NEW_RELIC_LOG_LEVEL}
+
 #--------------------------------------------------------------------
 # APP
 #--------------------------------------------------------------------
@@ -102,7 +107,3 @@ SHA256-PASSWORD-SALT = ${SHA256_PASSWORD_SALT}
 aws.credentials_profile = profile
 aws.region = eu-west-1
 
-# New Relic Variable
-NEW_RELIC_LICENSE_KEY = ${NEW_RELIC_LICENSE_KEY}
-NEW_RELIC_APP_NAME = ${NEW_RELIC_APP_NAME}
-NEW_RELIC_LOG_LEVEL = ${NEW_RELIC_LOG_LEVEL}

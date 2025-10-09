@@ -160,3 +160,18 @@ variable "task_memory" {
   type        = number
   default     = 1024 # Increased to accommodate two containers (1 GB)
 }
+
+variable "NEW_RELIC_APP_NAME" {
+  description = "New Relic App Name"
+  type        = string
+}
+
+variable "NEW_RELIC_LICENSE_KEY" {
+  description = "New Relic Key"
+  type        = string
+}
+
+variable "NEW_RELIC_LOG_LEVEL" {
+  description = "New Relic log level"
+  type        = string
+}

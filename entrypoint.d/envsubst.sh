@@ -8,7 +8,7 @@ VARS_TO_SUBST='BASE_URL \
                 DB_NAME \
                 DB_HOST \
                 DB_PASS \
-                NEW_RELIC_LOG_LEVEL \
+                NEW_RELIC_LICENSE_KEY \
                 NEW_RELIC_APP_NAME \
                 NEW_RELIC_LOG_LEVEL'
 
