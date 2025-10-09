@@ -40,7 +40,7 @@ OUTPUT_FILE="$PHP_CONF_DIR/newrelic.ini"
 NEWRELIC_VARS_TO_SUBST='NEW_RELIC_LICENSE_KEY \
                 NEW_RELIC_APP_NAME'
 
-echo "Check environment for new relic"
+echo "Check environment for new relic ..."
 printenv | grep 'NEW_RELIC'
 
 # --- Execution ---
