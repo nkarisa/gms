@@ -59,6 +59,7 @@ class SystemOpeningBalance extends WebController
 
     function result($id = null, $parentTable = null)
     {
+        $officeLibrary = new \App\Libraries\Core\OfficeLibrary();
         $result = parent::result($id, $parentTable);
 
         if ($this->action == 'edit') {
@@ -74,7 +75,7 @@ class SystemOpeningBalance extends WebController
                 ->getRow()->fk_office_id;
 
             $result['office_banks'] = $this->financialReportLibrary->getOfficeBanks([$office_id]);
-
+            $result['fcpStartDate'] = $officeLibrary->getOfficeById($office_id)['office_start_date'];
         }
 
         return $result;

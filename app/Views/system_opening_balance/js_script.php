@@ -651,13 +651,24 @@ extract($result);
     }
   })
 
-  $(document).on('click', '.datepicker', function () {
-    $(this).datepicker(
+  $(document).on('click', '#insert_outstanding_cheque, #insert_deposit_in_transit', function () {
+    $('.datepicker').datepicker(
       {
-        'format': 'yyyy-mm-dd'
+        format: 'yyyy-mm-dd',
+        endDate: "<?=date('Y-m-d',strtotime('-1 days',strtotime($fcpStartDate)));?>",
+        startDate: "<?=date('Y-m-d', strtotime('-5 months',strtotime($fcpStartDate)));?>"
+
       }
     )
   })
+
+  // $(document).on('click', '.datepicker', function () {
+  //   $(this).datepicker(
+  //     {
+  //       'format': 'yyyy-mm-dd'
+  //     }
+  //   )
+  // })
 
   // $('.delete_statement').on('click', function (){
   //   alert('Hello')
