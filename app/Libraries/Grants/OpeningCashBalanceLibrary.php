@@ -52,4 +52,8 @@ class OpeningCashBalanceLibrary extends GrantsLibrary implements \App\Interfaces
 
         return $balance;
     }
+
+    function showAddButton(): bool {
+        return false;
+    }
 }

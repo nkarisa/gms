@@ -20,5 +20,7 @@ class OpeningAccrualBalanceLibrary extends GrantsLibrary implements \App\Interfa
     }
 
 
-   
+   function showAddButton(): bool {
+        return false;
+    }
 }

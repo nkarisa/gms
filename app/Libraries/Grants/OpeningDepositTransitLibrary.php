@@ -19,6 +19,8 @@ class OpeningDepositTransitLibrary extends GrantsLibrary implements \App\Interfa
         $this->table = 'grants';
     }
 
-
+    function showAddButton(): bool {
+        return false;
+    }
    
 }

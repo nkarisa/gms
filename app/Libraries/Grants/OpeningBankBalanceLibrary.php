@@ -19,6 +19,8 @@ class OpeningBankBalanceLibrary extends GrantsLibrary implements \App\Interfaces
         $this->table = 'grants';
     }
 
-
+    function showAddButton(): bool {
+        return false;
+    }
    
 }

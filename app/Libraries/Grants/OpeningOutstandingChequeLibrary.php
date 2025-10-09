@@ -18,5 +18,9 @@ class OpeningOutstandingChequeLibrary extends GrantsLibrary implements \App\Inte
 
         $this->table = 'grants';
     }
+
+    function showAddButton(): bool {
+        return false;
+    }
    
 }

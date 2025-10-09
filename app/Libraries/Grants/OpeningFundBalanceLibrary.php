@@ -20,5 +20,7 @@ class OpeningFundBalanceLibrary extends GrantsLibrary implements \App\Interfaces
     }
 
 
-   
+   function showAddButton(): bool {
+        return false;
+    }
 }
