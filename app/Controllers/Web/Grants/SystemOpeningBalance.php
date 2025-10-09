@@ -56,7 +56,7 @@ class SystemOpeningBalance extends WebController
         $this->attachmentLibrary = new \App\Libraries\Core\AttachmentLibrary();
 
     }
-
+    
     function result($id = null, $parentTable = null)
     {
         $officeLibrary = new \App\Libraries\Core\OfficeLibrary();
