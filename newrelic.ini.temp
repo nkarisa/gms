@@ -1,7 +1,7 @@
 extension=newrelic.so
 newrelic.enabled=true
-newrelic.license = 
-newrelic.appname = 
+newrelic.license = ${NEW_RELIC_LICENSE_KEY}
+newrelic.appname = ${NEW_RELIC_APP_NAME}
 newrelic.loglevel = info
 newrelic.log = "/dev/stdout"
 newrelic.distributed_tracing_enabled = true
