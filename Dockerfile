@@ -25,6 +25,7 @@ RUN mkdir -p /usr/local/etc/php/conf.d/
 RUN dos2unix /etc/entrypoint.d/envsubst.sh && \
     chmod +x /etc/entrypoint.d/envsubst.sh
 
+
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
 && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
 && php -r "unlink('composer-setup.php');" 
