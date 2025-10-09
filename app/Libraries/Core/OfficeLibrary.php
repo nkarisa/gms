@@ -253,8 +253,8 @@ class OfficeLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
       'office_name',
       'office_description',
       'office_code',
-      'office_start_date',
-      'office_end_date',
+      // 'office_start_date',
+      // 'office_end_date',
       'office_is_active'
     ];
 
