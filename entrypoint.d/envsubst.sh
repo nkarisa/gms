@@ -40,6 +40,9 @@ OUTPUT_FILE="$PHP_CONF_DIR/newrelic.ini"
 NEWRELIC_VARS_TO_SUBST='NEW_RELIC_LICENSE_KEY \
                 NEW_RELIC_APP_NAME'
 
+echo "Check environment for new relic"
+printenv | grep 'NEW_RELIC'
+
 # --- Execution ---
 
 echo "Starting New Relic configuration..."
@@ -63,6 +66,9 @@ echo "Substituting variables from environment into $TEMPLATE_FILE..."
 # Use envsubst to replace the listed variables from the template,
 # output to a temporary file in /tmp.
 envsubst "$NEWRELIC_VARS_TO_SUBST" < "$TEMPLATE_FILE" > $PROJECT_ROOT/newrelic.ini.tmp
+
+echo "Check newrelic.ini.tmp after substitution $PROJECT_ROOT/newrelic.ini.tmp ..."
+cat $PROJECT_ROOT/newrelic.ini.tmp
 
 # 3. Check substitution success and move the file
 if [ $? -eq 0 ]; then
