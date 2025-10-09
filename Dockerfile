@@ -18,11 +18,12 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* # Clean up apt cache to keep image small
 
 # This container ENTRYPOINT as per serversiderup/php
-COPY  --chown=root:root ./entrypoint.d/envsubst.sh /etc/entrypoint.d/
+COPY --chown=root:root ./entrypoint.d/envsubst.sh ./entrypoint.d/newrelic.sh /etc/entrypoint.d/
 
-RUN dos2unix /etc/entrypoint.d/envsubst.sh && \ 
-    chmod +x /etc/entrypoint.d/envsubst.sh
+RUN mkdir -p /usr/local/etc/php/conf.d/
 
+RUN dos2unix /etc/entrypoint.d/*.sh && \
+    chmod +x /etc/entrypoint.d/*.sh
 
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
 && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
@@ -43,35 +44,6 @@ RUN set -eux; \
     "https://download.newrelic.com/php_agent/release/newrelic-php5-${NEW_RELIC_AGENT_VERSION}-linux.tar.gz"; \
     tar xzf newrelic-php-agent.tar.gz; \
     NR_INSTALL_USE_CP_NOT_LN=1 NR_INSTALL_SILENT=1 ./*/newrelic-install install;
-
-# Configure New Relic Agent (lean inline config)
-
-# Replace this path with the actual location of your newrelic.ini file
-# You can check this location by running 'php -i | grep "Scan this dir"' in your container
-ENV NEWRELIC_INI_PATH=/usr/local/etc/php/conf.d/newrelic.ini
-
-RUN { \
-    echo "extension=newrelic.so"; \
-    echo "newrelic.enabled=true"; \
-    echo "newrelic.license=${NEW_RELIC_LICENSE_KEY}"; \
-    echo "newrelic.appname=${NEW_RELIC_APP_NAME}"; \
-    echo "newrelic.loglevel=${NEW_RELIC_LOG_LEVEL}"; \
-    echo "newrelic.log=/dev/stdout"; \
-    echo "newrelic.distributed_tracing_enabled=true"; \
-    } > $NEWRELIC_INI_PATH
-
-RUN sed -i \
-    -e "s/newrelic.license = .*/newrelic.license = \"\${NEW_RELIC_LICENSE_KEY}\"/g" \
-    -e "s/newrelic.appname = .*/newrelic.appname = \"\${NEW_RELIC_APP_NAME}\"/g" \
-    -e "s/newrelic.appname = .*/newrelic.appname = \"\${NEW_RELIC_APP_NAME}\"/g" \
-    $NEWRELIC_INI_PATH
-
-
-# This command appends the setting, or updates it if it already exists, ensuring 'true' is set.
-RUN sed -i -E 's/^;?\s*newrelic\.distributed_tracing_enabled\s*=.*/newrelic.distributed_tracing_enabled = true/' "$NEWRELIC_INI_PATH"
-
-# This command appends the setting, or updates it if it already exists, using the quotes for the string value.
-RUN sed -i -E 's/^;?\s*newrelic\.log\s*=.*/newrelic.log = "\/dev\/stdout"/' "$NEWRELIC_INI_PATH"
 
 
 USER www-data
