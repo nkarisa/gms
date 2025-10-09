@@ -101,12 +101,14 @@ class VoucherCreator
      * Retrieves the voucher type details.
      *
      * @param int $voucherTypeId
-     * @return object
+     * @return array
      */
-    private function _getVoucherTypeDetails(int $voucherTypeId): object
+    private function _getVoucherTypeDetails(int $voucherTypeId): array
     {
         // Placeholder for the actual method
-        return (object) ['voucher_type_effect_code' => 'expense', 'voucher_type_account_code' => ''];
+        // return (object) ['voucher_type_effect_code' => 'expense', 'voucher_type_account_code' => ''];
+        $voucherTypeLibrary = new \App\Libraries\Grants\VoucherTypeLibrary();
+        return $voucherTypeLibrary->getVoucherTypeById($voucherTypeId);
     }
 
     /**
@@ -117,7 +119,7 @@ class VoucherCreator
      * @param object $voucherType
      * @return array
      */
-    private function _prepareVoucherHeaderData(array $post, string $voucherNumber, object $voucherType): array
+    private function _prepareVoucherHeaderData(array $post, string $voucherNumber, array $voucherType): array
     {
         $track = $this->voucherLibrary->generateItemTrackNumberAndName('voucher');
         $header = [
@@ -138,7 +140,7 @@ class VoucherCreator
         ];
 
         // Handle reversal/clearing description and ID
-        $this->_handleVoucherReversal($header, $post, $voucherType->voucher_type_effect_code);
+        $this->_handleVoucherReversal($header, $post, $voucherType['voucher_type_effect_code']);
 
         return $header;
     }
@@ -241,9 +243,9 @@ class VoucherCreator
      */
     private function _prepareVoucherDetailData(int $headerId, array $post, int $index, string $voucherTypeEffectCode): array
     {
-        $quantity = str_replace(",", "", $post['voucher_detail_quantity'][$index]);
-        $unitCost = str_replace(",", "", $post['voucher_detail_unit_cost'][$index]);
-        $totalCost = str_replace(",", "", $post['voucher_detail_total_cost'][$index]);
+        $quantity = unformat_number($post['voucher_detail_quantity'][$index]); // str_replace(",", "", $post['voucher_detail_quantity'][$index]);
+        $unitCost = unformat_number($post['voucher_detail_unit_cost'][$index]); // str_replace(",", "", $post['voucher_detail_unit_cost'][$index]);
+        $totalCost = unformat_number($post['voucher_detail_total_cost'][$index]); // str_replace(",", "", $post['voucher_detail_total_cost'][$index]);
 
         $tracking = $this->voucherLibrary->generateItemTrackNumberAndName('voucher_detail');
 
@@ -284,6 +286,7 @@ class VoucherCreator
      */
     private function _assignDetailAccountIds(array &$detail, array $post, int $index, string $voucherTypeEffectCode): void
     {
+        // log_message('error', json_encode(compact('detail', 'post', 'index', 'voucherTypeEffectCode')));
         $account_id = $post['voucher_detail_account'][$index] ?? 0;
         $detail['fk_expense_account_id'] = 0;
         $detail['fk_income_account_id'] = 0;
@@ -302,14 +305,16 @@ class VoucherCreator
 
         $incomeRelatedTypes = [
             'income',
-            'bank_to_bank_contra',
+            // 'bank_to_bank_contra',
             VoucherTypeEffectEnum::RECEIVABLES->getCode(),
             VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->getCode(),
         ];
 
         $contraRelatedTypes = [
             'bank_contra',
-            'cash_contra'
+            'cash_contra',
+            'bank_to_bank_contra',
+            'cash_to_cash_contra'
         ];
 
         if (in_array($voucherTypeEffectCode, $expenseRelatedTypes)) {
@@ -588,10 +593,10 @@ class VoucherCreator
         $headerId = $this->_insertVoucherHeader($header, $fullyApprovedStatusId);
 
         // Step 4: Prepare and insert voucher details
-        $totalVoucherCost = $this->_insertVoucherDetails($headerId, $post, $voucherType->voucher_type_effect_code);
+        $totalVoucherCost = $this->_insertVoucherDetails($headerId, $post, $voucherType['voucher_type_effect_code']);
 
         // Step 5: Handle all related updates
-        $this->_handleRelatedUpdates($headerId, $post, $header, $totalVoucherCost, $voucherType->voucher_type_effect_code);
+        $this->_handleRelatedUpdates($headerId, $post, $header, $totalVoucherCost, $voucherType['voucher_type_effect_code']);
 
         // Step 6: Validate and return
         $voucher_posting_condition = $this->voucherPostingCondition($post);

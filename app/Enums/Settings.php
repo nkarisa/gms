@@ -44,8 +44,10 @@ enum Settings {
                                 $transaction_account == VoucherTypeAccountEnum::CASH->value && 
                                 $transaction_effect == VoucherTypeEffectEnum::CASH_CONTRA->value
                             )
+                            
                         ) ||
                         $transaction_effect == VoucherTypeEffectEnum::RECEIVABLES_PAYMENTS->value
+    
                     ),
             self::BANK_EXPENSE => (
                                     (

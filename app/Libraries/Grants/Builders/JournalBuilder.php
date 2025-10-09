@@ -2,7 +2,6 @@
 
 namespace App\Libraries\Grants\Builders;
 
-use App\Controllers\Web\Core\Setting;
 use App\Enums\VoucherTypeEffectEnum;
 use App\Enums\Settings;
 use App\Enums\AccrualLedgerAccounts;
@@ -355,21 +354,19 @@ trait JournalBuilder
         $office_bank_id = $voucher['office_bank_id'];
         $receiving_office_bank_id = $voucher['receiving_office_bank_id'];
 
-        if ($office_bank_id && isset($sum_bank_income[$office_bank_id])) {
-            $office_bank_id = $voucher['office_bank_id'];
-        } elseif ($receiving_office_bank_id && is_int($receiving_office_bank_id) && isset($sum_bank_income[$receiving_office_bank_id])) {
-            $office_bank_id = $voucher['receiving_office_bank_id'];
+        if ($receiving_office_bank_id && isset($sum_bank_income[$receiving_office_bank_id])) {
+
+            $bank_income[$receiving_office_bank_id] = $receiving_office_bank_id ? $voucher_amount : 0;
+            $bank_expense[$receiving_office_bank_id] = 0; 
+            
+            $this->calculateRunningBalance($bank_income[$receiving_office_bank_id], $bank_expense[$receiving_office_bank_id],$sum_bank_income[$receiving_office_bank_id], $sum_bank_expense[$receiving_office_bank_id],$running_bank_balance[$receiving_office_bank_id]);
         }
 
-        if ($office_bank_id) {
+        if ($office_bank_id && isset($sum_bank_income[$office_bank_id])) {
             $bank_income[$office_bank_id] = Settings::BANK_INCOME->getTransactionEffectCondition($voucher_type_cash_account, $voucher_type_transaction_effect) ? $voucher_amount : 0;
-
             $bank_expense[$office_bank_id] = Settings::BANK_EXPENSE->getTransactionEffectCondition($voucher_type_cash_account, $voucher_type_transaction_effect) ? $voucher_amount : 0;
 
-            $sum_bank_income[$office_bank_id] += $bank_income[$office_bank_id];
-            $sum_bank_expense[$office_bank_id] += $bank_expense[$office_bank_id];
-
-            $running_bank_balance[$office_bank_id] += ($bank_income[$office_bank_id] - $bank_expense[$office_bank_id]);
+            $this->calculateRunningBalance($bank_income[$office_bank_id], $bank_expense[$office_bank_id],$sum_bank_income[$office_bank_id], $sum_bank_expense[$office_bank_id],$running_bank_balance[$office_bank_id]);
         }
     }
 
@@ -379,25 +376,55 @@ trait JournalBuilder
         $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
         $office_cash_id = $voucher['office_cash_id'];
         $receiving_office_cash_id = $voucher['receiving_office_cash_id'];
+        
+        if ($receiving_office_cash_id && isset($sum_petty_cash_income[$receiving_office_cash_id])) {
+            $cash_income[$receiving_office_cash_id] = $receiving_office_cash_id > 0 ? $voucher_amount : 0;
+            $cash_expense[$receiving_office_cash_id] = 0;
 
-        if ($office_cash_id && isset($sum_petty_cash_income[$office_cash_id])) {
-            $office_cash_id = $voucher['office_cash_id'];
-        } elseif ($receiving_office_cash_id && is_int($receiving_office_cash_id) && isset($sum_petty_cash_income[$receiving_office_cash_id])) {
-            $office_cash_id = $voucher['receiving_office_cash_id'];
+            $this->calculateRunningBalance($cash_income[$receiving_office_cash_id], $cash_expense[$receiving_office_cash_id],$sum_petty_cash_income[$receiving_office_cash_id], $sum_petty_cash_expense[$receiving_office_cash_id],$running_petty_cash_balance[$receiving_office_cash_id]);
         }
 
-        if ($office_cash_id) {
+        if ($office_cash_id && isset($sum_petty_cash_income[$office_cash_id])) {
             $cash_income[$office_cash_id] = Settings::CASH_INCOME->getTransactionEffectCondition($voucher_type_cash_account, $voucher_type_transaction_effect) ? $voucher_amount : 0;
-
             $cash_expense[$office_cash_id] = Settings::CASH_EXPENSE->getTransactionEffectCondition($voucher_type_cash_account, $voucher_type_transaction_effect) ? $voucher_amount : 0;
 
-            $sum_petty_cash_income[$office_cash_id] += $cash_income[$office_cash_id];
-            $sum_petty_cash_expense[$office_cash_id] += $cash_expense[$office_cash_id];
-            
-            $running_petty_cash_balance[$office_cash_id] += ($cash_income[$office_cash_id] - $cash_expense[$office_cash_id]);
+            $this->calculateRunningBalance($cash_income[$office_cash_id], $cash_expense[$office_cash_id],$sum_petty_cash_income[$office_cash_id], $sum_petty_cash_expense[$office_cash_id],$running_petty_cash_balance[$office_cash_id]);
         }
 
     }
+
+    private function calculateRunningBalance($accounts_income, $accounts_expense, &$sum_accounts_income, &$sum_accounts_expense, &$account_running_balance){
+        $sum_accounts_income += $accounts_income;
+        $sum_accounts_expense += $accounts_expense;
+
+        return $account_running_balance += ($accounts_income - $accounts_expense);
+    }
+
+    // public function computeCashAndBankRunningBalances($voucher, $voucher_amount, &$sum_income, &$sum_expense, &$income, &$expense, &$running_balance, $cash_account_type = 'bank')
+    // {
+    //     $cash_account_type_id = 'office_'.$cash_account_type.'_id';
+    //     $voucher_type_cash_account = $voucher['voucher_type_cash_account'];
+    //     $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
+    //     $account_id = $voucher[$cash_account_type_id];
+    //     $receiving_account_id = $voucher['receiving_'.$cash_account_type_id];
+    //     $income_label = strtoupper($cash_account_type).'_INCOME';
+    //     $expense_label = strtoupper($cash_account_type).'_EXPENSE';
+
+    //     if ($receiving_account_id && is_int($receiving_account_id) && isset($sum_income[$receiving_account_id])) {
+    //         $income[$receiving_account_id] = $receiving_account_id > 0 ? $voucher_amount : 0;
+    //         $expense[$receiving_account_id] = 0;
+
+    //         $this->calculateRunningBalance($income[$receiving_account_id], $expense[$receiving_account_id],$sum_income[$receiving_account_id], $sum_expense[$receiving_account_id],$running_balance[$receiving_account_id]);
+    //     }
+
+    //     if ($account_id && isset($sum_petty_cash_income[$account_id])) {
+    //         $income[$account_id] = Settings::{$income_label}->getTransactionEffectCondition($voucher_type_cash_account, $voucher_type_transaction_effect) ? $voucher_amount : 0;
+    //         $expense[$account_id] = Settings::{$expense_label}->getTransactionEffectCondition($voucher_type_cash_account, $voucher_type_transaction_effect) ? $voucher_amount : 0;
+
+    //         $this->calculateRunningBalance($income[$account_id], $expense[$account_id],$sum_income[$account_id], $sum_expense[$account_id],$running_balance[$account_id]);
+    //     }
+
+    // }
 
     public function computePayablesRunningBalances($voucher, $voucher_amount, &$sum_payables_income, &$sum_payables_expense, &$payables_income, &$payables_expense, &$running_payables_balance)
     {
@@ -479,11 +506,14 @@ trait JournalBuilder
 
     public function computeCurrentJournalRowBankBalance($voucher, $bank_id, $bank_income, $bank_expense, $running_bank_balance)
     {
+        // log_message('info', json_encode(compact('voucher','bank_id','bank_income','bank_expense','running_bank_balance')));
+
         $bank_inc = 0;
         $bank_exp = 0;
         $bank_bal = 0;
 
         $office_bank_id = $voucher['office_bank_id'];
+        $receiving_office_bank_id = $voucher['receiving_office_bank_id'];
         $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
         $receiving_office_bank_id = $voucher['receiving_office_bank_id'];
 

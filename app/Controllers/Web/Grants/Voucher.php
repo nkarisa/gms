@@ -124,9 +124,9 @@ class Voucher extends WebController
     $voucher_type_account = $voucher_type_effect_and_code->voucher_type_account_code;
     $office_accounting_system = $this->library->officeAccountSystem($office_id);
 
-    if (count($officeBankLibrary->getActiveOfficeBanks($office_id)) > 1 && $voucher_type_account == 'cash') {
-      $response['office_banks'] = $this->library->getOfficeBanks($office_id);
-    }
+    // if (count($officeBankLibrary->getActiveOfficeBanks($office_id)) > 1 && $voucher_type_account == 'cash') {
+    //   $response['office_banks'] = $this->library->getOfficeBanks($office_id);
+    // }
 
     if(AccrualVoucherTypeEffects::tryFrom($voucher_type_effect)){
         $response['accrual_voucher_effect'] = $voucher_type_effect;

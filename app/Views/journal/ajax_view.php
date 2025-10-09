@@ -197,7 +197,7 @@ $accrual_activated = $result['accrual_activated'];
 
                         // Compute bank and cash running balances
                         $voucher_amount = array_sum(array_column($spread, 'transacted_amount'));
-
+                    
                         $journal->computeBankRunningBalances(
                             $voucher,
                             $voucher_amount,

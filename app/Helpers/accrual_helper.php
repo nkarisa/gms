@@ -95,3 +95,36 @@ if(!function_exists('isValidDate')){
         return $dateTime && $dateTime->format($format) === $dateString;
     }
 }
+
+if(!function_exists('format_number')){
+    function format_number(float $number, $decimal = 2){
+        $session = service('session');
+        $formatter = new NumberFormatter($session->user_locale, NumberFormatter::DECIMAL);
+        // Set minimum and maximum fraction digits to control decimal places
+        $formatter->setAttribute(NumberFormatter::MIN_FRACTION_DIGITS, $decimal); // Minimum 2 decimal places
+        $formatter->setAttribute(NumberFormatter::MAX_FRACTION_DIGITS, $decimal); // Maximum 2 decimal places
+
+        return $formatter->format($number);
+    }
+}
+
+if(!function_exists('unformat_number')){
+    function unformat_number(string $numberString){
+        $session = service('session');
+        $userLocale = $session->user_locale;
+        $formatterUS = new NumberFormatter($userLocale, NumberFormatter::DECIMAL);
+        $decimal_point = $formatterUS->getSymbol(NumberFormatter::DECIMAL_SEPARATOR_SYMBOL);
+        $thousands_sep = $formatterUS->getSymbol(NumberFormatter::GROUPING_SEPARATOR_SYMBOL);
+        
+        // An array of separators to remove. We also include a space as a common separator.
+        $separatorsToRemove = [$thousands_sep, ' '];
+        
+        // First, remove all thousand separators and any spaces from the string.
+        $cleanedString = str_replace($separatorsToRemove, '', $numberString);
+        
+        // Now, replace the locale-specific decimal point with a standard dot.
+        $normalizedString = str_replace($decimal_point, '.', $cleanedString);
+        
+        return $normalizedString;
+    }
+}

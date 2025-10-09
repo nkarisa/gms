@@ -2,6 +2,7 @@
 
 namespace App\Libraries\Grants;
 
+use App\Controllers\Web\Grants\VoucherTypeEffect;
 use App\Libraries\System\GrantsLibrary;
 use App\Models\Grants\VoucherModel;
 use App\Enums\AccountSystemSettingEnum;
@@ -1205,9 +1206,124 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return $voucher_id;
     }
 
-    function add($post, $parentTable = null, $parentId = null){
-        // log_message('info', json_encode($post));
-        $responseArr = $this->addVoucher($post->header);        
+    private function getBankVoucherTypeAccountId(){
+        $voucherTypeAccountBuilder = $this->read_db->table('voucher_type_account');
+
+        $voucherTypeAccountBuilder->where('voucher_type_account_code', VoucherTypeAccountEnum::BANK->value);
+        return $voucherTypeAccountBuilder->get()->getRowArray()['voucher_type_account_id'];
+    }   
+
+    private function getBankToBankVoucherTypeEffectId(){
+        $voucherTypeEffectBuilder = $this->read_db->table('voucher_type_effect');
+
+        $voucherTypeEffectBuilder->where('voucher_type_effect_code', VoucherTypeEffectEnum::BANK_TO_BANK_CONTRA->value);
+        return $voucherTypeEffectBuilder->get()->getRowArray()['voucher_type_effect_id'];
+    }
+
+    private function createBankToBankVoucherType($accountSystem){
+        $voucherTypeBuilder = $this->write_db->table('voucher_type');
+
+        $nameAndTrackNumber = $this->generateItemTrackNumberAndName('voucher_type');
+
+        $voucher_type['voucher_type_name'] = $accountSystem['account_system_code'] . 'Bank to Bank';
+        $voucher_type['voucher_type_track_number'] = $nameAndTrackNumber['voucher_type_track_number'];
+        $voucher_type['voucher_type_is_active'] = 1;
+        $voucher_type['voucher_type_abbrev'] = $accountSystem['account_system_code'].'B2B';
+        $voucher_type['fk_voucher_type_account_id'] = $this->getBankVoucherTypeAccountId();
+        $voucher_type['fk_voucher_type_effect_id'] = $this->getBankToBankVoucherTypeEffectId();
+        $voucher_type['voucher_type_is_cheque_referenced'] = 0;
+        $voucher_type['voucher_type_is_hidden'] = 0;
+        $voucher_type['fk_account_system_id'] = $accountSystem['account_system_id'];
+        $voucher_type['voucher_type_created_by	'] = $this->session->user_id;
+        $voucher_type['voucher_type_created_date'] = date('Y-m-d');
+        $voucher_type['voucher_type_last_modified_by'] = $this->session->user_id;
+        $voucher_type['voucher_type_last_modified_date'] = date('Y-m-d');
+
+        $voucherTypeBuilder->insert($voucher_type);
+
+        return $this->write_db->insertID();
+    }
+
+    private function getOfficeBankToBankVoucherTypeId($officeId){
+        // If the voucher type is missing, create it
+        $voucherTypeBuilder = $this->read_db->table('voucher_type');
+
+        $voucherTypeBuilder->join('account_system','account_system.account_system_id=voucher_type.fk_account_system_id');
+        $voucherTypeBuilder->join('office','office.fk_account_system_id=account_system.account_system_id');
+        $voucherTypeBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+        $voucherTypeBuilder->where('office_id', $officeId);
+        $voucherTypeBuilder->where('voucher_type_effect_code', VoucherTypeEffectEnum::BANK_TO_BANK_CONTRA->value);
+        $voucherTypeObj = $voucherTypeBuilder->get();
+
+        $bankToBankVoucherTypeId = 0;
+
+        if($voucherTypeObj->getNumRows() > 0){
+            $bankToBankVoucherTypeId = $voucherTypeObj->getRowArray()['voucher_type_id'];
+        }else{
+            $officeLibrary = new \App\Libraries\Core\OfficeLibrary();
+            $officeAccountSystem = $officeLibrary->getOfficeAccountSystem($officeId);
+            $bankToBankVoucherTypeId = $this->createBankToBankVoucherType($officeAccountSystem);
+        }
+
+        return $bankToBankVoucherTypeId;
+    }
+
+    private function getOfficeBankToBankContraAccountId($officeBankId){
+        $officeBankBuilder = $this->read_db->table('office_bank');
+
+        $officeBankBuilder->where('office_bank_id', $officeBankId);
+        $officeBankBuilder->join('contra_account','contra_account.fk_office_bank_id=office_bank.office_bank_id');
+        $officeBankBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=contra_account.fk_voucher_type_effect_id');
+        $officeBankBuilder->where('voucher_type_effect_code', VoucherTypeEffectEnum::BANK_TO_BANK_CONTRA->value);
+        $contraAccountObj = $officeBankBuilder->get();
+
+        $contraAccountId = 0;
+
+        if($contraAccountObj->getNumRows() > 0){
+            $contraAccountId = $contraAccountObj->getRowArray()['contra_account_id'];
+        }
+        
+        return $contraAccountId;
+    }
+
+    private function addPayrollLiabilityVoucher($post){
+
+            // $originalCashRecipientAccount = $post->header['cash_recipient_account'];
+            $originalPayrollLiabilityVoucherTypeId = $post->header['fk_voucher_type_id'];
+            $originalVoucherDetailAccount = $post->header['voucher_detail_account'];
+
+            // Bank to Bank 
+            $officeBankToBankContraAccount = $this->getOfficeBankToBankContraAccountId($post->header['fk_office_bank_id']);
+
+            $post->header['voucher_detail_account'] = array_map(function($value) use ($officeBankToBankContraAccount) {
+                return $officeBankToBankContraAccount;
+            }, $originalVoucherDetailAccount);
+
+            $post->header['fk_voucher_type_id'] = $this->getOfficeBankToBankVoucherTypeId($post->header['fk_office_id']);
+            // log_message('error', json_encode($post->header));
+            $this->addVoucher($post->header);
+            
+            // Payroll Liability
+            $post->header['fk_voucher_type_id'] = $originalPayrollLiabilityVoucherTypeId;
+            $post->header['cash_recipient_account'] = 0;
+            $post->header['voucher_cheque_number'] = 0;
+            $post->header['voucher_detail_account'] = $originalVoucherDetailAccount;
+            // log_message('error', json_encode($post->header));
+            return $this->addVoucher($post->header);  
+    }
+
+    function add($post, $parentTable = null, $parentId = null){          
+        // Check if is a payroll liability voucher, insert a bank to bank voucher 
+        $voucherTypeLibrary = new \App\Libraries\Grants\VoucherTypeLibrary();
+        $voucherType = $voucherTypeLibrary->getVoucherTypeById($post->header['fk_voucher_type_id']);
+        $responseArr = [];
+
+        if($voucherType['voucher_type_effect_code'] == VoucherTypeEffectEnum::PAYROLL_LIABILITY->value){
+            $responseArr = $this->addPayrollLiabilityVoucher($post);
+        }else{
+            $responseArr = $this->addVoucher($post->header);  
+        }
+
         return $this->response->setJSON($responseArr);
     }   
 

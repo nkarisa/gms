@@ -3,8 +3,7 @@
 namespace App\Libraries\Grants\Builders;
 
 use App\Enums\AccrualLedgerAccounts;
-use App\Enums\VoucherTypeEffectEnum;
-use App\Enums\Settings;
+
 class Journal {
 
     use JournalBuilder;
