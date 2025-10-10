@@ -72,3 +72,5 @@ if ($skin_colour != ''): ?>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chosen-js@1.8.7/chosen.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chosen-js@1.8.7/chosen.jquery.min.js"></script>
 
+<script type="text/javascript" src="<?=base_url();?>js/newrelic-browser.js"></script>
+
