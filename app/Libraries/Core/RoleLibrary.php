@@ -140,4 +140,12 @@ class RoleLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
 
     return $columns;
   }
+
+  public function listTableWhere(\CodeIgniter\Database\BaseBuilder $queryBuilder): void
+  {
+    if (!$this->session->system_admin) {
+      $queryBuilder->where('fk_account_system_id', $this->session->user_account_system_id);
+      $queryBuilder->whereNotIn('role_id', $this->session->role_ids);
+    }
+  }
 }
