@@ -217,8 +217,11 @@ class BudgetItem extends WebController
     public function budgetLimitRemainingAmount($budget_id, $expense_account_id)
     {
         $budgetLimitLib = new \App\Libraries\Grants\BudgetLimitLibrary();
+        $expenseAccountLibrary = new \App\Libraries\Grants\ExpenseAccountLibrary();
 
-        echo $budgetLimitLib->budgetLimitRemainingAmount($budget_id, $expense_account_id);
+        $incomeAccountId = $expenseAccountLibrary->getExpenseIncomeAccountId($expense_account_id);
+
+        echo $budgetLimitLib->budgetLimitRemainingAmount($budget_id, $incomeAccountId);
     }
 
     function getBudgetLimitRemainingAmount($budget_id, $expense_account_id)

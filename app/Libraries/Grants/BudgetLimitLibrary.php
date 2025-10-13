@@ -45,7 +45,6 @@ class BudgetLimitLibrary extends GrantsLibrary implements \App\Interfaces\Librar
     {
         $budget_limit_amount = $this->budgetLimitAmount($budget_id, $income_account_id);
 
-        //log_message('error',json_encode($budget_limit_amount ));
         
         $budgetLib=new \App\Libraries\Grants\BudgetLibrary();
 
@@ -63,17 +62,15 @@ class BudgetLimitLibrary extends GrantsLibrary implements \App\Interfaces\Librar
      * @author: Livingstone Onduso
      * @Date: 4/12/2022
      */
-    private function budgetLimitAmount(int $budget_id, int $expense_account_id):float
+    private function budgetLimitAmount(int $budget_id, int $income_account_id):float
     {
 
         $budget_limit_amount = 0;
 
-
         //Get the income_account
-        $writer_builder_budget_limit=$this->write_db->table('expense_account');
-        $writer_builder_budget_limit->where(['expense_account_id'=>$expense_account_id]);
-        $income_account_id=$writer_builder_budget_limit->get()->getRow()->fk_income_account_id;
-
+        // $writer_builder_budget_limit=$this->write_db->table('expense_account');
+        // $writer_builder_budget_limit->where(['expense_account_id'=>$expense_account_id]);
+        // $income_account_id=$writer_builder_budget_limit->get()->getRow()->fk_income_account_id;
 
         $builder_budget_limit = $this->read_db->table('budget_limit');
         $builder_budget_limit->join('budget', 'budget.budget_id = budget_limit.fk_budget_id');
