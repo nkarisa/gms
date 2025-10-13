@@ -345,8 +345,7 @@ class Login extends WebController
         return $this->response->setJSON($un_allowed_password);
     }
 
-
-       public function getOfficeData(): ResponseInterface{
+    public function getOfficeData(): ResponseInterface{
         $post = $this->request->getPost();
     
         $compassionCountryId = $post['compassion_country_id'];
@@ -359,5 +358,101 @@ class Login extends WebController
         return $this->response->setJSON($officeIdsAndNames);
     }
 
+    /**
+     * Resets a user's password using a hashed ID and a token.
+     *
+     * @param string $hashed_user_id The hashed user ID.
+     * @param string $token The password reset token from the URL.
+     * @return string
+     */
+    public function resetPassword(?string $hashed_user_id = null, string $token = ""): string
+    {
+        // 1. Session Handling (sess_destroy() is replaced by session()->destroy())
+        // CI4 uses the global 'session()' helper function
+        session()->destroy();
+
+        // 2. Decode the hashed ID (assuming 'hash_id' is a helper function you'll port)
+        // You would need to ensure the 'hash_id' function is available as a helper in CI4
+        $user_id = hash_id($hashed_user_id, 'decode');
+
+        $user_data = $this->read_db->table('user')
+            ->select('user_password_reset_token')
+            ->where('user_id', $user_id)
+            ->get()
+            ->getRow(); // Get the single row object
+
+        $is_password_reset_link_active = false;
+
+        // 4. Token Validation Logic
+        if ($user_data) { // CI4 checks if the object exists directly
+            $token_data = $user_data->user_password_reset_token;
+
+            if ($token_data !== null) {
+                $token_data_array = json_decode($token_data);
+
+                // Use optional chaining for safer property access if you are on PHP 8+
+                $database_token = $token_data_array?->token ?? null;
+                $token_expiration_time = $token_data_array?->expiration ?? 0;
+
+                // CI4 recommendation: Use Time/DateTime objects for expiration checks,
+                // but sticking to your original logic using time() for direct comparison.
+                if ($token_expiration_time > time() && $database_token === $token) {
+                    $is_password_reset_link_active = true;
+                }
+            }
+        }
+
+        // 5. View Loading (this->load->view() is replaced by view() helper function)
+        $view_page = 'general/reset_password';
+
+        if (!$is_password_reset_link_active) {
+            $view_page = 'general/user_token_expiration';
+        }
+
+        // Views are loaded by returning the view() helper function output
+        return view($view_page);
+    }
+
+     public function ajax_reset_password(){
+        $emailTemplateLibrary = new \App\Libraries\Core\EmailTemplateLibrary();
+        $resp                   = array();
+        $resp['status']         = 'false';
+
+        //resetting user password here
+        $new_password           =   $_POST["password"];
+        $user_id = hash_id($_POST['user_id'], 'decode');
+
+        // Checking credential for user
+        $userWriteBuilder = $this->write_db->table('user');
+        $query = $userWriteBuilder->where( array('user_id' => $user_id))->get();
+        
+        // log_message('info', json_encode($_POST));
+
+        $user = [];
+
+        if ($query->getNumRows() > 0) {
+            $user = $query->getRow();
+
+            $reset_data = array('user_password' => $this->password_salt($new_password), 'user_first_time_login' => 1, 'user_password_reset_token' => NULL);
+            $userWriteBuilder->where('user_id', $user_id);
+            $userWriteBuilder->update($reset_data);
+            $resp['status']         = 'true';
+
+            $tags['user'] =  $user->user_firstname . ' ' . $user->user_lastname;
+            $tags['email'] = $user->user_email;
+            $tags['password'] = $new_password;
+
+            $email_subject = get_phrase('password_reset_notification');
+
+            $email_body = file_get_contents(APPPATH . 'resources/email_templates/en/password_reset.txt'); // Template language should be from user session
+
+            $mail_recipients['send_to'] = [$user->user_email]; // must be an array
+
+            $emailTemplateLibrary->logEmail($tags, $email_subject, $email_body, $mail_recipients);
+
+        }
+        // log_message('info', json_encode($resp));
+        echo json_encode($resp);
+    } 
 
 }

@@ -66,5 +66,6 @@ class GrantsConfig extends BaseConfig
 
     public $refundClearanceValidPeriodInMonths = 6; // period in months
     public $accrualClearanceValidPeriodInMonths = 6;
+    public $userTokenExpirationTime = 3600;
 
 }

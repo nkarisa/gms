@@ -421,7 +421,7 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
             'user.user_is_active',
             'context_definition.context_definition_name',
             'context_definition.context_definition_id',
-            'user.user_password',
+            // 'user.user_password',
             'language.language_id',
             'language.language_name',
             'role.role_id',
@@ -438,6 +438,7 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
             'account_system.account_system_id as account_system_id',
             'account_system.account_system_code as account_system_code',
             'account_system.account_system_name as account_system_name',
+            'user.user_password_reset_token as user_password_reset_token'
         ]);
 
         // Join the necessary tables
@@ -1919,5 +1920,71 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
   
       return $user->user_firstname . ' ' . $user->user_lastname;
     }
+
+function postApprovalActionEvent(array $item): void{
+    $statusLibrary = new StatusLibrary();
+    $next_status = $item['post']['next_status'];
+    $user_id = $item['post']['item_id'];
+
+    $max_user_approval_status_ids = $statusLibrary->getMaxApprovalStatusId('user');
+
+    if(in_array($next_status, $max_user_approval_status_ids)){
+      $update_user['user_is_active'] = 1;
+
+      // Create a password reset token
+      $this->createUserPasswordResetToken($user_id);
+      // Send an email
+      $user_info = $this->getUserInfo(['user_id' => $user_id]);
+      $user_full_name = $user_info['fullname'];
+      $email = $user_info['user_email'];
+      $token_data = json_decode($user_info['user_password_reset_token']);
+
+      $this->logNewUserEmail($user_id, $user_full_name, $email, $token_data);
+    }else{
+      $update_user['user_is_active'] = 0;
+    }
+
+    $builder = $this->write_db->table('user');
+    $builder->where(['user_id' => $user_id]);
+    $builder->update($update_user);
+
+   }
+
+   public function logNewUserEmail($user_id, $user_full_name, $email, $token_data){
+      $emailTemplateLibrary = new \App\Libraries\Core\EmailTemplateLibrary();
+      // Get user token
+      $userBuilder = $this->read_db->table('user');
+      $userBuilder->where(array('user_id' => $email));
+      $userBuilder->get();
+
+      $tags['user'] =  $user_full_name;
+      $tags['email'] = $email;
+      $tags['system_name'] = $this->read_db->table('setting')
+      ->where(array('type' => 'system_name'))->get()->getRow()->description;
+      $tags['url'] = base_url().'login'.DS.'reset_password'.DS.hash_id($user_id,'encode').DS.$token_data->token;
+
+      $email_subject = get_phrase('new_user_account');
+
+      $email_body = file_get_contents(APPPATH . 'resources/email_templates/en/approved_user.txt'); // Template language should be from user session
+
+      $mail_recipients['send_to'] = [$email]; // must be an array
+
+      $emailTemplateLibrary->logEmail($tags, $email_subject, $email_body, $mail_recipients);
+}
+
+   private function createUserPasswordResetToken($user_id){
+    $validityPeriod = $this->config->userTokenExpirationTime;
+    $token = bin2hex(random_bytes(16));
+    $expiration = time() + $validityPeriod;
+
+    $update_data['token'] = $token;
+    $update_data['expiration'] = $expiration;
+
+    $data['user_password_reset_token'] = json_encode($update_data);
+
+    $builder = $this->write_db->table('user');
+    $builder->where(array('user_id' => $user_id));
+    $builder->update($data);
+   }
     
 }

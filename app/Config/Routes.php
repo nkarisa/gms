@@ -32,7 +32,9 @@ $routes->group('login', static function ($routes) {
     $routes->get('forgot_password', [Login::class, 'forgotPassword']);
     $routes->get('create_account', [Login::class, 'createAccount']);
     $routes->get('forgot_password', [Login::class, 'forgotPassword']);
+    $routes->get('reset_password/(:any)', [Login::class, 'resetPassword']);
     $routes->post('ajax_forgot_password', [Login::class, 'ajax_forgot_password']);
+    $routes->post('ajax_reset_password', [Login::class, 'ajax_reset_password']);
     $routes->post('(:segment)', [Login::class, 'ajax_login']);
     $routes->get('(:segment)', [Login::class, 'index']);
     
