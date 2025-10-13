@@ -132,33 +132,67 @@ class BudgetLimitLibrary extends GrantsLibrary implements \App\Interfaces\Librar
         return $budget_limits;
     }
 
+// public function lookupValues(): array
+//   {
+//     $lookup_values = [];
+//     return $lookup_values;
+//   }
+
+ public function singleFormAddVisibleColumns(): array
+    {
+        return  ["budget_name", "income_account_name", "budget_limit_amount"];
+
+    }
+
     public function lookupValues(): array
-  {
-    $lookup_values = [];
+    {
+        $lookup_values = parent::lookupValues();
 
-    // if (!session()->get('system_admin')) {
+        $lookup_values['income_account'] = [];
 
-    // /**
-    //  * 
-    //  */
-    //   $builder = $this->read_db->table('income_account');  // Query builder for 'office' table
+        if($this->action == 'edit' || $this->action == 'singleFormAdd'){
+            $incomeAccountBuilder = $this->read_db->table('income_account');
 
-    //   // Apply WHERE IN condition for office_id
-    //   $builder->join('office', 'office.fk_account_system_id=income_account.fk_account_system_id');
-    //   $builder->whereIn('office_id', array_column(session()->get('hierarchy_offices'), 'office_id'));
-    //   $builder->where([
-    //     'income_account_is_active ' => 1,
-       
-    //   ]);
+            $incomeAccountBuilder->select(array('income_account_id','income_account_name'));
+            $incomeAccountBuilder->where(array('income_account_is_budgeted'=>1,'income_account_is_active' => 1,'fk_account_system_id'=>$this->session->user_account_system_id));
+            $lookup_values['income_account'] = $incomeAccountBuilder->get()->getResultArray();
+        }
 
-    //   // Fetch results
-    //   $lookup_values['fk_income_account_id'] = $builder->get()->getResultArray();
+        $budgetBuilder = $this->read_db->table('budget');
 
-    // }
+        $budgetBuilder->select(array('budget_id','CONCAT(office_code," ","FY",budget_year," ",budget_tag_name) as budget_name'));
+        if($this->subAction != null && $this->subAction == 'budget'){
+            $budgetBuilder->where(array('budget_id' => hash_id($this->id,'decode')));
+        }elseif(!$this->session->system_admin){
+            $budgetBuilder->whereIn('budget.fk_office_id',array_column($this->session->hierarchy_offices,'office_id'));
+        }
+        $budgetBuilder->join('office','office.office_id=budget.fk_office_id');
+        $budgetBuilder->join('budget_tag','budget_tag.budget_tag_id=budget.fk_budget_tag_id');
+        $lookup_values['budget'] = $budgetBuilder->get()->getResultArray();
 
-    // log_message('error',json_encode($lookup_values));
-    return $lookup_values;
-  }
+        // $officeBuilder = $this->read_db->table('office');
+        // $officeBuilder->select(array('office_id','office_name'));
+        // if($this->subAction != null && $this->subAction == 'budget'){
+        //     $officeBuilder->join('budget','budget.fk_office_id=office.office_id');
+        //     $officeBuilder->where(array('budget_id' => hash_id($this->id,'decode')));
+        // }elseif(!$this->session->system_admin){
+        //     $officeBuilder->whereIn('office_id',array_column($this->session->hierarchy_offices,'office_id'));
+        // }
+        // $officeBuilder->where(array('fk_context_definition_id' => 1,'office_is_active' => 1));
+        // $lookup_values['office'] = $officeBuilder->get()->getResultArray();
 
+        return $lookup_values;
+    }
+
+    function editVisibleColumns(): array{
+        return [
+            'income_account_name',
+            'budget_limit_amount'
+        ];
+    }
+
+    function transactionValidateDuplicatesColumns(): array {
+        return ['fk_budget_id','fk_income_account_id'];
+    }
     
 }

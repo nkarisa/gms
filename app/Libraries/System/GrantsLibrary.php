@@ -45,6 +45,7 @@ class GrantsLibrary
   public array $lookUpTablesForeignKeyMappings = [];
   protected array $postArray;
   protected string $tableName;
+  protected string|null $subAction;
 
   function __construct()
   {
@@ -89,6 +90,8 @@ class GrantsLibrary
     $this->response = service('response'); 
 
     $this->tableName = $this->controller;
+    // log_message('error', json_encode($segments));
+    $this->subAction = $segments[3] ?? null;
   }
 
   function sanitizePostValueBeforeInsert($post_array, $column_value_from_post)

@@ -18,7 +18,7 @@
                     <th><?=get_phrase('office_code','Office Code');?></th>
                     <th><?=get_phrase('budget_year','Budget Year');?></th>
                     <th><?=get_phrase('budget_review_period','Budget Review Period');?></th>
-                    <th><?=get_phrase('income_account_name','Income Accoount Name');?></th>
+                    <th><?=get_phrase('income_account_name','Income Account Name');?></th>
                     <th><?=get_phrase('budget_limit_amount','Budget Limit Amount');?></th>
                 </tr>
             </thead>

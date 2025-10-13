@@ -44,15 +44,6 @@ class BudgetLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
 
   public function budgetToDateAmountByIncomeAccount($budget_id, $income_account_id)
   {
-
-
-    //budget_to_date_amount_by_income_account
-
-    //Get account_income_id
-    // $builder_reader=$this->read_db->table('expense_account');
-    // $builder_reader->select(['fk_income_account_id']);
-    // $builder_reader->where('expense_account_id', $expense_account_id);
-    // $income_account_id=$builder_reader->get()->getRow()->fk_income_account_id;
     
     //Get the total amount
     $budget_item_detail_amount = 0.0;
@@ -1308,6 +1299,15 @@ class BudgetLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
     }
 
     return $budget_id;
+  }
+
+  function showEditButton(): bool {
+
+    if($this->session->system_admin){
+      return true;
+    }
+    
+    return false;
   }
 
 }
