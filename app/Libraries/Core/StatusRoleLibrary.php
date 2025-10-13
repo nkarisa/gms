@@ -65,10 +65,7 @@ class StatusRoleLibrary extends GrantsLibrary implements \App\Interfaces\Library
     }
 
     function editVisibleColumns(): array {
-        return  [
-            'status_role_name',
-            'status_role_is_active',
-        ];
+        return ['role_name', 'status_role_is_active'];
     }
 
     public function lookUpValues(): array
@@ -93,10 +90,10 @@ class StatusRoleLibrary extends GrantsLibrary implements \App\Interfaces\Library
             ->where('status_id', $status_id)
             ->get();
         $approve_item_name = $approveItemQuery->getRow()->approve_item_name;
+
         // Query to get role information with conditions
         $builder = $this->read_db->table('role');
         $builder->select('role_id, role_name');
-        $builder->where("NOT EXISTS (SELECT * FROM status_role WHERE status_role.fk_role_id = role.role_id AND status_role_status_id = " . $status_id . ")", null, false);
 
         if (!$this->session->get('system_admin')) {
             $builder->where('fk_account_system_id', $this->session->user_account_system_id);
@@ -112,6 +109,11 @@ class StatusRoleLibrary extends GrantsLibrary implements \App\Interfaces\Library
                     ->join('menu', 'menu.menu_id = permission.fk_menu_id');
             }
         }
+
+        if ($this->action !== 'edit'){
+            $builder->where("NOT EXISTS (SELECT * FROM status_role WHERE status_role.fk_role_id = role.role_id AND status_role_status_id = " . $status_id . ")", null, false);
+        }
+        
         $lookup_values['role'] = $builder->get()->getResultArray();
 
         return $lookup_values;
