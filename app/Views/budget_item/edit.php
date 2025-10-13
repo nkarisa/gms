@@ -388,9 +388,7 @@ function save(go_back = true){
 
     let frm = $("#frm_budget_item");
 
-    let data = frm.serializeArray();
-
-    
+    let data = frm.serializeArray();    
 
     const source_budget_item_id = {
         name: 'source_budget_item_id',
@@ -407,10 +405,6 @@ function save(go_back = true){
      data.push(source_budget_item_id);
      data.push(budget_item_marked_for_review);
 
-    //console.log(data)
-    
-    // return false;
-
     let url = "<?=base_url();?>ajax/budget_item/updateBudgetItem/"+budget_item_id;
 
     $.ajax({
@@ -418,7 +412,7 @@ function save(go_back = true){
         data:data,
         type:"POST",
         success:function(response){
-
+            $(".btn-save").addClass('disabled')
             alert(response);
             if(go_back) {
                 location.href = document.referrer;

@@ -537,11 +537,8 @@ extract($result);
             //End of addition
 
             postRequest(url, modifiedData, function(response) {
+                $(".btn-save, .btn-save-new").addClass('disabled')
                 alert(response);
-
-                // console.log(data);
-                //return false;
-
                 if (go_back) {
                     location.href = document.referrer;
                 }
