@@ -171,4 +171,31 @@ class ChequeInjectionLibrary extends GrantsLibrary implements \App\Interfaces\Li
             $chequeInjectionWriteBuilder->update($data);
         }
     }
+
+    function listTableWhere(\CodeIgniter\Database\BaseBuilder $builder): void
+    {
+        if (!$this->session->system_admin) {
+            $office_ids = array_column($this->session->hierarchy_offices, "office_id");
+            $builder->whereIn('office_bank.fk_office_id', $office_ids);
+        }
+    }
+
+    public function lookupValues(): array
+    {
+        $lookup_values = parent::lookupValues();
+
+        if (!$this->session->system_admin) {
+            $office_ids = array_column($this->session->hierarchy_offices, "office_id");
+            $officeBankBuilder = $this->read_db->table('office_bank');
+            $officeBankBuilder->whereIn('fk_office_id', $office_ids);
+            $lookup_values['office_bank'] = $officeBankBuilder->get()->getResultArray();
+        }
+
+        $itemReasonBuilder = $this->read_db->table('item_reason');
+        $itemReasonBuilder->join('approve_item','approve_item.approve_item_id=item_reason.fk_approve_item_id');
+        $lookup_values['item_reason'] = $itemReasonBuilder->where(array('approve_item_name' => 'cheque_injection'))
+        ->get()->getResultArray();
+
+        return $lookup_values;
+    }
 }
