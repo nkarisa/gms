@@ -87,6 +87,8 @@ class GrantsLibrary
 
     // Response 
     $this->response = service('response'); 
+
+    $this->tableName = $this->controller;
   }
 
   /**
