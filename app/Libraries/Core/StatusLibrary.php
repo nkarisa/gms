@@ -1051,4 +1051,8 @@ class StatusLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
     return $status_ids;
   }
 
+  function editVisibleColumns(): array{
+    return ['status_name','status_button_label','status_decline_button_label', 'status_signatory_label'];
+  }
+
 }

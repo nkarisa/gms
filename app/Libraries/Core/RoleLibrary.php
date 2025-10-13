@@ -93,9 +93,7 @@ class RoleLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
             $context_definition_level = $this->session->context_definition['context_definition_level'];
 
             $lookup_values['context_definition'] = array_filter($contextDefinitions, function ($contextDefinition) use($context_definition_level) {
-                if($contextDefinition['context_definition_level'] <= $context_definition_level){
-                    return $contextDefinition;
-                }
+                return $contextDefinition['context_definition_level'] <= $context_definition_level;
             });
 
         }
@@ -103,18 +101,15 @@ class RoleLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
         return $lookup_values;
     }
 
-  function actionAfterEdit(array $postData, int $approveId, int $itemId): bool {
-  
-    // if($postData['role_is_active'] == 0){
-    //   // Disable all role permissions
-    //   $rolePermissionWriteBuilder->where('fk_role_id', $itemId);
-    //   $rolePermissionWriteBuilder->update(['role_permission_is_active' => 0]);
-    // }else{
-    //   // Enable all role permissions
-    //   $rolePermissionWriteBuilder->where('fk_role_id', $itemId);
-    //   $rolePermissionWriteBuilder->update(['role_permission_is_active' => 1]);
-    // }
+  function actionBeforeInsert($post_array): array
+  {
+    $post_array['header']['role_is_active'] = 1;
+    !isset($post_array['header']['fk_account_system_id']) ? $post_array['header']['fk_account_system_id'] = $this->session->user_account_system_id : null;
+    return $this->sanitizePostValueBeforeInsert($post_array, 'role_shortname');
+  }
 
+
+  function actionAfterEdit(array $postData, int $approveId, int $itemId): bool {
 
     $rolePermissionWriteBuilder = $this->write_db->table('role_permission');
 
@@ -134,28 +129,15 @@ class RoleLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
     return true;
   }
 
-  function changeFieldType():array{
-    
-    $fields = []; 
 
-    $readerBuilder=$this->read_db->table('context_definition');
-    $readerBuilder->select(array('context_definition_id','context_definition_name'));
-    $context_definition_names=$readerBuilder->get()->getResultArray();
+  function singleFormAddVisibleColumns(): array{
+    $columns = ['role_name','role_shortname','role_description','role_is_new_status_default','role_is_department_strict','context_definition_name','account_system_name'];
 
-    $names=array_column($context_definition_names,'context_definition_name');
-
-    $ids=array_column($context_definition_names,'context_definition_id');
-
-    $combine_ids_and_names=array_combine($ids,$names);
-
-    $fields['context_definition_name']['field_type'] = 'select';
-
-    foreach($combine_ids_and_names as $id=>$name){
-      $fields['context_definition_name']['options'][$id] = $name;
+    if(!$this->session->system_admin){
+        $columns = ['role_track_number','role_name','role_description','context_definition_name'];
     }
 
-    
 
-    return $fields;
+    return $columns;
   }
 }

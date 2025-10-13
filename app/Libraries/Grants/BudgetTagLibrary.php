@@ -71,5 +71,31 @@ class BudgetTagLibrary extends GrantsLibrary implements \App\Interfaces\LibraryI
 
         return $budget_tag;
     }
+
+    function changeFieldType(): array{
+        $budgetReviewCountBuilder = $this->read_db->table('budget_review_count');
+
+        $budget_review_count_obj = $budgetReviewCountBuilder->where(
+        array('fk_account_system_id'=>$this->session->user_account_system_id))->get();
+
+        $max_review_count = 4;
+
+        if($budget_review_count_obj->getNumRows() > 0){
+        $max_review_count = $budget_review_count_obj->getRow()->budget_review_count_number;
+        }
+
+        $range_of_review_count = range(1, $max_review_count);
+
+        $budget_tag_level = [];
+
+        foreach($range_of_review_count as $review_count){
+        $budget_tag_level[$review_count] = $review_count == 1 ? get_phrase('initial_budget') : addOrdinalNumberSuffix($review_count - 1). ' ' .get_phrase('budget_review');
+        }
+
+        $field_type['budget_tag_level']['field_type'] = 'select';
+        $field_type['budget_tag_level']['options'] = $budget_tag_level;
+
+        return $field_type;
+  }
     
 }

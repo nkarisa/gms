@@ -76,4 +76,30 @@ class Status extends WebController
           return $result;
         }
       }
+
+    function checkIfStatusIsStraightJump($status_id){
+      $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+      $is_straight_jump = 0;
+
+      $statusBuilder = $this->read_db->table('status');
+
+      $statusBuilder->select(array('status_id','approve_item_name','status_approval_direction'));
+      $statusBuilder->where(array('status_id'=>$status_id));
+      $statusBuilder->join('approval_flow','approval_flow.approval_flow_id=status.fk_approval_flow_id');
+      $statusBuilder->join('approve_item','approve_item.approve_item_id=approval_flow.fk_approve_item_id');
+      $status_approval_direction_obj = $statusBuilder->get()->getRow();
+
+      $initial_item_status = $statusLibrary->initialItemStatus($status_approval_direction_obj->approve_item_name);
+      $max_approval_ids = $statusLibrary->getMaxApprovalStatusId($status_approval_direction_obj->approve_item_name);
+      $status_id = $status_approval_direction_obj->status_id;
+      $status_approval_direction = $status_approval_direction_obj->status_approval_direction;
+
+      if(($status_approval_direction == 1 || $status_approval_direction == 0) && $initial_item_status != $status_id){
+        $is_straight_jump = 1;
+      }
+
+      $response = ['is_straight_jump' => $is_straight_jump, 'initial_status' => $initial_item_status == $status_id, 'final_status' => in_array($status_id, $max_approval_ids )];
+      
+      return $this->response->setJSON($response);
+  }
 }

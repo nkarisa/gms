@@ -91,6 +91,19 @@ class GrantsLibrary
     $this->tableName = $this->controller;
   }
 
+  function sanitizePostValueBeforeInsert($post_array, $column_value_from_post)
+  {
+    $update_post_array = [];
+    foreach ($post_array['header'] as $column_name => $column_value) {
+      if ($column_name == $column_value_from_post) {
+        $column_value = sanitize_characters($column_value);
+      }
+
+      $update_post_array['header'][$column_name] = $column_value;
+    }
+    return $update_post_array;
+  }
+
   /**
    * Retrieves the context definition of a user based on their user ID.
    *
