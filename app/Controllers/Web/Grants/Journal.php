@@ -44,6 +44,16 @@ class Journal extends WebController
             // Users should be able to reverse voucher even if the MFRs are submitted. This is important to allow handling stale cheques and invalid transactions
             $result['mfr_submited_status'] = $financialReportLibrary->checkIfFinancialReportIsSubmitted([$office_id], $transacting_month); // A stop gap waiting a discussion with Development Team on this matter so that ticket INC0218239 can be resolved.           
             $result['accrual_activated'] = $journalLibrary->checkIfAccountingSystemAccrualIsActivated($account_system_id, $office_id, $transacting_month);
+          } elseif ($this->action == 'list') {
+            $columns = $this->columns();
+            array_shift($columns);
+            $result['columns'] = $columns;
+            $result['has_details_table'] = false;
+            $result['has_details_listing'] = false;
+            $result['is_multi_row'] = false;
+            $result['show_add_button'] = false;
+
+            return $result;
           }
 
         return $result;
@@ -159,7 +169,6 @@ class Journal extends WebController
         //   return $this->response->setJSON(['success' => true ,'message' => '', 'requireBankRef' => true]);
         // }
         
-        log_message('error', json_encode($post));
 
         $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
         $response = [
@@ -267,4 +276,162 @@ class Journal extends WebController
 
         return $this->response->setJSON(compact('isBankReferenced','options'));
       }
+
+      function get_journals(){
+
+    $columns = $this->columns();
+    $search_columns = $columns;
+
+    // Limiting records
+    $post=$this->request->getPost();
+
+    $start = intval($post['start']);
+    $length = intval($post['length']);
+
+    $journalBuilder=$this->read_db->table('journal');
+
+    $journalBuilder->limit($length, $start);
+
+    // Ordering records
+
+    $order = $post['order']?? '';
+    $col = '';
+    $dir = 'desc';
+    
+    if(!empty($order)){
+      $col = $order[0]['column'];
+      $dir = $order[0]['dir'];
+    }
+          
+    if( $col == ''){
+      $journalBuilder->orderBy('journal_id DESC');
+    }else{
+      $journalBuilder->orderBy($columns[$col],$dir); 
+    }
+
+    // Searching
+
+    $search = $post['search'];
+    $value = $search['value'];
+
+    array_shift($search_columns);
+
+    if(!empty($value)){
+      $journalBuilder->groupStart();
+      $column_key = 0;
+        foreach($search_columns as $column){
+          if($column_key == 0) {
+            $journalBuilder->like($column,$value,'both'); 
+          }else{
+            $journalBuilder->orLike($column,$value,'both');
+        }
+          $column_key++;				
+      }
+      $journalBuilder->groupEnd();       
+    }
+
+    $journalBuilder->select($columns);
+    $journalBuilder->join('status','status.status_id=journal.fk_status_id');
+    $journalBuilder->join('office','office.office_id=journal.fk_office_id');
+
+    if(!$this->session->system_admin){
+      $journalBuilder->whereIn('journal.fk_office_id',array_column($this->session->hierarchy_offices,'office_id'));
+    }
+
+    $result_obj = $journalBuilder->get();
+    
+    $results = [];
+
+    if($result_obj->getNumRows() > 0){
+      $results = $result_obj->getResultArray();
+    }
+
+    return $results;
+  }
+
+  function count_journals(){
+
+    $journalBuilder=$this->read_db->table('journal');
+    $columns = $this->columns();
+    $search_columns = $columns;
+
+    // Searching
+
+    $search = $this->request->getPost('search');
+    $value = $search['value'];
+
+    array_shift($search_columns);
+
+    if(!empty($value)){
+      $journalBuilder->groupStart();
+      $column_key = 0;
+        foreach($search_columns as $column){
+          if($column_key == 0) {
+            $journalBuilder->like($column,$value,'both'); 
+          }else{
+            $journalBuilder->orLike($column,$value,'both');
+        }
+          $column_key++;				
+      }
+      $journalBuilder->groupEnd();
+    }
+    
+    if(!$this->session->system_admin){
+      $journalBuilder->whereIn('journal.fk_office_id',array_column($this->session->hierarchy_offices,'office_id'));
+    }
+
+    $journalBuilder->join('status','status.status_id=journal.fk_status_id');
+    $journalBuilder->join('office','office.office_id=journal.fk_office_id');
+  
+    $count_all_results = $journalBuilder->countAllResults();
+
+    return $count_all_results;
+  }
+
+  function columns(){
+    $columns = [
+      'journal_id',
+      'journal_track_number',
+      'journal_name',
+      'journal_month',
+      'journal_created_date',
+      'journal_last_modified_date',
+      'office_name'
+    ];
+
+    return $columns;
+
+  }
+
+    function showList():ResponseInterface{
+
+    $draw =intval($this->request->getPost('draw'));
+    $journals = $this->get_journals();
+    $count_journals = $this->count_journals();
+
+    $result = [];
+
+    $cnt = 0;
+    foreach($journals as $journal){
+      $journal_id = array_shift($journal);
+      $journal_track_number = $journal['journal_track_number'];
+      $journal['journal_track_number'] = '<a href="'.base_url().$this->controller.'/view/'.hash_id($journal_id).'">'.$journal_track_number.'</a>';
+      $row = array_values($journal);
+
+      $result[$cnt] = $row;
+
+      $cnt++;
+    }
+
+    $response = [
+      'draw'=>$draw,
+      'recordsTotal'=>$count_journals,
+      'recordsFiltered'=>$count_journals,
+      'data'=>$result
+    ];
+    
+    return $this->response->setJSON($response);
+  }
+
+  
 }
