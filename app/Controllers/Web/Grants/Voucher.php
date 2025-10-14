@@ -10,17 +10,27 @@ use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use App\Libraries\{Core, Grants};
 use App\Enums\VoucherTypeEffectEnum;
+use CodeIgniter\HTTP\ResponsableInterface;
 use PDO;
 
 class Voucher extends WebController
 {
   protected $library;
 
+  //For performance code on datatables
+  public $max_status_id = null;
+
   function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
   {
     parent::initController($request, $response, $logger);
 
     $this->library = new Grants\VoucherLibrary();
+
+    //For performance code on datatables
+
+    $statusLib=new \App\Libraries\Core\StatusLibrary();
+
+    $this->max_status_id =  $statusLib->getMaxApprovalStatusId($this->controller);
   }
 
   function result($id = "", $parentTable = null)
@@ -41,7 +51,18 @@ class Voucher extends WebController
       $result['office_has_request'] = $requestLibrary->getOfficeRequestCount() == 0 ? false : true;
     } elseif ($this->action == 'edit') {      
       $result['voucher_header_info'] = $this->library->getVoucherHeaderToEdit(hash_id($this->id, 'decode'));
-    }
+    }elseif ($this->action == 'list') {
+      $columns = $this->columns();
+      array_shift($columns);
+      unset($columns[array_search('office.fk_account_system_id',$columns)]);
+      $result['columns'] = $columns;
+      $result['has_details_table'] = false;
+      $result['has_details_listing'] = true;
+      $result['is_multi_row'] = false;
+      $result['show_add_button'] = true;
+
+      return $result;
+    } 
 
     return $result;
   }
@@ -1580,4 +1601,270 @@ class Voucher extends WebController
 
     return $this->response->setJSON(compact('save_status'));
   }
+
+
+  //To resolve perfomance issues: added on 14/10/2025 by Karisa and Onduso
+
+  public function showList():ResponseInterface
+  {
+
+    $cnt = 0;
+    $result = [];
+    $draw = intval($this->request->getPost('draw'));
+    $vouchers = $this->get_vouchers();
+    $count_vouchers = $this->count_vouchers();
+
+    $voucherLib=new \App\Libraries\Grants\VoucherLibrary();
+    $statusLib=new \App\Libraries\Core\StatusLibrary();
+    $userLib=new \App\Libraries\Core\UserLibrary();
+
+    
+    $month_cancelled_vouchers = isset($vouchers[0]) ? $voucherLib->monthCancelledVouchers($vouchers[0]['voucher_date']) : date("Y-m-d");
+
+    $initial_record_status_id = $statusLib->initialItemStatus('voucher');
+    
+    $logged_user_permission=$userLib->checkRoleHasPermissions(ucfirst($this->controller), 'create');
+
+
+    $approve_item_id = $this->read_db->table('approve_item')->where(['approve_item_name' => 'voucher'])->get()->getRow()->approve_item_id;
+
+    $user_has_voucher_update_permission = $userLib->checkRoleHasPermissions(ucfirst($this->controller), 'update');
+
+    $accountingSystemSettingLib=new \App\Libraries\Core\AccountSystemSettingLibrary();
+    $voucherLib=new \App\Libraries\Grants\VoucherLibrary();
+    foreach ($vouchers as $voucher) {
+
+      $account_system_settings = $accountingSystemSettingLib->getAccountSystemSettings($voucher['fk_account_system_id']);
+      $voucher_attachments_required = false;
+      if(
+        array_key_exists('voucher_attachments_required',$account_system_settings)
+        && $account_system_settings['voucher_attachments_required'] == 1
+      ){
+        $voucher_attachments_required = true;
+      }
+
+      $status_data = $statusLib->actionButtonData($this->controller, $voucher['fk_account_system_id']);
+      extract($status_data);
+
+      $status_info = $status_data['item_status'];
+      $style = "";
+      $btn_color = "btn-success";
+      $is_voided_chq = false;
+      $voucher_id = array_shift($voucher);
+      $status_id = $voucher['status_id'];
+
+      $voucher_status = array_pop($voucher);
+
+      //Disable the edit if status is not Ready to Submit or Reinstate
+      // We replace voucher status with inital status resolve the issue of vouchers getting stuck.
+      $status_approval_direction = isset($status_info[$voucher_status]['status_approval_direction']) ? $status_info[$voucher_status]['status_approval_direction'] : $status_info[$initial_record_status_id]['status_approval_direction'];
+
+      $disable_edit = 'disabled';
+
+      if ($voucher['voucher_is_reversed'] != 1 && $logged_user_permission && ($initial_record_status_id == $status_id || $status_approval_direction == -1)) {
+        $disable_edit = '';
+      }
+
+      if(trim($voucher['voucher_type_name'])=='Voided Cheque'){
+        $style="style='color:orange;'";
+        $btn_color='btn-warning';
+        $is_voided_chq=true;
+      }
+      //Construct the View and Edit <a> tag
+      $voucher['voucher_track_number'] = '<a '.$style.' class="btn btn-default" href="' . base_url() . $this->controller . '/view/' . hash_id($voucher_id) . '"><i class="fa fa-eye" style="font-size:18px;color:black"></i> ' . ' [' . $voucher['voucher_track_number'] . ']' . '</a>';
+      $voucher['voucher_number'] = '<a   class="btn '.$btn_color.' edit  ' . $disable_edit . '"  href="' . base_url() . $this->controller . '/edit/' . hash_id($voucher_id) . '"><i class="fa fa-pencil" style="font-size:18px;color:white"></i> ' . ' [' . $voucher['voucher_number'] . ']' . '</a>';
+      $voucher['voucher_is_reversed'] = $voucher['voucher_is_reversed'] == 1 ? get_phrase('yes') :  get_phrase('no');
+      $row = array_values($voucher);
+    
+
+      $voucher_attachments = $voucherLib->getAttachments($approve_item_id, $voucher_id);
+
+      $action = '';
+      $count_of_attachments = count($voucher_attachments);
+      $btn_color = $count_of_attachments == 0 ? 'btn-danger' : 'btn-success';
+      $btn_label = $count_of_attachments == 0 ? get_phrase('attach_documents','Attach Support Documents') : get_phrase('show_documents','Show Support Documents');
+      $disable_approval_button = $count_of_attachments == 0 && $voucher_attachments_required ? true : false;
+
+      if (is_array($month_cancelled_vouchers) && !in_array($voucher_id, $month_cancelled_vouchers)) {
+        if($voucher_attachments_required){
+          $action .= '<div class = "btn '.$btn_color.' dt-control" id = "dt-control-'.$voucher_id.'">' . $btn_label . '</div> ';
+        }
+        $action .= approval_action_button($this->controller, $item_status, $voucher_id, $voucher_status, $item_initial_item_status_id, $item_max_approval_status_ids,$disable_approval_button, true,'', $is_voided_chq);
+      }
+
+      $can_delete_attachment = ($status_id == $item_initial_item_status_id || $status_approval_direction == '-1') && $user_has_voucher_update_permission ? true : false;
+      $can_upload_attachment = $user_has_voucher_update_permission ? true : false;
+      // log_message('error', json_encode($can_delete_attachment));
+      array_unshift($row, $action);
+      array_push($row,$can_upload_attachment, $can_delete_attachment,  $voucher_attachments, $voucher_id);
+
+      $result[$cnt] = $row;
+
+      $cnt++;
+    }
+
+    $response = [
+      'draw' => $draw,
+      'recordsTotal' => $count_vouchers,
+      'recordsFiltered' => $count_vouchers,
+      'data' => $result
+    ];
+
+    return $this->response->setJSON($response);
+  }
+
+  function columns()
+  {
+    $columns = [
+      'voucher_id',
+      'voucher_track_number',
+      'voucher_number',
+      'voucher_description',
+      'voucher_date',
+      'voucher_cheque_number',
+      'voucher_is_reversed',
+      'voucher_created_date',
+      'office_name',
+      'voucher_type_name',
+      'status_name',
+      'office.fk_account_system_id',
+      
+    ];
+
+    return $columns;
+  }
+
+  public function get_vouchers()
+  {
+
+    $max_voucher_status_id = $this->max_status_id;
+    $columns = $this->columns();
+    //array_push($columns, 'status_id');
+    array_push($columns, 'status_id');
+
+    $search_columns = $columns;
+
+    $post=$this->request->getPost();
+    $voucherBuilder=$this->read_db->table('voucher');
+    
+    // Limiting records
+    $start = intval( $post['start']);
+    $length = intval( $post['length']);
+
+    $voucherBuilder->limit($length, $start);
+
+    // Ordering records
+
+    $order = $post['order']?? '';
+    $col = '';
+    $dir = 'desc';
+
+    if (!empty($order)) {
+      $col = $order[0]['column'];
+      $dir = $order[0]['dir'];
+    }
+
+    if ($col == '') {
+      $voucherBuilder->orderBy('voucher_id ASC');
+    } else {
+      $voucherBuilder->orderBy($columns[$col], $dir);
+    }
+
+    // Searching
+
+    $search = $post['search'];
+    $value = $search['value'];
+
+    // array_shift($search_columns);
+
+    if (!empty($value)) {
+      $voucherBuilder->groupStart();
+      $column_key = 0;
+      foreach ($search_columns as $column) {
+        if ($column_key == 0) {
+          $voucherBuilder->like($column, $value, 'both');
+        } else {
+          $voucherBuilder->orLike($column, $value, 'both');
+        }
+        $column_key++;
+      }
+      $voucherBuilder->groupEnd();
+    }
+
+    $voucherBuilder->select($columns);
+    $voucherBuilder->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+    $voucherBuilder->join('status', 'status.status_id=voucher.fk_status_id');
+    $voucherBuilder->join('office', 'office.office_id=voucher.fk_office_id');
+
+    if (!$this->session->system_admin) {
+      $voucherBuilder->whereIn('voucher.fk_office_id', array_column($this->session->hierarchy_offices, 'office_id'));
+    }
+
+    if (empty($value)) {
+      $voucherBuilder->whereNotIn('voucher.fk_status_id', $max_voucher_status_id);
+    }
+
+    //$this->read_db->order_by('voucher_number', 'ASC');
+
+    $result_obj = $voucherBuilder->get();
+
+    $results = [];
+
+    if ($result_obj->getNumRows() > 0) {
+      $results = $result_obj->getResultArray();
+    }
+
+    return $results;
+  }
+
+  function count_vouchers()
+  {
+
+    $post=$this->request->getPost();
+
+    $voucherBuilder=$this->read_db->table('voucher');
+
+    $max_voucher_status_id = $this->max_status_id;
+    $columns = $this->columns();
+    $search_columns = $columns;
+
+    // Searching
+
+    $search = $post['search'];
+    $value = $search['value'];
+
+    array_shift($search_columns);
+
+    if (!empty($value)) {
+      $voucherBuilder->groupStart();
+      $column_key = 0;
+      foreach ($search_columns as $column) {
+        if ($column_key == 0) {
+          $voucherBuilder->like($column, $value, 'both');
+        } else {
+          $voucherBuilder->orLike($column, $value, 'both');
+        }
+        $column_key++;
+      }
+      $voucherBuilder->groupEnd();
+    }
+
+    $voucherBuilder->join('voucher_type', 'voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+    $voucherBuilder->join('status', 'status.status_id=voucher.fk_status_id');
+    $voucherBuilder->join('office', 'office.office_id=voucher.fk_office_id');
+
+    if (!$this->session->system_admin) {
+      $voucherBuilder->whereIn('voucher.fk_office_id', array_column($this->session->hierarchy_offices, 'office_id'));
+    }
+
+    if (empty($value)) {
+      $voucherBuilder->whereNotIn('voucher.fk_status_id', $max_voucher_status_id);
+    }
+
+    //$this->read_db->from('voucher');
+    $count_all_results = $voucherBuilder->countAllResults();
+
+    return $count_all_results;
+  }
+  //ENd of addition
 }

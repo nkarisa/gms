@@ -56,32 +56,32 @@ class Services extends BaseService
           return new \App\Libraries\System\GrantsLibrary();
     }
 
-    public static function logger($getShared = true)
-      {
-          if ($getShared) {
-              return static::getSharedInstance('logger');
-          }
+    // public static function logger($getShared = true)
+    //   {
+    //       if ($getShared) {
+    //           return static::getSharedInstance('logger');
+    //       }
      
-        $logFile = WRITEPATH.'logs/log-'.date('Y-m-d').'.log';
-        $stream = ENVIRONMENT == 'production' || ENVIRONMENT == 'prod' || ENVIRONMENT == 'stage' || getenv('SESSION_USE_DYNAMODB') == 1 ? 'php://stdout' : $logFile;
+    //     $logFile = WRITEPATH.'logs/log-'.date('Y-m-d').'.log';
+    //     $stream = ENVIRONMENT == 'production' || ENVIRONMENT == 'prod' || ENVIRONMENT == 'stage' || getenv('SESSION_USE_DYNAMODB') == 1 ? 'php://stdout' : $logFile;
         
-        // Logging domain
-        $logger = new Logger('safina');
+    //     // Logging domain
+    //     $logger = new Logger('safina');
         
-        // Logger handlers
-        $logtailHandler = LogtailHandlerBuilder::withSourceToken(env('LOGTAIL_TOKEN'))
-          ->withEndpoint("https://s1353094.eu-nbg-2.betterstackdata.com")
-          ->build();
+    //     // Logger handlers
+    //     $logtailHandler = LogtailHandlerBuilder::withSourceToken(env('LOGTAIL_TOKEN'))
+    //       ->withEndpoint("https://s1353094.eu-nbg-2.betterstackdata.com")
+    //       ->build();
         
-        $stdoutHandler = new StreamHandler($stream, Level::Info);
+    //     $stdoutHandler = new StreamHandler($stream, Level::Info);
 
-        // Push logger handlers
-        if(ENVIRONMENT == 'production'){          
-          $logger->pushHandler($logtailHandler);
-        }
+    //     // Push logger handlers
+    //     if(ENVIRONMENT == 'production'){          
+    //       $logger->pushHandler($logtailHandler);
+    //     }
 
-        $logger->pushHandler($stdoutHandler);
+    //     $logger->pushHandler($stdoutHandler);
         
-        return $logger;
-      }
+    //     return $logger;
+    //   }
 }
