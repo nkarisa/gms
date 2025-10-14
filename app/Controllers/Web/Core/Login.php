@@ -86,7 +86,6 @@ class Login extends WebController
         // Validate the login credentials
         $login_status = $this->validate_login(strtolower(trim($email)), $password);
 
-
         // Add the login status to the response array
         $response['login_status'] = $login_status;
 
@@ -96,7 +95,7 @@ class Login extends WebController
             // Send the JSON response to the client
             return $this->response->setJSON($response);
         } 
-        return null;
+        return $this->response->setJSON($response);
     }
 
     function validate_login(string $email, string $password = '', bool $is_user_switch = false): string
@@ -112,7 +111,7 @@ class Login extends WebController
         } else {
             $user = $this->libs->loadLibrary('user')->getUserInfo(['user_email' => $email, 'user_is_active' => 1]);
         }
-
+        
         // Create user session or invalidate user
         // On maintainance mode, only system admins can login
         if (empty($user)) {
