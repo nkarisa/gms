@@ -17,7 +17,7 @@ $("#fk_voucher_type_effect_id").on('change',function(){
     var url = "<?=base_url();?>ajax/voucher_type/checkSelectVoucherTypeEffect/"+voucher_type_effect_id;
 
     getRequest(url,function(response){
-        //alert(response);
+
         if((
             response.voucher_type_effect_code == 'expense' && voucher_type_account == 1) || 
             response.voucher_type_effect_code == 'bank_contra' || 
