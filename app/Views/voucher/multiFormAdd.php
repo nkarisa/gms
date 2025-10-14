@@ -1601,7 +1601,7 @@ extract($result);
                 // return false;
                 // console.log(JSON.parse(response));
                 // return false;
-
+                $(".btn-save").addClass('disabled');
                 if (!response.check) {
                     post_voucher_transaction(clicked_btn)
                 } else {
