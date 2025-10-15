@@ -46,8 +46,6 @@ class Budget extends WebController
   // }
   function checkOfficePeriodBudgetExists($office_id)
   {
-
-    //$budgetLibrary = new \App\Libraries\Grants\BudgetLibrary();
     $budget = $this->budgetLib->getBudgetByOfficeCurrentTransactionDate($office_id);
 
     $check = false;
@@ -202,17 +200,22 @@ class Budget extends WebController
       $result['is_declined_state'] = $this->isBudgetDeclinedState(hash_id($this->id, 'decode'));
       $result['status_data'] = $this->libs->actionButtonData('Budget', $office->account_system_id);
       $result['budget_status_id'] = $office->budget_status_id;
-    }
-     else{
+    } elseif ($this->action == 'list') {
+      $budgetLibrary = new \App\Libraries\Grants\BudgetLibrary();
+      $columns = alias_columns($this->columns());
+
+      array_shift($columns);
+      $result['columns'] = $columns;
+      $result['has_details_table'] = false;
+      $result['has_details_listing'] = true;
+      $result['is_multi_row'] =  $budgetLibrary->is_multi_row;
+      $result['show_add_button'] = true;
+    }else{
       $result=parent::result($id, $parentTable);
 
       $columns=$this->budgetLib->singleFormAddVisibleColumns();
 
-      $result['fields']=$this->addFormFields($columns);
-
-
-    
-     
+      $result['fields']=$this->addFormFields($columns); 
     }
     
     return $result;
@@ -699,6 +702,172 @@ class Budget extends WebController
         return $this->response->setJSON(["budget_id" => $hashedBudgetId]);
     }
 }
+
+  function columns()
+  {
+    $columns = [
+      'budget_id',
+      'budget_track_number',
+      'office_name',
+      'budget_tag_name',
+      'budget_year',
+      'status_name',
+      'month_name as budget_fy_start_month',
+      'custom_financial_year_reset_date as fy_reset_start_date'
+    ];
+
+    return $columns;
+  }
+
+  /**
+   * @todo:
+   * Await documentation
+   */
+  function get_budgets()
+  {
+
+    $columns = $this->columns();
+    $search_columns = array_column(alias_columns($columns), 'query_columns');
+
+    // Limiting records
+    $post = $this->request->getPost();
+    $budgetReadBuilder = $this->read_db->table('budget');
+    $start = intval($post['start']);
+    $length = intval($post['length']);
+
+    $budgetReadBuilder->limit($length, $start);
+
+    // Ordering records
+
+    $order = $post['order'] ?? '';
+    $col = '';
+    $dir = 'desc';
+
+    if (!empty($order)) {
+      $col = $order[0]['column'];
+      $dir = $order[0]['dir'];
+    }
+
+    if ($col == '') {
+      $budgetReadBuilder->orderBy('budget_id DESC');
+    } else {
+      $budgetReadBuilder->orderBy($columns[$col], $dir);
+    }
+
+    // Searching
+
+    $search = $post['search'];
+    $value = $search['value'];
+
+    array_shift($search_columns);
+
+    if (!empty($value)) {
+      $budgetReadBuilder->groupStart();
+      $column_key = 0;
+      foreach ($search_columns as $column) {
+        if ($column_key == 0) {
+          $budgetReadBuilder->like($column, $value, 'both');
+        } else {
+          $budgetReadBuilder->orLike($column, $value, 'both');
+        }
+        $column_key++;
+      }
+      $budgetReadBuilder->groupEnd();
+    }
+
+    $budgetReadBuilder->select($columns);
+    $budgetReadBuilder->join('budget_tag', 'budget_tag.budget_tag_id=budget.fk_budget_tag_id');
+    $budgetReadBuilder->join('status', 'status.status_id=budget.fk_status_id');
+    $budgetReadBuilder->join('office', 'office.office_id=budget.fk_office_id');
+    $budgetReadBuilder->join('custom_financial_year', 'custom_financial_year.custom_financial_year_id=budget.fk_custom_financial_year_id', 'LEFT');
+    $budgetReadBuilder->join('month', 'month.month_number=custom_financial_year.custom_financial_year_start_month', 'LEFT');
+    $budgetReadBuilder->whereIn('budget.fk_office_id', array_column($this->session->hierarchy_offices, 'office_id'));
+    $result_obj = $budgetReadBuilder->get();
+
+    $results = [];
+
+    if ($result_obj->getNumRows() > 0) {
+      $results = $result_obj->getResultArray();
+    }
+
+    return $results;
+  }
+
+  function count_budgets()
+  {
+
+    $columns = $columns = $this->columns();
+    $search_columns = array_column(alias_columns($columns), 'query_columns');
+
+    // Searching
+    $post = $this->request->getPost();
+    $budgetReadBuilder = $this->read_db->table('budget');
+    $search = $post['search'];
+    $value = $search['value'];
+
+    array_shift($search_columns);
+
+    if (!empty($value)) {
+      $budgetReadBuilder->groupStart();
+      $column_key = 0;
+      foreach ($search_columns as $column) {
+        if ($column_key == 0) {
+          $budgetReadBuilder->like($column, $value, 'both');
+        } else {
+          $budgetReadBuilder->orLike($column, $value, 'both');
+        }
+        $column_key++;
+      }
+      $budgetReadBuilder->groupEnd();
+    }
+
+    if (!$this->session->system_admin) {
+      $budgetReadBuilder->whereIn('budget.fk_office_id', array_column($this->session->hierarchy_offices, 'office_id'));
+    }
+
+    $budgetReadBuilder->join('budget_tag', 'budget_tag.budget_tag_id=budget.fk_budget_tag_id');
+    $budgetReadBuilder->join('status', 'status.status_id=budget.fk_status_id');
+    $budgetReadBuilder->join('office', 'office.office_id=budget.fk_office_id');
+    $budgetReadBuilder->join('custom_financial_year', 'custom_financial_year.custom_financial_year_id=budget.fk_custom_financial_year_id', 'LEFT');
+    $budgetReadBuilder->join('month', 'month.month_number=custom_financial_year.custom_financial_year_start_month', 'LEFT');
+    $budgetReadBuilder->whereIn('budget.fk_office_id', array_column($this->session->hierarchy_offices, 'office_id'));
+
+    $count_all_results = $budgetReadBuilder->countAllResults();
+
+    return $count_all_results;
+  }
+
+  function showList():ResponseInterface
+  {
+
+    $draw = intval($this->request->getPost('draw'));
+    $budgets = $this->get_budgets();
+    $count_budgets = $this->count_budgets();
+
+    $result = [];
+
+    $cnt = 0;
+    foreach ($budgets as $budget) {
+      $budget_id = array_shift($budget);
+      $budget_track_number = $budget['budget_track_number'];
+      $budget['budget_track_number'] = '<a href="' . base_url() . $this->controller . '/view/' . hash_id($budget_id) . '">' . $budget_track_number . '</a>';
+      $budget['budget_year'] = "FY" . $budget['budget_year'];
+      $row = array_values($budget);
+
+      $result[$cnt] = $row;
+
+      $cnt++;
+    }
+
+    $response = [
+      'draw' => $draw,
+      'recordsTotal' => $count_budgets,
+      'recordsFiltered' => $count_budgets,
+      'data' => $result
+    ];
+
+    return $this->response->setJSON($response);
+  }
 
 
 }

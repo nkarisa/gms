@@ -20,9 +20,7 @@ class BudgetLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
   protected $budgetReviewCountLib;
   protected $monthLib;
   public $is_multi_row = false;
-
   protected $messageLib;
-
   public $dependant_table = 'budget_item';
 
   function __construct()
