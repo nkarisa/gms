@@ -2687,11 +2687,12 @@ function submitFinancialReport()
       $financial_report_track_number = $financial_report['financial_report_track_number'];
       $financial_report['financial_report_track_number'] = '<a target="__blank" href="' . base_url() . $this->controller . '/view/' . hash_id($financial_report_id) . '">' . $financial_report_track_number . '</a>';
       $financial_report['financial_report_is_submitted'] = $financial_report['financial_report_is_submitted'] == 1 ? get_phrase('yes') :  get_phrase('no');
+      // $financial_report['financial_report_submitted_date'] = '';
       $row = array_values($financial_report);
 
-      $action = ''; //approval_action_button($this->controller, $item_status, $financial_report_id, $financial_status, $item_initial_item_status_id, $item_max_approval_status_ids);
-
-      array_unshift($row, $action);
+      // $action = ''; //approval_action_button($this->controller, $item_status, $financial_report_id, $financial_status, $item_initial_item_status_id, $item_max_approval_status_ids);
+      // log_message('error', json_encode($row));
+      // array_unshift($row, $action);
 
       $result[$cnt] = $row;
 
