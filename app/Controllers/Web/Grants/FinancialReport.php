@@ -1160,7 +1160,18 @@ function result($id = '', $parentId = null)
       'office_id' =>$this->getOfficeId(),
       'action_lable'=>$action_label['status_name'],
     ], $this->grantsLibrary->actionButtonData($this->controller, $account_system_id));
-  } 
+  } elseif ($this->action == 'list') {
+      $columns = $this->columns();
+      unset($columns[array_search('fk_account_system_id', $columns)]);
+      array_shift($columns);
+      $result['columns'] = $columns;
+      $result['has_details_table'] = false;
+      $result['has_details_listing'] = false;
+      $result['is_multi_row'] = false;
+      $result['show_add_button'] = false;
+
+      return $result;
+    }
   
   return $result;
 }
@@ -2632,4 +2643,149 @@ function submitFinancialReport()
     return $result;
   }
 
+
+  //For performance on CI4 temporarily. Added on 15/10/2025 by Onduso 
+
+  function columns()
+  {
+    $columns = [
+      'financial_report_id',
+      'financial_report_track_number',
+      'office_name',
+      'financial_report_is_submitted',
+      'financial_report_month',
+      'financial_report_submitted_date',
+      //'financial_report_created_date',
+      'status_name',
+      'fk_account_system_id',
+    ];
+
+    return $columns;
+  }
+
+  function showList():ResponseInterface
+  {
+
+    $draw = intval($this->request->getPost('draw'));
+    $financial_reports = $this->get_financial_reports();
+    $count_financial_reports = $this->count_financial_reports();
+
+    $result = [];
+
+    $cnt = 0;
+
+    $statusLib=new \App\Libraries\Core\StatusLibrary();
+
+    foreach ($financial_reports as $financial_report) {
+
+      $status_data = $statusLib->actionButtonData($this->controller, $financial_report['fk_account_system_id']);
+      extract($status_data);
+
+      $financial_report_id = array_shift($financial_report);
+      $financial_status = array_pop($financial_report);
+
+      $financial_report_track_number = $financial_report['financial_report_track_number'];
+      $financial_report['financial_report_track_number'] = '<a target="__blank" href="' . base_url() . $this->controller . '/view/' . hash_id($financial_report_id) . '">' . $financial_report_track_number . '</a>';
+      $financial_report['financial_report_is_submitted'] = $financial_report['financial_report_is_submitted'] == 1 ? get_phrase('yes') :  get_phrase('no');
+      $row = array_values($financial_report);
+
+      $action = ''; //approval_action_button($this->controller, $item_status, $financial_report_id, $financial_status, $item_initial_item_status_id, $item_max_approval_status_ids);
+
+      array_unshift($row, $action);
+
+      $result[$cnt] = $row;
+
+      $cnt++;
+    }
+
+    $response = [
+      'draw' => $draw,
+      'recordsTotal' => $count_financial_reports,
+      'recordsFiltered' => $count_financial_reports,
+      'data' => $result
+    ];
+
+    return $this->response->setJSON($response);
+  }
+
+  //End
+function get_financial_reports()
+  {
+
+    $columns = $this->columns();
+    array_push($columns, 'status_id');
+    $search_columns = $columns;
+
+    $mfrBuilder=$this->read_db->table('financial_report');
+
+    // Limiting records
+    $post=$this->request->getPost();
+
+    $start = intval($post['start']);
+    $length = intval($post['length']);
+
+    $mfrBuilder->limit($length, $start);
+
+    // Ordering records
+
+    $order = $post['order'] ?? '';
+    $col = '';
+    $dir = 'desc';
+
+    if (!empty($order)) {
+      $col = $order[0]['column'];
+      $dir = $order[0]['dir'];
+    }
+
+    if ($col == '') {
+      $mfrBuilder->orderBy('financial_report_id DESC');
+    } else {
+      $mfrBuilder->orderBy($columns[$col], $dir);
+    }
+
+    $searchbuilder=new \App\Libraries\System\SearchBuilderLibrary();
+
+    $searchbuilder->searchbuilder_query_group($this->columns(),$mfrBuilder);
+
+    $mfrBuilder->select($columns);
+    $mfrBuilder->join('status', 'status.status_id=financial_report.fk_status_id');
+    $mfrBuilder->join('office', 'office.office_id=financial_report.fk_office_id');
+
+    if (!$this->session->system_admin) {
+      $mfrBuilder->whereIn('financial_report.fk_office_id', array_column($this->session->hierarchy_offices, 'office_id'));
+    }
+
+    $result_obj = $mfrBuilder->get();
+
+    $results = [];
+
+    if ($result_obj->getNumRows() > 0) {
+      $results = $result_obj->getResultArray();
+    }
+
+    return $results;
+  }
+
+  function count_financial_reports()
+  {
+
+    $columns = $this->columns();
+    $search_columns = $columns;
+
+    $mfrBuilder=$this->read_db->table('financial_report');
+
+    $searchbuilder=new \App\Libraries\System\SearchBuilderLibrary();
+
+    $searchbuilder->searchbuilder_query_group($this->columns(),$mfrBuilder);
+
+    if (!$this->session->system_admin) {
+       $mfrBuilder->whereIn('financial_report.fk_office_id', array_column($this->session->hierarchy_offices, 'office_id'));
+    }
+
+     $mfrBuilder->join('status', 'status.status_id=financial_report.fk_status_id');
+     $mfrBuilder->join('office', 'office.office_id=financial_report.fk_office_id');
+    $count_all_results =  $mfrBuilder->countAllResults();
+
+    return $count_all_results;
+  }
 }
