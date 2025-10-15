@@ -600,17 +600,27 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
     ];
   }
 
+  // private function checkIfOfficeBankIsUtilizedInMonth($officeBakId, $reportingMonth){
+  //   $check = true;
+
+  //   if($officeBakId == '2939'){
+  //     $check = false;
+  //   }
+
+  //   return $check;
+  // }
+
   function getActiveOfficeBanksByReportingMonth($office_ids, $reporting_month, $project_ids = [], $office_bank_ids = [])
   {
     $office_banks = $this->getOfficeBanks($office_ids, $project_ids, $office_bank_ids);
     $office_banks_array = [];
-
+    
     $cnt = 0;
     for ($i = 0; $i < count($office_banks); $i++) {
-      $is_office_bank_obselete = $this->isOfficeBankObselete($office_banks[$i]['office_bank_id'], $reporting_month);
-
+      $officeBankId = $office_banks[$i]['office_bank_id'];
+      $is_office_bank_obselete = $this->isOfficeBankObselete($officeBankId, $reporting_month);
+          
       if (!$is_office_bank_obselete) {
-        // unset($office_banks[$i]);
         $office_banks_array[$cnt] = $office_banks[$i];
         $cnt++;
       }
@@ -645,9 +655,10 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
   function getOfficeBanks(array $office_ids, array $project_ids = [], array $office_bank_ids = []): array
   {
     $builder = $this->read_db->table("office_bank_project_allocation");
-    $builder->select(array('DISTINCT(office_bank_id)', 'office_bank_name'));
+    $builder->select(array('DISTINCT(office_bank_id)', 'office_bank_name','bank_name','office_bank_account_number'));
     $builder->whereIn('fk_office_id', $office_ids);
     $builder->join('office_bank', 'office_bank.office_bank_id=office_bank_project_allocation.fk_office_bank_id');
+    $builder->join('bank', 'bank.bank_id=office_bank.fk_bank_id');
 
     if (!empty($office_bank_ids)) {
       $builder->whereIn('fk_office_bank_id', $office_bank_ids);
@@ -750,7 +761,14 @@ class OfficeBankLibrary extends GrantsLibrary implements \App\Interfaces\Library
     $end_month_date = date('Y-m-t', strtotime($reporting_month));
 
     $builder = $this->read_db->table("voucher");
-    $builder->where(array('voucher_date >= ' => $start_month_date, 'voucher_date <= ' => $end_month_date, 'fk_office_bank_id' => $office_bank_id));
+    $builder->where(['voucher_date >= ' => $start_month_date, 'voucher_date <= ' => $end_month_date]);
+
+    $builder->groupStart();
+    $builder->where(array('voucher.fk_office_bank_id' => $office_bank_id));
+    $builder->orWhere(array('cash_recipient_account.fk_office_bank_id' => $office_bank_id));
+    $builder->groupEnd();
+    
+    $builder->join('cash_recipient_account','cash_recipient_account.fk_voucher_id=voucher.voucher_id','left');
     $count_of_vouchers = $builder->get()->getNumRows();
 
     $office_bank_has_transaction_in_month = $count_of_vouchers > 0;

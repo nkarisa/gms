@@ -24,4 +24,12 @@ enum AccrualVoucherTypeEffects: string {
         };
     }
 
+    static function getAccrualClearanceEffects(){
+        return [
+            self::RECEIVABLES_PAYMENTS->value,
+            self::PAYABLE_DISBURSEMENTS->value,
+            self::PREPAYMENT_SETTLEMENTS->value
+        ];
+    }
+
 }

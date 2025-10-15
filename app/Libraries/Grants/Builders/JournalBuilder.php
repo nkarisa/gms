@@ -61,14 +61,17 @@ trait JournalBuilder
     public function accrualLedgerColumnHeaders()
     {
         return view('journal/components/accrualLedgerColumnHeaders', [
-            'month_opening_balance' => $this->getAccrualOpeningBalances()
+            'active_accrual_ledgers' => $this->getActiveAccrualLedgers()
         ]);
     }
 
     public function accrualLedgerOpeningBalance()
     {
+        $activeLedgers = $this->getActiveAccrualLedgers();
+
         return view('journal/components/accrualLedgerOpeningBalance', [
-            'month_opening_balance' => $this->getAccrualOpeningBalances()
+            'month_opening_balance' => $this->getAccrualOpeningBalances(),
+            'active_accrual_ledgers' => !empty($activeLedgers) ? array_column($activeLedgers, 'accrual_ledger_code'): []
         ]);
     }
 
@@ -107,7 +110,7 @@ trait JournalBuilder
     {
         return view(
             'journal/components/accrualAccountsTitle',
-            ['month_opening_balance' => $this->getAccrualOpeningBalances()]
+            ['active_accrual_ledgers' => $this->getActiveAccrualLedgers()]
         );
     }
 
@@ -127,26 +130,24 @@ trait JournalBuilder
         );
     }
 
-    public function journalAccrualClearAction($voucherId, $officeId, $accrualClearingEffect){
-        $userLibrary = new \App\Libraries\Core\UserLibrary();
-        $hasVoucherCreatePermission = $userLibrary->checkRoleHasPermissions('voucher', 'create');
-        $showBankAccounts = false;
-        $showBankReferences = false;
+    // public function journalAccrualClearAction($voucherId, $voucher_number, $officeId, $accrualClearingEffect){
+    //     $userLibrary = new \App\Libraries\Core\UserLibrary();
+    //     $hasVoucherCreatePermission = $userLibrary->checkRoleHasPermissions('voucher', 'create');
+    //     $showBankAccounts = false;
+    //     $showBankReferences = false;
 
-        if ($accrualClearingEffect == AccrualVoucherTypeEffects::RECEIVABLES_PAYMENTS->value) {
-            $showBankAccounts = true;
-        } elseif ($accrualClearingEffect == AccrualVoucherTypeEffects::PAYABLE_DISBURSEMENTS->value) {
-            $showBankAccounts = true;
-            $showBankReferences = true;
-        }
+    //     if ($accrualClearingEffect == AccrualVoucherTypeEffects::RECEIVABLES_PAYMENTS->value) {
+    //         $showBankAccounts = true;
+    //     } elseif ($accrualClearingEffect == AccrualVoucherTypeEffects::PAYABLE_DISBURSEMENTS->value) {
+    //         $showBankAccounts = true;
+    //         $showBankReferences = true;
+    //     }
 
-        $accrualClearButton = view('journal/components/accrualClearButton', compact('hasVoucherCreatePermission','voucherId'));
-
-        return view(
-            'journal/components/journalAccrualClearAction',
-            compact('voucherId', 'officeId', 'hasVoucherCreatePermission', 'accrualClearingEffect', 'showBankAccounts','showBankReferences','accrualClearButton')
-        );
-    }
+    //     return view(
+    //         'journal/components/journalAccrualClearAction',
+    //         compact('voucherId', 'voucher_number','officeId', 'hasVoucherCreatePermission', 'accrualClearingEffect', 'showBankAccounts','showBankReferences')
+    //     );
+    // }
 
     public function journalActionRelatedVouchers($voucher_reversal_from, $voucher_reversal_to)
     {
@@ -221,9 +222,10 @@ trait JournalBuilder
         $item_max_approval_status_ids,
         $check_if_financial_report_is_submitted
     ) {
-        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+        // $statusLibrary = new \App\Libraries\Core\StatusLibrary();
 
         $return_string = '';
+        // $voucher_number = $voucher['voucher_number'];
         $voucher_is_reversed = $voucher['voucher_is_reversed'];
         $voucher_reversal_from = $voucher['voucher_reversal_from'];
         $voucher_reversal_to = $voucher['voucher_reversal_to'];
@@ -235,38 +237,38 @@ trait JournalBuilder
         // $voucher_cleared_to = $voucher['voucher_cleared_to'];
         // $voucher_cleared_from = $voucher['voucher_cleared_from'];
         // $voucher_transaction_cleared_date = $voucher['voucher_transaction_cleared_date'];
-        $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
-        $voucher_type_cash_account = $voucher['voucher_type_cash_account'];
-        $isAccrualEffect = AccrualVoucherTypeEffects::tryFrom($voucher_type_transaction_effect);
-        $isAccruingEffect = AccrualLedgerAccounts::tryFrom($voucher_type_transaction_effect);
-        $isAccrualAccount = VoucherTypeAccountEnum::ACCRUAL->value;
-        $maxStatusIds = $statusLibrary->getMaxApprovalStatusId('voucher');
-        $voucher_refunding_to = $voucher['voucher_refunding_to'];
-        $officeId = $voucher['office_id'];
+        // $voucher_type_transaction_effect = $voucher['voucher_type_transaction_effect'];
+        // $voucher_type_cash_account = $voucher['voucher_type_cash_account'];
+        // $isAccrualEffect = AccrualVoucherTypeEffects::tryFrom($voucher_type_transaction_effect);
+        // $isAccruingEffect = AccrualLedgerAccounts::tryFrom($voucher_type_transaction_effect);
+        // $isAccrualAccount = VoucherTypeAccountEnum::ACCRUAL->value;
+        // $maxStatusIds = $statusLibrary->getMaxApprovalStatusId('voucher');
+        // $voucher_refunding_to = $voucher['voucher_refunding_to'];
+        // $officeId = $voucher['office_id'];
 
         // Check if the voucher type effect is accrual and get the corresponding accrual ledger ENUM case. Set to NULL if the voucher type effect is not accrual
-        $effectAccrualLedger = AccrualVoucherTypeEffects::tryFrom($voucher_type_transaction_effect) 
-                                            ? 
-                                            AccrualVoucherTypeEffects::tryFrom($voucher_type_transaction_effect)->getEffectAccrualLedger()
-                                            : 
-                                            NULL;
+        // $effectAccrualLedger = AccrualVoucherTypeEffects::tryFrom($voucher_type_transaction_effect) 
+        //                                     ? 
+        //                                     AccrualVoucherTypeEffects::tryFrom($voucher_type_transaction_effect)->getEffectAccrualLedger()
+        //                                     : 
+        //                                     NULL;
         
         // Get the corresponding accrual ledger for an accrual effect
-        $accrualLedgerHasCorrespondingClearingEffect = $effectAccrualLedger ? AccrualLedgerAccounts::tryFrom($effectAccrualLedger->value)->accrualLedgerClearingEffect() : NULL; // Can be clearing effect or NULL
+        // $accrualLedgerHasCorrespondingClearingEffect = $effectAccrualLedger ? AccrualLedgerAccounts::tryFrom($effectAccrualLedger->value)->accrualLedgerClearingEffect() : NULL; // Can be clearing effect or NULL
 
-        if(
-            $accrualLedgerHasCorrespondingClearingEffect && 
-            $isAccrualEffect && 
-            $isAccruingEffect && 
-            $voucher_type_cash_account == $isAccrualAccount && 
-            $voucher_refunding_to == NULL &&
-            // !$voucher_cleared_to && 
-            // !$voucher_cleared_from && 
-            // $voucher_transaction_cleared_date == NULL &&
-            in_array($status_id, $maxStatusIds)
-        ){
-            $return_string .= $this->journalAccrualClearAction($voucher_id, $officeId, $accrualLedgerHasCorrespondingClearingEffect);
-        }
+        // if(
+        //     $accrualLedgerHasCorrespondingClearingEffect && 
+        //     $isAccrualEffect && 
+        //     $isAccruingEffect && 
+        //     $voucher_type_cash_account == $isAccrualAccount && 
+        //     $voucher_refunding_to == NULL &&
+        //     // !$voucher_cleared_to && 
+        //     // !$voucher_cleared_from && 
+        //     // $voucher_transaction_cleared_date == NULL &&
+        //     in_array($status_id, $maxStatusIds)
+        // ){
+        //     $return_string .= $this->journalAccrualClearAction($voucher_id, $voucher_number, $officeId, $accrualLedgerHasCorrespondingClearingEffect);
+        // }
 
         if ($voucher_is_reversed && ($voucher_reversal_from || $voucher_reversal_to)) {
             $return_string .= $this->journalActionRelatedVouchers($voucher_reversal_from, $voucher_reversal_to);

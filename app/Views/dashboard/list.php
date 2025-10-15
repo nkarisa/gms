@@ -1,8 +1,8 @@
-<?php 
-    // $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
-    // $voucher = $voucherLibrary->checkIfAccrualVoucherCanBeCleared(1739905);
-    // echo json_encode($voucher);
-    // Test
+<?php
+    // $db = \Config\Database::connect();
+
+    // $fields = $db->getFieldData('accrual_ledger');
+    // echo json_encode($fields);
 ?>
 <div class = 'row'>
     <div class="col-sm-12">

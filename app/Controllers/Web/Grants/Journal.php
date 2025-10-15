@@ -36,7 +36,7 @@ class Journal extends WebController
             $account_system_id = $office_data_from_journal->fk_account_system_id ?? 0;
       
             $status_data = $this->libs->actionButtonData('voucher', $account_system_id);
-            $result['vouchers']=$this->library->getVouchersOfTheMonth($office_id,$transacting_month,$journal_id);
+            $result['vouchers']= $journalLibrary->getVouchersOfTheMonth($office_id,$transacting_month,$journal_id);
             $result['status_data'] = $status_data;
             $result['transacting_month']=$transacting_month;
             $result['role_has_journal_update_permission'] = $userLibrary->checkRoleHasPermissions(ucfirst($this->controller), 'update');
@@ -198,71 +198,98 @@ class Journal extends WebController
 
         return $checkIf;
       }
+
+      // public function getActionOfficeBanks($hashedJournalId){
+      //   $journalId = hash_id($hashedJournalId, 'decode');
+      //   $officeBankLibrary = new \App\Libraries\Grants\OfficeBankLibrary();
+      //   $journalLibrary = new JournalLibrary();
+
+      //   $officeId = $journalLibrary->getJournalOfficeId($journalId);
+      //   $officeBanks = $officeBankLibrary->getActiveOfficeBank($officeId);
+
+      //   return $this->response->setJSON($officeBanks);
+      // }
+
+      // public function getAccrualTransactionDetails($voucherId){
+      //   $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+      //   $voucherTransaction = $voucherLibrary->voucherTransactionWithSumDetailPerAccount($voucherId, 'receivables');
+
+      //   // log_message('info', json_encode($voucherTransaction));
+  
+
+      //   $response = [
+      //     'account' => 'R100 - Support Funds',
+      //     'original_amount' => 210000,
+      //     'uncleared_amount' => 210000,
+      //   ];
+
+      //   return $this->response->setJSON($response);
+      // }
       
-      public function getBankAndRefViews(){
-        $post = $this->request->getPost();
+      // public function getBankAndRefViews(){
+      //   $post = $this->request->getPost();
        
-        ['voucherId' => $voucherId, 'accrualClearingEffect' => $accrualClearingEffect, 'officeId' => $officeId] = $post;
+      //   ['voucherId' => $voucherId, 'accrualClearingEffect' => $accrualClearingEffect, 'officeId' => $officeId] = $post;
         
-        // Sum all accounts into one row in the voucher details
-       $voucher = $this->voucherTransactionWithSumDetailPerAccount($voucherId, $accrualClearingEffect);
+      //   // Sum all accounts into one row in the voucher details
+      //  $voucher = $this->voucherTransactionWithSumDetailPerAccount($voucherId, $accrualClearingEffect);
         
-        // Get active office bank details
-        $officeBankLibrary = new \App\Libraries\Grants\OfficeBankLibrary();
-        $activeOfficeBanks  = $officeBankLibrary->getActiveOfficeBank($officeId);
+      //   // Get active office bank details
+      //   $officeBankLibrary = new \App\Libraries\Grants\OfficeBankLibrary();
+      //   $activeOfficeBanks  = $officeBankLibrary->getActiveOfficeBank($officeId);
 
-        $isBankReferenced = false;
-        // Initialized as empty but obtain data in getOfficeBankRefByOfficeBank method
-        $validChequeNumbers = [];
+      //   $isBankReferenced = false;
+      //   // Initialized as empty but obtain data in getOfficeBankRefByOfficeBank method
+      //   $validChequeNumbers = [];
         
-        if($accrualClearingEffect == AccrualVoucherTypeEffects::PAYABLE_DISBURSEMENTS->value){
-          $voucherTypeLibrary = new \App\Libraries\Grants\VoucherTypeLibrary();
-          $isBankReferenced = $voucherTypeLibrary->checkIfPayableDisbursementVoucherTypeIsBankReferencedByOfficeId($officeId);
-        }
+      //   if($accrualClearingEffect == AccrualVoucherTypeEffects::PAYABLE_DISBURSEMENTS->value){
+      //     $voucherTypeLibrary = new \App\Libraries\Grants\VoucherTypeLibrary();
+      //     $isBankReferenced = $voucherTypeLibrary->checkIfPayableDisbursementVoucherTypeIsBankReferencedByOfficeId($officeId);
+      //   }
 
-        $modalBodyContents = view('journal/components/accrualClearanceView', compact('accrualClearingEffect','activeOfficeBanks','validChequeNumbers','isBankReferenced', 'voucher','voucherId'));
+      //   $modalBodyContents = view('journal/components/accrualClearanceView', compact('accrualClearingEffect','activeOfficeBanks','validChequeNumbers','isBankReferenced', 'voucher','voucherId'));
 
-        return $this->response->setJSON(['view' => $modalBodyContents, ...$post]);
-      }
+      //   return $this->response->setJSON(['view' => $modalBodyContents, ...$post]);
+      // }
 
-      private function voucherTransactionWithSumDetailPerAccount($voucherId, $accrualClearingEffect){
-        // Voucher details
-        $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
-        $voucher = $voucherLibrary->getTransactionVoucher(hash_id($voucherId, 'encode'));
+      // private function voucherTransactionWithSumDetailPerAccount($voucherId, $accrualClearingEffect){
+      //   // Voucher details
+      //   $voucherLibrary = new \App\Libraries\Grants\VoucherLibrary();
+      //   $voucher = $voucherLibrary->getTransactionVoucher(hash_id($voucherId, 'encode'));
         
-        // Compute voucher uncleared amount
-        $clearedAmount = $voucherLibrary->getClearedAccrualAmountByAccount($voucherId, $accrualClearingEffect);
+      //   // Compute voucher uncleared amount
+      //   $clearedAmount = $voucherLibrary->getClearedAccrualAmountByAccount($voucherId, $accrualClearingEffect);
         
-        $body = $voucher['body'];
-        $account_codes = array_unique(array_column($body, 'account_code'));
-        $newBody = [];
+      //   $body = $voucher['body'];
+      //   $account_codes = array_unique(array_column($body, 'account_code'));
+      //   $newBody = [];
         
-        foreach($body as $detail){
-          $newBody[$detail['account_code']]['account_code'] = $detail['account_code'];
-          if(!isset($newBody[$detail['account_code']]['totalcost'])){
-            $newBody[$detail['account_code']]['totalcost'] = 0;          }
+      //   foreach($body as $detail){
+      //     $newBody[$detail['account_code']]['account_code'] = $detail['account_code'];
+      //     if(!isset($newBody[$detail['account_code']]['totalcost'])){
+      //       $newBody[$detail['account_code']]['totalcost'] = 0;          }
 
-          if(!isset($newBody[$detail['account_code']]['cleared_amount'])){
-            $newBody[$detail['account_code']]['cleared_amount'] = 0;
-          }
+      //     if(!isset($newBody[$detail['account_code']]['cleared_amount'])){
+      //       $newBody[$detail['account_code']]['cleared_amount'] = 0;
+      //     }
 
-          foreach($account_codes as $account_code){
-            if($account_code == $detail['account_code']){
-              $newBody[$detail['account_code']]['totalcost'] +=  $detail['totalcost'];
-            }
-          }
+      //     foreach($account_codes as $account_code){
+      //       if($account_code == $detail['account_code']){
+      //         $newBody[$detail['account_code']]['totalcost'] +=  $detail['totalcost'];
+      //       }
+      //     }
 
-          foreach($clearedAmount as $detailAmount){
-            if($account_code == $detailAmount['account_code']){
-              $newBody[$detail['account_code']]['cleared_amount'] +=  $detailAmount['voucher_detail_total_cost'];
-            }
-          }
-        }
+      //     foreach($clearedAmount as $detailAmount){
+      //       if($account_code == $detailAmount['account_code']){
+      //         $newBody[$detail['account_code']]['cleared_amount'] +=  $detailAmount['voucher_detail_total_cost'];
+      //       }
+      //     }
+      //   }
 
-        $voucher['body'] = $newBody;
+      //   $voucher['body'] = $newBody;
 
-        return $voucher;
-      }
+      //   return $voucher;
+      // }
 
       function getOfficeBankRefByOfficeBank(){
         $post = $this->request->getPost();

@@ -54,7 +54,7 @@ class BudgetLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInte
       'fk_income_account_id' => $income_account_id
     ]);
     $budget_item_detail_amount_obj = $builder->get();
-
+    // log_message('error', $budget_item_detail_amount_obj);
 
     if (!empty($budget_item_detail_amount_obj)) {
       $budget_item_detail_amount = $budget_item_detail_amount_obj->getRow()->budget_item_detail_amount;

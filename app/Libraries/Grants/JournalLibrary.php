@@ -48,6 +48,59 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         return $journal;
     }
 
+    private function  monthOpeningBalanceForUtilizedLedgers(
+        $month_opening_balance, 
+        $active_office_banks_by_reporting_month,
+        $active_office_cash_accounts_by_reporting_month,
+        $month_active_accrual_ledger
+    ){
+
+        // 2. Create efficient lookup maps for active accounts
+        $active_bank_ids = array_column($active_office_banks_by_reporting_month, 'office_bank_id');
+        $active_cash_ids = array_column($active_office_cash_accounts_by_reporting_month, 'office_cash_id');
+        $active_accrual_codes = array_column($month_active_accrual_ledger, 'accrual_ledger_code');
+
+        /**
+         * 3. Filter Bank Balances: Only keep bank accounts that are active for the month.
+         * Using array_map for clarity, but array_filter with an arrow function is also fine.
+         */
+        $month_opening_balance['bank'] = array_filter(
+            $month_opening_balance['bank'],
+            fn($officeBank) => in_array($officeBank['office_bank_id'], $active_bank_ids)
+        );
+
+        /**
+         * 4. Filter Cash Balances: Only keep cash accounts that are active for the month.
+         */
+        $month_opening_balance['cash'] = array_filter(
+            $month_opening_balance['cash'],
+            fn($officeCash) => in_array($officeCash['office_cash_id'], $active_cash_ids)
+        );
+
+        /**
+         * 5. Final Filter: Keep 'cash' and 'bank' regardless, and keep other accounts 
+         * (accrual ledgers) only if they are active AND have a non-zero balance.
+         */
+        $month_opening_balance = array_filter(
+            $month_opening_balance,
+            function($balance, $accountCode) use ($active_accrual_codes) {
+                // Always keep 'cash' and 'bank' accounts (the top-level keys)
+                if (in_array($accountCode, ['cash', 'bank'])) {
+                    return true;
+                }
+
+                // For other accounts (accruals), keep only if active AND amount is non-zero
+                $is_active_accrual = in_array($accountCode, $active_accrual_codes);
+                $has_non_zero_balance = ($balance['amount'] != 0);
+
+                return $is_active_accrual && $has_non_zero_balance;
+            },
+            ARRAY_FILTER_USE_BOTH
+        );
+
+        return $month_opening_balance;
+    }
+
     public function getVouchersOfTheMonth($office_id, $transacting_month, $journal_id, $office_bank_id = 0, $project_allocation_ids = [])
     {
 
@@ -55,20 +108,38 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
         $financialReportLibrary = new \App\Libraries\Grants\FinancialReportLibrary();
         $chequeBookLibrary      = new \App\Libraries\Grants\ChequeBookLibrary();
         $statusLibrary          = new \App\Libraries\Core\StatusLibrary();
+        $officeCashLibrary      = new \App\Libraries\Grants\OfficeCashLibrary();
+        $accrualLedgerLibrary   = new \App\Libraries\Grants\AccrualLedgerLibrary(); 
 
         $active_office_banks_by_reporting_month = $officeBankLibrary->getActiveOfficeBanksByReportingMonth([$office_id], $transacting_month);
+        $active_office_cash_accounts_by_reporting_month = $officeCashLibrary->getActiveOfficeCashAccountsByReportingMonth($office_id, $transacting_month);
+        $month_active_accrual_ledger = $accrualLedgerLibrary->getActiveAccrualLedgersByReportingMonth($office_id, $transacting_month);
 
+        $all_month_opening_balances = $this->monthOpeningBankCashBalance($office_id, $transacting_month);
+
+        $month_opening_balance = $this->monthOpeningBalanceForUtilizedLedgers(
+            $all_month_opening_balances, 
+        $active_office_banks_by_reporting_month,
+        $active_office_cash_accounts_by_reporting_month,
+        $month_active_accrual_ledger
+        );
+
+
+        $vouchers = $this->journalRecords($office_id, $transacting_month, $project_allocation_ids, $office_bank_id);
+        
         $result = [
             'active_office_banks'               => $active_office_banks_by_reporting_month,
+            'active_office_cash_accounts'       => $active_office_cash_accounts_by_reporting_month, 
+            'active_accrual_ledgers'            => $month_active_accrual_ledger,
             'office_bank_accounts'              => $officeBankLibrary->officeBankAccounts($office_id, $office_bank_id),
-            'office_has_multiple_bank_accounts' => $officeBankLibrary->officeHasMultipleBankAccounts($office_id),
+            'office_has_multiple_bank_accounts' => $officeBankLibrary->officeHasMultipleBankAccounts($office_id) && count($active_office_banks_by_reporting_month) > 1,
             'transacting_month'                 => $transacting_month,
             'office_id'                         => $office_id,
             'office_name'                       => $this->getOfficeDataFromJournal($journal_id)->office_name ?? '',
             'navigation'                        => $this->journalNavigation($office_id, $transacting_month),
             'accounts'                          => $this->financialAccounts($office_id, $transacting_month),
-            'month_opening_balance'             => $this->monthOpeningBankCashBalance($office_id, $transacting_month, $office_bank_id),
-            'vouchers'                          => $this->journalRecords($office_id, $transacting_month, $project_allocation_ids, $office_bank_id),
+            'month_opening_balance'             => $month_opening_balance, 
+            'vouchers'                          => $vouchers,
             'mfr_submited_status'               => $financialReportLibrary->checkIfFinancialReportIsSubmitted([$office_id], $transacting_month), //Line added by ONDUSO on DEC 20 2022 for avoiding cancelling a voucher once mfr is submitted.
             'allow_skipping_of_cheque_leaves'   => $chequeBookLibrary->allowSkippingOfChequeLeaves(),
             'financial_report_max_status'       => $statusLibrary->getMaxApprovalStatusId('financial_report')[0],
@@ -255,6 +326,7 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             $result = $builder->orderBy('voucher_id', 'ASC')->get()->getResultArray();
         }
 
+
         return $result;
     }
 
@@ -314,6 +386,7 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             $bank_to_date_expense[$office_bank_id_in_loop]               = $this->getCashIncomeOrExpenseToDate($office_id, $transacting_month, 'bank', 'expense', $office_bank_id_in_loop);
             $month_bank_opening[$office_bank_id_in_loop]['account_name'] = $system_opening_bank[$office_bank_id_in_loop]['account_name'];
             $month_bank_opening[$office_bank_id_in_loop]['amount']       = $system_opening_bank[$office_bank_id_in_loop]['amount'] + ($bank_to_date_income[$office_bank_id_in_loop] - $bank_to_date_expense[$office_bank_id_in_loop]);
+            $month_bank_opening[$office_bank_id_in_loop]['office_bank_id'] = $office_bank_id_in_loop;
         }
 
         foreach ($system_opening_cash as $office_cash_id => $office_cash_balance) {
@@ -321,6 +394,7 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             $cash_to_date_expense[$office_cash_id]               = $this->getCashIncomeOrExpenseToDate($office_id, $transacting_month, 'cash', 'expense', $office_bank_id, $office_cash_id);
             $month_cash_opening[$office_cash_id]['account_name'] = $office_cash_balance['account_name'];
             $month_cash_opening[$office_cash_id]['amount']       = $office_cash_balance['amount'] + ($cash_to_date_income[$office_cash_id] - $cash_to_date_expense[$office_cash_id]);
+            $month_cash_opening[$office_cash_id]['office_cash_id'] = $office_cash_id;
         }
 
        return [
@@ -1211,7 +1285,14 @@ class JournalLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             
         }
         
-
         return $checkIfSet;
+    }
+
+    public function getJournalOfficeId($journalId){
+        $journalbuilder = $this->read_db->table('journal')
+            ->where(['journal.journal_id' => $journalId])
+            ->get();
+
+        return $journalbuilder->getRow()->fk_office_id;
     }
 }

@@ -1,3 +1,3 @@
-<?php foreach ($month_opening_balance as $accrual_ledger => $ledger_opening_balance) { ?>
-    <th colspan='3'><?= number_format($ledger_opening_balance, 2); ?></th>
+<?php foreach ($active_accrual_ledgers as $accrual_ledger) { ?>
+    <th colspan='3'><?= number_format($month_opening_balance[$accrual_ledger] ?? 0, 2); ?></th>
 <?php } ?>

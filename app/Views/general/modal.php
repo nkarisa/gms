@@ -221,4 +221,21 @@
   function search(el) {
     datatable.search($(el).val()).draw();
   }
+
+  function getThirdURISegment() {
+        // 1. Get the path part of the URL (e.g., "/segment1/segment2/segment3/segment4")
+        const path = window.location.pathname;
+
+        // 2. Split the path by the forward slash ('/')
+        // This will result in an array where the first element is usually an empty string
+        // because the path starts with a '/', like: ['', 'segment1', 'segment2', 'segment3', ...]
+        const segments = path.split('/');
+
+        // 3. The 3rd segment is at index 3 of the split array
+        // (Index 0 is the empty string, Index 1 is the 1st segment, Index 2 is the 2nd segment)
+        const thirdSegment = segments[3];
+
+        // 4. Return the segment. It might be undefined or an empty string if it doesn't exist.
+        return thirdSegment;
+    }
 </script>

@@ -40,7 +40,7 @@ class Journal {
     }
 
     function getOfficeBankAccountsIds(){
-        return array_column($this->journalData['vouchers']['office_bank_accounts'],'office_bank_id');
+        return array_column($this->journalData['vouchers']['active_office_banks'],'office_bank_id');
     }
 
     function getOfficeCashAccountsIds(){
@@ -54,14 +54,32 @@ class Journal {
         return $this->journalData['vouchers']['month_opening_balance']['cash'];
     }
 
-    public function getAccrualOpeningBalances(): array {
+    public function getActiveAccrualLedgers(){
+        return $this->journalData['vouchers']['active_accrual_ledgers'];
+    }
+
+    // public function getAccrualOpeningBalances(): array {
+    //     $month_opening_balance = $this->journalData['vouchers']['month_opening_balance'];
+    //     $accrualLedgers = AccrualLedgerAccounts::cases();
+    //     $openingBalances = []; 
+
+    //     foreach($accrualLedgers as $accrualLedgerObj){
+    //         $accrualLedgerName = $accrualLedgerObj->value;
+    //         $openingBalances[$accrualLedgerName] = $month_opening_balance[$accrualLedgerName]['amount'] ?? null;
+    //     }
+
+    //     return $openingBalances; 
+    // }
+
+     public function getAccrualOpeningBalances(): array {
         $month_opening_balance = $this->journalData['vouchers']['month_opening_balance'];
-        $accrualLedgers = AccrualLedgerAccounts::cases();
+        unset($month_opening_balance['bank']);
+        unset($month_opening_balance['cash']);
+
         $openingBalances = []; 
 
-        foreach($accrualLedgers as $accrualLedgerObj){
-            $accrualLedgerName = $accrualLedgerObj->value;
-            $openingBalances[$accrualLedgerName] = $month_opening_balance[$accrualLedgerName]['amount'] ?? null;
+        foreach($month_opening_balance as $accrual_ledger_code => $balance){
+            $openingBalances[$accrual_ledger_code] = $balance['amount'];
         }
 
         return $openingBalances; 

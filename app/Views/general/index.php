@@ -88,7 +88,10 @@
 				include VIEWPATH.'components'.DS.$action.'Script.php';
 			}
         include 'modal.php';
+
     ?>
+
+
 
 </body>
 

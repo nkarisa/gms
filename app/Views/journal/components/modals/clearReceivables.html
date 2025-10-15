@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voucher Clearance Management (Dynamic Effects)</title>
+    <!-- Load Bootstrap 3 CSS -->
+    <style>
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css');
+        
+        /* Custom styles */
+        body {
+            background-color: #f7f9fb;
+        }
+        .container-wrapper {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 6px; /* Simple rounded corners */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Simple shadow */
+        }
+        .page-title {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 30px;
+            font-weight: bold;
+            color: #333;
+        }
+        .table > thead > tr > th {
+            border-bottom: 2px solid #ddd;
+            background-color: #f5f5f5;
+        }
+        .form-control[readonly] {
+            background-color: #eeeeee;
+        }
+        /* Style for the dynamic status message */
+        #statusMessage {
+            margin-top: 15px;
+        }
+        .clearance-row {
+            margin-bottom: 10px;
+        }
+        .row-header {
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        
+        /* Spinning icon for loading */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .spinning {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container-wrapper">
+        <h1 class="page-title">Voucher Transactions by Accrual Effect</h1>
+        
+        <!-- CI4: This table would be populated by looping through data passed from the controller -->
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Accrual Effect</th> <!-- New Column -->
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <!-- ID added to tbody to allow for dynamic injection -->
+                <tbody id="vouchersTableBody">
+                    <tr>
+                        <td colspan="5" class="text-center" style="padding: 20px;">
+                            <i class="glyphicon glyphicon-refresh spinning"></i> Loading Vouchers...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Bootstrap 3 Modal Structure -->
+    <div class="modal fade" id="clearVoucherModal" tabindex="-1" role="dialog" aria-labelledby="clearVoucherLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="clearVoucherLabel">Clear Voucher: <span id="voucherDescription"></span></h4>
+                </div>
+                
+                <form id="clearanceForm">
+                    <input type="hidden" id="voucherId" name="voucher_id">
+                    <input type="hidden" id="voucherEffect" name="voucher_effect">
+
+                    <div class="modal-body">
+                        
+                        <!-- 1. Bank Account Section (Conditionally Hidden) -->
+                        <div class="bank-section">
+                            <div class="form-group" id="bankAccountGroup">
+                                <label for="bankAccount">Bank Account</label>
+                                <select class="form-control" id="bankAccount" name="bank_account" required>
+                                    <option value="" disabled selected>Loading Accounts...</option>
+                                </select>
+                            </div>
+
+                            <!-- 2. Bank Reference Field (Conditionally Hidden/Disabled) -->
+                            <div class="form-group" id="bankReferenceGroup">
+                                <label for="bankReference">Bank Reference (Transaction Ref No.)</label>
+                                <input type="text" class="form-control" id="bankReference" name="bank_reference" 
+                                    placeholder="Enter bank transaction reference number" required disabled>
+                                <p class="help-block text-danger bank-ref-help" style="margin-top: 5px; display: none;">Select a Bank Account first to enable this field.</p>
+                            </div>
+                        </div>
+
+                        
+                        <!-- 3. Dynamic Clearance Section (Always Visible) -->
+                        <div id="partialClearanceSection" class="well" style="background-color: #f9f9f9; border-left: 5px solid #5cb85c; margin-top: 20px;">
+                            <h5 class="text-success" style="font-weight: bold; margin-top: 0; margin-bottom: 15px;">Clearance Details (Total Uncleared: $<span id="totalUnclearedDisplay">0.00</span>)</h5>
+                            
+                            <h5 style="font-size: 14px; font-weight: bold; margin-top: 5px; margin-bottom: 10px;">Individual Clearance Entries</h5>
+
+                            <!-- Row Header for dynamic fields -->
+                            <div class="row row-header">
+                                <div class="col-xs-5">Account / Code</div>
+                                <div class="col-xs-3">Remaining Amt</div>
+                                <div class="col-xs-3">Clear Amount</div>
+                                <div class="col-xs-1"></div>
+                            </div>
+
+                            <div id="clearanceRowsContainer">
+                                <!-- Dynamic rows are injected here -->
+                            </div>
+
+                            <button type="button" id="addRowBtn" class="btn btn-xs btn-default btn-block" style="margin-top: 10px;">
+                                <i class="glyphicon glyphicon-plus"></i> Add Split Row (For Remaining Balance)
+                            </button>
+                        </div>
+
+                        <!-- Loading/Error Message Area -->
+                        <div id="statusMessage" style="padding: 10px; border-radius: 4px; display: none;"></div>
+                        
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">Save Clearance</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load jQuery (required for Bootstrap 3 JS) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <!-- Load Bootstrap 3 JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // Global state variables
+            let currentVoucherId = null; 
+            let currentVoucherEffect = null; 
+            let currentUnclearedAmount = 0; 
+            let splittableAccountsCache = []; 
+
+            // --- SIMULATED DATA (Updated with income_id) ---
+            const simulatedVoucherList = [ 
+                { id: '101', description: 'Office Supplies', amount: 1500.00, effect: 'PAYABLES' },
+                { id: '102', description: 'Marketing Campaign', amount: 5200.00, effect: 'RECEIVABLES' },
+                { id: '103', description: 'Consultant Fees', amount: 3500.50, effect: 'PAYABLES' },
+                { id: '104', description: 'Utility Bills', amount: 890.75, effect: 'PREPAYMENTS' },
+                { id: '105', description: 'Software License', amount: 1200.00, effect: 'PREPAYMENTS' }
+            ];
+            
+            // Simulated Data for Bank Accounts
+            const simulatedBankAccounts = [
+                { value: 'BA001', text: 'Corporate Checking (BA001)' },
+                { value: 'BA002', text: 'Treasury Savings (BA002)' },
+                { value: 'BA003', text: 'Payroll Account (BA003)' }
+            ];
+            
+            // Simulated API response for clearance entries (income_id is now used)
+            const simulatedClearanceEntryData = {
+                '101': [ 
+                    { income_id: 'CE001', account_id: 'C101', account_name: 'R100-Office Maintenance', income_code: 'INC005', uncleared_amount: 800.00 },
+                    { income_id: 'CE002', account_id: 'C102', account_name: 'R200-Printer Toner', income_code: 'INC010', uncleared_amount: 700.00 }
+                ],
+                '102': [ 
+                    { income_id: 'CE003', account_id: 'C201', account_name: 'R300-Social Media Ads', income_code: 'INC010', uncleared_amount: 4000.00 },
+                    { income_id: 'CE004', account_id: 'C202', account_name: 'R400-Print Materials', income_code: 'INC015', uncleared_amount: 1200.00 }
+                ],
+                '103': [ 
+                    { income_id: 'CE005', account_id: 'C301', account_name: 'R500-Legal Review', income_code: 'INC015', uncleared_amount: 3500.50 }
+                ],
+                '104': [ 
+                    { income_id: 'CE006', account_id: 'C401', account_name: 'R600-Electricity', income_code: 'INC020', uncleared_amount: 890.75 }
+                ],
+                '105': [
+                    { income_id: 'CE007', account_id: 'C501', account_name: 'R700-Annual Fee', income_code: 'INC025', uncleared_amount: 1200.00 }
+                ]
+            };
+            // --- END SIMULATED DATA ---
+
+            /**
+             * Formats a number as currency string without the symbol.
+             * @param {number} amount 
+             * @returns {string}
+             */
+            function formatCurrency(amount) {
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(amount).replace('$', ''); 
+            }
+
+            // =========================================================
+            // CORE FUNCTIONS: UTILITY & VALIDATION
+            // =========================================================
+            
+            /**
+             * Checks if all accounts available in the splittable cache are already used in a row
+             * and disables the Add Split Row button if so.
+             * Uses income_id for tracking available accounts.
+             */
+            function checkAndToggleAddButton() {
+                const addButton = document.getElementById('addRowBtn');
+                
+                // Hide the button completely if there's no data to split against
+                if (splittableAccountsCache.length === 0) {
+                    addButton.style.display = 'none';
+                    return;
+                }
+                
+                addButton.style.display = 'block';
+
+                // Collect all used income_ids from all current clearance rows
+                const usedIds = new Set();
+                document.querySelectorAll('[name^="clear_account_id["]').forEach(element => {
+                    if (element.value) {
+                        usedIds.add(element.value);
+                    }
+                });
+                
+                // Check how many of the original splittable accounts (by income_id) are currently NOT in use
+                let availableCount = 0;
+                const splittableIds = new Set(splittableAccountsCache.map(acc => acc.income_id));
+                
+                splittableIds.forEach(id => {
+                    if (!usedIds.has(id)) {
+                        availableCount++;
+                    }
+                });
+
+                if (availableCount === 0) {
+                    addButton.disabled = true;
+                    addButton.textContent = 'All Fetched Accounts Are Already Used';
+                } else {
+                    addButton.disabled = false;
+                    addButton.textContent = 'Add Split Row (For Remaining Balance)';
+                }
+            }
+
+
+            // =========================================================
+            // CORE FUNCTIONS: TABLE POPULATION
+            // =========================================================
+
+            /**
+             * Attaches the click event listener to all "Clear Voucher" buttons.
+             */
+            function attachVoucherButtonListeners() {
+                document.querySelectorAll('.clear_voucher').forEach(button => {
+                    button.removeEventListener('click', handleVoucherButtonClick); 
+                    button.addEventListener('click', handleVoucherButtonClick);
+                });
+            }
+
+            /**
+             * Handles the click on a "Clear Voucher" button.
+             */
+            function handleVoucherButtonClick() {
+                const id = this.dataset.id; 
+                const description = this.dataset.description;
+                const effect = this.dataset.effect; // Get the effect type
+                
+                currentVoucherId = id;
+                currentVoucherEffect = effect; // Store the effect
+                
+                // Reset modal state
+                document.getElementById('clearanceForm').reset(); 
+                document.getElementById('partialClearanceSection').style.display = 'none';
+                document.getElementById('statusMessage').innerHTML = '';
+                document.getElementById('statusMessage').style.display = 'none';
+                document.getElementById('clearanceRowsContainer').innerHTML = '';
+                currentUnclearedAmount = 0;
+                splittableAccountsCache = []; // Reset the cache
+                
+                // Set hidden ID, effect, and modal title
+                document.getElementById('voucherId').value = id;
+                document.getElementById('voucherEffect').value = effect;
+                document.getElementById('voucherDescription').textContent = description + ' (' + effect + ')';
+
+                // Reset bank reference field state
+                const bankRef = document.getElementById('bankReference');
+                bankRef.disabled = true;
+                bankRef.required = false; 
+                document.querySelector('.bank-ref-help').style.display = 'none';
+                
+                // Apply required attribute only if needed
+                if (effect === 'PAYABLES' || effect === 'RECEIVABLES') {
+                    document.getElementById('bankAccount').required = true;
+                } else {
+                    document.getElementById('bankAccount').required = false;
+                }
+                
+                if (effect === 'PAYABLES') {
+                    bankRef.required = true;
+                }
+            }
+
+            /**
+             * Populates the main vouchers table with data.
+             */
+            function populateVouchersTable(vouchers) {
+                const tableBody = document.getElementById('vouchersTableBody');
+                if (!tableBody) return;
+                
+                tableBody.innerHTML = ''; // Clear existing content
+
+                const rowsHtml = vouchers.map(voucher => `
+                    <tr>
+                        <td>${voucher.id}</td>
+                        <td>${voucher.description}</td>
+                        <td>$${formatCurrency(voucher.amount)}</td>
+                        <td><span class="label label-${getEffectClass(voucher.effect)}">${voucher.effect}</span></td>
+                        <td class="text-center">
+                            <button 
+                                class="clear_voucher btn btn-sm btn-success" 
+                                data-id="${voucher.id}" 
+                                data-description="${voucher.description}" 
+                                data-effect="${voucher.effect}"
+                                data-toggle="modal" 
+                                data-target="#clearVoucherModal"
+                            >
+                                Clear Voucher
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+                
+                tableBody.innerHTML = rowsHtml;
+                attachVoucherButtonListeners();
+            }
+
+            /** Helper to get Bootstrap class for effect */
+            function getEffectClass(effect) {
+                switch (effect) {
+                    case 'RECEIVABLES': return 'primary';
+                    case 'PAYABLES': return 'warning';
+                    case 'PREPAYMENTS': return 'info';
+                    default: return 'default';
+                }
+            }
+
+            /**
+             * Simulated fetch request to get the main list of voucher transactions.
+             */
+            async function fetchVouchers() {
+                const tableBody = document.getElementById('vouchersTableBody');
+                if (!tableBody) return;
+                
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center" style="padding: 20px;">
+                            <i class="glyphicon glyphicon-refresh spinning"></i> Loading Vouchers...
+                        </td>
+                    </tr>
+                `;
+
+                try {
+                    await new Promise(resolve => setTimeout(resolve, 1000)); 
+                    populateVouchersTable(simulatedVoucherList);
+                    
+                } catch (error) {
+                    console.error('Failed to fetch voucher list:', error);
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="text-center text-danger" style="padding: 20px;">
+                                <i class="glyphicon glyphicon-warning-sign"></i> Failed to load voucher data.
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+
+
+            // =========================================================
+            // CORE FUNCTIONS: MODAL POPULATION (refactored)
+            // =========================================================
+
+            /**
+             * Generates an HTML structure for a single amount clearance row.
+             * Uses income_id as the accountId for tracking and submission.
+             */
+            function createClearanceRowHtml(entry) {
+                // Use income_id if entry exists (existing entry), otherwise use a temporary timestamp ID for a new split row
+                const accountId = entry ? entry.income_id : 'new-split-' + Date.now(); 
+                const isNew = !entry;
+                
+                let accountFieldHtml = '';
+                let remainingAmount = 0.00;
+                let initialClearAmount = '';
+                
+                if (isNew) {
+                    const usedIds = new Set();
+                    // Check against the *values* of the currently selected income ids
+                    document.querySelectorAll('[name^="clear_account_id["]').forEach(el => {
+                        if (el.value) usedIds.add(el.value);
+                    });
+                    
+                    // Filter accounts based on income_id
+                    const availableAccounts = splittableAccountsCache.filter(acc => !usedIds.has(acc.income_id));
+                    
+                    // Select options use income_id as the value
+                    const selectOptions = availableAccounts.map(acc => 
+                        `<option value="${acc.income_id}" data-max-amount="${acc.uncleared_amount.toFixed(2)}">${acc.account_name} (${acc.income_code})</option>`
+                    ).join('');
+
+                    accountFieldHtml = `
+                        <select class="form-control income-account-select splittable-account-select" 
+                                name="clear_account_id[${accountId}]" 
+                                data-account-id="${accountId}" 
+                                required>
+                            <option value="" disabled selected>Select Account to Split</option>
+                            ${selectOptions}
+                        </select>
+                    `;
+                    remainingAmount = 0.00; 
+                    initialClearAmount = '';
+                } else {
+                    accountFieldHtml = `
+                        <input type="text" class="form-control" value="${entry.account_name} (${entry.income_code})" readonly>
+                        <input type="hidden" name="clear_account_id[${accountId}]" value="${entry.income_id}">
+                    `;
+                    remainingAmount = entry.uncleared_amount;
+                    initialClearAmount = entry.uncleared_amount.toFixed(2);
+                }
+                
+                const formattedMax = remainingAmount.toFixed(2);
+
+                return `
+                    <div class="row clearance-row" id="${accountId}"> 
+                        <div class="col-xs-5">
+                            <div class="form-group">
+                                ${accountFieldHtml}
+                            </div>
+                        </div>
+                        <div class="col-xs-3">
+                            <div class="form-group">
+                                <input type="text" class="form-control remaining-amount-field" 
+                                       data-uncleared-max="${formattedMax}" 
+                                       value="${formatCurrency(remainingAmount)}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-xs-3">
+                            <div class="form-group">
+                                <input type="number" step="0.01" class="form-control amount-to-clear" 
+                                    name="amount_to_clear[${accountId}]" placeholder="Clear Amount" 
+                                    value="${initialClearAmount}" max="${formattedMax}" required>
+                            </div>
+                        </div>
+                        <div class="col-xs-1 text-right">
+                            <button type="button" class="btn btn-danger remove-row-btn" data-account-id="${accountId}" style="margin-top: 5px; padding: 5px 8px;"> 
+                                <i class="glyphicon glyphicon-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            /**
+             * Simulated fetch request to get Bank Accounts from the server.
+             */
+            async function fetchBankAccounts() {
+                const select = document.getElementById('bankAccount');
+                
+                select.innerHTML = '';
+                select.insertAdjacentHTML('beforeend', `<option value="" disabled selected>Loading Banks...</option>`);
+                select.disabled = true;
+
+                await new Promise(resolve => setTimeout(resolve, 700));
+
+                select.innerHTML = '';
+                select.insertAdjacentHTML('beforeend', `<option value="" disabled selected>Select Bank Account</option>`);
+
+                simulatedBankAccounts.forEach(account => {
+                    const option = document.createElement('option');
+                    option.value = account.value;
+                    option.textContent = account.text;
+                    select.appendChild(option);
+                });
+                
+                select.disabled = false;
+            }
+
+            /**
+             * Fetches ALL required clearance entries for the voucher in one go (Consolidated Fetch).
+             */
+            async function fetchClearanceEntries(voucherId) {
+                const section = document.getElementById('partialClearanceSection');
+                const status = document.getElementById('statusMessage');
+                const clearanceRowsContainer = document.getElementById('clearanceRowsContainer');
+                
+                status.style.display = 'none';
+                status.classList.remove('alert-danger', 'alert-success', 'alert-info');
+                clearanceRowsContainer.innerHTML = ''; 
+                currentUnclearedAmount = 0; 
+                splittableAccountsCache = []; 
+                
+                try {
+                    status.innerHTML = '<i class="glyphicon glyphicon-time"></i> Loading clearance entries...';
+                    status.style.display = 'block';
+                    status.classList.add('alert-info');
+                    
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    const entries = simulatedClearanceEntryData[voucherId]; 
+                    
+                    if (!entries || entries.length === 0) {
+                        currentUnclearedAmount = parseFloat(simulatedVoucherList.find(a => a.id === voucherId).amount); 
+                    } else {
+                        // 1. Calculate the total uncleared amount
+                        currentUnclearedAmount = entries.reduce((sum, entry) => sum + entry.uncleared_amount, 0); 
+                        
+                        // 2. Populate rows with fetched data
+                        entries.forEach(entry => {
+                            clearanceRowsContainer.insertAdjacentHTML('beforeend', createClearanceRowHtml(entry));
+                        });
+
+                        // 3. Populate the splittable cache
+                        splittableAccountsCache = entries;
+                    }
+
+                    // 4. Update the total display and show section
+                    document.getElementById('totalUnclearedDisplay').textContent = formatCurrency(currentUnclearedAmount);
+                    section.style.display = 'block'; 
+                    
+                    // 5. Clear status and update add button state
+                    status.innerHTML = '';
+                    status.style.display = 'none';
+                    checkAndToggleAddButton();
+
+                } catch (error) {
+                    console.error('Fetch error (Clearance Entries):', error);
+                    section.style.display = 'none'; 
+                    status.innerHTML = '<i class="glyphicon glyphicon-warning-sign"></i> Failed to load clearance entries: ' + error.message;
+                    status.style.display = 'block';
+                    status.classList.add('alert-danger');
+                }
+            }
+            
+            // =========================================================
+            // EVENT HANDLERS
+            // =========================================================
+            
+            // 1. Initial Data Load (Main Table)
+            fetchVouchers();
+
+            // 2. Handle Modal Show Event - Use jQuery for Bootstrap 3 event
+            $('#clearVoucherModal').on('show.bs.modal', async function(e) {
+                const status = document.getElementById('statusMessage');
+                const bankSection = document.querySelector('.bank-section');
+                const bankRefGroup = document.getElementById('bankReferenceGroup');
+                const bankRefInput = document.getElementById('bankReference');
+                
+                // Hide all optional fields first
+                bankSection.style.display = 'none';
+                bankRefGroup.style.display = 'none';
+                bankRefInput.disabled = true;
+                bankRefInput.value = '';
+
+                // Conditionally display sections based on the stored effect
+                if (currentVoucherEffect === 'PAYABLES' || currentVoucherEffect === 'RECEIVABLES') {
+                    bankSection.style.display = 'block';
+                    fetchBankAccounts(); // Fetch bank accounts only if needed
+                }
+
+                if (currentVoucherEffect === 'PAYABLES') {
+                    bankRefGroup.style.display = 'block';
+                    document.querySelector('.bank-ref-help').style.display = 'block';
+                }
+
+                
+                status.innerHTML = '<i class="glyphicon glyphicon-refresh spinning"></i> Fetching configuration data...';
+                status.style.display = 'block';
+                status.classList.add('alert-info');
+                
+                try {
+                    // Fetch Clearance Entries (always needed)
+                    await fetchClearanceEntries(currentVoucherId);
+                } catch (error) {
+                    status.innerHTML = '<i class="glyphicon glyphicon-warning-sign"></i> Critical Error: Could not load required data.';
+                    status.style.display = 'block';
+                    status.classList.add('alert-danger');
+                    console.error('Modal initialization failed:', error);
+                }
+            });
+
+            // 3. Bank Account Change Listener (Enables Bank Reference for PAYABLES)
+            document.getElementById('bankAccount').addEventListener('change', function() {
+                const bankRef = document.getElementById('bankReference');
+                const helpText = document.querySelector('.bank-ref-help');
+                
+                if (currentVoucherEffect === 'PAYABLES') {
+                    // Enable bank reference and hide help text
+                    bankRef.disabled = false;
+                    bankRef.focus();
+                    helpText.style.display = 'none';
+                }
+                // For other effects, the field remains hidden or disabled (as set in show.bs.modal)
+            });
+
+
+            // 4. Dynamic Row Handlers (Same as previous iteration)
+            const clearanceRowsContainer = document.getElementById('clearanceRowsContainer');
+
+            // 4.a Account Change Listener 
+            clearanceRowsContainer.addEventListener('change', async function(event) {
+                if (!event.target.classList.contains('splittable-account-select')) return;
+                
+                const $select = event.target;
+                // The value is now the income_id
+                const selectedIncomeId = $select.value; 
+                const $status = document.getElementById('statusMessage');
+                
+                $status.style.display = 'none';
+                $status.classList.remove('alert-danger', 'alert-warning');
+
+                // --- ROBUST DUPLICATE CHECK ---
+                let count = 0;
+                // Check against the new name attribute
+                document.querySelectorAll('[name^="clear_account_id["]').forEach(element => {
+                    if (element.value === selectedIncomeId && selectedIncomeId !== '') {
+                        count++;
+                    }
+                });
+
+                if (count > 1) { 
+                    $select.value = ''; 
+                    const $row = $select.closest('.clearance-row');
+                    $row.querySelector('.remaining-amount-field').value = formatCurrency(0);
+                    $row.querySelector('.amount-to-clear').setAttribute('max', '0.00');
+                    $row.querySelector('.amount-to-clear').value = '';
+
+                    $status.innerHTML = '<i class="glyphicon glyphicon-alert"></i> **Error:** This Account ID is already selected in another clearance entry.';
+                    $status.style.display = 'block';
+                    $status.classList.add('alert-danger');
+                    checkAndToggleAddButton(); 
+                    return;
+                }
+                // --- END ROBUST DUPLICATE CHECK ---
+
+                const selectedOption = $select.options[$select.selectedIndex];
+                const maxAmount = parseFloat(selectedOption.dataset.maxAmount) || 0;
+                
+                const $row = $select.closest('.clearance-row');
+                const $remainingField = $row.querySelector('.remaining-amount-field');
+                const $clearAmountField = $row.querySelector('.amount-to-clear');
+
+                
+                if (maxAmount > 0) {
+                    $remainingField.value = formatCurrency(maxAmount);
+                    $remainingField.setAttribute('data-uncleared-max', maxAmount.toFixed(2)); 
+                    
+                    $clearAmountField.setAttribute('max', maxAmount.toFixed(2));
+                    $clearAmountField.value = maxAmount.toFixed(2); 
+                } else {
+                    $remainingField.value = formatCurrency(0);
+                    $remainingField.setAttribute('data-uncleared-max', '0.00');
+                    $clearAmountField.setAttribute('max', '0.00');
+                    $clearAmountField.value = '';
+                }
+                
+                checkAndToggleAddButton();
+            });
+
+
+            // 4.b Add Row
+            document.getElementById('addRowBtn').addEventListener('click', function() {
+                const status = document.getElementById('statusMessage');
+                if (splittableAccountsCache.length > 0) {
+                    clearanceRowsContainer.insertAdjacentHTML('beforeend', createClearanceRowHtml(null));
+                } else {
+                     status.innerHTML = '<i class="glyphicon glyphicon-warning-sign"></i> Cannot add split row: No existing accounts loaded from server to split against.';
+                     status.style.display = 'block';
+                     status.classList.add('alert-warning');
+                }
+                checkAndToggleAddButton(); 
+            });
+
+            // 4.c Remove Row
+            clearanceRowsContainer.addEventListener('click', function(event) {
+                const button = event.target.closest('.remove-row-btn');
+                if (!button) return;
+
+                const allRows = clearanceRowsContainer.querySelectorAll('.clearance-row');
+                const status = document.getElementById('statusMessage');
+
+                // --- LOGIC: ENFORCE AT LEAST ONE ROW ---
+                if (allRows.length <= 1) {
+                    status.classList.remove('alert-success', 'alert-info');
+                    status.classList.add('alert-danger');
+                    status.innerHTML = '<i class="glyphicon glyphicon-ban-circle"></i> **Restriction:** At least one clearance entry row must remain for the voucher.';
+                    status.style.display = 'block';
+
+                    // Hide the message after 4 seconds
+                    setTimeout(() => {
+                        status.style.display = 'none';
+                    }, 4000);
+                    return; // Stop the removal process
+                }
+                // --- END LOGIC ---
+
+                const rowToRemove = button.closest('.clearance-row');
+                rowToRemove.remove(); 
+                
+                // Clear status message and update the add button state
+                status.style.display = 'none';
+                checkAndToggleAddButton();
+            });
+
+
+            // 5. Handle Form Submission (Simulation)
+            document.getElementById('clearanceForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const form = e.target;
+                const submitButton = form.querySelector('button[type="submit"]');
+                const formData = [];
+                const status = document.getElementById('statusMessage');
+
+                // Basic Form Validation check (especially for required fields that are hidden)
+                const bankAccountSelect = document.getElementById('bankAccount');
+                const bankRefInput = document.getElementById('bankReference');
+                
+                if ((currentVoucherEffect === 'PAYABLES' || currentVoucherEffect === 'RECEIVABLES') && !bankAccountSelect.value) {
+                    status.innerHTML = '<i class="glyphicon glyphicon-alert"></i> **Validation Error:** Please select a Bank Account.';
+                    status.style.display = 'block';
+                    status.classList.add('alert-danger');
+                    return;
+                }
+                if (currentVoucherEffect === 'PAYABLES' && bankRefInput.disabled) {
+                    status.innerHTML = '<i class="glyphicon glyphicon-alert"></i> **Validation Error:** Please select a Bank Account and enter a Bank Reference.';
+                    status.style.display = 'block';
+                    status.classList.add('alert-danger');
+                    return;
+                }
+                
+                // Collect data for submission
+                form.querySelectorAll('input, select').forEach(element => {
+                    // Exclude disabled (like bank reference if not enabled for payables)
+                    if (element.name && element.value && !element.disabled) { 
+                        // Only include non-required fields if they have a value (like optional split rows)
+                        if (element.required || element.value) {
+                            formData.push({ name: element.name, value: element.value });
+                        }
+                    }
+                });
+
+                console.log(`--- Form Data for VOUCHER ID ${currentVoucherId} (${currentVoucherEffect}) ---`);
+                console.log("Each clearance entry ID (name starting with 'clear_account_id') is explicitly posted along with its 'amount_to_clear'.");
+                console.log(formData);
+
+
+                let totalCleared = 0;
+                
+                formData.forEach(item => {
+                    if (item.name.startsWith('amount_to_clear[')) {
+                        totalCleared += parseFloat(item.value) || 0; 
+                    }
+                });
+                
+                status.classList.remove('alert-danger', 'alert-success', 'alert-info');
+                
+                // Validate total cleared amount 
+                if (totalCleared > currentUnclearedAmount) {
+                    status.innerHTML = `<i class="glyphicon glyphicon-alert"></i> **Error:** Total cleared amount ($${totalCleared.toFixed(2)}) exceeds the *parent voucher's* total uncleared amount ($${currentUnclearedAmount.toFixed(2)}).`;
+                    status.style.display = 'block';
+                    status.classList.add('alert-danger');
+                    return;
+                }
+
+                // --- SUCCESS LOGIC ---
+                status.innerHTML = '<i class="glyphicon glyphicon-ok"></i> Clearance simulated successfully! Data logged to console. Closing in 3 seconds...';
+                status.style.display = 'block';
+                status.classList.add('alert-success');
+
+                submitButton.disabled = true;
+
+                setTimeout(() => {
+                    $('#clearVoucherModal').modal('hide');
+                    fetchVouchers();
+                    submitButton.disabled = false;
+                    status.style.display = 'none';
+                    status.innerHTML = '';
+                }, 3000); 
+            });
+
+        });
+    </script>
+
+</body>
+</html>

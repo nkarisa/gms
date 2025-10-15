@@ -601,7 +601,11 @@ class VoucherCreator
         // Step 6: Validate and return
         $voucher_posting_condition = $this->voucherPostingCondition($post);
 
-        return compact('voucher_posting_condition', 'headerId');
+        $header_id = $headerId;
+        $post_array = $post;
+        $approval_id = null;
+
+        return compact('post_array', 'approval_id', 'header_id');
     }
 }
 

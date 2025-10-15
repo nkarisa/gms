@@ -126,5 +126,5 @@ class ExpenseAccountLibrary extends GrantsLibrary implements \App\Interfaces\Lib
 
     return $accrualExpenseAccountsByAccountingSystemIds;
   }
-   
+
 }

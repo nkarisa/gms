@@ -1,3 +1,3 @@
-<?php foreach ($month_opening_balance as $accrual_ledger => $ledger_opening_balance) { ?>
-    <th colspan='3' style='text-align:center;'><?= get_phrase($accrual_ledger); ?></th>
+<?php foreach ($active_accrual_ledgers as $accrual_ledger) { ?>
+    <th colspan='3' style='text-align:center;'><?= get_phrase($accrual_ledger['accrual_ledger_name']); ?></th>
 <?php } ?>

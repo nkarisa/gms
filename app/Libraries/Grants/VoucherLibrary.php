@@ -686,7 +686,7 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
                     // If voucher_id is null then no vouchers in tha month [e.g. all month vouchers have been deleted]
                     if (empty($last_voucher)) {
 
-                        $this->getCalculatedLastVoucher($office_id, $financial_report_month);
+                        $last_voucher = $this->getCalculatedLastVoucher($office_id, $financial_report_month);
                     }
                 } else {
                     //Get max voucher_id based on max financial_report_month
@@ -1335,7 +1335,9 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
 
         $result = $voucherGenerator->insertVoucher($post, $fullyApprovedStatusId);
 
-        if ($this->write_db->transStatus() === FALSE  || !$result['voucher_posting_condition']) {
+        $response = $this->actionAfterInsert($result['post_array'], $result['approval_id'], $result['header_id']);        
+
+        if ($this->write_db->transStatus() === FALSE  || !$response) {
             $this->write_db->transRollback();
         } else {
             $this->write_db->transCommit();
@@ -1343,7 +1345,62 @@ class VoucherLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInt
             $message = get_phrase('voucher_creation_success');
         }
 
-        return ['flag' => $flag,'message' => $message, 'voucherId' => $result['headerId']];
+        return ['flag' => $flag,'message' => $message, 'voucherId' => $result['header_id']];
+    }
+
+    public function actionAfterInsert(array $post_array, int|null $approval_id, int $header_id): bool {
+        // Check if voucher is accrual
+        $accrualVoucherMetaData = $this->checkIfVoucherIsAccrual($header_id);
+
+        if(empty($accrualVoucherMetaData)){
+            return true;    
+        }
+
+        $post_array['voucher_type_effect_code'] = $accrualVoucherMetaData['voucher_type_effect_code'];
+
+        // Insert data to accrual_clearance table
+        return $this->insertAccrualClearance($header_id, $post_array);
+        
+    }
+
+    private function checkIfVoucherIsAccrual($voucherId){
+        $voucherBuilder = $this->read_db->table('voucher');
+
+        $voucherBuilder->select('voucher_id, voucher_type_account_code, voucher_type_effect_code');
+        $voucherBuilder->join('voucher_type','voucher_type.voucher_type_id=voucher.fk_voucher_type_id');
+        $voucherBuilder->join('voucher_type_account','voucher_type_account.voucher_type_account_id=voucher_type.fk_voucher_type_account_id');
+        $voucherBuilder->join('voucher_type_effect','voucher_type_effect.voucher_type_effect_id=voucher_type.fk_voucher_type_effect_id');
+        $voucherBuilder->where('voucher_type_account_code', VoucherTypeAccountEnum::ACCRUAL->value);
+        $voucherMetaDataObj = $voucherBuilder->get();
+
+        $voucherMetaData = [];
+        
+        if($voucherMetaDataObj->getNumRows() > 0){
+            $voucherMetaData = $voucherMetaDataObj->getRowArray();
+        }
+
+        return $voucherMetaData;
+    }
+
+    private function insertAccrualClearance($voucherId, $postArray){
+
+        $generateNameAdTrackNumber = $this->generateItemTrackNumberAndName('accrual_clearance');
+        $clearanceVoucherTypeEffects = AccrualVoucherTypeEffects::getAccrualClearanceEffects();
+
+        $accrualClearanceInsert['accrual_clearance_name'] = $generateNameAdTrackNumber['accrual_clearance_name'];
+        $accrualClearanceInsert['accrual_clearance_track_number'] = $generateNameAdTrackNumber['accrual_clearance_track_number'];
+        $accrualClearanceInsert['fk_voucher_id'] = $voucherId; 
+        $accrualClearanceInsert['accrual_clearance_status'] = \App\Enums\AccrualClearanceStatus::PENDING->value;
+        $accrualClearanceInsert['accrual_clearance_voucher_from'] = isset($postArray['voucher_cleared_from']) && in_array($postArray['voucher_type_effect_code'], $clearanceVoucherTypeEffects) ? $postArray['voucher_cleared_from'] : NULL; 
+        $accrualClearanceInsert['accrual_clearance_amount'] = isset($postArray['voucher_cleared_from']) && in_array($postArray['voucher_type_effect_code'], $clearanceVoucherTypeEffects) ? array_sum($postArray['voucher_detail_total_cost']) : 0 ;
+        $accrualClearanceInsert['accrual_clearance_created_date'] = date('Y-m-d');
+        $accrualClearanceInsert['accrual_clearance_created_by'] = $this->session->user_id;
+        $accrualClearanceInsert['accrual_clearance_last_modified_date'] = date('Y-m-d');
+        $accrualClearanceInsert['accrual_clearance_last_modified_by'] = $this->session->user_id;
+
+        $this->write_db->table('accrual_clearance')->insert($accrualClearanceInsert);
+
+        return $this->write_db->affectedRows() > 0 ? true: false;
     }
 
     public function officeHasVouchersForTheTransactingMonth($office_id, $transacting_month)
@@ -3050,4 +3107,74 @@ public function checkChequeValidity($office_bank_id, $edit_chq_number = 0): arra
 
     return $voucherResult;
   }
+
+public function voucherTransactionWithSumDetailPerAccount($voucherId, $accrualClearingEffect){
+        // Voucher details
+        $voucher = $this->getTransactionVoucher(hash_id($voucherId, 'encode'));
+        
+        // Compute voucher uncleared amount
+        $clearedAmount = $this->getClearedAccrualAmountByAccount($voucherId, $accrualClearingEffect);
+        
+        $body = $voucher['body'];
+        $account_codes = array_unique(array_column($body, 'account_code'));
+        $newBody = [];
+        
+        foreach($body as $detail){
+          $newBody[$detail['account_code']]['account_code'] = $detail['account_code'];
+          if(!isset($newBody[$detail['account_code']]['totalcost'])){
+            $newBody[$detail['account_code']]['totalcost'] = 0;          }
+
+          if(!isset($newBody[$detail['account_code']]['cleared_amount'])){
+            $newBody[$detail['account_code']]['cleared_amount'] = 0;
+          }
+
+          foreach($account_codes as $account_code){
+            if($account_code == $detail['account_code']){
+              $newBody[$detail['account_code']]['totalcost'] +=  $detail['totalcost'];
+            }
+          }
+
+          foreach($clearedAmount as $detailAmount){
+            if($account_code == $detailAmount['account_code']){
+              $newBody[$detail['account_code']]['cleared_amount'] +=  $detailAmount['voucher_detail_total_cost'];
+            }
+          }
+        }
+
+        $voucher['body'] = $newBody;
+
+        return $voucher;
+      }
+
+      public function UnclearedAccrualTransactions($officeIds = []){
+        
+        $statusLibrary = new \App\Libraries\Core\StatusLibrary();
+        $maxApprovalIds = $statusLibrary->getMaxApprovalStatusId('voucher');
+
+        $accrualClearanceBuilder = $this->read_db->table('accrual_clearance');
+
+        $accrualClearanceBuilder->selectSum('voucher_detail_total_cost');
+        $accrualClearanceBuilder->select('voucher_id,voucher_number,voucher.fk_office_id as office_id,voucher_description');
+
+        if(!empty($officeIds)){
+            $accrualClearanceBuilder->whereIn('voucher.fk_office_id', $officeIds);
+        }
+
+        $accrualClearanceBuilder->join('voucher','voucher.voucher_id=accrual_clearance.fk_voucher_id');
+        $accrualClearanceBuilder->join('voucher_detail','voucher_detail.fk_voucher_id=voucher.voucher_id');
+        $accrualClearanceBuilder->where('accrual_clearance_status', \App\Enums\AccrualClearanceStatus::PENDING->value);
+        $accrualClearanceBuilder->whereIn('voucher.fk_status_id', $maxApprovalIds);
+        $accrualClearanceBuilder->groupBy('voucher_id, voucher_number');
+        $accrualClearanceBuilder->orderBy('voucher_id DESC');
+        $accrualClearanceObj = $accrualClearanceBuilder->get();
+
+        $pendingAccrualClearance = [];
+
+        if($accrualClearanceObj->getNumRows() > 0){
+            $pendingAccrualClearance = $accrualClearanceObj->getResultArray();
+        }
+
+        return $pendingAccrualClearance;
+
+      }
 }

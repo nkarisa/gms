@@ -100,7 +100,9 @@ if (empty($transacting_month)) {
                 <div class='btn btn-default hidden' id='print_vouchers'><?= get_phrase('print_vouchers'); ?></div>
             </div>
 
-            <?php if ($office_has_multiple_bank_accounts) { ?>
+            <?php 
+                // Turns true there is nore than one non obselete bank account
+                if ($office_has_multiple_bank_accounts) { ?>
                 <div class='col-xs-6'>
                     <div class='form-group'>
                         <label class='control-label col-xs-2'>
@@ -109,7 +111,7 @@ if (empty($transacting_month)) {
                         <div class='col-xs-10'>
                             <select class='form-control' id='select_office_bank'>
                                 <option value='0'><?= get_phrase('all_bank_accounts'); ?></option>
-                                <?php foreach ($office_bank_accounts as $office_bank_account) { ?>
+                                <?php foreach ($active_office_banks as $office_bank_account) { ?>
                                     <option value='<?= $office_bank_account['office_bank_id']; ?>'>
                                         <?= $office_bank_account['bank_name'] . ' - ' . $office_bank_account['office_bank_name'] . ' - ' . $office_bank_account['office_bank_account_number']; ?>
                                     </option>
@@ -209,3 +211,5 @@ if (empty($transacting_month)) {
         })
     })
 </script>
+
+

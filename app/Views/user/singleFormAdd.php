@@ -522,7 +522,7 @@ extract($result);
 
         // Validate fields missing
 
-        const form_controls = $(".form-control");
+        const form_controls = $("#frm_user.form-control");
         let count_validation_errors = 0;
 
         $.each(form_controls, function (index, elem) {
