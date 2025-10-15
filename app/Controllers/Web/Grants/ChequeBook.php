@@ -133,6 +133,15 @@ class ChequeBook extends WebController
         if($this->action == 'singleFormAdd'){
             $office_ids = array_column($this->session->hierarchy_offices, 'office_id');
             $result['office_banks']=$chequeBookLibrary->retrieveOfficeBank($office_ids);
+        }elseif($this->action == 'list'){
+            $columns = $this->columns();
+            array_shift($columns);
+            unset($columns[array_search('fk_account_system_id', $columns)]);
+            $result['columns'] = $columns;
+            $result['has_details_table'] = false; 
+            $result['has_details_listing'] = false;
+            $result['is_multi_row'] = false;
+            $result['show_add_button'] = true;
         }
 
         return $result;
@@ -392,48 +401,48 @@ class ChequeBook extends WebController
         return $count_all_results;
     }
 
-//     function showList(): ResponseInterface
-//     {
-//         $grantsLibrary = new GrantsLibrary();
-//         $draw =intval($this->request->getPost('draw'));
-//         $cheque_books = $this->get_cheque_books();
-//         $count_cheque_books = $this->count_cheque_books();
+    function showList(): ResponseInterface
+    {
+        $grantsLibrary = new GrantsLibrary();
+        $draw =intval($this->request->getPost('draw'));
+        $cheque_books = $this->get_cheque_books();
+        $count_cheque_books = $this->count_cheque_books();
 
-//         $result = [];
+        $result = [];
 
-//         $cnt = 0;
-//         foreach($cheque_books as $cheque_book){
-//             $status_data = $grantsLibrary->actionButtonData($this->controller, $cheque_book['fk_account_system_id']); // This has performance issues due to reading db on loops
-//             extract($status_data);
-//             $cheque_book_id = array_shift($cheque_book);
-//             $cheque_book_is_used = array_pop($cheque_book);
-//             $cheque_book_status = array_pop($cheque_book);
+        $cnt = 0;
+        foreach($cheque_books as $cheque_book){
+            $status_data = $grantsLibrary->actionButtonData($this->controller, $cheque_book['fk_account_system_id']); // This has performance issues due to reading db on loops
+            extract($status_data);
+            $cheque_book_id = array_shift($cheque_book);
+            $cheque_book_is_used = array_pop($cheque_book);
+            $cheque_book_status = array_pop($cheque_book);
 
-//             $cheque_book_track_number = $cheque_book['cheque_book_track_number'];
-//             $cheque_book['cheque_book_track_number'] = '<a href="'.base_url().$this->controller.'/view/'.hash_id($cheque_book_id).'">'.$cheque_book_track_number.'</a>';
-//             $cheque_book['cheque_book_is_active'] = $cheque_book['cheque_book_is_active'] == 1 ? get_phrase('yes') : get_phrase('no');
-//             $row = array_values($cheque_book);
+            $cheque_book_track_number = $cheque_book['cheque_book_track_number'];
+            $cheque_book['cheque_book_track_number'] = '<a href="'.base_url().$this->controller.'/view/'.hash_id($cheque_book_id).'">'.$cheque_book_track_number.'</a>';
+            $cheque_book['cheque_book_is_active'] = $cheque_book['cheque_book_is_active'] == 1 ? get_phrase('yes') : get_phrase('no');
+            $row = array_values($cheque_book);
 
-//             $deactivate_action_buttons = $cheque_book_is_used ? true : false;
-//             $action = approval_action_button($this->controller, $item_status, $cheque_book_id, $cheque_book_status, $item_initial_item_status_id, $item_max_approval_status_ids, $deactivate_action_buttons);
+            // $deactivate_action_buttons = $cheque_book_is_used ? true : false;
+            // $action = approval_action_button($this->controller, $item_status, $cheque_book_id, $cheque_book_status, $item_initial_item_status_id, $item_max_approval_status_ids, $deactivate_action_buttons);
 
-//             array_unshift($row, $action);
+            // array_unshift($row, $action);
 
-//             $result[$cnt] = $row;
+            $result[$cnt] = $row;
 
-//             $cnt++;
-//         }
+            $cnt++;
+        }
 
-//         $response = [
-//             'draw'=>$draw,
-//             'recordsTotal'=>$count_cheque_books,
-//             'recordsFiltered'=>$count_cheque_books,
-//             'data'=>$result
-//         ];
+        $response = [
+            'draw'=>$draw,
+            'recordsTotal'=>$count_cheque_books,
+            'recordsFiltered'=>$count_cheque_books,
+            'data'=>$result
+        ];
 
-// //        echo json_encode($response);
-//         return $this->response->setJSON($response);
-//     }
+//        echo json_encode($response);
+        return $this->response->setJSON($response);
+    }
 
     static function get_menu_list(){}
 }
