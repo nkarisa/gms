@@ -1,4 +1,4 @@
-FROM serversideup/php:8.3-fpm-apache
+FROM docker.io/serversideup/php:8.3-fpm-apache
 
 # --- Environment Variables ---
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
