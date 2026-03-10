@@ -107,3 +107,4 @@ SHA256-PASSWORD-SALT = ${SHA256_PASSWORD_SALT}
 aws.credentials_profile = profile
 aws.region = eu-west-1
 
+
