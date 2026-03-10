@@ -5,3 +5,5 @@ terraform/
 .kiro
 .idea
 .vscode
+writable/*
+!writable/index.html
