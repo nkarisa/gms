@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "main", "accrual-voucher-types-et2" ]
     tags: [ 'v*' ]
-  workflow_dispatch:
+  workflow_dispatch: # Allows you to run this manually from the Actions tab
 
 env:
   REGISTRY: ghcr.io
@@ -21,14 +21,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Set up QEMU for ARM64 emulation
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
+      # Set up Docker Buildx with network=host to prevent TLS handshake timeouts
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
           driver-opts: network=host
 
+      # Login to GitHub Container Registry
       - name: Log into registry ${{ env.REGISTRY }}
         uses: docker/login-action@v3
         with:
@@ -36,6 +39,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # Extract metadata (tags, labels) for Docker
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -47,6 +51,7 @@ jobs:
             type=sha,format=short
             latest
 
+      # Build and push the multi-arch image with automatic retries for network flakiness
       - name: Build and push Docker image
         uses: Wandalen/waction-retry@v1
         with:
@@ -61,18 +66,3 @@ jobs:
             labels: ${{ steps.meta.outputs.labels }}
             cache-from: type=gha
             cache-to: type=gha,mode=max
-
-  # New Job: Automatically prune old images to save storage
-  prune-images:
-    runs-on: ubuntu-latest
-    needs: build-and-push
-    permissions:
-      packages: write
-    steps:
-      - name: Delete old image versions
-        uses: actions/delete-package-versions@v5
-        with:
-          package-name: 'toolkit'
-          package-type: 'container'
-          min-versions-to-keep: 5
-          delete-only-untagged-versions: 'true'
