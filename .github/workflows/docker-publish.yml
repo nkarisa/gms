@@ -2,7 +2,7 @@ name: Build and Push Multi-Arch Image
 
 on:
   push:
-    branches: [ "main", "accrual-voucher-types-et2" ]
+    branches: [ "main","accrual-voucher-types-et2" ]
     tags: [ 'v*' ]
   workflow_dispatch: # Allows you to run this manually from the Actions tab
 
@@ -25,11 +25,9 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
-      # Set up Docker Buildx with network=host to prevent TLS handshake timeouts
+      # Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        with:
-          driver-opts: network=host
 
       # Login to GitHub Container Registry
       - name: Log into registry ${{ env.REGISTRY }}
@@ -51,18 +49,15 @@ jobs:
             type=sha,format=short
             latest
 
-      # Build and push the multi-arch image with automatic retries for network flakiness
+      # Build and push the multi-arch image
       - name: Build and push Docker image
-        uses: Wandalen/waction-retry@v1
+        uses: docker/build-push-action@v6
         with:
-          attempt_limit: 3
-          attempt_delay: 2000
-          action: docker/build-push-action@v6
-          with: |
-            context: .
-            push: true
-            platforms: linux/amd64,linux/arm64
-            tags: ${{ steps.meta.outputs.tags }}
-            labels: ${{ steps.meta.outputs.labels }}
-            cache-from: type=gha
-            cache-to: type=gha,mode=max
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # Enables faster subsequent builds by caching layers in GHCR
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
