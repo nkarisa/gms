@@ -1,2 +1,7 @@
 terraform/
 *.tfvars
+.git
+.github
+.kiro
+.idea
+.vscode
