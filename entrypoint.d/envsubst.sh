@@ -2,6 +2,9 @@
 
 ### 1. Substitute variables into the main .env file ###
 
+# Root where the application lives
+APP_ROOT="/var/www/html"
+
 # Define the list of environment variables for the .env substitution
 ENV_VARS_TO_SUBST='BASE_URL \
                 LOGTAIL_TOKEN \ 
@@ -14,7 +17,7 @@ ENV_VARS_TO_SUBST='BASE_URL \
 
 echo "Starting environment variable substitution into .env..."
 # Perform the substitution on the 'env' file, output to a temporary file, then move to .env
-envsubst "$ENV_VARS_TO_SUBST" < env > .env.tmp && mv .env.tmp .env \
+envsubst "$ENV_VARS_TO_SUBST" < "$APP_ROOT/env" > "$APP_ROOT/.env.tmp" && mv "$APP_ROOT/.env.tmp" "$APP_ROOT/.env" \
     && echo "Successfully created/updated .env file." || { 
         echo "Error: Failed to substitute variables into .env."
         exit 1
