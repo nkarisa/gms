@@ -7,3 +7,17 @@ terraform/
 .vscode
 writable/*
 !writable/index.html
+!writable/cache/
+!writable/cache/**
+!writable/log/
+!writable/log/**
+!writable/logs/
+!writable/logs/**
+!writable/debugger/
+!writable/debugger/**
+!writable/debugbar/
+!writable/debugbar/**
+!writable/session/
+!writable/session/**
+!writable/uploads/
+!writable/uploads/**
