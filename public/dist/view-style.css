@@ -1,0 +1,177 @@
+/*!*********************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./public/assets/styles/view.css ***!
+  \*********************************************************************************/
+@media print {
+    /* 1. Hide everything by default */
+    body * {
+        visibility: hidden;
+    }
+    
+    /* 2. Make the selected element visible */
+    #print-area, #print-area * {
+        visibility: visible;
+    }
+    
+    /* 3. Position the selected element at the top left of the page */
+    #print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+    .no-print {
+        display: none !important; /* The !important ensures it overrides other rules */
+    }
+}
+
+
+
+/* History section */
+.wrap_history{
+    gap: 1rem;
+    flex: 1;
+    width: 88%;
+    justify-self: center;
+    margin-bottom: 3.75rem
+}
+.wrap_history .history_header{
+    align-self: stretch;
+    gap: 0.75rem;
+    align-items: flex-start;
+}
+
+.wrap_history .history_header .head {
+    color: var(--colors-text-text-primary-900, #101828);
+    font-size: var(--size-5, 1.25rem);
+    font-style: normal;
+    font-weight: 600;
+    line-height: 125%; /* 1.5625rem */
+    align-self: stretch;
+}
+
+.section_header p {
+    margin-bottom: 1rem;
+}
+
+
+.wrap_history .history_header .description{
+    color: var(--colors-text-text-primary-900, #101828);
+font-size: var(--size-4, 1rem);
+font-style: normal;
+font-weight: 500;
+line-height: 150%; /* 1.5rem */
+}
+
+.wrap_history .history_body {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    border-top: 1px solid var(--Colors-Border-border-secondary, #EAECF0);
+    padding-top: 1rem;
+}
+
+.wrap_history .history_body .action_type{
+    align-self: stretch;
+    color: var(--palette-neutral-moderate, #63697D);
+    font-size: var(--size-4, 1rem);
+    font-style: normal;
+    font-weight: 700;
+    line-height: 125%; /* 1.25rem */
+}
+
+.author_trail_wrapper{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    align-self: stretch;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--Colors-Border-border-secondary, #EAECF0);;
+}
+
+.wrap_history .history_body .author_trail_wrapper .action_by_wrapper{
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    align-self: stretch;
+}
+
+.wrap_history .history_body .author_trail_wrapper .action_by_wrapper .name_role{
+    color: var(--palette-neutral-moderate, #63697D);
+    font-size: var(--size-4, 1rem);
+    font-style: normal;
+    font-weight: 500;
+    line-height: 125%; /* 1.25rem */
+    align-self: center;
+}
+.wrap_history .history_body .author_trail_wrapper .action_by_wrapper .action_timestamp{
+    color: var(--colors-text-text-tertiary-600, #475467);
+    font-size: var(--size-4, 1rem);
+    font-style: normal;
+    font-weight: 400;
+    line-height: 125%; /* 1.25rem */
+    margin-left: auto;
+    align-self: center;
+}
+
+ .details_head {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+        align-self: stretch;
+    }
+
+    .details_head .wrap_actions {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 1.5rem;
+    }
+
+    .details_head .wrap_detail {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        align-self: stretch;
+    }
+
+    .details_head .wrap_detail .detail_row {
+        flex: 1;
+    }
+
+    .details_head .wrap_detail .detail_row .detail_cell {
+        flex: 1;
+        align-items: flex-start;
+    }
+
+    .details_head .wrap_detail .detail_row .detail_cell .title {
+        color: var(--colors-text-text-secondary-700, #344054);
+        font-size: var(--size-4, 1rem);
+        font-style: normal;
+        font-weight: 500;
+        line-height: 125%;
+        /* 1.25rem */
+    }
+
+    .details_head .wrap_detail .detail_row .detail_cell .content {
+        overflow: hidden;
+        color: var(--color-input-foreground-neutral-potent, #252831);
+        text-overflow: ellipsis;
+        font-size: 1rem;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 150%;
+        /* 1.5rem */
+    }
+
+    /* table specific design */
+    .table_st {
+        width: 100%;
+    }
+
+    .read_only .desc_txt {
+        width: 21.3125rem;
+        max-width: 21.3125rem;
+    }

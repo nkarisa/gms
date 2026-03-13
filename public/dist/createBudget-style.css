@@ -1,0 +1,112 @@
+/*!*****************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./public/assets/styles/createBudget.css ***!
+  \*****************************************************************************************/
+body{
+    background-color: #fff;
+}
+main{
+    margin: 2rem auto;
+}
+.containerWrapper{
+    width: 91%;
+}
+
+.grid{
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(1, 1fr);
+    gap: 1.5rem;
+}
+.row_header{
+    /* layout */
+    display: flex;
+    padding: var(--size-5, 1.25rem) var(--size-4, 1rem) var(--size-5, 1.25rem) 5.8125rem;
+    align-items: center;
+    gap: var(--size-5, 1.25rem);
+    align-self: stretch;
+    /* style */
+    border-radius: 0.625rem 0.625rem 0rem 0rem;
+    border-bottom: 1px solid var(--color-container-border-neutral-mild, #D6D8DF);
+    background: var(--palette-alpha-faint, #FFF);
+    /* debug */
+    max-height: max-content;
+    width: 100%;
+    margin-top: 3rem;
+} 
+.row_header p{
+    flex: 1;
+    color: #000;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 125%; /* 1.25rem */
+}
+
+/* dynamic budget limits */
+.budget_limit_row{
+    display: flex;
+    padding: 1rem var(--spacing-roomy-xs, 3rem);
+    align-items: center;
+    gap: 1.5rem;
+    align-self: stretch;
+    /* style */
+    border-bottom: 1px solid var(--color-container-border-neutral-mild, #D6D8DF);
+    background: #FFF;
+}
+.budget_limit_row .form_group{
+    flex: 1;
+}
+.budget_limit_row .form_group input{
+    padding: 0.49rem 0.875rem;
+    line-height: 146%;
+    margin: 0rem;
+}
+.btn_rmv_row{
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid silver;
+    cursor: pointer;
+}
+.actions{
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    gap: 1.5rem;
+    align-self: stretch;
+    height: max-content;
+    width: 100%;
+}
+.budget_limit_row_wrap .budget_limit_row:nth-child(even){
+    background-color: var(--palette-neutral-faint, #F4F5F7);
+}
+.budget_limit_row_wrap .budget_limit_row:nth-child(1) .btn_rmv_row {
+    opacity: 0;
+}
+.btn_add_row_wrapper{
+    margin: 2rem 0rem;
+}
+.btnCreateNewLimit{
+    display: flex;
+    cursor: pointer;
+    width: max-content;
+    padding: 0.625rem 0.875rem;
+    justify-content: space-between;
+    align-items: center;
+    gap: .4rem;
+    /* style */
+    border-radius: var(--radius-md, 0.5rem);
+    border: 1px solid var(--Component-colors-Components-Buttons-Secondary-button-secondary-border, #D0D5DD);
+    background: var(--Component-colors-Components-Buttons-Secondary-button-secondary-bg, #FFF);
+}
+
+.btn_chip_icon,
+.btn_chip_fill{
+    display: flex;
+    padding: var(--spacing-comfy-sm, 1rem) var(--spacing-comfy-md, 1.25rem);
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-snug-lg, 0.375rem);
+}

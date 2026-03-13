@@ -1,0 +1,340 @@
+/*!*******************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./public/assets/styles/create_account.css ***!
+  \*******************************************************************************************/
+.create_account_wrapper{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--palette-alpha-faint, #FFF);
+    min-height: 100vh;
+}
+.menu_holder{
+    display: flex;
+    max-width: 27.5rem;
+    padding: 2rem;
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 1 0 0;
+    align-self: stretch;
+    background: var(--palette-primary-faint);
+}
+.menu_holder_wrapper{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex: 1 0 0;
+    align-self: stretch;
+}
+.menu_holder_wrapper .container{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-8xl, 5rem);
+    align-self: stretch;
+}
+.steps{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+    align-self: stretch;
+}
+.step{
+    display: flex;
+    padding: 0.75rem 1.5rem;
+    align-items: flex-start;
+    gap: var(--spacing-xl, 1rem);
+    align-self: stretch;
+    display: flex;
+    padding: 0.75rem 1.5rem;
+    align-items: flex-start;
+    gap: var(--spacing-xl, 1rem);
+    align-self: stretch;
+    border-radius: 6.25rem;
+    cursor: pointer;
+}
+.step:hover{
+    background: #BFD8FE;
+}
+.step.active{
+    background: #BFD8FE;
+}
+.step_icon{
+    display: flex;
+    padding-bottom: var(--spacing-xs, 0.25rem);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-xs, 0.25rem);
+    align-self: stretch;
+}
+.step_detail{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xxs, 0.125rem);
+    flex: 1 0 0;
+}
+.title_txt{
+    color: var(--palette-neutral-potent, #494F61);
+    font-size: var(--size-4, 1rem);
+    font-style: normal;
+    font-weight: 600;
+    line-height: 125%; /* 1.25rem */
+}
+.body_txt{
+    color: var(--palette-neutral-potent, #494F61);
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 150%; /* 1.5rem */
+}
+.active .title_txt,
+.active .body_txt {
+    color: var(--palette-neutral-amplified, #252831);
+}
+
+
+/* main section */
+
+.main_section{
+    flex: 1;
+    display: grid;
+    place-items: center;
+    background-color: transparent;
+}
+.wrap_section{
+    min-width: 26.5rem;
+    max-width: 26.5rem;
+    min-height: 29.3rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    overflow-x: hidden;
+    position: relative;
+    transform-origin: left 0%;
+}
+.container_wrapper{
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    transition: transform ease-in-out 500ms;
+}
+.container_wrapper.step_password{
+    transform: translate(calc((100% / 3)* -1));
+
+}
+.container_wrapper.complete_profile{
+    transform: translate(calc((100% / 3)* -2));
+}
+.your_detail_container{
+    min-width: 26.5rem;
+    max-width: 26.5rem;
+    display: flex;
+    padding: var(--spacing-4xl, 2rem) 2.5rem;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-3xl, 1.5rem);
+}
+.your_detail_container .form_wrapper{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+    align-self: stretch;
+}
+.your_detail_container .form_wrapper .form{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-2xl, 1.25rem);
+    align-self: stretch;
+}
+.your_detail_container .form_wrapper .form .header_txt{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-lg, 0.75rem);
+    align-self: stretch;
+}
+.your_detail_container .form_wrapper .form .header_txt .title{
+    color: var(--palette-neutral-amplified, #252831);
+    align-self: stretch;
+    font-size: 2.5rem;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 125%; /* 3.125rem */
+    letter-spacing: -0.05rem;
+}
+.your_detail_container .form_wrapper .form .header_txt .title .title_desc{
+    color: var(--palette-neutral-amplified, #252831);
+    align-self: stretch;
+    font-size: 2.5rem;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 125%; /* 3.125rem */
+    letter-spacing: -0.05rem;
+}
+.your_detail_container_content{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2rem;
+    align-self: stretch;
+}
+.choose_password_container{
+    min-width: 26.5rem;
+    max-width: 26.5rem;
+    height: 100%;
+    display: flex;
+    padding: var(--spacing-4xl, 1rem) 1.5rem;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-3xl, 1.5rem);
+}
+.choose_password_container .content{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-3xl, 1.5rem);
+    align-self: stretch;
+}
+.choose_password_container .content .content_wrapper{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2rem;
+    align-self: stretch;
+}
+.choose_password_container .content .content_wrapper .form_wrapper{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+    align-self: stretch;
+}
+.choose_password_container .content .content_wrapper .form_wrapper .form{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-2xl, 1.25rem);
+    align-self: stretch;
+}
+
+.choose_password_container .content .content_wrapper .form_wrapper .form .header_txt{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-lg, 0.75rem);
+    align-self: stretch;
+}
+.choose_password_container .content .content_wrapper .form_wrapper .form  .header_txt .title{
+    color: var(--palette-neutral-amplified, #252831);
+    align-self: stretch;
+    font-size: 2.5rem;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 125%; /* 3.125rem */
+    letter-spacing: -0.05rem;
+    white-space: nowrap;
+}
+
+
+
+
+.complete_profile_container{
+    min-width: 26.5rem;
+    /* max-width: 26.5rem; */
+    height: 100%;
+    display: flex;
+    padding: var(--spacing-4xl, 2rem) 2.5rem;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-3xl, 1.5rem);
+}
+.complete_profile_container .content{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2rem;
+    align-self: stretch;
+}
+.complete_profile_container .content .form_container{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+    align-self: stretch;
+}
+.complete_profile_container .content .form_container .form{
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto 1fr ;
+    gap: 1.5rem;
+    max-height: 80vh;
+}
+/* ........... */
+.complete_profile_container .content .form_container .form .scroll_fields{
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+    align-self: stretch;
+    padding-right: 0.5rem;
+}
+
+
+
+.complete_profile_container .content .form_container .form .form_header{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-lg, 0.75rem);
+    align-self: stretch;
+}
+.complete_profile_container .content .form_container .form .form_header .title{
+    color: var(--palette-neutral-amplified, #252831);
+    font-size: 2.5rem;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 125%; /* 3.125rem */
+    letter-spacing: -0.05rem;
+    white-space: nowrap;
+   
+}
+
+.complete_profile_container .content .form_container .form .form_header .description{
+    color: var(--palette-neutral-potent, #494F61);
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 150%; /* 1.5rem */
+}
+
+/* Continue buttons */
+.btn_verify_your_detail, .btn_create_account{
+    background-color: var(--palette-primary-mild);
+    height: 2.75rem;
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 20px;
+    word-wrap: break-word;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: calc(2.75rem / 2);
+    cursor: pointer;
+    border: none;
+    text-transform: none;
+}

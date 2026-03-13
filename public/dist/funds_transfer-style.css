@@ -1,0 +1,61 @@
+/*!*******************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./public/assets/styles/funds_transfer.css ***!
+  \*******************************************************************************************/
+.funds_transfer_form_wrapper {
+    width: 100%;
+    box-sizing: border-box;
+    padding: var(--spacing-2xl, 1.5rem) 1.5rem;
+}
+
+.ft_alert_spacing {
+    margin-bottom: var(--spacing-xl, 1rem);
+}
+
+.ft_alert_spacing .alert_container {
+    border-radius: var(--radius-xl, 0.75rem);
+}
+
+.ft_alert_spacing .alert_container .alert {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.ft_alert_spacing .alert_container .content .txt_content {
+    width: 100%;
+    max-width: 100%;
+}
+
+.voucher_item_table {
+    width: 100%;
+}
+
+.voucher_item_table thead td {
+    font-weight: 600;
+    color: var(--color-foreground-amplified, #161D55);
+    padding: var(--spacing-md, 0.5rem) var(--spacing-sm, 0.25rem);
+}
+
+.voucher_item_table tbody td {
+    padding: var(--spacing-md, 0.5rem) var(--spacing-sm, 0.25rem);
+    vertical-align: middle;
+}
+
+.body_actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1.5rem;
+    align-self: stretch;
+    padding-top: var(--spacing-xl, 1rem);
+}
+
+.invisible {
+    visibility: hidden;
+    opacity: 0;
+}
+
+.wrap_rows {
+    width: 100%;
+    overflow-x: auto;
+}

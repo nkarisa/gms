@@ -1,0 +1,1325 @@
+/*!*********************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./public/assets/styles/financial_report.css ***!
+  \*********************************************************************************************/
+/**
+ * Financial Report Module Styles
+ * Consolidated CSS for the financial report views and components
+ */
+
+/* ============================================
+   MODAL STYLES - Variance Comment Modal
+   ============================================ */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal .modal_content {
+    position: relative;
+    background-color: #fff;
+    border-radius: 0.75rem;
+    max-width: 560px;
+    width: 90%;
+    max-height: 80vh;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    animation: modalFadeIn 0.3s ease forwards;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal .modal_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--color-container-border-neutral-mild, #D6D8DF);
+}
+
+.modal .modal_header h3 {
+    color: var(--palette-neutral-amplified, #252831);
+    font-family: "Neighbour Sans", sans-serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.25;
+    margin: 0;
+}
+
+.modal .modal_close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--palette-neutral-mild, #7C8399);
+    padding: 0;
+    line-height: 1;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.modal .modal_close:hover {
+    background-color: var(--palette-neutral-faint, #F4F5F7);
+    color: var(--palette-neutral-potent, #494F61);
+}
+
+.modal .modal_body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modal .modal_footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem 1.5rem;
+    border-top: 1px solid var(--color-container-border-neutral-mild, #D6D8DF);
+}
+
+/* Modal Buttons */
+.modal .btn {
+    display: inline-flex;
+    padding: 0.625rem 1rem;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 0.5rem;
+    font-family: "Neighbour Sans", sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.modal .btn_primary {
+    background: var(--palette-primary-mild, #3268FA);
+    color: #fff;
+    border-color: var(--palette-primary-mild, #3268FA);
+}
+
+.modal .btn_primary:hover {
+    background: var(--palette-primary-moderate, #214AEF);
+    border-color: var(--palette-primary-moderate, #214AEF);
+}
+
+.modal .btn_primary:disabled {
+    background: var(--palette-neutral-subtle, #999EB0);
+    border-color: var(--palette-neutral-subtle, #999EB0);
+    cursor: not-allowed;
+}
+
+.modal .btn_secondary {
+    background: #fff;
+    color: var(--palette-neutral-potent, #494F61);
+    border-color: var(--color-container-border-neutral-mild, #D6D8DF);
+}
+
+.modal .btn_secondary:hover {
+    background: var(--palette-neutral-faint, #F4F5F7);
+}
+
+/* ============================================
+   COMMENT TRAIL STYLES
+   ============================================ */
+.comment_trail {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.comment_trail .comment_item {
+    padding: 1rem;
+    background: var(--palette-neutral-faint, #F4F5F7);
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-container-border-neutral-mild, #D6D8DF);
+}
+
+.comment_trail .comment_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.comment_trail .comment_author {
+    font-weight: 600;
+    color: var(--palette-neutral-amplified, #252831);
+    font-size: 0.875rem;
+}
+
+.comment_trail .comment_date {
+    font-size: 0.75rem;
+    color: var(--palette-neutral-mild, #7C8399);
+}
+
+.comment_trail .comment_text {
+    color: var(--palette-neutral-potent, #494F61);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.comment_trail p.error {
+    color: var(--palette-negative-potent, #C6351A);
+    font-size: 0.875rem;
+    padding: 1rem;
+    text-align: center;
+}
+
+/* Comment Input Section */
+.comment_input_section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.comment_input_section textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-container-border-neutral-mild, #D6D8DF);
+    border-radius: 0.5rem;
+    font-family: "Neighbour Sans", sans-serif;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    resize: vertical;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.comment_input_section textarea:focus {
+    outline: none;
+    border-color: var(--palette-primary-mild, #3268FA);
+    box-shadow: 0 0 0 3px var(--color-ring-moderate, rgba(28, 45, 140, 0.25));
+}
+
+.comment_input_section textarea::placeholder {
+    color: var(--palette-neutral-subtle, #999EB0);
+}
+
+.comment_attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* ============================================
+   TOOLTIP STYLES
+   ============================================ */
+.balance_tooltip {
+    position: absolute;
+    z-index: 1000;
+    background: #ffffff;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 0.75rem 1rem;
+    max-width: 300px;
+    min-width: 200px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.balance_tooltip.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.balance_tooltip.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.balance_tooltip .tooltip_content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.balance_tooltip .tooltip_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.balance_tooltip .tooltip_title {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--palette-neutral-amplified, #252831);
+}
+
+.balance_tooltip .tooltip_close {
+    background: none;
+    border: none;
+    font-size: 1.125rem;
+    cursor: pointer;
+    color: var(--palette-neutral-mild, #7C8399);
+    padding: 0;
+    line-height: 1;
+}
+
+.balance_tooltip .tooltip_close:hover {
+    color: var(--palette-neutral-potent, #494F61);
+}
+
+.balance_tooltip .tooltip_body {
+    font-size: 0.8125rem;
+    color: var(--palette-neutral-potent, #494F61);
+    line-height: 1.5;
+}
+
+.balance_tooltip .tooltip_message {
+    margin: 0;
+}
+
+.balance_tooltip.success .tooltip_title {
+    color: var(--palette-positive-subtle, #499E57);
+}
+
+.balance_tooltip.error .tooltip_title {
+    color: var(--palette-negative-potent, #C6351A);
+}
+
+.balance_tooltip.info .tooltip_title {
+    color: var(--palette-neutral-amplified, #252831);
+}
+
+/* Arrow pointer */
+.balance_tooltip::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 8px solid transparent;
+    border-bottom-color: #ffffff;
+}
+
+/* ============================================
+   LOADING PLACEHOLDER STYLES
+   ============================================ */
+.loading-placeholder {
+    padding: 2rem;
+    text-align: center;
+    color: var(--palette-neutral-mild, #7C8399);
+    background: var(--palette-neutral-faint, #F4F5F7);
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+}
+
+.loading-placeholder p {
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+.loading-row td {
+    padding: 2rem !important;
+    text-align: center;
+    color: var(--palette-neutral-mild, #7C8399);
+    background: var(--palette-neutral-faint, #F4F5F7);
+}
+
+/* ============================================
+   STATE INDICATOR STYLES
+   ============================================ */
+.state {
+    display: inline-flex;
+    padding: 0.375rem 0.75rem;
+    justify-content: center;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.state.success {
+    border: 1px solid var(--palette-positive-subtle, #38CF84) !important;
+    background: var(--palette-positive-faint, #ECFDF3) !important;
+    color: var(--palette-positive-mild, #418F51);
+}
+
+.state.error {
+    border: 1px solid var(--palette-negative-subtle, #F97066) !important;
+    background: var(--palette-negative-faint, #FEF3F2) !important;
+    color: var(--palette-negative-potent, #C6351A);
+}
+
+.state.info {
+    border: 1px solid var(--palette-warning-subtle, #FFF2AD);
+    background: var(--palette-warning-faint, #FFFAEB);
+    color: var(--palette-warning-moderate, #DD7002);
+}
+
+/* Clickable state buttons */
+.btn_clear_cheque,
+.btn_clear_transit {
+    cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.btn_clear_cheque:hover,
+.btn_clear_transit:hover {
+    opacity: 0.8;
+    transform: scale(1.02);
+}
+
+.btn_clear_cheque:active,
+.btn_clear_transit:active {
+    transform: scale(0.98);
+}
+
+/* ============================================
+   LABEL BUTTON STYLES (Proof of Cash)
+   ============================================ */
+.label_btn {
+    display: inline-flex;
+    padding: 0.5rem 0.75rem;
+    justify-content: center;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid var(--palette-primary-subtle, #609EFA);
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.label_btn.success {
+    border-color: var(--palette-positive-subtle, #38CF84) !important;
+    background: var(--palette-positive-faint, #ECFDF3) !important;
+    color: var(--palette-positive-mild, #418F51);
+}
+
+.label_btn.error {
+    border-color: var(--palette-negative-subtle, #F97066) !important;
+    background: var(--palette-negative-faint, #FEF3F2) !important;
+    color: var(--palette-negative-potent, #C6351A);
+}
+
+/* ============================================
+   EXPENSE ACCOUNT SECTION
+   ============================================ */
+.summary_expense_accounts .no_data {
+    padding: 2rem;
+    text-align: center;
+    color: var(--palette-neutral-mild, #7C8399);
+}
+
+.expense_wrapper .negative {
+    color: var(--palette-negative-potent, #C6351A) !important;
+}
+
+/* Comment button in expense table */
+.btn_comment {
+    display: inline-flex;
+    padding: 0.5rem;
+    justify-content: center;
+    align-items: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 0.375rem;
+    transition: background-color 0.2s ease;
+}
+
+.btn_comment:hover {
+    background-color: var(--palette-primary-faint, #F4F7FF);
+}
+
+.btn_comment svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+/* ============================================
+   ACCRUED BALANCES SECTION
+   ============================================ */
+#accrued_balances_section .total_row td {
+    border-top: 2px solid var(--color-container-border-neutral-mild, #D6D8DF);
+    font-weight: 600;
+}
+
+#accrued_balances_section .adjustment_spacer td {
+    height: 1.5rem;
+    border: none;
+    background: transparent;
+}
+
+#accrued_balances_section .adjustment_header td {
+    font-weight: 600;
+    color: var(--palette-neutral-amplified, #252831);
+}
+
+#accrued_balances_section .adjustment_row td {
+    padding-left: 1rem;
+}
+
+#accrued_balances_section .final_total td {
+    border-top: 2px solid var(--color-container-border-neutral-mild, #D6D8DF);
+    border-bottom: 2px solid var(--color-container-border-neutral-mild, #D6D8DF);
+}
+
+/* ============================================
+   CHEQUE TOTAL ROW
+   ============================================ */
+.cheque_total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--palette-neutral-faint, #F4F5F7);
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+}
+
+.cheque_total .label {
+    font-weight: 500;
+    color: var(--palette-neutral-amplified, #252831);
+}
+
+.cheque_total .value {
+    font-weight: 600;
+    color: var(--palette-neutral-amplified, #252831);
+}
+
+/* ============================================
+   PROOF OF CASH ICON STYLES
+   ============================================ */
+.icon_button_wrapper {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s ease;
+}
+
+.icon_button_wrapper:hover {
+    background-color: var(--palette-neutral-faint, #F4F5F7);
+}
+
+/* ============================================
+   FINANCIAL RATIO INFO ICONS
+   ============================================ */
+.financial_ratio .info_icon {
+    cursor: help;
+    margin-left: 0.25rem;
+}
+
+/* ============================================
+   VALIDATION SUMMARY CHECKLIST
+   ============================================ */
+.validation_summary {
+    background: #fff;
+    border-radius: 0.5rem;
+    padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--color-container-border-neutral-mild, #D6D8DF);
+}
+
+.validation_summary h4 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--palette-neutral-amplified, #252831);
+    margin: 0 0 0.75rem;
+}
+
+.validation_items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.validation_item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--palette-neutral-potent, #494F61);
+}
+
+.validation_item .validation_icon {
+    display: inline-flex;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Pass state - green checkmark */
+.validation_item.pass .validation_icon {
+    background: var(--palette-positive-faint, #ECFDF3);
+    border: 1.5px solid var(--palette-positive-subtle, #38CF84);
+}
+
+.validation_item.pass .validation_icon::after {
+    content: '';
+    width: 0.375rem;
+    height: 0.625rem;
+    border: solid var(--palette-positive-mild, #418F51);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    margin-bottom: 2px;
+}
+
+.validation_item.pass .validation_label {
+    color: var(--palette-positive-mild, #418F51);
+}
+
+/* Fail state - red cross */
+.validation_item.fail .validation_icon {
+    background: var(--palette-negative-faint, #FEF3F2);
+    border: 1.5px solid var(--palette-negative-subtle, #F97066);
+}
+
+.validation_item.fail .validation_icon::before,
+.validation_item.fail .validation_icon::after {
+    content: '';
+    position: absolute;
+    width: 0.5rem;
+    height: 2px;
+    background: var(--palette-negative-potent, #C6351A);
+}
+
+.validation_item.fail .validation_icon::before {
+    transform: rotate(45deg);
+}
+
+.validation_item.fail .validation_icon::after {
+    transform: rotate(-45deg);
+}
+
+.validation_item.fail .validation_icon {
+    position: relative;
+}
+
+.validation_item.fail .validation_label {
+    color: var(--palette-negative-potent, #C6351A);
+}
+
+/* Pending state - grey dot */
+.validation_item.pending .validation_icon {
+    background: var(--palette-neutral-faint, #F4F5F7);
+    border: 1.5px solid var(--palette-neutral-subtle, #999EB0);
+}
+
+.validation_item.pending .validation_icon::after {
+    content: '';
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 50%;
+    background: var(--palette-neutral-subtle, #999EB0);
+}
+
+.validation_item.pending .validation_label {
+    color: var(--palette-neutral-mild, #7C8399);
+}
+
+/* ============================================
+   SUBMIT BUTTON SECTION
+   ============================================ */
+.approval_button_cell {
+    display: flex;
+    justify-content: flex-end;
+    padding: 1.5rem 2rem;
+}
+
+.approvalBtn {
+    display: inline-flex;
+    padding: 0.75rem 1.5rem;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.approvalBtn.loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+    position: relative;
+}
+
+.approvalBtn.loading::after {
+    content: '';
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    margin-left: 0.5rem;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: btnSpinner 0.6s linear infinite;
+}
+
+@keyframes btnSpinner {
+    to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   DEPOSIT IN TRANSIT SECTION
+   ============================================ */
+.summary_deposit_transit {
+    margin-top: 1.5rem;
+}
+
+.summary_deposit_transit .section_title h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--palette-neutral-amplified, #252831);
+    margin-bottom: 1rem;
+}
+
+.summary_deposit_transit .cheque_section_wrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+}
+
+.summary_deposit_transit .side_panel {
+    background: #fff;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.summary_deposit_transit .side_panel h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--palette-neutral-potent, #494F61);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-container-border-neutral-mild, #D6D8DF);
+}
+
+.summary_deposit_transit .table_st {
+    overflow-x: auto;
+}
+
+.summary_deposit_transit .table_list {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+}
+
+.summary_deposit_transit .th_list {
+    background: var(--palette-neutral-faint, #F4F5F7);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    font-weight: 500;
+    color: var(--palette-neutral-mild, #7C8399);
+    border-bottom: 1px solid var(--color-container-border-neutral-mild, #D6D8DF);
+    white-space: nowrap;
+}
+
+.summary_deposit_transit tbody td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--palette-neutral-faint, #F4F5F7);
+    color: var(--palette-neutral-potent, #494F61);
+}
+
+.summary_deposit_transit .deposit_total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: var(--palette-neutral-faint, #F4F5F7);
+    border-radius: 0.25rem;
+    margin-top: 0.75rem;
+    font-weight: 600;
+}
+
+.summary_deposit_transit .deposit_total .label {
+    color: var(--palette-neutral-potent, #494F61);
+}
+
+.summary_deposit_transit .deposit_total .value {
+    color: var(--palette-neutral-amplified, #252831);
+}
+
+/* ============================================
+   PROOF OF CASH SECTION
+   ============================================ */
+.summary_proof_of_cash .proof_of_cash,
+.proof_of_cash {
+    background: #fff;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.summary_proof_of_cash h4 {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--palette-neutral-amplified, #252831);
+}
+
+.summary_proof_of_cash .sec_body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.summary_proof_of_cash .stack_row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+}
+
+.summary_proof_of_cash .stack_row.total_row {
+    border-top: 1px solid var(--color-container-border-neutral-mild, #D6D8DF);
+    padding-top: 1rem;
+    margin-top: 0.5rem;
+}
+
+.summary_proof_of_cash .cash_title {
+    color: var(--palette-neutral-potent, #494F61);
+    font-size: 0.875rem;
+}
+
+.summary_proof_of_cash .cash_value {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--palette-neutral-amplified, #252831);
+}
+
+.summary_proof_of_cash .cash_value_amount {
+    font-size: 1rem;
+}
+
+.summary_proof_of_cash .validation_row {
+    justify-content: flex-start;
+    padding-top: 0.5rem;
+}
+
+/* ============================================
+   BANK RECONCILIATION SECTION
+   ============================================ */
+.bank_reconciliation {
+    background: #fff;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.bank_reconciliation h4 {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--palette-neutral-amplified, #252831);
+}
+
+.bank_reconciliation .sec_body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.bank_reconciliation .stack_row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+}
+
+.bank_reconciliation .cash_title {
+    color: var(--palette-neutral-potent, #494F61);
+    font-size: 0.875rem;
+}
+
+.bank_reconciliation .cash_value {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: var(--palette-neutral-amplified, #252831);
+}
+
+.bank_reconciliation .cash_value.negative span {
+    color: var(--palette-negative-potent, #C6351A);
+}
+
+.bank_reconciliation .cash_value.negative span::before {
+    content: '(';
+}
+
+.bank_reconciliation .cash_value.negative span::after {
+    content: ')';
+}
+
+.bank_reconciliation .cash_value.positive span {
+    color: var(--palette-positive-mild, #418F51);
+}
+
+.bank_reconciliation .cash_value.variance span {
+    color: var(--palette-negative-potent, #C6351A);
+    font-weight: 600;
+}
+
+.bank_reconciliation .deduction_row {
+    background: var(--palette-negative-faint, #FFEBE5);
+    padding: 0.5rem 0.75rem;
+    margin: 0 -0.5rem;
+    border-radius: 0.25rem;
+}
+
+.bank_reconciliation .addition_row {
+    background: var(--palette-positive-faint, #F0F8E2);
+    padding: 0.5rem 0.75rem;
+    margin: 0 -0.5rem;
+    border-radius: 0.25rem;
+}
+
+.bank_reconciliation .result_row {
+    background: var(--palette-neutral-faint, #F4F5F7);
+    padding: 0.75rem;
+    margin: 0.5rem -0.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--color-container-border-neutral-mild, #D6D8DF);
+}
+
+.bank_reconciliation .result_row .cash_value {
+    gap: 1rem;
+}
+
+.bank_reconciliation .reconciliation_divider {
+    height: 1px;
+    background: var(--color-container-border-neutral-mild, #D6D8DF);
+    margin: 0.5rem 0;
+}
+
+.bank_reconciliation .book_balance_row {
+    padding-top: 0.75rem;
+}
+
+.bank_reconciliation .book_balance_row .cash_value {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.bank_reconciliation .variance_row {
+    background: var(--palette-negative-faint, #FFEBE5);
+    padding: 0.5rem 0.75rem;
+    margin: 0 -0.5rem;
+    border-radius: 0.25rem;
+}
+
+.bank_reconciliation .state {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* bankReconSvg - uses standard balance_tooltip via JS */
+.bank_reconciliation #bankReconSvg {
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.bank_reconciliation .bank_statement_input {
+    width: 140px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    border: 1px solid var(--color-container-border-neutral-mild, #D6D8DF);
+    border-radius: 0.25rem;
+    text-align: right;
+    background: var(--palette-neutral-faint, #F4F5F7);
+}
+
+.bank_reconciliation .bank_statement_input:focus {
+    outline: none;
+    border-color: var(--palette-primary-potent, #2A5EEC);
+    box-shadow: 0 0 0 2px rgba(42, 94, 236, 0.15);
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+@media (max-width: 768px) {
+    .modal .modal_content {
+        max-width: 95%;
+        max-height: 90vh;
+    }
+
+    .modal .modal_header,
+    .modal .modal_body,
+    .modal .modal_footer {
+        padding: 1rem;
+    }
+
+    .balance_tooltip {
+        max-width: 260px;
+        min-width: 180px;
+    }
+
+    .summary_section.side_panels {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================
+   MFR BREADCRUMB - Financial Report View
+   ============================================ */
+.mfr_breadcrumb_info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    align-self: stretch;
+    gap: 1rem;
+    margin-top: -0.25rem;
+}
+
+.mfr_breadcrumb_left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.mfr_report_month {
+    color: var(--palette-neutral-potent, #494F61);
+    font-family: "Neighbour Sans", sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.25;
+}
+
+.mfr_breadcrumb_actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.mfr_btn {
+    display: inline-flex;
+    padding: 0.5rem 1rem;
+    justify-content: center;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: 0.5rem;
+    font-family: "Neighbour Sans", sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+.mfr_btn svg {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+}
+
+.mfr_btn_primary {
+    background: var(--palette-primary-mild, #3268FA);
+    color: #fff;
+    border-color: var(--palette-primary-mild, #3268FA);
+}
+
+.mfr_btn_primary:hover {
+    background: var(--palette-primary-moderate, #214AEF);
+    border-color: var(--palette-primary-moderate, #214AEF);
+}
+
+.mfr_btn_secondary {
+    background: #fff;
+    color: var(--palette-neutral-potent, #494F61);
+    border-color: var(--color-container-border-neutral-mild, #D6D8DF);
+}
+
+.mfr_btn_secondary:hover {
+    background: var(--palette-neutral-faint, #F4F5F7);
+}
+
+.mfr_btn_danger {
+    background: #fff;
+    color: var(--palette-negative-potent, #C6351A);
+    border-color: var(--palette-negative-subtle, #F97066);
+}
+
+.mfr_btn_danger:hover {
+    background: var(--palette-negative-faint, #FEF3F2);
+}
+
+.mfr_btn.loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.mfr_btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ============================================
+   MFR SECTION
+   ============================================ */
+.containerWrapper:has(.mfr_section) {
+    margin-bottom: 0;
+}
+
+.mfr_section .comment_section {
+    margin-bottom: 1.5rem;
+}
+
+/* Hide comment section until content is loaded to prevent empty-space flicker */
+.mfr_section .comment_section:empty {
+    display: none;
+}
+
+/* ============================================
+   CONFIRMATION DIALOG STYLES
+   ============================================ */
+#confirm_dialog_overlay.model_overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(37, 40, 49, 0.65);
+    backdrop-filter: blur(2px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001;
+}
+
+#confirm_dialog_overlay .model_wrapper {
+    position: relative;
+    display: inline-flex;
+    padding: 2rem 2.5rem;
+    border-radius: 0.625rem;
+    border: 1px solid var(--color-container-border-neutral-mild, #D6D8DF);
+    background: #FFF;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    max-width: 420px;
+    width: 90%;
+    animation: confirmFadeIn 0.2s ease forwards;
+}
+
+@keyframes confirmFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+#confirm_dialog_overlay .content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+}
+
+#confirm_dialog_overlay .dialog_icon {
+    display: flex;
+    width: 3rem;
+    height: 3rem;
+    padding: 0.75rem;
+    justify-content: center;
+    align-items: center;
+    align-self: flex-start;
+    border-radius: 50%;
+    background: var(--palette-primary-faint, #F4F7FF);
+}
+
+#confirm_dialog_overlay .model_head p {
+    color: var(--palette-neutral-amplified, #252831);
+    font-family: "Neighbour Sans", sans-serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.25;
+    margin: 0;
+}
+
+#confirm_dialog_overlay .wrap_confirm_text {
+    color: var(--palette-neutral-potent, #494F61);
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+#confirm_dialog_overlay .wrap_confirm_text p {
+    margin: 0;
+}
+
+#confirm_dialog_overlay .stack_collumn {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0.5rem;
+}
+
+#confirm_dialog_overlay .gap_lg {
+    gap: 0.75rem;
+}
+
+#confirm_dialog_overlay .align_stretch {
+    align-self: stretch;
+}
+
+#confirm_dialog_overlay .btn_form_primary,
+#confirm_dialog_overlay .btn_form_secondary {
+    display: flex;
+    padding: 0.75rem 1rem;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: "Neighbour Sans", sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+#confirm_dialog_overlay .btn_form_primary {
+    background: var(--palette-primary-mild, #3268FA);
+    color: #fff;
+    border: 1px solid var(--palette-primary-mild, #3268FA);
+}
+
+#confirm_dialog_overlay .btn_form_primary:hover {
+    background: var(--palette-primary-moderate, #214AEF);
+    border-color: var(--palette-primary-moderate, #214AEF);
+}
+
+#confirm_dialog_overlay .btn_form_secondary {
+    background: #fff;
+    color: var(--palette-neutral-potent, #494F61);
+    border: 1px solid var(--color-container-border-neutral-mild, #D6D8DF);
+}
+
+#confirm_dialog_overlay .btn_form_secondary:hover {
+    background: var(--palette-neutral-faint, #F4F5F7);
+}
+
+#confirm_dialog_overlay .btn_form_primary p,
+#confirm_dialog_overlay .btn_form_secondary p {
+    margin: 0;
+}
+
+#confirm_dialog_overlay .wrap_close_btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s ease;
+}
+
+#confirm_dialog_overlay .wrap_close_btn:hover {
+    background-color: var(--palette-neutral-faint, #F4F5F7);
+}
+
+/* ============================================
+   CUSTOM ALERT COMPONENT OVERRIDES
+   ============================================ */
+.alert_container.show {
+    display: flex !important;
+}
+
+.alert_container .alert {
+    animation: slideIn 0.3s ease forwards;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   SKELETON LOADING ANIMATION
+   ============================================ */
+@keyframes skeletonPulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+.loading-placeholder {
+    animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+.loading-row td {
+    animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+/* ============================================
+   RETRY ERROR STYLES
+   ============================================ */
+.retry_error {
+    padding: 1rem;
+    text-align: center;
+    color: var(--palette-neutral-mild, #7C8399);
+    font-size: 0.875rem;
+}
+
+.retry_link {
+    color: var(--palette-primary-mild, #3268FA);
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.retry_link:hover {
+    color: var(--palette-primary-moderate, #214AEF);
+}

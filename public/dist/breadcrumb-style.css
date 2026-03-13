@@ -1,0 +1,100 @@
+/*!***************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./public/assets/styles/breadcrumb.css ***!
+  \***************************************************************************************/
+body{
+    width: unset;
+    display: unset;
+}
+.breadcrumb{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.breadcrumb .container{
+    display: flex;
+    /* max-width: var(--container-max-width-desktop, 1280px); */
+    padding: 0px var(--container-padding-desktop, 32px);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    align-self: stretch;
+    width: 100%;
+    min-height: 5.38rem;
+    max-height: 5.38rem;
+}
+.breadcrumb .container .path_series{
+    display: flex;
+    align-items: flex-start;
+    align-self: stretch;
+}
+.breadcrumb .container .path_series .breadcrumb_wrapper{
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-action-sm, 0.5rem);
+}
+.breadcrumb .container .path_series .breadcrumb_wrapper .isLink{
+    color: var(--color-action-foreground-moderate, #214AEF);
+    text-align: justify;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 125%; /* 1.25rem */
+    position: relative;
+    margin-right: 1.5rem;
+    text-decoration: none;
+}
+.breadcrumb .container .path_series .breadcrumb_wrapper .isLink::after{
+    position: absolute;
+    content: url(82dbd52e3941e28e2055.svg);
+    height: max-content;
+    top: 50%;
+    left: calc(100% + 1rem);
+    transform: translate(-50%, -50%);
+}
+
+.breadcrumb .container .path_series .breadcrumb_wrapper .isTail{
+    color: var(--color-foreground-amplified, #161D55);
+    text-align: justify;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 125%; /* 1.25rem */
+}
+.breadcrumb .container .page_details h2{
+    color: #000;
+    font-family: "Neighbour Sans";
+    font-size: 2.5rem;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 125%; /* 3.125rem */
+    letter-spacing: -0.05rem;
+}
+
+/* Dashboard date display shown above welcome header */
+.dashboard_date {
+    color: var(--color-foreground-moderate, #697586);
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 150%;
+    margin: 0;
+}
+
+/* Dashboard user details (FCP name + role) shown below welcome header */
+.dashboard_user_details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+.dashboard_user_details .dashboard_office_name {
+    color: var(--color-foreground-amplified, #161D55);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 150%;
+}
+.dashboard_user_details .dashboard_role_name {
+    color: var(--color-foreground-moderate, #697586);
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 150%;
+}

@@ -1,0 +1,337 @@
+/*!************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./public/assets/styles/budget_summary_view.css ***!
+  \************************************************************************************************/
+body {
+    position: relative;
+}
+
+/* main{
+    overflow-x: hidden;
+} */
+
+.list_ribbon {
+    padding: 2rem 3rem;
+}
+
+.list_ribbon .title {
+    position: relative;
+    font-size: 24px;
+    line-height: 125%;
+    font-family: 'Neighbour Sans';
+    color: #4b5565;
+    text-align: justify;
+    font-weight: 500;
+}
+
+.ribbon_actions {
+    gap: 1.5rem;
+}
+
+.limit_list {
+    margin: 2rem 3rem;
+    border: 1px solid #d6d8df;
+    border-radius: 10px;
+    display: flex;
+}
+
+.limit_list .list_column {
+    flex-grow: 1;
+    flex-basis: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.limit_list .list_column>* {
+    max-height: 3.9rem;
+    min-height: 3.9rem;
+    display: flex;
+    align-items: center;
+    padding: 0rem 1rem;
+}
+
+.limit_list .list_column>*:nth-child(2n+3) {
+    background-color: var(--palette-neutral-faint, #F4F5F7);
+}
+
+.limit_list .list_column p,
+.quatar_badge {
+    color: var(--color-foreground-neutral-moderate, #353B45);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.875rem;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 125%;
+    /* 1.09375rem */
+    border-bottom: 1px solid var(--color-container-border-neutral-mild, #D6D8DF);
+    white-space: nowrap;
+    /*  */
+    flex: 1;
+}
+
+.limit_list .list_column .quatar_badge div span {
+    background: var(--Component-colors-Components-Buttons-Secondary-button-secondary-bg, #FFF);
+}
+
+.limit_list .list_column p.caption {
+    color: var(--color-foreground-neutral-moderate, #353B45);
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 125%;
+    /* 1.25rem */
+}
+
+.quatar_badge div {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-height: 2rem;
+}
+
+.quatar_badge div span {
+    border: 1px solid var(--color-container-border-neutral-mild, #D6D8DF);
+    max-height: 2rem;
+    padding: 0.375rem 1rem;
+    border-radius: 10px;
+    color: var(--palette-neutral-amplified, #252831);
+    text-align: center;
+    font-size: 0.875rem;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 125%;
+    /* 1.09375rem */
+}
+
+.list_column.actions {
+    max-width: 180px;
+    border-radius: 0.625rem;
+    box-shadow: var(--size-0, 0.001px) var(--size-025, 1px) var(--size-1, 4px) var(--size-0, 0.001px) var(--color-shadow-potent, rgba(0, 0, 0, 0.12)), var(--size-0, 0.001px) var(--size-025, 1px) var(--size-05, 2px) var(--size-0, 0.001px) var(--color-shadow-moderate, rgba(0, 0, 0, 0.08));
+}
+
+.actions .action {
+    flex: 1;
+    border-bottom: 1px solid var(--color-container-border-neutral-mild, #D6D8DF);
+    padding: var(--size-3, 0.75rem) var(--spacing-xl, 1rem);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.del_action {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.3125rem;
+}
+
+.revenue_action{
+    display: flex;
+    height: 50px;
+    gap: 2rem;
+    margin-left: 2rem;
+}
+
+.revenue_accounts {
+    display: flex;
+    flex-direction: column;
+    gap: 3.75rem;
+    width: 100%;
+}
+
+.revenue_accounts .revenue_account {
+    border: 1px solid #d6d8df;
+    padding: 2.5rem 2rem;
+    border-radius: 10px;
+    flex: 1;
+}
+
+.revenue_accounts .revenue_account.border_section:not(:last-child) {
+    margin-bottom: 0;
+}
+
+.revenue_account_head {
+    display: flex;
+    justify-content: space-between;
+
+}
+
+.revenue_account_head .content_left.stack_collumn {
+
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.content_left .h5, .content_left .h5 span {
+    color: var(--color-foreground-neutral-mild, #4B5565);
+    font-size: var(--size-6, 1.5rem);
+    font-style: normal;
+    font-weight: 600;
+    line-height: 125%;
+    /* 1.875rem */
+}
+
+.content_left p {
+    color: var(--color-foreground-neutral-mild, #4B5565);
+    font-size: var(--size-4, 1rem);
+    font-style: normal;
+    font-weight: 500;
+    line-height: 150%;
+    /* 1.5rem */
+}
+
+/* table per revenue account */
+.wrap_expence_table {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+    align-self: stretch;
+    margin-top: 1.5rem;
+}
+
+.wrap_expence_table .table_Head {
+    width: 100%;
+    display: flex;
+}
+
+.model {
+    position: absolute;
+    z-index: 999999999;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    background: rgba(37, 40, 49, 0.65);
+}
+
+.wrap_model {
+    display: inline-flex;
+    padding: 2rem 2.5rem;
+    align-items: center;
+    gap: 0.625rem;
+    position: relative;
+    border-radius: 0.625rem;
+    border: 1px solid var(--color-container-border-neutral-mild, #D6D8DF);
+    background: #FFF;
+
+    /* outline/shadow/subtle */
+    box-shadow: var(--size-0, 0.001px) var(--size-025, 1px) var(--size-05, 2px) var(--size-0, 0.001px) var(--color-shadow-mild, rgba(0, 0, 0, 0.05));
+}
+
+.wrap_model .content {
+    display: flex;
+    width: 22.5rem;
+    max-width: 22.5rem;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-4xl, 2rem);
+}
+
+.wrap_model .content .model_title {
+    align-self: stretch;
+    color: var(--palette-neutral-amplified, #252831);
+    font-size: 1.5rem;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 125%;
+    /* 1.875rem */
+}
+
+.wrap_model .close_model {
+    position: absolute;
+    right: 0.9375rem;
+    top: 1.25rem;
+    background-color: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.wrap_model .close_model:hover {
+    background-color: rgb(232, 232, 232);
+}
+
+.model_actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1.5rem;
+    align-self: stretch;
+}
+
+.budget_limit_list .align_stretch {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-self: stretch;
+}
+
+
+.border_section h4 span {
+    color: var(--color-foreground-neutral-mild, #4B5565);
+    font-family: var(--family-display, "Neighbour Sans");
+    font-size: var(--size-6, 1.5rem);
+    font-style: normal;
+    font-weight: 600;
+    line-height: 125%;
+}
+
+
+.btn_form_secondary p span {
+    color: var(--color-action-foreground-moderate, #1D46D8);
+    font-size: var(--size-4, 1rem);
+    font-style: normal;
+    font-weight: 600;
+    line-height: 1.5;
+    /* 1.25rem */
+    white-space: nowrap;
+}
+
+tbody td[td_cell="number"] {
+    text-align: right;
+}
+
+/* budget_summary_view.css */
+
+.table_wrapper {
+    position: relative;
+    overflow: auto; /* Handles both x and y */
+    max-height: 600px; /* Or your preferred height */
+}
+
+/* Target the total row cells */
+.table-total-row td {
+    position: -webkit-sticky;
+    position: sticky;
+    bottom: 0;
+    background-color: #ffffff !important; /* Must be opaque to cover data rows scrolling behind */
+    z-index: 10;
+    font-weight: bold;
+    border-top: 2px solid #dee2e6;
+    /* Box shadow creates a visual separation when scrolling over data */
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1); 
+}
+
+/* Ensure background color for alternating rows doesn't overlap sticky row */
+.table-total-row:hover td {
+    background-color: #f8f9fa !important;
+}
+
+/* Alignment helper */
+.text-right {
+    text-align: right;
+}
+
+
+/* Chat launcher styles moved to style.css as shared styles */
+
+.details_head .wrap_actions .btn_form_secondary {
+    padding: 8px;
+}
+
+

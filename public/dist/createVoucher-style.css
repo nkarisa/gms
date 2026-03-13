@@ -1,0 +1,149 @@
+/*!******************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./public/assets/styles/createVoucher.css ***!
+  \******************************************************************************************/
+
+main.new_voucher_body{
+    width: 100%;
+    background: #FFF;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    height: 100%;
+    padding: 0px var(--container-padding-desktop, 32px);
+}
+.new_voucher_wrapper.container{
+        align-self: stretch;
+        display: flex;
+        /* max-width: var(--container-max-width-desktop, 1280px); */
+        padding: 0px var(--container-padding-desktop, 32px);
+        align-items: center;
+        gap: 1.5rem;
+        align-self: stretch;
+        position: relative;
+        flex-direction: column;
+        padding: 1rem 0rem;
+        width: 100%;
+}
+.new_voucher_wrapper .wrap_voucher_header{
+    height: 100%;
+    width: 100%;
+    position: relative;
+    max-height: max-content;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(1, 1fr);
+    gap: 1.5rem;
+}
+.new_voucher_wrapper .wrap_header_body{
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.new_voucher_wrapper .wrap_header_body .body_actions{
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    gap: 1.5rem;
+    align-self: stretch;
+}
+
+/* row summury */
+.wrap_summation{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.wrap_summation .btn_add_row{
+    display: flex;
+    padding: 0.625rem 0.875rem;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    border-radius: var(--radius-md, 0.5rem);
+    border: 1px solid var(--Component-colors-Components-Buttons-Secondary-button-secondary-border, #D0D5DD);
+    background: var(--Component-colors-Components-Buttons-Secondary-button-secondary-bg, #FFF);
+}
+.wrap_summation .btn_add_row p {
+    text-wrap: none;
+    color: var(--color-foreground-neutral-moderate, #353B45);
+    font-size: var(--size-4, 1rem);
+    font-style: normal;
+    font-weight: 600;
+    line-height: 125%; /* 1.25rem */
+    cursor: pointer;
+}
+.wrap_summation .total_card{
+    display: flex;
+    width: 15.625rem;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.25rem;
+}
+.wrap_summation .total_card .input_field{
+    align-self: auto;
+    flex: 1;
+}
+.voucher_item_table{
+    width: 100%;
+    
+}
+
+.voucher_item_table thead tr td{
+    color: #000;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 125%; /* 1.25rem */
+    padding: 1rem ;
+}
+.remove_row{
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0rem  0.5rem;
+}
+
+.voucher_item_table thead{
+    border-radius: 0.625rem 0.625rem 0rem 0rem;
+    border-bottom: 1px solid var(--color-container-border-neutral-mild, #D6D8DF);
+    border-top: 1px solid var(--color-container-border-neutral-mild, #D6D8DF);
+    background: var(--palette-alpha-faint, #FFF);
+    padding: 2rem;
+}
+
+.voucher_item_table tbody td tr td{
+    padding: var(--size-5, 1.25rem) var(--size-4, 1rem);
+}
+.voucher_item_table tbody td tr {
+    border: 1px solid silver;
+}
+
+.table_body tr:nth-child(even) td{
+    background-color: var(--palette-neutral-faint, #F4F5F7);
+}
+.table_body tr td{
+    padding: 1rem 0rem;
+    border-bottom: 1px solid var(--color-container-border-neutral-mild, #D6D8DF);
+    background-color: #ffffff;
+}
+.table_body tr:nth-child(1) td {
+    border-top: 1px solid var(--color-container-border-neutral-mild, #D6D8DF);
+}
+.table_body tr td .input_field{
+    padding: 0rem 1rem;
+    max-width: max-content;
+    /* padding-right: 0rem; */
+}
+.table_body tr td .input_field.fill{
+    max-width: 100%;
+}
+.table_body tr td .input_field.parent_center{
+    margin: 0 auto;
+}
+
+.table_body tr td:last-child .input_field{
+    padding-right: 0;
+}

@@ -1,0 +1,78 @@
+/*!*********************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./public/assets/styles/list.css ***!
+  \*********************************************************************************/
+/* Spinner Animation */
+.spinner-border {
+    display: inline-block;
+    width: 1.2rem;
+    height: 1.2rem;
+    vertical-align: text-bottom;
+    border: 0.2em solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spinner-border .75s linear infinite;
+    color: #6c757d;
+    /* Muted gray */
+}
+
+@keyframes spinner-border {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Row Transition smoothness */
+.tr_comment {
+    transition: background-color 0.3s ease;
+}
+
+.tr_comment.is_comment {
+    background-color: #f8f9fa;
+}
+
+.tr_comment.is_attachment {
+    background-color: #fff;
+}
+
+.tr_comment.collapsable .td_comment.collapsable {
+    text-align:center; 
+}
+
+td.optional_sticky {
+    text-align: center;
+}
+
+tbody td[td_cell="number"] {
+    /* text-align: right; */
+}
+
+/* budget_summary_view.css */
+
+.table_wrapper {
+    position: relative;
+    overflow: auto; /* Handles both x and y */
+    max-height: 600px; /* Or your preferred height */
+}
+
+/* Target the total row cells */
+.table-total-row td {
+    position: -webkit-sticky;
+    position: sticky;
+    bottom: 0;
+    background-color: #ffffff !important; /* Must be opaque to cover data rows scrolling behind */
+    z-index: 10;
+    font-weight: bold;
+    border-top: 2px solid #dee2e6;
+    /* Box shadow creates a visual separation when scrolling over data */
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1); 
+}
+
+/* Ensure background color for alternating rows doesn't overlap sticky row */
+.table-total-row:hover td {
+    background-color: #f8f9fa !important;
+}
+
+/* Alignment helper */
+.text-right {
+    text-align: right;
+}

@@ -1,0 +1,202 @@
+/*!*************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./public/assets/styles/budget_schedule_view.css ***!
+  \*************************************************************************************************/
+
+main{
+    max-width: 96%;
+}
+.budget_single_revenue {
+    margin-top: 3.75rem;
+}
+.revenue_action{
+    display: flex;
+}
+
+section.container {
+    margin-left: 2rem;
+}
+
+.revenue_wrapper{
+    border-radius: 0.625rem;
+    border: 1px solid var(--color-container-border-neutral-mild, #DCDFE4);
+    background: #FFF;
+    margin: 2.5rem  0rem;
+    padding: 2.5rem 2rem;
+
+    /* order columns */
+    display: flex;
+    padding: 2.5rem 2rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+    align-self: stretch;
+}
+.revenue_head{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    align-self: stretch;
+}
+
+.revenue_head .head_txt{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+.revenue_head .head_txt h5{
+    color: var(--color-foreground-neutral-mild, #4B5565);
+    font-size: var(--size-6, 1.5rem);
+    font-style: normal;
+    font-weight: 600;
+    line-height: 125%; /* 1.875rem */
+}
+.revenue_head .head_txt p{
+    color: var(--color-foreground-neutral-mild, #4B5565);
+    font-size: var(--size-4, 1rem);
+    font-style: normal;
+    font-weight: 500;
+    line-height: 150%; /* 1.5rem */
+}
+.filter_budge_wrapper{
+    display: flex;
+}
+.revenue_header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2rem;
+    align-self: stretch;
+}
+.filter_budge {
+    display: flex;
+    padding: 0.625rem 0.875rem;
+    justify-content: center;
+    align-items: center;
+    gap: 0.3125rem;
+    /* style */
+    border-radius: var(--radius-md, 0.5rem);
+border: 1px solid var(--Component-colors-Components-Buttons-Secondary-button-secondary-border, #D0D5DD);
+background: var(--Component-colors-Components-Buttons-Secondary-button-secondary-bg, #FFF);
+}
+
+.budget_expense_account{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    overflow-x: auto;
+}
+
+.expence_name_wrapper{
+    display: flex;
+    width: 100%;
+    height: 3rem;
+    padding: 0rem 2rem;
+    align-items: center;
+    /* style */
+    border-bottom: 1px solid var(--color-container-border-neutral-mild, #D6D8DF);
+    background: var(--color-input-background-disabled-subtle, #F6F7F9);
+}
+.expence_name_wrapper p{
+    color: var(--color-foreground-neutral-mild, #4B5565);
+    font-size: 0.875rem;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 125%; 
+}
+/* customise table to fit new proposal */
+.table_body table .head_list .th_list .actions .btn_more{
+    opacity: 1;;
+}
+.table_body table .head_list .th_list .actions .btn_sort{
+    display: none;
+}
+.table_body table .head_list .th_list .resize-bar{
+    opacity: 0;
+}
+.table_body table .head_list .th_list:hover .resize-bar{
+    opacity: 1;
+}
+
+/* Container spacing */
+    .budget_schedule_container {
+        margin-bottom: 4rem;
+        /* Significant space between different tables */
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+        padding: 10px;
+    }
+
+    /* Header styling */
+    .budget_schedule_header {
+        background-color: #f8fafc;
+        /* Light grey background to distinguish from table body */
+        padding: 16px 24px;
+        border-bottom: 2px solid #1D46D8;
+        /* Brand color accent line */
+    }
+
+    .schedule_head_txt h5 {
+        color: #1e293b;
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Ensure the table itself has breathing room */
+    .list_table_wrapper {
+        padding: 0 10px 20px 10px;
+    }
+    /* Add space below the blue horizontal line */
+    .budget_schedule_header {
+        background-color: #f8fafc;
+        padding: 16px 24px;
+        border-bottom: 2px solid #c2c6c8;
+        /* This creates the gap between the blue line and the table start */
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+.table_spacing_layer{
+    height: 10px;
+}
+
+tbody td[td_cell="number"] {
+    text-align: right;
+}
+
+/* budget_summary_view.css */
+
+.table_wrapper {
+    position: relative;
+    overflow: auto; /* Handles both x and y */
+    max-height: 600px; /* Or your preferred height */
+}
+
+/* Target the total row cells */
+.table-total-row td {
+    position: -webkit-sticky;
+    position: sticky;
+    bottom: 0;
+    background-color: #ffffff !important; /* Must be opaque to cover data rows scrolling behind */
+    z-index: 10;
+    font-weight: bold;
+    border-top: 2px solid #dee2e6;
+    /* Box shadow creates a visual separation when scrolling over data */
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1); 
+}
+
+/* Ensure background color for alternating rows doesn't overlap sticky row */
+.table-total-row:hover td {
+    background-color: #f8f9fa !important;
+}
+
+/* Alignment helper */
+.text-right {
+    text-align: right;
+}
