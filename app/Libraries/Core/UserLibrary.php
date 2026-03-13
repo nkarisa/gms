@@ -1050,39 +1050,70 @@ class UserLibrary extends GrantsLibrary implements \App\Interfaces\LibraryInterf
     }
 
     function formatColumnsValuesDependancyData($users): array{
-        $ids = array_column($users, 'user_id');
-        $userContextDefinitions = array_column($users, 'context_definition_name');
-        $userIdsAndContexts = array_combine($ids, $userContextDefinitions);
-        
         $userOffices = [];
 
-        $center = array_filter($userIdsAndContexts, fn($user) => $user == 'center');
-        $cluster = array_filter($userIdsAndContexts, fn($user) => $user == 'cluster');
-        $cohort = array_filter($userIdsAndContexts, fn($user) => $user == 'cohort');
-        $country = array_filter($userIdsAndContexts, fn($user) => $user == 'country');
+        if (empty($users)) {
+            return compact('userOffices');
+        }
 
-        $groupedUsers = compact('center','cluster','cohort','country');
+        $supportedHierarchyLevels = ['center', 'cluster', 'cohort', 'country', 'region', 'global'];
+        $groupedUserIds = [];
 
-        foreach ($groupedUsers as $hierarchyLevel => $groupUsers) {
-            if (sizeof($groupedUsers)) {
-                $contextCenterUser = $this->read_db->table('context_' . $hierarchyLevel . '_user');
-                $contextCenterUser->whereIn('fk_user_id', $ids);
-                $contextCenterUser->join('context_' . $hierarchyLevel, 'context_' . $hierarchyLevel . '.context_' . $hierarchyLevel . '_id=context_' . $hierarchyLevel . '_user.fk_context_' . $hierarchyLevel . '_id');
+        foreach ($users as $user) {
+            if (!isset($user['user_id'], $user['context_definition_name'])) {
+                continue;
+            }
 
-                $contextCenterUser->join('office', 'office.office_id=context_'.$hierarchyLevel.'.fk_office_id');
-                $officesObj = $contextCenterUser->get();
+            $hierarchyLevel = strtolower(trim((string)$user['context_definition_name']));
 
-                if ($officesObj->getNumRows() > 0) {
-                    $users = $officesObj->getResultArray();
-                    foreach ($users as $user) {
-                        if (in_array($user['fk_user_id'], $ids)) {
-                            $userOffices[$user['fk_user_id']][] = $user['office_code'];
-                        }
-                    }
+            if (!in_array($hierarchyLevel, $supportedHierarchyLevels, true)) {
+                continue;
+            }
+
+            $groupedUserIds[$hierarchyLevel][] = $user['user_id'];
+        }
+
+        foreach ($groupedUserIds as $hierarchyLevel => $userIds) {
+            $userIds = array_values(array_unique(array_filter($userIds)));
+
+            if (empty($userIds)) {
+                continue;
+            }
+
+            $contextUserTable = 'context_' . $hierarchyLevel . '_user';
+            $contextTable = 'context_' . $hierarchyLevel;
+
+            $builder = $this->read_db->table($contextUserTable);
+            $builder->select([
+                $contextUserTable . '.fk_user_id',
+                'office.office_code'
+            ]);
+            $builder->join(
+                $contextTable,
+                $contextTable . '.' . $contextTable . '_id=' . $contextUserTable . '.fk_' . $contextTable . '_id'
+            );
+            $builder->join('office', 'office.office_id=' . $contextTable . '.fk_office_id');
+            $builder->whereIn($contextUserTable . '.fk_user_id', $userIds);
+            $builder->where($contextUserTable . '.' . $contextUserTable . '_is_active', 1);
+
+            $officeRows = $builder->get()->getResultArray();
+
+            foreach ($officeRows as $officeRow) {
+                $userId = $officeRow['fk_user_id'];
+                $officeCode = $officeRow['office_code'];
+
+                if (!isset($userOffices[$userId])) {
+                    $userOffices[$userId] = [];
                 }
+
+                $userOffices[$userId][] = $officeCode;
             }
         }
-        
+
+        foreach ($userOffices as $userId => $officeCodes) {
+            $userOffices[$userId] = array_values(array_unique($officeCodes));
+        }
+
         return compact('userOffices');
     }
 
